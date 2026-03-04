@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tenant Portal – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .portal-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 68px);
+    }
+    .sidebar {
+      background: var(--dark);
+      padding: 1.5rem 0;
+    }
+    .sidebar-section { padding: 0 1rem; margin-bottom: 0.5rem; }
+    .sidebar-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-600);
+      padding: 0.5rem 0.75rem;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      color: var(--gray-400);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .sidebar-link:hover { background: rgba(255,255,255,0.07); color: white; text-decoration: none; }
+    .sidebar-link.active { background: var(--primary); color: white; }
+    .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .portal-main { background: var(--gray-100); padding: 2rem; }
+
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 800; }
+    .page-header p { color: var(--gray-600); margin-top: 4px; }
+
+    /* Login screen */
+    .login-screen {
+      min-height: calc(100vh - 68px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-100);
+    }
+    .login-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-lg);
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-logo h2 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-top: 0.5rem; }
+    .login-logo p { color: var(--gray-600); font-size: 0.9rem; }
+
+    /* Payment method cards */
+    .pay-method {
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .pay-method:hover, .pay-method.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .pay-method-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .pay-method h4 { font-weight: 700; margin-bottom: 0.2rem; }
+    .pay-method p { color: var(--gray-600); font-size: 0.8rem; }
+
+    /* Payment step indicator */
+    .steps-indicator {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      color: var(--gray-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .step-dot.active { background: var(--primary); color: white; }
+    .step-dot.done { background: var(--success); color: white; }
+    .step-line { flex: 1; height: 2px; background: var(--gray-200); }
+    .step-line.done { background: var(--success); }
+
+    /* Payment history table */
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .status-dot.green { background: var(--success); }
+    .status-dot.yellow { background: var(--warning); }
+    .status-dot.red { background: var(--danger); }
+
+    /* Rent summary card */
+    .rent-card {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .rent-card .amount { font-size: 3rem; font-weight: 900; }
+    .rent-card .label { opacity: 0.8; font-size: 0.9rem; }
+    .rent-card .due { font-size: 0.85rem; opacity: 0.75; margin-top: 4px; }
+    .rent-card-grid { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    Rent<span>Verified</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">← Back to Home</a>
+  </div>
+  <div class="nav-cta">
+    <span style="font-size:0.85rem;color:var(--gray-600);">Sanders Property Management</span>
+  </div>
+</nav>
+
+<!-- LOGIN (shown by default, hidden after login) -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div style="font-size:2.5rem;">🔑</div>
+      <h2>Tenant Portal</h2>
+      <p>Sanders Property Management</p>
+    </div>
+
+    <div class="alert alert-info" style="font-size:0.85rem;">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+      Demo mode — click Sign In to access the portal.
+    </div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" placeholder="your@email.com" value="tenant@example.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" placeholder="••••••••" value="password" />
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.8rem;" onclick="showPortal()">Sign In to Portal</button>
+    <p style="text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--gray-600);">
+      New tenant? <a href="#">Request portal access</a>
+    </p>
+    <div class="divider"></div>
+    <p style="text-align:center;font-size:0.82rem;color:var(--gray-600);">
+      🔒 Secure login · Your data is encrypted
+    </p>
+  </div>
+</div>
+
+<!-- PORTAL (hidden until login) -->
+<div id="portal-screen" style="display:none;">
+  <div class="portal-layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div style="padding:0 1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">JD</div>
+          <div>
+            <div style="color:white;font-weight:600;font-size:0.9rem;">Jane Doe</div>
+            <div style="color:var(--gray-600);font-size:0.75rem;">123 Maple St, Unit 2A</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">My Home</div>
+        <div class="sidebar-link active" onclick="showTab('dashboard')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </div>
+        <div class="sidebar-link" onclick="showTab('pay')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Pay Rent
+        </div>
+        <div class="sidebar-link" onclick="showTab('history')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Payment History
+        </div>
+        <div class="sidebar-link" onclick="showTab('docs')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Documents
+        </div>
+      </div>
+
+      <div class="sidebar-section" style="margin-top:1rem;">
+        <div class="sidebar-label">Support</div>
+        <div class="sidebar-link" onclick="toggleChat()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          AI Chat Support
+        </div>
+        <div class="sidebar-link" onclick="showPortal(); this.parentNode.parentNode.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span onclick="document.getElementById('portal-screen').style.display='none';document.getElementById('login-screen').style.display='flex';" style="color:inherit;">Sign Out</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="portal-main">
+
+      <!-- DASHBOARD TAB -->
+      <div id="tab-dashboard" class="tab-content active">
+        <div class="page-header">
+          <h1>Welcome back, Jane 👋</h1>
+          <p>Here's a summary of your tenancy at 123 Maple Street, Unit 2A.</p>
+        </div>
+
+        <!-- Rent summary -->
+        <div class="rent-card">
+          <div class="rent-card-grid">
+            <div>
+              <div class="label">Rent Due This Month</div>
+              <div class="amount">$1,200</div>
+              <div class="due">📅 Due March 1, 2026 · <span style="color:#fca5a5;">3 days overdue</span></div>
+            </div>
+            <button class="btn btn-lg" style="background:white;color:var(--primary);font-weight:700;" onclick="showTab('pay')">Pay Now</button>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:2rem;">
+          <div class="stat-card">
+            <div class="stat-value">$0</div>
+            <div class="stat-label">Outstanding Balance</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-value">11</div>
+            <div class="stat-label">On-Time Payments</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-value">Mar 1</div>
+            <div class="stat-label">Next Due Date</div>
+          </div>
+        </div>
+
+        <!-- Lease info -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:1.25rem;">🏠 Your Lease</h3>
+            <div class="grid-2">
+              <div>
+                <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">PROPERTY</div>
+                <div style="font-weight:600;">123 Maple Street, Unit 2A</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">MONTHLY RENT</div>
+                <div style="font-weight:600;">$1,200.00</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">LEASE START</div>
+                <div style="font-weight:600;">April 1, 2025</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">LEASE END</div>
+                <div style="font-weight:600;">March 31, 2026 <span class="badge badge-pending" style="font-size:0.7rem;">Renewal Due</span></div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">LANDLORD</div>
+                <div style="font-weight:600;">Sanders Property Management</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">CONTACT</div>
+                <div style="font-weight:600;">danielrhart1284@gmail.com</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:1.25rem;">Quick Actions</h3>
+            <div class="grid-4">
+              <button class="btn btn-outline" onclick="showTab('pay')" style="justify-content:center;padding:0.85rem;">💳 Pay Rent</button>
+              <button class="btn btn-outline" onclick="showTab('docs')" style="justify-content:center;padding:0.85rem;">📄 View Lease</button>
+              <button class="btn btn-outline" onclick="toggleChat()" style="justify-content:center;padding:0.85rem;">🤖 Ask AI</button>
+              <button class="btn btn-outline" style="justify-content:center;padding:0.85rem;">🔧 Maintenance</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAY RENT TAB -->
+      <div id="tab-pay" class="tab-content">
+        <div class="page-header">
+          <h1>Pay Rent</h1>
+          <p>Choose your payment method. No processing fees — ever.</p>
+        </div>
+
+        <!-- Steps -->
+        <div class="steps-indicator" style="gap:0;">
+          <div class="step-dot active" id="step1">1</div>
+          <div class="step-line" id="line1"></div>
+          <div class="step-dot" id="step2">2</div>
+          <div class="step-line" id="line2"></div>
+          <div class="step-dot" id="step3">3</div>
+        </div>
+
+        <!-- Step 1: Choose method -->
+        <div id="pay-step-1">
+          <div class="card" style="margin-bottom:1.5rem;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:0.4rem;">Amount Due</h3>
+              <p style="color:var(--gray-600);font-size:0.9rem;margin-bottom:1.25rem;">March 2026 Rent · 123 Maple Street, Unit 2A</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:var(--gray-100);padding:1rem 1.25rem;border-radius:var(--radius);">
+                <span style="font-weight:600;">Monthly Rent</span>
+                <span style="font-weight:700;font-size:1.2rem;">$1,200.00</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1.25rem;color:var(--success);">
+                <span style="font-size:0.875rem;">Processing Fee</span>
+                <span style="font-weight:600;">$0.00 FREE</span>
+              </div>
+              <div style="height:1px;background:var(--gray-200);margin:0.5rem 0;"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1.25rem;">
+                <span style="font-weight:700;">Total</span>
+                <span style="font-weight:800;font-size:1.4rem;color:var(--primary);">$1,200.00</span>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="font-weight:700;margin-bottom:1rem;">Choose Payment Method</h3>
+          <div class="grid-2" style="max-width:500px;">
+            <div class="pay-method selected" id="method-cashapp" onclick="selectMethod('cashapp')">
+              <div class="pay-method-icon">💚</div>
+              <h4>Cash App</h4>
+              <p>Send to $cashtag<br/>Instant · Free</p>
+            </div>
+            <div class="pay-method" id="method-zelle" onclick="selectMethod('zelle')">
+              <div class="pay-method-icon">💜</div>
+              <h4>Zelle</h4>
+              <p>Send to phone/email<br/>Instant · Free</p>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg" style="margin-top:1.5rem;" onclick="nextPayStep(2)">Continue →</button>
+        </div>
+
+        <!-- Step 2: Send payment + instructions -->
+        <div id="pay-step-2" style="display:none;">
+          <div class="alert alert-warning" style="margin-bottom:1.5rem;">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <div><strong>Important:</strong> Only send payment to the info below. Sanders Property Management will never ask you to pay via gift cards, wire transfer, or any other method.</div>
+          </div>
+
+          <!-- Cash App Instructions -->
+          <div id="cashapp-instructions">
+            <div class="card" style="margin-bottom:1.5rem;">
+              <div class="card-body">
+                <h3 style="font-weight:700;margin-bottom:1rem;">💚 Send via Cash App</h3>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
+                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">CASH APP $CASHTAG</div>
+                  <div style="font-size:1.8rem;font-weight:900;color:#15803d;font-family:monospace;">$SandersRentals</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:4px;">Sanders Property Management</div>
+                </div>
+                <div style="background:var(--gray-100);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;">
+                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
+                  <div style="font-size:1.4rem;font-weight:800;">$1,200.00</div>
+                </div>
+                <p style="color:var(--gray-700);font-size:0.9rem;"><strong>In the note field, include:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Zelle Instructions (hidden) -->
+          <div id="zelle-instructions" style="display:none;">
+            <div class="card" style="margin-bottom:1.5rem;">
+              <div class="card-body">
+                <h3 style="font-weight:700;margin-bottom:1rem;">💜 Send via Zelle</h3>
+                <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
+                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">SEND TO PHONE NUMBER</div>
+                  <div style="font-size:1.8rem;font-weight:900;color:#7c3aed;font-family:monospace;">(555) 000-0000</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:4px;">OR email: payments@sanderspm.com</div>
+                </div>
+                <div style="background:var(--gray-100);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;">
+                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
+                  <div style="font-size:1.4rem;font-weight:800;">$1,200.00</div>
+                </div>
+                <p style="color:var(--gray-700);font-size:0.9rem;"><strong>In the memo field, include:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="nextPayStep(1)">← Back</button>
+            <button class="btn btn-primary btn-lg" onclick="nextPayStep(3)">I've Sent the Payment – Upload Confirmation →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Upload confirmation -->
+        <div id="pay-step-3" style="display:none;">
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:0.4rem;">📸 Upload Payment Screenshot</h3>
+              <p style="color:var(--gray-600);margin-bottom:1.5rem;font-size:0.9rem;">Take a screenshot of your payment confirmation and upload it here. This is how we verify your payment.</p>
+
+              <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <p style="font-weight:600;margin-top:0.5rem;color:var(--gray-700);">Click to upload screenshot</p>
+                <p style="font-size:0.8rem;color:var(--gray-400);">PNG, JPG, or PDF · Max 10MB</p>
+              </div>
+              <input type="file" id="file-input" accept="image/*,.pdf" style="display:none;" onchange="handleUpload(this)" />
+
+              <div id="upload-preview" style="display:none;margin-top:1rem;">
+                <div style="display:flex;align-items:center;gap:10px;background:var(--gray-100);padding:0.75rem 1rem;border-radius:8px;">
+                  <span style="font-size:1.5rem;">📎</span>
+                  <div>
+                    <div style="font-weight:600;font-size:0.9rem;" id="upload-filename">screenshot.png</div>
+                    <div style="font-size:0.8rem;color:var(--success);">✓ Ready to submit</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top:1.5rem;">
+                <label>Additional Notes (optional)</label>
+                <input type="text" placeholder="e.g. Sent via Cash App on March 4, 2026 at 2:15pm" />
+              </div>
+
+              <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+                <button class="btn btn-outline" onclick="nextPayStep(2)">← Back</button>
+                <button class="btn btn-success btn-lg" onclick="submitPayment()">✓ Submit Payment Confirmation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Success -->
+        <div id="pay-step-4" style="display:none;">
+          <div class="card" style="text-align:center;padding:3rem;">
+            <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+            <h2 style="font-weight:800;margin-bottom:0.5rem;">Payment Submitted!</h2>
+            <p style="color:var(--gray-600);max-width:400px;margin:0 auto 2rem;">Your payment confirmation has been received. Sanders Property Management will verify it within 24 hours and mark your rent as paid.</p>
+            <div class="alert alert-success" style="max-width:400px;margin:0 auto 2rem;text-align:left;">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              You'll receive an email confirmation once verified.
+            </div>
+            <button class="btn btn-primary" onclick="showTab('history')">View Payment History</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT HISTORY TAB -->
+      <div id="tab-history" class="tab-content">
+        <div class="page-header">
+          <h1>Payment History</h1>
+          <p>All rent payments for 123 Maple Street, Unit 2A.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div style="padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-200);">
+              <h3 style="font-weight:700;">Payment Records</h3>
+              <button class="btn btn-outline btn-sm">Download PDF</button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Mar 4, 2026</td>
+                  <td>March 2026 Rent</td>
+                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
+                  <td style="font-weight:700;">$1,200.00</td>
+                  <td><span class="status-dot yellow"></span><span class="badge badge-pending">Pending Verification</span></td>
+                </tr>
+                <tr>
+                  <td>Feb 1, 2026</td>
+                  <td>February 2026 Rent</td>
+                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
+                  <td style="font-weight:700;">$1,200.00</td>
+                  <td><span class="status-dot green"></span><span class="badge badge-verified">Confirmed</span></td>
+                </tr>
+                <tr>
+                  <td>Jan 2, 2026</td>
+                  <td>January 2026 Rent</td>
+                  <td><span style="color:#7c3aed;font-weight:600;">💜 Zelle</span></td>
+                  <td style="font-weight:700;">$1,200.00</td>
+                  <td><span class="status-dot green"></span><span class="badge badge-verified">Confirmed</span></td>
+                </tr>
+                <tr>
+                  <td>Dec 1, 2025</td>
+                  <td>December 2025 Rent</td>
+                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
+                  <td style="font-weight:700;">$1,200.00</td>
+                  <td><span class="status-dot green"></span><span class="badge badge-verified">Confirmed</span></td>
+                </tr>
+                <tr>
+                  <td>Nov 1, 2025</td>
+                  <td>November 2025 Rent</td>
+                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
+                  <td style="font-weight:700;">$1,200.00</td>
+                  <td><span class="status-dot green"></span><span class="badge badge-verified">Confirmed</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTS TAB -->
+      <div id="tab-docs" class="tab-content">
+        <div class="page-header">
+          <h1>Documents</h1>
+          <p>Your lease, rental application, and other documents from Sanders Property Management.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-body">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem;">
+                <div style="font-size:2rem;">📄</div>
+                <span class="badge badge-verified">Active</span>
+              </div>
+              <h4 style="font-weight:700;margin-bottom:0.25rem;">Lease Agreement</h4>
+              <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:1rem;">April 1, 2025 – March 31, 2026 · 123 Maple St, Unit 2A</p>
+              <button class="btn btn-outline btn-sm">📥 Download</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem;">
+                <div style="font-size:2rem;">📋</div>
+                <span class="badge badge-verified">Approved</span>
+              </div>
+              <h4 style="font-weight:700;margin-bottom:0.25rem;">Rental Application</h4>
+              <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:1rem;">Submitted March 15, 2025</p>
+              <button class="btn btn-outline btn-sm">📥 Download</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem;">
+                <div style="font-size:2rem;">🏠</div>
+                <span class="badge badge-available">Available</span>
+              </div>
+              <h4 style="font-weight:700;margin-bottom:0.25rem;">Move-In Inspection Report</h4>
+              <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:1rem;">Completed April 1, 2025</p>
+              <button class="btn btn-outline btn-sm">📥 Download</button>
+            </div>
+          </div>
+
+          <div class="card" style="border:2px dashed var(--gray-200);">
+            <div class="card-body" style="text-align:center;padding:2rem;">
+              <div style="font-size:2rem;margin-bottom:0.5rem;">📤</div>
+              <h4 style="font-weight:700;margin-bottom:0.25rem;">Upload a Document</h4>
+              <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:1rem;">Submit renter's insurance, ID, or other documents to your landlord.</p>
+              <button class="btn btn-outline btn-sm">Upload File</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end portal-main -->
+  </div><!-- end portal-layout -->
+</div><!-- end portal-screen -->
+
+<!-- AI CHAT WIDGET -->
+<div id="chat-bubble" onclick="toggleChat()" style="display:none;">
+  <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+  </svg>
+</div>
+
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">AI</div>
+      <div>
+        <div class="chat-title">Sanders PM Assistant</div>
+        <div class="chat-status">🟢 Online · Replies instantly</div>
+      </div>
+    </div>
+    <div class="chat-close" onclick="toggleChat()">
+      <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg ai">Hi Jane! 👋 How can I help you today? I can answer questions about your lease, help with payments, or connect you with management.</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Type your question..." onkeypress="handleChatKey(event)" />
+    <button class="chat-send" onclick="sendChat()">
+      <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+  function showPortal() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('portal-screen').style.display = 'block';
+    document.getElementById('chat-bubble').style.display = 'flex';
+  }
+
+  function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  let selectedMethod = 'cashapp';
+  function selectMethod(m) {
+    selectedMethod = m;
+    document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
+    document.getElementById('method-' + m).classList.add('selected');
+  }
+
+  function nextPayStep(n) {
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById('pay-step-' + i);
+      if (el) el.style.display = i === n ? 'block' : 'none';
+    }
+    // Update step dots
+    [1,2,3].forEach(i => {
+      const dot = document.getElementById('step' + i);
+      const line = document.getElementById('line' + i);
+      if (i < n) { dot.className = 'step-dot done'; dot.innerHTML = '✓'; }
+      else if (i === n) { dot.className = 'step-dot active'; dot.innerHTML = i; }
+      else { dot.className = 'step-dot'; dot.innerHTML = i; }
+      if (line && i < n) line.classList.add('done');
+      else if (line) line.classList.remove('done');
+    });
+    // Show correct payment instructions
+    if (n === 2) {
+      document.getElementById('cashapp-instructions').style.display = selectedMethod === 'cashapp' ? 'block' : 'none';
+      document.getElementById('zelle-instructions').style.display = selectedMethod === 'zelle' ? 'block' : 'none';
+    }
+  }
+
+  function handleUpload(input) {
+    if (input.files && input.files[0]) {
+      document.getElementById('upload-filename').textContent = input.files[0].name;
+      document.getElementById('upload-preview').style.display = 'block';
+    }
+  }
+
+  function submitPayment() {
+    nextPayStep(4);
+  }
+</script>
+</body>
+</html>

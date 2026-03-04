@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Rentals – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .listings-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      max-width: 100%;
+    }
+    .filter-panel {
+      background: white;
+      border-right: 1px solid var(--gray-200);
+      padding: 1.5rem;
+      min-height: calc(100vh - 68px);
+      position: sticky;
+      top: 68px;
+      height: calc(100vh - 68px);
+      overflow-y: auto;
+    }
+    .listings-main { background: var(--gray-100); padding: 1.5rem 2rem; }
+
+    .filter-group { margin-bottom: 1.5rem; }
+    .filter-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--gray-600);
+      margin-bottom: 0.75rem;
+    }
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .filter-option input { width: auto; }
+
+    .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+
+    .sort-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .sort-bar select {
+      padding: 0.5rem 1rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--gray-700);
+    }
+
+    @media (max-width: 900px) {
+      .listings-layout { grid-template-columns: 1fr; }
+      .filter-panel { position: static; height: auto; min-height: unset; border-right: none; border-bottom: 1px solid var(--gray-200); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    Rent<span>Verified</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="#" style="color:var(--primary);">Browse Rentals</a>
+    <a href="landlord-signup.html">List Property</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Tenant Login</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">List Property</a>
+  </div>
+</nav>
+
+<!-- SEARCH BAR -->
+<div style="background:white;border-bottom:1px solid var(--gray-200);padding:1rem 2rem;">
+  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+    <input type="text" placeholder="🔍  City, ZIP, or address..." style="flex:1;min-width:200px;padding:0.65rem 1rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:0.9rem;" />
+    <select style="padding:0.65rem 1rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:0.875rem;">
+      <option>Any Price</option>
+      <option>Under $800</option>
+      <option>$800–$1,200</option>
+      <option>$1,200–$1,800</option>
+      <option>$1,800+</option>
+    </select>
+    <select style="padding:0.65rem 1rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:0.875rem;">
+      <option>Any Beds</option>
+      <option>Studio</option>
+      <option>1 Bed</option>
+      <option>2 Beds</option>
+      <option>3+ Beds</option>
+    </select>
+    <button class="btn btn-primary">Search</button>
+  </div>
+</div>
+
+<div class="listings-layout">
+  <!-- FILTER PANEL -->
+  <div class="filter-panel">
+    <h3 style="font-weight:700;margin-bottom:1.5rem;">Filters</h3>
+
+    <div class="filter-group">
+      <div class="filter-label">Availability</div>
+      <label class="filter-option"><input type="checkbox" checked /> Available Now</label>
+      <label class="filter-option"><input type="checkbox" /> Coming Soon</label>
+      <label class="filter-option"><input type="checkbox" /> Show All</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">Property Type</div>
+      <label class="filter-option"><input type="checkbox" checked /> Apartment</label>
+      <label class="filter-option"><input type="checkbox" checked /> House</label>
+      <label class="filter-option"><input type="checkbox" /> Condo</label>
+      <label class="filter-option"><input type="checkbox" /> Townhouse</label>
+      <label class="filter-option"><input type="checkbox" /> Studio</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">Bedrooms</div>
+      <label class="filter-option"><input type="checkbox" /> Studio</label>
+      <label class="filter-option"><input type="checkbox" /> 1 Bed</label>
+      <label class="filter-option"><input type="checkbox" checked /> 2 Beds</label>
+      <label class="filter-option"><input type="checkbox" /> 3 Beds</label>
+      <label class="filter-option"><input type="checkbox" /> 4+ Beds</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">Amenities</div>
+      <label class="filter-option"><input type="checkbox" /> Parking Included</label>
+      <label class="filter-option"><input type="checkbox" /> W/D In Unit</label>
+      <label class="filter-option"><input type="checkbox" /> Pets Welcome</label>
+      <label class="filter-option"><input type="checkbox" /> A/C</label>
+      <label class="filter-option"><input type="checkbox" /> Utilities Included</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">Verified Only</div>
+      <label class="filter-option"><input type="checkbox" checked /> ✓ Verified Landlords Only</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">Landlord</div>
+      <label class="filter-option"><input type="checkbox" checked /> Sanders Property Mgmt ⭐</label>
+      <label class="filter-option"><input type="checkbox" /> Other Verified Landlords</label>
+    </div>
+
+    <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:0.5rem;" onclick="">Clear Filters</button>
+  </div>
+
+  <!-- LISTINGS MAIN -->
+  <div class="listings-main">
+    <div class="sort-bar">
+      <div>
+        <strong>12 verified listings</strong>
+        <span style="color:var(--gray-500);font-size:0.875rem;margin-left:0.5rem;">in Atlanta, GA</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span style="font-size:0.875rem;color:var(--gray-600);">Sort:</span>
+        <select>
+          <option>Newest First</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+          <option>Closest to You</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Featured badge section -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+      <span style="background:#fffbeb;border:1px solid #f59e0b;color:#92400e;border-radius:999px;padding:3px 12px;font-size:0.75rem;font-weight:700;">⭐ Sanders Property Management</span>
+      <span style="font-size:0.85rem;color:var(--gray-600);">Featured verified landlord</span>
+    </div>
+
+    <div class="listing-grid">
+
+      <!-- Listing 1 -->
+      <div class="property-card">
+        <div class="property-img">🏠</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+            <div class="property-price">$1,200/mo</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+              <span class="badge badge-available">Available</span>
+              <span class="badge badge-verified" style="font-size:0.7rem;">✓ Verified</span>
+            </div>
+          </div>
+          <div class="property-address">📍 123 Maple Street, Unit 2A</div>
+          <div class="property-meta">
+            <span>🛏 2 Beds</span>
+            <span>🚿 1 Bath</span>
+            <span>📐 850 sqft</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.5rem;">💚 Cash App / Zelle · $0 fee</div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="toggleChat()">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listing 2 -->
+      <div class="property-card">
+        <div class="property-img" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">🏢</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+            <div class="property-price">$950/mo</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+              <span class="badge badge-available">Available</span>
+              <span class="badge badge-verified" style="font-size:0.7rem;">✓ Verified</span>
+            </div>
+          </div>
+          <div class="property-address">📍 456 Oak Avenue, Apt 1B</div>
+          <div class="property-meta">
+            <span>🛏 1 Bed</span>
+            <span>🚿 1 Bath</span>
+            <span>📐 620 sqft</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.5rem;">💚 Cash App / Zelle · $0 fee</div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="toggleChat()">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listing 3 (rented) -->
+      <div class="property-card" style="opacity:0.75;">
+        <div class="property-img" style="background:linear-gradient(135deg,#10b981,#059669);">🏡</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+            <div class="property-price" style="color:var(--gray-500);">$1,650/mo</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+              <span class="badge badge-rented">Rented</span>
+            </div>
+          </div>
+          <div class="property-address">📍 789 Pine Road, House</div>
+          <div class="property-meta">
+            <span>🛏 3 Beds</span>
+            <span>🚿 2 Baths</span>
+            <span>📐 1,400 sqft</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.5rem;">Join waitlist for next opening</div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="toggleChat()">Join Waitlist</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other verified landlord listings (placeholder) -->
+      <div class="property-card">
+        <div class="property-img" style="background:linear-gradient(135deg,#f59e0b,#d97706);">🏘️</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+            <div class="property-price">$1,100/mo</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+              <span class="badge badge-available">Available</span>
+              <span class="badge badge-verified" style="font-size:0.7rem;">✓ Verified</span>
+            </div>
+          </div>
+          <div class="property-address">📍 321 Elm Drive, Unit B</div>
+          <div class="property-meta">
+            <span>🛏 2 Beds</span>
+            <span>🚿 1 Bath</span>
+            <span>📐 780 sqft</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.5rem;">Metro Rentals LLC · Pro Member</div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="toggleChat()">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="property-card">
+        <div class="property-img" style="background:linear-gradient(135deg,#ec4899,#db2777);">🏠</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+            <div class="property-price">$1,450/mo</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+              <span class="badge badge-available">Available</span>
+              <span class="badge badge-verified" style="font-size:0.7rem;">✓ Verified</span>
+            </div>
+          </div>
+          <div class="property-address">📍 555 Birch Lane, House</div>
+          <div class="property-meta">
+            <span>🛏 3 Beds</span>
+            <span>🚿 1 Bath</span>
+            <span>📐 1,100 sqft</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.5rem;">Riverdale Properties · Pro Member</div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="toggleChat()">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="property-card">
+        <div class="property-img" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">🏢</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+            <div class="property-price">$850/mo</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+              <span class="badge badge-available">Available</span>
+              <span class="badge badge-verified" style="font-size:0.7rem;">✓ Verified</span>
+            </div>
+          </div>
+          <div class="property-address">📍 200 Cedar Court, Studio</div>
+          <div class="property-meta">
+            <span>🛏 Studio</span>
+            <span>🚿 1 Bath</span>
+            <span>📐 450 sqft</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.5rem;">Urban Living LLC · Pro Member</div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="toggleChat()">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end listing-grid -->
+
+    <!-- Load more -->
+    <div style="text-align:center;margin-top:2.5rem;">
+      <button class="btn btn-outline btn-lg">Load More Listings</button>
+      <p style="font-size:0.8rem;color:var(--gray-500);margin-top:0.75rem;">Showing 6 of 12 verified listings</p>
+    </div>
+
+  </div><!-- end listings-main -->
+</div><!-- end listings-layout -->
+
+<!-- AI CHAT WIDGET -->
+<div id="chat-bubble" onclick="toggleChat()">
+  <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+  </svg>
+</div>
+
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">AI</div>
+      <div>
+        <div class="chat-title">RentVerified Assistant</div>
+        <div class="chat-status">🟢 Online · Replies instantly</div>
+      </div>
+    </div>
+    <div class="chat-close" onclick="toggleChat()">
+      <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg ai">Hi! 👋 Looking for a rental? I can help you find the right property, answer questions about any listing, or start your application. What are you looking for?</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Ask about any listing..." onkeypress="handleChatKey(event)" />
+    <button class="chat-send" onclick="sendChat()">
+      <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
