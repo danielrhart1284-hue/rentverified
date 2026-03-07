@@ -287,6 +287,36 @@
       .acc-sidebar { display: none; }
       .report-grid { grid-template-columns: 1fr; }
     }
+  /* ── Advanced Accounting Sections ──────────────────── */
+  .recon-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.5rem; }
+  .recon-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem 1.5rem; }
+  .recon-card h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.07em; color:#64748b; margin:0 0 .5rem; }
+  .recon-balance { font-size:1.75rem; font-weight:700; color:#1e293b; }
+  .recon-diff-ok { color:#16a34a; }
+  .recon-diff-bad { color:#dc2626; }
+  .cleared-row td { background:#f0fdf4 !important; }
+  .cleared-badge { background:#dcfce7; color:#166534; font-size:.72rem; font-weight:600; padding:.15rem .5rem; border-radius:99px; }
+  .owner-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1rem; }
+  .owner-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+  .owner-name { font-weight:700; font-size:1.05rem; color:#1e293b; }
+  .owner-props { font-size:.8rem; color:#64748b; }
+  .disbursement-table { width:100%; font-size:.88rem; border-collapse:collapse; }
+  .disbursement-table td { padding:.5rem .75rem; border-bottom:1px solid #f1f5f9; }
+  .disbursement-table .label { color:#64748b; }
+  .disbursement-table .amount-pos { color:#16a34a; font-weight:600; text-align:right; }
+  .disbursement-table .amount-neg { color:#dc2626; font-weight:600; text-align:right; }
+  .disbursement-table .amount-net { color:#1e293b; font-weight:700; font-size:1rem; text-align:right; border-top:2px solid #e2e8f0; }
+  .disbursement-table .total-row td { border-top:2px solid #e2e8f0; padding-top:.75rem; }
+  .print-stmt { background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px; padding:1.5rem; margin-top:1rem; font-size:.85rem; }
+  .print-stmt-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; border-bottom:2px solid #1e293b; padding-bottom:.75rem; }
+  .stmt-logo { font-weight:800; font-size:1.1rem; color:#1a56db; }
+  .nec-flag { background:#fef3c7; color:#92400e; font-size:.72rem; font-weight:700; padding:.15rem .55rem; border-radius:99px; }
+  .nec-ok { background:#dcfce7; color:#166534; font-size:.72rem; font-weight:600; padding:.15rem .55rem; border-radius:99px; }
+  .tax-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
+  .owner-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  @media(max-width:700px) {
+    .recon-grid,.tax-summary-grid,.owner-form-grid { grid-template-columns:1fr; }
+  }
   </style>
 </head>
 <body>
@@ -313,6 +343,14 @@
     <a href="#add" onclick="showSection('add',this)">➕ Add Transaction</a>
     <a href="#transactions" onclick="showSection('transactions',this)">📋 All Transactions</a>
     <a href="#reports" onclick="showSection('reports',this)">📈 Reports</a>
+
+    <h3>Advanced</h3>
+    <a href="#reconcile" onclick="showSection('reconcile',this)">🏦 Bank Reconciliation</a>
+    <a href="#disbursements" onclick="showSection('disbursements',this)">💸 Owner Disbursements</a>
+    <a href="#tax1099" onclick="showSection('tax1099',this)">📋 1099s &amp; Tax</a>
+
+    <h3>Owner Statements</h3>
+    <a href="owner-statements.html" style="color:#fbbf24;border-left-color:#fbbf24;">💸 Owner Statements</a>
 
     <h3>Manage</h3>
     <a href="landlord-signup.html">🏠 My Properties</a>
@@ -594,6 +632,188 @@
           <select id="propYear" onchange="renderPropertyReport()"></select>
         </div>
         <div id="propertyGrid"></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: BANK RECONCILIATION                       -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-reconcile" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>🏦 Bank Reconciliation</h1>
+          <p>Match your transactions to your bank statement to verify accuracy.</p>
+        </div>
+        <button class="btn btn-primary" onclick="markReconciled()" style="background:#16a34a;border-color:#16a34a;">✅ Save Reconciliation</button>
+      </div>
+
+      <!-- Statement inputs -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;align-items:end;">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Statement End Date</label>
+            <input type="date" id="reconDate" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;" oninput="renderReconTable()">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Bank Statement Balance</label>
+            <input type="number" id="bankStmtBalance" placeholder="0.00" step="0.01" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;" oninput="renderReconSummary()">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Starting Book Balance</label>
+            <input type="number" id="startingBalance" placeholder="0.00" step="0.01" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;" oninput="renderReconSummary()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="recon-grid">
+        <div class="recon-card">
+          <h4>Book Balance (Cleared)</h4>
+          <div class="recon-balance" id="reconBookBal">$0.00</div>
+          <div style="font-size:.8rem;color:#64748b;margin-top:.25rem;" id="reconClearedCount">0 transactions cleared</div>
+        </div>
+        <div class="recon-card">
+          <h4>Bank Statement Balance</h4>
+          <div class="recon-balance" id="reconBankBal">$0.00</div>
+          <div style="font-size:.8rem;color:#64748b;margin-top:.25rem;">Entered from your bank</div>
+        </div>
+        <div class="recon-card">
+          <h4>Outstanding Deposits</h4>
+          <div class="recon-balance" id="reconOutDeposits" style="color:#16a34a;">$0.00</div>
+          <div style="font-size:.8rem;color:#64748b;margin-top:.25rem;" id="reconOutDepCount">0 uncleared income items</div>
+        </div>
+        <div class="recon-card">
+          <h4>Difference</h4>
+          <div class="recon-balance recon-diff-bad" id="reconDiff">$0.00</div>
+          <div style="font-size:.8rem;margin-top:.25rem;" id="reconDiffMsg">Enter your bank balance to begin</div>
+        </div>
+      </div>
+
+      <!-- Transaction checklist -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;font-size:1rem;">Check Off Cleared Transactions</h3>
+          <div style="display:flex;gap:.5rem;">
+            <button class="btn btn-outline" onclick="reconSelectAll(true)">Select All</button>
+            <button class="btn btn-outline" onclick="reconSelectAll(false)">Clear All</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th style="width:2rem;">✓</th><th>Date</th><th>Description</th><th>Property</th><th>Method</th><th style="text-align:right;">Amount</th></tr></thead>
+          <tbody id="reconTbody"><tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">Set a statement date above to load transactions.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: OWNER DISBURSEMENTS                       -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-disbursements" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>💸 Owner Disbursements</h1>
+          <p>Calculate net proceeds and generate owner statements for each property owner.</p>
+        </div>
+        <button class="btn btn-primary" onclick="toggleAddOwner()">➕ Add Owner</button>
+      </div>
+
+      <!-- Add owner form -->
+      <div id="addOwnerForm" class="card" style="display:none;margin-bottom:1.5rem;">
+        <h3 style="margin:0 0 1rem;font-size:1rem;">New Property Owner</h3>
+        <div class="owner-form-grid">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Owner Full Name</label>
+            <input id="ownerName" type="text" placeholder="Jane Smith" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Email</label>
+            <input id="ownerEmail" type="email" placeholder="jane@email.com" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Properties (comma-separated address keywords)</label>
+            <input id="ownerProps" type="text" placeholder="119 E 600 S, 234 Main" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">PM Management Fee (%)</label>
+            <input id="ownerFee" type="number" placeholder="10" min="0" max="100" step="0.5" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Statement Month</label>
+            <input id="ownerStmtMonth" type="month" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="saveOwner()" style="width:100%;">Save Owner</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month selector -->
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+        <label style="font-size:.88rem;font-weight:600;color:#374151;">Disbursement Month:</label>
+        <input type="month" id="disbMonth" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .8rem;font-size:.88rem;" onchange="renderDisbursements()">
+      </div>
+
+      <!-- Owner cards -->
+      <div id="ownerCardsContainer">
+        <div style="text-align:center;padding:3rem;color:#94a3b8;">No owners added yet. Click <strong>Add Owner</strong> to get started.</div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: 1099s & TAX                               -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-tax1099" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>📋 1099s &amp; Tax</h1>
+          <p>Identify vendors paid $600+ and generate 1099-NEC summaries for tax filing.</p>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center;">
+          <select id="taxYear" onchange="render1099()" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .8rem;font-size:.88rem;color:#374151;"></select>
+          <button class="btn btn-export" onclick="export1099CSV()">⬇ Export 1099 CSV</button>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="tax-summary-grid">
+        <div class="stat-card" style="background:#fff;">
+          <div class="stat-label">Total Vendors Paid</div>
+          <div class="stat-value" id="taxTotalVendors">—</div>
+        </div>
+        <div class="stat-card" style="background:#fff;">
+          <div class="stat-label">Require 1099-NEC ($600+)</div>
+          <div class="stat-value" style="color:#dc2626;" id="taxNECCount">—</div>
+        </div>
+        <div class="stat-card" style="background:#fff;">
+          <div class="stat-label">Total Contractor Payments</div>
+          <div class="stat-value" id="taxTotalPaid">—</div>
+        </div>
+      </div>
+
+      <!-- Info banner -->
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.87rem;color:#1e40af;">
+        <strong>📌 1099-NEC Rule:</strong> You must file a 1099-NEC for any unincorporated contractor, handyman, or service provider paid <strong>$600 or more</strong> in the tax year. Corporations (Inc./LLC taxed as corp) are generally exempt. Deadline: <strong>January 31</strong> of the following year.
+      </div>
+
+      <!-- Vendor table -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;font-size:1rem;">Vendor Payment Summary</h3>
+          <span style="font-size:.8rem;color:#64748b;">Sourced from expense transactions — add TIN/EIN below for each vendor</span>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Vendor / Payee</th><th style="text-align:right;">Total Paid</th><th>1099 Required?</th><th>TIN / EIN</th><th>Type</th><th>Actions</th></tr></thead>
+          <tbody id="necTbody"><tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- 1099 Print Preview -->
+      <div id="nec-preview-wrapper" style="display:none;margin-top:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+          <h3 style="margin:0;">1099-NEC Summary (Print Preview)</h3>
+          <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
+        </div>
+        <div class="print-stmt" id="necPrintArea"></div>
       </div>
     </div>
 
@@ -1061,6 +1281,372 @@ function groupBy(txs, key) {
     return acc;
   }, {});
 }
+
+// ═════════════════════════════════════════════════════════
+//  BANK RECONCILIATION
+// ═════════════════════════════════════════════════════════
+let clearedSet = new Set(); // ids of cleared transactions
+
+function renderReconTable() {
+  const dateVal = document.getElementById('reconDate').value;
+  const tbody = document.getElementById('reconTbody');
+  if (!dateVal) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">Set a statement date above.</td></tr>'; return; }
+  const cutoff = new Date(dateVal);
+  const filtered = transactions.filter(t => new Date(t.date) <= cutoff).sort((a,b) => new Date(a.date)-new Date(b.date));
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">No transactions on or before this date.</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(t => {
+    const cleared = clearedSet.has(t.id);
+    const sign = t.type === 'income' ? '+' : '-';
+    const color = t.type === 'income' ? '#16a34a' : '#dc2626';
+    return `<tr class="${cleared ? 'cleared-row' : ''}">
+      <td><input type="checkbox" ${cleared ? 'checked' : ''} onchange="toggleCleared('${t.id}',this.checked)"></td>
+      <td>${t.date}</td>
+      <td>${t.category}${t.notes ? ' — <span style="color:#64748b;font-size:.82rem;">' + t.notes + '</span>' : ''}</td>
+      <td style="font-size:.82rem;color:#64748b;">${t.property.split(',')[0]}</td>
+      <td style="font-size:.82rem;">${t.method||''}</td>
+      <td style="text-align:right;font-weight:600;color:${color};">${sign}${fmt(t.amount)}</td>
+    </tr>`;
+  }).join('');
+  renderReconSummary();
+}
+
+function toggleCleared(id, checked) {
+  if (checked) clearedSet.add(id); else clearedSet.delete(id);
+  renderReconSummary();
+}
+
+function reconSelectAll(select) {
+  const dateVal = document.getElementById('reconDate').value;
+  if (!dateVal) return;
+  const cutoff = new Date(dateVal);
+  transactions.filter(t => new Date(t.date) <= cutoff).forEach(t => {
+    if (select) clearedSet.add(t.id); else clearedSet.delete(t.id);
+  });
+  renderReconTable();
+}
+
+function renderReconSummary() {
+  const startingBal = parseFloat(document.getElementById('startingBalance').value) || 0;
+  const bankBal = parseFloat(document.getElementById('bankStmtBalance').value) || 0;
+  const cleared = transactions.filter(t => clearedSet.has(t.id));
+  const clearedNet = cleared.reduce((s,t) => s + (t.type==='income' ? t.amount : -t.amount), 0);
+  const bookBal = startingBal + clearedNet;
+  const dateVal = document.getElementById('reconDate').value;
+  const cutoff = dateVal ? new Date(dateVal) : null;
+  const uncleared = cutoff ? transactions.filter(t => new Date(t.date)<=cutoff && !clearedSet.has(t.id)) : [];
+  const outDeposits = uncleared.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const diff = bookBal - bankBal;
+  document.getElementById('reconBookBal').textContent = fmt(bookBal);
+  document.getElementById('reconBankBal').textContent = fmt(bankBal);
+  document.getElementById('reconOutDeposits').textContent = '$' + outDeposits.toLocaleString('en-US',{minimumFractionDigits:2});
+  document.getElementById('reconClearedCount').textContent = cleared.length + ' transactions cleared';
+  document.getElementById('reconOutDepCount').textContent = uncleared.filter(t=>t.type==='income').length + ' uncleared income items';
+  const diffEl = document.getElementById('reconDiff');
+  const msgEl = document.getElementById('reconDiffMsg');
+  diffEl.textContent = (diff === 0 ? '' : (diff > 0 ? '+' : '-')) + fmt(diff);
+  if (diff === 0 && bankBal !== 0) {
+    diffEl.className = 'recon-balance recon-diff-ok';
+    msgEl.style.color = '#16a34a'; msgEl.textContent = '✅ Fully reconciled!';
+  } else {
+    diffEl.className = 'recon-balance recon-diff-bad';
+    msgEl.style.color = '#dc2626'; msgEl.textContent = diff !== 0 ? 'Difference must be $0.00 to reconcile' : 'Enter balances above';
+  }
+}
+
+function markReconciled() {
+  const diff = parseFloat(document.getElementById('reconDiff').textContent.replace(/[^0-9.-]/g,''));
+  if (diff !== 0) { toast('⚠️ Difference must be $0.00 before saving reconciliation'); return; }
+  const month = document.getElementById('reconDate').value.slice(0,7);
+  const rec = JSON.parse(localStorage.getItem('rv_reconciliations')||'[]');
+  rec.push({ date: new Date().toISOString(), statementDate: document.getElementById('reconDate').value, cleared: [...clearedSet] });
+  localStorage.setItem('rv_reconciliations', JSON.stringify(rec));
+  toast('✅ Reconciliation saved for ' + month + '!');
+}
+
+// ═════════════════════════════════════════════════════════
+//  OWNER DISBURSEMENTS
+// ═════════════════════════════════════════════════════════
+let owners = [];
+
+function loadOwners() {
+  try { owners = JSON.parse(localStorage.getItem('rv_owners') || '[]'); } catch(e){ owners=[]; }
+  if (!owners.length) {
+    owners = [
+      { id:'owner1', name:'Daniel Hart (Self-Managed)', email:'danielrhart1284@gmail.com', props:['119 E 600 S'], fee:0 },
+    ];
+  }
+}
+
+function saveOwners() { localStorage.setItem('rv_owners', JSON.stringify(owners)); }
+
+function toggleAddOwner() {
+  const f = document.getElementById('addOwnerForm');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  // set default month to current
+  const now = new Date();
+  document.getElementById('ownerStmtMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+}
+
+function saveOwner() {
+  const name  = document.getElementById('ownerName').value.trim();
+  const email = document.getElementById('ownerEmail').value.trim();
+  const props = document.getElementById('ownerProps').value.trim();
+  const fee   = parseFloat(document.getElementById('ownerFee').value) || 0;
+  if (!name) { toast('⚠️ Owner name required'); return; }
+  owners.push({ id: uid(), name, email, props: props.split(',').map(p=>p.trim()).filter(Boolean), fee });
+  saveOwners();
+  document.getElementById('addOwnerForm').style.display = 'none';
+  renderDisbursements();
+  toast('✅ Owner ' + name + ' added!');
+}
+
+function renderDisbursements() {
+  loadOwners();
+  const monthVal = document.getElementById('disbMonth').value;
+  const container = document.getElementById('ownerCardsContainer');
+  if (!owners.length) { container.innerHTML = '<div style="text-align:center;padding:3rem;color:#94a3b8;">No owners yet.</div>'; return; }
+  container.innerHTML = owners.map(o => buildOwnerCard(o, monthVal)).join('');
+}
+
+function buildOwnerCard(owner, monthVal) {
+  // Filter transactions for owner's properties and selected month
+  let ownerTx = transactions;
+  if (owner.props && owner.props.length) {
+    ownerTx = transactions.filter(t => owner.props.some(p => t.property.toLowerCase().includes(p.toLowerCase())));
+  }
+  if (monthVal) {
+    ownerTx = ownerTx.filter(t => t.date.startsWith(monthVal));
+  }
+  const grossRent = ownerTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expenses  = ownerTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const mgmtFee   = grossRent * (owner.fee / 100);
+  const net       = grossRent - expenses - mgmtFee;
+  const monthLabel = monthVal ? new Date(monthVal+'-02').toLocaleDateString('en-US',{month:'long',year:'numeric'}) : 'All Time';
+  const expRows = ownerTx.filter(t=>t.type==='expense').map(t =>
+    `<tr><td class="label" style="padding-left:1.5rem;">↳ ${t.category} — ${t.notes||t.party||''}</td><td class="amount-neg">-${fmt(t.amount)}</td></tr>`
+  ).join('');
+  return `<div class="owner-card">
+    <div class="owner-card-header">
+      <div>
+        <div class="owner-name">${owner.name}</div>
+        <div class="owner-props">${owner.email} · PM Fee: ${owner.fee}% · Properties: ${owner.props.join(', ')||'All'}</div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button class="btn btn-outline" onclick="printStatement('${owner.id}','${monthVal}')">🖨 Print Statement</button>
+        <button class="btn btn-outline" style="color:#dc2626;border-color:#fca5a5;" onclick="deleteOwner('${owner.id}')">✕</button>
+      </div>
+    </div>
+    <table class="disbursement-table">
+      <tr><td class="label">Gross Rent Collected</td><td class="amount-pos">+${fmt(grossRent)}</td></tr>
+      ${expRows}
+      <tr><td class="label">Total Expenses</td><td class="amount-neg">-${fmt(expenses)}</td></tr>
+      ${owner.fee > 0 ? `<tr><td class="label">PM Management Fee (${owner.fee}%)</td><td class="amount-neg">-${fmt(mgmtFee)}</td></tr>` : ''}
+      <tr class="total-row"><td class="label" style="font-weight:700;">Net Owner Disbursement — ${monthLabel}</td><td class="amount-net ${net>=0?'':'amount-neg'}">${net>=0?'+':''}${fmt(net)}</td></tr>
+    </table>
+  </div>`;
+}
+
+function deleteOwner(id) {
+  if (!confirm('Remove this owner?')) return;
+  owners = owners.filter(o => o.id !== id);
+  saveOwners();
+  renderDisbursements();
+}
+
+function printStatement(ownerId, monthVal) {
+  loadOwners();
+  const owner = owners.find(o=>o.id===ownerId);
+  if (!owner) return;
+  let ownerTx = transactions;
+  if (owner.props && owner.props.length) {
+    ownerTx = transactions.filter(t => owner.props.some(p => t.property.toLowerCase().includes(p.toLowerCase())));
+  }
+  if (monthVal) ownerTx = ownerTx.filter(t => t.date.startsWith(monthVal));
+  const grossRent = ownerTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expenses  = ownerTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const mgmtFee   = grossRent * (owner.fee / 100);
+  const net       = grossRent - expenses - mgmtFee;
+  const monthLabel = monthVal ? new Date(monthVal+'-02').toLocaleDateString('en-US',{month:'long',year:'numeric'}) : 'All Time';
+  const expRows = ownerTx.filter(t=>t.type==='expense').map(t =>
+    `<tr><td style="padding:.4rem .5rem;color:#64748b;font-size:.85rem;">↳ ${t.date} · ${t.category} · ${t.notes||t.party||''}</td><td style="text-align:right;color:#dc2626;font-size:.85rem;">-${fmt(t.amount)}</td></tr>`
+  ).join('');
+  const html = `
+    <div class="print-stmt-header">
+      <div><div class="stmt-logo">✓ RentVerified</div><div style="font-size:.8rem;color:#64748b;">Sanders Property Management</div></div>
+      <div style="text-align:right;font-size:.85rem;color:#374151;"><strong>Owner Statement</strong><br>${monthLabel}<br>Generated: ${new Date().toLocaleDateString()}</div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <strong>Owner:</strong> ${owner.name}<br>
+      <span style="color:#64748b;font-size:.85rem;">${owner.email}</span><br>
+      <span style="color:#64748b;font-size:.85rem;">Properties: ${owner.props.join(', ')||'All'}</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+      <tr style="background:#f8fafc;"><td style="padding:.5rem;font-weight:600;">Gross Rent Collected</td><td style="text-align:right;color:#16a34a;font-weight:600;">+${fmt(grossRent)}</td></tr>
+      ${expRows}
+      <tr><td style="padding:.4rem .5rem;font-weight:600;">Total Expenses</td><td style="text-align:right;color:#dc2626;font-weight:600;">-${fmt(expenses)}</td></tr>
+      ${owner.fee > 0 ? `<tr><td style="padding:.4rem .5rem;">PM Fee (${owner.fee}%)</td><td style="text-align:right;color:#dc2626;">-${fmt(mgmtFee)}</td></tr>` : ''}
+      <tr style="border-top:2px solid #1e293b;"><td style="padding:.75rem .5rem;font-size:1rem;font-weight:700;">Net Disbursement</td><td style="text-align:right;font-size:1rem;font-weight:700;color:${net>=0?'#16a34a':'#dc2626'};">${net>=0?'+':''}${fmt(net)}</td></tr>
+    </table>
+    <div style="margin-top:1.5rem;font-size:.75rem;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:.75rem;">
+      This statement is prepared by Sanders Property Management using RentVerified. Please retain for your records.
+    </div>`;
+  document.getElementById('necPrintArea') && (document.getElementById('nec-preview-wrapper').style.display='none');
+  // Open print window
+  const w = window.open('','_blank','width=700,height=900');
+  w.document.write(`<!DOCTYPE html><html><head><title>Owner Statement – ${owner.name}</title>
+    <style>body{font-family:system-ui,sans-serif;padding:2rem;color:#1e293b;} @media print{body{padding:.5rem;}}</style></head>
+    <body>${html}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+  w.document.close();
+}
+
+// ═════════════════════════════════════════════════════════
+//  1099 / TAX
+// ═════════════════════════════════════════════════════════
+let vendorTINs = {};
+
+function loadTINs() {
+  try { vendorTINs = JSON.parse(localStorage.getItem('rv_vendor_tins') || '{}'); } catch(e){ vendorTINs={}; }
+}
+function saveTINs() { localStorage.setItem('rv_vendor_tins', JSON.stringify(vendorTINs)); }
+
+function render1099() {
+  loadTINs();
+  const year = parseInt(document.getElementById('taxYear').value);
+  // Only expense transactions paid to vendors/contractors
+  const yearTx = transactions.filter(t => t.type==='expense' && t.date.startsWith(String(year)));
+  // Group by party name
+  const byParty = {};
+  yearTx.forEach(t => {
+    const key = (t.party||'Unknown Vendor').trim();
+    if (!byParty[key]) byParty[key] = { total:0, txCount:0, categories:new Set() };
+    byParty[key].total += t.amount;
+    byParty[key].txCount++;
+    byParty[key].categories.add(t.category);
+  });
+  const parties = Object.entries(byParty).sort((a,b)=>b[1].total-a[1].total);
+  const necParties = parties.filter(([,v])=>v.total >= 600);
+  // Update stats
+  document.getElementById('taxTotalVendors').textContent = parties.length;
+  document.getElementById('taxNECCount').textContent = necParties.length;
+  document.getElementById('taxTotalPaid').textContent = fmt(yearTx.reduce((s,t)=>s+t.amount,0));
+  // Render table
+  const tbody = document.getElementById('necTbody');
+  if (!parties.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">No expense transactions in ' + year + '.</td></tr>'; return; }
+  tbody.innerHTML = parties.map(([party, data]) => {
+    const needs1099 = data.total >= 600;
+    const tin = vendorTINs[party] || '';
+    const type = vendorTINs[party+'_type'] || 'Individual';
+    return `<tr>
+      <td style="font-weight:600;">${party}<br><span style="font-size:.78rem;color:#64748b;">${[...data.categories].join(', ')}</span></td>
+      <td style="text-align:right;font-weight:600;${needs1099?'color:#dc2626;':'color:#374151;'}">${fmt(data.total)}</td>
+      <td><span class="${needs1099?'nec-flag':'nec-ok'}">${needs1099?'⚠️ YES — File 1099-NEC':'No'}</span></td>
+      <td><input type="text" value="${tin}" placeholder="XX-XXXXXXX" style="width:110px;border:1.5px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.82rem;" onchange="saveTIN('${party}',this.value)"></td>
+      <td>
+        <select style="border:1.5px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.82rem;" onchange="saveTINType('${party}',this.value)">
+          <option ${type==='Individual'?'selected':''}>Individual</option>
+          <option ${type==='LLC'?'selected':''}>LLC</option>
+          <option ${type==='Corporation'?'selected':''}>Corporation</option>
+          <option ${type==='Partnership'?'selected':''}>Partnership</option>
+        </select>
+      </td>
+      <td><button class="btn btn-outline" style="font-size:.78rem;padding:.3rem .65rem;" onclick="preview1099('${party}',${data.total},${year})">Preview</button></td>
+    </tr>`;
+  }).join('');
+  // Show print preview if there are NEC vendors
+  if (necParties.length) renderNECPreview(necParties, year);
+}
+
+function saveTIN(party, val) {
+  loadTINs();
+  vendorTINs[party] = val;
+  saveTINs();
+}
+function saveTINType(party, val) {
+  loadTINs();
+  vendorTINs[party+'_type'] = val;
+  saveTINs();
+}
+
+function preview1099(party, total, year) {
+  const tin = vendorTINs[party] || '___-__-____';
+  const html = `
+    <div class="print-stmt-header">
+      <div><div class="stmt-logo">✓ RentVerified</div><div style="font-size:.8rem;color:#64748b;">Sanders Property Management · EIN: XX-XXXXXXX</div></div>
+      <div style="text-align:right;font-size:.85rem;"><strong>1099-NEC Summary</strong><br>Tax Year ${year}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem;margin-top:.75rem;">
+      <tr style="background:#f8fafc;"><th style="padding:.5rem;text-align:left;">Field</th><th style="padding:.5rem;text-align:left;">Value</th></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Payer (Box — Filer Info)</td><td style="padding:.4rem .5rem;"><strong>Sanders Property Management</strong><br>Daniel Hart · danielrhart1284@gmail.com</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient Name</td><td style="padding:.4rem .5rem;font-weight:600;">${party}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient TIN/EIN</td><td style="padding:.4rem .5rem;">${tin}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Box 1 — Nonemployee Compensation</td><td style="padding:.4rem .5rem;font-weight:700;font-size:1.1rem;color:#dc2626;">${fmt(total)}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Tax Year</td><td style="padding:.4rem .5rem;">${year}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Filing Deadline</td><td style="padding:.4rem .5rem;">January 31, ${year+1}</td></tr>
+    </table>
+    <div style="margin-top:1rem;font-size:.75rem;color:#94a3b8;">This is a summary only. File official 1099-NEC forms through IRS e-file or a licensed tax preparer.</div>`;
+  const wrapper = document.getElementById('nec-preview-wrapper');
+  document.getElementById('necPrintArea').innerHTML = html;
+  wrapper.style.display = 'block';
+  wrapper.scrollIntoView({ behavior:'smooth' });
+}
+
+function renderNECPreview(necParties, year) {
+  const rows = necParties.map(([party, data]) => {
+    const tin = vendorTINs[party] || 'TIN NEEDED';
+    return `<tr><td style="padding:.4rem .5rem;font-weight:600;">${party}</td><td style="padding:.4rem .5rem;">${tin}</td><td style="padding:.4rem .5rem;font-weight:700;color:#dc2626;">${fmt(data.total)}</td></tr>`;
+  }).join('');
+  document.getElementById('necPrintArea').innerHTML = `
+    <div class="print-stmt-header">
+      <div><div class="stmt-logo">✓ RentVerified</div><div style="font-size:.8rem;color:#64748b;">Sanders Property Management</div></div>
+      <div style="text-align:right;font-size:.85rem;"><strong>1099-NEC Filing List</strong><br>Tax Year ${year}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+      <tr style="background:#f8fafc;"><th style="padding:.5rem;text-align:left;">Vendor</th><th style="padding:.5rem;text-align:left;">TIN/EIN</th><th style="padding:.5rem;text-align:left;">Box 1 Amount</th></tr>
+      ${rows}
+    </table>
+    <div style="margin-top:1rem;font-size:.75rem;color:#94a3b8;">File 1099-NEC for each vendor above by January 31, ${year+1}. Verify TINs before filing.</div>`;
+  document.getElementById('nec-preview-wrapper').style.display = 'block';
+}
+
+function export1099CSV() {
+  loadTINs();
+  const year = parseInt(document.getElementById('taxYear').value);
+  const yearTx = transactions.filter(t=>t.type==='expense' && t.date.startsWith(String(year)));
+  const byParty = {};
+  yearTx.forEach(t => {
+    const key = (t.party||'Unknown').trim();
+    byParty[key] = (byParty[key]||0) + t.amount;
+  });
+  const rows = Object.entries(byParty).sort((a,b)=>b[1]-a[1]).map(([party, total]) => [
+    `"${party}"`, vendorTINs[party]||'', vendorTINs[party+'_type']||'Individual', fmt(total).replace('$',''), total>=600?'YES':'NO', year
+  ].join(','));
+  const csv = ['Vendor,TIN/EIN,Type,Total Paid,1099-NEC Required,Tax Year', ...rows].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`1099-NEC-list-${year}.csv`; a.click(); URL.revokeObjectURL(url);
+  toast('📥 1099 CSV exported!');
+}
+
+// init advanced sections on load
+document.addEventListener('DOMContentLoaded', () => {
+  // Recon: set default date to today
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('reconDate').value = today;
+  // Disbursements: set default month
+  const now = new Date();
+  document.getElementById('disbMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  loadOwners();
+  renderDisbursements();
+  // 1099: populate year dropdown
+  const taxSel = document.getElementById('taxYear');
+  const curYear = now.getFullYear();
+  for (let y=curYear; y>=curYear-5; y--) {
+    const opt = document.createElement('option');
+    opt.value=y; opt.textContent=y; taxSel.appendChild(opt);
+  }
+  render1099();
+});
 
 // ─────────────────────────────────────────────────────────
 //  CSV EXPORT
