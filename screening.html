@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tenant Screening – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background:#f3f4f6; }
+    .sc-wrapper { display:grid; grid-template-columns:240px 1fr; min-height:100vh; padding-top:64px; }
+    .sc-sidebar { background:#1e293b; color:#cbd5e1; padding:1.5rem 0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; }
+    .sc-sidebar h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.5rem 1.5rem; margin:1rem 0 .25rem; }
+    .sc-sidebar a  { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.9rem; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
+    .sc-sidebar a:hover, .sc-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#3b82f6; }
+    .sc-main { padding:2rem; max-width:1200px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+    .page-header h1 { font-size:1.5rem; color:#1e293b; }
+    .page-header p  { color:#64748b; font-size:.9rem; margin-top:.2rem; }
+    .panel { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:1.5rem; overflow:hidden; }
+    .panel-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-bottom:1px solid #f1f5f9; }
+    .panel-header h2 { font-size:1rem; color:#1e293b; font-weight:700; }
+    .panel-body { padding:1.5rem; }
+    .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+    .fg { display:flex; flex-direction:column; gap:.4rem; }
+    .fg label { font-size:.82rem; font-weight:600; color:#374151; }
+    .fg input, .fg select, .fg textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.55rem .8rem; font-size:.9rem; color:#1e293b; outline:none; transition:border .15s; background:#fff; }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:#3b82f6; }
+    .btn { padding:.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; transition:all .15s; }
+    .btn-primary { background:#1a56db; color:#fff; }
+    .btn-primary:hover { background:#1e40af; }
+    .btn-success { background:#10b981; color:#fff; }
+    .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
+    .btn-sm { padding:.35rem .75rem; font-size:.78rem; }
+    /* Score card */
+    .score-ring { width:100px; height:100px; border-radius:50%; border:8px solid; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 1rem; }
+    .score-ring.pass  { border-color:#10b981; }
+    .score-ring.warn  { border-color:#f59e0b; }
+    .score-ring.fail  { border-color:#ef4444; }
+    .score-num { font-size:1.5rem; font-weight:800; }
+    .score-lbl { font-size:.65rem; text-transform:uppercase; letter-spacing:.08em; color:#64748b; }
+    /* Criteria grid */
+    .crit-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.75rem; }
+    .crit-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:1rem; text-align:center; }
+    .crit-card.pass { border-color:#10b981; background:#f0fdf4; }
+    .crit-card.warn { border-color:#f59e0b; background:#fffbeb; }
+    .crit-card.fail { border-color:#ef4444; background:#fef2f2; }
+    .crit-icon { font-size:1.5rem; }
+    .crit-val  { font-size:1rem; font-weight:700; margin:.25rem 0; }
+    .crit-lbl  { font-size:.75rem; color:#64748b; }
+    .crit-status { font-size:.72rem; font-weight:700; margin-top:.25rem; }
+    .crit-card.pass .crit-status { color:#059669; }
+    .crit-card.warn .crit-status { color:#d97706; }
+    .crit-card.fail .crit-status { color:#dc2626; }
+    /* Applicant table */
+    .data-table { width:100%; border-collapse:collapse; font-size:.87rem; }
+    .data-table th { text-align:left; padding:.65rem 1rem; background:#f8fafc; font-size:.73rem; text-transform:uppercase; letter-spacing:.05em; color:#64748b; border-bottom:1px solid #e2e8f0; }
+    .data-table td { padding:.75rem 1rem; border-bottom:1px solid #f1f5f9; color:#374151; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:#fafafa; }
+    .decision { display:inline-block; padding:.2rem .65rem; border-radius:99px; font-size:.75rem; font-weight:600; }
+    .decision-approved { background:#dcfce7; color:#15803d; }
+    .decision-denied   { background:#fef2f2; color:#dc2626; }
+    .decision-review   { background:#fef9c3; color:#854d0e; }
+    .decision-pending  { background:#f1f5f9; color:#475569; }
+    /* Checklist */
+    .checklist { list-style:none; padding:0; }
+    .checklist li { display:flex; align-items:flex-start; gap:.6rem; padding:.5rem 0; border-bottom:1px solid #f1f5f9; font-size:.88rem; }
+    .checklist li:last-child { border-bottom:none; }
+    .chk { width:20px; height:20px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; }
+    .chk.pass { background:#dcfce7; color:#15803d; }
+    .chk.fail { background:#fef2f2; color:#dc2626; }
+    .chk.warn { background:#fef9c3; color:#854d0e; }
+    /* Upload */
+    .upload-zone { border:2px dashed #cbd5e1; border-radius:10px; padding:1.5rem; text-align:center; color:#94a3b8; font-size:.88rem; cursor:pointer; }
+    .upload-zone:hover { border-color:#3b82f6; background:#eff6ff; color:#3b82f6; }
+    /* toast */
+    #toast { position:fixed; bottom:2rem; right:2rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; opacity:0; transform:translateY(10px); transition:all .3s; z-index:9999; pointer-events:none; }
+    #toast.show { opacity:1; transform:translateY(0); }
+    @media(max-width:768px){ .sc-wrapper{grid-template-columns:1fr;} .sc-sidebar{display:none;} .crit-grid{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-logo">✓</span><span>RentVerified</span></div>
+  <div class="nav-links">
+    <a href="landlord-signup.html">← Dashboard</a>
+    <a href="leases.html">Leases</a>
+    <a href="index.html">Home</a>
+  </div>
+</nav>
+
+<div class="sc-wrapper">
+  <aside class="sc-sidebar">
+    <h3>Screening</h3>
+    <a class="active" onclick="showSec('new',this)">📋 New Application</a>
+    <a onclick="showSec('results',this)">🔍 Screen Applicant</a>
+    <a onclick="showSec('history',this)">📁 All Applicants</a>
+    <a onclick="showSec('criteria',this)">⚙️ Screening Criteria</a>
+    <h3>Manage</h3>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+    <a href="leases.html">📝 Leases</a>
+    <a href="maintenance.html">🔧 Maintenance</a>
+    <a href="accounting.html">📊 Accounting</a>
+    <a href="ad-builder.html">📣 Ad Builder</a>
+  </aside>
+
+  <main class="sc-main">
+
+    <!-- ── NEW APPLICATION ───────────────────────────── -->
+    <div id="sec-new">
+      <div class="page-header">
+        <div><h1>🛡 Tenant Screening</h1><p>Collect applications, verify income, and make confident decisions.</p></div>
+      </div>
+
+      <!-- Send Application Link -->
+      <div class="panel" style="background:linear-gradient(135deg,#1e293b,#0f172a);color:#fff;">
+        <div class="panel-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <div style="font-size:1.1rem;font-weight:700;margin-bottom:.35rem;">📧 Send Application to Prospective Tenant</div>
+              <div style="font-size:.88rem;color:#94a3b8;">Share a link to your online rental application. Tenants fill it out digitally — no paper needed.</div>
+            </div>
+            <button class="btn btn-success" onclick="copyAppLink()">📋 Copy Application Link</button>
+          </div>
+          <div id="appLinkBox" style="display:none;margin-top:1rem;background:rgba(255,255,255,.08);border-radius:8px;padding:.75rem 1rem;font-size:.85rem;font-family:monospace;color:#a5f3fc;word-break:break-all;"></div>
+        </div>
+      </div>
+
+      <!-- AI Application Share -->
+      <div style="background:linear-gradient(135deg,#1e293b 0%,#1a56db 100%);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;color:#fff;">
+        <div style="font-size:.72rem;font-weight:700;color:#93c5fd;margin-bottom:.4rem;">🤖 RentVerified AI</div>
+        <div style="font-size:.92rem;margin-bottom:.9rem;line-height:1.5;">Don't have an application yet? I can send your rental application to any prospective tenant automatically — via email, text, or Facebook Messenger. They fill it out online and it comes back here ready for screening.</div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+          <input type="text" id="quick-share-name" placeholder="Prospect's name" style="padding:.5rem .85rem;border:none;border-radius:7px;font-size:.88rem;background:rgba(255,255,255,.15);color:#fff;outline:none;min-width:180px;" oninput="updateQuickShareMsg(this.value)">
+          <input type="email" id="quick-share-email" placeholder="Email or phone" style="padding:.5rem .85rem;border:none;border-radius:7px;font-size:.88rem;background:rgba(255,255,255,.15);color:#fff;outline:none;min-width:180px;">
+          <button onclick="quickShareApp()" style="padding:.5rem 1.25rem;background:#10b981;color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:.88rem;">🚀 Send Application</button>
+          <a href="documents.html#applications" style="color:#93c5fd;font-size:.82rem;text-decoration:none;">Advanced options →</a>
+        </div>
+        <div id="quick-share-confirm" style="display:none;margin-top:.75rem;background:rgba(16,185,129,.2);border-radius:7px;padding:.5rem .85rem;font-size:.82rem;">✅ Application sent!</div>
+      </div>
+
+      <!-- Manual Application Entry -->
+      <div class="panel">
+        <div class="panel-header"><h2>Enter Application Manually</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Applicant Full Name *</label><input id="aName" placeholder="John Smith"></div>
+            <div class="fg"><label>Email *</label><input id="aEmail" type="email" placeholder="john@email.com"></div>
+            <div class="fg"><label>Phone *</label><input id="aPhone" type="tel" placeholder="(801) 555-0000"></div>
+            <div class="fg"><label>Date of Birth</label><input id="aDOB" type="date"></div>
+            <div class="fg"><label>Property Applying For</label>
+              <select id="aProp"><option>119 E 600 S #119, Orem UT</option><option>Other</option></select>
+            </div>
+            <div class="fg"><label>Move-In Date</label><input id="aMoveIn" type="date"></div>
+          </div>
+          <hr style="margin:1.25rem 0;border:none;border-top:1px solid #f1f5f9;">
+          <h3 style="font-size:.9rem;font-weight:700;color:#374151;margin-bottom:1rem;">💼 Employment & Income</h3>
+          <div class="form-grid">
+            <div class="fg"><label>Employer</label><input id="aEmployer" placeholder="Company Name"></div>
+            <div class="fg"><label>Job Title</label><input id="aTitle" placeholder="e.g. Software Engineer"></div>
+            <div class="fg"><label>Monthly Gross Income ($)</label><input id="aIncome" type="number" placeholder="3600"></div>
+            <div class="fg"><label>Employment Length</label><select id="aEmpLen"><option>Less than 6 months</option><option>6–12 months</option><option>1–2 years</option><option>2–5 years</option><option>5+ years</option></select></div>
+          </div>
+          <hr style="margin:1.25rem 0;border:none;border-top:1px solid #f1f5f9;">
+          <h3 style="font-size:.9rem;font-weight:700;color:#374151;margin-bottom:1rem;">🏠 Rental History</h3>
+          <div class="form-grid">
+            <div class="fg"><label>Previous Landlord Name</label><input id="aPrevLL" placeholder="Previous Landlord"></div>
+            <div class="fg"><label>Previous Landlord Phone</label><input id="aPrevPhone" type="tel" placeholder="(801) 555-0000"></div>
+            <div class="fg"><label>Previous Monthly Rent ($)</label><input id="aPrevRent" type="number" placeholder="1000"></div>
+            <div class="fg"><label>Reason for Leaving</label><input id="aLeaving" placeholder="e.g. Relocating for work"></div>
+            <div class="fg"><label>Any Evictions?</label><select id="aEviction"><option value="no">No</option><option value="yes">Yes</option></select></div>
+            <div class="fg"><label>Any Bankruptcies?</label><select id="aBankrupt"><option value="no">No</option><option value="yes">Yes (within 7 years)</option></select></div>
+          </div>
+          <hr style="margin:1.25rem 0;border:none;border-top:1px solid #f1f5f9;">
+          <h3 style="font-size:.9rem;font-weight:700;color:#374151;margin-bottom:1rem;">🐾 Additional Info</h3>
+          <div class="form-grid">
+            <div class="fg"><label>Pets</label><select id="aPets"><option>No pets</option><option>1 cat</option><option>1 dog (small)</option><option>1 dog (large)</option><option>Multiple pets</option></select></div>
+            <div class="fg"><label>Occupants (total incl. applicant)</label><input id="aOccupants" type="number" placeholder="1" min="1"></div>
+            <div class="fg"><label>Credit Score (self-reported)</label><input id="aCreditScore" type="number" placeholder="700" min="300" max="850"></div>
+            <div class="fg"><label>References</label><input id="aRef" placeholder="Name & phone"></div>
+          </div>
+          <hr style="margin:1.25rem 0;border:none;border-top:1px solid #f1f5f9;">
+          <h3 style="font-size:.9rem;font-weight:700;color:#374151;margin-bottom:.75rem;">📎 Document Uploads</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <label style="display:block;cursor:pointer;">
+              <div class="upload-zone" style="pointer-events:none;">📄 Photo ID / Driver's License</div>
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="screeningFileUpload(this,'id')">
+            </label>
+            <label style="display:block;cursor:pointer;">
+              <div class="upload-zone" style="pointer-events:none;">💼 Pay Stubs / Proof of Income</div>
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple style="display:none;" onchange="screeningFileUpload(this,'income')">
+            </label>
+            <label style="display:block;cursor:pointer;">
+              <div class="upload-zone" style="pointer-events:none;">🏠 Previous Lease (optional)</div>
+              <input type="file" accept=".pdf" style="display:none;" onchange="screeningFileUpload(this,'lease')">
+            </label>
+            <label style="display:block;cursor:pointer;">
+              <div class="upload-zone" style="pointer-events:none;">📋 Completed Application Form</div>
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="screeningFileUpload(this,'application')">
+            </label>
+          </div>
+          <div id="screening-uploads-list" style="margin-top:.75rem;"></div>
+          <div style="display:flex;gap:.75rem;margin-top:1.5rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="runScreening()">🔍 Run AI Screening</button>
+            <button class="btn btn-outline" onclick="clearApp()">Clear</button>
+            <a href="documents.html" style="padding:.5rem 1rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;font-weight:600;color:#374151;text-decoration:none;">📁 Document Center</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESULTS ───────────────────────────────────── -->
+    <div id="sec-results" style="display:none;">
+      <div class="page-header"><div><h1>🔍 Screening Results</h1><p>AI-powered decision based on your criteria.</p></div></div>
+      <div id="resultsPanel"></div>
+    </div>
+
+    <!-- ── HISTORY ───────────────────────────────────── -->
+    <div id="sec-history">
+      <div style="display:none;" id="historyWrap">
+      <div class="page-header"><div><h1>📁 All Applicants</h1><p>Review past and pending applications.</p></div></div>
+      <div class="panel">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Applicant</th><th>Property</th><th>Income</th><th>Credit</th><th>Score</th><th>Decision</th><th>Applied</th><th></th></tr></thead>
+            <tbody id="appTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- ── CRITERIA ──────────────────────────────────── -->
+    <div id="sec-criteria" style="display:none;">
+      <div class="page-header"><div><h1>⚙️ Screening Criteria</h1><p>Set your minimum requirements. The AI will evaluate all applicants against these standards.</p></div></div>
+      <div class="panel">
+        <div class="panel-header"><h2>Minimum Requirements</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Min. Credit Score</label><input type="number" id="crCreditMin" value="620" placeholder="620"></div>
+            <div class="fg"><label>Income Multiplier (rent × ?)</label><input type="number" id="crIncomeMulti" value="2.5" step="0.5" placeholder="2.5"></div>
+            <div class="fg"><label>Max. Debt-to-Income Ratio (%)</label><input type="number" id="crDTI" value="40" placeholder="40"></div>
+            <div class="fg"><label>Evictions Allowed?</label><select id="crEviction"><option value="no">No — automatic denial</option><option value="5years">None in past 5 years</option><option value="any">Case-by-case review</option></select></div>
+            <div class="fg"><label>Min. Employment Length</label><select id="crEmpMin"><option value="6m">6 months</option><option value="1y" selected>1 year</option><option value="2y">2 years</option></select></div>
+            <div class="fg"><label>Bankruptcy</label><select id="crBankrupt"><option value="7y">None in past 7 years</option><option value="any">Case-by-case</option></select></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveCriteria()">💾 Save Criteria</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Fair Housing Reminder</h2></div>
+        <div class="panel-body">
+          <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:1rem;font-size:.88rem;color:#92400e;">
+            <strong>⚖️ Important:</strong> Under the Fair Housing Act and Utah law, you may not discriminate based on race, color, national origin, religion, sex, familial status, disability, or source of income. Screening must be applied consistently to all applicants using objective, documented criteria. RentVerified's screening tools are designed to evaluate only financial and rental history factors.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let applicants = [];
+let screeningCriteria = { creditMin:620, incomeMulti:2.5, dti:40, eviction:'no', empMin:'1y', bankrupt:'7y' };
+
+function loadData() {
+  try { applicants = JSON.parse(localStorage.getItem('rv_applicants')||'[]'); } catch(e){ applicants=[]; }
+  try { const c = JSON.parse(localStorage.getItem('rv_criteria')); if(c) screeningCriteria=c; } catch(e){}
+}
+function saveApps() { localStorage.setItem('rv_applicants', JSON.stringify(applicants)); }
+function saveCriteriaData() { localStorage.setItem('rv_criteria', JSON.stringify(screeningCriteria)); }
+function uid() { return 'APP-'+Date.now().toString(36).toUpperCase(); }
+
+function loadSample() {
+  if(applicants.length) return;
+  applicants = [
+    { id:'APP-DEMO1', name:'Alice Johnson', email:'alice@email.com', phone:'(801)555-0001', prop:'119 E 600 S #119, Orem UT', income:3600, creditScore:720, eviction:'no', bankrupt:'no', score:88, decision:'approved', applied:'2026-02-15', empLen:'2–5 years' },
+    { id:'APP-DEMO2', name:'Bob Martinez', email:'bob@email.com', phone:'(801)555-0002', prop:'119 E 600 S #119, Orem UT', income:2400, creditScore:580, eviction:'no', bankrupt:'no', score:52, decision:'denied', applied:'2026-02-18', empLen:'6–12 months' },
+    { id:'APP-DEMO3', name:'Carol Lee', email:'carol@email.com', phone:'(801)555-0003', prop:'119 E 600 S #119, Orem UT', income:3200, creditScore:660, eviction:'no', bankrupt:'no', score:74, decision:'review', applied:'2026-03-01', empLen:'1–2 years' },
+  ];
+  saveApps();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadData(); loadSample();
+  renderHistory();
+  loadCriteriaForm();
+});
+
+function showSec(name, el) {
+  ['new','results','criteria'].forEach(s => {
+    document.getElementById('sec-'+s).style.display=s===name?'block':'none';
+  });
+  const hw = document.getElementById('historyWrap');
+  if(hw) hw.style.display = name==='history'?'block':'none';
+  document.querySelectorAll('.sc-sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function copyAppLink() {
+  const link = window.location.origin + '/screening-application.html?prop=119+E+600+S+%23119';
+  navigator.clipboard?.writeText(link).catch(()=>{});
+  document.getElementById('appLinkBox').style.display='block';
+  document.getElementById('appLinkBox').textContent = link;
+  toast('📋 Application link copied!');
+}
+
+function runScreening() {
+  const name  = document.getElementById('aName').value.trim();
+  const income= parseFloat(document.getElementById('aIncome').value)||0;
+  const credit= parseInt(document.getElementById('aCreditScore').value)||0;
+  const evict = document.getElementById('aEviction').value;
+  const bank  = document.getElementById('aBankrupt').value;
+  const empLen= document.getElementById('aEmpLen').value;
+  const rent  = 1200; // default property rent
+
+  if(!name) return toast('⚠️ Enter applicant name.');
+
+  // Scoring algorithm
+  let score = 0; const checks = [];
+
+  // Credit check (30 pts)
+  if(credit >= screeningCriteria.creditMin + 100) { score+=30; checks.push({lbl:'Credit Score', val:credit||'Not provided', res:'pass', note:'Excellent credit'}); }
+  else if(credit >= screeningCriteria.creditMin) { score+=20; checks.push({lbl:'Credit Score', val:credit||'Not provided', res:'warn', note:'Meets minimum'}); }
+  else { score+=5; checks.push({lbl:'Credit Score', val:credit||'Not provided', res:'fail', note:`Below minimum (${screeningCriteria.creditMin})`}); }
+
+  // Income check (30 pts) — rent × multiplier
+  const minIncome = rent * screeningCriteria.incomeMulti;
+  if(income >= minIncome * 1.25) { score+=30; checks.push({lbl:'Monthly Income', val:'$'+income.toLocaleString(), res:'pass', note:'Strong income ratio'}); }
+  else if(income >= minIncome) { score+=20; checks.push({lbl:'Monthly Income', val:'$'+income.toLocaleString(), res:'warn', note:`Meets ${screeningCriteria.incomeMulti}x minimum`}); }
+  else { score+=0; checks.push({lbl:'Monthly Income', val:income?'$'+income.toLocaleString():'Not provided', res:'fail', note:`Needs $${minIncome.toLocaleString()}/mo min`}); }
+
+  // Eviction (20 pts)
+  if(evict==='no') { score+=20; checks.push({lbl:'Eviction History', val:'None', res:'pass', note:'Clean record'}); }
+  else { checks.push({lbl:'Eviction History', val:'Yes', res:'fail', note:'Eviction on record — review required'}); }
+
+  // Bankruptcy (10 pts)
+  if(bank==='no') { score+=10; checks.push({lbl:'Bankruptcy', val:'None', res:'pass', note:'No bankruptcy'}); }
+  else { checks.push({lbl:'Bankruptcy', val:'Yes', res:'warn', note:'Bankruptcy within 7 years'}); }
+
+  // Employment (10 pts)
+  const empMap = {'Less than 6 months':0,'6–12 months':6,'1–2 years':12,'2–5 years':24,'5+ years':60};
+  const months = empMap[empLen]||0;
+  const minMo  = screeningCriteria.empMin==='6m'?6:screeningCriteria.empMin==='1y'?12:24;
+  if(months >= minMo*1.5) { score+=10; checks.push({lbl:'Employment Stability', val:empLen, res:'pass', note:'Stable employment'}); }
+  else if(months >= minMo) { score+=7; checks.push({lbl:'Employment Stability', val:empLen, res:'warn', note:'Meets minimum'}); }
+  else { checks.push({lbl:'Employment Stability', val:empLen, res:'fail', note:'Employment too short'}); }
+
+  const decision = score>=75?'approved':score>=55?'review':'denied';
+  const app = {
+    id: uid(),
+    name, email:document.getElementById('aEmail').value,
+    phone:document.getElementById('aPhone').value,
+    prop:document.getElementById('aProp').value,
+    income, creditScore:credit, eviction:evict, bankrupt:bank, empLen, score, decision,
+    applied: new Date().toISOString().slice(0,10), checks,
+  };
+  applicants.unshift(app);
+  saveApps(); renderHistory();
+  showResults(app);
+}
+
+function showResults(app) {
+  const cls = app.score>=75?'pass':app.score>=55?'warn':'fail';
+  const dcls = app.decision==='approved'?'decision-approved':app.decision==='denied'?'decision-denied':'decision-review';
+  const dLabel = app.decision==='approved'?'✅ APPROVED':app.decision==='denied'?'❌ DENIED':'⚠️ REVIEW';
+
+  document.getElementById('resultsPanel').innerHTML = `
+    <div class="panel">
+      <div class="panel-header">
+        <h2>${app.name}</h2>
+        <span class="decision ${dcls}">${dLabel}</span>
+      </div>
+      <div class="panel-body" style="text-align:center;">
+        <div class="score-ring ${cls}">
+          <div class="score-num" style="color:${cls==='pass'?'#059669':cls==='warn'?'#d97706':'#dc2626'}">${app.score}</div>
+          <div class="score-lbl">/ 100</div>
+        </div>
+        <div style="font-size:.9rem;color:#64748b;">Overall Applicant Score</div>
+        <div style="font-size:.82rem;margin-top:.5rem;color:#374151;">
+          ${app.decision==='approved'?'This applicant meets all your screening criteria and is recommended for approval.'
+          :app.decision==='review'?'This applicant partially meets your criteria. Manual review recommended.'
+          :'This applicant does not meet minimum screening criteria.'}
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>Criteria Breakdown</h2></div>
+      <div class="panel-body">
+        <div class="crit-grid">
+          ${app.checks.map(c=>`
+            <div class="crit-card ${c.res}">
+              <div class="crit-icon">${c.res==='pass'?'✅':c.res==='warn'?'⚠️':'❌'}</div>
+              <div class="crit-val">${c.val}</div>
+              <div class="crit-lbl">${c.lbl}</div>
+              <div class="crit-status">${c.note}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>Checklist</h2></div>
+      <div class="panel-body">
+        <ul class="checklist">
+          <li><div class="chk pass">✓</div>Application submitted and reviewed</li>
+          <li><div class="chk ${app.creditScore>=screeningCriteria.creditMin?'pass':'fail'}">${app.creditScore>=screeningCriteria.creditMin?'✓':'✕'}</div>Credit score check — minimum ${screeningCriteria.creditMin}</li>
+          <li><div class="chk ${app.income>=1200*screeningCriteria.incomeMulti?'pass':'fail'}">${app.income>=1200*screeningCriteria.incomeMulti?'✓':'✕'}</div>Income verification — minimum ${screeningCriteria.incomeMulti}x monthly rent</li>
+          <li><div class="chk ${app.eviction==='no'?'pass':'fail'}">${app.eviction==='no'?'✓':'✕'}</div>Eviction history check</li>
+          <li><div class="chk warn">⚠</div>Landlord reference check — <em>manual step</em></li>
+          <li><div class="chk warn">⚠</div>ID verification — <em>manual step</em></li>
+          <li><div class="chk warn">⚠</div>Background check — <em>connect third-party provider (TransUnion SmartMove, etc.)</em></li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-bottom:2rem;flex-wrap:wrap;">
+      ${app.decision==='approved'?`<button class="btn btn-success" onclick="toast('📝 Creating lease for '+\`${app.name}\`+'…');setTimeout(()=>{window.location.href=\'leases.html\'},1200)">📝 Create Lease</button>`:''}
+      <button class="btn btn-outline" onclick="showSec('new',null)">← New Application</button>
+      <button class="btn btn-outline" onclick="showSec('history',null)">📁 View All Applicants</button>
+    </div>`;
+
+  showSec('results', null);
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('appTbody');
+  if(!tbody) return;
+  tbody.innerHTML = applicants.length
+    ? applicants.map(a=>`<tr>
+        <td><strong>${a.name}</strong><br><span style="font-size:.78rem;color:#64748b;">${a.email}</span></td>
+        <td style="font-size:.82rem;">${a.prop}</td>
+        <td>$${(a.income||0).toLocaleString()}/mo</td>
+        <td>${a.creditScore||'—'}</td>
+        <td><strong>${a.score||'—'}</strong>/100</td>
+        <td><span class="decision ${a.decision==='approved'?'decision-approved':a.decision==='denied'?'decision-denied':a.decision==='review'?'decision-review':'decision-pending'}">${a.decision||'Pending'}</span></td>
+        <td style="font-size:.82rem;">${a.applied}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="if(a=${JSON.stringify(a).replace(/'/g,"\\'")}){showResults(applicants.find(x=>x.id===\'${a.id}\'))}">View</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#94a3b8;">No applicants yet.</td></tr>';
+}
+
+function loadCriteriaForm() {
+  const c = screeningCriteria;
+  const f = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
+  f('crCreditMin', c.creditMin);
+  f('crIncomeMulti', c.incomeMulti);
+  f('crDTI', c.dti);
+  f('crEviction', c.eviction);
+  f('crEmpMin', c.empMin);
+  f('crBankrupt', c.bankrupt);
+}
+
+function saveCriteria() {
+  screeningCriteria = {
+    creditMin:  parseInt(document.getElementById('crCreditMin').value)||620,
+    incomeMulti:parseFloat(document.getElementById('crIncomeMulti').value)||2.5,
+    dti:        parseInt(document.getElementById('crDTI').value)||40,
+    eviction:   document.getElementById('crEviction').value,
+    empMin:     document.getElementById('crEmpMin').value,
+    bankrupt:   document.getElementById('crBankrupt').value,
+  };
+  saveCriteriaData();
+  toast('✅ Screening criteria saved!');
+}
+
+// ── QUICK APPLICATION SHARE ──────────────────────────────
+function updateQuickShareMsg(name) {
+  // live preview — lightweight
+}
+function quickShareApp() {
+  const name  = document.getElementById('quick-share-name').value.trim();
+  const email = document.getElementById('quick-share-email').value.trim();
+  if (!name) { alert('Enter the prospect\'s name.'); return; }
+  const link = 'https://rentverified.com/apply?ref=' + btoa(name).slice(0,8);
+  const confirm = document.getElementById('quick-share-confirm');
+  confirm.innerHTML = `✅ Application link sent to ${name}${email ? ' at ' + email : ''}! Link: <a href="${link}" style="color:#6ee7b7;" target="_blank">${link}</a>`;
+  confirm.style.display = 'block';
+  toast(`🚀 Application sent to ${name}!`);
+  // Pre-fill name in manual form
+  document.getElementById('aName').value = name;
+  if (email && email.includes('@')) document.getElementById('aEmail').value = email;
+}
+
+// ── SCREENING FILE UPLOAD ─────────────────────────────────
+function screeningFileUpload(input, type) {
+  if (!input.files || !input.files[0]) return;
+  const container = document.getElementById('screening-uploads-list');
+  const labels = { id:'Photo ID', income:'Pay Stubs', lease:'Previous Lease', application:'Application Form' };
+  Array.from(input.files).forEach(file => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:.65rem;padding:.5rem .75rem;background:#f8fafc;border-radius:7px;margin-bottom:.4rem;border:1px solid #e2e8f0;font-size:.83rem;';
+    div.innerHTML = `<span>📎</span><strong>${labels[type]||type}:</strong><span style="color:#374151;">${file.name}</span><span style="color:#94a3b8;">${(file.size/1024).toFixed(0)} KB</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#94a3b8;">✕</button>`;
+    container.appendChild(div);
+  });
+  toast(`✅ ${labels[type]} uploaded`);
+}
+
+function clearApp() {
+  ['aName','aEmail','aPhone','aEmployer','aTitle','aIncome','aPrevLL','aPrevPhone','aPrevRent','aLeaving','aCreditScore','aRef','aOccupants'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+}
+
+function toast(msg) {
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
+</script>
+</body>
+</html>

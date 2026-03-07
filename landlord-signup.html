@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Landlord Sign Up – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .signup-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 68px);
+    }
+    .signup-left {
+      background: linear-gradient(135deg, #1a56db 0%, #1e3a8a 100%);
+      color: white;
+      padding: 4rem 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .signup-right {
+      background: var(--gray-100);
+      padding: 3rem 2.5rem;
+      overflow-y: auto;
+    }
+    .benefit-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+    .benefit-icon {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.2rem;
+    }
+    .benefit-text h4 { font-weight: 700; margin-bottom: 2px; }
+    .benefit-text p { opacity: 0.8; font-size: 0.875rem; }
+
+    /* Dashboard preview after signup */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 68px);
+    }
+    .dash-sidebar {
+      background: var(--dark);
+      padding: 1.5rem 0;
+    }
+    .dash-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.65rem 1rem;
+      margin: 0 0.75rem;
+      border-radius: 8px;
+      color: var(--gray-400);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .dash-link:hover { background: rgba(255,255,255,0.07); color: white; text-decoration: none; }
+    .dash-link.active { background: var(--primary); color: white; }
+    .dash-link svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .dash-main { background: var(--gray-100); padding: 2rem; overflow-y: auto; }
+
+    .property-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-100);
+      transition: background 0.15s;
+    }
+    .property-row:hover { background: var(--gray-100); }
+    .property-row:last-child { border-bottom: none; }
+    .prop-thumb {
+      width: 56px; height: 56px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .inquiry-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .inquiry-item:last-child { border-bottom: none; }
+    .inquiry-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white; font-weight: 700; font-size: 0.8rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .plan-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    Rent<span>Verified</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">← Back to Home</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Tenant Login</a>
+  </div>
+</nav>
+
+<!-- SIGN UP FORM (shown by default) -->
+<div id="signup-screen">
+  <div class="signup-layout">
+
+    <!-- LEFT: Benefits -->
+    <div class="signup-left">
+      <div style="margin-bottom:2.5rem;">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.7;margin-bottom:0.75rem;">For Landlords</div>
+        <h1 style="font-size:2.2rem;font-weight:900;line-height:1.2;margin-bottom:1rem;">List Your Properties.<br/>Let AI Handle the Rest.</h1>
+        <p style="opacity:0.85;font-size:1rem;line-height:1.6;">Join RentVerified and get AI-powered tenant communication on every channel — website, SMS, email, WhatsApp, and Facebook Messenger.</p>
+      </div>
+
+      <div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🤖</div>
+          <div class="benefit-text">
+            <h4>AI Answers for You</h4>
+            <p>Claude AI responds to tenant questions 24/7 across all your channels. You focus on managing properties, not answering the same questions.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🛡️</div>
+          <div class="benefit-text">
+            <h4>Scam-Proof Your Listings</h4>
+            <p>Every listing gets a unique QR code and verification badge. Tenants know your Facebook ad is real because they can verify it here.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">📄</div>
+          <div class="benefit-text">
+            <h4>Secure Document Sharing</h4>
+            <p>Share rental applications, leases, and move-in reports through a secure portal. No email attachments or Google Drive links.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">💚</div>
+          <div class="benefit-text">
+            <h4>Tenant Portal Included</h4>
+            <p>Your tenants get a free portal to pay via Cash App or Zelle, view documents, and chat with AI support.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:2rem;padding:1rem;background:rgba(255,255,255,0.1);border-radius:var(--radius);font-size:0.875rem;">
+        ✅ 14-day free trial · No credit card required · Cancel anytime
+      </div>
+    </div>
+
+    <!-- RIGHT: Form -->
+    <div class="signup-right">
+      <div style="max-width:480px;margin:0 auto;">
+
+        <!-- ── LOGIN PANEL ───────────────────────────── -->
+        <div id="login-panel">
+          <div style="text-align:center;margin-bottom:1.75rem;">
+            <div style="font-size:2.5rem;margin-bottom:.5rem;">🏠</div>
+            <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.35rem;">Sign In to RentVerified</h2>
+            <p style="color:var(--gray-600);font-size:.9rem;">Landlord, Property Manager, or Listing Agent</p>
+          </div>
+          <!-- Role selector on login -->
+          <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;">
+            <button onclick="setLoginRole('landlord',this)" id="roleBtn-landlord"
+              style="flex:1;padding:.5rem;border-radius:8px;border:2px solid #1a56db;background:#eff6ff;color:#1a56db;font-size:.8rem;font-weight:700;cursor:pointer;">🏢 Landlord / PM</button>
+            <button onclick="setLoginRole('agent',this)" id="roleBtn-agent"
+              style="flex:1;padding:.5rem;border-radius:8px;border:2px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:.8rem;font-weight:700;cursor:pointer;">📋 Listing Agent</button>
+            <button onclick="setLoginRole('vendor',this)" id="roleBtn-vendor"
+              style="flex:1;padding:.5rem;border-radius:8px;border:2px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:.8rem;font-weight:700;cursor:pointer;">🔧 Vendor</button>
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label style="font-weight:600;font-size:.88rem;">Email Address</label>
+            <input type="email" id="loginEmail" placeholder="you@email.com" value="danielrhart1284@gmail.com"
+              style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
+          </div>
+          <div class="form-group" style="margin-bottom:.5rem;">
+            <label style="font-weight:600;font-size:.88rem;">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="loginPw" placeholder="••••••••"
+                style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
+              <span onclick="togglePw()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);cursor:pointer;font-size:.85rem;color:#94a3b8;">👁</span>
+            </div>
+          </div>
+          <div id="loginErr" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:.75rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;"></div>
+          <button onclick="doLogin()"
+            style="width:100%;padding:.75rem;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.75rem;transition:background .15s;"
+            onmouseover="this.style.background='#1e40af'" onmouseout="this.style.background='#1a56db'">
+            Sign In →
+          </button>
+          <p style="text-align:center;margin-top:1.25rem;font-size:.85rem;color:var(--gray-600);">
+            Don't have an account? <a href="#" onclick="showSignupForm()" style="color:#1a56db;font-weight:600;">Create one free →</a>
+          </p>
+        </div>
+
+        <!-- ── SIGNUP PANEL (hidden by default) ─────── -->
+        <div id="signup-panel" style="display:none;">
+        <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:0.4rem;">Create Your Account</h2>
+        <p style="color:var(--gray-600);margin-bottom:1rem;font-size:0.9rem;">Takes about 2 minutes. Already have an account? <a href="#" onclick="showLoginForm()" style="color:#1a56db;font-weight:600;">Sign in →</a></p>
+        <!-- Role selector on signup -->
+        <div style="margin-bottom:1.5rem;">
+          <label style="font-size:.82rem;font-weight:700;color:#374151;display:block;margin-bottom:.5rem;">I am a…</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+            <label style="border:2px solid #1a56db;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;background:#eff6ff;font-size:.85rem;font-weight:600;color:#1a56db;">
+              <input type="radio" name="signupRole" value="landlord" checked style="accent-color:#1a56db;"> 🏢 Landlord</label>
+            <label style="border:2px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#64748b;">
+              <input type="radio" name="signupRole" value="pm" style="accent-color:#1a56db;"> 🏙 Property Manager</label>
+            <label style="border:2px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#64748b;">
+              <input type="radio" name="signupRole" value="agent" onclick="window.location.href='agent-portal.html'" style="accent-color:#8b5cf6;"> 📋 Listing Agent</label>
+            <label style="border:2px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#64748b;">
+              <input type="radio" name="signupRole" value="vendor" onclick="window.location.href='vendor-portal.html'" style="accent-color:#f59e0b;"> 🔧 Vendor / Handyman</label>
+          </div>
+        </div>
+
+        <div id="step-indicator" style="display:flex;gap:0.5rem;margin-bottom:2rem;">
+          <div id="si-1" style="flex:1;height:4px;border-radius:2px;background:var(--primary);"></div>
+          <div id="si-2" style="flex:1;height:4px;border-radius:2px;background:var(--gray-200);"></div>
+          <div id="si-3" style="flex:1;height:4px;border-radius:2px;background:var(--gray-200);"></div>
+        </div>
+
+        <!-- Form Step 1: Account -->
+        <div id="form-step-1">
+          <h3 style="font-weight:700;margin-bottom:1.5rem;font-size:1rem;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Step 1 of 3 · Account Info</h3>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" placeholder="Daniel" />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" placeholder="Sanders" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" placeholder="(555) 000-0000" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" placeholder="At least 8 characters" />
+          </div>
+          <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="formNext(2)">Continue →</button>
+        </div>
+
+        <!-- Form Step 2: Business -->
+        <div id="form-step-2" style="display:none;">
+          <h3 style="font-weight:700;margin-bottom:1.5rem;font-size:1rem;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Step 2 of 3 · Your Business</h3>
+          <div class="form-group">
+            <label>Business / Company Name</label>
+            <input type="text" placeholder="Sanders Property Management" />
+          </div>
+          <div class="form-group">
+            <label>How many properties do you manage?</label>
+            <select>
+              <option>1-3 properties</option>
+              <option>4-10 properties</option>
+              <option>11-25 properties</option>
+              <option>26+ properties</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>City / State</label>
+            <input type="text" placeholder="Atlanta, GA" />
+          </div>
+          <div class="form-group">
+            <label>Choose Your Plan</label>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:0.5rem;">
+              <div id="plan-monthly" class="pay-method" onclick="selectPlan('monthly')" style="text-align:left;display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;">
+                <div>
+                  <div style="font-weight:700;">Monthly Pro – $79/month</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">Unlimited listings · All channels · 14-day free trial</div>
+                </div>
+                <div id="check-monthly" style="margin-left:auto;color:var(--primary);display:none;">✓</div>
+              </div>
+              <div id="plan-annual" class="pay-method selected" onclick="selectPlan('annual')" style="text-align:left;display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;">
+                <div>
+                  <div style="font-weight:700;">Annual Pro – $59/month <span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;font-size:0.75rem;">Save $240</span></div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">Everything in Monthly · Priority placement · WhatsApp AI</div>
+                </div>
+                <div id="check-annual" style="margin-left:auto;color:var(--primary);">✓</div>
+              </div>
+              <div id="plan-perlisting" class="pay-method" onclick="selectPlan('perlisting')" style="text-align:left;display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;">
+                <div>
+                  <div style="font-weight:700;">Pay Per Listing – $29/listing</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">Perfect for occasional landlords</div>
+                </div>
+                <div id="check-perlisting" style="margin-left:auto;color:var(--primary);display:none;">✓</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+            <button class="btn btn-outline" onclick="formNext(1)">← Back</button>
+            <button class="btn btn-primary btn-lg" style="flex:1;justify-content:center;" onclick="formNext(3)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Form Step 3: Verification & Credentials -->
+        <div id="form-step-3" style="display:none;">
+          <h3 style="font-weight:700;margin-bottom:1rem;font-size:1rem;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Step 3 of 3 · Identity & Business Verification</h3>
+
+          <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:13px 16px;margin-bottom:18px;font-size:.85rem;color:#92400e;">
+            <strong>🔒 Required for all non-tenant accounts.</strong> RentVerified verifies every landlord, property manager, and agent to protect tenants from scams and ensure compliance with Utah law. All documents are encrypted and reviewed within 1–2 business days.
+          </div>
+
+          <!-- Government ID — all roles -->
+          <div class="form-group">
+            <label style="font-weight:700;">Government-Issued ID <span style="color:#ef4444;">*</span></label>
+            <p style="font-size:.8rem;color:var(--gray-600);margin-bottom:.5rem;">Driver's license, state ID, or passport. Must match the name on your account.</p>
+            <div class="upload-zone" onclick="document.getElementById('id-upload').click()">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+              <p style="font-weight:600;margin-top:.4rem;color:var(--gray-700);font-size:.88rem;">Click to upload ID</p>
+              <p style="font-size:.75rem;color:var(--gray-400);">JPG, PNG, or PDF · AES-256 encrypted</p>
+            </div>
+            <input type="file" id="id-upload" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="llShowFile(this,'id-file-name')">
+            <div id="id-file-name" style="font-size:.78rem;color:#10b981;margin-top:5px;"></div>
+          </div>
+
+          <!-- Property Manager license — shown for PM role -->
+          <div id="pm-license-section" style="display:none;">
+            <div style="background:#eff6ff;border:1.5px solid #3b82f6;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+              <div style="font-weight:700;color:#1e40af;margin-bottom:10px;">🏙️ Utah Property Management License</div>
+              <p style="font-size:.8rem;color:#1e40af;margin-bottom:10px;">Utah requires a real estate license to act as a property manager for compensation. <a href="https://realestate.utah.gov" target="_blank" style="color:#1d4ed8;">Verify at realestate.utah.gov</a></p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <div>
+                  <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:4px;">License Number <span style="color:#ef4444;">*</span></label>
+                  <input type="text" id="pm-lic-num" placeholder="e.g. 5501234" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+                </div>
+                <div>
+                  <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:4px;">Expiration Date <span style="color:#ef4444;">*</span></label>
+                  <input type="date" id="pm-lic-exp" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:4px;">Upload License Certificate <span style="color:#ef4444;">*</span></label>
+                <input type="file" id="pm-lic-file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%;padding:7px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.82rem;background:#fff;" onchange="llShowFile(this,'pm-lic-name')">
+                <div id="pm-lic-name" style="font-size:.75rem;color:#10b981;margin-top:4px;"></div>
+              </div>
+            </div>
+            <!-- E&O Insurance for PM -->
+            <div style="background:#f0fdf4;border:1.5px solid #10b981;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+              <div style="font-weight:700;color:#065f46;margin-bottom:10px;">🛡️ Errors & Omissions (E&O) Insurance</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <div>
+                  <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:4px;">Carrier</label>
+                  <input type="text" id="pm-ins-carrier" placeholder="e.g. Nationwide" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+                </div>
+                <div>
+                  <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:4px;">Policy Number</label>
+                  <input type="text" id="pm-ins-policy" placeholder="Policy #" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:.8rem;font-weight:700;display:block;margin-bottom:4px;">Upload Certificate of Insurance</label>
+                <input type="file" id="pm-ins-file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%;padding:7px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.82rem;background:#fff;" onchange="llShowFile(this,'pm-ins-name')">
+                <div id="pm-ins-name" style="font-size:.75rem;color:#10b981;margin-top:4px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Business / Entity docs — for landlords with an LLC/Corp -->
+          <div class="form-group">
+            <label style="font-weight:700;">Business Entity Documents <span style="font-weight:400;color:var(--gray-500);">(required if holding property in an LLC or Corporation)</span></label>
+            <p style="font-size:.8rem;color:var(--gray-600);margin-bottom:.5rem;">Articles of Organization, Operating Agreement, or Secretary of State filing showing your name as member/manager.</p>
+            <div class="upload-zone" onclick="document.getElementById('biz-upload').click()">
+              <p style="font-weight:600;color:var(--gray-700);font-size:.88rem;">Click to upload entity documents</p>
+              <p style="font-size:.75rem;color:var(--gray-400);">PDF preferred · Optional for individual owners</p>
+            </div>
+            <input type="file" id="biz-upload" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="llShowFile(this,'biz-file-name')">
+            <div id="biz-file-name" style="font-size:.78rem;color:#10b981;margin-top:5px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label>How did you hear about RentVerified?</label>
+            <select>
+              <option>Facebook</option>
+              <option>Google Search</option>
+              <option>Word of mouth</option>
+              <option>Zillow</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;cursor:pointer;">
+              <input type="checkbox" id="ll-certify" style="width:auto;margin-top:2px;" />
+              <span style="font-size:.875rem;color:var(--gray-700);">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I certify that all documents provided are accurate, current, and belong to me. I understand that providing false information may result in account termination and legal action.</span>
+            </label>
+          </div>
+
+          <div style="display:flex;gap:1rem;margin-top:1rem;">
+            <button class="btn btn-outline" onclick="formNext(2)">← Back</button>
+            <button class="btn btn-primary btn-lg" style="flex:1;justify-content:center;" onclick="submitSignup()">🎉 Submit Application</button>
+          </div>
+        </div>
+
+        </div><!-- end signup-panel -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD (shown after signup) -->
+<div id="dashboard-screen" style="display:none;">
+  <div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <div class="dash-sidebar">
+      <div style="padding:0 1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">SP</div>
+          <div>
+            <div style="color:white;font-weight:600;font-size:0.875rem;">Sanders PM</div>
+            <div style="margin-top:3px;"><span class="plan-chip">Pro Plan</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:0 0.75rem;">
+        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-600);padding:0.5rem 0.25rem;margin-bottom:0.25rem;">Manage</div>
+        <div class="dash-link active" onclick="dashTab('overview')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </div>
+        <div class="dash-link" onclick="dashTab('properties')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          My Properties
+        </div>
+        <div class="dash-link" onclick="dashTab('inquiries')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          AI Conversations
+          <span style="margin-left:auto;background:var(--danger);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;">3</span>
+        </div>
+        <div class="dash-link" onclick="dashTab('payments')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Rent Payments
+          <span style="margin-left:auto;background:var(--warning);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;">2</span>
+        </div>
+        <div class="dash-link" onclick="dashTab('docs')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Documents
+        </div>
+        <a href="ad-builder.html" class="dash-link" style="color:var(--gray-400);">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+          📣 Ad Builder
+        </a>
+        <a href="accounting.html" class="dash-link" style="color:var(--gray-400);">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V5a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2h-2M9 7h6"/></svg>
+          📊 Accounting
+        </a>
+        <a href="maintenance.html" class="dash-link" style="color:var(--gray-400);">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+          🔧 Maintenance
+        </a>
+        <a href="leases.html" class="dash-link" style="color:var(--gray-400);">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          📝 Leases
+        </a>
+        <a href="screening.html" class="dash-link" style="color:var(--gray-400);">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          🛡 Tenant Screening
+        </a>
+        <a href="documents.html" class="dash-link" style="color:var(--gray-400);">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
+          📁 Document Center
+        </a>
+
+        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-600);padding:0.5rem 0.25rem;margin:1rem 0 0.25rem;">Settings</div>
+        <div class="dash-link" onclick="dashTab('ai')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          AI Settings
+        </div>
+        <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="document.getElementById('dashboard-screen').style.display='none';document.getElementById('signup-screen').style.display='block';">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Sign Out
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="dash-main">
+
+      <!-- OVERVIEW -->
+      <div id="dtab-overview" class="tab-content active">
+        <div class="page-header">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <h1>Welcome to Your Dashboard</h1>
+              <p>Sanders Property Management · <span class="plan-chip">Pro Plan</span></p>
+            </div>
+            <button class="btn btn-primary" onclick="dashTab('properties')">+ Add Property</button>
+          </div>
+        </div>
+
+        <div class="grid-4" style="margin-bottom:2rem;">
+          <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Active Listings</div></div>
+          <div class="stat-card green"><div class="stat-value">2</div><div class="stat-label">Active Tenants</div></div>
+          <div class="stat-card yellow"><div class="stat-value">$2,400</div><div class="stat-label">Rent Pending</div></div>
+          <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">AI Chats Today</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-body" style="padding-bottom:0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <h3 style="font-weight:700;">Recent AI Conversations</h3>
+                <button class="btn btn-outline btn-sm" onclick="dashTab('inquiries')">View All</button>
+              </div>
+              <div class="inquiry-item">
+                <div class="inquiry-avatar">MR</div>
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem;">Maria Rodriguez</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">Asked about 123 Maple St availability</div>
+                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">2 min ago · via Website Chat</div>
+                </div>
+                <span class="badge badge-verified" style="flex-shrink:0;">AI Replied</span>
+              </div>
+              <div class="inquiry-item">
+                <div class="inquiry-avatar" style="background:#10b981;">TJ</div>
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem;">Tyler Johnson</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">Requested rental application</div>
+                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">1 hr ago · via SMS</div>
+                </div>
+                <span class="badge badge-available" style="flex-shrink:0;">App Sent</span>
+              </div>
+              <div class="inquiry-item">
+                <div class="inquiry-avatar" style="background:#f59e0b;">KP</div>
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem;">Karen Pierce</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">"Is the Oak Ave unit pet friendly?"</div>
+                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">3 hrs ago · via Facebook</div>
+                </div>
+                <span class="badge badge-pending" style="flex-shrink:0;">Needs Review</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body" style="padding-bottom:0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <h3 style="font-weight:700;">Pending Rent Payments</h3>
+                <button class="btn btn-outline btn-sm" onclick="dashTab('payments')">View All</button>
+              </div>
+              <div class="inquiry-item">
+                <div style="font-size:1.5rem;">💚</div>
+                <div style="flex:1;">
+                  <div style="font-weight:600;font-size:0.875rem;">Jane Doe · 123 Maple St 2A</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">Cash App · March 2026 Rent</div>
+                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">Screenshot uploaded · Awaiting confirmation</div>
+                </div>
+                <div>
+                  <div style="font-weight:800;font-size:1rem;">$1,200</div>
+                  <button class="btn btn-success btn-sm" style="margin-top:6px;">Confirm</button>
+                </div>
+              </div>
+              <div class="inquiry-item">
+                <div style="font-size:1.5rem;">💜</div>
+                <div style="flex:1;">
+                  <div style="font-weight:600;font-size:0.875rem;">Robert Lee · 456 Oak Ave 1B</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);">Zelle · March 2026 Rent</div>
+                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">Screenshot uploaded · Awaiting confirmation</div>
+                </div>
+                <div>
+                  <div style="font-weight:800;font-size:1rem;">$950</div>
+                  <button class="btn btn-success btn-sm" style="margin-top:6px;">Confirm</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROPERTIES TAB -->
+      <div id="dtab-properties" class="tab-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div><h1>My Properties</h1><p>Manage your listings and tenant assignments.</p></div>
+          <button class="btn btn-primary">+ Add New Property</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div class="property-row" style="background:var(--gray-100);font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray-600);">
+              <div style="width:56px;flex-shrink:0;"></div>
+              <div style="flex:2;">Property</div>
+              <div style="flex:1;">Rent</div>
+              <div style="flex:1;">Tenant</div>
+              <div style="flex:1;">Status</div>
+              <div style="flex:1;">Listing ID</div>
+              <div style="width:100px;">Actions</div>
+            </div>
+            <div class="property-row">
+              <div class="prop-thumb" style="background:#ede9fe;">🏠</div>
+              <div style="flex:2;"><div style="font-weight:600;">123 Maple Street, Unit 2A</div><div style="font-size:0.8rem;color:var(--gray-600);">2 bed · 1 bath · 850 sqft</div></div>
+              <div style="flex:1;font-weight:700;">$1,200/mo</div>
+              <div style="flex:1;font-size:0.875rem;">Jane Doe</div>
+              <div style="flex:1;"><span class="badge badge-rented">Rented</span></div>
+              <div style="flex:1;font-family:monospace;font-size:0.8rem;color:var(--gray-600);">RV-2026-0001</div>
+              <div style="width:100px;display:flex;gap:6px;"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">QR</button></div>
+            </div>
+            <div class="property-row">
+              <div class="prop-thumb" style="background:#e0f2fe;">🏢</div>
+              <div style="flex:2;"><div style="font-weight:600;">456 Oak Avenue, Apt 1B</div><div style="font-size:0.8rem;color:var(--gray-600);">1 bed · 1 bath · 620 sqft</div></div>
+              <div style="flex:1;font-weight:700;">$950/mo</div>
+              <div style="flex:1;font-size:0.875rem;">Robert Lee</div>
+              <div style="flex:1;"><span class="badge badge-rented">Rented</span></div>
+              <div style="flex:1;font-family:monospace;font-size:0.8rem;color:var(--gray-600);">RV-2026-0002</div>
+              <div style="width:100px;display:flex;gap:6px;"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">QR</button></div>
+            </div>
+            <div class="property-row">
+              <div class="prop-thumb" style="background:#dcfce7;">🏡</div>
+              <div style="flex:2;"><div style="font-weight:600;">789 Pine Road</div><div style="font-size:0.8rem;color:var(--gray-600);">3 bed · 2 bath · 1,400 sqft</div></div>
+              <div style="flex:1;font-weight:700;">$1,650/mo</div>
+              <div style="flex:1;font-size:0.875rem;color:var(--gray-400);">Vacant</div>
+              <div style="flex:1;"><span class="badge badge-available">Available</span></div>
+              <div style="flex:1;font-family:monospace;font-size:0.8rem;color:var(--gray-600);">RV-2026-0003</div>
+              <div style="width:100px;display:flex;gap:6px;"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">QR</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI CONVERSATIONS TAB -->
+      <div id="dtab-inquiries" class="tab-content">
+        <div class="page-header"><h1>AI Conversations</h1><p>Messages handled by your AI across all channels.</p></div>
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--gray-200);">
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <span class="badge" style="background:#e0f2fe;color:#0369a1;cursor:pointer;">All Channels</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Website Chat</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">SMS</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Facebook</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Email</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">WhatsApp</span>
+              </div>
+            </div>
+            <table>
+              <thead><tr><th>Contact</th><th>Message</th><th>Property</th><th>Channel</th><th>Time</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Maria R.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">maria@email.com</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"Is 123 Maple still available?"</td>
+                  <td style="font-size:0.875rem;">123 Maple St</td>
+                  <td><span class="badge badge-available">💬 Chat</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">2m ago</td>
+                  <td><span class="badge badge-verified">AI Replied</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Tyler J.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">(555) 201-9876</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"Can I get an application?"</td>
+                  <td style="font-size:0.875rem;">789 Pine Rd</td>
+                  <td><span class="badge badge-pending">📱 SMS</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">1h ago</td>
+                  <td><span class="badge badge-available">App Sent</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Karen P.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">Facebook DM</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"Is the Oak Ave unit pet friendly?"</td>
+                  <td style="font-size:0.875rem;">456 Oak Ave</td>
+                  <td><span class="badge" style="background:#ede9fe;color:#5b21b6;">📘 Facebook</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">3h ago</td>
+                  <td><span class="badge badge-pending">Needs Review</span></td>
+                </tr>
+                <tr>
+                  <td><strong>James W.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">james@email.com</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"What utilities are included?"</td>
+                  <td style="font-size:0.875rem;">123 Maple St</td>
+                  <td><span class="badge" style="background:#fef3c7;color:#92400e;">📧 Email</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">5h ago</td>
+                  <td><span class="badge badge-verified">AI Replied</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENTS TAB -->
+      <div id="dtab-payments" class="tab-content">
+        <div class="page-header"><h1>Rent Payments</h1><p>Confirm Cash App and Zelle payments from your tenants.</p></div>
+        <div class="alert alert-warning" style="margin-bottom:1.5rem;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          2 payments are awaiting your confirmation. Review the screenshots and confirm once you've received the funds.
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <table>
+              <thead><tr><th>Tenant</th><th>Property</th><th>Period</th><th>Method</th><th>Amount</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Jane Doe</strong></td>
+                  <td style="font-size:0.875rem;">123 Maple St 2A</td>
+                  <td style="font-size:0.875rem;">Mar 2026</td>
+                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
+                  <td style="font-weight:800;">$1,200</td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">Mar 4 · 2:15pm</td>
+                  <td><span class="badge badge-pending">Pending</span></td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;">View Screenshot</button>
+                      <button class="btn btn-success btn-sm">✓ Confirm</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Robert Lee</strong></td>
+                  <td style="font-size:0.875rem;">456 Oak Ave 1B</td>
+                  <td style="font-size:0.875rem;">Mar 2026</td>
+                  <td><span style="color:#7c3aed;font-weight:600;">💜 Zelle</span></td>
+                  <td style="font-weight:800;">$950</td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">Mar 3 · 10:22am</td>
+                  <td><span class="badge badge-pending">Pending</span></td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;">View Screenshot</button>
+                      <button class="btn btn-success btn-sm">✓ Confirm</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Jane Doe</strong></td>
+                  <td style="font-size:0.875rem;">123 Maple St 2A</td>
+                  <td style="font-size:0.875rem;">Feb 2026</td>
+                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
+                  <td style="font-weight:800;">$1,200</td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">Feb 1</td>
+                  <td><span class="badge badge-verified">Confirmed</span></td>
+                  <td><span style="font-size:0.8rem;color:var(--gray-500);">Feb 1, 2026</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI SETTINGS TAB -->
+      <div id="dtab-ai" class="tab-content">
+        <div class="page-header"><h1>AI Settings</h1><p>Configure how your AI assistant responds to tenants.</p></div>
+        <div class="grid-2" style="align-items:start;">
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1.25rem;">🤖 AI Channels</h3>
+              <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+                  <div><div style="font-weight:600;font-size:0.9rem;">💬 Website Chat Widget</div><div style="font-size:0.8rem;color:var(--success);">Active</div></div>
+                  <input type="checkbox" checked style="width:auto;" />
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+                  <div><div style="font-weight:600;font-size:0.9rem;">📱 SMS (Twilio)</div><div style="font-size:0.8rem;color:var(--success);">Active · +1 (555) 000-0000</div></div>
+                  <input type="checkbox" checked style="width:auto;" />
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+                  <div><div style="font-weight:600;font-size:0.9rem;">📘 Facebook Messenger</div><div style="font-size:0.8rem;color:var(--success);">Active</div></div>
+                  <input type="checkbox" checked style="width:auto;" />
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+                  <div><div style="font-weight:600;font-size:0.9rem;">📧 Email (SendGrid)</div><div style="font-size:0.8rem;color:var(--success);">Active</div></div>
+                  <input type="checkbox" checked style="width:auto;" />
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+                  <div><div style="font-weight:600;font-size:0.9rem;">💚 WhatsApp</div><div style="font-size:0.8rem;color:var(--warning);">Setup required</div></div>
+                  <input type="checkbox" style="width:auto;" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1.25rem;">⚙️ AI Behavior</h3>
+              <div class="form-group">
+                <label>Business Name (shown to tenants)</label>
+                <input type="text" value="Sanders Property Management" />
+              </div>
+              <div class="form-group">
+                <label>AI Greeting Message</label>
+                <textarea rows="3" style="resize:none;">Hi! I'm the virtual assistant for Sanders Property Management. I can answer questions about available rentals, help you start an application, or connect you with management. How can I help?</textarea>
+              </div>
+              <div class="form-group">
+                <label>Cash App $Cashtag</label>
+                <input type="text" placeholder="$SandersRentals" />
+              </div>
+              <div class="form-group">
+                <label>Zelle Phone/Email</label>
+                <input type="text" placeholder="payments@sanderspm.com or phone" />
+              </div>
+              <button class="btn btn-primary">Save Settings</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCS TAB -->
+      <div id="dtab-docs" class="tab-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div><h1>Documents</h1><p>Manage rental applications, leases, and tenant files.</p></div>
+          <button class="btn btn-primary">+ Upload Document</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <table>
+              <thead><tr><th>Document</th><th>Tenant</th><th>Property</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>📋 <strong>Rental Application</strong></td>
+                  <td>Tyler Johnson</td>
+                  <td>789 Pine Rd</td>
+                  <td>Mar 4, 2026</td>
+                  <td><button class="btn btn-outline btn-sm">Send to Tenant</button></td>
+                </tr>
+                <tr>
+                  <td>📄 <strong>Lease Agreement</strong></td>
+                  <td>Jane Doe</td>
+                  <td>123 Maple St 2A</td>
+                  <td>Apr 1, 2025</td>
+                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                </tr>
+                <tr>
+                  <td>📄 <strong>Lease Agreement</strong></td>
+                  <td>Robert Lee</td>
+                  <td>456 Oak Ave 1B</td>
+                  <td>Jun 1, 2025</td>
+                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                </tr>
+                <tr>
+                  <td>🏠 <strong>Move-In Inspection</strong></td>
+                  <td>Jane Doe</td>
+                  <td>123 Maple St 2A</td>
+                  <td>Apr 1, 2025</td>
+                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end dash-main -->
+  </div><!-- end dashboard-layout -->
+</div><!-- end dashboard-screen -->
+
+<script src="app.js"></script>
+<script>
+  let selectedPlan = 'annual';
+  function selectPlan(p) {
+    selectedPlan = p;
+    ['monthly','annual','perlisting'].forEach(id => {
+      document.getElementById('plan-' + id).classList.toggle('selected', id === p);
+      document.getElementById('check-' + id).style.display = id === p ? 'block' : 'none';
+    });
+  }
+
+  function formNext(n) {
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById('form-step-' + i).style.display = i === n ? 'block' : 'none';
+      document.getElementById('si-' + i).style.background = i <= n ? 'var(--primary)' : 'var(--gray-200)';
+    }
+    // Show PM license block if Property Manager role selected
+    if (n === 3) {
+      const role = document.querySelector('input[name="signupRole"]:checked');
+      const isPM = role && role.value === 'pm';
+      const pmSec = document.getElementById('pm-license-section');
+      if (pmSec) pmSec.style.display = isPM ? 'block' : 'none';
+    }
+  }
+
+  // File name preview helper for landlord signup
+  function llShowFile(input, targetId) {
+    const el = document.getElementById(targetId);
+    if (el && input.files && input.files[0]) {
+      el.textContent = '✅ ' + input.files[0].name;
+    }
+  }
+
+  // ── AUTH ──────────────────────────────────────────
+  const ACCOUNTS = [
+    { email: 'danielrhart1284@gmail.com', password: 'SPMis#1!', name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' }
+  ];
+
+  let currentLoginRole = 'landlord';
+
+  function setLoginRole(role, btn) {
+    currentLoginRole = role;
+    ['landlord','agent','vendor'].forEach(r => {
+      const b = document.getElementById('roleBtn-'+r);
+      if(b) {
+        const colors = { landlord:'#1a56db', agent:'#8b5cf6', vendor:'#f59e0b' };
+        const c = colors[r];
+        b.style.borderColor = r===role ? c : '#e2e8f0';
+        b.style.background  = r===role ? (r==='landlord'?'#eff6ff':r==='agent'?'#f5f3ff':'#fffbeb') : '#f8fafc';
+        b.style.color       = r===role ? c : '#64748b';
+      }
+    });
+  }
+
+  function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const pw    = document.getElementById('loginPw').value;
+    const errEl = document.getElementById('loginErr');
+    const acct  = ACCOUNTS.find(a => a.email.toLowerCase() === email && a.password === pw);
+    if (!acct) {
+      errEl.textContent = '⚠️ Incorrect email or password. Please try again.';
+      errEl.style.display = 'block';
+      document.getElementById('loginPw').style.borderColor = '#ef4444';
+      return;
+    }
+    errEl.style.display = 'none';
+    // Route by role
+    if (currentLoginRole === 'agent') {
+      window.location.href = 'agent-portal.html';
+      return;
+    }
+    if (currentLoginRole === 'vendor') {
+      window.location.href = 'vendor-portal.html';
+      return;
+    }
+    // Landlord / PM → dashboard
+    document.getElementById('signup-screen').style.display = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+  }
+
+  function togglePw() {
+    const el = document.getElementById('loginPw');
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+
+  function showSignupForm() {
+    document.getElementById('login-panel').style.display = 'none';
+    document.getElementById('signup-panel').style.display = 'block';
+  }
+
+  function showLoginForm() {
+    document.getElementById('signup-panel').style.display = 'none';
+    document.getElementById('login-panel').style.display = 'block';
+  }
+
+  // Allow Enter key to submit login
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('login-panel') &&
+        document.getElementById('login-panel').style.display !== 'none') {
+      doLogin();
+    }
+  });
+
+  function submitSignup() {
+    document.getElementById('signup-screen').style.display = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+  }
+
+  function dashTab(name) {
+    document.querySelectorAll('#dashboard-screen .tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.dash-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('dtab-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+</body>
+</html>

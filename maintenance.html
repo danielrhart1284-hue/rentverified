@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maintenance – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: #f3f4f6; }
+    .maint-wrapper {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+      padding-top: 64px;
+    }
+    /* Sidebar */
+    .maint-sidebar {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+    .maint-sidebar h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.5rem 1.5rem; margin:1rem 0 .25rem; }
+    .maint-sidebar a  { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.9rem; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
+    .maint-sidebar a:hover, .maint-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#3b82f6; }
+    /* Main */
+    .maint-main { padding:2rem; max-width:1200px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+    .page-header h1 { font-size:1.5rem; color:#1e293b; }
+    .page-header p  { color:#64748b; font-size:.9rem; margin-top:.2rem; }
+    /* Stats */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.75rem; }
+    .stat-card { background:#fff; border-radius:12px; padding:1.25rem; box-shadow:0 1px 4px rgba(0,0,0,.08); border-left:4px solid #e2e8f0; }
+    .stat-card.open    { border-left-color:#f59e0b; }
+    .stat-card.prog    { border-left-color:#3b82f6; }
+    .stat-card.done    { border-left-color:#10b981; }
+    .stat-card.urgent  { border-left-color:#ef4444; }
+    .stat-card .lbl    { font-size:.72rem; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+    .stat-card .val    { font-size:1.8rem; font-weight:700; color:#1e293b; }
+    /* Panel */
+    .panel { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:1.5rem; overflow:hidden; }
+    .panel-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-bottom:1px solid #f1f5f9; }
+    .panel-header h2 { font-size:1rem; color:#1e293b; font-weight:700; }
+    .panel-body { padding:1.5rem; }
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+    .fg { display:flex; flex-direction:column; gap:.4rem; }
+    .fg label { font-size:.82rem; font-weight:600; color:#374151; }
+    .fg input, .fg select, .fg textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.55rem .8rem; font-size:.9rem; color:#1e293b; outline:none; transition:border .15s; background:#fff; }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:#3b82f6; }
+    .fg textarea { resize:vertical; min-height:80px; }
+    /* Priority badge */
+    .pri { display:inline-block; padding:.18rem .55rem; border-radius:99px; font-size:.72rem; font-weight:700; }
+    .pri-emergency { background:#fef2f2; color:#dc2626; }
+    .pri-high      { background:#fff7ed; color:#ea580c; }
+    .pri-medium    { background:#fefce8; color:#ca8a04; }
+    .pri-low       { background:#f0fdf4; color:#16a34a; }
+    /* Status badge */
+    .sts { display:inline-block; padding:.2rem .65rem; border-radius:99px; font-size:.75rem; font-weight:600; }
+    .sts-open       { background:#fef9c3; color:#854d0e; }
+    .sts-assigned   { background:#dbeafe; color:#1d4ed8; }
+    .sts-inprogress { background:#ede9fe; color:#7c3aed; }
+    .sts-done       { background:#dcfce7; color:#15803d; }
+    .sts-closed     { background:#f1f5f9; color:#475569; }
+    /* Table */
+    .data-table { width:100%; border-collapse:collapse; font-size:.87rem; }
+    .data-table th { text-align:left; padding:.65rem 1rem; background:#f8fafc; font-size:.73rem; text-transform:uppercase; letter-spacing:.05em; color:#64748b; border-bottom:1px solid #e2e8f0; }
+    .data-table td { padding:.75rem 1rem; border-bottom:1px solid #f1f5f9; color:#374151; vertical-align:top; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:#fafafa; }
+    /* Filter */
+    .filter-bar { display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; padding:1rem 1.5rem; border-bottom:1px solid #f1f5f9; background:#fafafa; }
+    .filter-bar select, .filter-bar input { border:1.5px solid #e2e8f0; border-radius:7px; padding:.4rem .75rem; font-size:.85rem; color:#374151; outline:none; background:#fff; }
+    /* Timeline */
+    .timeline { padding:0; list-style:none; }
+    .timeline li { display:flex; gap:1rem; padding-bottom:1rem; position:relative; }
+    .timeline li::before { content:''; position:absolute; left:14px; top:28px; bottom:0; width:2px; background:#e2e8f0; }
+    .timeline li:last-child::before { display:none; }
+    .tl-dot { width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.9rem; }
+    .tl-submitted  { background:#fef9c3; }
+    .tl-assigned   { background:#dbeafe; }
+    .tl-started    { background:#ede9fe; }
+    .tl-completed  { background:#dcfce7; }
+    .tl-body       { flex:1; }
+    .tl-body .who  { font-size:.8rem; color:#94a3b8; }
+    /* Work Order Detail Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:16px; width:min(700px,95vw); max-height:90vh; overflow-y:auto; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    .modal-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; }
+    .modal-close { background:none; border:none; font-size:1.5rem; cursor:pointer; color:#94a3b8; line-height:1; padding:.25rem; }
+    /* Vendor card */
+    .vendor-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:1rem; display:flex; justify-content:space-between; align-items:center; margin-bottom:.75rem; }
+    .vendor-card:hover { border-color:#3b82f6; }
+    .vendor-name { font-weight:700; color:#1e293b; font-size:.95rem; }
+    .vendor-trade { font-size:.78rem; color:#64748b; }
+    .vendor-rating { color:#f59e0b; font-size:.85rem; }
+    /* Btn */
+    .btn { padding:.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; transition:all .15s; }
+    .btn-primary { background:#1a56db; color:#fff; }
+    .btn-primary:hover { background:#1e40af; }
+    .btn-success { background:#10b981; color:#fff; }
+    .btn-success:hover { background:#059669; }
+    .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
+    .btn-outline:hover { border-color:#94a3b8; }
+    .btn-sm { padding:.35rem .75rem; font-size:.78rem; }
+    .btn-danger { background:#fef2f2; color:#dc2626; border:1.5px solid #fecaca; }
+    /* Upload zone */
+    .upload-zone { border:2px dashed #cbd5e1; border-radius:10px; padding:1.5rem; text-align:center; color:#94a3b8; font-size:.88rem; cursor:pointer; transition:all .15s; margin-top:.5rem; }
+    .upload-zone:hover { border-color:#3b82f6; background:#eff6ff; color:#3b82f6; }
+    /* Toast */
+    #toast { position:fixed; bottom:2rem; right:2rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; opacity:0; transform:translateY(10px); transition:all .3s; z-index:9999; pointer-events:none; }
+    #toast.show { opacity:1; transform:translateY(0); }
+    /* Kanban */
+    .kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+    .kboard { background:#f8fafc; border-radius:10px; padding:.75rem; border:1px solid #e2e8f0; }
+    .kboard-header { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#64748b; margin-bottom:.75rem; display:flex; justify-content:space-between; }
+    .kcard { background:#fff; border-radius:8px; padding:.75rem; margin-bottom:.6rem; box-shadow:0 1px 3px rgba(0,0,0,.08); border-left:3px solid #e2e8f0; cursor:pointer; }
+    .kcard:hover { box-shadow:0 2px 8px rgba(0,0,0,.12); }
+    .kcard .kprop { font-size:.7rem; color:#94a3b8; }
+    .kcard .kdesc { font-size:.85rem; font-weight:600; color:#1e293b; margin:.2rem 0; }
+    .kcard .kmeta { font-size:.72rem; color:#64748b; }
+    .kcard.pri-emergency { border-left-color:#ef4444; }
+    .kcard.pri-high      { border-left-color:#f97316; }
+    .kcard.pri-medium    { border-left-color:#eab308; }
+    .kcard.pri-low       { border-left-color:#22c55e; }
+    @media(max-width:900px){ .kanban{grid-template-columns:1fr 1fr;} }
+    @media(max-width:600px){ .kanban{grid-template-columns:1fr;} .maint-wrapper{grid-template-columns:1fr;} .maint-sidebar{display:none;} }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-logo">✓</span><span>RentVerified</span></div>
+  <div class="nav-links">
+    <a href="landlord-signup.html">← Dashboard</a>
+    <a href="accounting.html">Accounting</a>
+    <a href="index.html">Home</a>
+  </div>
+</nav>
+
+<div class="maint-wrapper">
+  <aside class="maint-sidebar">
+    <h3>Maintenance</h3>
+    <a class="active" onclick="showSec('board',this)">📋 Work Order Board</a>
+    <a onclick="showSec('list',this)">📄 All Requests</a>
+    <a onclick="showSec('new',this)">➕ New Request</a>
+    <a onclick="showSec('vendors',this)">🔧 Vendors</a>
+    <h3>Manage</h3>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+    <a href="accounting.html">📊 Accounting</a>
+    <a href="leases.html">📝 Leases</a>
+    <a href="screening.html">🛡 Screening</a>
+    <a href="ad-builder.html">📣 Ad Builder</a>
+  </aside>
+
+  <main class="maint-main">
+
+    <!-- ── BOARD ─────────────────────────────────────── -->
+    <div id="sec-board">
+      <div class="page-header">
+        <div><h1>🔧 Work Order Board</h1><p>Track maintenance from request to completion.</p></div>
+        <button class="btn btn-primary" onclick="showSec('new',null)">+ New Request</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card open">  <div class="lbl">Open</div>        <div class="val" id="cntOpen">0</div></div>
+        <div class="stat-card prog">  <div class="lbl">In Progress</div> <div class="val" id="cntProg">0</div></div>
+        <div class="stat-card done">  <div class="lbl">Completed</div>   <div class="val" id="cntDone">0</div></div>
+        <div class="stat-card urgent"><div class="lbl">Emergency</div>   <div class="val" id="cntUrgent">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Kanban Board</h2></div>
+        <div class="panel-body" style="padding:1rem;">
+          <div class="kanban" id="kanban"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LIST ──────────────────────────────────────── -->
+    <div id="sec-list" style="display:none;">
+      <div class="page-header">
+        <div><h1>📄 All Maintenance Requests</h1><p>Filter and manage all work orders.</p></div>
+        <button class="btn btn-primary" onclick="showSec('new',null)">+ New Request</button>
+      </div>
+      <div class="panel">
+        <div class="filter-bar">
+          <select id="fStatus" onchange="renderTable()"><option value="">All Status</option><option>Open</option><option>Assigned</option><option>In Progress</option><option>Completed</option><option>Closed</option></select>
+          <select id="fPriority" onchange="renderTable()"><option value="">All Priority</option><option>Emergency</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <select id="fProp" onchange="renderTable()"><option value="">All Properties</option></select>
+          <input id="fSearch" placeholder="Search…" oninput="renderTable()" style="flex:1;min-width:140px;">
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Property/Unit</th><th>Issue</th><th>Category</th><th>Priority</th><th>Status</th><th>Submitted</th><th>Vendor</th><th></th></tr></thead>
+            <tbody id="woTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NEW REQUEST ───────────────────────────────── -->
+    <div id="sec-new" style="display:none;">
+      <div class="page-header"><div><h1>➕ New Maintenance Request</h1><p>Submit a work order for any property.</p></div></div>
+      <div class="panel">
+        <div class="panel-header"><h2>Request Details</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg">
+              <label>Property *</label>
+              <select id="nrProp">
+                <option value="119 E 600 S #119, Orem UT">119 E 600 S #119, Orem UT</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Category *</label>
+              <select id="nrCat">
+                <option>Plumbing</option><option>Electrical</option><option>HVAC / Heating</option>
+                <option>Appliance</option><option>Pest Control</option><option>Structural</option>
+                <option>Landscaping</option><option>Cleaning</option><option>Locks / Security</option>
+                <option>Internet / Cable</option><option>Other</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Priority *</label>
+              <select id="nrPri">
+                <option value="Low">Low — Not urgent</option>
+                <option value="Medium" selected>Medium — Needs attention</option>
+                <option value="High">High — Affects habitability</option>
+                <option value="Emergency">🚨 Emergency — Health/Safety</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Reported By</label>
+              <select id="nrSource">
+                <option>Tenant</option><option>Landlord</option><option>Inspection</option><option>Vendor</option>
+              </select>
+            </div>
+            <div class="fg" style="grid-column:1/-1;">
+              <label>Issue Description *</label>
+              <textarea id="nrDesc" placeholder="Describe the problem in detail. What happened? When did it start? How severe?"></textarea>
+            </div>
+            <div class="fg">
+              <label>Preferred Entry Time</label>
+              <select id="nrEntry">
+                <option>Anytime</option><option>Morning (8am–12pm)</option><option>Afternoon (12pm–5pm)</option>
+                <option>Evenings only</option><option>Weekends only</option><option>Notify first</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Assign Vendor (optional)</label>
+              <select id="nrVendor">
+                <option value="">— Unassigned —</option>
+              </select>
+            </div>
+            <div class="fg" style="grid-column:1/-1;">
+              <label>Photos / Attachments</label>
+              <div class="upload-zone" onclick="toast('📷 Photo upload ready — connect storage to enable.')">📷 Click to attach photos or drag files here</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+            <button class="btn btn-primary" onclick="submitRequest()">Submit Work Order</button>
+            <button class="btn btn-outline" onclick="clearNR()">Clear</button>
+          </div>
+        </div>
+      </div>
+      <!-- AI Suggestion Panel -->
+      <div class="panel">
+        <div class="panel-header"><h2>🤖 AI Recommendation</h2></div>
+        <div class="panel-body">
+          <p style="font-size:.88rem;color:#374151;margin-bottom:.75rem;">Based on the category selected, our AI recommends:</p>
+          <div id="aiRec" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:1rem;font-size:.88rem;color:#1d4ed8;">
+            Select a category above to see AI recommendations for vendors and typical costs.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VENDORS ───────────────────────────────────── -->
+    <div id="sec-vendors" style="display:none;">
+      <div class="page-header">
+        <div><h1>🔧 Vendor Directory</h1><p>Manage preferred vendors and contractors.</p></div>
+        <button class="btn btn-primary" onclick="showAddVendor()">+ Add Vendor</button>
+      </div>
+      <!-- Add Vendor Form (hidden by default) -->
+      <div id="addVendorPanel" style="display:none;" class="panel">
+        <div class="panel-header"><h2>Add Vendor</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Company Name *</label><input id="vName" placeholder="ABC Plumbing"></div>
+            <div class="fg"><label>Trade / Specialty *</label>
+              <select id="vTrade">
+                <option>Plumbing</option><option>Electrical</option><option>HVAC</option><option>General Handyman</option>
+                <option>Pest Control</option><option>Landscaping</option><option>Roofing</option><option>Appliance Repair</option>
+                <option>Cleaning</option><option>Locksmith</option><option>Painting</option><option>Other</option>
+              </select>
+            </div>
+            <div class="fg"><label>Phone</label><input id="vPhone" placeholder="(801) 555-0000" type="tel"></div>
+            <div class="fg"><label>Email</label><input id="vEmail" placeholder="vendor@example.com" type="email"></div>
+            <div class="fg"><label>License #</label><input id="vLic" placeholder="UT-LIC-12345"></div>
+            <div class="fg"><label>Avg Hourly Rate ($)</label><input id="vRate" type="number" placeholder="85"></div>
+            <div class="fg" style="grid-column:1/-1;"><label>Notes</label><textarea id="vNotes" placeholder="Preferred vendor for…"></textarea></div>
+          </div>
+          <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+            <button class="btn btn-primary" onclick="saveVendor()">Save Vendor</button>
+            <button class="btn btn-outline" onclick="document.getElementById('addVendorPanel').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <!-- Vendor Grid -->
+      <div id="vendorGrid"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- WORK ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="woModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div style="font-size:1.1rem;font-weight:700;color:#1e293b;" id="modalTitle"></div>
+        <div style="font-size:.85rem;color:#64748b;margin-top:.25rem;" id="modalMeta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────
+let workOrders = [], vendors = [];
+
+const AI_RECS = {
+  'Plumbing':      'Typical cost: $75–$250. Common issues: leaky faucets, clogged drains, running toilets. Emergency shutoff: turn off main water valve. Recommend licensed plumber for any pipe work.',
+  'Electrical':    'Typical cost: $100–$400. Always use a licensed electrician — electrical work is a safety/code issue. Check breaker panel first before calling.',
+  'HVAC / Heating':'Typical cost: $80–$600. Change filters monthly. Most HVAC issues occur at season change. Emergency heat: check thermostat batteries and gas supply first.',
+  'Appliance':     'Typical cost: $50–$300. Check warranty first — many appliances have 1-year parts/labor. Confirm whether tenant or landlord is responsible per lease.',
+  'Pest Control':  'Typical cost: $100–$350 per treatment. Document issue with photos. Seal entry points. Utah common pests: mice, spiders, ants. Professional treatment recommended.',
+  'Structural':    'Priority: HIGH. Document immediately with photos. Any foundation cracks, roof leaks, or structural damage should be assessed by a contractor ASAP.',
+  'Landscaping':   'Typical cost: $50–$200/visit. Confirm lease responsibility — many leases make tenant responsible for lawn care. Schedule seasonal service.',
+  'Locks / Security':'Typical cost: $50–$200. Re-key or replace locks after every tenant turnover. Smart locks recommended for easy management.',
+  'Other':         'Document the issue thoroughly with photos. Determine trade needed before assigning a vendor.'
+};
+
+function loadData() {
+  try { workOrders = JSON.parse(localStorage.getItem('rv_workorders') || '[]'); } catch(e){ workOrders=[]; }
+  try { vendors = JSON.parse(localStorage.getItem('rv_vendors') || '[]'); } catch(e){ vendors=[]; }
+}
+function saveOrders() { localStorage.setItem('rv_workorders', JSON.stringify(workOrders)); }
+function saveVendors() { localStorage.setItem('rv_vendors', JSON.stringify(vendors)); }
+
+function uid() { return 'WO-' + Date.now().toString(36).toUpperCase(); }
+
+function loadSampleData() {
+  if(workOrders.length) return;
+  workOrders = [
+    { id:'WO-A1B2C', prop:'119 E 600 S #119, Orem UT', cat:'Plumbing',   priority:'High',      status:'In Progress', desc:'Bathroom faucet dripping constantly — wasting water.',            source:'Tenant',   vendor:'Mike\'s Plumbing',  submitted:'2026-02-28', updated:'2026-03-01', notes:[] },
+    { id:'WO-D3E4F', prop:'119 E 600 S #119, Orem UT', cat:'Electrical', priority:'Medium',     status:'Open',        desc:'Kitchen outlet near sink stopped working.',                       source:'Tenant',   vendor:'',                  submitted:'2026-03-02', updated:'2026-03-02', notes:[] },
+    { id:'WO-G5H6I', prop:'119 E 600 S #119, Orem UT', cat:'HVAC / Heating', priority:'Low',   status:'Completed',   desc:'Furnace filter replacement — routine maintenance.',               source:'Landlord', vendor:'ComfortPro HVAC',   submitted:'2026-01-15', updated:'2026-01-20', notes:['Filter replaced, unit running well.'] },
+    { id:'WO-J7K8L', prop:'119 E 600 S #119, Orem UT', cat:'Appliance',  priority:'Emergency', status:'Assigned',    desc:'Refrigerator not cooling — food at risk.',                        source:'Tenant',   vendor:'Appliance Express',  submitted:'2026-03-04', updated:'2026-03-04', notes:[] },
+  ];
+  vendors = [
+    { id:'V001', name:"Mike's Plumbing", trade:'Plumbing',   phone:'(801) 555-0101', email:'mike@mikesplumbing.com', lic:'UT-PL-4421', rate:95,  rating:4.8, jobs:12, notes:'Reliable, 24/7 emergency available' },
+    { id:'V002', name:'ComfortPro HVAC', trade:'HVAC',       phone:'(801) 555-0202', email:'info@comfortpro.com',    lic:'UT-HVAC-881', rate:110, rating:4.6, jobs:7,  notes:'Annual service contracts available' },
+    { id:'V003', name:'Bright Spark Electric', trade:'Electrical', phone:'(801) 555-0303', email:'bill@brightspark.com', lic:'UT-EL-2291', rate:120, rating:4.9, jobs:5, notes:'Licensed master electrician' },
+    { id:'V004', name:'Appliance Express', trade:'Appliance Repair', phone:'(801) 555-0404', email:'fix@applianceexpress.com', lic:'', rate:75, rating:4.3, jobs:9, notes:'Same-day service most appliances' },
+  ];
+  saveOrders(); saveVendors();
+}
+
+// ── INIT ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  loadSampleData();
+  renderAll();
+  populateVendorSelect();
+  populatePropFilter();
+  document.getElementById('nrCat').addEventListener('change', updateAIRec);
+});
+
+function renderAll() {
+  renderKanban();
+  renderTable();
+  renderVendorGrid();
+  updateCounts();
+}
+
+// ── SECTION NAV ─────────────────────────────────────────
+function showSec(name, el) {
+  ['board','list','new','vendors'].forEach(s => {
+    document.getElementById('sec-'+s).style.display = s===name?'block':'none';
+  });
+  document.querySelectorAll('.maint-sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── COUNTS ───────────────────────────────────────────────
+function updateCounts() {
+  document.getElementById('cntOpen').textContent   = workOrders.filter(w=>w.status==='Open').length;
+  document.getElementById('cntProg').textContent   = workOrders.filter(w=>w.status==='In Progress').length;
+  document.getElementById('cntDone').textContent   = workOrders.filter(w=>w.status==='Completed').length;
+  document.getElementById('cntUrgent').textContent = workOrders.filter(w=>w.priority==='Emergency').length;
+}
+
+// ── KANBAN ───────────────────────────────────────────────
+const COLS = [
+  { key:'Open',        label:'🟡 Open' },
+  { key:'Assigned',    label:'🔵 Assigned' },
+  { key:'In Progress', label:'🟣 In Progress' },
+  { key:'Completed',   label:'✅ Completed' },
+];
+
+function renderKanban() {
+  const kb = document.getElementById('kanban');
+  kb.innerHTML = COLS.map(col => {
+    const cards = workOrders.filter(w => w.status === col.key);
+    return `<div class="kboard">
+      <div class="kboard-header"><span>${col.label}</span><span>${cards.length}</span></div>
+      ${cards.length ? cards.map(w => `
+        <div class="kcard pri-${w.priority.toLowerCase()}" onclick="openModal('${w.id}')">
+          <div class="kprop">${w.prop}</div>
+          <div class="kdesc">${w.cat} — ${w.desc.slice(0,50)}${w.desc.length>50?'…':''}</div>
+          <div class="kmeta">${w.id} · <span class="pri pri-${w.priority.toLowerCase()}">${w.priority}</span></div>
+        </div>`).join('')
+      : '<div style="font-size:.8rem;color:#cbd5e1;text-align:center;padding:.75rem 0;">No orders</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ── TABLE ────────────────────────────────────────────────
+function populatePropFilter() {
+  const sel = document.getElementById('fProp');
+  const props = [...new Set(workOrders.map(w=>w.prop))];
+  props.forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; sel.appendChild(o); });
+}
+
+function renderTable() {
+  let f = [...workOrders];
+  const st = document.getElementById('fStatus')?.value;
+  const pr = document.getElementById('fPriority')?.value;
+  const pp = document.getElementById('fProp')?.value;
+  const ss = (document.getElementById('fSearch')?.value||'').toLowerCase();
+  if(st) f = f.filter(w=>w.status===st);
+  if(pr) f = f.filter(w=>w.priority===pr);
+  if(pp) f = f.filter(w=>w.prop===pp);
+  if(ss) f = f.filter(w=>(w.desc+w.cat+w.id+w.vendor).toLowerCase().includes(ss));
+  f.sort((a,b)=>{
+    const pOrd = {Emergency:0,High:1,Medium:2,Low:3};
+    return (pOrd[a.priority]||9) - (pOrd[b.priority]||9);
+  });
+  const tbody = document.getElementById('woTbody');
+  tbody.innerHTML = f.length ? f.map(w => `
+    <tr>
+      <td style="font-size:.78rem;font-family:monospace;color:#64748b;">${w.id}</td>
+      <td style="font-size:.82rem;">${w.prop}</td>
+      <td><strong>${w.cat}</strong><br><span style="font-size:.78rem;color:#64748b;">${w.desc.slice(0,60)}…</span></td>
+      <td><span class="pri pri-${w.priority.toLowerCase()}">${w.priority}</span></td>
+      <td><span class="sts sts-${w.status.replace(' ','').toLowerCase()}">${w.status}</span></td>
+      <td style="font-size:.8rem;">${w.submitted}</td>
+      <td style="font-size:.82rem;color:#64748b;">${w.vendor||'Unassigned'}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="openModal('${w.id}')">View</button>
+      </td>
+    </tr>`).join('')
+  : '<tr><td colspan="8"><div style="text-align:center;padding:2rem;color:#94a3b8;">No work orders match your filters.</div></td></tr>';
+}
+
+// ── MODAL ────────────────────────────────────────────────
+function openModal(id) {
+  const w = workOrders.find(x=>x.id===id);
+  if(!w) return;
+  document.getElementById('modalTitle').textContent = `${w.cat} — ${w.prop}`;
+  document.getElementById('modalMeta').textContent  = `${w.id} · Submitted ${w.submitted} · Reported by ${w.source}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+      <div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">Priority</div>
+        <span class="pri pri-${w.priority.toLowerCase()}">${w.priority}</span></div>
+      <div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">Status</div>
+        <span class="sts sts-${w.status.replace(' ','').toLowerCase()}">${w.status}</span></div>
+      <div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">Vendor</div>
+        <strong>${w.vendor||'Unassigned'}</strong></div>
+      <div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">Last Updated</div>
+        <span>${w.updated}</span></div>
+    </div>
+    <div style="background:#f8fafc;border-radius:8px;padding:1rem;margin-bottom:1.25rem;">
+      <div style="font-size:.75rem;color:#64748b;text-transform:uppercase;margin-bottom:.5rem;">Description</div>
+      <p style="color:#374151;font-size:.9rem;">${w.desc}</p>
+    </div>
+    <div style="display:flex;gap:.75rem;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;">
+      <div style="font-size:.82rem;font-weight:600;color:#374151;">Update Status:</div>
+      ${['Open','Assigned','In Progress','Completed','Closed'].map(s =>
+        `<button class="btn btn-outline btn-sm" style="${s===w.status?'background:#1a56db;color:#fff;border-color:#1a56db;':''}"
+          onclick="updateStatus('${id}','${s}')">${s}</button>`).join('')}
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <div style="font-size:.82rem;font-weight:600;color:#374151;margin-bottom:.5rem;">Assign Vendor:</div>
+      <div style="display:flex;gap:.75rem;">
+        <select id="modalVendor" style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .75rem;font-size:.88rem;">
+          <option value="">— Unassigned —</option>
+          ${vendors.map(v=>`<option value="${v.name}" ${v.name===w.vendor?'selected':''}>${v.name} (${v.trade})</option>`).join('')}
+        </select>
+        <button class="btn btn-success btn-sm" onclick="assignVendorFromModal('${id}')">Assign</button>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:.82rem;font-weight:600;color:#374151;margin-bottom:.75rem;">Activity Log</div>
+      <ul class="timeline">
+        <li><div class="tl-dot tl-submitted">📋</div><div class="tl-body"><strong>Submitted</strong><div class="who">${w.source} · ${w.submitted}</div></div></li>
+        ${w.notes.map(n=>`<li><div class="tl-dot tl-started">💬</div><div class="tl-body"><strong>Note</strong><div class="who">${n}</div></div></li>`).join('')}
+        ${w.status==='Completed'?`<li><div class="tl-dot tl-completed">✅</div><div class="tl-body"><strong>Completed</strong><div class="who">${w.updated}</div></div></li>`:''}
+      </ul>
+      <div style="display:flex;gap:.75rem;margin-top:.75rem;">
+        <input id="newNote" style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .75rem;font-size:.88rem;" placeholder="Add a note…">
+        <button class="btn btn-outline btn-sm" onclick="addNote('${id}')">Add Note</button>
+      </div>
+    </div>`;
+  document.getElementById('woModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('woModal').classList.remove('open'); }
+
+function updateStatus(id, status) {
+  const w = workOrders.find(x=>x.id===id);
+  if(!w) return;
+  w.status = status;
+  w.updated = new Date().toISOString().slice(0,10);
+  saveOrders(); renderAll(); openModal(id);
+  toast(`✅ Status updated to "${status}"`);
+}
+
+function assignVendorFromModal(id) {
+  const w = workOrders.find(x=>x.id===id);
+  const v = document.getElementById('modalVendor').value;
+  if(!w) return;
+  w.vendor = v;
+  w.status = v ? 'Assigned' : 'Open';
+  w.updated = new Date().toISOString().slice(0,10);
+  saveOrders(); renderAll(); openModal(id);
+  toast(v ? `🔧 Assigned to ${v}` : 'Vendor removed');
+}
+
+function addNote(id) {
+  const w = workOrders.find(x=>x.id===id);
+  const txt = document.getElementById('newNote').value.trim();
+  if(!w||!txt) return;
+  w.notes.push(txt);
+  w.updated = new Date().toISOString().slice(0,10);
+  saveOrders(); openModal(id);
+  toast('💬 Note added');
+}
+
+// ── NEW REQUEST ─────────────────────────────────────────
+function submitRequest() {
+  const desc = document.getElementById('nrDesc').value.trim();
+  if(!desc) return toast('⚠️ Please describe the issue.');
+  const wo = {
+    id: uid(),
+    prop: document.getElementById('nrProp').value,
+    cat:  document.getElementById('nrCat').value,
+    priority: document.getElementById('nrPri').value,
+    status: 'Open',
+    desc,
+    source: document.getElementById('nrSource').value,
+    vendor: document.getElementById('nrVendor').value,
+    submitted: new Date().toISOString().slice(0,10),
+    updated:   new Date().toISOString().slice(0,10),
+    notes: [],
+    entry: document.getElementById('nrEntry').value,
+  };
+  if(wo.vendor) wo.status = 'Assigned';
+  workOrders.unshift(wo);
+  saveOrders(); renderAll();
+
+  // ── DISPATCH VENDOR LEAD ─────────────────────────────
+  // Map maintenance categories to vendor trade types
+  const TRADE_MAP = {
+    'Plumbing':    'Plumbing',
+    'Electrical':  'Electrical',
+    'HVAC':        'HVAC',
+    'Appliances':  'Appliances',
+    'Painting':    'Painting',
+    'Landscaping': 'Landscaping',
+    'Cleaning':    'Cleaning',
+    'Carpentry':   'Carpentry',
+    'Other':       'General',
+  };
+  const propZIP = (wo.prop.match(/\b8\d{4}\b/) || ['84601'])[0];
+  const lead = {
+    id:          'lead-' + wo.id.toLowerCase(),
+    title:       wo.cat + ' Issue — ' + (wo.prop.split(',')[0] || wo.prop),
+    address:     wo.prop,
+    zip:         propZIP,
+    trade:       TRADE_MAP[wo.cat] || 'General',
+    priority:    wo.priority,
+    description: wo.desc,
+    submitted:   wo.submitted,
+    status:      'open',
+    landlord:    'Sanders Property Management',
+    contact:     'Daniel Hart — (801) 555-0199',
+  };
+  try {
+    const existingLeads = JSON.parse(localStorage.getItem('rv_vendor_leads') || '[]');
+    // Avoid duplicates
+    if (!existingLeads.find(l => l.id === lead.id)) {
+      existingLeads.unshift(lead);
+      localStorage.setItem('rv_vendor_leads', JSON.stringify(existingLeads));
+    }
+  } catch(e) { /* fail silently */ }
+  // ── END DISPATCH ─────────────────────────────────────
+
+  const leadNote = `🔔 Lead dispatched to matched local vendors in ZIP ${propZIP}.`;
+  toast(`✅ Work order ${wo.id} created! ${leadNote}`);
+  showSec('board', document.querySelector('.maint-sidebar a'));
+  clearNR();
+}
+
+function clearNR() {
+  document.getElementById('nrDesc').value='';
+  document.getElementById('aiRec').textContent='Select a category above to see AI recommendations.';
+}
+
+function updateAIRec() {
+  const cat = document.getElementById('nrCat').value;
+  document.getElementById('aiRec').textContent = AI_RECS[cat] || AI_RECS['Other'];
+}
+
+// ── VENDORS ─────────────────────────────────────────────
+function populateVendorSelect() {
+  const sel = document.getElementById('nrVendor');
+  sel.innerHTML = '<option value="">— Unassigned —</option>';
+  vendors.forEach(v => {
+    const o=document.createElement('option'); o.value=v.name; o.textContent=`${v.name} (${v.trade})`; sel.appendChild(o);
+  });
+}
+
+function showAddVendor() {
+  document.getElementById('addVendorPanel').style.display='block';
+  document.getElementById('addVendorPanel').scrollIntoView({behavior:'smooth'});
+}
+
+function saveVendor() {
+  const name = document.getElementById('vName').value.trim();
+  if(!name) return toast('⚠️ Vendor name required.');
+  vendors.push({
+    id: 'V'+Date.now(),
+    name,
+    trade:  document.getElementById('vTrade').value,
+    phone:  document.getElementById('vPhone').value,
+    email:  document.getElementById('vEmail').value,
+    lic:    document.getElementById('vLic').value,
+    rate:   parseFloat(document.getElementById('vRate').value)||0,
+    rating: 5.0,
+    jobs:   0,
+    notes:  document.getElementById('vNotes').value,
+  });
+  saveVendors(); populateVendorSelect(); renderVendorGrid();
+  document.getElementById('addVendorPanel').style.display='none';
+  toast(`✅ ${name} added to vendor directory.`);
+  ['vName','vPhone','vEmail','vLic','vRate','vNotes'].forEach(id=>document.getElementById(id).value='');
+}
+
+function renderVendorGrid() {
+  const grid = document.getElementById('vendorGrid');
+  grid.innerHTML = vendors.length ? `
+    <div class="panel">
+      <div class="panel-header"><h2>Preferred Vendors (${vendors.length})</h2></div>
+      <div class="panel-body" style="padding:1rem 1.5rem;">
+        ${vendors.map(v => `
+          <div class="vendor-card">
+            <div>
+              <div class="vendor-name">${v.name}</div>
+              <div class="vendor-trade">${v.trade}${v.lic?' · License: '+v.lic:''}</div>
+              <div style="font-size:.8rem;color:#64748b;margin-top:.2rem;">${v.phone} · ${v.email}</div>
+              ${v.notes?`<div style="font-size:.78rem;color:#94a3b8;margin-top:.2rem;">${v.notes}</div>`:''}
+            </div>
+            <div style="text-align:right;">
+              <div class="vendor-rating">★ ${v.rating.toFixed(1)}</div>
+              <div style="font-size:.78rem;color:#64748b;">${v.jobs} jobs</div>
+              ${v.rate?`<div style="font-size:.82rem;color:#374151;margin-top:.2rem;">~$${v.rate}/hr</div>`:''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`
+  : '<div style="text-align:center;padding:3rem;color:#94a3b8;"><div style="font-size:2.5rem;">🔧</div><p>No vendors yet. Add your first trusted vendor.</p></div>';
+}
+
+function toast(msg) {
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

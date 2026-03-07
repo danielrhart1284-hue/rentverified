@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listing Agent Portal – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background:#f3f4f6; }
+    /* Login */
+    .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#1e293b,#312e81); padding-top:64px; }
+    .login-card { background:#fff; border-radius:16px; padding:2.5rem; width:100%; max-width:440px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    /* Layout */
+    .ap-wrapper { display:grid; grid-template-columns:240px 1fr; min-height:100vh; padding-top:64px; }
+    .ap-sidebar { background:#1e293b; padding:1.5rem 0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; }
+    .ap-sidebar h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.5rem 1.5rem; margin:1rem 0 .25rem; }
+    .ap-sidebar a  { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.9rem; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
+    .ap-sidebar a:hover, .ap-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#8b5cf6; }
+    .ap-main { padding:2rem; max-width:1200px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+    .page-header h1 { font-size:1.5rem; color:#1e293b; }
+    .page-header p  { color:#64748b; font-size:.9rem; margin-top:.2rem; }
+    /* Stats */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.75rem; }
+    .stat-card { background:#fff; border-radius:12px; padding:1.25rem; box-shadow:0 1px 4px rgba(0,0,0,.08); border-left:4px solid #8b5cf6; }
+    .stat-card.green { border-left-color:#10b981; }
+    .stat-card.blue  { border-left-color:#3b82f6; }
+    .stat-card.gold  { border-left-color:#f59e0b; }
+    .stat-card .lbl { font-size:.72rem; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+    .stat-card .val { font-size:1.8rem; font-weight:700; color:#1e293b; }
+    /* Panel */
+    .panel { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:1.5rem; overflow:hidden; }
+    .panel-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-bottom:1px solid #f1f5f9; }
+    .panel-header h2 { font-size:1rem; color:#1e293b; font-weight:700; }
+    .panel-body { padding:1.5rem; }
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+    .fg { display:flex; flex-direction:column; gap:.4rem; }
+    .fg label { font-size:.82rem; font-weight:600; color:#374151; }
+    .fg input, .fg select, .fg textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.55rem .8rem; font-size:.9rem; color:#1e293b; outline:none; transition:border .15s; background:#fff; }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:#8b5cf6; }
+    .fg textarea { resize:vertical; min-height:80px; }
+    /* Buttons */
+    .btn { padding:.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; transition:all .15s; }
+    .btn-agent { background:#8b5cf6; color:#fff; }
+    .btn-agent:hover { background:#7c3aed; }
+    .btn-success { background:#10b981; color:#fff; }
+    .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
+    .btn-sm { padding:.35rem .75rem; font-size:.78rem; }
+    /* Table */
+    .data-table { width:100%; border-collapse:collapse; font-size:.87rem; }
+    .data-table th { text-align:left; padding:.65rem 1rem; background:#f8fafc; font-size:.73rem; text-transform:uppercase; letter-spacing:.05em; color:#64748b; border-bottom:1px solid #e2e8f0; }
+    .data-table td { padding:.75rem 1rem; border-bottom:1px solid #f1f5f9; color:#374151; vertical-align:middle; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:#fafafa; }
+    /* Badges */
+    .badge { display:inline-block; padding:.2rem .65rem; border-radius:99px; font-size:.75rem; font-weight:600; }
+    .badge-active   { background:#dcfce7; color:#15803d; }
+    .badge-pending  { background:#fef9c3; color:#854d0e; }
+    .badge-rented   { background:#dbeafe; color:#1d4ed8; }
+    .badge-new      { background:#ede9fe; color:#7c3aed; }
+    /* Client card */
+    .client-card { border:1.5px solid #e2e8f0; border-radius:10px; padding:1rem 1.25rem; margin-bottom:.75rem; display:flex; justify-content:space-between; align-items:center; }
+    .client-card:hover { border-color:#8b5cf6; }
+    /* Pipeline */
+    .pipeline { display:grid; grid-template-columns:repeat(5,1fr); gap:.75rem; }
+    .pipe-col { background:#f8fafc; border-radius:10px; padding:.75rem; border:1px solid #e2e8f0; }
+    .pipe-col h4 { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#64748b; margin-bottom:.6rem; }
+    .pipe-card { background:#fff; border-radius:8px; padding:.65rem; margin-bottom:.5rem; box-shadow:0 1px 3px rgba(0,0,0,.07); cursor:pointer; border-left:3px solid #8b5cf6; font-size:.83rem; }
+    .pipe-card:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); }
+    .pipe-card .pname { font-weight:700; color:#1e293b; }
+    .pipe-card .pmeta { font-size:.75rem; color:#64748b; margin-top:.15rem; }
+    /* Commission tracker */
+    .comm-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid #f1f5f9; font-size:.88rem; }
+    .comm-row:last-child { border-bottom:none; }
+    /* Toast */
+    #toast { position:fixed; bottom:2rem; right:2rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; opacity:0; transform:translateY(10px); transition:all .3s; z-index:9999; pointer-events:none; }
+    #toast.show { opacity:1; transform:translateY(0); }
+    @media(max-width:768px){ .ap-wrapper{grid-template-columns:1fr;} .ap-sidebar{display:none;} .pipeline{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-logo">✓</span><span>RentVerified</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="listings.html">Listings</a>
+    <a href="landlord-signup.html">Landlord Portal</a>
+  </div>
+</nav>
+
+<!-- LOGIN / SIGNUP -->
+<div id="agent-login" class="login-screen" style="align-items:flex-start;padding:40px 16px;overflow-y:auto;min-height:100vh;">
+  <div class="login-card" style="width:500px;max-width:96vw;margin:auto;">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:2.5rem;margin-bottom:.5rem;">📋</div>
+      <h2 style="font-size:1.5rem;font-weight:800;color:#1e293b;margin-bottom:.3rem;">Listing Agent Portal</h2>
+      <p style="color:#64748b;font-size:.9rem;">RentVerified · Utah Licensed Agents</p>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button id="atab-login" onclick="agentShowTab('login')"
+        style="flex:1;padding:9px;border:2px solid #8b5cf6;background:#f5f3ff;border-radius:8px;font-weight:700;color:#8b5cf6;cursor:pointer;">Sign In</button>
+      <button id="atab-signup" onclick="agentShowTab('signup')"
+        style="flex:1;padding:9px;border:2px solid #e2e8f0;background:#fff;border-radius:8px;font-weight:600;color:#64748b;cursor:pointer;">Join as Agent</button>
+    </div>
+
+    <!-- ── LOGIN PANEL ── -->
+    <div id="apanel-login">
+      <div style="margin-bottom:1rem;">
+        <label style="font-size:.82rem;font-weight:600;color:#374151;display:block;margin-bottom:.4rem;">Email</label>
+        <input type="email" id="aLoginEmail" placeholder="agent@email.com" onkeydown="if(event.key==='Enter')agentLogin()"
+          style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:.5rem;">
+        <label style="font-size:.82rem;font-weight:600;color:#374151;display:block;margin-bottom:.4rem;">Password</label>
+        <input type="password" id="aLoginPw" placeholder="••••••••" onkeydown="if(event.key==='Enter')agentLogin()"
+          style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;">
+      </div>
+      <div id="aLoginErr" style="display:none;color:#dc2626;font-size:.82rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;margin-bottom:.75rem;"></div>
+      <button onclick="agentLogin()"
+        style="width:100%;padding:.75rem;background:#8b5cf6;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.75rem;">
+        Sign In →
+      </button>
+      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#64748b;">No account? <a onclick="agentShowTab('signup')" style="color:#8b5cf6;font-weight:600;cursor:pointer;">Apply as Agent →</a></p>
+      <p style="text-align:center;margin-top:.4rem;font-size:.75rem;color:#94a3b8;">Demo: danielrhart1284@gmail.com / SPMis#1!</p>
+    </div>
+
+    <!-- ── SIGNUP PANEL ── -->
+    <div id="apanel-signup" style="display:none;">
+      <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:9px;padding:11px 14px;margin-bottom:16px;font-size:.82rem;color:#92400e;">
+        <strong>📋 Utah DRE License Required.</strong> Only licensed real estate agents may join as Listing Agents. Your license will be verified before your account is activated.
+      </div>
+
+      <!-- Basic info -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Full Name <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="as-name" placeholder="Jane Smith" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Phone <span style="color:#ef4444;">*</span></label>
+          <input type="tel" id="as-phone" placeholder="(801) 555-0100" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Email <span style="color:#ef4444;">*</span></label>
+        <input type="email" id="as-email" placeholder="jane@brokerage.com" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Brokerage Name <span style="color:#ef4444;">*</span></label>
+        <input type="text" id="as-brokerage" placeholder="e.g. Equity Real Estate" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+      </div>
+
+      <!-- DRE License -->
+      <div style="background:#f5f3ff;border:1.5px solid #8b5cf6;border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="font-weight:700;color:#6d28d9;margin-bottom:10px;">🏛️ Utah Division of Real Estate License</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">DRE License Number <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="as-dre-num" placeholder="e.g. 5501234-SA00" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">License Type <span style="color:#ef4444;">*</span></label>
+            <select id="as-dre-type" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+              <option>Sales Agent</option>
+              <option>Associate Broker</option>
+              <option>Principal Broker</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">License Expiration <span style="color:#ef4444;">*</span></label>
+            <input type="date" id="as-dre-exp" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Sponsoring Broker Name <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="as-broker-name" placeholder="Broker of record" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Upload License Certificate <span style="color:#ef4444;">*</span></label>
+          <input type="file" id="as-dre-file" accept=".pdf,.jpg,.jpeg,.png"
+            style="width:100%;padding:7px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.82rem;background:#fff;"
+            onchange="agentFilePreview(this,'as-dre-fname')">
+          <div id="as-dre-fname" style="font-size:.75rem;color:#10b981;margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <!-- E&O Insurance -->
+      <div style="background:#f0fdf4;border:1.5px solid #10b981;border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="font-weight:700;color:#065f46;margin-bottom:10px;">🛡️ Errors & Omissions (E&O) Insurance <span style="font-weight:400;font-size:.82rem;color:#6b7280;">(required)</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Carrier <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="as-eo-carrier" placeholder="e.g. Rice Insurance" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Policy Number <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="as-eo-policy" placeholder="Policy #" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Coverage Amount <span style="color:#ef4444;">*</span></label>
+            <select id="as-eo-coverage" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+              <option>$100,000</option><option selected>$250,000</option><option>$500,000</option><option>$1,000,000</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Policy Expiration <span style="color:#ef4444;">*</span></label>
+            <input type="date" id="as-eo-exp" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Upload E&O Certificate <span style="color:#ef4444;">*</span></label>
+          <input type="file" id="as-eo-file" accept=".pdf,.jpg,.jpeg,.png"
+            style="width:100%;padding:7px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.82rem;background:#fff;"
+            onchange="agentFilePreview(this,'as-eo-fname')">
+          <div id="as-eo-fname" style="font-size:.75rem;color:#10b981;margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.8rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Password <span style="color:#ef4444;">*</span></label>
+        <input type="password" id="as-pw" placeholder="Create a secure password" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.88rem;">
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:14px;">
+        <input type="checkbox" id="as-certify" style="margin-top:3px;accent-color:#8b5cf6;">
+        <label for="as-certify" style="font-size:.79rem;color:#374151;cursor:pointer;">
+          I certify my Utah DRE license is valid and active, my E&O insurance is current, and all information provided is accurate. I understand that misrepresenting credentials may result in account termination and referral to the Utah Division of Real Estate.
+        </label>
+      </div>
+
+      <div style="background:#eff6ff;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:.8rem;color:#1e40af;">
+        💡 <strong>$99/month</strong> after a 14-day free trial. Your account will be activated within 1–2 business days after credential review.
+      </div>
+
+      <button onclick="agentSignup()"
+        style="width:100%;padding:.75rem;background:#8b5cf6;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">
+        Submit Application →
+      </button>
+      <div id="aSignupErr" style="display:none;color:#dc2626;font-size:.82rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;margin-top:.75rem;"></div>
+      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#64748b;">Already have an account? <a onclick="agentShowTab('login')" style="color:#8b5cf6;font-weight:600;cursor:pointer;">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="agent-dashboard" style="display:none;">
+<div class="ap-wrapper">
+  <aside class="ap-sidebar">
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:.5rem;">
+      <div style="color:#fff;font-weight:700;font-size:.95rem;" id="agentName">Daniel Hart</div>
+      <div style="color:#94a3b8;font-size:.75rem;">Listing Agent · RentVerified Pro</div>
+    </div>
+    <h3>My Work</h3>
+    <a class="active" onclick="showSec('overview',this)">📊 Overview</a>
+    <a onclick="showSec('clients',this)">👥 My Clients</a>
+    <a onclick="showSec('listings',this)">🏠 Listings</a>
+    <a onclick="showSec('pipeline',this)">📈 Applicant Pipeline</a>
+    <a onclick="showSec('commissions',this)">💰 Commissions</a>
+    <h3>Tools</h3>
+    <a href="ad-builder.html">📣 Ad Builder</a>
+    <a href="screening.html">🛡 Tenant Screening</a>
+    <a href="leases.html">📝 Leases</a>
+    <h3>Account</h3>
+    <a onclick="showSec('settings',this)">⚙️ Settings</a>
+    <a onclick="agentLogout()" style="color:#ef4444;">🚪 Sign Out</a>
+  </aside>
+
+  <main class="ap-main">
+
+    <!-- OVERVIEW -->
+    <div id="sec-overview">
+      <!-- Verification pending banner -->
+      <div id="agent-verify-pending" style="display:none;background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:16px 20px;margin-bottom:20px;align-items:center;gap:14px;">
+        <span style="font-size:2rem;">⏳</span>
+        <div>
+          <div style="font-weight:800;color:#92400e;font-size:1rem;">License Verification Pending — Features Limited</div>
+          <div style="font-size:.84rem;color:#92400e;margin-top:3px;">Your Utah DRE license and E&O insurance are under review. Full access is granted within 1–2 business days. You'll receive an email when your account is approved. Questions? Email <strong>support@rentverified.com</strong></div>
+        </div>
+      </div>
+      <div class="page-header">
+        <div><h1>👋 Welcome back, <span id="agentFirstName">Daniel</span></h1><p>Here's your activity summary.</p></div>
+        <button class="btn btn-agent" onclick="showSec('clients',null)">+ Add Client</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="lbl">Active Listings</div><div class="val" id="statListings">0</div></div>
+        <div class="stat-card green"><div class="lbl">Rented This Month</div><div class="val" id="statRented">0</div></div>
+        <div class="stat-card blue"><div class="lbl">Applicants</div><div class="val" id="statApplicants">0</div></div>
+        <div class="stat-card gold"><div class="lbl">Est. Commission</div><div class="val" id="statComm">$0</div></div>
+      </div>
+      <!-- Recent activity -->
+      <div class="panel">
+        <div class="panel-header"><h2>Recent Activity</h2></div>
+        <div class="panel-body" id="activityFeed">
+          <div style="color:#94a3b8;text-align:center;padding:1.5rem;font-size:.88rem;">No activity yet. Add your first client to get started.</div>
+        </div>
+      </div>
+      <!-- My Listings snapshot -->
+      <div class="panel">
+        <div class="panel-header"><h2>Active Listings</h2><button class="btn btn-outline btn-sm" onclick="showSec('listings',null)">View All</button></div>
+        <div class="panel-body" style="padding:0;"><table class="data-table"><thead><tr><th>Property</th><th>Client</th><th>Rent</th><th>Status</th><th>Days Listed</th></tr></thead><tbody id="listingSnap"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div id="sec-clients" style="display:none;">
+      <div class="page-header"><div><h1>👥 My Clients</h1><p>Property owners who have hired you to list their rentals.</p></div></div>
+      <!-- Add Client Form -->
+      <div class="panel">
+        <div class="panel-header"><h2>Add New Client</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Owner Name *</label><input id="cName" placeholder="John Smith"></div>
+            <div class="fg"><label>Email *</label><input id="cEmail" type="email" placeholder="owner@email.com"></div>
+            <div class="fg"><label>Phone</label><input id="cPhone" type="tel" placeholder="(801) 555-0000"></div>
+            <div class="fg"><label>Property Address *</label><input id="cProp" placeholder="123 Main St, City UT"></div>
+            <div class="fg"><label>Monthly Rent ($)</label><input id="cRent" type="number" placeholder="1200"></div>
+            <div class="fg"><label>Commission Type</label>
+              <select id="cCommType">
+                <option value="flat">Flat fee — one month's rent</option>
+                <option value="pct">Percentage — % of annual rent</option>
+                <option value="monthly">Monthly retainer</option>
+              </select>
+            </div>
+            <div class="fg" style="grid-column:1/-1;"><label>Notes</label><textarea id="cNotes" placeholder="Property details, special instructions…"></textarea></div>
+          </div>
+          <button class="btn btn-agent" style="margin-top:1rem;" onclick="addClient()">+ Add Client</button>
+        </div>
+      </div>
+      <!-- Client list -->
+      <div id="clientList"></div>
+    </div>
+
+    <!-- LISTINGS -->
+    <div id="sec-listings" style="display:none;">
+      <div class="page-header"><div><h1>🏠 My Listings</h1><p>All properties you are actively marketing.</p></div>
+        <button class="btn btn-agent" onclick="showSec('clients',null)">+ Add Listing via Client</button>
+      </div>
+      <div class="panel">
+        <div style="overflow-x:auto;"><table class="data-table">
+          <thead><tr><th>Property</th><th>Owner</th><th>Rent</th><th>Status</th><th>Listed</th><th>Views</th><th>Leads</th><th></th></tr></thead>
+          <tbody id="listingTable"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div id="sec-pipeline" style="display:none;">
+      <div class="page-header"><div><h1>📈 Applicant Pipeline</h1><p>Track every prospect from inquiry to move-in.</p></div></div>
+      <div class="pipeline" id="pipelineBoard"></div>
+    </div>
+
+    <!-- COMMISSIONS -->
+    <div id="sec-commissions" style="display:none;">
+      <div class="page-header"><div><h1>💰 Commission Tracker</h1><p>Track your earnings from each placement.</p></div></div>
+      <div class="panel">
+        <div class="panel-header"><h2>Log a Commission</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Property</label>
+              <select id="commProp"><option value="">— Select Property —</option></select>
+            </div>
+            <div class="fg"><label>Amount Earned ($)</label><input id="commAmt" type="number" placeholder="1200"></div>
+            <div class="fg"><label>Date Received</label><input id="commDate" type="date"></div>
+            <div class="fg"><label>Notes</label><input id="commNote" placeholder="e.g. One month's rent — John Smith"></div>
+          </div>
+          <button class="btn btn-success" style="margin-top:1rem;" onclick="logCommission()">Log Commission</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Commission History</h2>
+          <div style="font-size:.95rem;font-weight:700;color:#059669;">Total: <span id="commTotal">$0</span></div>
+        </div>
+        <div class="panel-body" id="commList"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="sec-settings" style="display:none;">
+      <div class="page-header"><div><h1>⚙️ Agent Settings</h1></div></div>
+      <div class="panel">
+        <div class="panel-header"><h2>Your Profile</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Full Name</label><input id="sName" value="Daniel Hart"></div>
+            <div class="fg"><label>Email</label><input id="sEmail" type="email" value="danielrhart1284@gmail.com"></div>
+            <div class="fg"><label>Phone</label><input id="sPhone" placeholder="(801) 555-0000"></div>
+            <div class="fg"><label>License #</label><input id="sLic" placeholder="UT-RE-12345"></div>
+            <div class="fg"><label>Brokerage</label><input id="sBrok" placeholder="e.g. Self / KW / Century 21"></div>
+            <div class="fg"><label>Service Areas (zip codes)</label><input id="sZips" placeholder="84058, 84601, 84003"></div>
+          </div>
+          <button class="btn btn-agent" style="margin-top:1rem;" onclick="toast('✅ Profile saved!')">Save Profile</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Subscription</h2></div>
+        <div class="panel-body">
+          <div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:1.25rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <div style="font-weight:700;color:#7c3aed;font-size:1rem;">📋 Agent Pro Plan</div>
+              <div style="font-size:.85rem;color:#64748b;margin-top:.25rem;">$99/month · Unlimited clients & listings · AI tenant Q&A · Verified badges</div>
+            </div>
+            <span style="background:#dcfce7;color:#15803d;border-radius:99px;padding:.3rem .9rem;font-size:.82rem;font-weight:700;">✅ Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────
+let clients = [], commissions = [];
+
+const PIPELINE_STAGES = ['New Inquiry','Showing Scheduled','Application Sent','Screening','Approved / Denied'];
+
+function loadData() {
+  try { clients = JSON.parse(localStorage.getItem('rv_agent_clients')||'[]'); } catch(e){ clients=[]; }
+  try { commissions = JSON.parse(localStorage.getItem('rv_agent_comm')||'[]'); } catch(e){ commissions=[]; }
+}
+function saveClients() { localStorage.setItem('rv_agent_clients', JSON.stringify(clients)); }
+function saveComm()    { localStorage.setItem('rv_agent_comm', JSON.stringify(commissions)); }
+function uid() { return 'AG-'+Date.now().toString(36).toUpperCase(); }
+
+function loadSample() {
+  if (clients.length) return;
+  clients = [
+    { id:'AG-DEMO1', name:'Robert & Linda Mays', email:'rmays@email.com', phone:'(801)555-0101', prop:'245 N 500 W, Provo UT', rent:1450, commType:'flat', notes:'Great landlords, flexible on move-in date', status:'active', listed:'2026-02-10', views:128, leads:7 },
+    { id:'AG-DEMO2', name:'Tom Keller', email:'tom@email.com', phone:'(801)555-0202', prop:'890 Center St #3, Orem UT', rent:1100, commType:'flat', notes:'Studio unit, prefers single occupant', status:'active', listed:'2026-02-28', views:54, leads:3 },
+    { id:'AG-DEMO3', name:'Sarah Park', email:'spark@email.com', phone:'(801)555-0303', prop:'12 Elm Ave, Lehi UT', rent:1800, commType:'pct', notes:'3 bed/2 bath, garage included', status:'rented', listed:'2026-01-05', views:210, leads:18 },
+  ];
+  commissions = [
+    { id:'CM-1', prop:'12 Elm Ave, Lehi UT', amount:1800, date:'2026-02-01', note:"One month's rent — Sarah Park" },
+  ];
+  saveClients(); saveComm();
+}
+
+// ── AUTH ─────────────────────────────────────────────
+const AGENT_ACCOUNTS = [
+  { email:'danielrhart1284@gmail.com', password:'SPMis#1!', name:'Daniel Hart' }
+];
+
+// Tab toggle
+function agentShowTab(tab) {
+  document.getElementById('apanel-login').style.display  = tab === 'login'  ? 'block' : 'none';
+  document.getElementById('apanel-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('atab-login').style.borderColor  = tab === 'login'  ? '#8b5cf6' : '#e2e8f0';
+  document.getElementById('atab-login').style.background   = tab === 'login'  ? '#f5f3ff' : '#fff';
+  document.getElementById('atab-login').style.color        = tab === 'login'  ? '#8b5cf6' : '#64748b';
+  document.getElementById('atab-signup').style.borderColor = tab === 'signup' ? '#8b5cf6' : '#e2e8f0';
+  document.getElementById('atab-signup').style.background  = tab === 'signup' ? '#f5f3ff' : '#fff';
+  document.getElementById('atab-signup').style.color       = tab === 'signup' ? '#8b5cf6' : '#64748b';
+}
+
+function agentFilePreview(input, targetId) {
+  const el = document.getElementById(targetId);
+  if (el && input.files && input.files[0]) el.textContent = '✅ ' + input.files[0].name;
+}
+
+function agentLaunchDashboard(acct) {
+  document.getElementById('agentName').textContent = acct.name;
+  document.getElementById('agentFirstName').textContent = acct.name.split(' ')[0];
+  document.getElementById('agent-login').style.display = 'none';
+  document.getElementById('agent-dashboard').style.display = 'block';
+  localStorage.setItem('rv_doc_role', 'agent');
+  // Verification banner
+  const isApproved = !acct.verificationStatus || acct.verificationStatus === 'approved';
+  const pendingBanner = document.getElementById('agent-verify-pending');
+  if (pendingBanner) pendingBanner.style.display = isApproved ? 'none' : 'flex';
+}
+
+function agentLogin() {
+  const email = document.getElementById('aLoginEmail').value.trim().toLowerCase();
+  const pw    = document.getElementById('aLoginPw').value;
+  const errEl = document.getElementById('aLoginErr');
+  let acct  = AGENT_ACCOUNTS.find(a=>a.email.toLowerCase()===email && a.password===pw);
+  // Also check localStorage signups
+  if (!acct) {
+    const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
+    acct = stored.find(a=>a.email.toLowerCase()===email && a.password===pw);
+  }
+  if(!acct){ errEl.textContent='⚠️ Incorrect credentials.'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  agentLaunchDashboard(acct);
+}
+
+function agentSignup() {
+  const name      = document.getElementById('as-name').value.trim();
+  const email     = document.getElementById('as-email').value.trim();
+  const phone     = document.getElementById('as-phone').value.trim();
+  const brokerage = document.getElementById('as-brokerage').value.trim();
+  const dreNum    = document.getElementById('as-dre-num').value.trim();
+  const dreType   = document.getElementById('as-dre-type').value;
+  const dreExp    = document.getElementById('as-dre-exp').value;
+  const brokerName= document.getElementById('as-broker-name').value.trim();
+  const dreFile   = document.getElementById('as-dre-file').files[0];
+  const eoCarrier = document.getElementById('as-eo-carrier').value.trim();
+  const eoPolicy  = document.getElementById('as-eo-policy').value.trim();
+  const eoCoverage= document.getElementById('as-eo-coverage').value;
+  const eoExp     = document.getElementById('as-eo-exp').value;
+  const eoFile    = document.getElementById('as-eo-file').files[0];
+  const pw        = document.getElementById('as-pw').value;
+  const certify   = document.getElementById('as-certify').checked;
+  const errEl     = document.getElementById('aSignupErr');
+
+  if (!name || !email || !pw || !brokerage || !phone) {
+    errEl.textContent = '⚠️ Please fill in all personal information fields.'; errEl.style.display='block'; return;
+  }
+  if (!dreNum || !dreExp || !dreFile || !brokerName) {
+    errEl.textContent = '⚠️ Utah DRE license number, expiration, sponsoring broker, and certificate are required.'; errEl.style.display='block'; return;
+  }
+  if (!eoCarrier || !eoPolicy || !eoExp || !eoFile) {
+    errEl.textContent = '⚠️ E&O insurance carrier, policy number, expiration, and certificate are required.'; errEl.style.display='block'; return;
+  }
+  if (!certify) {
+    errEl.textContent = '⚠️ You must certify your credentials are accurate to continue.'; errEl.style.display='block'; return;
+  }
+  errEl.style.display = 'none';
+  const acct = {
+    name, email, phone, brokerage, password: pw,
+    verificationStatus: 'pending',
+    joined: new Date().toISOString().split('T')[0],
+    credentials: {
+      dre: { number: dreNum, type: dreType, expires: dreExp, broker: brokerName, fileName: dreFile.name },
+      eo:  { carrier: eoCarrier, policy: eoPolicy, coverage: eoCoverage, expires: eoExp, fileName: eoFile.name },
+      submittedAt: new Date().toISOString()
+    }
+  };
+  const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
+  stored.push(acct);
+  localStorage.setItem('rv_agent_signups', JSON.stringify(stored));
+  agentLaunchDashboard(acct);
+}
+
+function agentLogout() {
+  document.getElementById('agent-dashboard').style.display='none';
+  document.getElementById('agent-login').style.display='flex';
+  localStorage.removeItem('rv_doc_role');
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Enter' && document.getElementById('apanel-login').style.display!=='none') agentLogin(); });
+
+// ── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{ loadData(); loadSample(); renderAll(); setDefaultDate(); });
+
+function setDefaultDate() {
+  const d = document.getElementById('commDate');
+  if(d) d.valueAsDate = new Date();
+}
+
+function renderAll() {
+  renderStats();
+  renderClientList();
+  renderListingTable();
+  renderListingSnap();
+  renderPipeline();
+  renderCommissions();
+  renderActivityFeed();
+  populateCommPropSelect();
+}
+
+// ── STATS ─────────────────────────────────────────────
+function renderStats() {
+  document.getElementById('statListings').textContent = clients.filter(c=>c.status==='active').length;
+  document.getElementById('statRented').textContent   = clients.filter(c=>c.status==='rented').length;
+  document.getElementById('statApplicants').textContent = clients.reduce((s,c)=>s+(c.leads||0),0);
+  const totalComm = commissions.reduce((s,c)=>s+c.amount,0);
+  document.getElementById('statComm').textContent = '$'+totalComm.toLocaleString();
+}
+
+// ── ACTIVITY FEED ─────────────────────────────────────
+function renderActivityFeed() {
+  const el = document.getElementById('activityFeed');
+  const items = [
+    { icon:'👤', text:'New applicant inquiry — 245 N 500 W, Provo', time:'2 hours ago' },
+    { icon:'📋', text:'Lease signed — 12 Elm Ave, Lehi UT', time:'3 days ago' },
+    { icon:'👁', text:'Listing viewed 12 times today — 890 Center St #3', time:'Today' },
+    { icon:'🤖', text:'AI answered 3 tenant questions overnight', time:'Last night' },
+  ];
+  el.innerHTML = items.map(i=>`
+    <div style="display:flex;gap:.75rem;align-items:flex-start;padding:.65rem 0;border-bottom:1px solid #f1f5f9;">
+      <div style="font-size:1.2rem;">${i.icon}</div>
+      <div style="flex:1;font-size:.88rem;color:#374151;">${i.text}</div>
+      <div style="font-size:.75rem;color:#94a3b8;white-space:nowrap;">${i.time}</div>
+    </div>`).join('');
+}
+
+// ── CLIENTS ───────────────────────────────────────────
+function addClient() {
+  const name = document.getElementById('cName').value.trim();
+  const prop = document.getElementById('cProp').value.trim();
+  if(!name||!prop) return toast('⚠️ Owner name and property are required.');
+  clients.unshift({
+    id: uid(),
+    name, prop,
+    email:    document.getElementById('cEmail').value,
+    phone:    document.getElementById('cPhone').value,
+    rent:     parseFloat(document.getElementById('cRent').value)||0,
+    commType: document.getElementById('cCommType').value,
+    notes:    document.getElementById('cNotes').value,
+    status: 'active',
+    listed: new Date().toISOString().slice(0,10),
+    views: 0, leads: 0,
+  });
+  saveClients(); renderAll();
+  ['cName','cEmail','cPhone','cProp','cRent','cNotes'].forEach(id=>document.getElementById(id).value='');
+  toast(`✅ Client ${name} added!`);
+}
+
+function renderClientList() {
+  const el = document.getElementById('clientList');
+  el.innerHTML = clients.length ? clients.map(c=>`
+    <div class="client-card">
+      <div>
+        <div style="font-weight:700;color:#1e293b;">${c.name}</div>
+        <div style="font-size:.82rem;color:#64748b;">🏠 ${c.prop}</div>
+        ${c.notes?`<div style="font-size:.78rem;color:#94a3b8;margin-top:.2rem;">${c.notes}</div>`:''}
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <span class="badge ${c.status==='rented'?'badge-rented':c.status==='active'?'badge-active':'badge-pending'}">${c.status}</span>
+        <div style="font-size:.82rem;color:#374151;margin-top:.35rem;font-weight:600;">$${(c.rent||0).toLocaleString()}/mo</div>
+        <div style="font-size:.75rem;color:#94a3b8;">${c.phone}</div>
+      </div>
+    </div>`).join('')
+  : '<div style="text-align:center;padding:2.5rem;color:#94a3b8;"><div style="font-size:2rem;">👥</div><p>No clients yet. Add your first client above.</p></div>';
+}
+
+// ── LISTINGS ──────────────────────────────────────────
+function renderListingTable() {
+  const tbody = document.getElementById('listingTable');
+  tbody.innerHTML = clients.length ? clients.map(c=>{
+    const days = Math.ceil((new Date()-new Date(c.listed))/86400000);
+    return `<tr>
+      <td><strong>${c.prop}</strong></td>
+      <td style="font-size:.82rem;">${c.name}</td>
+      <td>$${(c.rent||0).toLocaleString()}/mo</td>
+      <td><span class="badge ${c.status==='rented'?'badge-rented':'badge-active'}">${c.status}</span></td>
+      <td>${c.listed}</td>
+      <td>${c.views||0}</td>
+      <td>${c.leads||0}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="toast('Opening listing…')">View</button></td>
+    </tr>`;
+  }).join('')
+  : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#94a3b8;">No listings yet.</td></tr>';
+}
+
+function renderListingSnap() {
+  const tbody = document.getElementById('listingSnap');
+  const active = clients.filter(c=>c.status==='active').slice(0,5);
+  tbody.innerHTML = active.length ? active.map(c=>{
+    const days = Math.ceil((new Date()-new Date(c.listed))/86400000);
+    return `<tr>
+      <td><strong>${c.prop}</strong></td>
+      <td style="font-size:.82rem;">${c.name}</td>
+      <td>$${(c.rent||0).toLocaleString()}</td>
+      <td><span class="badge badge-active">Active</span></td>
+      <td>${days} days</td>
+    </tr>`;
+  }).join('')
+  : '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:#94a3b8;">No active listings.</td></tr>';
+}
+
+// ── PIPELINE ──────────────────────────────────────────
+const SAMPLE_LEADS = [
+  { name:'Alex Torres',    prop:'245 N 500 W, Provo',    stage:0 },
+  { name:'Maria Chen',     prop:'245 N 500 W, Provo',    stage:1 },
+  { name:'James Williams', prop:'890 Center St #3, Orem', stage:2 },
+  { name:'Priya Patel',    prop:'890 Center St #3, Orem', stage:3 },
+  { name:'Carlos Ruiz',    prop:'12 Elm Ave, Lehi',       stage:4 },
+];
+
+function renderPipeline() {
+  const board = document.getElementById('pipelineBoard');
+  board.innerHTML = PIPELINE_STAGES.map((stage, i)=>{
+    const leads = SAMPLE_LEADS.filter(l=>l.stage===i);
+    return `<div class="pipe-col">
+      <h4>${stage} <span style="float:right;">${leads.length}</span></h4>
+      ${leads.map(l=>`<div class="pipe-card"><div class="pname">${l.name}</div><div class="pmeta">${l.prop}</div></div>`).join('')}
+      ${!leads.length?`<div style="font-size:.78rem;color:#cbd5e1;text-align:center;padding:.5rem 0;">Empty</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── COMMISSIONS ───────────────────────────────────────
+function populateCommPropSelect() {
+  const sel = document.getElementById('commProp');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">— Select Property —</option>' +
+    clients.map(c=>`<option value="${c.prop}">${c.prop} (${c.name})</option>`).join('');
+}
+
+function logCommission() {
+  const prop = document.getElementById('commProp').value;
+  const amt  = parseFloat(document.getElementById('commAmt').value);
+  const date = document.getElementById('commDate').value;
+  if(!prop||!amt||!date) return toast('⚠️ Fill in all commission fields.');
+  commissions.unshift({ id:uid(), prop, amount:amt, date, note:document.getElementById('commNote').value });
+  saveComm(); renderCommissions(); renderStats();
+  ['commAmt','commNote'].forEach(id=>document.getElementById(id).value='');
+  toast('💰 Commission logged!');
+}
+
+function renderCommissions() {
+  const total = commissions.reduce((s,c)=>s+c.amount,0);
+  const el = document.getElementById('commTotal');
+  if(el) el.textContent = '$'+total.toLocaleString();
+  const list = document.getElementById('commList');
+  if(!list) return;
+  list.innerHTML = commissions.length ? commissions.map(c=>`
+    <div class="comm-row">
+      <div><div style="font-weight:600;font-size:.88rem;">${c.prop}</div>${c.note?`<div style="font-size:.78rem;color:#64748b;">${c.note}</div>`:''}</div>
+      <div style="text-align:right;"><div style="font-weight:700;color:#059669;">+$${c.amount.toLocaleString()}</div><div style="font-size:.75rem;color:#94a3b8;">${c.date}</div></div>
+    </div>`).join('')
+  : '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:.88rem;">No commissions logged yet.</div>';
+}
+
+// ── SECTION NAV ───────────────────────────────────────
+function showSec(name, el) {
+  ['overview','clients','listings','pipeline','commissions','settings'].forEach(s=>{
+    const sec = document.getElementById('sec-'+s);
+    if(sec) sec.style.display = s===name?'block':'none';
+  });
+  document.querySelectorAll('.ap-sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toast(msg) {
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document Center – RentVerified</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background: #f3f4f6; }
+  .doc-wrapper {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 64px);
+    padding-top: 64px;
+  }
+  /* Sidebar */
+  .doc-sidebar {
+    background: #1e293b; color: #cbd5e1;
+    padding: 1.5rem 0;
+    position: sticky; top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .doc-sidebar h3 { font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.4rem 1.5rem; margin:.9rem 0 .2rem; }
+  .doc-sidebar a  { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.88rem; font-weight:500; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
+  .doc-sidebar a:hover, .doc-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#3b82f6; }
+
+  /* Main */
+  .doc-main { padding: 2rem; max-width: 1100px; }
+  .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+  .page-header h1 { font-size:1.5rem; color:#1e293b; }
+  .page-header p  { color:#64748b; font-size:.88rem; margin-top:.2rem; }
+
+  /* Sections */
+  .doc-section { display:none; }
+  .doc-section.active { display:block; }
+
+  /* Cards */
+  .panel { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); margin-bottom:1.5rem; overflow:hidden; }
+  .panel-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-bottom:1px solid #f1f5f9; }
+  .panel-header h2 { font-size:.95rem; color:#1e293b; font-weight:700; }
+  .panel-body { padding:1.25rem 1.5rem; }
+
+  /* Upload Zone */
+  .drop-zone {
+    border: 2px dashed #cbd5e1; border-radius:10px;
+    padding:2.5rem 1.5rem; text-align:center;
+    color:#94a3b8; cursor:pointer; transition:all .2s;
+    background:#fafafa;
+  }
+  .drop-zone:hover, .drop-zone.dragover { border-color:#3b82f6; background:#eff6ff; color:#3b82f6; }
+  .drop-zone .dz-icon { font-size:2.5rem; margin-bottom:.75rem; }
+  .drop-zone .dz-title { font-size:.95rem; font-weight:700; color:#374151; margin-bottom:.3rem; }
+  .drop-zone .dz-sub { font-size:.78rem; color:#94a3b8; }
+  .drop-zone input[type="file"] { display:none; }
+
+  /* File list */
+  .file-list { margin-top:1rem; }
+  .file-item {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.65rem .9rem; background:#f8fafc; border-radius:8px;
+    margin-bottom:.5rem; border:1px solid #e2e8f0;
+  }
+  .file-item .fi-icon { font-size:1.4rem; flex-shrink:0; }
+  .file-item .fi-name { font-size:.88rem; font-weight:600; color:#1e293b; flex:1; }
+  .file-item .fi-meta { font-size:.75rem; color:#64748b; }
+  .file-item .fi-status { font-size:.72rem; font-weight:700; padding:.15rem .5rem; border-radius:99px; }
+  .status-pending  { background:#fef9c3; color:#854d0e; }
+  .status-approved { background:#dcfce7; color:#15803d; }
+  .status-rejected { background:#fee2e2; color:#b91c1c; }
+  .fi-del { background:none; border:none; cursor:pointer; color:#94a3b8; font-size:1rem; padding:.2rem; margin-left:.25rem; }
+  .fi-del:hover { color:#ef4444; }
+
+  /* Photo Grid */
+  .photo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-top:1rem; }
+  .photo-card { border-radius:10px; overflow:hidden; position:relative; background:#e2e8f0; aspect-ratio:4/3; }
+  .photo-card img { width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-card .ph-overlay {
+    position:absolute; inset:0; background:rgba(0,0,0,.55);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    opacity:0; transition:opacity .2s;
+  }
+  .photo-card:hover .ph-overlay { opacity:1; }
+  .photo-card .ph-label { color:#fff; font-size:.75rem; font-weight:700; margin-top:.3rem; text-align:center; padding:0 .5rem; }
+  .ph-del { background:#ef4444; color:#fff; border:none; border-radius:6px; padding:.3rem .75rem; cursor:pointer; font-size:.75rem; font-weight:700; }
+  .ph-add { border:2px dashed #cbd5e1; border-radius:10px; aspect-ratio:4/3; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; background:#f8fafc; }
+  .ph-add:hover { border-color:#3b82f6; background:#eff6ff; }
+  .ph-add span { font-size:2rem; margin-bottom:.25rem; }
+  .ph-add p { font-size:.75rem; color:#94a3b8; font-weight:600; }
+
+  /* Application card */
+  .app-card {
+    border:1.5px solid #e2e8f0; border-radius:10px; padding:1rem 1.25rem;
+    margin-bottom:.75rem; display:flex; align-items:center; gap:1rem;
+    transition:border-color .15s;
+  }
+  .app-card:hover { border-color:#3b82f6; }
+  .app-card .app-avatar { width:40px; height:40px; border-radius:50%; background:#dbeafe; display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:800; color:#1d4ed8; flex-shrink:0; }
+  .app-card .app-name { font-weight:700; font-size:.93rem; color:#1e293b; }
+  .app-card .app-meta { font-size:.78rem; color:#64748b; margin-top:.15rem; }
+  .app-card .app-score { font-size:1.1rem; font-weight:900; margin-left:auto; }
+  .score-hi { color:#10b981; }
+  .score-mid { color:#f59e0b; }
+  .score-lo { color:#ef4444; }
+
+  /* Share dialog */
+  .share-box { background:#eff6ff; border:1.5px solid #3b82f6; border-radius:10px; padding:1rem; margin-top:.75rem; }
+  .share-box h4 { font-size:.88rem; font-weight:700; color:#1e40af; margin-bottom:.5rem; }
+  .share-link { display:flex; gap:.5rem; }
+  .share-link input { flex:1; padding:.5rem .75rem; border:1.5px solid #bfdbfe; border-radius:7px; font-size:.82rem; background:#fff; color:#374151; }
+  .share-link button { padding:.5rem 1rem; background:#1a56db; color:#fff; border:none; border-radius:7px; font-weight:700; cursor:pointer; font-size:.82rem; }
+
+  /* Form elements */
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .fg { display:flex; flex-direction:column; gap:.4rem; }
+  .fg label { font-size:.82rem; font-weight:600; color:#374151; }
+  .fg input, .fg select, .fg textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.55rem .8rem; font-size:.9rem; color:#1e293b; outline:none; transition:border .15s; }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:#3b82f6; }
+  .fg textarea { resize:vertical; min-height:80px; }
+
+  /* Table */
+  .data-table { width:100%; border-collapse:collapse; font-size:.87rem; }
+  .data-table th { text-align:left; padding:.6rem 1rem; background:#f8fafc; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:#64748b; border-bottom:1px solid #e2e8f0; }
+  .data-table td { padding:.7rem 1rem; border-bottom:1px solid #f1f5f9; color:#374151; vertical-align:middle; }
+  .data-table tr:hover td { background:#fafafa; }
+
+  /* Badges */
+  .badge { display:inline-block; padding:.18rem .6rem; border-radius:99px; font-size:.72rem; font-weight:700; }
+  .badge-blue   { background:#dbeafe; color:#1d4ed8; }
+  .badge-green  { background:#dcfce7; color:#15803d; }
+  .badge-yellow { background:#fef9c3; color:#854d0e; }
+  .badge-red    { background:#fee2e2; color:#b91c1c; }
+  .badge-gray   { background:#f1f5f9; color:#475569; }
+  .badge-purple { background:#ede9fe; color:#6d28d9; }
+
+  /* Buttons */
+  .btn { padding:.5rem 1rem; border-radius:8px; border:none; cursor:pointer; font-size:.85rem; font-weight:600; transition:all .15s; }
+  .btn-primary { background:#1a56db; color:#fff; }
+  .btn-primary:hover { background:#1e40af; }
+  .btn-success { background:#10b981; color:#fff; }
+  .btn-success:hover { background:#059669; }
+  .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
+  .btn-outline:hover { border-color:#94a3b8; }
+  .btn-sm { padding:.3rem .7rem; font-size:.78rem; }
+  .btn-purple { background:#8b5cf6; color:#fff; }
+  .btn-purple:hover { background:#7c3aed; }
+
+  /* AI Bot bubble */
+  .ai-bubble {
+    background: linear-gradient(135deg,#1e293b 0%,#1a56db 100%);
+    color:#fff; border-radius:12px; padding:1rem 1.25rem;
+    font-size:.88rem; line-height:1.6; margin-bottom:1rem;
+    position:relative;
+  }
+  .ai-bubble::before { content:'🤖 RentVerified AI'; font-size:.72rem; font-weight:700; color:#93c5fd; display:block; margin-bottom:.4rem; }
+
+  /* Stats */
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+  .stat-card { background:#fff; border-radius:10px; padding:1rem; box-shadow:0 1px 3px rgba(0,0,0,.07); border-left:4px solid #3b82f6; }
+  .stat-card .lbl { font-size:.7rem; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+  .stat-card .val { font-size:1.75rem; font-weight:800; color:#1e293b; }
+
+  /* Notice */
+  .notice { display:flex; gap:.75rem; padding:.75rem 1rem; border-radius:8px; font-size:.83rem; margin-bottom:1rem; align-items:flex-start; }
+  .notice-yellow { background:#fef9c3; border:1px solid #fde047; color:#713f12; }
+  .notice-blue   { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+  .notice-green  { background:#f0fdf4; border:1px solid #86efac; color:#14532d; }
+
+  /* Section tabs (for subsections) */
+  .sub-tabs { display:flex; gap:.5rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+  .sub-tab { padding:.45rem 1rem; border-radius:8px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:.83rem; font-weight:600; cursor:pointer; transition:all .15s; }
+  .sub-tab.active { background:#eff6ff; border-color:#3b82f6; color:#1d4ed8; }
+
+  /* Lease viewer */
+  .lease-preview {
+    background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;
+    padding:1.25rem; font-size:.85rem; line-height:1.7; color:#374151;
+    max-height:320px; overflow-y:auto;
+  }
+  .lease-preview h3 { text-align:center; font-size:1rem; margin-bottom:.75rem; }
+  .lease-preview .clause { margin-bottom:.75rem; }
+  .lease-preview .clause strong { display:block; margin-bottom:.2rem; }
+
+  /* Toast */
+  #toast { position:fixed; bottom:2rem; right:2rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; opacity:0; transform:translateY(10px); transition:all .3s; z-index:9999; pointer-events:none; }
+  #toast.show { opacity:1; transform:translateY(0); }
+
+  @media(max-width:768px){ .doc-wrapper{grid-template-columns:1fr;} .doc-sidebar{display:none;} .stats-row{grid-template-columns:1fr 1fr;} .form-row{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-logo">✓</span><span>RentVerified</span></div>
+  <div class="nav-links">
+    <a href="landlord-signup.html">← Dashboard</a>
+    <a href="screening.html">Screening</a>
+    <a href="leases.html">Leases</a>
+    <a href="index.html">Home</a>
+  </div>
+</nav>
+
+<div class="doc-wrapper">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="doc-sidebar">
+    <h3>Documents</h3>
+    <a class="active" onclick="showSec('overview',this)">📊 Overview</a>
+    <a onclick="showSec('credentials',this)">🔒 Credentials & Licenses</a>
+    <a onclick="showSec('ownership',this)">🏠 Property Ownership</a>
+    <a onclick="showSec('agreements',this)">📋 Management Agreements</a>
+    <a onclick="showSec('photos',this)">📷 Property Photos</a>
+    <a onclick="showSec('applications',this)">📝 Applications</a>
+    <a onclick="showSec('leases',this)">📄 Leases</a>
+    <h3>Manage</h3>
+    <a href="landlord-signup.html">🏢 Dashboard</a>
+    <a href="maintenance.html">🔧 Maintenance</a>
+    <a href="accounting.html">📊 Accounting</a>
+    <a href="screening.html">🛡 Screening</a>
+    <a href="leases.html">📝 Leases</a>
+    <a href="ad-builder.html">📣 Ad Builder</a>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="doc-main">
+
+    <!-- ══════════ OVERVIEW ══════════ -->
+    <div class="doc-section active" id="sec-overview">
+      <div class="page-header">
+        <div><h1>📁 Document Center</h1><p>All files, credentials, photos, applications, and leases in one place.</p></div>
+        <button class="btn btn-primary" onclick="showSec('applications',null)">+ Share Application</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card" style="border-left-color:#10b981;">
+          <div class="lbl">Credentials on File</div>
+          <div class="val" id="ov-creds">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color:#3b82f6;">
+          <div class="lbl">Property Photos</div>
+          <div class="val" id="ov-photos">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color:#8b5cf6;">
+          <div class="lbl">Applications</div>
+          <div class="val" id="ov-apps">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color:#f59e0b;">
+          <div class="lbl">Active Leases</div>
+          <div class="val" id="ov-leases">0</div>
+        </div>
+      </div>
+
+      <div class="ai-bubble">
+        As your AI property manager, I monitor all document expirations and missing requirements. Here's what needs attention:
+        <ul style="margin:.5rem 0 0 1rem;line-height:2;">
+          <li>📋 <strong>2 credentials expire within 60 days</strong> — renew to keep your account active.</li>
+          <li>🏠 <strong>No management agreement on file</strong> for 119 E 600 S — upload a signed PM authorization.</li>
+          <li>📝 <strong>1 prospective tenant</strong> (Marcus Thompson) has not yet submitted an application — I can send them one automatically.</li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>📂 Recent Document Activity</h2></div>
+        <div class="panel-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Document</th><th>Category</th><th>Property</th><th>Uploaded</th><th>Status</th><th></th></tr></thead>
+            <tbody id="activity-table">
+              <tr><td><strong>Contractor License – Hart Handyman</strong></td><td><span class="badge badge-blue">Credential</span></td><td>All Properties</td><td>2026-03-04</td><td><span class="badge badge-yellow">Pending</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening document…')">View</button></td></tr>
+              <tr><td><strong>Certificate of Insurance – COI</strong></td><td><span class="badge badge-blue">Credential</span></td><td>All Properties</td><td>2026-03-04</td><td><span class="badge badge-yellow">Pending</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening document…')">View</button></td></tr>
+              <tr><td><strong>Front exterior – 119 E 600 S</strong></td><td><span class="badge badge-purple">Photo</span></td><td>119 E 600 S #119</td><td>2026-03-01</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening photo…')">View</button></td></tr>
+              <tr><td><strong>Lease – Jane Doe – Unit 119</strong></td><td><span class="badge badge-yellow">Lease</span></td><td>119 E 600 S #119</td><td>2026-02-15</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening lease…')">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /overview -->
+
+    <!-- ══════════ CREDENTIALS ══════════ -->
+    <div class="doc-section" id="sec-credentials">
+      <div class="page-header">
+        <div><h1>🔒 Credentials & Licenses</h1><p id="cred-subtitle">Upload documents required for your account type.</p></div>
+      </div>
+
+      <!-- Role selector / indicator -->
+      <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div style="font-size:.82rem;font-weight:700;color:#374151;">Viewing requirements for:</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;" id="role-selector-btns">
+          <button class="role-btn" data-role="landlord"    onclick="setRole('landlord',this)"    style="padding:.4rem 1rem;border-radius:8px;border:2px solid #e2e8f0;font-size:.82rem;font-weight:700;cursor:pointer;background:#fff;color:#64748b;">🏢 Landlord</button>
+          <button class="role-btn" data-role="pm"          onclick="setRole('pm',this)"          style="padding:.4rem 1rem;border-radius:8px;border:2px solid #e2e8f0;font-size:.82rem;font-weight:700;cursor:pointer;background:#fff;color:#64748b;">🏙️ Property Manager</button>
+          <button class="role-btn" data-role="agent"       onclick="setRole('agent',this)"       style="padding:.4rem 1rem;border-radius:8px;border:2px solid #e2e8f0;font-size:.82rem;font-weight:700;cursor:pointer;background:#fff;color:#64748b;">📋 Listing Agent</button>
+          <button class="role-btn" data-role="vendor"      onclick="setRole('vendor',this)"      style="padding:.4rem 1rem;border-radius:8px;border:2px solid #e2e8f0;font-size:.82rem;font-weight:700;cursor:pointer;background:#fff;color:#64748b;">🔧 Contractor / Vendor</button>
+        </div>
+      </div>
+
+      <!-- Role-specific requirement summary banner -->
+      <div id="role-req-banner" style="border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:none;">
+        <div style="font-weight:700;font-size:.95rem;margin-bottom:.6rem;" id="role-req-title"></div>
+        <div id="role-req-list" style="font-size:.85rem;line-height:2;"></div>
+      </div>
+
+      <!-- Dynamic credential tabs — shown/hidden per role -->
+      <div class="sub-tabs" id="cred-tabs-row" style="display:none;"></div>
+
+      <!-- ── GOV ID (all roles) ─────────────────────── -->
+      <div id="cred-govid" style="display:none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>🪪 Government-Issued ID</h2>
+            <span style="font-size:.78rem;background:#dcfce7;color:#15803d;padding:2px 10px;border-radius:99px;font-weight:700;">✓ Required for all roles</span>
+          </div>
+          <div class="panel-body">
+            <div class="notice notice-blue">🔐 <div>Your ID is encrypted using AES-256 and stored securely. Only accessed by RentVerified compliance staff for identity verification. Never shared with tenants or third parties.</div></div>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>ID Type</label>
+                <select id="cr-id-type"><option>Driver's License</option><option>State ID</option><option>Passport</option><option>Military ID</option></select>
+              </div>
+              <div class="fg"><label>Expiration Date</label><input type="date" id="cr-id-exp"></div>
+            </div>
+            <div class="drop-zone" id="dz-govid" onclick="document.getElementById('govid-file-input').click()" ondragover="dzOver(event,'dz-govid')" ondragleave="dzLeave('dz-govid')" ondrop="dzDrop(event,'dz-govid','govid-files')">
+              <div class="dz-icon">🪪</div>
+              <div class="dz-title">Drop ID front (and back for driver's license) here</div>
+              <div class="dz-sub">JPG, PNG, or PDF · Max 10 MB</div>
+            </div>
+            <input type="file" id="govid-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'govid-files')">
+            <div class="file-list" id="govid-files"></div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveCredential('Government ID')">Upload ID</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROPERTY OWNERSHIP (landlord) ─────────── -->
+      <div id="cred-ownership-req" style="display:none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>🏠 Proof of Property Ownership</h2>
+            <span style="font-size:.78rem;background:#dcfce7;color:#15803d;padding:2px 10px;border-radius:99px;font-weight:700;">✓ Required — Landlords</span>
+          </div>
+          <div class="panel-body">
+            <p style="font-size:.85rem;color:#64748b;margin-bottom:1rem;">Upload one ownership document per property you intend to list. Acceptable: Warranty Deed, Quitclaim Deed, Title Policy, County Assessor Record, HUD-1 Settlement, or Property Tax Bill showing your name.</p>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>Document Type</label>
+                <select id="cr-own-type"><option>Warranty Deed</option><option>Quitclaim Deed</option><option>Title Insurance Policy</option><option>County Assessor Record</option><option>HUD-1 Settlement Statement</option><option>Property Tax Bill</option></select>
+              </div>
+              <div class="fg"><label>Property Address</label>
+                <input type="text" id="cr-own-addr" placeholder="e.g. 119 E 600 S #119, Orem, UT">
+              </div>
+            </div>
+            <div class="drop-zone" id="dz-ownership-req" onclick="document.getElementById('own-req-input').click()" ondragover="dzOver(event,'dz-ownership-req')" ondragleave="dzLeave('dz-ownership-req')" ondrop="dzDrop(event,'dz-ownership-req','own-req-files')">
+              <div class="dz-icon">🏠</div>
+              <div class="dz-title">Drop deed or title document here</div>
+              <div class="dz-sub">PDF preferred · All pages required</div>
+            </div>
+            <input type="file" id="own-req-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'own-req-files')">
+            <div class="file-list" id="own-req-files"></div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveCredential('Property Ownership')">Upload Ownership Document</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RE / PM LICENSE (pm, agent) ───────────── -->
+      <div id="cred-license" style="display:none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>🏛️ Utah Real Estate / Property Management License</h2>
+            <span style="font-size:.78rem;background:#dcfce7;color:#15803d;padding:2px 10px;border-radius:99px;font-weight:700;">✓ Required — Property Managers & Listing Agents</span>
+          </div>
+          <div class="panel-body">
+            <div class="notice notice-blue">📋 <div>Utah law (§ 61-2f) requires a real estate license to manage or lease residential property for compensation. <a href="https://realestate.utah.gov" target="_blank" style="color:#1d4ed8;">Verify at realestate.utah.gov →</a></div></div>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>License Number</label><input type="text" id="cr-lic-num" placeholder="e.g. 5501234-SA00"></div>
+              <div class="fg"><label>License Type</label>
+                <select id="cr-lic-type"><option>Sales Agent</option><option>Associate Broker</option><option>Principal Broker</option><option>Property Manager</option></select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>Issuing State</label><select id="cr-lic-state"><option selected>Utah</option><option>Nevada</option><option>Arizona</option><option>Colorado</option></select></div>
+              <div class="fg"><label>Expiration Date</label><input type="date" id="cr-lic-exp"></div>
+            </div>
+            <div class="fg" style="margin-bottom:1rem;">
+              <label>Sponsoring Broker / Brokerage</label>
+              <input type="text" id="cr-broker" placeholder="e.g. Equity Real Estate – Orem">
+            </div>
+            <div class="drop-zone" id="dz-license" onclick="document.getElementById('lic-file-input').click()" ondragover="dzOver(event,'dz-license')" ondragleave="dzLeave('dz-license')" ondrop="dzDrop(event,'dz-license','license-files')">
+              <div class="dz-icon">📄</div>
+              <div class="dz-title">Drop license certificate here or click to browse</div>
+              <div class="dz-sub">PDF, JPG, or PNG · Must be current and legible</div>
+            </div>
+            <input type="file" id="lic-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'license-files')">
+            <div class="file-list" id="license-files"></div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveCredential('RE / PM License')">Save License</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── E&O INSURANCE (pm, agent) ─────────────── -->
+      <div id="cred-eo" style="display:none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>🛡️ Errors & Omissions (E&O) Insurance</h2>
+            <span style="font-size:.78rem;background:#dcfce7;color:#15803d;padding:2px 10px;border-radius:99px;font-weight:700;">✓ Required — Property Managers & Listing Agents</span>
+          </div>
+          <div class="panel-body">
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>Insurance Carrier</label><input type="text" id="cr-eo-carrier" placeholder="e.g. Rice Insurance, Victor O. Schinnerer"></div>
+              <div class="fg"><label>Policy Number</label><input type="text" id="cr-eo-policy" placeholder="Policy #"></div>
+            </div>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>Coverage Amount</label>
+                <select id="cr-eo-cov"><option>$100,000</option><option selected>$250,000</option><option>$500,000</option><option>$1,000,000</option></select>
+              </div>
+              <div class="fg"><label>Policy Expiration</label><input type="date" id="cr-eo-exp"></div>
+            </div>
+            <div class="drop-zone" id="dz-eo" onclick="document.getElementById('eo-file-input').click()" ondragover="dzOver(event,'dz-eo')" ondragleave="dzLeave('dz-eo')" ondrop="dzDrop(event,'dz-eo','eo-files')">
+              <div class="dz-icon">🛡️</div>
+              <div class="dz-title">Drop E&O Certificate of Insurance here</div>
+              <div class="dz-sub">ACORD 25 form preferred · PDF or JPG</div>
+            </div>
+            <input type="file" id="eo-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'eo-files')">
+            <div class="file-list" id="eo-files"></div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveCredential('E&O Insurance')">Save E&O Insurance</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CONTRACTOR LICENSE (vendor) ───────────── -->
+      <div id="cred-contractor" style="display:none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>🔧 Contractor License</h2>
+            <span style="font-size:.78rem;background:#dcfce7;color:#15803d;padding:2px 10px;border-radius:99px;font-weight:700;">✓ Required — Contractors & Vendors</span>
+          </div>
+          <div class="panel-body">
+            <div class="notice notice-blue">🔧 <div>Utah requires a contractor license for most trade work. <a href="https://dopl.utah.gov/construction/" target="_blank" style="color:#1d4ed8;">Verify at dopl.utah.gov →</a></div></div>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>License Number</label><input type="text" id="cr-con-num" placeholder="e.g. 123456-5501"></div>
+              <div class="fg"><label>License Classification</label>
+                <select id="cr-con-class">
+                  <option>General Building (B100)</option><option>Plumbing (P200)</option><option>Electrical (S200)</option>
+                  <option>HVAC (S340)</option><option>Concrete / Masonry (E100)</option><option>Painting (S500)</option>
+                  <option>Landscaping</option><option>Handyman (Unlicensed — Limited Work)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>Issuing State</label><select id="cr-con-state"><option selected>Utah</option><option>Nevada</option><option>Arizona</option><option>Colorado</option></select></div>
+              <div class="fg"><label>Expiration Date</label><input type="date" id="cr-con-exp"></div>
+            </div>
+            <div class="drop-zone" id="dz-contractor" onclick="document.getElementById('con-file-input').click()" ondragover="dzOver(event,'dz-contractor')" ondragleave="dzLeave('dz-contractor')" ondrop="dzDrop(event,'dz-contractor','contractor-files')">
+              <div class="dz-icon">🔧</div>
+              <div class="dz-title">Drop contractor license certificate here</div>
+              <div class="dz-sub">PDF, JPG, or PNG · License must be current</div>
+            </div>
+            <input type="file" id="con-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'contractor-files')">
+            <div class="file-list" id="contractor-files"></div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveCredential('Contractor License')">Save Contractor License</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── GENERAL LIABILITY (vendor) ────────────── -->
+      <div id="cred-gl" style="display:none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>🛡️ General Liability Insurance</h2>
+            <span style="font-size:.78rem;background:#dcfce7;color:#15803d;padding:2px 10px;border-radius:99px;font-weight:700;">✓ Required — Contractors & Vendors ($1M minimum)</span>
+          </div>
+          <div class="panel-body">
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>Insurance Carrier</label><input type="text" id="cr-gl-carrier" placeholder="e.g. State Farm, Nationwide"></div>
+              <div class="fg"><label>Policy Number</label><input type="text" id="cr-gl-policy" placeholder="Policy #"></div>
+            </div>
+            <div class="form-row" style="margin-bottom:1rem;">
+              <div class="fg"><label>Coverage Amount</label>
+                <select id="cr-gl-cov"><option>$500,000</option><option selected>$1,000,000</option><option>$2,000,000</option><option>$5,000,000</option></select>
+              </div>
+              <div class="fg"><label>Policy Expiration</label><input type="date" id="cr-gl-exp"></div>
+            </div>
+            <div class="fg" style="margin-bottom:1rem;">
+              <label>Bond Amount <span style="font-weight:400;color:#64748b;">(optional but recommended)</span></label>
+              <input type="text" id="cr-gl-bond" placeholder="e.g. $10,000">
+            </div>
+            <div class="drop-zone" id="dz-gl" onclick="document.getElementById('gl-file-input').click()" ondragover="dzOver(event,'dz-gl')" ondragleave="dzLeave('dz-gl')" ondrop="dzDrop(event,'dz-gl','gl-files')">
+              <div class="dz-icon">🛡️</div>
+              <div class="dz-title">Drop Certificate of Insurance (COI / ACORD 25) here</div>
+              <div class="dz-sub">PDF preferred · Must list RentVerified as certificate holder</div>
+            </div>
+            <input type="file" id="gl-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'gl-files')">
+            <div class="file-list" id="gl-files"></div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveCredential('General Liability Insurance')">Save GL Insurance</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Credentials on file (filtered by role) -->
+      <div class="panel" id="creds-on-file-panel" style="display:none;">
+        <div class="panel-header"><h2>📂 Credentials on File</h2></div>
+        <div class="panel-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Document</th><th>Type</th><th>Number / Policy</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+            <tbody id="creds-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /credentials -->
+
+    <!-- ══════════ OWNERSHIP ══════════ -->
+    <div class="doc-section" id="sec-ownership">
+      <div class="page-header">
+        <div><h1>🏠 Property Ownership Documents</h1><p>Prove ownership of each property you list on RentVerified.</p></div>
+      </div>
+
+      <div class="notice notice-yellow">
+        ⚠️ <div><strong>Required for all landlords and property managers.</strong> You must upload at least one ownership document per property. Acceptable documents: Warranty Deed, Quitclaim Deed, Title Insurance Policy, County Assessor Record, Settlement Statement (HUD-1), or Property Tax Bill showing your name.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>➕ Upload Ownership Document</h2></div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg">
+              <label>Property Address</label>
+              <select id="own-prop">
+                <option>119 E 600 S #119, Orem, UT 84601</option>
+                <option>Other / New Property</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Document Type</label>
+              <select id="own-type">
+                <option>Warranty Deed</option>
+                <option>Quitclaim Deed</option>
+                <option>Title Insurance Policy</option>
+                <option>County Assessor Record</option>
+                <option>HUD-1 Settlement Statement</option>
+                <option>Property Tax Bill</option>
+                <option>LLC Operating Agreement (with property listed)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Owner Name on Document</label><input type="text" id="own-name" placeholder="Name as it appears on the deed" value="Daniel Hart / Sanders PM LLC"></div>
+            <div class="fg"><label>Recording Date / Document Date</label><input type="date" id="own-date"></div>
+          </div>
+          <div class="drop-zone" id="dz-ownership" onclick="document.getElementById('own-file-input').click()" ondragover="dzOver(event,'dz-ownership')" ondragleave="dzLeave('dz-ownership')" ondrop="dzDrop(event,'dz-ownership','ownership-files')">
+            <div class="dz-icon">🏠</div>
+            <div class="dz-title">Drop deed or title document here</div>
+            <div class="dz-sub">PDF preferred · All pages required · Max 50 MB</div>
+          </div>
+          <input type="file" id="own-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'ownership-files')">
+          <div class="file-list" id="ownership-files"></div>
+          <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveOwnershipDoc()">Upload Ownership Document</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>📂 Ownership Documents on File</h2></div>
+        <div class="panel-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Property</th><th>Document Type</th><th>Owner on Record</th><th>Date</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>119 E 600 S #119</strong><br><span style="font-size:.75rem;color:#64748b;">Orem, UT 84601</span></td>
+                <td><span class="badge badge-blue">Warranty Deed</span></td>
+                <td>Daniel Hart</td>
+                <td>2021-08-14</td>
+                <td><span class="badge badge-green">Verified</span></td>
+                <td><button class="btn btn-outline btn-sm">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /ownership -->
+
+    <!-- ══════════ MANAGEMENT AGREEMENTS ══════════ -->
+    <div class="doc-section" id="sec-agreements">
+      <div class="page-header">
+        <div><h1>📋 Management Agreements</h1><p>Signed authorizations allowing agents and PMs to legally represent property owners.</p></div>
+        <button class="btn btn-primary" onclick="generatePMTemplate()">Generate Template</button>
+      </div>
+
+      <div class="notice notice-blue">
+        📋 <div><strong>Required for Property Managers and Listing Agents.</strong> A signed Property Management Agreement or Listing Authorization must be on file for every property you manage or list on behalf of an owner. This protects both you and the owner.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>➕ Upload Management Agreement</h2></div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Property Address</label><select id="agr-prop"><option>119 E 600 S #119, Orem, UT 84601</option><option>Other / New Property</option></select></div>
+            <div class="fg"><label>Agreement Type</label>
+              <select id="agr-type">
+                <option>Property Management Agreement</option>
+                <option>Exclusive Listing Authorization</option>
+                <option>Leasing Agent Authorization</option>
+                <option>Limited Power of Attorney</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Owner / Principal Name</label><input type="text" id="agr-owner" placeholder="Property owner's legal name"></div>
+            <div class="fg"><label>Agent / PM Name</label><input type="text" id="agr-agent" placeholder="Authorized agent name" value="Daniel Hart – Sanders Property Management"></div>
+          </div>
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Agreement Start Date</label><input type="date" id="agr-start"></div>
+            <div class="fg"><label>Agreement End Date</label><input type="date" id="agr-end"></div>
+          </div>
+          <div class="drop-zone" id="dz-agreement" onclick="document.getElementById('agr-file-input').click()" ondragover="dzOver(event,'dz-agreement')" ondragleave="dzLeave('dz-agreement')" ondrop="dzDrop(event,'dz-agreement','agreement-files')">
+            <div class="dz-icon">📋</div>
+            <div class="dz-title">Drop signed management agreement here</div>
+            <div class="dz-sub">Must be fully signed by both parties · PDF preferred</div>
+          </div>
+          <input type="file" id="agr-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'agreement-files')">
+          <div class="file-list" id="agreement-files"></div>
+          <button class="btn btn-primary" style="margin-top:1rem;" onclick="saveAgreement()">Upload Agreement</button>
+        </div>
+      </div>
+
+      <!-- PM Template Preview -->
+      <div class="panel" id="pm-template-panel" style="display:none;">
+        <div class="panel-header"><h2>📄 Property Management Agreement Template</h2><button class="btn btn-success btn-sm" onclick="downloadTemplate()">⬇ Download .docx</button></div>
+        <div class="panel-body">
+          <div class="lease-preview">
+            <h3>PROPERTY MANAGEMENT AGREEMENT</h3>
+            <p style="text-align:center;color:#64748b;font-size:.8rem;margin-bottom:1rem;">Sanders Property Management · RentVerified Platform</p>
+            <div class="clause"><strong>PARTIES:</strong> This Property Management Agreement ("Agreement") is entered into by and between _______________________ ("Owner") and Sanders Property Management / Daniel Hart, licensed Utah real estate broker ("Manager").</div>
+            <div class="clause"><strong>1. PROPERTY:</strong> Owner hereby appoints Manager as exclusive property manager for the property located at: _______________________</div>
+            <div class="clause"><strong>2. TERM:</strong> This Agreement shall commence on _______ and continue for one year, renewing automatically unless either party provides 30 days written notice of termination.</div>
+            <div class="clause"><strong>3. MANAGER'S AUTHORITY:</strong> Owner grants Manager authority to: (a) advertise the property; (b) screen and select tenants; (c) execute leases on Owner's behalf; (d) collect rents and security deposits; (e) authorize repairs up to $500 without prior approval; (f) initiate eviction proceedings if necessary.</div>
+            <div class="clause"><strong>4. MANAGEMENT FEE:</strong> Owner agrees to pay Manager a monthly management fee of ___% of collected rent (typically 8–12%) or $___/month flat fee.</div>
+            <div class="clause"><strong>5. LEASING FEE:</strong> Owner agrees to pay a one-time leasing fee of one month's rent for each new tenancy secured by Manager.</div>
+            <div class="clause"><strong>6. TRUST ACCOUNT:</strong> Manager shall maintain all tenant funds in a separate trust account as required by Utah Code § 61-2f-301.</div>
+            <div class="clause"><strong>7. OWNER REPRESENTATIONS:</strong> Owner represents that they hold clear title to the property, that it is in compliance with applicable housing codes, and that they have authority to enter this Agreement.</div>
+            <div class="clause"><strong>8. INSURANCE:</strong> Owner shall maintain property and liability insurance. Manager maintains E&O and general liability insurance.</div>
+            <div style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+              <div><div style="border-top:1px solid #64748b;padding-top:.3rem;font-size:.78rem;color:#64748b;">Owner Signature / Date</div></div>
+              <div><div style="border-top:1px solid #64748b;padding-top:.3rem;font-size:.78rem;color:#64748b;">Manager Signature / Date</div></div>
+            </div>
+          </div>
+          <p style="font-size:.75rem;color:#94a3b8;margin-top:.75rem;">This template is provided for reference. Consult a Utah real estate attorney before using in a transaction.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>📂 Agreements on File</h2></div>
+        <div class="panel-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Property</th><th>Agreement Type</th><th>Owner</th><th>Agent / PM</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+            <tbody id="agreements-table">
+              <tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:2rem;">No management agreements on file. Upload or generate a template above.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /agreements -->
+
+    <!-- ══════════ PHOTOS ══════════ -->
+    <div class="doc-section" id="sec-photos">
+      <div class="page-header">
+        <div><h1>📷 Property Photos</h1><p>Upload and organize listing photos. High-quality photos get 3× more inquiries.</p></div>
+      </div>
+
+      <div class="notice notice-green">
+        📸 <div><strong>Photo tips:</strong> Use landscape orientation · Shoot in natural light · Include every room · Show the exterior, parking, and amenities · Minimum 8 photos recommended per listing.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>119 E 600 S #119 – Orem, UT</h2>
+          <select id="photo-prop-select" onchange="switchPhotoProperty(this.value)" style="border:1.5px solid #e2e8f0;border-radius:7px;padding:.35rem .75rem;font-size:.85rem;outline:none;">
+            <option>119 E 600 S #119, Orem, UT</option>
+            <option>Add New Property…</option>
+          </select>
+        </div>
+        <div class="panel-body">
+          <div class="photo-grid" id="photo-grid">
+            <!-- Photos rendered by JS -->
+          </div>
+          <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="addPhotos(this.files)">
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>📋 Photo Checklist</h2></div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;" id="photo-checklist">
+          </div>
+        </div>
+      </div>
+    </div><!-- /photos -->
+
+    <!-- ══════════ APPLICATIONS ══════════ -->
+    <div class="doc-section" id="sec-applications">
+      <div class="page-header">
+        <div><h1>📝 Rental Applications</h1><p>Share applications with prospects and manage submissions.</p></div>
+        <button class="btn btn-primary" onclick="showShareDialog()">+ Share Application Link</button>
+      </div>
+
+      <!-- AI auto-share -->
+      <div class="ai-bubble">
+        I can automatically send your rental application to any prospective tenant via email, text, or Facebook Messenger. Just enter their contact info below and I'll handle the rest — including a friendly intro message explaining next steps.
+      </div>
+
+      <!-- Share panel -->
+      <div class="panel" id="share-app-panel">
+        <div class="panel-header"><h2>📤 Send Application to Prospective Tenant</h2></div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Prospective Tenant Name</label><input type="text" id="share-name" placeholder="Full name"></div>
+            <div class="fg"><label>Property They're Applying For</label>
+              <select id="share-prop"><option>119 E 600 S #119, Orem, UT 84601 – $1,250/mo</option></select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Email Address</label><input type="email" id="share-email" placeholder="tenant@email.com"></div>
+            <div class="fg"><label>Phone / Text</label><input type="tel" id="share-phone" placeholder="(801) 555-0100"></div>
+          </div>
+          <div class="fg" style="margin-bottom:1rem;">
+            <label>Send via</label>
+            <div style="display:flex;gap:.75rem;margin-top:.3rem;">
+              <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.88rem;"><input type="checkbox" id="send-email" checked style="accent-color:#1a56db;"> Email</label>
+              <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.88rem;"><input type="checkbox" id="send-sms" style="accent-color:#1a56db;"> SMS / Text</label>
+              <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.88rem;"><input type="checkbox" id="send-fb" style="accent-color:#1a56db;"> Facebook Messenger</label>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:1rem;">
+            <label>AI Message Preview (editable)</label>
+            <textarea id="share-msg" rows="4">Hi [Name], thank you for your interest in the property at 119 E 600 S #119, Orem, UT! Please complete your rental application using the link below. The process takes about 10 minutes. Once submitted, our team will review it within 1–2 business days and be in touch. – Sanders Property Management</textarea>
+          </div>
+          <div style="display:flex;gap:.75rem;">
+            <button class="btn btn-primary" onclick="sendApplication()">🚀 Send Application Now</button>
+            <button class="btn btn-outline" onclick="copyAppLink()">📋 Copy Link Only</button>
+          </div>
+          <div id="share-link-display" style="display:none;" class="share-box">
+            <h4>📎 Application Link</h4>
+            <div class="share-link">
+              <input type="text" id="app-link-val" readonly>
+              <button onclick="copyLink()">Copy</button>
+            </div>
+            <p style="font-size:.75rem;color:#1e40af;margin-top:.5rem;">This link expires in 30 days · Tracks when the applicant opens it</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Application Template Upload -->
+      <div class="panel">
+        <div class="panel-header"><h2>📄 Application Template on File</h2><button class="btn btn-outline btn-sm" onclick="document.getElementById('app-tmpl-input').click()">Upload Custom Template</button></div>
+        <div class="panel-body">
+          <p style="font-size:.85rem;color:#64748b;margin-bottom:1rem;">RentVerified includes a standard Utah rental application. You can also upload your own custom application form (PDF) and that will be sent to prospects instead.</p>
+          <div class="file-item">
+            <span class="fi-icon">📝</span>
+            <div><div class="fi-name">RentVerified Standard Application (Default)</div><div class="fi-meta">Last updated: 2026-01-15 · Utah compliant · Includes credit authorization, rental history, employment</div></div>
+            <span class="fi-status status-approved">Active</span>
+            <button class="btn btn-outline btn-sm" onclick="previewDefaultApp()">Preview</button>
+          </div>
+          <div class="file-list" id="app-template-files"></div>
+          <input type="file" id="app-tmpl-input" accept=".pdf" style="display:none;" onchange="handleFiles(this.files,'app-template-files')">
+        </div>
+      </div>
+
+      <!-- Application Preview Modal -->
+      <div class="panel" id="app-preview-panel" style="display:none;">
+        <div class="panel-header"><h2>📝 Standard Rental Application Preview</h2><button class="btn btn-outline btn-sm" onclick="document.getElementById('app-preview-panel').style.display='none'">Close</button></div>
+        <div class="panel-body">
+          <div class="lease-preview">
+            <h3>RENTAL APPLICATION</h3>
+            <p style="text-align:center;color:#64748b;font-size:.8rem;margin-bottom:1.25rem;">Sanders Property Management · Powered by RentVerified</p>
+            <div class="clause"><strong>SECTION 1 — PERSONAL INFORMATION</strong><br>
+              Full Legal Name: _______________________  Date of Birth: ________  SSN (last 4): ____<br>
+              Current Address: _______________________  How long at current address: ______<br>
+              Phone: _______________________  Email: _______________________
+            </div>
+            <div class="clause"><strong>SECTION 2 — EMPLOYMENT & INCOME</strong><br>
+              Employer: _______________________  Position: _______________________<br>
+              Monthly Gross Income: $________  Start Date: ________<br>
+              Supervisor Name & Phone: _______________________
+            </div>
+            <div class="clause"><strong>SECTION 3 — RENTAL HISTORY</strong><br>
+              Current Landlord Name & Phone: _______________________<br>
+              Previous Address: _______________________  Dates: ________ to ________<br>
+              Reason for leaving: _______________________
+            </div>
+            <div class="clause"><strong>SECTION 4 — BACKGROUND</strong><br>
+              Have you ever been evicted? □ Yes □ No  — If yes, explain: _______________________<br>
+              Have you ever filed bankruptcy? □ Yes □ No<br>
+              Any felony convictions in the past 7 years? □ Yes □ No
+            </div>
+            <div class="clause"><strong>SECTION 5 — REFERENCES</strong><br>
+              Reference 1: _______________________  Phone: _______________________<br>
+              Reference 2: _______________________  Phone: _______________________
+            </div>
+            <div class="clause"><strong>SECTION 6 — AUTHORIZATION</strong><br>
+              I authorize Sanders Property Management and RentVerified to obtain a credit report and verify all information in this application. I certify all information is true and accurate. I understand that misrepresentation is grounds for denial or termination of tenancy.<br><br>
+              Signature: _______________________  Date: ________
+            </div>
+            <p style="font-size:.72rem;color:#94a3b8;margin-top:1rem;">Application fee: $35 (covers credit + background check) · This form complies with Utah Fair Housing Act</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submitted Applications -->
+      <div class="panel">
+        <div class="panel-header"><h2>📥 Submitted Applications</h2></div>
+        <div class="panel-body" id="submitted-apps">
+          <div class="app-card">
+            <div class="app-avatar">AT</div>
+            <div>
+              <div class="app-name">Alice Thompson</div>
+              <div class="app-meta">Applied: 2026-03-01 · 119 E 600 S #119 · Score: 88/100</div>
+            </div>
+            <span class="badge badge-green" style="margin-left:auto;">Approved</span>
+            <div class="app-score score-hi">88</div>
+            <button class="btn btn-outline btn-sm" onclick="toast('Opening application…')">View</button>
+          </div>
+          <div class="app-card">
+            <div class="app-avatar">BJ</div>
+            <div>
+              <div class="app-name">Bob Johnson</div>
+              <div class="app-meta">Applied: 2026-03-03 · 119 E 600 S #119 · Score: 52/100</div>
+            </div>
+            <span class="badge badge-red" style="margin-left:auto;">Denied</span>
+            <div class="app-score score-lo">52</div>
+            <button class="btn btn-outline btn-sm" onclick="toast('Opening application…')">View</button>
+          </div>
+          <div class="app-card" style="border-color:#f59e0b;background:#fffbeb;">
+            <div class="app-avatar" style="background:#fef3c7;color:#92400e;">MT</div>
+            <div>
+              <div class="app-name">Marcus Thompson</div>
+              <div class="app-meta">Sent: 2026-03-05 · 119 E 600 S #119 · <em style="color:#f59e0b;">Not yet submitted</em></div>
+            </div>
+            <span class="badge badge-yellow" style="margin-left:auto;">Pending</span>
+            <div class="app-score" style="color:#f59e0b;">—</div>
+            <button class="btn btn-outline btn-sm" onclick="resendApp('Marcus Thompson')">Resend</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload received paper apps -->
+      <div class="panel">
+        <div class="panel-header"><h2>📤 Upload Paper Application</h2><span style="font-size:.78rem;color:#64748b;">For applications received in person or by email</span></div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Applicant Name</label><input type="text" id="paper-app-name" placeholder="Full legal name"></div>
+            <div class="fg"><label>Property Applied For</label><select id="paper-app-prop"><option>119 E 600 S #119, Orem, UT</option></select></div>
+          </div>
+          <div class="drop-zone" id="dz-paperapps" onclick="document.getElementById('paper-app-input').click()" ondragover="dzOver(event,'dz-paperapps')" ondragleave="dzLeave('dz-paperapps')" ondrop="dzDrop(event,'dz-paperapps','paper-app-files')">
+            <div class="dz-icon">📝</div>
+            <div class="dz-title">Drop completed application here</div>
+            <div class="dz-sub">PDF or clear photo (JPG/PNG) · All pages required</div>
+          </div>
+          <input type="file" id="paper-app-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'paper-app-files')">
+          <div class="file-list" id="paper-app-files"></div>
+          <button class="btn btn-primary" style="margin-top:1rem;" onclick="uploadPaperApp()">Upload & Add to Queue</button>
+        </div>
+      </div>
+    </div><!-- /applications -->
+
+    <!-- ══════════ LEASES ══════════ -->
+    <div class="doc-section" id="sec-leases">
+      <div class="page-header">
+        <div><h1>📄 Lease Agreements</h1><p>Store, manage, and upload executed lease agreements.</p></div>
+        <button class="btn btn-primary" onclick="window.location.href='leases.html'">Open Lease Builder →</button>
+      </div>
+
+      <div class="notice notice-blue">
+        📄 <div>Upload signed lease agreements here for secure storage. For creating new leases with digital signing, use the <a href="leases.html" style="color:#1d4ed8;font-weight:700;">Lease Builder →</a></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>➕ Upload Signed Lease</h2></div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Tenant Name(s)</label><input type="text" id="ls-tenant" placeholder="Full legal name(s) of all tenants"></div>
+            <div class="fg"><label>Property / Unit</label><select id="ls-prop"><option>119 E 600 S #119, Orem, UT 84601</option><option>Other</option></select></div>
+          </div>
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Lease Start Date</label><input type="date" id="ls-start"></div>
+            <div class="fg"><label>Lease End Date</label><input type="date" id="ls-end"></div>
+          </div>
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="fg"><label>Monthly Rent</label><input type="text" id="ls-rent" placeholder="$1,250"></div>
+            <div class="fg"><label>Security Deposit</label><input type="text" id="ls-deposit" placeholder="$1,250"></div>
+          </div>
+          <div class="drop-zone" id="dz-lease" onclick="document.getElementById('lease-file-input').click()" ondragover="dzOver(event,'dz-lease')" ondragleave="dzLeave('dz-lease')" ondrop="dzDrop(event,'dz-lease','lease-upload-files')">
+            <div class="dz-icon">📄</div>
+            <div class="dz-title">Drop signed lease agreement here</div>
+            <div class="dz-sub">All pages including signature page required · PDF preferred</div>
+          </div>
+          <input type="file" id="lease-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files,'lease-upload-files')">
+          <div class="file-list" id="lease-upload-files"></div>
+          <button class="btn btn-primary" style="margin-top:1rem;" onclick="uploadLease()">Upload Lease</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>📂 Leases on File</h2></div>
+        <div class="panel-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Tenant</th><th>Property</th><th>Term</th><th>Rent</th><th>Status</th><th>Documents</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Jane Doe</strong></td>
+                <td style="font-size:.82rem;">119 E 600 S #119<br><span style="color:#64748b;">Orem, UT 84601</span></td>
+                <td style="font-size:.82rem;">2026-02-01<br>→ 2027-01-31</td>
+                <td>$1,250/mo</td>
+                <td><span class="badge badge-green">Active</span></td>
+                <td><span class="badge badge-blue">Lease.pdf</span></td>
+                <td><button class="btn btn-outline btn-sm">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /leases -->
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════
+   NAVIGATION
+══════════════════════════════ */
+function showSec(id, el) {
+  document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.doc-sidebar a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+/* ══════════════════════════════
+   ROLE-BASED CREDENTIALS
+══════════════════════════════ */
+
+// Role definitions: which credential panels to show + requirement text
+const ROLE_CONFIG = {
+  landlord: {
+    label: '🏢 Landlord',
+    color: '#1a56db',
+    bg: '#eff6ff',
+    subtitle: 'Documents required to list and rent out properties you own.',
+    requirements: [
+      '🪪 Government-issued photo ID',
+      '🏠 Proof of property ownership (deed, title, or assessor record) — one per listed property',
+    ],
+    panels: ['govid','ownership-req'],
+    sampleCreds: [
+      { doc:'Driver\'s License', type:'Gov ID', badge:'badge-gray', num:'D123-456-78', exp:'2028-11-22', status:'badge-green', statusTxt:'Approved' },
+      { doc:'Warranty Deed – 119 E 600 S', type:'Ownership', badge:'badge-blue', num:'Recorded 2021-08-14', exp:'—', status:'badge-green', statusTxt:'Verified' },
+    ]
+  },
+  pm: {
+    label: '🏙️ Property Manager',
+    color: '#0891b2',
+    bg: '#ecfeff',
+    subtitle: 'Utah law requires a real estate license to manage property for compensation.',
+    requirements: [
+      '🪪 Government-issued photo ID',
+      '🏛️ Utah Division of Real Estate license (Sales Agent, Broker, or PM designation)',
+      '🛡️ Errors & Omissions (E&O) insurance',
+      '📋 Signed management agreement for each property managed <em style="font-size:.78rem;">(see Management Agreements section)</em>',
+    ],
+    panels: ['govid','license','eo'],
+    sampleCreds: [
+      { doc:'Utah RE License', type:'RE License', badge:'badge-blue', num:'5501234-SA00', exp:'2027-06-30', status:'badge-green', statusTxt:'Approved' },
+      { doc:'E&O Insurance – Rice Insurance', type:'E&O', badge:'badge-purple', num:'EO-2026-44712', exp:'2027-01-01', status:'badge-green', statusTxt:'Approved' },
+      { doc:'Driver\'s License', type:'Gov ID', badge:'badge-gray', num:'D123-456-78', exp:'2028-11-22', status:'badge-green', statusTxt:'Approved' },
+    ]
+  },
+  agent: {
+    label: '📋 Listing Agent',
+    color: '#8b5cf6',
+    bg: '#f5f3ff',
+    subtitle: 'Licensed real estate agents helping owners market and lease properties.',
+    requirements: [
+      '🪪 Government-issued photo ID',
+      '🏛️ Active Utah DRE real estate license (any active designation)',
+      '🛡️ Errors & Omissions (E&O) insurance',
+    ],
+    panels: ['govid','license','eo'],
+    sampleCreds: [
+      { doc:'Utah DRE License', type:'RE License', badge:'badge-purple', num:'5501234-SA00', exp:'2027-06-30', status:'badge-green', statusTxt:'Approved' },
+      { doc:'E&O Insurance', type:'E&O', badge:'badge-purple', num:'EO-2026-88312', exp:'2027-01-01', status:'badge-green', statusTxt:'Approved' },
+      { doc:'Driver\'s License', type:'Gov ID', badge:'badge-gray', num:'D123-456-78', exp:'2028-11-22', status:'badge-green', statusTxt:'Approved' },
+    ]
+  },
+  vendor: {
+    label: '🔧 Contractor / Vendor',
+    color: '#f59e0b',
+    bg: '#fffbeb',
+    subtitle: 'Licensed, insured contractors and tradespeople serving rental properties.',
+    requirements: [
+      '🪪 Government-issued photo ID',
+      '🔧 State contractor\'s license matching your trade(s)',
+      '🛡️ General Liability insurance — minimum $1,000,000 per occurrence',
+      '🔗 Bonding certificate (optional but increases your lead acceptance rate)',
+    ],
+    panels: ['govid','contractor','gl'],
+    sampleCreds: [
+      { doc:'Utah Contractor License', type:'Contractor', badge:'badge-yellow', num:'123456-5501', exp:'2027-03-15', status:'badge-yellow', statusTxt:'Pending' },
+      { doc:'General Liability COI', type:'GL Insurance', badge:'badge-yellow', num:'GL-2026-99821', exp:'2026-04-15', status:'badge-red', statusTxt:'Expires Soon' },
+      { doc:'Driver\'s License', type:'Gov ID', badge:'badge-gray', num:'D123-456-78', exp:'2028-11-22', status:'badge-green', statusTxt:'Approved' },
+    ]
+  }
+};
+
+// All panel IDs (to reset before showing role-specific ones)
+const ALL_CRED_PANELS = ['govid','ownership-req','license','eo','contractor','gl'];
+
+function setRole(role, btn) {
+  const cfg = ROLE_CONFIG[role];
+  if (!cfg) return;
+
+  // Save to localStorage so it persists
+  localStorage.setItem('rv_doc_role', role);
+
+  // Highlight selected button
+  document.querySelectorAll('.role-btn').forEach(b => {
+    b.style.background = '#fff';
+    b.style.color = '#64748b';
+    b.style.borderColor = '#e2e8f0';
+  });
+  if (btn) {
+    btn.style.background = cfg.bg;
+    btn.style.color = cfg.color;
+    btn.style.borderColor = cfg.color;
+  }
+
+  // Update subtitle
+  document.getElementById('cred-subtitle').textContent = cfg.subtitle;
+
+  // Show requirement banner
+  const banner = document.getElementById('role-req-banner');
+  banner.style.display = 'block';
+  banner.style.background = cfg.bg;
+  banner.style.border = '1.5px solid ' + cfg.color;
+  document.getElementById('role-req-title').style.color = cfg.color;
+  document.getElementById('role-req-title').textContent = 'Required documents for ' + cfg.label + ':';
+  document.getElementById('role-req-list').innerHTML = cfg.requirements.map(r =>
+    `<div style="display:flex;align-items:flex-start;gap:.5rem;">${r}</div>`
+  ).join('');
+
+  // Hide all panels, show role-specific ones
+  ALL_CRED_PANELS.forEach(p => {
+    const el = document.getElementById('cred-' + p);
+    if (el) el.style.display = 'none';
+  });
+  cfg.panels.forEach(p => {
+    const el = document.getElementById('cred-' + p);
+    if (el) el.style.display = 'block';
+  });
+
+  // Show creds table
+  document.getElementById('creds-on-file-panel').style.display = 'block';
+  const tbody = document.getElementById('creds-table');
+  tbody.innerHTML = cfg.sampleCreds.map(c => `
+    <tr>
+      <td>${c.doc}</td>
+      <td><span class="badge ${c.badge}">${c.type}</span></td>
+      <td style="font-size:.82rem;">${c.num}</td>
+      <td style="font-size:.82rem;${c.exp.includes('2026') ? 'color:#ef4444;font-weight:700;' : ''}">${c.exp}</td>
+      <td><span class="badge ${c.status}">${c.statusTxt}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="toast('Opening document…')">View</button></td>
+    </tr>`).join('');
+}
+
+// On page load: auto-detect role from session or default to showing picker
+window.addEventListener('DOMContentLoaded', () => {
+  // Check which portal the user came from
+  let detectedRole = localStorage.getItem('rv_doc_role');
+  if (!detectedRole) {
+    if (localStorage.getItem('rv_vendor_session')) detectedRole = 'vendor';
+    else if (localStorage.getItem('rv_agent_session')) detectedRole = 'agent';
+    else detectedRole = 'landlord'; // default for landlord dashboard
+  }
+  const btn = document.querySelector(`.role-btn[data-role="${detectedRole}"]`);
+  setRole(detectedRole, btn);
+});
+
+/* ══════════════════════════════
+   DRAG & DROP ZONES
+══════════════════════════════ */
+function dzOver(e, id) { e.preventDefault(); document.getElementById(id).classList.add('dragover'); }
+function dzLeave(id) { document.getElementById(id).classList.remove('dragover'); }
+function dzDrop(e, id, listId) {
+  e.preventDefault();
+  document.getElementById(id).classList.remove('dragover');
+  handleFiles(e.dataTransfer.files, listId);
+}
+
+/* ══════════════════════════════
+   FILE HANDLING
+══════════════════════════════ */
+function handleFiles(fileList, containerId) {
+  const container = document.getElementById(containerId);
+  Array.from(fileList).forEach(file => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const icon = ext === 'pdf' ? '📄' : ['jpg','jpeg','png'].includes(ext) ? '🖼️' : '📁';
+    const size = file.size > 1048576 ? (file.size/1048576).toFixed(1) + ' MB' : Math.round(file.size/1024) + ' KB';
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.innerHTML = `
+      <span class="fi-icon">${icon}</span>
+      <div>
+        <div class="fi-name">${file.name}</div>
+        <div class="fi-meta">${size} · Uploaded ${new Date().toLocaleDateString()}</div>
+      </div>
+      <span class="fi-status status-pending">Pending Review</span>
+      <button class="fi-del" onclick="this.parentElement.remove()">✕</button>`;
+    container.appendChild(div);
+  });
+  toast(`✅ ${fileList.length} file${fileList.length>1?'s':''} queued for upload`);
+}
+
+/* ══════════════════════════════
+   SAVE ACTIONS (simulated)
+══════════════════════════════ */
+function saveCredential(type) {
+  toast(`✅ ${type.charAt(0).toUpperCase()+type.slice(1)} credential saved — pending review.`);
+}
+function saveOwnershipDoc() {
+  const prop = document.getElementById('own-prop').value;
+  const type = document.getElementById('own-type').value;
+  const tbody = document.querySelector('#sec-ownership table tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `<td><strong>${prop.split(',')[0]}</strong></td><td><span class="badge badge-blue">${type}</span></td><td>${document.getElementById('own-name').value}</td><td>${document.getElementById('own-date').value||'—'}</td><td><span class="badge badge-yellow">Pending</span></td><td><button class="btn btn-outline btn-sm">View</button></td>`;
+  tbody.appendChild(row);
+  toast('✅ Ownership document uploaded — pending verification.');
+}
+function saveAgreement() {
+  const prop = document.getElementById('agr-prop').value;
+  const type = document.getElementById('agr-type').value;
+  const owner = document.getElementById('agr-owner').value;
+  const agent = document.getElementById('agr-agent').value;
+  const start = document.getElementById('agr-start').value;
+  const end = document.getElementById('agr-end').value;
+  const tbody = document.getElementById('agreements-table');
+  tbody.innerHTML = `<tr><td><strong>${prop.split(',')[0]}</strong></td><td><span class="badge badge-purple">${type}</span></td><td>${owner}</td><td>${agent}</td><td>${end||'—'}</td><td><span class="badge badge-yellow">Pending</span></td><td><button class="btn btn-outline btn-sm">View</button></td></tr>`;
+  toast('✅ Management agreement uploaded — pending review.');
+}
+function uploadLease() {
+  const tenant = document.getElementById('ls-tenant').value;
+  const prop = document.getElementById('ls-prop').value;
+  if (!tenant) { toast('⚠️ Enter tenant name first.'); return; }
+  toast(`✅ Lease for ${tenant} uploaded successfully.`);
+}
+function uploadPaperApp() {
+  const name = document.getElementById('paper-app-name').value.trim();
+  if (!name) { toast('⚠️ Enter applicant name.'); return; }
+  toast(`✅ Application for ${name} uploaded — added to screening queue.`);
+}
+
+/* ══════════════════════════════
+   MANAGEMENT AGREEMENT TEMPLATE
+══════════════════════════════ */
+function generatePMTemplate() {
+  document.getElementById('pm-template-panel').style.display = 'block';
+  document.getElementById('pm-template-panel').scrollIntoView({behavior:'smooth'});
+}
+function downloadTemplate() {
+  toast('📄 Template download starting… (connect to server for live download)');
+}
+
+/* ══════════════════════════════
+   APPLICATION SHARING
+══════════════════════════════ */
+function showShareDialog() {
+  document.getElementById('share-app-panel').scrollIntoView({behavior:'smooth'});
+  document.getElementById('share-name').focus();
+}
+
+function sendApplication() {
+  const name  = document.getElementById('share-name').value.trim();
+  const email = document.getElementById('share-email').value.trim();
+  const prop  = document.getElementById('share-prop').value;
+  if (!name) { toast('⚠️ Enter the applicant\'s name.'); return; }
+
+  // Update message with name
+  const msg = document.getElementById('share-msg');
+  msg.value = msg.value.replace('[Name]', name);
+
+  const channels = [];
+  if (document.getElementById('send-email').checked && email) channels.push('Email');
+  if (document.getElementById('send-sms').checked) channels.push('SMS');
+  if (document.getElementById('send-fb').checked) channels.push('Facebook Messenger');
+
+  // Show link
+  const link = `https://rentverified.com/apply?p=119E600S&ref=${btoa(name).slice(0,8)}&exp=${Date.now()+2592000000}`;
+  document.getElementById('app-link-val').value = link;
+  document.getElementById('share-link-display').style.display = 'block';
+
+  // Add to submitted list
+  const container = document.getElementById('submitted-apps');
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const card = document.createElement('div');
+  card.className = 'app-card';
+  card.style.borderColor = '#f59e0b';
+  card.style.background = '#fffbeb';
+  card.innerHTML = `
+    <div class="app-avatar" style="background:#fef3c7;color:#92400e;">${initials}</div>
+    <div>
+      <div class="app-name">${name}</div>
+      <div class="app-meta">Sent: ${new Date().toLocaleDateString()} · ${prop.split('–')[0].trim()} · <em style="color:#f59e0b;">Not yet submitted</em></div>
+    </div>
+    <span class="badge badge-yellow" style="margin-left:auto;">Pending</span>
+    <div class="app-score" style="color:#f59e0b;">—</div>
+    <button class="btn btn-outline btn-sm" onclick="resendApp('${name}')">Resend</button>`;
+  container.prepend(card);
+
+  toast(`🚀 Application sent to ${name}${channels.length ? ' via ' + channels.join(' + ') : ''}!`);
+}
+
+function copyAppLink() {
+  const name = document.getElementById('share-name').value || 'prospect';
+  const link = `https://rentverified.com/apply?p=119E600S&ref=${btoa(name).slice(0,8)}`;
+  document.getElementById('app-link-val').value = link;
+  document.getElementById('share-link-display').style.display = 'block';
+  copyLink();
+}
+function copyLink() {
+  const val = document.getElementById('app-link-val').value;
+  navigator.clipboard.writeText(val).catch(()=>{});
+  toast('📋 Link copied to clipboard!');
+}
+function resendApp(name) {
+  toast(`📤 Application resent to ${name}!`);
+}
+function previewDefaultApp() {
+  const panel = document.getElementById('app-preview-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') panel.scrollIntoView({behavior:'smooth'});
+}
+
+/* ══════════════════════════════
+   PHOTOS
+══════════════════════════════ */
+const PHOTO_CHECKLIST_ITEMS = [
+  'Front Exterior','Backyard / Patio','Kitchen','Living Room',
+  'Master Bedroom','Additional Bedrooms','Bathrooms','Laundry',
+  'Parking','Storage / Garage','Building Entrance','Neighborhood'
+];
+
+const photoStore = JSON.parse(localStorage.getItem('rv_photos') || '[]');
+
+function renderPhotos() {
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+  photoStore.forEach((ph, i) => {
+    const div = document.createElement('div');
+    div.className = 'photo-card';
+    div.innerHTML = `
+      <img src="${ph.url}" alt="${ph.label}" loading="lazy">
+      <div class="ph-overlay">
+        <button class="ph-del" onclick="deletePhoto(${i})">🗑 Delete</button>
+        <div class="ph-label">${ph.label}</div>
+      </div>`;
+    grid.appendChild(div);
+  });
+  // Add button
+  const add = document.createElement('div');
+  add.className = 'ph-add';
+  add.innerHTML = '<span>＋</span><p>Add Photos</p>';
+  add.onclick = () => document.getElementById('photo-file-input').click();
+  grid.appendChild(add);
+
+  document.getElementById('ov-photos').textContent = photoStore.length;
+
+  // Checklist
+  const cl = document.getElementById('photo-checklist');
+  cl.innerHTML = PHOTO_CHECKLIST_ITEMS.map((item, i) => {
+    const done = photoStore.some(p => p.label === item) || i < Math.min(photoStore.length, 3);
+    return `<label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.85rem;padding:.35rem 0;">
+      <span style="font-size:1.1rem;">${done ? '✅' : '⬜'}</span> ${item}
+    </label>`;
+  }).join('');
+}
+
+function addPhotos(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      photoStore.push({ url: e.target.result, label: file.name.replace(/\.[^.]+$/,''), prop: '119 E 600 S #119' });
+      localStorage.setItem('rv_photos', JSON.stringify(photoStore));
+      renderPhotos();
+    };
+    reader.readAsDataURL(file);
+  });
+  toast(`✅ ${files.length} photo${files.length>1?'s':''} uploaded!`);
+}
+
+function deletePhoto(i) {
+  if (!confirm('Remove this photo?')) return;
+  photoStore.splice(i, 1);
+  localStorage.setItem('rv_photos', JSON.stringify(photoStore));
+  renderPhotos();
+}
+
+/* ══════════════════════════════
+   OVERVIEW STATS
+══════════════════════════════ */
+function refreshOverview() {
+  document.getElementById('ov-creds').textContent = '3';
+  document.getElementById('ov-apps').textContent = document.querySelectorAll('.app-card').length;
+  document.getElementById('ov-leases').textContent = '1';
+}
+
+/* ══════════════════════════════
+   TOAST
+══════════════════════════════ */
+function toast(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+/* ══════════════════════════════
+   INIT
+══════════════════════════════ */
+renderPhotos();
+refreshOverview();
+</script>
+</body>
+</html>

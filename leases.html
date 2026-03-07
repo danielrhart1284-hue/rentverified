@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lease Management – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background:#f3f4f6; }
+    .lm-wrapper { display:grid; grid-template-columns:240px 1fr; min-height:100vh; padding-top:64px; }
+    .lm-sidebar { background:#1e293b; color:#cbd5e1; padding:1.5rem 0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; }
+    .lm-sidebar h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.5rem 1.5rem; margin:1rem 0 .25rem; }
+    .lm-sidebar a  { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.9rem; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
+    .lm-sidebar a:hover, .lm-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#3b82f6; }
+    .lm-main { padding:2rem; max-width:1200px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+    .page-header h1 { font-size:1.5rem; color:#1e293b; }
+    .page-header p  { color:#64748b; font-size:.9rem; margin-top:.2rem; }
+    /* Stats */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.75rem; }
+    .stat-card { background:#fff; border-radius:12px; padding:1.25rem; box-shadow:0 1px 4px rgba(0,0,0,.08); border-left:4px solid #e2e8f0; }
+    .stat-card.active-s { border-left-color:#10b981; }
+    .stat-card.expiring  { border-left-color:#f59e0b; }
+    .stat-card.vacant    { border-left-color:#ef4444; }
+    .stat-card.pending   { border-left-color:#3b82f6; }
+    .stat-card .lbl { font-size:.72rem; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+    .stat-card .val { font-size:1.8rem; font-weight:700; color:#1e293b; }
+    /* Panel */
+    .panel { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:1.5rem; overflow:hidden; }
+    .panel-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-bottom:1px solid #f1f5f9; }
+    .panel-header h2 { font-size:1rem; color:#1e293b; font-weight:700; }
+    .panel-body { padding:1.5rem; }
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+    .fg { display:flex; flex-direction:column; gap:.4rem; }
+    .fg label { font-size:.82rem; font-weight:600; color:#374151; }
+    .fg input, .fg select, .fg textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.55rem .8rem; font-size:.9rem; color:#1e293b; outline:none; transition:border .15s; background:#fff; }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:#3b82f6; }
+    .fg textarea { resize:vertical; min-height:80px; }
+    /* Badges */
+    .lsts { display:inline-block; padding:.2rem .65rem; border-radius:99px; font-size:.75rem; font-weight:600; }
+    .lsts-active   { background:#dcfce7; color:#15803d; }
+    .lsts-expiring { background:#fef9c3; color:#854d0e; }
+    .lsts-expired  { background:#fef2f2; color:#dc2626; }
+    .lsts-pending  { background:#dbeafe; color:#1d4ed8; }
+    .lsts-vacant   { background:#f1f5f9; color:#475569; }
+    /* Table */
+    .data-table { width:100%; border-collapse:collapse; font-size:.87rem; }
+    .data-table th { text-align:left; padding:.65rem 1rem; background:#f8fafc; font-size:.73rem; text-transform:uppercase; letter-spacing:.05em; color:#64748b; border-bottom:1px solid #e2e8f0; }
+    .data-table td { padding:.75rem 1rem; border-bottom:1px solid #f1f5f9; color:#374151; vertical-align:middle; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:#fafafa; }
+    /* Buttons */
+    .btn { padding:.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; transition:all .15s; }
+    .btn-primary { background:#1a56db; color:#fff; }
+    .btn-primary:hover { background:#1e40af; }
+    .btn-success { background:#10b981; color:#fff; }
+    .btn-success:hover { background:#059669; }
+    .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
+    .btn-outline:hover { border-color:#94a3b8; }
+    .btn-sm { padding:.35rem .75rem; font-size:.78rem; }
+    .btn-warn { background:#fef9c3; color:#854d0e; border:1.5px solid #fde68a; }
+    /* Lease card */
+    .lease-card { border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem; transition:all .15s; }
+    .lease-card:hover { border-color:#3b82f6; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .lease-card.expiring-soon { border-color:#f59e0b; background:#fffbeb; }
+    .lc-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.75rem; }
+    .lc-prop { font-size:1rem; font-weight:700; color:#1e293b; }
+    .lc-tenant { font-size:.88rem; color:#374151; margin-top:.2rem; }
+    .lc-meta { display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:.75rem; font-size:.83rem; color:#64748b; }
+    .lc-meta strong { color:#374151; }
+    /* Expiry bar */
+    .expiry-bar-track { height:6px; background:#e2e8f0; border-radius:99px; margin-top:.6rem; overflow:hidden; }
+    .expiry-bar-fill  { height:100%; border-radius:99px; transition:width .5s; }
+    /* E-sign steps */
+    .esign-steps { display:flex; gap:0; margin-bottom:1.5rem; }
+    .estep { flex:1; text-align:center; padding:.75rem .5rem; font-size:.8rem; position:relative; }
+    .estep::after { content:''; position:absolute; top:50%; right:0; transform:translateY(-50%); width:1px; height:60%; background:#e2e8f0; }
+    .estep:last-child::after { display:none; }
+    .estep .enum { width:28px; height:28px; border-radius:50%; margin:0 auto .4rem; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; background:#e2e8f0; color:#94a3b8; }
+    .estep.done .enum { background:#10b981; color:#fff; }
+    .estep.active .enum { background:#1a56db; color:#fff; }
+    .estep .elbl { color:#94a3b8; }
+    .estep.done .elbl { color:#10b981; }
+    .estep.active .elbl { color:#1a56db; font-weight:700; }
+    /* Clause toggle */
+    .clause { border:1px solid #e2e8f0; border-radius:8px; margin-bottom:.5rem; overflow:hidden; }
+    .clause-hdr { display:flex; justify-content:space-between; align-items:center; padding:.65rem 1rem; cursor:pointer; background:#f8fafc; font-size:.88rem; font-weight:600; color:#374151; }
+    .clause-hdr:hover { background:#f1f5f9; }
+    .clause-body { padding:.75rem 1rem; font-size:.85rem; color:#374151; border-top:1px solid #f1f5f9; display:none; line-height:1.6; }
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:16px; width:min(720px,95vw); max-height:90vh; overflow-y:auto; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    .modal-close { background:none; border:none; font-size:1.5rem; cursor:pointer; color:#94a3b8; }
+    /* Toast */
+    #toast { position:fixed; bottom:2rem; right:2rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; opacity:0; transform:translateY(10px); transition:all .3s; z-index:9999; pointer-events:none; }
+    #toast.show { opacity:1; transform:translateY(0); }
+    /* Lease preview */
+    .lease-doc { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:2rem; font-size:.88rem; line-height:1.7; color:#374151; max-height:500px; overflow-y:auto; }
+    .lease-doc h2 { text-align:center; color:#1e293b; margin-bottom:.5rem; }
+    .lease-doc h3 { color:#1e293b; margin:1.25rem 0 .5rem; border-bottom:1px solid #e2e8f0; padding-bottom:.25rem; }
+    .lease-doc .field { background:#fef9c3; border-radius:3px; padding:0 .25rem; font-weight:600; }
+    @media(max-width:768px){ .lm-wrapper{grid-template-columns:1fr;} .lm-sidebar{display:none;} .esign-steps{flex-direction:column;} }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-logo">✓</span><span>RentVerified</span></div>
+  <div class="nav-links">
+    <a href="landlord-signup.html">← Dashboard</a>
+    <a href="maintenance.html">Maintenance</a>
+    <a href="index.html">Home</a>
+  </div>
+</nav>
+
+<div class="lm-wrapper">
+  <aside class="lm-sidebar">
+    <h3>Leases</h3>
+    <a class="active" onclick="showSec('leases',this)">📋 Active Leases</a>
+    <a onclick="showSec('new',this)">➕ New Lease</a>
+    <a onclick="showSec('esign',this)">✍️ Digital Signing</a>
+    <a onclick="showSec('renewals',this)">🔄 Renewals</a>
+    <a onclick="showSec('templates',this)">📄 Templates</a>
+    <h3>Manage</h3>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+    <a href="accounting.html">📊 Accounting</a>
+    <a href="maintenance.html">🔧 Maintenance</a>
+    <a href="screening.html">🛡 Screening</a>
+    <a href="ad-builder.html">📣 Ad Builder</a>
+  </aside>
+
+  <main class="lm-main">
+
+    <!-- ── ACTIVE LEASES ─────────────────────────────── -->
+    <div id="sec-leases">
+      <div class="page-header">
+        <div><h1>📋 Lease Management</h1><p>Track all leases, renewals, and expirations.</p></div>
+        <button class="btn btn-primary" onclick="showSec('new',null)">+ New Lease</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card active-s"><div class="lbl">Active</div><div class="val" id="cntActive">0</div></div>
+        <div class="stat-card expiring"><div class="lbl">Expiring &lt;60 Days</div><div class="val" id="cntExpiring">0</div></div>
+        <div class="stat-card vacant"> <div class="lbl">Vacant Units</div><div class="val" id="cntVacant">0</div></div>
+        <div class="stat-card pending"><div class="lbl">Pending Signature</div><div class="val" id="cntPending">0</div></div>
+      </div>
+      <!-- Expiring Soon Banner -->
+      <div id="expiringBanner" style="display:none;background:#fffbeb;border:1.5px solid #f59e0b;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.9rem;color:#92400e;">
+        <strong>⚠️ Upcoming Expirations:</strong> <span id="expiringList"></span>
+      </div>
+      <div id="leaseCards"></div>
+    </div>
+
+    <!-- ── NEW LEASE ─────────────────────────────────── -->
+    <div id="sec-new" style="display:none;">
+      <div class="page-header"><div><h1>➕ Create New Lease</h1><p>Fill in tenant and property details to generate a lease agreement.</p></div></div>
+      <div class="panel">
+        <div class="panel-header"><h2>Property & Tenant Info</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Property *</label>
+              <select id="nlProp">
+                <option>119 E 600 S #119, Orem UT</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="fg"><label>Unit</label><input id="nlUnit" placeholder="e.g. Unit 119"></div>
+            <div class="fg"><label>Tenant Full Name *</label><input id="nlTenant" placeholder="John Smith"></div>
+            <div class="fg"><label>Tenant Email *</label><input id="nlEmail" type="email" placeholder="tenant@email.com"></div>
+            <div class="fg"><label>Tenant Phone</label><input id="nlPhone" type="tel" placeholder="(801) 555-0000"></div>
+            <div class="fg"><label>Co-Tenant (if any)</label><input id="nlCo" placeholder="Co-tenant name"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Lease Terms</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Lease Start *</label><input type="date" id="nlStart"></div>
+            <div class="fg"><label>Lease End *</label><input type="date" id="nlEnd"></div>
+            <div class="fg"><label>Monthly Rent ($) *</label><input type="number" id="nlRent" placeholder="1200"></div>
+            <div class="fg"><label>Security Deposit ($)</label><input type="number" id="nlDeposit" placeholder="1200"></div>
+            <div class="fg"><label>Late Fee ($)</label><input type="number" id="nlLateFee" placeholder="75"></div>
+            <div class="fg"><label>Grace Period (days)</label><input type="number" id="nlGrace" placeholder="5"></div>
+            <div class="fg"><label>Rent Due Day</label>
+              <select id="nlDueDay">
+                <option value="1">1st of month</option><option value="5">5th of month</option>
+                <option value="15">15th of month</option><option value="last">Last day</option>
+              </select>
+            </div>
+            <div class="fg"><label>Pet Policy</label>
+              <select id="nlPets">
+                <option>No Pets</option><option>Cats allowed</option><option>Small dogs allowed</option>
+                <option>All pets negotiated</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Utilities & Responsibilities</h2></div>
+        <div class="panel-body">
+          <p style="font-size:.85rem;color:#64748b;margin-bottom:1rem;">Check which utilities the <strong>tenant</strong> is responsible for:</p>
+          <div style="display:flex;flex-wrap:wrap;gap:.75rem;" id="utilityChecks">
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;color:#374151;cursor:pointer;"><input type="checkbox" value="Electricity" checked> Electricity</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;color:#374151;cursor:pointer;"><input type="checkbox" value="Natural Gas" checked> Natural Gas</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;color:#374151;cursor:pointer;"><input type="checkbox" value="Internet" checked> Internet</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;color:#374151;cursor:pointer;"><input type="checkbox" value="Water/Sewer"> Water/Sewer</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;color:#374151;cursor:pointer;"><input type="checkbox" value="Trash"> Trash</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;color:#374151;cursor:pointer;"><input type="checkbox" value="Lawn Care"> Lawn Care</label>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Additional Clauses</h2></div>
+        <div class="panel-body">
+          <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;">
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;"><input type="checkbox" id="clSmoke" checked> No Smoking Clause</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;"><input type="checkbox" id="clRenter"> Renters Insurance Required</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;"><input type="checkbox" id="clParking" checked> Parking Policy</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;"><input type="checkbox" id="clGuest"> Guest Policy</label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;"><input type="checkbox" id="clAirbnb" checked> No Subletting/Airbnb</label>
+          </div>
+          <div class="fg"><label>Additional Notes / Custom Clauses</label><textarea id="nlNotes" placeholder="Any custom terms or special agreements…"></textarea></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-bottom:2rem;">
+        <button class="btn btn-primary" onclick="createLease()">📝 Generate Lease</button>
+        <button class="btn btn-outline" onclick="showSec('leases',null)">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ── E-SIGN ─────────────────────────────────────── -->
+    <div id="sec-esign" style="display:none;">
+      <div class="page-header"><div><h1>✍️ Digital Lease Signing</h1><p>Send leases for electronic signature — no printing required.</p></div></div>
+      <div class="panel">
+        <div class="panel-header"><h2>How It Works</h2></div>
+        <div class="panel-body">
+          <div class="esign-steps">
+            <div class="estep done"><div class="enum">✓</div><div class="elbl">Create Lease</div></div>
+            <div class="estep done"><div class="enum">✓</div><div class="elbl">Review & Preview</div></div>
+            <div class="estep active"><div class="enum">3</div><div class="elbl">Send to Tenant</div></div>
+            <div class="estep"><div class="enum">4</div><div class="elbl">Tenant Signs</div></div>
+            <div class="estep"><div class="enum">5</div><div class="elbl">Landlord Signs</div></div>
+            <div class="estep"><div class="enum">6</div><div class="elbl">Lease Active</div></div>
+          </div>
+          <p style="font-size:.88rem;color:#374151;margin-bottom:1rem;">Tenants receive an email with a secure signing link. Once both parties sign, the executed lease is automatically saved to your document storage.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Pending Signatures</h2></div>
+        <div id="pendingSignatures" class="panel-body"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Send for Signature</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="fg"><label>Select Lease</label>
+              <select id="esignLease" id="esignLease"></select>
+            </div>
+            <div class="fg"><label>Tenant Email</label><input id="esignEmail" type="email" placeholder="tenant@example.com"></div>
+          </div>
+          <div style="margin-top:1rem;">
+            <button class="btn btn-primary" onclick="sendForSignature()">✉️ Send Signing Request</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RENEWALS ───────────────────────────────────── -->
+    <div id="sec-renewals" style="display:none;">
+      <div class="page-header"><div><h1>🔄 Lease Renewals</h1><p>Manage upcoming renewals and send renewal offers to tenants.</p></div></div>
+      <div id="renewalCards"></div>
+    </div>
+
+    <!-- ── TEMPLATES ─────────────────────────────────── -->
+    <div id="sec-templates" style="display:none;">
+      <div class="page-header"><div><h1>📄 Lease Templates</h1><p>Pre-built Utah residential lease templates.</p></div></div>
+      <div class="panel">
+        <div class="panel-header"><h2>Standard Utah Residential Lease</h2><span class="lsts lsts-active">Ready to Use</span></div>
+        <div class="panel-body">
+          <p style="font-size:.88rem;color:#64748b;margin-bottom:1rem;">This template includes all required disclosures for Utah residential tenancies. <strong>Always have a licensed attorney review before use.</strong></p>
+          <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;">
+            <span style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:99px;padding:.25rem .75rem;font-size:.78rem;font-weight:600;">✓ Lead Paint Disclosure</span>
+            <span style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:99px;padding:.25rem .75rem;font-size:.78rem;font-weight:600;">✓ Security Deposit Terms</span>
+            <span style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:99px;padding:.25rem .75rem;font-size:.78rem;font-weight:600;">✓ Entry Notice (24hr)</span>
+            <span style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:99px;padding:.25rem .75rem;font-size:.78rem;font-weight:600;">✓ Habitability Standards</span>
+            <span style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:99px;padding:.25rem .75rem;font-size:.78rem;font-weight:600;">✓ Termination Procedures</span>
+          </div>
+          <!-- Clause viewer -->
+          <div id="clauseList"></div>
+          <button class="btn btn-outline" onclick="showSec('new',null)" style="margin-top:1rem;">Use This Template →</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- LEASE DETAIL MODAL -->
+<div class="modal-overlay" id="leaseModal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
+      <h2 style="font-size:1.2rem;color:#1e293b;" id="modalTitle">Lease Detail</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+let leases = [];
+
+function loadData() {
+  try { leases = JSON.parse(localStorage.getItem('rv_leases') || '[]'); } catch(e){ leases=[]; }
+}
+function saveData() { localStorage.setItem('rv_leases', JSON.stringify(leases)); }
+function uid() { return 'LS-' + Date.now().toString(36).toUpperCase(); }
+
+function loadSample() {
+  if(leases.length) return;
+  leases = [
+    {
+      id: 'LS-SAMPLE1',
+      prop: '119 E 600 S #119, Orem UT', unit: 'Unit 119',
+      tenant: 'Current Tenant', email: 'tenant@example.com', phone: '(801) 555-1234', co:'',
+      start: '2026-01-01', end: '2026-12-31',
+      rent: 1200, deposit: 1200, lateFee: 75, grace: 5, dueDay: '1',
+      pets: 'No Pets', utilities: ['Electricity','Natural Gas','Internet'],
+      status: 'active', signed: true, signedDate: '2025-12-20',
+      notes: 'Tenant pays internet, gas, electricity per lease.',
+      clauses: ['noSmoke','parking','noAirbnb'],
+    }
+  ];
+  saveData();
+}
+
+const CLAUSES = [
+  { key:'noSmoke', title:'No Smoking Policy', text:'Smoking of any kind, including tobacco, cannabis, or e-cigarettes, is strictly prohibited inside the unit and within 25 feet of the property. Violation may result in lease termination and the tenant will be responsible for deodorization costs.' },
+  { key:'renterIns', title:'Renters Insurance Requirement', text:'Tenant shall maintain renters insurance with a minimum of $50,000 personal property coverage and $100,000 liability coverage throughout the tenancy. Proof of coverage must be provided to Landlord within 14 days of occupancy.' },
+  { key:'parking', title:'Parking Policy', text:'Tenant is assigned one (1) designated parking space. Unauthorized vehicles may be towed at owner\'s expense. Guest parking is available in designated areas only.' },
+  { key:'guestPolicy', title:'Guest Policy', text:'Guests may stay no longer than 7 consecutive days or 14 days in any calendar month without prior written approval from Landlord. Guests who exceed this limit may be considered unauthorized occupants.' },
+  { key:'noAirbnb', title:'No Subletting or Short-Term Rental', text:'Tenant shall not sublet, assign, or rent the premises or any portion thereof, including through platforms such as Airbnb, VRBO, or similar services, without prior written consent from Landlord.' },
+  { key:'maintenance', title:'Tenant Maintenance Responsibilities', text:'Tenant is responsible for keeping the premises clean and sanitary, replacing light bulbs, maintaining smoke detector batteries, and promptly reporting any damage or needed repairs to Landlord.' },
+  { key:'entry', title:'Landlord Right of Entry', text:'Landlord shall provide at least 24 hours written notice before entering the premises for non-emergency repairs or inspections. In the event of an emergency, Landlord may enter without notice.' },
+  { key:'deposit', title:'Security Deposit Terms', text:'Security deposit shall be returned within 30 days of move-out, less any deductions for unpaid rent, cleaning, or damages beyond normal wear and tear. An itemized statement will be provided.' },
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadData(); loadSample();
+  setDefaultDates();
+  renderAll();
+  renderClauses();
+  renderESignPanel();
+  renderRenewals();
+});
+
+function setDefaultDates() {
+  const s = document.getElementById('nlStart');
+  const e = document.getElementById('nlEnd');
+  if(!s||!e) return;
+  const now = new Date();
+  s.valueAsDate = new Date(now.getFullYear(), now.getMonth()+1, 1);
+  const end = new Date(now.getFullYear()+1, now.getMonth()+1, 0);
+  e.valueAsDate = end;
+}
+
+function renderAll() {
+  renderLeaseCards();
+  updateCounts();
+  renderExpiringBanner();
+}
+
+// ── COUNTS ──────────────────────────────────────────
+function daysUntil(dateStr) {
+  return Math.ceil((new Date(dateStr+'T12:00:00') - new Date()) / 86400000);
+}
+
+function updateCounts() {
+  document.getElementById('cntActive').textContent   = leases.filter(l=>l.status==='active').length;
+  document.getElementById('cntExpiring').textContent = leases.filter(l=>l.status==='active'&&daysUntil(l.end)<=60&&daysUntil(l.end)>0).length;
+  document.getElementById('cntVacant').textContent   = leases.filter(l=>l.status==='vacant').length;
+  document.getElementById('cntPending').textContent  = leases.filter(l=>!l.signed).length;
+}
+
+function renderExpiringBanner() {
+  const exp = leases.filter(l=>l.status==='active'&&daysUntil(l.end)<=60&&daysUntil(l.end)>0);
+  if(!exp.length) { document.getElementById('expiringBanner').style.display='none'; return; }
+  document.getElementById('expiringBanner').style.display='block';
+  document.getElementById('expiringList').textContent = exp.map(l=>`${l.tenant} (${l.prop}) — expires in ${daysUntil(l.end)} days`).join('; ');
+}
+
+// ── LEASE CARDS ──────────────────────────────────────
+function leaseStatus(l) {
+  const days = daysUntil(l.end);
+  if(l.status==='vacant') return 'vacant';
+  if(!l.signed) return 'pending';
+  if(days < 0) return 'expired';
+  if(days <= 60) return 'expiring';
+  return 'active';
+}
+
+function renderLeaseCards() {
+  const el = document.getElementById('leaseCards');
+  if(!leases.length) {
+    el.innerHTML='<div style="text-align:center;padding:3rem;color:#94a3b8;"><div style="font-size:2.5rem;">📋</div><p>No leases yet. Create your first lease to get started.</p><button class="btn btn-primary" style="margin-top:1rem;" onclick="showSec(\'new\',null)">+ Create Lease</button></div>';
+    return;
+  }
+  el.innerHTML = leases.map(l => {
+    const sts = leaseStatus(l);
+    const days = daysUntil(l.end);
+    const total = (new Date(l.end) - new Date(l.start)) / 86400000;
+    const elapsed = total - Math.max(days,0);
+    const pct = Math.round((elapsed/total)*100);
+    return `<div class="lease-card ${sts==='expiring'?'expiring-soon':''}">
+      <div class="lc-top">
+        <div>
+          <div class="lc-prop">🏠 ${l.prop}</div>
+          <div class="lc-tenant">👤 ${l.tenant}${l.co?' & '+l.co:''}</div>
+        </div>
+        <span class="lsts lsts-${sts}">${sts.charAt(0).toUpperCase()+sts.slice(1)}</span>
+      </div>
+      <div class="lc-meta">
+        <span>📅 <strong>${l.start}</strong> → <strong>${l.end}</strong></span>
+        <span>💰 <strong>$${l.rent.toLocaleString()}/mo</strong></span>
+        <span>🔑 Deposit: <strong>$${l.deposit.toLocaleString()}</strong></span>
+        <span>⚡ Tenant pays: <strong>${l.utilities.join(', ')||'None'}</strong></span>
+        ${l.signed?`<span>✍️ Signed: <strong>${l.signedDate||'Yes'}</strong></span>`:'<span style="color:#f59e0b;">⚠️ <strong>Awaiting Signature</strong></span>'}
+        <span>${days>0?`📆 ${days} days remaining`:'📆 Expired'}</span>
+      </div>
+      <div class="expiry-bar-track"><div class="expiry-bar-fill" style="width:${Math.max(0,Math.min(100,pct))}%;background:${sts==='expiring'?'#f59e0b':sts==='expired'?'#ef4444':'#10b981'};"></div></div>
+      <div style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="openLeaseModal('${l.id}')">View Lease</button>
+        ${!l.signed?`<button class="btn btn-warn btn-sm" onclick="markSigned('${l.id}')">✍️ Mark Signed</button>`:''}
+        ${sts==='expiring'?`<button class="btn btn-success btn-sm" onclick="offerRenewal('${l.id}')">🔄 Offer Renewal</button>`:''}
+        <button class="btn btn-sm" style="background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;" onclick="deleteLease('${l.id}')">✕ Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CREATE LEASE ─────────────────────────────────────
+function createLease() {
+  const tenant = document.getElementById('nlTenant').value.trim();
+  const email  = document.getElementById('nlEmail').value.trim();
+  const start  = document.getElementById('nlStart').value;
+  const end    = document.getElementById('nlEnd').value;
+  const rent   = parseFloat(document.getElementById('nlRent').value);
+  if(!tenant||!email||!start||!end||!rent) return toast('⚠️ Please fill in all required fields.');
+  const utils = [...document.querySelectorAll('#utilityChecks input:checked')].map(c=>c.value);
+  const l = {
+    id: uid(),
+    prop:    document.getElementById('nlProp').value,
+    unit:    document.getElementById('nlUnit').value,
+    tenant, email,
+    phone:   document.getElementById('nlPhone').value,
+    co:      document.getElementById('nlCo').value,
+    start, end,
+    rent, deposit: parseFloat(document.getElementById('nlDeposit').value)||0,
+    lateFee: parseFloat(document.getElementById('nlLateFee').value)||75,
+    grace:   parseInt(document.getElementById('nlGrace').value)||5,
+    dueDay:  document.getElementById('nlDueDay').value,
+    pets:    document.getElementById('nlPets').value,
+    utilities: utils,
+    status: 'active',
+    signed: false, signedDate: '',
+    notes: document.getElementById('nlNotes').value,
+    clauses: [],
+  };
+  leases.unshift(l);
+  saveData(); renderAll(); renderESignPanel(); renderRenewals();
+  toast(`✅ Lease created for ${l.tenant}. Send for signature now.`);
+  showSec('leases', null);
+}
+
+function markSigned(id) {
+  const l = leases.find(x=>x.id===id);
+  if(!l) return;
+  l.signed = true;
+  l.signedDate = new Date().toISOString().slice(0,10);
+  saveData(); renderAll();
+  toast('✍️ Lease marked as signed!');
+}
+
+function deleteLease(id) {
+  if(!confirm('Remove this lease?')) return;
+  leases = leases.filter(l=>l.id!==id);
+  saveData(); renderAll(); renderESignPanel();
+  toast('🗑 Lease removed.');
+}
+
+function offerRenewal(id) {
+  const l = leases.find(x=>x.id===id);
+  if(!l) return;
+  toast(`📧 Renewal offer sent to ${l.email}! (Connect email backend to send live.)`);
+}
+
+// ── E-SIGN ────────────────────────────────────────────
+function renderESignPanel() {
+  const sel = document.getElementById('esignLease');
+  if(!sel) return;
+  sel.innerHTML = leases.map(l=>`<option value="${l.id}">${l.tenant} — ${l.prop}</option>`).join('');
+  const pending = leases.filter(l=>!l.signed);
+  const el = document.getElementById('pendingSignatures');
+  el.innerHTML = pending.length
+    ? pending.map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem;background:#fff7ed;border-radius:8px;margin-bottom:.5rem;border:1px solid #fed7aa;">
+        <div><strong>${l.tenant}</strong> — ${l.prop}<div style="font-size:.78rem;color:#92400e;">Awaiting signature · Sent to ${l.email}</div></div>
+        <button class="btn btn-warn btn-sm" onclick="markSigned('${l.id}')">✍️ Mark Signed</button>
+      </div>`).join('')
+    : '<p style="color:#94a3b8;font-size:.88rem;text-align:center;padding:1.5rem 0;">✅ All leases are signed!</p>';
+  if(leases.length && document.getElementById('esignEmail')) {
+    const l = leases[0];
+    document.getElementById('esignEmail').value = l.email || '';
+  }
+}
+
+function sendForSignature() {
+  const id = document.getElementById('esignLease').value;
+  const email = document.getElementById('esignEmail').value;
+  if(!email) return toast('⚠️ Enter tenant email.');
+  const l = leases.find(x=>x.id===id);
+  toast(`✉️ Signing link sent to ${email}! (Connect email backend to send live.)`);
+}
+
+// ── RENEWALS ──────────────────────────────────────────
+function renderRenewals() {
+  const el = document.getElementById('renewalCards');
+  if(!el) return;
+  const renewing = leases.filter(l=>{
+    const d = daysUntil(l.end);
+    return l.status==='active' && d <= 90;
+  });
+  el.innerHTML = renewing.length
+    ? renewing.map(l=>{
+        const days = daysUntil(l.end);
+        return `<div class="panel">
+          <div class="panel-header">
+            <div><h2>${l.tenant} — ${l.prop}</h2><div style="font-size:.82rem;color:#64748b;">Current lease ends ${l.end} (${days>0?days+' days':Math.abs(days)+' days ago'})</div></div>
+            <span class="lsts ${days<=0?'lsts-expired':days<=30?'lsts-expiring':'lsts-pending'}">${days<=0?'Expired':days<=30?'Urgent':'Expiring Soon'}</span>
+          </div>
+          <div class="panel-body">
+            <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+              <div class="fg" style="flex:1;min-width:180px;">
+                <label>New Monthly Rent ($)</label>
+                <input type="number" id="ren_${l.id}" value="${l.rent}" placeholder="${l.rent}">
+              </div>
+              <div class="fg" style="flex:1;min-width:180px;">
+                <label>New End Date</label>
+                <input type="date" id="rend_${l.id}">
+              </div>
+            </div>
+            <div style="display:flex;gap:.75rem;margin-top:.75rem;">
+              <button class="btn btn-success btn-sm" onclick="processRenewal('${l.id}')">🔄 Create Renewal</button>
+              <button class="btn btn-outline btn-sm" onclick="offerRenewal('${l.id}')">📧 Email Tenant</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="text-align:center;padding:3rem;color:#94a3b8;"><div style="font-size:2.5rem;">🔄</div><p>No leases expiring within 90 days.</p></div>';
+}
+
+function processRenewal(id) {
+  const l = leases.find(x=>x.id===id);
+  const newRent = parseFloat(document.getElementById('ren_'+id).value);
+  const newEnd  = document.getElementById('rend_'+id).value;
+  if(!newEnd) return toast('⚠️ Please set a new end date.');
+  const renewal = { ...l, id: uid(), start: l.end, end: newEnd, rent: newRent||l.rent, signed:false, signedDate:'' };
+  leases.unshift(renewal);
+  saveData(); renderAll(); renderESignPanel(); renderRenewals();
+  toast(`✅ Renewal lease created for ${l.tenant}. Send for signature.`);
+}
+
+// ── LEASE MODAL ───────────────────────────────────────
+function openLeaseModal(id) {
+  const l = leases.find(x=>x.id===id);
+  if(!l) return;
+  document.getElementById('modalTitle').textContent = `Lease — ${l.tenant}`;
+  const utils = l.utilities.join(', ')||'None';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="lease-doc">
+      <h2>RESIDENTIAL LEASE AGREEMENT</h2>
+      <p style="text-align:center;color:#64748b;font-size:.82rem;">RentVerified · Sanders Property Management</p>
+      <h3>1. Parties</h3>
+      <p><strong>Landlord:</strong> Sanders Property Management<br>
+      <strong>Tenant(s):</strong> <span class="field">${l.tenant}${l.co?' & '+l.co:''}</span><br>
+      <strong>Tenant Email:</strong> ${l.email} &nbsp; <strong>Phone:</strong> ${l.phone||'N/A'}</p>
+      <h3>2. Property</h3>
+      <p><span class="field">${l.prop}</span>${l.unit?', <span class="field">'+l.unit+'</span>':''}</p>
+      <h3>3. Term</h3>
+      <p>This lease begins <span class="field">${l.start}</span> and ends <span class="field">${l.end}</span>.</p>
+      <h3>4. Rent</h3>
+      <p>Monthly rent is <span class="field">$${l.rent.toLocaleString()}</span>, due on the <span class="field">${l.dueDay}</span> of each month.
+      A grace period of <span class="field">${l.grace}</span> days applies. Late fee: <span class="field">$${l.lateFee}</span>.</p>
+      <h3>5. Security Deposit</h3>
+      <p>Security deposit of <span class="field">$${l.deposit.toLocaleString()}</span> due at signing. Returned within 30 days of move-out per Utah Code § 57-17.</p>
+      <h3>6. Utilities</h3>
+      <p>Tenant is responsible for: <span class="field">${utils}</span>. All other utilities are included.</p>
+      <h3>7. Pet Policy</h3>
+      <p><span class="field">${l.pets}</span>.</p>
+      <h3>8. Additional Terms</h3>
+      <p>${l.notes||'Standard terms apply.'}</p>
+      <h3>9. Signatures</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem;">
+        <div><div style="border-bottom:1px solid #374151;margin-bottom:.5rem;height:40px;display:flex;align-items:flex-end;padding-bottom:.25rem;">
+          ${l.signed?`<em style="color:#10b981;">✍️ ${l.tenant} (signed ${l.signedDate})</em>`:'<span style="color:#94a3b8;font-size:.8rem;">Tenant Signature</span>'}
+        </div><div style="font-size:.78rem;color:#64748b;">Tenant · Date: ${l.signed?l.signedDate:'___________'}</div></div>
+        <div><div style="border-bottom:1px solid #374151;margin-bottom:.5rem;height:40px;display:flex;align-items:flex-end;padding-bottom:.25rem;">
+          <em style="color:#10b981;">✍️ Sanders Property Management</em>
+        </div><div style="font-size:.78rem;color:#64748b;">Landlord · Date: ${l.start}</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap;">
+      ${!l.signed?`<button class="btn btn-success" onclick="markSigned('${l.id}');closeModal()">✍️ Mark as Signed</button>`:''}
+      <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+    </div>`;
+  document.getElementById('leaseModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('leaseModal').classList.remove('open'); }
+
+// ── TEMPLATES ────────────────────────────────────────
+function renderClauses() {
+  const el = document.getElementById('clauseList');
+  if(!el) return;
+  el.innerHTML = CLAUSES.map(c=>`
+    <div class="clause">
+      <div class="clause-hdr" onclick="toggleClause(this)">
+        <span>${c.title}</span><span>▼</span>
+      </div>
+      <div class="clause-body">${c.text}</div>
+    </div>`).join('');
+}
+
+function toggleClause(hdr) {
+  const body = hdr.nextElementSibling;
+  body.style.display = body.style.display==='block' ? 'none' : 'block';
+}
+
+// ── SECTION NAV ──────────────────────────────────────
+function showSec(name, el) {
+  ['leases','new','esign','renewals','templates'].forEach(s=>{
+    document.getElementById('sec-'+s).style.display=s===name?'block':'none';
+  });
+  document.querySelectorAll('.lm-sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toast(msg) {
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
+</script>
+</body>
+</html>

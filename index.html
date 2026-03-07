@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified – Find Verified Rentals, Skip the Scams</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 60%, #1e3a8a 100%);
+      color: white;
+      padding: 6rem 2rem 5rem;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 5px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.04em;
+    }
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero h1 .highlight { color: #93c5fd; }
+    .hero p {
+      font-size: 1.15rem;
+      opacity: 0.88;
+      max-width: 550px;
+      margin: 0 auto 2.5rem;
+    }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      margin-top: 3.5rem;
+      flex-wrap: wrap;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .num { font-size: 2rem; font-weight: 800; }
+    .hero-stat .lbl { font-size: 0.8rem; opacity: 0.75; margin-top: 2px; }
+
+    /* Trust bar */
+    .trust-bar {
+      background: var(--dark);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray-400);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .trust-item svg { color: #4ade80; }
+
+    /* Search bar */
+    .search-bar-wrap {
+      background: white;
+      padding: 2rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .search-bar {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 0.8rem 1.25rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    .search-bar input:focus { outline: none; border-color: var(--primary); }
+    .search-bar select {
+      padding: 0.8rem 1rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    /* How it works */
+    .step-card {
+      text-align: center;
+      padding: 2rem;
+    }
+    .step-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+    .step-icon svg { width: 28px; height: 28px; color: var(--primary); }
+    .step-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--primary);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+    .step-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--dark); }
+    .step-card p { color: var(--gray-600); font-size: 0.9rem; }
+
+    /* Scam alert banner */
+    .scam-banner {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 1px solid #f59e0b;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .scam-banner-icon {
+      font-size: 3rem;
+      flex-shrink: 0;
+    }
+
+    /* Landlord CTA section */
+    .landlord-cta {
+      background: linear-gradient(135deg, #1a56db 0%, #1e3a8a 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .landlord-cta h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .landlord-cta p { opacity: 0.85; max-width: 480px; }
+
+    /* Featured landlord */
+    .featured-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fffbeb;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* Verify tool */
+    .verify-tool {
+      background: var(--gray-100);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      text-align: center;
+    }
+    .verify-tool h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .verify-input {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 500px;
+      margin: 1.5rem auto 0;
+    }
+    .verify-input input {
+      flex: 1;
+      padding: 0.75rem 1.25rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+
+    /* Testimonials */
+    .testimonial-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+    }
+    .testimonial-text { color: var(--gray-700); font-size: 0.95rem; line-height: 1.7; margin-bottom: 1rem; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: 10px; }
+    .author-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 0.85rem;
+    }
+    .author-name { font-weight: 700; font-size: 0.9rem; }
+    .author-role { color: var(--gray-600); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    Rent<span>Verified</span>
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">Browse Rentals</a>
+    <a href="#roles">Who We Serve</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Tenant Login</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+    100% Verified Landlords – Zero Scams
+  </div>
+  <h1>Find Your Next Rental <span class="highlight">Without the Stress</span></h1>
+  <p>Every listing is verified. Every landlord is screened. AI-powered support answers your questions 24/7.</p>
+  <div class="hero-btns">
+    <a href="listings.html" class="btn btn-lg" style="background:white;color:var(--primary);font-weight:700;">Browse Verified Rentals</a>
+    <a href="landlord-signup.html" class="btn btn-lg btn-outline" style="border-color:rgba(255,255,255,0.5);color:white;">List Your Property</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">100%</div><div class="lbl">Verified Landlords</div></div>
+    <div class="hero-stat"><div class="num">24/7</div><div class="lbl">AI Support</div></div>
+    <div class="hero-stat"><div class="num">$0</div><div class="lbl">Tenant Fees</div></div>
+    <div class="hero-stat"><div class="num">0</div><div class="lbl">Scam Listings</div></div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    Identity-Verified Landlords
+  </div>
+  <div class="trust-item">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    QR-Code Verified Listings
+  </div>
+  <div class="trust-item">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    Secure Document Sharing
+  </div>
+  <div class="trust-item">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    No Wire-Transfer Scams
+  </div>
+</div>
+
+<!-- WHO WE SERVE -->
+<section class="section" id="roles" style="background:white;padding:3.5rem 0;">
+  <div class="container">
+    <div class="text-center">
+      <h2 class="section-title">One Platform. Every Role.</h2>
+      <p class="section-subtitle">Whether you're renting, managing, selling, or servicing — RentVerified has a portal built for you.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;margin-top:2.5rem;">
+
+      <!-- TENANT -->
+      <div style="border-radius:16px;border:2px solid #e2e8f0;padding:2rem;text-align:center;transition:all .2s;cursor:pointer;" onmouseover="this.style.borderColor='#10b981';this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(16,185,129,.12)'" onmouseout="this.style.borderColor='#e2e8f0';this.style.transform='';this.style.boxShadow=''">
+        <div style="font-size:3rem;margin-bottom:1rem;">🏠</div>
+        <h3 style="font-weight:800;color:#1e293b;font-size:1.15rem;margin-bottom:.5rem;">Tenant</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:1.25rem;">Find verified rentals, pay rent for free via Cash App or Zelle, submit maintenance requests, and communicate with your landlord — all in one portal.</p>
+        <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;text-align:left;">
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#10b981;">✓</span> Browse verified listings</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#10b981;">✓</span> $0 rent payment fees</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#10b981;">✓</span> Submit maintenance requests</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#10b981;">✓</span> 24/7 AI chat support</div>
+        </div>
+        <a href="tenant-portal.html" style="display:block;padding:.65rem;background:#10b981;color:#fff;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">Tenant Portal →</a>
+        <div style="margin-top:.75rem;font-size:.78rem;color:#94a3b8;">Always free for tenants</div>
+      </div>
+
+      <!-- LANDLORD / PROPERTY MANAGER -->
+      <div style="border-radius:16px;border:2px solid #1a56db;padding:2rem;text-align:center;background:linear-gradient(135deg,#eff6ff,#ffffff);box-shadow:0 4px 20px rgba(26,86,219,.1);position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1a56db;color:#fff;font-size:.72rem;font-weight:700;padding:.25rem 1rem;border-radius:99px;white-space:nowrap;">LANDLORD & PROPERTY MANAGER</div>
+        <div style="font-size:3rem;margin-bottom:1rem;margin-top:.5rem;">🏢</div>
+        <h3 style="font-weight:800;color:#1e293b;font-size:1.15rem;margin-bottom:.5rem;">Landlord / Property Manager</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:1.25rem;">Full property management platform with AI tenant communication, leases, maintenance, accounting, tenant screening, and multi-platform ad syndication.</p>
+        <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;text-align:left;">
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#1a56db;">✓</span> AI on every channel (SMS, Email, FB, Chat)</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#1a56db;">✓</span> Leases, screening & maintenance</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#1a56db;">✓</span> Full accounting suite</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#1a56db;">✓</span> Ad Builder — Facebook, Zillow &amp; more</div>
+        </div>
+        <a href="landlord-signup.html" style="display:block;padding:.65rem;background:#1a56db;color:#fff;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;" onmouseover="this.style.background='#1e40af'" onmouseout="this.style.background='#1a56db'">Start Free Trial →</a>
+        <div style="margin-top:.75rem;font-size:.78rem;color:#94a3b8;">From $29/listing or $79/mo</div>
+      </div>
+
+      <!-- LISTING AGENT -->
+      <div style="border-radius:16px;border:2px solid #e2e8f0;padding:2rem;text-align:center;transition:all .2s;cursor:pointer;" onmouseover="this.style.borderColor='#8b5cf6';this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(139,92,246,.12)'" onmouseout="this.style.borderColor='#e2e8f0';this.style.transform='';this.style.boxShadow=''">
+        <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
+        <h3 style="font-weight:800;color:#1e293b;font-size:1.15rem;margin-bottom:.5rem;">Listing Agent</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:1.25rem;">Market rental properties on behalf of owners, manage your client portfolio, track leads, generate verified listings, and earn commissions — all from your agent dashboard.</p>
+        <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;text-align:left;">
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#8b5cf6;">✓</span> Manage multiple owner clients</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#8b5cf6;">✓</span> Verified listing badges for clients</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#8b5cf6;">✓</span> Lead tracking & applicant pipeline</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#8b5cf6;">✓</span> AI handles tenant questions for you</div>
+        </div>
+        <a href="agent-portal.html" style="display:block;padding:.65rem;background:#8b5cf6;color:#fff;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;" onmouseover="this.style.background='#7c3aed'" onmouseout="this.style.background='#8b5cf6'">Agent Portal →</a>
+        <div style="margin-top:.75rem;font-size:.78rem;color:#94a3b8;">$99/mo — unlimited clients</div>
+      </div>
+
+      <!-- HANDYMAN / VENDOR -->
+      <div style="border-radius:16px;border:2px solid #e2e8f0;padding:2rem;text-align:center;transition:all .2s;cursor:pointer;" onmouseover="this.style.borderColor='#f59e0b';this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(245,158,11,.12)'" onmouseout="this.style.borderColor='#e2e8f0';this.style.transform='';this.style.boxShadow=''">
+        <div style="font-size:3rem;margin-bottom:1rem;">🔧</div>
+        <h3 style="font-weight:800;color:#1e293b;font-size:1.15rem;margin-bottom:.5rem;">Handyman &amp; Maintenance</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;margin-bottom:1.25rem;">Get matched to maintenance jobs in your area from verified landlords and property managers. Receive real leads — not tire-kickers. Build your reputation with reviews.</p>
+        <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;text-align:left;">
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#f59e0b;">✓</span> Leads matched to your trade &amp; zip code</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#f59e0b;">✓</span> See job details before accepting</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#f59e0b;">✓</span> Build verified reviews from landlords</div>
+          <div style="font-size:.8rem;color:#374151;display:flex;gap:.5rem;align-items:center;"><span style="color:#f59e0b;">✓</span> Only pay when you accept a lead</div>
+        </div>
+        <a href="vendor-portal.html" style="display:block;padding:.65rem;background:#f59e0b;color:#fff;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">Get Jobs in My Area →</a>
+        <div style="margin-top:.75rem;font-size:.78rem;color:#94a3b8;">$19/mo + $5 per accepted lead</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH BAR -->
+<div class="search-bar-wrap">
+  <div class="search-bar">
+    <input type="text" placeholder="🔍  City, ZIP code, or address..." />
+    <select>
+      <option>Any Price</option>
+      <option>Under $800</option>
+      <option>$800 – $1,200</option>
+      <option>$1,200 – $1,800</option>
+      <option>$1,800+</option>
+    </select>
+    <select>
+      <option>Any Beds</option>
+      <option>Studio</option>
+      <option>1 Bed</option>
+      <option>2 Beds</option>
+      <option>3+ Beds</option>
+    </select>
+    <button class="btn btn-primary">Search</button>
+  </div>
+</div>
+
+<!-- FEATURED LISTINGS -->
+<section class="section" style="background: var(--gray-100);">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="featured-badge">⭐ Featured</div>
+        <h2 class="section-title" style="margin-top:0.5rem;margin-bottom:0;">Sanders Property Management</h2>
+        <p class="text-gray text-sm" style="margin-top:4px;">Verified &amp; trusted since 2020 · Professional management · AI-powered tenant support</p>
+      </div>
+      <a href="listings.html" class="btn btn-outline">View All Listings →</a>
+    </div>
+
+    <div class="grid-3">
+
+      <!-- Property 1 -->
+      <div class="property-card">
+        <div class="property-img">🏠</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div class="property-price">$1,200/mo</div>
+            <span class="badge badge-available">Available</span>
+          </div>
+          <div class="property-address">📍 119 E 600 S #119, Orem, UT 84058</div>
+          <div class="property-meta">
+            <span>🛏 2 Beds</span>
+            <span>🚿 1 Bath</span>
+            <span>🏢 Condo</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.4rem;">Near UVU & BYU · $1,200 deposit</div>
+          <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="openChat('119 E 600 S')">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Property 2 -->
+      <div class="property-card">
+        <div class="property-img" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">🏢</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div class="property-price">$950/mo</div>
+            <span class="badge badge-available">Available</span>
+          </div>
+          <div class="property-address">📍 456 Oak Avenue, Apt 1B</div>
+          <div class="property-meta">
+            <span>🛏 1 Bed</span>
+            <span>🚿 1 Bath</span>
+            <span>📐 620 sqft</span>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="openChat('456 Oak Avenue')">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Property 3 -->
+      <div class="property-card">
+        <div class="property-img" style="background:linear-gradient(135deg,#10b981,#059669);">🏡</div>
+        <div class="property-info">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div class="property-price">$1,650/mo</div>
+            <span class="badge badge-rented">Rented</span>
+          </div>
+          <div class="property-address">📍 789 Pine Road, House</div>
+          <div class="property-meta">
+            <span>🛏 3 Beds</span>
+            <span>🚿 2 Baths</span>
+            <span>📐 1,400 sqft</span>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+            <a href="property-detail.html" class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">View Details</a>
+            <button class="btn btn-outline btn-sm" onclick="openChat('789 Pine Road')">Join Waitlist</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SCAM ALERT -->
+<section class="section-sm">
+  <div class="container">
+    <div class="scam-banner">
+      <div class="scam-banner-icon">🛡️</div>
+      <div>
+        <h3 style="font-size:1.3rem;font-weight:800;margin-bottom:0.4rem;">Protect Yourself From Facebook Rental Scams</h3>
+        <p style="color:var(--gray-700);font-size:0.95rem;max-width:600px;">Scammers copy real listings and ask for wire transfers or gift cards. Every listing on RentVerified has a unique QR code. If a Facebook ad doesn't link here — it may be fake.</p>
+        <div id="verify" style="margin-top:1rem;">
+          <div class="verify-input" style="max-width:100%;margin:0;">
+            <input type="text" placeholder="Enter a listing ID (e.g. RV-2024-0123) to verify..." style="padding:0.65rem 1rem;border:1.5px solid #d97706;border-radius:8px;font-size:0.9rem;flex:1;" />
+            <button class="btn btn-sm" style="background:#d97706;color:white;">Verify Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" style="background:var(--gray-100);">
+  <div class="container text-center">
+    <h2 class="section-title">How RentVerified Works</h2>
+    <p class="section-subtitle">Safe, simple, and transparent — for both tenants and landlords.</p>
+    <div class="grid-4">
+      <div class="step-card">
+        <div class="step-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></div>
+        <div class="step-num">Step 1</div>
+        <h3>Search Listings</h3>
+        <p>Browse verified properties from screened landlords. No fake listings.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg></div>
+        <div class="step-num">Step 2</div>
+        <h3>Ask the AI</h3>
+        <p>Get instant answers about any property — 24/7, no waiting for a callback.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+        <div class="step-num">Step 3</div>
+        <h3>Apply Securely</h3>
+        <p>Receive and submit your rental application through our secure portal.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></div>
+        <div class="step-num">Step 4</div>
+        <h3>Move In</h3>
+        <p>Pay rent via Cash App or Zelle and manage everything in your tenant portal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SHOWCASE -->
+<section class="section" style="background:white;" id="features">
+  <div class="container">
+    <div class="text-center">
+      <h2 class="section-title">Everything You Need to Manage Properties</h2>
+      <p class="section-subtitle">All the power of enterprise software like Yardi — at a fraction of the cost, with AI built in.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2.5rem;">
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">🤖</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">AI Tenant Communication</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">24/7 AI responds to inquiries via website chat, SMS, WhatsApp, email, and Facebook Messenger. Answers questions, shares applications, and qualifies tenants automatically.</p>
+        <div style="margin-top:.75rem;"><span style="background:#eff6ff;color:#1d4ed8;border-radius:99px;padding:.2rem .65rem;font-size:.75rem;font-weight:600;">🔵 RentVerified Exclusive</span></div>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">📊</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">Full Accounting Suite</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Income and expense tracking, monthly and annual reports, property-by-property P&L, and one-click CSV export for tax time. No separate software needed.</p>
+        <a href="accounting.html" style="display:inline-block;margin-top:.75rem;font-size:.82rem;color:#1a56db;font-weight:600;">View Accounting →</a>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">🔧</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">Maintenance & Work Orders</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Tenants submit requests online. Track every work order from open to completed with a Kanban board, vendor assignments, AI recommendations, and activity logs.</p>
+        <a href="maintenance.html" style="display:inline-block;margin-top:.75rem;font-size:.82rem;color:#1a56db;font-weight:600;">View Maintenance →</a>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">📝</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">Lease Management & Digital Signing</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Create leases digitally, send for electronic signature, track renewals, and get expiration alerts. Utah-compliant templates with required disclosures included.</p>
+        <a href="leases.html" style="display:inline-block;margin-top:.75rem;font-size:.82rem;color:#1a56db;font-weight:600;">View Leases →</a>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">🛡</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">AI Tenant Screening</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Score applicants automatically against your custom criteria — credit, income ratio, employment, eviction history. Get approved/denied/review decisions instantly.</p>
+        <a href="screening.html" style="display:inline-block;margin-top:.75rem;font-size:.82rem;color:#1a56db;font-weight:600;">View Screening →</a>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">💸</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">Free Rent Collection</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Collect rent via Cash App or Zelle — $0 processing fees, ever. Tenants upload payment screenshots, landlords confirm in one click. No Stripe fees eating your income.</p>
+        <div style="margin-top:.75rem;"><span style="background:#f0fdf4;color:#15803d;border-radius:99px;padding:.2rem .65rem;font-size:.75rem;font-weight:600;">✅ $0 Transaction Fees</span></div>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">📣</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">Multi-Platform Ad Builder</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Build one listing, deploy to Facebook Marketplace, Zillow, Apartments.com, and Realtor.com with platform-optimized copy. AI polishes your descriptions automatically.</p>
+        <a href="ad-builder.html" style="display:inline-block;margin-top:.75rem;font-size:.82rem;color:#1a56db;font-weight:600;">View Ad Builder →</a>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">✅</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">Verified Listing Badges + Scam Protection</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Every listing gets a unique QR code and listing ID. Tenants can verify any property before paying. Protects you from impersonators running scams on Facebook.</p>
+        <div style="margin-top:.75rem;"><span style="background:#eff6ff;color:#1d4ed8;border-radius:99px;padding:.2rem .65rem;font-size:.75rem;font-weight:600;">🔵 RentVerified Exclusive</span></div>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:14px;padding:1.5rem;border:1.5px solid #e2e8f0;">
+        <div style="font-size:2rem;margin-bottom:.75rem;">👤</div>
+        <h3 style="font-weight:700;margin-bottom:.5rem;color:#1e293b;">Tenant Portal</h3>
+        <p style="font-size:.88rem;color:#64748b;line-height:1.6;">Tenants get their own portal to pay rent, submit maintenance requests, view documents, message management, and track their lease — all in one place.</p>
+        <a href="tenant-portal.html" style="display:inline-block;margin-top:.75rem;font-size:.82rem;color:#1a56db;font-weight:600;">View Tenant Portal →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- VS YARDI COMPARISON -->
+<section class="section" style="background:var(--gray-100);">
+  <div class="container">
+    <div class="text-center">
+      <h2 class="section-title">RentVerified vs. Yardi Breeze</h2>
+      <p class="section-subtitle">We do everything Yardi does — plus the things they can't.</p>
+    </div>
+    <div style="overflow-x:auto;margin-top:2rem;">
+      <table style="width:100%;border-collapse:collapse;background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+        <thead>
+          <tr style="background:#1e293b;color:white;">
+            <th style="padding:1rem 1.5rem;text-align:left;font-size:.88rem;">Feature</th>
+            <th style="padding:1rem;text-align:center;font-size:.88rem;color:#60a5fa;">RentVerified</th>
+            <th style="padding:1rem;text-align:center;font-size:.88rem;color:#94a3b8;">Yardi Breeze</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Online Rent Collection</td><td style="text-align:center;color:#059669;font-weight:700;">✅ $0 fees (Cash App / Zelle)</td><td style="text-align:center;color:#64748b;font-size:.85rem;">✅ ACH / credit card fees apply</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Maintenance Work Orders</td><td style="text-align:center;color:#059669;font-weight:700;">✅ Full kanban + AI recs</td><td style="text-align:center;color:#64748b;font-size:.85rem;">✅ Basic work orders</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Lease Management + e-Sign</td><td style="text-align:center;color:#059669;font-weight:700;">✅ Included</td><td style="text-align:center;color:#64748b;font-size:.85rem;">✅ Breeze Premier only ($400/mo min)</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Tenant Screening</td><td style="text-align:center;color:#059669;font-weight:700;">✅ AI scoring + criteria engine</td><td style="text-align:center;color:#64748b;font-size:.85rem;">✅ Add-on cost</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Accounting / Financial Reports</td><td style="text-align:center;color:#059669;font-weight:700;">✅ Full income/expense + CSV export</td><td style="text-align:center;color:#64748b;font-size:.85rem;">✅ Full GL / AP / AR</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Tenant Portal</td><td style="text-align:center;color:#059669;font-weight:700;">✅ Pay, maintenance, messages, docs</td><td style="text-align:center;color:#64748b;font-size:.85rem;">✅ Standard portal</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">AI-Powered Tenant Chat (24/7)</td><td style="text-align:center;color:#059669;font-weight:700;">✅ Chat, SMS, Email, WhatsApp, FB</td><td style="text-align:center;color:#dc2626;font-size:.85rem;">❌ No AI chat</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Multi-Platform Ad Builder</td><td style="text-align:center;color:#059669;font-weight:700;">✅ FB, Zillow, Apartments, Realtor</td><td style="text-align:center;color:#dc2626;font-size:.85rem;">❌ Not available</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Scam Protection / Verified Badges</td><td style="text-align:center;color:#059669;font-weight:700;">✅ QR codes + listing ID system</td><td style="text-align:center;color:#dc2626;font-size:.85rem;">❌ Not available</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;"><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Starting Price</td><td style="text-align:center;color:#059669;font-weight:700;">$29/listing or $79/mo</td><td style="text-align:center;color:#64748b;font-size:.85rem;">$100/mo minimum</td></tr>
+          <tr><td style="padding:.85rem 1.5rem;font-size:.88rem;color:#374151;">Setup / Onboarding Fee</td><td style="text-align:center;color:#059669;font-weight:700;">$0</td><td style="text-align:center;color:#64748b;font-size:.85rem;">Varies</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center;margin-top:2rem;">
+      <a href="landlord-signup.html" class="btn btn-primary" style="font-size:1rem;padding:.85rem 2rem;">Switch from Yardi — Start Free →</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="text-center">
+      <h2 class="section-title">Simple, Transparent Pricing</h2>
+      <p class="section-subtitle">No per-unit fees. No setup costs. No surprise charges. Cancel anytime.</p>
+    </div>
+    <div class="grid-3" style="max-width:960px;margin:0 auto;">
+
+      <div class="pricing-card">
+        <h3 style="font-weight:700;margin-bottom:0.5rem;">Starter</h3>
+        <div class="pricing-price">$29 <span>/listing</span></div>
+        <p style="color:var(--gray-600);font-size:0.85rem;margin-top:0.5rem;">Great for 1–2 properties</p>
+        <ul class="pricing-features">
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>1 verified listing</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>AI website chat</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Verified badge + QR code</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Digital rental application</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Ad builder access</li>
+        </ul>
+        <a href="landlord-signup.html" class="btn btn-outline" style="width:100%;justify-content:center;">Get Started</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div style="font-size:.75rem;font-weight:700;background:#10b981;color:white;border-radius:99px;padding:.2rem .75rem;display:inline-block;margin-bottom:.5rem;">MOST POPULAR</div>
+        <h3 style="font-weight:700;margin-bottom:0.5rem;">Pro Monthly</h3>
+        <div class="pricing-price">$79 <span>/month</span></div>
+        <p style="color:var(--gray-600);font-size:0.85rem;margin-top:0.5rem;">Full platform — compete with Yardi</p>
+        <ul class="pricing-features">
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Unlimited listings</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>AI on all channels (SMS/Email/FB/Chat)</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Lease management + digital signing</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Maintenance work orders + vendors</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>AI tenant screening engine</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Full accounting + tax-ready CSV</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Tenant portal (pay, maintenance, messages)</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Multi-platform ad syndication</li>
+        </ul>
+        <a href="landlord-signup.html" class="btn btn-primary" style="width:100%;justify-content:center;">Start Free Trial</a>
+      </div>
+
+      <div class="pricing-card">
+        <div style="font-size:.75rem;font-weight:700;background:#f59e0b;color:white;border-radius:99px;padding:.2rem .75rem;display:inline-block;margin-bottom:.5rem;">BEST VALUE</div>
+        <h3 style="font-weight:700;margin-bottom:0.5rem;">Pro Annual</h3>
+        <div class="pricing-price">$59 <span>/month</span></div>
+        <p style="color:var(--gray-600);font-size:0.85rem;margin-top:0.5rem;">Billed $708/yr — save $240/yr</p>
+        <ul class="pricing-features">
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Everything in Pro Monthly</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Priority listing placement</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>WhatsApp AI integration</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Dedicated account manager</li>
+          <li><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Custom branding on tenant portal</li>
+        </ul>
+        <a href="landlord-signup.html" class="btn btn-outline" style="width:100%;justify-content:center;">Save $240/Year →</a>
+      </div>
+
+    </div>
+    <p style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--gray-600);">No setup fees. No per-unit charges. No contracts. Compare: Yardi Breeze starts at $100/month with per-unit pricing.</p>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" style="background:var(--gray-100);">
+  <div class="container">
+    <h2 class="section-title text-center">What People Are Saying</h2>
+    <p class="section-subtitle text-center">Tenants and landlords love RentVerified.</p>
+    <div class="grid-3">
+      <div class="testimonial-card">
+        <p class="testimonial-text">"I found an amazing apartment and the AI answered all my questions at 11pm when I was looking. No scams, no stress — just a real, verified listing."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">MJ</div>
+          <div><div class="author-name">Maria J.</div><div class="author-role">Tenant</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <p class="testimonial-text">"As a landlord I was tired of fake inquiries on Facebook. RentVerified weeds out the noise — I only hear from serious, qualified tenants now."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">DW</div>
+          <div><div class="author-name">David W.</div><div class="author-role">Landlord · 8 properties</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <p class="testimonial-text">"My mom almost got scammed on Facebook Marketplace. Now I tell everyone — check the listing on RentVerified first. It's the only way to be sure."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">TK</div>
+          <div><div class="author-name">Tamara K.</div><div class="author-role">Tenant</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LANDLORD CTA -->
+<section class="section">
+  <div class="container">
+    <div class="landlord-cta">
+      <div>
+        <h2>Ready to List Your Property?</h2>
+        <p>Join RentVerified and reach verified tenants with AI-powered support. Your listings go live after a quick review — usually within 24 hours.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;flex-shrink:0;">
+        <a href="landlord-signup.html" class="btn btn-lg" style="background:white;color:var(--primary);font-weight:700;">Get Started Today</a>
+        <span style="font-size:0.8rem;opacity:0.75;text-align:center;">14-day free trial · No credit card required</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+        <span style="font-size:1.2rem;font-weight:800;color:white;">🏠 RentVerified</span>
+      </div>
+      <p style="font-size:0.875rem;line-height:1.7;max-width:280px;">The only rental platform where every listing is verified and every landlord is screened. Powered by AI.</p>
+    </div>
+    <div>
+      <h4>For Tenants</h4>
+      <a href="listings.html">Browse Rentals</a>
+      <a href="tenant-portal.html">Pay Rent</a>
+      <a href="#">Request Application</a>
+      <a href="#verify">Verify a Listing</a>
+    </div>
+    <div>
+      <h4>For Landlords</h4>
+      <a href="landlord-signup.html">Sign Up</a>
+      <a href="#">Landlord Dashboard</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">How It Works</a>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <a href="#">About Us</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 RentVerified. All rights reserved.</span>
+    <span>Powered by Sanders Property Management</span>
+  </div>
+</footer>
+
+<!-- AI CHAT WIDGET -->
+<div id="chat-bubble" onclick="toggleChat()">
+  <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+  </svg>
+</div>
+
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">AI</div>
+      <div>
+        <div class="chat-title">RentVerified Assistant</div>
+        <div class="chat-status">🟢 Online · Replies instantly</div>
+      </div>
+    </div>
+    <div class="chat-close" onclick="toggleChat()">
+      <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg ai">Hi! 👋 I'm the RentVerified AI assistant. I can answer questions about our listings, help you start a rental application, or verify that a listing is real. What can I help you with?</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Ask about a property..." onkeypress="handleChatKey(event)" />
+    <button class="chat-send" onclick="sendChat()">
+      <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
