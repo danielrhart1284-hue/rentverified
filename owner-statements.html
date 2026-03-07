@@ -431,10 +431,74 @@
     </div>
     <div class="form-grid">
       <div class="form-group full"><label>Property Address *</label><input id="pm-address" type="text" placeholder="5041 Doren Dr. S. Ogden, UT"></div>
-      <div class="form-group"><label>Monthly Rent ($)</label><input id="pm-rent" type="number" placeholder="1900" step="0.01" min="0"></div>
-      <div class="form-group"><label>Tenant Name</label><input id="pm-tenant" type="text" placeholder="Current Tenant"></div>
+
+      <!-- Property Type selector -->
+      <div class="form-group full">
+        <label>Property Type</label>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.15rem;">
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;transition:all .15s;" id="pt-res-lbl">
+            <input type="radio" name="pm-prop-type" value="residential" checked onchange="onPropTypeChange()"> 🏠 Residential
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;transition:all .15s;" id="pt-com-lbl">
+            <input type="radio" name="pm-prop-type" value="commercial" onchange="onPropTypeChange()"> 🏢 Commercial
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;transition:all .15s;" id="pt-rto-lbl">
+            <input type="radio" name="pm-prop-type" value="rent-to-own" onchange="onPropTypeChange()"> 🔑 Rent-to-Own
+          </label>
+        </div>
+      </div>
+
+      <!-- Common fields -->
+      <div class="form-group"><label id="pm-rent-label">Monthly Rent ($)</label><input id="pm-rent" type="number" placeholder="1900" step="0.01" min="0"></div>
+      <div class="form-group"><label>Tenant / Business Name</label><input id="pm-tenant" type="text" placeholder="Current Tenant"></div>
       <div class="form-group"><label>Unit / Suite (optional)</label><input id="pm-unit" type="text" placeholder="#1"></div>
       <div class="form-group"><label>PM Fee Override % (leave blank for owner default)</label><input id="pm-fee-override" type="number" placeholder="(use owner default)" step="0.5" min="0" max="100"></div>
+
+      <!-- Commercial-only fields -->
+      <div id="pm-commercial-fields" style="display:none;grid-column:1/-1;">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:1rem;margin-top:.5rem;">
+          <div style="font-size:.8rem;font-weight:700;color:#1e40af;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;">🏢 Commercial Details</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Square Footage</label><input id="pm-sqft" type="number" placeholder="2500" min="0"></div>
+            <div class="form-group"><label>Lease Type</label>
+              <select id="pm-lease-type">
+                <option value="gross">Gross (Landlord pays expenses)</option>
+                <option value="nnn">Triple Net — NNN (Tenant pays taxes, insurance, CAM)</option>
+                <option value="modified">Modified Gross (Split expenses)</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Property Type / Use</label>
+              <select id="pm-com-use">
+                <option>Retail</option>
+                <option>Office</option>
+                <option>Warehouse / Industrial</option>
+                <option>Restaurant / Food Service</option>
+                <option>Medical / Dental</option>
+                <option>Mixed Use</option>
+                <option>Other Commercial</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Monthly NNN / CAM Charges ($)<br><span style="font-size:.74rem;color:#64748b;font-weight:400;">(if NNN — tenant-paid pass-throughs)</span></label>
+              <input id="pm-cam" type="number" placeholder="0.00" step="0.01" min="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rent-to-Own fields -->
+      <div id="pm-rto-fields" style="display:none;grid-column:1/-1;">
+        <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:8px;padding:1rem;margin-top:.5rem;">
+          <div style="font-size:.8rem;font-weight:700;color:#7e22ce;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;">🔑 Rent-to-Own Terms</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Agreed Purchase Price ($)</label><input id="pm-purchase-price" type="number" placeholder="320000" step="100" min="0"></div>
+            <div class="form-group"><label>Option Fee Collected ($)</label><input id="pm-option-fee" type="number" placeholder="5000" step="100" min="0"></div>
+            <div class="form-group"><label>Monthly Rent Credit (%)<br><span style="font-size:.74rem;color:#64748b;font-weight:400;">(% of rent credited toward purchase)</span></label>
+              <input id="pm-credit-pct" type="number" placeholder="20" min="0" max="100" step="1">
+            </div>
+            <div class="form-group"><label>Option Period End Date</label><input id="pm-option-end" type="date"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
       <button class="btn btn-primary" onclick="saveProperty()">Save Property</button>
@@ -680,8 +744,8 @@ function renderOwnerList() {
           (o.properties||[]).map(p => `
             <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;background:#f8fafc;border-radius:8px;margin-bottom:.4rem;">
               <div>
-                <div style="font-weight:600;font-size:.9rem;">🏠 ${p.address}${p.unit?' '+p.unit:''}</div>
-                <div style="font-size:.78rem;color:#64748b;">Rent: ${fmtDollar(p.rent)} · Tenant: ${p.tenant||'Vacant'}</div>
+                <div style="font-weight:600;font-size:.9rem;">${propTypeIcon(p.type)} ${p.address}${p.unit?' '+p.unit:''}</div>
+                <div style="font-size:.78rem;color:#64748b;">${propTypeBadge(p.type)} Rent: ${fmtDollar(p.rent)}${p.type==='commercial'&&p.camCharges?' + '+fmtDollar(p.camCharges)+' CAM':''} · ${p.type==='commercial'?'Tenant':'Tenant'}: ${p.tenant||'Vacant'}${p.type==='rent-to-own'&&p.purchasePrice?' · Option Price: '+fmtDollar(p.purchasePrice):''}</div>
               </div>
               <div style="display:flex;gap:.4rem;">
                 <button class="btn btn-outline btn-sm" onclick="openPropModal('${o.id}','${p.id}')">Edit</button>
@@ -722,16 +786,45 @@ function openPropModal(ownerId, propId) {
       document.getElementById('pm-tenant').value = prop.tenant || '';
       document.getElementById('pm-unit').value = prop.unit || '';
       document.getElementById('pm-fee-override').value = prop.feeOverride != null ? prop.feeOverride : '';
+      // Restore type
+      const t = prop.type || 'residential';
+      const radio = document.querySelector(`input[name="pm-prop-type"][value="${t}"]`);
+      if (radio) radio.checked = true;
+      onPropTypeChange();
+      // Commercial extras
+      if (t === 'commercial') {
+        document.getElementById('pm-sqft').value = prop.sqft || '';
+        document.getElementById('pm-lease-type').value = prop.leaseType || 'gross';
+        document.getElementById('pm-com-use').value = prop.comUse || 'Retail';
+        document.getElementById('pm-cam').value = prop.camCharges || '';
+      }
+      // RTO extras
+      if (t === 'rent-to-own') {
+        document.getElementById('pm-purchase-price').value = prop.purchasePrice || '';
+        document.getElementById('pm-option-fee').value = prop.optionFee || '';
+        document.getElementById('pm-credit-pct').value = prop.creditPct || '';
+        document.getElementById('pm-option-end').value = prop.optionEnd || '';
+      }
       document.getElementById('prop-modal-title').textContent = 'Edit Property';
     }
   } else {
-    ['pm-address','pm-rent','pm-tenant','pm-unit','pm-fee-override'].forEach(id=>document.getElementById(id).value='');
+    ['pm-address','pm-rent','pm-tenant','pm-unit','pm-fee-override','pm-sqft','pm-cam','pm-purchase-price','pm-option-fee','pm-credit-pct','pm-option-end'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    const defRadio = document.querySelector('input[name="pm-prop-type"][value="residential"]');
+    if (defRadio) defRadio.checked = true;
+    onPropTypeChange();
     document.getElementById('prop-modal-title').textContent = 'Add Property';
   }
   document.getElementById('prop-modal-overlay').style.display = 'flex';
 }
 
 function closePropModal() { document.getElementById('prop-modal-overlay').style.display = 'none'; }
+
+function onPropTypeChange() {
+  const type = document.querySelector('input[name="pm-prop-type"]:checked')?.value || 'residential';
+  document.getElementById('pm-commercial-fields').style.display = type === 'commercial' ? 'block' : 'none';
+  document.getElementById('pm-rto-fields').style.display = type === 'rent-to-own' ? 'block' : 'none';
+  document.getElementById('pm-rent-label').textContent = type === 'commercial' ? 'Monthly Base Rent ($)' : 'Monthly Rent ($)';
+}
 
 function saveProperty() {
   const addr = document.getElementById('pm-address').value.trim();
@@ -741,14 +834,30 @@ function saveProperty() {
   const owner = owners.find(o=>o.id===ownerId);
   if (!owner) return;
   const feeOverrideVal = document.getElementById('pm-fee-override').value;
+  const propType = document.querySelector('input[name="pm-prop-type"]:checked')?.value || 'residential';
   const propData = {
     id: propId || uid(),
     address: addr,
+    type: propType,
     rent: parseFloat(document.getElementById('pm-rent').value) || 0,
     tenant: document.getElementById('pm-tenant').value.trim(),
     unit: document.getElementById('pm-unit').value.trim(),
     feeOverride: feeOverrideVal !== '' ? parseFloat(feeOverrideVal) : null
   };
+  // Commercial extras
+  if (propType === 'commercial') {
+    propData.sqft = parseInt(document.getElementById('pm-sqft').value) || 0;
+    propData.leaseType = document.getElementById('pm-lease-type').value;
+    propData.comUse = document.getElementById('pm-com-use').value;
+    propData.camCharges = parseFloat(document.getElementById('pm-cam').value) || 0;
+  }
+  // Rent-to-Own extras
+  if (propType === 'rent-to-own') {
+    propData.purchasePrice = parseFloat(document.getElementById('pm-purchase-price').value) || 0;
+    propData.optionFee = parseFloat(document.getElementById('pm-option-fee').value) || 0;
+    propData.creditPct = parseFloat(document.getElementById('pm-credit-pct').value) || 0;
+    propData.optionEnd = document.getElementById('pm-option-end').value;
+  }
   if (propId) {
     const idx = owner.properties.findIndex(p=>p.id===propId);
     if (idx >= 0) owner.properties[idx] = propData;
@@ -756,7 +865,7 @@ function saveProperty() {
     owner.properties.push(propData);
   }
   saveAll(); closePropModal(); renderOwnerList(); populateOwnerDropdowns();
-  toast('✅ Property saved!');
+  toast('✅ ' + (propType === 'commercial' ? '🏢' : propType === 'rent-to-own' ? '🔑' : '🏠') + ' Property saved!');
 }
 
 // ════════════════════════════════════════════════
@@ -893,6 +1002,10 @@ function buildStatementHTML(owner, period, type) {
   // Gather unique expense categories (excluding rent)
   const usedCats = [...new Set(ownerExp.filter(e=>e.type==='expense').map(e=>e.category))];
 
+  // Check if any commercial or RTO properties exist
+  const hasCommercial = props.some(p => p.type === 'commercial');
+  const hasRTO = props.some(p => p.type === 'rent-to-own');
+
   // Build rows per property
   const rows = props.map(prop => {
     const propExp = ownerExp.filter(e=>e.propId===prop.id);
@@ -903,19 +1016,30 @@ function buildStatementHTML(owner, period, type) {
     usedCats.forEach(cat => {
       catTotals[cat] = propExp.filter(e=>e.type==='expense'&&e.category===cat).reduce((s,e)=>s+e.amount, 0);
     });
+    // Commercial: NNN/CAM charges are pass-through income (or manual entries)
+    const camIncome = (prop.type==='commercial' && prop.leaseType==='nnn') ? (prop.camCharges || 0) : 0;
+    // Rent-to-Own: monthly credit toward purchase
+    const rtoCredit = (prop.type==='rent-to-own') ? rent * ((prop.creditPct||0)/100) : 0;
     const totalExp = mgmtFee + Object.values(catTotals).reduce((s,v)=>s+v, 0);
-    const net = rent - totalExp;
-    return { prop, rent, mgmtFee, catTotals, totalExp, net };
+    const totalIncome = rent + camIncome;
+    const net = totalIncome - totalExp - rtoCredit;
+    return { prop, rent, camIncome, rtoCredit, mgmtFee, catTotals, totalExp, totalIncome, net };
   });
 
   // Totals
   const totRent = rows.reduce((s,r)=>s+r.rent, 0);
+  const totCAM  = rows.reduce((s,r)=>s+r.camIncome, 0);
+  const totRTOCredit = rows.reduce((s,r)=>s+r.rtoCredit, 0);
   const totMgmt = rows.reduce((s,r)=>s+r.mgmtFee, 0);
-  const totExp = rows.reduce((s,r)=>s+r.totalExp, 0);
-  const totNet = rows.reduce((s,r)=>s+r.net, 0);
+  const totExp  = rows.reduce((s,r)=>s+r.totalExp, 0);
+  const totNet  = rows.reduce((s,r)=>s+r.net, 0);
 
   // Build category columns header
+  const camHeader  = hasCommercial ? '<th>NNN/CAM Income</th>' : '';
+  const rtoHeader  = hasRTO ? '<th>RTO Credit</th>' : '';
   const catHeaders = usedCats.map(c=>`<th>${c}</th>`).join('');
+  const camFooter  = hasCommercial ? `<td class="income-cell">${totCAM>0?fmtDollar(totCAM):''}</td>` : '';
+  const rtoFooter  = hasRTO ? `<td class="expense-cell">${totRTOCredit>0?fmtDollar(totRTOCredit):''}</td>` : '';
   const catFooters = usedCats.map(cat => {
     const t = rows.reduce((s,r)=>s+(r.catTotals[cat]||0),0);
     return `<td class="expense-cell">${t>0?fmtDollar(t):''}</td>`;
@@ -923,12 +1047,17 @@ function buildStatementHTML(owner, period, type) {
 
   // Build data rows
   const dataRows = rows.map(r => {
-    const catCells = usedCats.map(cat=>`<td class="expense-cell">${r.catTotals[cat]>0?fmtDollar(r.catTotals[cat]):''}</td>`).join('');
+    const catCells  = usedCats.map(cat=>`<td class="expense-cell">${r.catTotals[cat]>0?fmtDollar(r.catTotals[cat]):''}</td>`).join('');
+    const camCell   = hasCommercial ? `<td class="income-cell">${r.camIncome>0?fmtDollar(r.camIncome):''}</td>` : '';
+    const rtoCell   = hasRTO ? `<td class="expense-cell" title="Option credit withheld from disbursement">${r.rtoCredit>0?fmtDollar(r.rtoCredit):''}</td>` : '';
+    const typeIcon  = propTypeIcon(r.prop.type);
+    const typeNote  = r.prop.type==='commercial' ? ` <span style="font-size:.72rem;color:#1a56db;font-weight:600;">[${(r.prop.leaseType||'gross').toUpperCase()}]</span>` :
+                      r.prop.type==='rent-to-own' ? ` <span style="font-size:.72rem;color:#7e22ce;font-weight:600;">[RTO]</span>` : '';
     return `<tr>
-      <td>${r.prop.address}${r.prop.unit?' '+r.prop.unit:''}</td>
+      <td>${typeIcon} ${r.prop.address}${r.prop.unit?' '+r.prop.unit:''}${typeNote}</td>
       <td class="income-cell">${r.rent > 0 ? fmtDollar(r.rent) : ''}</td>
       <td class="expense-cell">${r.mgmtFee > 0 ? fmtDollar(r.mgmtFee) : ''}</td>
-      ${catCells}
+      ${camCell}${rtoCell}${catCells}
       <td class="expense-cell">${fmtDollar(r.totalExp)}</td>
       <td class="net-cell">${fmtDollar(r.net)}</td>
     </tr>`;
@@ -945,7 +1074,7 @@ function buildStatementHTML(owner, period, type) {
           <th>Property Address</th>
           <th>Rent</th>
           <th>Mgt. Fee</th>
-          ${catHeaders}
+          ${camHeader}${rtoHeader}${catHeaders}
           <th>Total Expenses</th>
           <th>Paid to Owner</th>
         </tr>
@@ -958,6 +1087,7 @@ function buildStatementHTML(owner, period, type) {
           <td>Owed to Owner</td>
           <td class="income-cell">${fmtDollar(totRent)}</td>
           <td class="expense-cell">${fmtDollar(totMgmt)}</td>
+          ${camFooter}${rtoFooter}
           ${catFooters}
           <td class="expense-cell">${fmtDollar(totExp)}</td>
           <td class="net-cell">${fmtDollar(totNet)}</td>
@@ -1148,6 +1278,18 @@ function syncRentFromTenantPortal() {
 // ════════════════════════════════════════════════
 //  HELPERS
 // ════════════════════════════════════════════════
+function propTypeIcon(type) {
+  if (type === 'commercial') return '🏢';
+  if (type === 'rent-to-own') return '🔑';
+  return '🏠';
+}
+
+function propTypeBadge(type) {
+  if (type === 'commercial') return '<span style="background:#dbeafe;color:#1e40af;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">COMMERCIAL</span>';
+  if (type === 'rent-to-own') return '<span style="background:#f3e8ff;color:#7e22ce;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">RENT-TO-OWN</span>';
+  return '<span style="background:#f0fdf4;color:#166534;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">RESIDENTIAL</span>';
+}
+
 function fmtDollar(n) {
   return '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 }

@@ -341,48 +341,121 @@
     <!-- Section 1: Property Info -->
     <div class="form-section">
       <h3><div class="section-num">1</div> Property Details</h3>
+
+      <!-- Listing Category selector -->
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label>Listing Category</label>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.25rem;">
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;" id="lc-res-lbl">
+            <input type="radio" name="listing-cat" value="residential" checked onchange="onListingCatChange()"> 🏠 Residential Rental
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;" id="lc-com-lbl">
+            <input type="radio" name="listing-cat" value="commercial" onchange="onListingCatChange()"> 🏢 Commercial
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;" id="lc-rto-lbl">
+            <input type="radio" name="listing-cat" value="rent-to-own" onchange="onListingCatChange()"> 🔑 Rent-to-Own
+          </label>
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Property Address</label>
         <input type="text" id="f-address" placeholder="119 E 600 S #119, Orem, UT 84058" value="119 E 600 S #119, Orem, UT 84058" oninput="updatePreviews()" />
       </div>
       <div class="grid-2">
         <div class="form-group">
-          <label>Monthly Rent</label>
+          <label id="f-rent-label">Monthly Rent</label>
           <input type="text" id="f-rent" placeholder="$1,200" value="$1,200" oninput="updatePreviews()" />
         </div>
-        <div class="form-group">
+        <div class="form-group" id="f-deposit-group">
           <label>Security Deposit</label>
           <input type="text" id="f-deposit" placeholder="$1,200" value="$1,200" oninput="updatePreviews()" />
         </div>
-        <div class="form-group">
+
+        <!-- Residential-only -->
+        <div class="form-group" id="f-beds-group">
           <label>Bedrooms</label>
           <select id="f-beds" oninput="updatePreviews()">
             <option>Studio</option>
             <option selected>2 Bedrooms</option>
             <option>3 Bedrooms</option>
             <option>4 Bedrooms</option>
+            <option>5+ Bedrooms</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="f-baths-group">
           <label>Bathrooms</label>
           <select id="f-baths" oninput="updatePreviews()">
             <option selected>1 Bathroom</option>
             <option>1.5 Bathrooms</option>
             <option>2 Bathrooms</option>
+            <option>2.5 Bathrooms</option>
+            <option>3+ Bathrooms</option>
           </select>
         </div>
+
         <div class="form-group">
-          <label>Property Type</label>
+          <label id="f-type-label">Property Type</label>
           <select id="f-type" oninput="updatePreviews()">
-            <option>Apartment</option>
-            <option selected>Condo</option>
-            <option>House</option>
-            <option>Townhouse</option>
+            <!-- Residential options -->
+            <optgroup label="Residential" id="f-type-res">
+              <option>Apartment</option>
+              <option selected>Condo</option>
+              <option>House</option>
+              <option>Townhouse</option>
+              <option>Duplex</option>
+              <option>Mobile Home</option>
+            </optgroup>
+            <!-- Commercial options (hidden by default) -->
+            <optgroup label="Commercial" id="f-type-com" style="display:none;">
+              <option>Retail Space</option>
+              <option>Office Space</option>
+              <option>Warehouse / Industrial</option>
+              <option>Restaurant / Food Service</option>
+              <option>Medical / Dental Office</option>
+              <option>Mixed Use</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
           <label>Available Date</label>
           <input type="text" id="f-avail" value="Available Now" oninput="updatePreviews()" />
+        </div>
+
+        <!-- Commercial-only fields -->
+        <div class="form-group" id="f-sqft-group" style="display:none;">
+          <label>Square Footage</label>
+          <input type="text" id="f-sqft" placeholder="2,500 sq ft" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-lease-type-group" style="display:none;">
+          <label>Lease Type</label>
+          <select id="f-lease-type" oninput="updatePreviews()">
+            <option value="gross">Gross Lease</option>
+            <option value="nnn">Triple Net (NNN)</option>
+            <option value="modified">Modified Gross</option>
+          </select>
+        </div>
+        <div class="form-group" id="f-zoning-group" style="display:none;">
+          <label>Zoning</label>
+          <input type="text" id="f-zoning" placeholder="C-1, C-2, M-1…" oninput="updatePreviews()">
+        </div>
+
+        <!-- Rent-to-Own fields -->
+        <div class="form-group" id="f-purchase-price-group" style="display:none;">
+          <label>Purchase Price (Option)</label>
+          <input type="text" id="f-purchase-price" placeholder="$320,000" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-option-fee-group" style="display:none;">
+          <label>Option Fee</label>
+          <input type="text" id="f-option-fee" placeholder="$5,000" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-credit-group" style="display:none;">
+          <label>Monthly Rent Credit</label>
+          <input type="text" id="f-credit" placeholder="$200/mo toward purchase" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-option-period-group" style="display:none;">
+          <label>Option Period</label>
+          <input type="text" id="f-option-period" placeholder="2 years" oninput="updatePreviews()">
         </div>
       </div>
     </div>
@@ -774,6 +847,43 @@ Apply online: https://rentrealverified.com/property-detail.html</div>
     el.classList.add('active');
   }
 
+  function onListingCatChange() {
+    const cat = document.querySelector('input[name="listing-cat"]:checked')?.value || 'residential';
+    const isRes = cat === 'residential';
+    const isCom = cat === 'commercial';
+    const isRTO = cat === 'rent-to-own';
+
+    // Show/hide residential fields
+    ['f-beds-group','f-baths-group','f-deposit-group'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isRes||isRTO ? 'block' : 'none';
+    });
+
+    // Show/hide commercial fields
+    ['f-sqft-group','f-lease-type-group','f-zoning-group'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isCom ? 'block' : 'none';
+    });
+
+    // Show/hide RTO fields
+    ['f-purchase-price-group','f-option-fee-group','f-credit-group','f-option-period-group'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isRTO ? 'block' : 'none';
+    });
+
+    // Swap property type optgroups
+    const resGroup = document.getElementById('f-type-res');
+    const comGroup = document.getElementById('f-type-com');
+    if (resGroup) resGroup.style.display = isCom ? 'none' : '';
+    if (comGroup) comGroup.style.display = isCom ? '' : 'none';
+
+    // Update labels
+    document.getElementById('f-rent-label').textContent = isCom ? 'Monthly Base Rent' : isRTO ? 'Monthly Rent' : 'Monthly Rent';
+    document.getElementById('f-type-label').textContent = isCom ? 'Space Type' : 'Property Type';
+
+    updatePreviews();
+  }
+
   function updatePreviews() {
     const address = document.getElementById('f-address').value || '119 E 600 S #119, Orem, UT 84058';
     const rent = document.getElementById('f-rent').value || '$1,200';
@@ -784,15 +894,33 @@ Apply online: https://rentrealverified.com/property-detail.html</div>
     const avail = document.getElementById('f-avail').value || 'Available Now';
     const desc = document.getElementById('f-desc').value || '';
     const shortDesc = desc.length > 120 ? desc.substring(0, 120) + '...' : desc;
+    const cat = document.querySelector('input[name="listing-cat"]:checked')?.value || 'residential';
+    const isCom = cat === 'commercial';
+    const isRTO = cat === 'rent-to-own';
+
+    // Build detail line based on category
+    let detailLine = '';
+    if (isCom) {
+      const sqft = document.getElementById('f-sqft').value;
+      const leaseT = document.getElementById('f-lease-type')?.value || 'gross';
+      detailLine = (sqft?sqft+' · ':'') + type + ' · ' + leaseT.toUpperCase();
+    } else if (isRTO) {
+      const pp = document.getElementById('f-purchase-price').value;
+      detailLine = beds.replace(' Bedrooms','') + ' bd · ' + baths.replace(' Bathroom','') + ' ba' + (pp?' · Option: '+pp:'');
+    } else {
+      detailLine = beds.replace(' Bedrooms','') + ' bd · ' + baths.replace(' Bathroom','') + ' ba · ' + type;
+    }
+
+    const priceLabel = isRTO ? rent + '/mo 🔑 RTO' : isCom ? rent + '/mo 🏢' : rent + '/month';
 
     // Facebook
-    document.getElementById('fb-price').textContent = rent + '/month';
+    document.getElementById('fb-price').textContent = priceLabel;
     document.getElementById('fb-address').textContent = '📍 ' + address;
     document.getElementById('fb-desc').textContent = shortDesc;
 
     // Zillow
-    document.getElementById('zillow-price').textContent = rent + '/mo';
-    document.getElementById('zillow-details').textContent = beds.replace(' Bedrooms','') + ' bd · ' + baths.replace(' Bathroom','') + ' ba · ' + type;
+    document.getElementById('zillow-price').textContent = rent + '/mo' + (isRTO?' · RTO':'') + (isCom?' · Commercial':'');
+    document.getElementById('zillow-details').textContent = detailLine;
     document.getElementById('zillow-address').textContent = address;
 
     // Apartments.com
