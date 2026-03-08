@@ -531,11 +531,23 @@
           </div>
         </div>
 
+        <!-- Tenant Assistance Notification Feed -->
+        <div id="assistance-feed-wrap" style="display:none;margin-bottom:1.5rem;">
+          <div style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-radius:12px;padding:1.1rem 1.5rem;color:white;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <div style="font-size:1.75rem;flex-shrink:0;">🤝</div>
+            <div style="flex:1;min-width:200px;">
+              <div style="font-weight:700;font-size:.95rem;" id="assist-banner-title">Tenant Seeking Assistance</div>
+              <div style="font-size:.82rem;opacity:.85;margin-top:.2rem;" id="assist-banner-msg">A tenant is actively seeking rental assistance. Eviction hold recommended.</div>
+            </div>
+            <a href="tenant-assistance.html" style="background:rgba(255,255,255,.15);color:white;padding:.5rem 1rem;border-radius:8px;font-weight:600;font-size:.85rem;text-decoration:none;border:1px solid rgba(255,255,255,.25);white-space:nowrap;">View Cases →</a>
+          </div>
+        </div>
+
         <div class="grid-4" style="margin-bottom:2rem;">
           <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Active Listings</div></div>
           <div class="stat-card green"><div class="stat-value">2</div><div class="stat-label">Active Tenants</div></div>
           <div class="stat-card yellow"><div class="stat-value">$2,400</div><div class="stat-label">Rent Pending</div></div>
-          <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">AI Chats Today</div></div>
+          <div class="stat-card"><div class="stat-value" id="dash-assist-count">0</div><div class="stat-label">Assistance Cases</div></div>
         </div>
 
         <div class="grid-2">
@@ -992,6 +1004,36 @@
     document.getElementById('dtab-' + name).classList.add('active');
     event.currentTarget.classList.add('active');
   }
+
+  // ── Tenant Assistance Notification Feed ──────────────────
+  function loadAssistanceNotifications() {
+    try {
+      const cases = JSON.parse(localStorage.getItem('rv_assistance_cases') || '[]');
+      const apps  = JSON.parse(localStorage.getItem('rv_app_tracker')    || '[]');
+      const active = cases.filter(c => c.evictionHold || c.status === 'seeking' || c.status === 'applied');
+      const pending = apps.filter(a => a.status === 'pending');
+      const wrap = document.getElementById('assistance-feed-wrap');
+      const countEl = document.getElementById('dash-assist-count');
+      if (countEl) countEl.textContent = active.length;
+      if (active.length > 0 && wrap) {
+        wrap.style.display = 'block';
+        const latest = active[0];
+        const titleEl = document.getElementById('assist-banner-title');
+        const msgEl   = document.getElementById('assist-banner-msg');
+        if (titleEl) titleEl.textContent = active.length === 1
+          ? `${latest.tenantName || 'A tenant'} is actively seeking rental assistance`
+          : `${active.length} tenants are actively seeking rental assistance`;
+        if (msgEl) {
+          if (pending.length > 0) {
+            msgEl.textContent = `${pending.length} assistance application(s) pending — eviction hold recommended while programs process requests.`;
+          } else {
+            msgEl.textContent = `Eviction hold recommended for ${active.length === 1 ? 'this tenant' : 'these tenants'}. Acting in good faith strengthens your legal position.`;
+          }
+        }
+      }
+    } catch(e) {}
+  }
+  document.addEventListener('DOMContentLoaded', loadAssistanceNotifications);
 </script>
 </body>
 </html>
