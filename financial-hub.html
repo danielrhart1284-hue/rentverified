@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Hub — RentVerified</title>
+<style>
+  :root {
+    --primary:#3b82f6; --primary-dark:#2563eb;
+    --success:#10b981; --warning:#f59e0b; --danger:#ef4444;
+    --purple:#8b5cf6; --indigo:#6366f1; --teal:#14b8a6; --emerald:#059669;
+    --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0;
+    --gray-300:#cbd5e1; --gray-400:#94a3b8; --gray-500:#64748b;
+    --gray-600:#475569; --gray-700:#334155; --gray-800:#1e293b; --gray-900:#0f172a;
+    --sidebar-w:252px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh;display:flex;flex-direction:column;}
+
+  /* NAV */
+  nav{background:var(--gray-900);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .nav-logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:white;font-weight:700;font-size:1.1rem;}
+  .nav-logo span{color:var(--primary);}
+  .nav-link{color:var(--gray-300);text-decoration:none;font-size:.875rem;padding:.4rem .75rem;border-radius:6px;transition:all .15s;}
+  .nav-link:hover{color:white;background:rgba(255,255,255,.07);}
+
+  /* LAYOUT */
+  .wrapper{display:grid;grid-template-columns:var(--sidebar-w) 1fr;flex:1;}
+  .fh-sidebar{background:var(--gray-900);min-height:calc(100vh - 52px);padding:1rem 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+  .fh-sidebar h3{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#475569;padding:.5rem 1.25rem;margin:.75rem 0 .2rem;}
+  .fh-sidebar a{display:flex;align-items:center;gap:.6rem;padding:.55rem 1.25rem;color:#94a3b8;text-decoration:none;font-size:.875rem;border-left:3px solid transparent;transition:all .15s;cursor:pointer;}
+  .fh-sidebar a:hover,.fh-sidebar a.active{background:rgba(255,255,255,.05);color:#fff;border-left-color:var(--teal);}
+  .fh-sidebar .rev-chip{margin-left:auto;background:rgba(20,184,166,.2);color:#5eead4;font-size:.68rem;padding:1px 7px;border-radius:999px;font-weight:700;}
+  .fh-sidebar .alert-chip{margin-left:auto;background:rgba(239,68,68,.2);color:#fca5a5;font-size:.68rem;padding:1px 7px;border-radius:999px;font-weight:700;}
+
+  .fh-main{padding:1.75rem 2rem;max-width:1100px;}
+
+  /* SECTIONS */
+  .section{display:none;} .section.active{display:block;}
+
+  /* PRODUCT HERO CARDS */
+  .product-hero{border-radius:14px;padding:1.5rem;color:white;margin-bottom:1.25rem;display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;}
+  .product-hero h2{font-size:1.1rem;font-weight:800;margin-bottom:.3rem;}
+  .product-hero p{font-size:.85rem;opacity:.8;line-height:1.5;}
+  .product-hero .ph-num{font-size:2.5rem;font-weight:900;opacity:.15;font-variant-numeric:tabular-nums;}
+  .hero-deposit{background:linear-gradient(135deg,#1e3a5f,#1e40af);}
+  .hero-renters{background:linear-gradient(135deg,#14532d,#15803d);}
+  .hero-guarantee{background:linear-gradient(135deg,#4a1942,#6b21a8);}
+  .hero-pro{background:linear-gradient(135deg,#1c1917,#44403c);}
+  .hero-claims{background:linear-gradient(135deg,#7f1d1d,#991b1b);}
+
+  /* PANELS */
+  .panel{background:white;border-radius:12px;border:1px solid var(--gray-200);overflow:hidden;margin-bottom:1.25rem;}
+  .panel-header{padding:.9rem 1.25rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:.75rem;}
+  .panel-header h2{font-size:1rem;font-weight:700;color:var(--gray-800);}
+  .panel-body{padding:1.25rem;}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
+  .page-header h1{font-size:1.4rem;font-weight:700;color:var(--gray-900);}
+  .page-header p{color:var(--gray-500);font-size:.9rem;margin-top:.3rem;}
+
+  /* STAT GRID */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1rem;margin-bottom:1.5rem;}
+  .stat-card{background:white;border-radius:10px;border:1px solid var(--gray-200);padding:1rem 1.25rem;}
+  .stat-card .lbl{font-size:.7rem;color:var(--gray-500);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;}
+  .stat-card .val{font-size:1.6rem;font-weight:800;color:var(--gray-900);}
+  .stat-card .sub{font-size:.73rem;color:var(--gray-400);margin-top:.15rem;}
+  .stat-card.teal .val{color:var(--teal);}
+  .stat-card.green .val{color:var(--success);}
+  .stat-card.purple .val{color:var(--purple);}
+  .stat-card.blue .val{color:var(--primary);}
+  .stat-card.gold .val{color:var(--warning);}
+
+  /* REVENUE TICKER */
+  .rev-ticker{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  .rev-ticker .rt-label{font-size:.75rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .rev-ticker .rt-val{font-size:1.5rem;font-weight:900;color:#5eead4;}
+  .rev-ticker .rt-sub{font-size:.78rem;color:#475569;margin-top:.15rem;}
+
+  /* PRODUCT CARDS */
+  .product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem;}
+  .prod-card{border:2px solid var(--gray-200);border-radius:12px;padding:1.25rem;background:white;transition:all .2s;cursor:pointer;}
+  .prod-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+  .prod-card.active-prod{border-color:var(--teal);box-shadow:0 0 0 3px rgba(20,184,166,.15);}
+  .prod-card .pc-icon{font-size:2rem;margin-bottom:.6rem;}
+  .prod-card .pc-name{font-weight:700;font-size:.9rem;color:var(--gray-900);}
+  .prod-card .pc-rev{font-size:.78rem;color:var(--teal);font-weight:600;margin-top:.25rem;}
+  .prod-card .pc-count{font-size:1.4rem;font-weight:800;color:var(--gray-900);margin-top:.35rem;}
+  .prod-card .pc-label{font-size:.72rem;color:var(--gray-400);}
+
+  /* BUTTONS */
+  .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font-size:.875rem;font-weight:600;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;}
+  .btn-primary{background:var(--primary);color:white;} .btn-primary:hover{background:var(--primary-dark);}
+  .btn-teal{background:var(--teal);color:white;} .btn-teal:hover{background:#0d9488;}
+  .btn-green{background:var(--success);color:white;} .btn-green:hover{background:#059669;}
+  .btn-purple{background:var(--purple);color:white;} .btn-purple:hover{background:#7c3aed;}
+  .btn-danger{background:var(--danger);color:white;} .btn-danger:hover{background:#dc2626;}
+  .btn-warning{background:var(--warning);color:white;} .btn-warning:hover{background:#d97706;}
+  .btn-outline{background:white;color:var(--gray-700);border:1px solid var(--gray-300);} .btn-outline:hover{background:var(--gray-50);}
+  .btn-sm{padding:.35rem .75rem;font-size:.8rem;}
+  .btn-lg{padding:.75rem 1.75rem;font-size:1rem;}
+
+  /* FORMS */
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+  .form-group{margin-bottom:1rem;}
+  .form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--gray-700);margin-bottom:.35rem;}
+  .form-group input,.form-group select,.form-group textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--gray-300);border-radius:8px;font-size:.875rem;color:var(--gray-800);outline:none;transition:border .15s;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(20,184,166,.1);}
+  .form-group textarea{resize:vertical;min-height:75px;}
+
+  /* TABLES */
+  .data-table{width:100%;border-collapse:collapse;}
+  .data-table th{text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray-500);padding:.6rem 1rem;background:var(--gray-50);border-bottom:1px solid var(--gray-200);}
+  .data-table td{padding:.8rem 1rem;border-bottom:1px solid var(--gray-100);font-size:.875rem;vertical-align:middle;}
+  .data-table tr:last-child td{border-bottom:none;}
+  .data-table tr:hover td{background:var(--gray-50);}
+
+  /* STATUS PILLS */
+  .pill{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .65rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+  .pill::before{content:'';width:6px;height:6px;border-radius:50%;}
+  .pill.active{background:#ccfbf1;color:#0f766e;} .pill.active::before{background:var(--teal);}
+  .pill.pending{background:#fef3c7;color:#92400e;} .pill.pending::before{background:var(--warning);}
+  .pill.approved{background:#d1fae5;color:#065f46;} .pill.approved::before{background:var(--success);}
+  .pill.denied{background:#fee2e2;color:#991b1b;} .pill.denied::before{background:var(--danger);}
+  .pill.expiring{background:#ffedd5;color:#9a3412;} .pill.expiring::before{background:#f97316;}
+  .pill.filed{background:#ede9fe;color:#5b21b6;} .pill.filed::before{background:var(--purple);}
+  .pill.paid{background:#d1fae5;color:#065f46;} .pill.paid::before{background:var(--success);}
+
+  /* CLAIM WIZARD */
+  .claim-wizard{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:14px;padding:2rem;color:white;}
+  .claim-wizard h2{font-size:1.1rem;font-weight:800;margin-bottom:.35rem;}
+  .claim-wizard p{font-size:.85rem;opacity:.75;margin-bottom:1.5rem;}
+  .claim-steps{display:flex;gap:.5rem;margin-bottom:1.75rem;flex-wrap:wrap;}
+  .claim-step{flex:1;min-width:100px;padding:.6rem .75rem;background:rgba(255,255,255,.08);border-radius:8px;text-align:center;border:1px solid rgba(255,255,255,.1);}
+  .claim-step.done{background:rgba(16,185,129,.2);border-color:#10b981;}
+  .claim-step.active{background:rgba(99,102,241,.3);border-color:var(--indigo);}
+  .claim-step .cs-icon{font-size:1.25rem;display:block;margin-bottom:.25rem;}
+  .claim-step .cs-label{font-size:.72rem;font-weight:600;}
+  .claim-package{display:flex;flex-direction:column;gap:.5rem;margin:.75rem 0;}
+  .cp-item{display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.08);border-radius:8px;padding:.6rem .85rem;}
+  .cp-item .cp-check{font-size:.9rem;flex-shrink:0;}
+  .cp-item .cp-text{font-size:.82rem;color:rgba(255,255,255,.9);}
+  .cp-item .cp-size{margin-left:auto;font-size:.72rem;color:rgba(255,255,255,.4);}
+
+  /* QUOTE BOX */
+  .quote-box{background:var(--gray-50);border:2px solid var(--gray-200);border-radius:12px;padding:1.5rem;text-align:center;}
+  .quote-box.highlighted{border-color:var(--teal);background:#f0fdfa;}
+  .quote-box .qb-provider{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-bottom:.5rem;}
+  .quote-box .qb-price{font-size:2rem;font-weight:900;color:var(--gray-900);}
+  .quote-box .qb-period{font-size:.85rem;color:var(--gray-400);}
+  .quote-box .qb-note{font-size:.78rem;color:var(--gray-500);margin:.5rem 0;}
+  .quote-box .qb-savings{font-size:.8rem;font-weight:700;color:var(--success);margin-top:.35rem;}
+
+  /* COMMISSION TRACKER */
+  .commission-row{display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid var(--gray-100);}
+  .commission-row:last-child{border-bottom:none;}
+  .cr-product{font-weight:600;font-size:.875rem;}
+  .cr-calc{font-size:.8rem;color:var(--gray-500);margin-top:.2rem;}
+  .cr-amount{font-size:1rem;font-weight:800;color:var(--teal);}
+
+  /* ALERTS */
+  .info-alert{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:.9rem 1.1rem;display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem;}
+  .info-alert p{font-size:.85rem;color:#1e40af;line-height:1.5;}
+  .warning-alert{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:.85rem 1.1rem;display:flex;gap:.6rem;align-items:flex-start;margin-bottom:1rem;}
+  .warning-alert p{font-size:.83rem;color:#92400e;line-height:1.5;}
+  .success-alert{background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:.85rem 1.1rem;display:flex;gap:.6rem;align-items:flex-start;margin-bottom:1rem;}
+  .success-alert p{font-size:.83rem;color:#065f46;line-height:1.5;}
+
+  /* INSURANCE PARTNER LOGOS */
+  .partner-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin:.75rem 0;}
+  .partner-card{border:1px solid var(--gray-200);border-radius:8px;padding:.85rem;text-align:center;background:white;cursor:pointer;transition:all .15s;}
+  .partner-card:hover,.partner-card.selected{border-color:var(--teal);background:#f0fdfa;}
+  .partner-card .p-logo{font-size:1.5rem;margin-bottom:.35rem;}
+  .partner-card .p-name{font-size:.78rem;font-weight:700;color:var(--gray-700);}
+  .partner-card .p-type{font-size:.7rem;color:var(--gray-400);margin-top:.1rem;}
+
+  /* PROGRESS BAR */
+  .progress-wrap{margin:.75rem 0;}
+  .progress-bar{background:var(--gray-200);border-radius:999px;height:8px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:999px;transition:width .5s ease;}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:1.75rem;}
+  .timeline::before{content:'';position:absolute;left:.4rem;top:.25rem;bottom:0;width:2px;background:var(--gray-200);}
+  .tl-item{position:relative;margin-bottom:1rem;}
+  .tl-item::before{content:'';position:absolute;left:-1.6rem;top:.3rem;width:10px;height:10px;border-radius:50%;background:var(--teal);border:2px solid white;box-shadow:0 0 0 2px var(--teal);}
+  .tl-item.pending::before{background:var(--warning);}
+  .tl-item .tl-time{font-size:.72rem;color:var(--gray-400);}
+  .tl-item .tl-text{font-size:.875rem;color:var(--gray-700);font-weight:500;}
+
+  /* EXPIRY WARNING */
+  .expiry-banner{background:linear-gradient(135deg,#7c2d12,#9a3412);border-radius:10px;padding:1rem 1.25rem;color:white;display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
+  .expiry-banner .exp-icon{font-size:1.5rem;flex-shrink:0;}
+  .expiry-banner .exp-text{flex:1;font-size:.85rem;}
+  .expiry-banner .exp-text strong{display:block;font-size:.95rem;margin-bottom:.2rem;}
+
+  @media(max-width:768px){.wrapper{grid-template-columns:1fr;}.fh-sidebar{display:none;}.form-row{grid-template-columns:1fr;}.product-grid{grid-template-columns:1fr 1fr;}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .fade-up{animation:fadeUp .3s ease;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Rent<span>Verified</span></a>
+  <div style="display:flex;align-items:center;gap:.5rem;">
+    <a href="landlord-signup.html" class="nav-link">← Dashboard</a>
+    <a href="eviction.html" class="nav-link">⚖️ Legal</a>
+    <a href="tenant-assistance.html" class="nav-link">🤝 Assistance</a>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="fh-sidebar">
+    <h3>Financial Products</h3>
+    <a class="active" onclick="showSection('dashboard',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview <span class="rev-chip" id="sb-rev">$0</span>
+    </a>
+    <a onclick="showSection('deposit',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      🔒 Deposit Bonds
+    </a>
+    <a onclick="showSection('renters',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      🏠 Renters Insurance
+    </a>
+    <a onclick="showSection('guarantee',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      💰 Rent Guarantee
+    </a>
+    <a onclick="showSection('professional',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      🛡️ Pro Insurance <span class="alert-chip" id="sb-expiring">0</span>
+    </a>
+    <h3>Operations</h3>
+    <a onclick="showSection('claims',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      📋 Claims Center <span class="alert-chip" id="sb-claims">0</span>
+    </a>
+    <a onclick="showSection('revenue',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      💵 Revenue Tracker
+    </a>
+    <h3>Navigate</h3>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+    <a href="tenant-portal.html">👤 Tenant Portal</a>
+    <a href="accounting.html">📊 Accounting</a>
+    <a href="eviction.html">⚖️ Legal Center</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="fh-main">
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  OVERVIEW DASHBOARD                         -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="section-dashboard" class="section active">
+      <div class="page-header">
+        <div>
+          <h1>💼 Financial Products Hub</h1>
+          <p>Insurance, deposit bonds, and rent guarantees — passive revenue built into every transaction.</p>
+        </div>
+        <a href="#" onclick="showSection('revenue',document.querySelector('.fh-sidebar a:nth-child(9)'));return false;" class="btn btn-teal">📊 Revenue Report</a>
+      </div>
+
+      <div class="rev-ticker">
+        <div>
+          <div class="rt-label">Projected Monthly Revenue</div>
+          <div class="rt-val" id="dash-rev-total">$0</div>
+          <div class="rt-sub">across all financial products</div>
+        </div>
+        <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+          <div style="text-align:right;"><div class="rt-label">Active Policies</div><div style="color:white;font-weight:800;font-size:1.25rem;" id="dash-policies">0</div></div>
+          <div style="text-align:right;"><div class="rt-label">Open Claims</div><div style="color:white;font-weight:800;font-size:1.25rem;" id="dash-claims-count">0</div></div>
+          <div style="text-align:right;"><div class="rt-label">Expiring Soon</div><div style="color:#fca5a5;font-weight:800;font-size:1.25rem;" id="dash-expiring">0</div></div>
+        </div>
+      </div>
+
+      <div class="product-grid">
+        <div class="prod-card" onclick="showSection('deposit',document.querySelector('.fh-sidebar a:nth-child(3)'))">
+          <div class="pc-icon">🔒</div>
+          <div class="pc-name">Deposit Bonds</div>
+          <div class="pc-rev">$5–10/tenant/month</div>
+          <div class="pc-count" id="dc-count">0</div>
+          <div class="pc-label">active bonds</div>
+        </div>
+        <div class="prod-card" onclick="showSection('renters',document.querySelector('.fh-sidebar a:nth-child(4)'))">
+          <div class="pc-icon">🏠</div>
+          <div class="pc-name">Renters Insurance</div>
+          <div class="pc-rev">$1.50–6/tenant/month</div>
+          <div class="pc-count" id="ri-count">0</div>
+          <div class="pc-label">active policies</div>
+        </div>
+        <div class="prod-card" onclick="showSection('guarantee',document.querySelector('.fh-sidebar a:nth-child(5)'))">
+          <div class="pc-icon">💰</div>
+          <div class="pc-name">Rent Guarantee</div>
+          <div class="pc-rev">$7.50–30/property/month</div>
+          <div class="pc-count" id="rg-count">0</div>
+          <div class="pc-label">protected properties</div>
+        </div>
+        <div class="prod-card" onclick="showSection('professional',document.querySelector('.fh-sidebar a:nth-child(6)'))">
+          <div class="pc-icon">🛡️</div>
+          <div class="pc-name">Pro Insurance</div>
+          <div class="pc-rev">Commission per policy</div>
+          <div class="pc-count" id="pi-count">0</div>
+          <div class="pc-label">active policies</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>🚨 Alerts & Actions</h2></div>
+        <div class="panel-body" id="dash-alerts">
+          <p style="color:var(--gray-400);text-align:center;padding:1rem 0;">No active alerts. All policies in good standing.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>💡 Revenue Scale Model</h2></div>
+        <div class="panel-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Product</th><th>Per Unit</th><th>100 Tenants</th><th>1,000 Tenants</th><th>10,000 Tenants</th></tr></thead>
+            <tbody>
+              <tr><td>🔒 Deposit Bonds</td><td>$5–10/tenant</td><td>$500–$1K</td><td>$5K–$10K</td><td style="color:var(--teal);font-weight:700;">$50K–$100K</td></tr>
+              <tr><td>🏠 Renters Insurance</td><td>$1.50–6/tenant</td><td>$150–$600</td><td>$1.5K–$6K</td><td style="color:var(--teal);font-weight:700;">$15K–$60K</td></tr>
+              <tr><td>💰 Rent Guarantee</td><td>$7.50–30/property</td><td>$750–$3K</td><td>$7.5K–$30K</td><td style="color:var(--teal);font-weight:700;">$75K–$300K</td></tr>
+              <tr><td>🛡️ Pro Insurance</td><td>Varies</td><td>$250–$750</td><td>$2.5K–$7.5K</td><td style="color:var(--teal);font-weight:700;">$25K–$75K</td></tr>
+              <tr style="background:var(--gray-50);font-weight:700;"><td colspan="2">TOTAL</td><td>$1.6K–$5.4K</td><td>$16.5K–$53.5K</td><td style="color:var(--teal);font-size:1rem;">$165K–$535K/mo</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  DEPOSIT BONDS                              -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="section-deposit" class="section">
+      <div class="page-header">
+        <div><h1>🔒 Deposit Bonds</h1><p>Tenants skip the upfront deposit. Landlords stay fully protected. You earn $5–10/tenant/month.</p></div>
+        <button class="btn btn-primary" onclick="openNewDepositModal()">+ Enroll Tenant</button>
+      </div>
+
+      <div class="product-hero hero-deposit fade-up">
+        <div>
+          <h2>Deposit Alternative — Powered by Jetty / Obligo</h2>
+          <p>Instead of $2,000 upfront, tenants pay $65/month covering a deposit bond AND renters insurance. Landlord protected up to full deposit value. You earn ~15% commission on every premium.</p>
+        </div>
+        <div class="ph-num">🔒</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card teal"><div class="lbl">Active Bonds</div><div class="val" id="dep-active">0</div><div class="sub">enrolled tenants</div></div>
+        <div class="stat-card green"><div class="lbl">Total Coverage</div><div class="val" id="dep-coverage">$0</div><div class="sub">landlords protected</div></div>
+        <div class="stat-card gold"><div class="lbl">Monthly Commission</div><div class="val" id="dep-rev">$0</div><div class="sub">~$7.50/bond avg</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>How Tenants See It at Lease Signing</h2></div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="quote-box" style="border-color:var(--gray-300);">
+              <div class="qb-provider">Option A — Traditional</div>
+              <div class="qb-price">$2,000</div>
+              <div class="qb-period">upfront deposit</div>
+              <div class="qb-note">Due at lease signing. Refundable at move-out (minus deductions). Sits unused in escrow.</div>
+              <div style="margin-top:.75rem;font-size:.78rem;color:var(--danger);font-weight:600;">⚠️ Most tenants don't have this</div>
+            </div>
+            <div class="quote-box highlighted">
+              <div class="qb-provider" style="color:var(--teal);">Option B — Deposit Bond ✨</div>
+              <div class="qb-price" style="color:var(--teal);">$65</div>
+              <div class="qb-period">/month covers everything</div>
+              <div class="qb-note">Includes deposit protection up to $2,000 AND renters insurance ($15K personal property). One payment covers both.</div>
+              <div class="qb-savings">✅ Keep your $2,000 in your pocket</div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:1rem;font-size:.82rem;color:var(--gray-500);">Most tenants choose Option B. You earn commissions on both products through one Jetty integration.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Active Deposit Bonds</h2>
+          <button class="btn btn-outline btn-sm" onclick="openNewDepositModal()">+ New Bond</button>
+        </div>
+        <div id="deposit-table-wrap" style="padding:0;">
+          <table class="data-table"><thead><tr><th>Tenant</th><th>Property</th><th>Coverage</th><th>Monthly Fee</th><th>Your Commission</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="deposit-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>🤝 API Partners</h2></div>
+        <div class="panel-body">
+          <div class="partner-grid">
+            <div class="partner-card selected" onclick="selectPartner(this,'Jetty')"><div class="p-logo">🚀</div><div class="p-name">Jetty</div><div class="p-type">Bond + Insurance</div></div>
+            <div class="partner-card" onclick="selectPartner(this,'Rhino')"><div class="p-logo">🦏</div><div class="p-name">Rhino</div><div class="p-type">Deposit bond</div></div>
+            <div class="partner-card" onclick="selectPartner(this,'Obligo')"><div class="p-logo">🔵</div><div class="p-name">Obligo</div><div class="p-type">Deposit-free</div></div>
+            <div class="partner-card" onclick="selectPartner(this,'LeaseLock')"><div class="p-logo">🔐</div><div class="p-name">LeaseLock</div><div class="p-type">Lease guarantee</div></div>
+          </div>
+          <div id="partner-info" style="margin-top:1rem;padding:1rem;background:var(--gray-50);border-radius:8px;font-size:.85rem;color:var(--gray-600);">
+            <strong>Jetty (Recommended)</strong> — Does both deposit bonds AND renters insurance in one API call. One integration, two revenue streams. Processing time: instant for tenant, 48hr coverage activation. Commission: 12–18% of premium. Best for RentVerified because the combined product is the most compelling offer at lease signing.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  RENTERS INSURANCE                          -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="section-renters" class="section">
+      <div class="page-header">
+        <div><h1>🏠 Renters Insurance</h1><p>Instant quotes via API. Certificate auto-uploads to tenant portal. Landlord auto-notified.</p></div>
+        <button class="btn btn-green" onclick="openRentersQuoteModal()">+ Get Quote</button>
+      </div>
+
+      <div class="product-hero hero-renters fade-up">
+        <div>
+          <h2>Renters Insurance — Powered by Lemonade / Sure</h2>
+          <p>Tenants get insured in under 2 minutes. Insurance certificate auto-uploads to their portal. Landlord is auto-notified of coverage. You earn $1.50–6/tenant/month in referral commissions forever.</p>
+        </div>
+        <div class="ph-num">🏠</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card teal"><div class="lbl">Insured Tenants</div><div class="val" id="ri-active">0</div><div class="sub">active policies</div></div>
+        <div class="stat-card green"><div class="lbl">Total Coverage</div><div class="val" id="ri-coverage">$0</div><div class="sub">personal property</div></div>
+        <div class="stat-card gold"><div class="lbl">Monthly Commission</div><div class="val" id="ri-rev">$0</div><div class="sub">~$3/policy avg</div></div>
+      </div>
+
+      <!-- Quote Engine -->
+      <div class="panel">
+        <div class="panel-header"><h2>⚡ Instant Quote Engine</h2><span style="font-size:.78rem;color:var(--gray-400);">Powered by Lemonade API</span></div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div class="form-group"><label>Tenant Name</label><input id="ri-tenant" placeholder="Jane Smith"></div>
+            <div class="form-group"><label>Property Address</label><input id="ri-address" placeholder="123 Main St, Salt Lake City, UT"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Personal Property Value</label>
+              <select id="ri-coverage-amt">
+                <option value="10000">$10,000 — Basic</option>
+                <option value="15000" selected>$15,000 — Standard</option>
+                <option value="25000">$25,000 — Enhanced</option>
+                <option value="50000">$50,000 — Premium</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Deductible</label>
+              <select id="ri-deductible">
+                <option value="250">$250 (lower premium)</option>
+                <option value="500" selected>$500 (standard)</option>
+                <option value="1000">$1,000 (lowest premium)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-green" onclick="generateRentersQuote()">⚡ Generate Quotes</button>
+          <div id="ri-quotes" style="margin-top:1.25rem;display:none;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;" id="ri-quotes-grid"></div>
+            <div class="success-alert" style="margin-top:1rem;"><div style="font-size:1.1rem;flex-shrink:0;">✅</div><p>Upon enrollment, the insurance certificate is automatically uploaded to the tenant's portal and your landlord account is notified of coverage. Zero manual steps.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Active Renters Insurance Policies</h2></div>
+        <div style="padding:0;">
+          <table class="data-table"><thead><tr><th>Tenant</th><th>Property</th><th>Provider</th><th>Coverage</th><th>Premium</th><th>Commission</th><th>Status</th></tr></thead>
+          <tbody id="renters-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  RENT GUARANTEE                             -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="section-guarantee" class="section">
+      <div class="page-header">
+        <div><h1>💰 Rent Guarantee Insurance</h1><p>Landlord never loses rent income. Claim filed inside RentVerified. Paid in 3–5 business days.</p></div>
+        <button class="btn btn-purple" onclick="openGuaranteeModal()">+ Protect a Property</button>
+      </div>
+
+      <div class="product-hero hero-guarantee fade-up">
+        <div>
+          <h2>Rent Guarantee — Powered by Steady / TheGuarantors</h2>
+          <p>The #1 reason landlords fear rentals is losing months of income during evictions. This eliminates that fear entirely. When tenant stops paying, landlord clicks "File Claim" — RentVerified auto-packages everything and submits. Paid in 3–5 days.</p>
+        </div>
+        <div class="ph-num">💰</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card teal"><div class="lbl">Protected Properties</div><div class="val" id="rg-active">0</div></div>
+        <div class="stat-card purple"><div class="lbl">Total Covered Rent</div><div class="val" id="rg-coverage">$0</div><div class="sub">per month</div></div>
+        <div class="stat-card gold"><div class="lbl">Monthly Commission</div><div class="val" id="rg-rev">$0</div><div class="sub">~$15/property avg</div></div>
+        <div class="stat-card green"><div class="lbl">Claims Paid Out</div><div class="val" id="rg-claims-paid">$0</div><div class="sub">by insurer to date</div></div>
+      </div>
+
+      <!-- CLAIM FILING WIZARD — the showstopper -->
+      <div class="claim-wizard fade-up" id="claim-wizard-panel">
+        <h2>⚡ One-Click Claim Filing</h2>
+        <p>Missed rent payment detected. RentVerified auto-assembles the complete claim package in seconds.</p>
+        <div class="claim-steps">
+          <div class="claim-step done" id="cs0"><span class="cs-icon">🚨</span><span class="cs-label">Rent Flagged</span></div>
+          <div class="claim-step done" id="cs1"><span class="cs-icon">📨</span><span class="cs-label">Reminders Sent</span></div>
+          <div class="claim-step done" id="cs2"><span class="cs-icon">🤝</span><span class="cs-label">Assistance Offered</span></div>
+          <div class="claim-step active" id="cs3"><span class="cs-icon">📋</span><span class="cs-label">File Claim</span></div>
+          <div class="claim-step" id="cs4"><span class="cs-icon">📬</span><span class="cs-label">Submitted</span></div>
+          <div class="claim-step" id="cs5"><span class="cs-icon">💸</span><span class="cs-label">Paid Out</span></div>
+        </div>
+        <div style="margin-bottom:1rem;font-size:.82rem;color:rgba(255,255,255,.6);">Auto-assembled claim package (60 seconds):</div>
+        <div class="claim-package">
+          <div class="cp-item"><span class="cp-check">✅</span><span class="cp-text">Signed Lease Agreement</span><span class="cp-size">245 KB · PDF</span></div>
+          <div class="cp-item"><span class="cp-check">✅</span><span class="cp-text">Complete Payment History (14 months)</span><span class="cp-size">Generated · CSV</span></div>
+          <div class="cp-item"><span class="cp-check">✅</span><span class="cp-text">All Written Communications</span><span class="cp-size">47 messages · PDF</span></div>
+          <div class="cp-item"><span class="cp-check">✅</span><span class="cp-text">Tenant Assistance Attempts (3 documented)</span><span class="cp-size">Timestamped · PDF</span></div>
+          <div class="cp-item"><span class="cp-check">✅</span><span class="cp-text">3-Day Pay or Quit Notice (served)</span><span class="cp-size">98 KB · PDF</span></div>
+          <div class="cp-item"><span class="cp-check">✅</span><span class="cp-text">Property Condition Photos</span><span class="cp-size">12 photos · ZIP</span></div>
+        </div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn btn-purple btn-lg" onclick="fileClaimDemo()">📬 Submit Claim Package</button>
+          <button class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,.2);" onclick="previewPackage()">👁 Preview Package</button>
+        </div>
+        <div id="claim-submitted-msg" style="display:none;margin-top:1rem;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:1rem;font-size:.85rem;color:#6ee7b7;">
+          ✅ Claim submitted to TheGuarantors. Reference #TG-2026-08847. Expected payment: 3–5 business days. You'll be notified when funds are released.
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:1.25rem;">
+        <div class="panel-header"><h2>Protected Properties</h2><button class="btn btn-outline btn-sm" onclick="openGuaranteeModal()">+ Add Property</button></div>
+        <div style="padding:0;">
+          <table class="data-table"><thead><tr><th>Property</th><th>Monthly Rent</th><th>Coverage</th><th>Fee/mo</th><th>Your Cut</th><th>Provider</th><th>Status</th><th></th></tr></thead>
+          <tbody id="guarantee-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  PROFESSIONAL INSURANCE                     -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="section-professional" class="section">
+      <div class="page-header">
+        <div><h1>🛡️ Professional Insurance</h1><p>Auto-alerts when policies expire. Contractors renew instantly through RentVerified. You earn commission.</p></div>
+        <button class="btn btn-primary" onclick="openProInsuranceModal()">+ Add Policy</button>
+      </div>
+
+      <div class="product-hero hero-pro fade-up">
+        <div>
+          <h2>Pro Insurance — Powered by Next Insurance / Coterie</h2>
+          <p>You already verify contractor insurance as part of onboarding. Now you also sell it. 30-day renewal alerts fire automatically. One click to get a new quote through RentVerified.</p>
+        </div>
+        <div class="ph-num">🛡️</div>
+      </div>
+
+      <div id="expiring-alerts"></div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>⚡ Instant Quote — Next Insurance API</h2></div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div class="form-group"><label>Professional Name / Business</label><input id="pro-name" placeholder="Dan's Plumbing LLC"></div>
+            <div class="form-group"><label>Professional Type</label>
+              <select id="pro-type">
+                <option value="contractor-general">General Contractor</option>
+                <option value="contractor-plumbing">Plumber</option>
+                <option value="contractor-electrical">Electrician</option>
+                <option value="contractor-hvac">HVAC Technician</option>
+                <option value="contractor-cleaning">Cleaning Service</option>
+                <option value="pm">Property Manager</option>
+                <option value="attorney">Real Estate Attorney</option>
+                <option value="inspector">Home Inspector</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Coverage Type</label>
+              <select id="pro-coverage-type">
+                <option value="gl">General Liability ($1M)</option>
+                <option value="gl2">General Liability ($2M)</option>
+                <option value="eo">E&O / Professional Liability</option>
+                <option value="wc">Workers Comp</option>
+                <option value="bundle">Bundle (GL + WC + Tools)</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Annual Revenue (approx)</label>
+              <select id="pro-revenue">
+                <option value="50000">Under $100K</option>
+                <option value="150000" selected>$100K – $250K</option>
+                <option value="400000">$250K – $500K</option>
+                <option value="750000">$500K – $1M</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="generateProQuote()">⚡ Get Instant Quote</button>
+          <div id="pro-quote-result" style="display:none;margin-top:1.25rem;"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Professional Insurance Policies</h2></div>
+        <div style="padding:0;">
+          <table class="data-table"><thead><tr><th>Professional</th><th>Type</th><th>Coverage</th><th>Provider</th><th>Expires</th><th>Your Commission</th><th>Status</th><th></th></tr></thead>
+          <tbody id="pro-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  CLAIMS CENTER                              -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="section-claims" class="section">
+      <div class="page-header">
+        <div><h1>📋 Claims Center</h1><p>All insurance claims across all products — real-time status tracking.</p></div>
+        <button class="btn btn-danger" onclick="openNewClaimModal()">🚨 File New Claim</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card blue"><div class="lbl">Total Claims</div><div class="val" id="cl-total">0</div></div>
+        <div class="stat-card gold"><div class="lbl">Pending Review</div><div class="val" id="cl-pending">0</div></div>
+        <div class="stat-card green"><div class="lbl">Approved</div><div class="val" id="cl-approved">0</div></div>
+        <div class="stat-card teal"><div class="lbl">Total Paid Out</div><div class="val" id="cl-paid">$0</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>All Claims</h2></div>
+        <div style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Claim #</th><th>Type</th><th>Property / Party</th><th>Amount</th><th>Filed</th><th>Status</th><th>Timeline</th><th></th></tr></thead>
+            <tbody id="claims-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  REVENUE TRACKER                            -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="section-revenue" class="section">
+      <div class="page-header"><div><h1>💵 Revenue Tracker</h1><p>Your commission income across all financial products.</p></div></div>
+
+      <div class="rev-ticker">
+        <div><div class="rt-label">This Month</div><div class="rt-val" id="rev-this-month">$0</div></div>
+        <div><div class="rt-label">Projected Annual</div><div class="rt-val" id="rev-annual">$0</div></div>
+        <div><div class="rt-label">Per Tenant Avg</div><div class="rt-val" id="rev-per-tenant">$0</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Revenue Breakdown by Product</h2></div>
+        <div class="panel-body" id="rev-breakdown"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>📈 Scale Projection Calculator</h2></div>
+        <div class="panel-body">
+          <div class="form-group"><label>How many tenants do you manage?</label>
+            <input type="range" id="scale-tenants" min="10" max="10000" value="100" oninput="updateScaleCalc()" style="width:100%;accent-color:var(--teal);">
+            <div style="text-align:center;font-size:.85rem;color:var(--gray-600);margin-top:.35rem;"><span id="scale-tenant-label">100</span> tenants</div>
+          </div>
+          <div id="scale-results" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-top:1rem;"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>💡 Optimization Tips</h2></div>
+        <div class="panel-body">
+          <div style="display:flex;flex-direction:column;gap:.75rem;" id="rev-tips"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closeModal()">
+  <div id="modal-box" style="background:white;border-radius:14px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;padding:1.75rem;"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════ */
+function load(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch{return d;}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtMoney(n){return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function genId(){return 'RV-'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase();}
+function daysUntil(dateStr){return Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24));}
+
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════ */
+function showSection(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.fh-sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const renders={dashboard:renderDashboard,deposit:renderDeposit,renters:renderRenters,guarantee:renderGuarantee,professional:renderProfessional,claims:renderClaims,revenue:renderRevenue};
+  if(renders[id]) renders[id]();
+}
+
+function closeModal(){document.getElementById('modal-overlay').style.display='none';}
+function openModal(html){
+  document.getElementById('modal-box').innerHTML=html;
+  document.getElementById('modal-overlay').style.display='flex';
+}
+
+/* ═══════════════════════════════════════════════
+   SAMPLE DATA SEED
+   ═══════════════════════════════════════════════ */
+function seedData(){
+  if(load('rv_deposit_bonds',[]).length) return;
+
+  save('rv_deposit_bonds',[
+    {id:genId(),tenant:'Jane Doe',address:'123 Maple St, Unit 2A',coverage:2000,monthly:65,commission:9.75,startDate:new Date(Date.now()-90*864e5).toISOString(),status:'active',provider:'Jetty'},
+    {id:genId(),tenant:'Robert Lee',address:'456 Oak Ave, Apt 1B',coverage:1500,monthly:50,commission:7.50,startDate:new Date(Date.now()-45*864e5).toISOString(),status:'active',provider:'Jetty'},
+  ]);
+
+  save('rv_renters_insurance',[
+    {id:genId(),tenant:'Jane Doe',address:'123 Maple St, Unit 2A',provider:'Lemonade',coverage:15000,monthly:14,commission:2.10,startDate:new Date(Date.now()-90*864e5).toISOString(),endDate:new Date(Date.now()+275*864e5).toISOString(),status:'active'},
+    {id:genId(),tenant:'Maria Lopez',address:'2847 W Temple St',provider:'Lemonade',coverage:10000,monthly:11,commission:1.65,startDate:new Date(Date.now()-30*864e5).toISOString(),endDate:new Date(Date.now()+335*864e5).toISOString(),status:'active'},
+  ]);
+
+  save('rv_rent_guarantee',[
+    {id:genId(),address:'123 Maple St, Unit 2A',rent:1200,coverage:14400,monthly:95,commission:14.25,provider:'TheGuarantors',status:'active',startDate:new Date(Date.now()-90*864e5).toISOString(),claims:[]},
+    {id:genId(),address:'456 Oak Ave, Apt 1B',rent:950,coverage:11400,monthly:75,commission:11.25,provider:'Steady',status:'active',startDate:new Date(Date.now()-60*864e5).toISOString(),claims:[]},
+  ]);
+
+  save('rv_pro_insurance',[
+    {id:genId(),name:'FastFix Plumbing',type:'Plumber',coverage:'General Liability $1M',provider:'Next Insurance',monthly:87,commission:13.05,expires:new Date(Date.now()+25*864e5).toISOString(),status:'expiring'},
+    {id:genId(),name:'Elite Electric',type:'Electrician',coverage:'GL $1M + Workers Comp',provider:'Coterie',monthly:142,commission:21.30,expires:new Date(Date.now()+180*864e5).toISOString(),status:'active'},
+    {id:genId(),name:'Clean Pro Services',type:'Cleaning',coverage:'General Liability $1M',provider:'Next Insurance',monthly:55,commission:8.25,expires:new Date(Date.now()+95*864e5).toISOString(),status:'active'},
+    {id:genId(),name:'Sanders Property Mgmt',type:'PM',coverage:'E&O / Professional Liability',provider:'Vouch',monthly:210,commission:31.50,expires:new Date(Date.now()+310*864e5).toISOString(),status:'active'},
+  ]);
+
+  save('rv_insurance_claims',[
+    {id:genId(),claimNum:'TG-2026-08847',type:'Rent Guarantee',party:'123 Maple St — Jane Doe',amount:1200,filed:new Date(Date.now()-8*864e5).toISOString(),status:'approved',paidOut:true,paidAt:new Date(Date.now()-3*864e5).toISOString(),timeline:[
+      {ts:new Date(Date.now()-8*864e5).toISOString(),text:'Claim package submitted automatically'},
+      {ts:new Date(Date.now()-7*864e5).toISOString(),text:'Under review by TheGuarantors'},
+      {ts:new Date(Date.now()-5*864e5).toISOString(),text:'Claim approved — $1,200'},
+      {ts:new Date(Date.now()-3*864e5).toISOString(),text:'Payment sent to landlord bank account'},
+    ]},
+  ]);
+}
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD
+   ═══════════════════════════════════════════════ */
+function renderDashboard(){
+  const bonds=load('rv_deposit_bonds',[]);
+  const ri=load('rv_renters_insurance',[]);
+  const rg=load('rv_rent_guarantee',[]);
+  const pro=load('rv_pro_insurance',[]);
+  const claims=load('rv_insurance_claims',[]);
+
+  const revDep=bonds.filter(b=>b.status==='active').reduce((s,b)=>s+b.commission,0);
+  const revRI=ri.filter(p=>p.status==='active').reduce((s,p)=>s+p.commission,0);
+  const revRG=rg.filter(g=>g.status==='active').reduce((s,g)=>s+g.commission,0);
+  const revPro=pro.filter(p=>p.status!=='cancelled').reduce((s,p)=>s+p.commission,0);
+  const totalRev=revDep+revRI+revRG+revPro;
+
+  const expiring=pro.filter(p=>daysUntil(p.expires)<=30&&p.status!=='cancelled').length;
+  const openClaims=claims.filter(c=>c.status==='pending'||c.status==='filed').length;
+  const policies=bonds.length+ri.length+rg.length+pro.length;
+
+  document.getElementById('dash-rev-total').textContent=fmtMoney(totalRev)+'/mo';
+  document.getElementById('dash-policies').textContent=policies;
+  document.getElementById('dash-claims-count').textContent=openClaims;
+  document.getElementById('dash-expiring').textContent=expiring;
+  document.getElementById('dc-count').textContent=bonds.filter(b=>b.status==='active').length;
+  document.getElementById('ri-count').textContent=ri.filter(p=>p.status==='active').length;
+  document.getElementById('rg-count').textContent=rg.filter(g=>g.status==='active').length;
+  document.getElementById('pi-count').textContent=pro.filter(p=>p.status==='active').length;
+  document.getElementById('sb-rev').textContent=fmtMoney(totalRev);
+  document.getElementById('sb-expiring').textContent=expiring;
+  document.getElementById('sb-claims').textContent=openClaims;
+
+  // Alerts
+  const alertsEl=document.getElementById('dash-alerts');
+  let alertsHTML='';
+  pro.forEach(p=>{
+    const days=daysUntil(p.expires);
+    if(days<=30) alertsHTML+=`<div class="expiry-banner"><div class="exp-icon">⚠️</div><div class="exp-text"><strong>${p.name} — ${p.coverage} expires in ${days} days</strong>They need to renew to stay on your platform. <a href="#" onclick="showSection('professional',null);return false;" style="color:#fca5a5;">Send renewal alert →</a></div></div>`;
+  });
+  claims.filter(c=>c.status==='filed').forEach(c=>{
+    alertsHTML+=`<div style="background:#faf5ff;border:1px solid #ddd6fe;border-radius:8px;padding:.85rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem;"><span style="font-size:1.1rem;">📋</span><div style="flex:1;font-size:.85rem;"><strong>${c.claimNum}</strong> — ${c.party} — ${fmtMoney(c.amount)} — Under review</div><span class="pill filed">Filed</span></div>`;
+  });
+  alertsEl.innerHTML=alertsHTML||'<p style="color:var(--gray-400);text-align:center;padding:1rem 0;">No active alerts. All policies in good standing. ✅</p>';
+}
+
+/* ═══════════════════════════════════════════════
+   DEPOSIT BONDS
+   ═══════════════════════════════════════════════ */
+function renderDeposit(){
+  const bonds=load('rv_deposit_bonds',[]);
+  const active=bonds.filter(b=>b.status==='active');
+  document.getElementById('dep-active').textContent=active.length;
+  document.getElementById('dep-coverage').textContent=fmtMoney(active.reduce((s,b)=>s+b.coverage,0));
+  document.getElementById('dep-rev').textContent=fmtMoney(active.reduce((s,b)=>s+b.commission,0))+'/mo';
+  document.getElementById('deposit-tbody').innerHTML=bonds.map(b=>`<tr>
+    <td><strong>${b.tenant}</strong></td>
+    <td style="font-size:.82rem;">${b.address}</td>
+    <td>${fmtMoney(b.coverage)}</td>
+    <td style="font-weight:700;">$${b.monthly}/mo</td>
+    <td style="color:var(--teal);font-weight:700;">$${b.commission.toFixed(2)}/mo</td>
+    <td><span class="pill ${b.status}">${b.status}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="viewBond('${b.id}')">View</button></td>
+  </tr>`).join('');
+}
+
+function openNewDepositModal(){
+  openModal(`<h2 style="font-weight:800;margin-bottom:.25rem;">🔒 Enroll in Deposit Bond</h2>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:1.25rem;">Tenant skips upfront deposit. Landlord fully protected. One click setup.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Tenant Name</label><input id="m-dep-tenant" placeholder="Jane Smith" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;"></div>
+      <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Property Address</label><input id="m-dep-address" placeholder="123 Main St" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Monthly Rent</label><input id="m-dep-rent" type="number" placeholder="1200" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;"></div>
+      <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Security Deposit Amount</label><input id="m-dep-deposit" type="number" placeholder="2000" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;"></div>
+    </div>
+    <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:.85rem;margin-bottom:1rem;font-size:.83rem;color:#0f766e;">
+      <strong>Bond fee:</strong> ~3.25% of monthly rent/month · <strong>Your commission:</strong> ~15% of bond fee · <strong>Partner:</strong> Jetty API
+    </div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-teal" onclick="saveDepositBond()">✅ Enroll Tenant</button>
+    </div>`);
+}
+
+function saveDepositBond(){
+  const tenant=document.getElementById('m-dep-tenant').value.trim();
+  const address=document.getElementById('m-dep-address').value.trim();
+  const rent=parseFloat(document.getElementById('m-dep-rent').value)||1200;
+  const deposit=parseFloat(document.getElementById('m-dep-deposit').value)||2000;
+  if(!tenant){alert('Enter tenant name');return;}
+  const monthly=Math.round(rent*0.0325);
+  const commission=+(monthly*0.15).toFixed(2);
+  const bonds=load('rv_deposit_bonds',[]);
+  bonds.push({id:genId(),tenant,address,coverage:deposit,monthly,commission,startDate:new Date().toISOString(),status:'active',provider:'Jetty'});
+  save('rv_deposit_bonds',bonds);
+  closeModal(); renderDeposit(); renderDashboard();
+  alert(`✅ Deposit bond enrolled!\n\nTenant ${tenant} is now covered up to ${fmtMoney(deposit)}.\nMonthly bond fee: $${monthly}\nYour commission: $${commission}/mo`);
+}
+
+function viewBond(id){
+  const b=load('rv_deposit_bonds',[]).find(x=>x.id===id); if(!b) return;
+  openModal(`<h2 style="font-weight:800;margin-bottom:1rem;">🔒 Bond Details — ${b.tenant}</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;">
+      ${[['Property',b.address],['Coverage',fmtMoney(b.coverage)],['Monthly Fee','$'+b.monthly],['Your Commission','$'+b.commission.toFixed(2)+'/mo'],['Provider',b.provider],['Started',fmtDate(b.startDate)],['Status',b.status.toUpperCase()]].map(([l,v])=>`<div><div style="font-size:.72rem;font-weight:700;color:var(--gray-500);margin-bottom:.2rem;">${l}</div><div style="font-weight:600;">${v}</div></div>`).join('')}
+    </div>
+    <button class="btn btn-outline" onclick="closeModal()" style="width:100%;">Close</button>`);
+}
+
+/* ═══════════════════════════════════════════════
+   RENTERS INSURANCE
+   ═══════════════════════════════════════════════ */
+function renderRenters(){
+  const ri=load('rv_renters_insurance',[]);
+  const active=ri.filter(p=>p.status==='active');
+  document.getElementById('ri-active').textContent=active.length;
+  document.getElementById('ri-coverage').textContent=fmtMoney(active.reduce((s,p)=>s+p.coverage,0));
+  document.getElementById('ri-rev').textContent=fmtMoney(active.reduce((s,p)=>s+p.commission,0))+'/mo';
+  document.getElementById('renters-tbody').innerHTML=ri.map(p=>`<tr>
+    <td><strong>${p.tenant}</strong></td>
+    <td style="font-size:.82rem;">${p.address}</td>
+    <td>${p.provider}</td>
+    <td>${fmtMoney(p.coverage)}</td>
+    <td style="font-weight:700;">$${p.monthly}/mo</td>
+    <td style="color:var(--teal);font-weight:700;">$${p.commission.toFixed(2)}/mo</td>
+    <td><span class="pill ${p.status}">${p.status}</span></td>
+  </tr>`).join('');
+}
+
+function generateRentersQuote(){
+  const tenant=document.getElementById('ri-tenant').value||'Tenant';
+  const coverage=parseInt(document.getElementById('ri-coverage-amt').value);
+  const deductible=parseInt(document.getElementById('ri-deductible').value);
+  const base=coverage/5000;
+  const ded=deductible===250?1.3:deductible===500?1.0:0.8;
+  const quotes=[
+    {provider:'Lemonade',monthly:+(base*ded*0.95).toFixed(2),note:'AI-powered, instant claims',commission:'15%',recommended:true},
+    {provider:'Sure',monthly:+(base*ded*1.05).toFixed(2),note:'White-label platform',commission:'12%',recommended:false},
+    {provider:'Assurant',monthly:+(base*ded*1.15).toFixed(2),note:'Established provider',commission:'10%',recommended:false},
+  ];
+  document.getElementById('ri-quotes').style.display='block';
+  document.getElementById('ri-quotes-grid').innerHTML=quotes.map(q=>`
+    <div class="quote-box ${q.recommended?'highlighted':''}">
+      ${q.recommended?'<div style="font-size:.72rem;font-weight:700;color:var(--teal);margin-bottom:.35rem;">✨ RECOMMENDED</div>':''}
+      <div class="qb-provider">${q.provider}</div>
+      <div class="qb-price" style="${q.recommended?'color:var(--teal)':''}">$${q.monthly}</div>
+      <div class="qb-period">/month</div>
+      <div class="qb-note">${q.note}</div>
+      <div class="qb-savings">Your commission: ${q.commission}</div>
+      <button class="btn btn-sm ${q.recommended?'btn-teal':'btn-outline'}" style="margin-top:.75rem;width:100%;" onclick="enrollRenters('${tenant}','${q.provider}',${q.monthly},${coverage})">Enroll</button>
+    </div>`).join('');
+}
+
+function openRentersQuoteModal(){
+  openModal(`<h2 style="font-weight:800;margin-bottom:.5rem;">🏠 Enroll in Renters Insurance</h2>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:1.25rem;">2 minutes to insure. Certificate auto-uploads. Landlord auto-notified.</p>
+    <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Tenant Name</label><input id="m-ri-tenant" placeholder="Jane Smith" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;margin-bottom:1rem;"></div>
+    <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Property Address</label><input id="m-ri-address" placeholder="123 Main St" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;margin-bottom:1rem;"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-green" onclick="quickEnrollRI()">✅ Enroll at $14/mo (Lemonade)</button>
+    </div>`);
+}
+
+function enrollRenters(tenant,provider,monthly,coverage){
+  const ri=load('rv_renters_insurance',[]);
+  const comm=+(monthly*0.15).toFixed(2);
+  ri.push({id:genId(),tenant,address:document.getElementById('ri-address')?.value||'Property',provider,coverage,monthly,commission:comm,startDate:new Date().toISOString(),endDate:new Date(Date.now()+365*864e5).toISOString(),status:'active'});
+  save('rv_renters_insurance',ri);
+  closeModal(); renderRenters(); renderDashboard();
+  document.getElementById('ri-quotes').style.display='none';
+  alert(`✅ ${tenant} enrolled with ${provider}!\n\nInsurance certificate auto-uploaded to tenant portal.\nLandlord notified of coverage.\nYour monthly commission: $${comm}`);
+}
+
+function quickEnrollRI(){
+  const tenant=document.getElementById('m-ri-tenant').value.trim()||'New Tenant';
+  const address=document.getElementById('m-ri-address').value.trim()||'Property';
+  const ri=load('rv_renters_insurance',[]);
+  ri.push({id:genId(),tenant,address,provider:'Lemonade',coverage:15000,monthly:14,commission:2.10,startDate:new Date().toISOString(),endDate:new Date(Date.now()+365*864e5).toISOString(),status:'active'});
+  save('rv_renters_insurance',ri);
+  closeModal(); renderRenters(); renderDashboard();
+  alert(`✅ ${tenant} enrolled!\n\nLemonade policy active. Certificate uploaded. Landlord notified.\nYour monthly commission: $2.10`);
+}
+
+/* ═══════════════════════════════════════════════
+   RENT GUARANTEE
+   ═══════════════════════════════════════════════ */
+function renderGuarantee(){
+  const rg=load('rv_rent_guarantee',[]);
+  const active=rg.filter(g=>g.status==='active');
+  document.getElementById('rg-active').textContent=active.length;
+  document.getElementById('rg-coverage').textContent=fmtMoney(active.reduce((s,g)=>s+g.rent,0));
+  document.getElementById('rg-rev').textContent=fmtMoney(active.reduce((s,g)=>s+g.commission,0))+'/mo';
+  const claims=load('rv_insurance_claims',[]).filter(c=>c.type==='Rent Guarantee'&&c.paidOut);
+  document.getElementById('rg-claims-paid').textContent=fmtMoney(claims.reduce((s,c)=>s+c.amount,0));
+  document.getElementById('guarantee-tbody').innerHTML=rg.map(g=>`<tr>
+    <td><strong style="font-size:.875rem;">${g.address}</strong></td>
+    <td>${fmtMoney(g.rent)}/mo</td>
+    <td>${fmtMoney(g.coverage)}/yr</td>
+    <td style="font-weight:700;">$${g.monthly}/mo</td>
+    <td style="color:var(--teal);font-weight:700;">$${g.commission.toFixed(2)}/mo</td>
+    <td>${g.provider}</td>
+    <td><span class="pill ${g.status}">${g.status}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="startClaimFlow('${g.id}')">🚨 File Claim</button></td>
+  </tr>`).join('');
+}
+
+function openGuaranteeModal(){
+  openModal(`<h2 style="font-weight:800;margin-bottom:.25rem;">💰 Add Rent Guarantee</h2>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:1.25rem;">Protect a property — never lose a month of rent income again.</p>
+    <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Property Address</label><input id="m-rg-addr" placeholder="123 Main St, SLC" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;margin-bottom:1rem;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Monthly Rent</label><input id="m-rg-rent" type="number" placeholder="1200" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;" oninput="updateGQuote()"></div>
+      <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Coverage Period</label><select id="m-rg-months" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;"><option value="6">6 months covered</option><option value="12" selected>12 months covered</option></select></div>
+    </div>
+    <div id="rg-quote-preview" style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:.85rem;margin-bottom:1rem;font-size:.83rem;color:#0f766e;display:none;"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-purple" onclick="saveGuarantee()">✅ Add Rent Guarantee</button>
+    </div>`);
+}
+
+function updateGQuote(){
+  const rent=parseFloat(document.getElementById('m-rg-rent').value)||0;
+  if(!rent) return;
+  const monthly=Math.round(rent*0.079);
+  const comm=+(monthly*0.15).toFixed(2);
+  document.getElementById('rg-quote-preview').style.display='block';
+  document.getElementById('rg-quote-preview').innerHTML=`<strong>Estimated premium:</strong> $${monthly}/mo · <strong>Your commission:</strong> $${comm}/mo · <strong>Provider:</strong> TheGuarantors`;
+}
+
+function saveGuarantee(){
+  const addr=document.getElementById('m-rg-addr').value.trim();
+  const rent=parseFloat(document.getElementById('m-rg-rent').value)||1200;
+  if(!addr){alert('Enter property address');return;}
+  const monthly=Math.round(rent*0.079);
+  const commission=+(monthly*0.15).toFixed(2);
+  const rg=load('rv_rent_guarantee',[]);
+  rg.push({id:genId(),address:addr,rent,coverage:rent*12,monthly,commission,provider:'TheGuarantors',status:'active',startDate:new Date().toISOString(),claims:[]});
+  save('rv_rent_guarantee',rg);
+  closeModal(); renderGuarantee(); renderDashboard();
+  alert(`✅ Rent guarantee activated!\n\n${addr}\nMonthly premium: $${monthly}\nYour commission: $${commission}/mo\n\nIf this tenant misses rent, click "File Claim" and we auto-package everything.`);
+}
+
+function fileClaimDemo(){
+  document.getElementById('cs3').className='claim-step done';
+  document.getElementById('cs4').className='claim-step active';
+  setTimeout(()=>{
+    document.getElementById('cs4').className='claim-step done';
+    document.getElementById('cs5').className='claim-step active';
+    document.getElementById('claim-submitted-msg').style.display='block';
+    // Save claim
+    const claims=load('rv_insurance_claims',[]);
+    const existing=claims.find(c=>c.claimNum==='TG-2026-08847');
+    if(!existing){
+      claims.push({id:genId(),claimNum:'TG-2026-08847',type:'Rent Guarantee',party:'Demo Property — Tenant',amount:1200,filed:new Date().toISOString(),status:'filed',paidOut:false,timeline:[{ts:new Date().toISOString(),text:'Claim submitted via RentVerified auto-package'}]});
+      save('rv_insurance_claims',claims);
+    }
+    renderDashboard();
+  },2200);
+}
+
+function previewPackage(){
+  openModal(`<h2 style="font-weight:800;margin-bottom:1rem;">📋 Claim Package Preview</h2>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:1rem;">This package is auto-assembled from your RentVerified data and submitted directly to the insurer.</p>
+    <div style="display:flex;flex-direction:column;gap:.5rem;">
+      ${[['📄','Signed Lease Agreement — 123 Maple St','Signed Mar 1, 2025','245 KB'],['💳','Payment History — 14 months on-time, 1 missed','Generated in real-time','CSV + PDF'],['💬','All Written Communications','47 messages, timestamped','PDF bundle'],['🤝','Tenant Assistance Documentation','3 resources offered, logged','PDF'],['⚖️','3-Day Pay or Quit Notice','Served Mar 3, 2026','98 KB'],['📸','Property Condition Photos','12 photos at move-in','ZIP']].map(([i,name,note,size])=>`
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:#f8fafc;border-radius:8px;">
+          <span style="font-size:1.25rem;">${i}</span>
+          <div style="flex:1;"><div style="font-weight:600;font-size:.875rem;">${name}</div><div style="font-size:.75rem;color:#64748b;">${note}</div></div>
+          <span style="font-size:.72rem;color:#94a3b8;">${size}</span>
+          <span style="background:#d1fae5;color:#065f46;font-size:.7rem;padding:2px 7px;border-radius:999px;font-weight:700;">✅ Ready</span>
+        </div>`).join('')}
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:.85rem;margin-top:1rem;font-size:.83rem;color:#1e40af;">
+      💡 <strong>Why insurance companies love RentVerified:</strong> This package eliminates fraud and reduces review time by 10×. You become their preferred reporting platform.
+    </div>
+    <button class="btn btn-outline" onclick="closeModal()" style="width:100%;margin-top:1rem;">Close</button>`);
+}
+
+function startClaimFlow(id){
+  const rg=load('rv_rent_guarantee',[]).find(g=>g.id===id); if(!rg) return;
+  openModal(`<h2 style="font-weight:800;margin-bottom:.5rem;">🚨 File Rent Guarantee Claim</h2>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:1rem;">${rg.address}</p>
+    <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:.85rem;margin-bottom:1rem;font-size:.83rem;color:#92400e;">
+      ⚠️ Before filing: RentVerified recommends offering tenant assistance first. Courts look more favorably on landlords who documented good-faith efforts. <a href="tenant-assistance.html" style="color:#92400e;font-weight:700;">Open Assistance →</a>
+    </div>
+    <div style="margin-bottom:1rem;"><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Months of missed rent</label>
+    <select id="m-cl-months" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;">
+      <option value="1">1 month — ${fmtMoney(rg.rent)}</option>
+      <option value="2">2 months — ${fmtMoney(rg.rent*2)}</option>
+      <option value="3">3 months — ${fmtMoney(rg.rent*3)}</option>
+    </select></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="submitClaim('${rg.id}')">📬 Submit Claim Package</button>
+    </div>`);
+}
+
+function submitClaim(rgId){
+  const rg=load('rv_rent_guarantee',[]).find(g=>g.id===rgId); if(!rg) return;
+  const months=parseInt(document.getElementById('m-cl-months').value)||1;
+  const amount=rg.rent*months;
+  const claims=load('rv_insurance_claims',[]);
+  const claimNum=genId();
+  claims.push({id:genId(),claimNum,type:'Rent Guarantee',party:rg.address,amount,filed:new Date().toISOString(),status:'filed',paidOut:false,timeline:[{ts:new Date().toISOString(),text:'Claim package auto-submitted — '+months+' month(s) rent, '+fmtMoney(amount)}]});
+  save('rv_insurance_claims',claims);
+  closeModal(); renderGuarantee(); renderDashboard();
+  alert(`✅ Claim submitted!\n\nReference: ${claimNum}\nAmount: ${fmtMoney(amount)}\nProvider: ${rg.provider}\n\nExpected payment: 3–5 business days. You'll be notified when funds are released.`);
+}
+
+/* ═══════════════════════════════════════════════
+   PROFESSIONAL INSURANCE
+   ═══════════════════════════════════════════════ */
+function renderProfessional(){
+  const pro=load('rv_pro_insurance',[]);
+  const alertsEl=document.getElementById('expiring-alerts');
+  const expiring=pro.filter(p=>daysUntil(p.expires)<=30&&p.status!=='cancelled');
+  alertsEl.innerHTML=expiring.map(p=>`<div class="expiry-banner"><div class="exp-icon">⚠️</div><div class="exp-text"><strong>${p.name} — ${p.coverage} expires in ${daysUntil(p.expires)} days</strong>Send them a renewal alert and earn commission on the new policy.</div><button class="btn btn-warning btn-sm" onclick="sendRenewalAlert('${p.id}')">Send Alert</button></div>`).join('');
+  document.getElementById('pro-tbody').innerHTML=pro.map(p=>{
+    const days=daysUntil(p.expires);
+    const status=days<=30?'expiring':'active';
+    return `<tr>
+      <td><strong>${p.name}</strong></td>
+      <td style="font-size:.82rem;">${p.type}</td>
+      <td style="font-size:.82rem;">${p.coverage}</td>
+      <td>${p.provider}</td>
+      <td style="${days<=30?'color:var(--danger);font-weight:700;':''}">
+        ${fmtDate(p.expires)} ${days<=30?'('+days+'d!)':''}
+      </td>
+      <td style="color:var(--teal);font-weight:700;">$${p.commission.toFixed(2)}/mo</td>
+      <td><span class="pill ${status}">${status}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="sendRenewalAlert('${p.id}')">Renew</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function generateProQuote(){
+  const name=document.getElementById('pro-name').value||'Professional';
+  const type=document.getElementById('pro-type').value;
+  const covType=document.getElementById('pro-coverage-type').value;
+  const rev=parseInt(document.getElementById('pro-revenue').value)||150000;
+  const base={gl:65,gl2:115,eo:155,wc:180,bundle:220}[covType]||65;
+  const monthly=Math.round(base*(rev/150000)*0.6+base*0.4);
+  const commission=+(monthly*0.15).toFixed(2);
+  document.getElementById('pro-quote-result').style.display='block';
+  document.getElementById('pro-quote-result').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+      <div class="quote-box highlighted">
+        <div class="qb-provider" style="color:var(--primary);">Next Insurance</div>
+        <div class="qb-price">$${monthly}</div><div class="qb-period">/month</div>
+        <div class="qb-note">Instant approval, same-day certificate, digital COI</div>
+        <div class="qb-savings">Your commission: $${commission}/mo</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:.75rem;width:100%;" onclick="enrollProInsurance('${name}','${document.getElementById('pro-type').options[document.getElementById('pro-type').selectedIndex].text}','${document.getElementById('pro-coverage-type').options[document.getElementById('pro-coverage-type').selectedIndex].text}','Next Insurance',${monthly},${commission})">Enroll</button>
+      </div>
+      <div class="quote-box">
+        <div class="qb-provider">Coterie</div>
+        <div class="qb-price">$${monthly+12}</div><div class="qb-period">/month</div>
+        <div class="qb-note">Fast underwriting, API-first platform</div>
+        <div class="qb-savings">Your commission: $${(+(monthly+12)*0.12).toFixed(2)}/mo</div>
+        <button class="btn btn-outline btn-sm" style="margin-top:.75rem;width:100%;" onclick="enrollProInsurance('${name}','${document.getElementById('pro-type').options[document.getElementById('pro-type').selectedIndex].text}','${document.getElementById('pro-coverage-type').options[document.getElementById('pro-coverage-type').selectedIndex].text}','Coterie',${monthly+12},${+((monthly+12)*0.12).toFixed(2)})">Enroll</button>
+      </div>
+    </div>`;
+}
+
+function enrollProInsurance(name,type,coverage,provider,monthly,commission){
+  const pro=load('rv_pro_insurance',[]);
+  const exp=new Date(); exp.setFullYear(exp.getFullYear()+1);
+  pro.push({id:genId(),name,type,coverage,provider,monthly,commission,expires:exp.toISOString(),status:'active'});
+  save('rv_pro_insurance',pro);
+  closeModal(); renderProfessional(); renderDashboard();
+  document.getElementById('pro-quote-result').style.display='none';
+  document.getElementById('pro-name').value='';
+  alert(`✅ ${name} enrolled!\n\nCoverage: ${coverage}\nProvider: ${provider}\nMonthly premium: $${monthly}\nYour monthly commission: $${commission}`);
+}
+
+function openProInsuranceModal(){ document.getElementById('pro-name').focus(); }
+function sendRenewalAlert(id){
+  const pro=load('rv_pro_insurance',[]).find(p=>p.id===id); if(!pro) return;
+  alert(`✅ Renewal alert sent to ${pro.name}!\n\nMessage: "Your ${pro.coverage} expires in ${daysUntil(pro.expires)} days. Click here to renew instantly through RentVerified and keep your verified status."\n\nWhen they renew, you earn $${pro.commission.toFixed(2)}/month commission.`);
+}
+
+function selectPartner(el,name){
+  document.querySelectorAll('.partner-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  const info={
+    'Jetty':'<strong>Jetty (Recommended)</strong> — Does both deposit bonds AND renters insurance in one API call. One integration, two revenue streams. Commission: 12–18% of premium. Best for RentVerified.',
+    'Rhino':'<strong>Rhino</strong> — Leading deposit bond provider. Used by over 2 million renters. Simple API, fast approval. Commission: 10–15%.',
+    'Obligo':'<strong>Obligo</strong> — Deposit-free solution using bank verification. No premium for tenant. Landlord charges a monthly fee. Commission: flat fee per enrollment.',
+    'LeaseLock':'<strong>LeaseLock</strong> — Whole-lease insurance at the property level. Landlord pays, tenant benefits. Higher coverage, higher commission.',
+  };
+  document.getElementById('partner-info').innerHTML=info[name]||'';
+}
+
+/* ═══════════════════════════════════════════════
+   CLAIMS
+   ═══════════════════════════════════════════════ */
+function renderClaims(){
+  const claims=load('rv_insurance_claims',[]);
+  document.getElementById('cl-total').textContent=claims.length;
+  document.getElementById('cl-pending').textContent=claims.filter(c=>c.status==='filed').length;
+  document.getElementById('cl-approved').textContent=claims.filter(c=>c.status==='approved').length;
+  document.getElementById('cl-paid').textContent=fmtMoney(claims.filter(c=>c.paidOut).reduce((s,c)=>s+c.amount,0));
+  document.getElementById('claims-tbody').innerHTML=claims.map(c=>`<tr>
+    <td><strong style="font-family:monospace;font-size:.82rem;">${c.claimNum}</strong></td>
+    <td><span class="pill ${c.type==='Rent Guarantee'?'filed':'active'}" style="font-size:.72rem;">${c.type}</span></td>
+    <td style="font-size:.82rem;">${c.party}</td>
+    <td style="font-weight:700;">${fmtMoney(c.amount)}</td>
+    <td style="font-size:.82rem;">${fmtDate(c.filed)}</td>
+    <td><span class="pill ${c.paidOut?'paid':c.status}">${c.paidOut?'Paid Out':c.status}</span></td>
+    <td>
+      <div class="timeline" style="padding-left:1.25rem;font-size:.72rem;">
+        ${(c.timeline||[]).slice(-2).map(t=>`<div class="tl-item" style="margin-bottom:.35rem;"><div class="tl-text">${t.text}</div></div>`).join('')}
+      </div>
+    </td>
+    <td><button class="btn btn-outline btn-sm" onclick="viewClaim('${c.id}')">Details</button></td>
+  </tr>`).join('');
+}
+
+function viewClaim(id){
+  const claims=load('rv_insurance_claims',[]);
+  const c=claims.find(x=>x.id===id); if(!c) return;
+  openModal(`<h2 style="font-weight:800;margin-bottom:1rem;">📋 ${c.claimNum}</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;">
+      ${[['Type',c.type],['Party',c.party],['Amount',fmtMoney(c.amount)],['Status',c.paidOut?'✅ Paid Out':c.status],['Filed',fmtDate(c.filed)]].map(([l,v])=>`<div><div style="font-size:.72rem;font-weight:700;color:var(--gray-500);margin-bottom:.2rem;">${l}</div><div style="font-weight:600;">${v}</div></div>`).join('')}
+    </div>
+    <h3 style="font-size:.875rem;font-weight:700;margin-bottom:.75rem;">Timeline</h3>
+    <div class="timeline">
+      ${(c.timeline||[]).map(t=>`<div class="tl-item"><div class="tl-time" style="font-size:.72rem;color:#94a3b8;">${new Date(t.ts).toLocaleString()}</div><div class="tl-text" style="font-size:.875rem;">${t.text}</div></div>`).join('')}
+    </div>
+    <button class="btn btn-outline" onclick="closeModal()" style="width:100%;margin-top:1rem;">Close</button>`);
+}
+
+function openNewClaimModal(){
+  openModal(`<h2 style="font-weight:800;margin-bottom:.5rem;">🚨 File New Claim</h2>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:1rem;">Select the claim type and property to auto-assemble your claim package.</p>
+    <div style="margin-bottom:1rem;"><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Claim Type</label>
+    <select id="m-cl-type" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;">
+      <option>Rent Guarantee</option><option>Renters Insurance</option><option>Deposit Bond</option><option>Professional Insurance</option>
+    </select></div>
+    <div style="margin-bottom:1rem;"><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Property / Party</label>
+    <input id="m-cl-party" placeholder="123 Main St — Tenant Name" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;"></div>
+    <div style="margin-bottom:1.25rem;"><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.35rem;">Claim Amount</label>
+    <input id="m-cl-amount" type="number" placeholder="1200" style="width:100%;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.875rem;"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="saveNewClaim()">📬 Submit Claim</button>
+    </div>`);
+}
+
+function saveNewClaim(){
+  const type=document.getElementById('m-cl-type').value;
+  const party=document.getElementById('m-cl-party').value.trim()||'Property';
+  const amount=parseFloat(document.getElementById('m-cl-amount').value)||0;
+  const claims=load('rv_insurance_claims',[]);
+  claims.push({id:genId(),claimNum:genId(),type,party,amount,filed:new Date().toISOString(),status:'filed',paidOut:false,timeline:[{ts:new Date().toISOString(),text:'Claim package submitted via RentVerified'}]});
+  save('rv_insurance_claims',claims);
+  closeModal(); renderClaims(); renderDashboard();
+  alert('✅ Claim submitted! Claim package auto-assembled and sent. Expected review: 3–5 business days.');
+}
+
+/* ═══════════════════════════════════════════════
+   REVENUE TRACKER
+   ═══════════════════════════════════════════════ */
+function renderRevenue(){
+  const bonds=load('rv_deposit_bonds',[]);
+  const ri=load('rv_renters_insurance',[]);
+  const rg=load('rv_rent_guarantee',[]);
+  const pro=load('rv_pro_insurance',[]);
+  const revDep=bonds.filter(b=>b.status==='active').reduce((s,b)=>s+b.commission,0);
+  const revRI=ri.filter(p=>p.status==='active').reduce((s,p)=>s+p.commission,0);
+  const revRG=rg.filter(g=>g.status==='active').reduce((s,g)=>s+g.commission,0);
+  const revPro=pro.filter(p=>p.status!=='cancelled').reduce((s,p)=>s+p.commission,0);
+  const total=revDep+revRI+revRG+revPro;
+  const totalPolicies=bonds.length+ri.length+rg.length+pro.length;
+  document.getElementById('rev-this-month').textContent=fmtMoney(total)+'/mo';
+  document.getElementById('rev-annual').textContent=fmtMoney(total*12)+'/yr';
+  document.getElementById('rev-per-tenant').textContent=fmtMoney(totalPolicies?total/totalPolicies:0);
+
+  document.getElementById('rev-breakdown').innerHTML=[
+    {name:'🔒 Deposit Bonds',count:bonds.filter(b=>b.status==='active').length,rev:revDep,rate:'~$7.50/bond avg'},
+    {name:'🏠 Renters Insurance',count:ri.filter(p=>p.status==='active').length,rev:revRI,rate:'~$2.50/policy avg'},
+    {name:'💰 Rent Guarantee',count:rg.filter(g=>g.status==='active').length,rev:revRG,rate:'~$15/property avg'},
+    {name:'🛡️ Pro Insurance',count:pro.filter(p=>p.status!=='cancelled').length,rev:revPro,rate:'~$18/policy avg'},
+  ].map(p=>`<div class="commission-row">
+    <div><div class="cr-product">${p.name}</div><div class="cr-calc">${p.count} active · ${p.rate}</div></div>
+    <div style="text-align:right;"><div class="cr-amount">${fmtMoney(p.rev)}/mo</div><div style="font-size:.72rem;color:#94a3b8;">${fmtMoney(p.rev*12)}/yr</div></div>
+  </div>`).join('');
+
+  updateScaleCalc();
+
+  document.getElementById('rev-tips').innerHTML=[
+    {icon:'🎯',tip:'<strong>Jetty integration</strong> is the highest-leverage move. One API, deposit bond + renters insurance bundled, most tenants choose it over paying upfront deposit.'},
+    {icon:'📣',tip:'<strong>Rent Guarantee is your landlord acquisition hook.</strong> Every landlord fears losing rent. Offer it free for 3 months — they\'ll never leave RentVerified.'},
+    {icon:'⚡',tip:'<strong>Pro Insurance renewal alerts</strong> fire 30 days early. That\'s your upsell window. Email + push notification gets 60%+ renewal rate.'},
+    {icon:'💡',tip:'<strong>Bundle pricing converts better.</strong> "Protect your property for $65/month" (bond + renters insurance + rent guarantee) converts 3× better than selling separately.'},
+  ].map(t=>`<div style="display:flex;gap:.75rem;padding:.85rem;background:var(--gray-50);border-radius:8px;font-size:.85rem;color:var(--gray-700);">
+    <span style="font-size:1.25rem;flex-shrink:0;">${t.icon}</span><div>${t.tip}</div></div>`).join('');
+}
+
+function updateScaleCalc(){
+  const n=parseInt(document.getElementById('scale-tenants').value)||100;
+  document.getElementById('scale-tenant-label').textContent=n.toLocaleString();
+  const lo={dep:n*5,ri:n*1.5,rg:n*7.5,pro:n*0.5};
+  const hi={dep:n*10,ri:n*6,rg:n*30,pro:n*3};
+  document.getElementById('scale-results').innerHTML=[
+    ['🔒 Deposit Bonds',lo.dep,hi.dep],
+    ['🏠 Renters Insurance',lo.ri,hi.ri],
+    ['💰 Rent Guarantee',lo.rg,hi.rg],
+    ['🛡️ Pro Insurance',lo.pro,hi.pro],
+    ['💵 TOTAL',lo.dep+lo.ri+lo.rg+lo.pro,hi.dep+hi.ri+hi.rg+hi.pro,true],
+  ].map(([name,lo,hi,bold])=>`<div style="background:${bold?'linear-gradient(135deg,#0f172a,#1e293b)':'var(--gray-50)'};border-radius:10px;padding:1rem;${bold?'color:white;':''};border:1px solid ${bold?'transparent':'var(--gray-200)'};grid-column:${bold?'1/-1':''};">
+    <div style="font-size:.72rem;font-weight:700;${bold?'color:#5eead4;':'color:var(--gray-500);'}margin-bottom:.3rem;">${name}</div>
+    <div style="font-size:${bold?'1.3rem':'1.1rem'};font-weight:800;${bold?'color:#5eead4;':'color:var(--gray-900);'}">
+      ${fmtMoney(lo)}–${fmtMoney(hi)}<span style="font-size:.75rem;font-weight:400;${bold?'color:#475569;':'color:var(--gray-400);'}"> /mo</span>
+    </div>
+  </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  seedData();
+  renderDashboard();
+});
+</script>
+</body>
+</html>
