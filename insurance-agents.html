@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RentVerified – Insurance Agent Marketplace</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-d: #1d4ed8;
+    --green: #10b981;
+    --green-d: #059669;
+    --amber: #f59e0b;
+    --amber-d: #d97706;
+    --red: #ef4444;
+    --dark: #0f172a;
+    --gray: #6b7280;
+    --light: #f8fafc;
+    --white: #ffffff;
+    --elite: #7c3aed;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: #1f2937; }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1e40af 100%);
+  }
+  .login-box {
+    background: var(--white); border-radius: 18px;
+    padding: 44px 40px; width: 540px; max-width: 96vw;
+    max-height: 94vh; overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.4);
+  }
+  .login-logo { text-align: center; margin-bottom: 28px; }
+  .login-logo h1 { font-size: 1.9rem; color: var(--dark); }
+  .login-logo p { color: var(--gray); font-size: .9rem; margin-top: 4px; }
+  .login-logo .badge-ins {
+    display: inline-block; background: #eff6ff; color: var(--primary);
+    font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 8px;
+  }
+  .role-tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+  .role-tab {
+    flex: 1; padding: 10px; border: 2px solid #e5e7eb; background: var(--white);
+    border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--gray); transition: all .2s;
+  }
+  .role-tab.active { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: .83rem; font-weight: 600; color: #374151; margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 10px 12px; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; font-size: .93rem; transition: border .2s;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: .9rem; transition: all .2s; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-d); }
+  .btn-success { background: var(--green); color: white; }
+  .btn-success:hover { background: var(--green-d); }
+  .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+  .btn-lg { padding: 13px 28px; font-size: 1rem; width: 100%; justify-content: center; }
+  .btn-sm { padding: 6px 14px; font-size: .8rem; }
+
+  /* ── NIPR VERIFY ANIMATION ── */
+  .verify-bar {
+    background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px;
+    padding: 12px 16px; display: none; align-items: center; gap: 10px;
+    font-size: .85rem; color: var(--primary); font-weight: 600; margin-top: 10px;
+  }
+  .verify-bar.show { display: flex; }
+  .spinner { width: 18px; height: 18px; border: 2.5px solid #bfdbfe; border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .verify-success { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+  .verify-success .spinner { display: none; }
+
+  /* ── TIER CARDS ON SIGNUP ── */
+  .tier-cards { display: flex; gap: 12px; flex-wrap: wrap; margin: 18px 0; }
+  .tier-card {
+    flex: 1; min-width: 140px; border: 2px solid #e5e7eb; border-radius: 12px;
+    padding: 16px 14px; cursor: pointer; transition: all .2s; text-align: center;
+  }
+  .tier-card:hover { border-color: var(--primary); }
+  .tier-card.selected { border-color: var(--primary); background: #eff6ff; }
+  .tier-card.elite-card.selected { border-color: var(--elite); background: #f5f3ff; }
+  .tier-card .tier-price { font-size: 1.5rem; font-weight: 900; margin: 6px 0 2px; }
+  .tier-card .tier-name { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+  .tier-card ul { font-size: .78rem; color: var(--gray); list-style: none; text-align: left; margin-top: 10px; }
+  .tier-card ul li { padding: 2px 0; }
+  .tier-card ul li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+
+  /* ── MAIN APP ── */
+  #app-screen { display: none; min-height: 100vh; }
+  .app-layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .ins-sidebar {
+    width: 240px; min-height: 100vh; background: var(--dark);
+    padding: 24px 16px; display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .ins-sidebar .brand { color: white; font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+  .ins-sidebar .brand span { color: #93c5fd; }
+  .ins-sidebar .sub-brand { color: #64748b; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 28px; }
+  .sidebar-section { margin-bottom: 20px; }
+  .sidebar-section-label { color: #475569; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; padding: 0 8px; }
+  .slink {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px;
+    border-radius: 8px; color: #94a3b8; font-size: .87rem; font-weight: 600;
+    cursor: pointer; transition: all .2s; text-decoration: none; margin-bottom: 2px;
+  }
+  .slink:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+  .slink.active { background: rgba(37,99,235,.2); color: #93c5fd; border-left: 3px solid #3b82f6; }
+  .slink svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .tier-badge-sidebar {
+    display: inline-block; font-size: .65rem; font-weight: 800; padding: 2px 7px;
+    border-radius: 20px; margin-left: auto; text-transform: uppercase; letter-spacing: .05em;
+  }
+  .tier-basic { background: rgba(107,114,128,.25); color: #9ca3af; }
+  .tier-featured { background: rgba(37,99,235,.3); color: #93c5fd; }
+  .tier-elite { background: rgba(124,58,237,.35); color: #c4b5fd; }
+
+  /* MAIN */
+  .ins-main { flex: 1; padding: 28px 32px; overflow-x: hidden; }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .page-header h1 { font-size: 1.6rem; font-weight: 800; color: var(--dark); }
+  .page-header p { color: var(--gray); font-size: .9rem; margin-top: 4px; }
+
+  .sec { display: none; }
+  .sec.active { display: block; }
+
+  /* CARDS */
+  .card { background: white; border-radius: var(--radius); border: 1px solid #e2e8f0; margin-bottom: 20px; }
+  .card-body { padding: 20px 22px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+  @media(max-width:900px){ .grid-3 { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width:600px){ .grid-3,.grid-2 { grid-template-columns: 1fr; } }
+
+  .stat-card { background: white; border-radius: var(--radius); border: 1px solid #e2e8f0; padding: 18px 20px; }
+  .stat-card .stat-val { font-size: 2rem; font-weight: 900; }
+  .stat-card .stat-lbl { font-size: .8rem; color: var(--gray); margin-top: 3px; }
+
+  /* AGENT PROFILE CARD */
+  .agent-card {
+    background: white; border-radius: 14px; border: 1px solid #e2e8f0;
+    padding: 20px; transition: all .2s; position: relative;
+  }
+  .agent-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.1); border-color: #bfdbfe; }
+  .agent-card .agt-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0; margin-bottom: 10px;
+  }
+  .agent-card .agt-name { font-weight: 800; font-size: 1rem; color: var(--dark); }
+  .agent-card .agt-company { font-size: .82rem; color: var(--gray); margin-bottom: 6px; }
+  .agent-card .verified-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .badge-nipr { background: #f0fdf4; color: #166534; font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .badge-featured { background: #eff6ff; color: var(--primary); font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .badge-elite { background: #f5f3ff; color: var(--elite); font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .badge-partner { background: #fef3c7; color: #92400e; font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .stars { color: #f59e0b; font-size: .85rem; }
+  .agt-specialties { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
+  .spec-tag { background: #f1f5f9; color: #475569; font-size: .72rem; padding: 2px 9px; border-radius: 12px; font-weight: 600; }
+  .agt-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; font-size: .78rem; color: var(--gray); }
+  .agt-stat-item { display: flex; align-items: center; gap: 4px; }
+  .agt-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .agt-actions a, .agt-actions button {
+    flex: 1; padding: 8px; border-radius: 8px; text-align: center;
+    font-weight: 700; font-size: .82rem; cursor: pointer; border: none; transition: all .2s; text-decoration: none;
+  }
+  .btn-get-quote { background: var(--primary); color: white; }
+  .btn-get-quote:hover { background: var(--primary-d); }
+  .btn-contact { background: #f1f5f9; color: #374151; }
+  .btn-contact:hover { background: #e2e8f0; }
+  .featured-crown { position: absolute; top: 12px; right: 12px; font-size: 1.2rem; }
+
+  /* LEADS SECTION */
+  .lead-card {
+    background: white; border-radius: var(--radius); border: 1px solid #e2e8f0;
+    padding: 16px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 14px;
+  }
+  .lead-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .lead-body { flex: 1; }
+  .lead-title { font-weight: 700; color: var(--dark); font-size: .92rem; }
+  .lead-detail { color: var(--gray); font-size: .83rem; margin: 3px 0; }
+  .lead-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .lead-tag { background: #f1f5f9; color: #374151; font-size: .73rem; padding: 2px 8px; border-radius: 8px; font-weight: 600; }
+  .lead-tag.hot { background: #fef2f2; color: #991b1b; }
+  .lead-tag.warm { background: #fef3c7; color: #92400e; }
+  .lead-tag.closed { background: #f0fdf4; color: #166534; }
+
+  /* SMART TRIGGERS */
+  .trigger-card {
+    background: white; border-radius: var(--radius); border: 1.5px solid #e2e8f0;
+    padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 14px;
+  }
+  .trigger-icon-wrap {
+    width: 44px; height: 44px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;
+  }
+  .trigger-body { flex: 1; }
+  .trigger-title { font-weight: 700; color: var(--dark); font-size: .9rem; }
+  .trigger-desc { color: var(--gray); font-size: .82rem; margin: 3px 0 8px; }
+  .trigger-toggle {
+    display: flex; align-items: center; gap: 8px; font-size: .8rem; font-weight: 600;
+  }
+  .toggle-switch {
+    width: 40px; height: 22px; border-radius: 11px; background: var(--green);
+    position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s;
+  }
+  .toggle-switch.off { background: #d1d5db; }
+  .toggle-switch::after {
+    content: ''; width: 16px; height: 16px; border-radius: 50%;
+    background: white; position: absolute; top: 3px; right: 3px; transition: all .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle-switch.off::after { right: auto; left: 3px; }
+
+  /* ANALYTICS */
+  .analytics-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+  @media(max-width:800px){ .analytics-grid { grid-template-columns: repeat(2,1fr); } }
+  .an-card { background: white; border-radius: var(--radius); border: 1px solid #e2e8f0; padding: 16px 18px; }
+  .an-val { font-size: 1.8rem; font-weight: 900; }
+  .an-lbl { font-size: .78rem; color: var(--gray); margin-top: 2px; }
+  .an-trend { font-size: .75rem; font-weight: 700; margin-top: 5px; }
+  .an-trend.up { color: var(--green); }
+  .an-trend.down { color: var(--red); }
+
+  /* PROFILE SECTION */
+  .profile-header {
+    background: linear-gradient(135deg, #0f172a, #1e3a5f);
+    border-radius: 14px; padding: 28px 28px; color: white; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .profile-avatar-lg { font-size: 3rem; width: 80px; height: 80px; background: rgba(255,255,255,.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .profile-info .name { font-size: 1.4rem; font-weight: 800; }
+  .profile-info .company { color: #93c5fd; font-size: .9rem; }
+  .profile-info .license-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .license-badge { background: rgba(16,185,129,.2); color: #6ee7b7; font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+
+  /* DIRECTORY SEARCH */
+  .search-bar-wrap { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+  .search-bar-wrap input, .search-bar-wrap select {
+    padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: .9rem; transition: border .2s;
+  }
+  .search-bar-wrap input:focus, .search-bar-wrap select:focus { outline: none; border-color: var(--primary); }
+  .search-bar-wrap input { flex: 1; min-width: 200px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: white; border-radius: 16px; padding: 28px 28px; max-width: 520px; width: 95vw; max-height: 85vh; overflow-y: auto; }
+  .modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; }
+
+  /* ALERT */
+  .alert { display: flex; gap: 10px; padding: 12px 16px; border-radius: 8px; font-size: .85rem; margin-bottom: 16px; }
+  .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+  .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .alert-warm { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+  /* REVIEW */
+  .review-item { padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+  .review-item:last-child { border-bottom: none; }
+  .review-meta { display: flex; justify-content: space-between; font-size: .8rem; color: var(--gray); margin-bottom: 4px; }
+  .review-text { font-size: .87rem; color: #374151; line-height: 1.5; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp .35s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- LOGIN / SIGNUP SCREEN                          -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>🛡️ RentVerified</h1>
+      <p>Insurance Agent Marketplace</p>
+      <span class="badge-ins">NIPR License Verified</span>
+    </div>
+
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="setLoginRole('landlord',this)">🏠 Find an Agent</button>
+      <button class="role-tab" onclick="setLoginRole('agent',this)">🛡️ I'm an Agent</button>
+    </div>
+
+    <!-- LANDLORD LOGIN -->
+    <div id="panel-landlord">
+      <div class="alert alert-info" style="margin-bottom:14px;">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+        <span>Every agent is verified against the <strong>National Insurance Producer Registry (NIPR)</strong>. Only active, licensed professionals.</span>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="ll-email" placeholder="you@example.com" value="daniel@sanderspm.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="ll-pw" placeholder="••••••••" value="password" />
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="loginLandlord()">Find Verified Agents →</button>
+      <p style="text-align:center;margin-top:14px;font-size:.83rem;color:var(--gray);">← <a href="landlord-signup.html" style="color:var(--primary);">Back to Dashboard</a></p>
+    </div>
+
+    <!-- AGENT SIGNUP -->
+    <div id="panel-agent" style="display:none;">
+      <div id="agent-step-1">
+        <div class="form-group">
+          <label>Your Full Name</label>
+          <input type="text" id="agt-name" placeholder="Sarah Johnson" />
+        </div>
+        <div class="form-group">
+          <label>Agency / Company Name</label>
+          <input type="text" id="agt-company" placeholder="State Farm — Sarah Johnson" />
+        </div>
+        <div class="form-group">
+          <label>State</label>
+          <select id="agt-state">
+            <option value="">Select your state</option>
+            <option value="UT" selected>Utah</option>
+            <option value="AZ">Arizona</option>
+            <option value="NV">Nevada</option>
+            <option value="ID">Idaho</option>
+            <option value="CO">Colorado</option>
+            <option value="CA">California</option>
+            <option value="TX">Texas</option>
+            <option value="FL">Florida</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Utah Insurance License Number</label>
+          <input type="text" id="agt-license" placeholder="e.g. 12345678" oninput="onLicenseInput(this)" />
+          <div class="verify-bar" id="nipr-bar">
+            <div class="spinner"></div>
+            <span id="nipr-msg">Checking NIPR database…</span>
+          </div>
+        </div>
+        <div id="agt-step1-extra" style="display:none;">
+          <div class="form-group">
+            <label>Service ZIP Codes (comma separated)</label>
+            <input type="text" id="agt-zips" placeholder="84601, 84604, 84097, 84062" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="agt-email" placeholder="sarah@statefarmagent.com" />
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="agt-phone" placeholder="(801) 555-0100" />
+          </div>
+          <div class="form-group">
+            <label>Insurance Specialties (select all that apply)</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+              <label style="display:flex;align-items:center;gap:5px;font-size:.84rem;cursor:pointer;"><input type="checkbox" checked /> 🏠 Landlord Insurance</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.84rem;cursor:pointer;"><input type="checkbox" checked /> 🏡 Renters Insurance</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.84rem;cursor:pointer;"><input type="checkbox" checked /> ☂️ Umbrella Liability</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.84rem;cursor:pointer;"><input type="checkbox" /> 🏢 Commercial Property</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.84rem;cursor:pointer;"><input type="checkbox" /> 👷 Workers Comp</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.84rem;cursor:pointer;"><input type="checkbox" /> 📋 Business Owner (BOP)</label>
+            </div>
+          </div>
+          <p style="font-size:.82rem;font-weight:700;color:#374151;margin-bottom:8px;">Choose Your Plan</p>
+          <div class="tier-cards">
+            <div class="tier-card" id="tc-basic" onclick="selectTier('basic')">
+              <div class="tier-name" style="color:var(--gray);">🥉 Basic</div>
+              <div class="tier-price" style="color:#374151;">$49<span style="font-size:.8rem;font-weight:600;">/mo</span></div>
+              <ul>
+                <li>Directory listing</li>
+                <li>Verified badge</li>
+                <li>Up to 10 leads/mo</li>
+              </ul>
+            </div>
+            <div class="tier-card selected" id="tc-featured" onclick="selectTier('featured')">
+              <div class="tier-name" style="color:var(--primary);">🥈 Featured</div>
+              <div class="tier-price" style="color:var(--primary);">$99<span style="font-size:.8rem;font-weight:600;">/mo</span></div>
+              <ul>
+                <li>Top search results</li>
+                <li>Smart triggers</li>
+                <li>Unlimited leads</li>
+                <li>Analytics dashboard</li>
+              </ul>
+            </div>
+            <div class="tier-card elite-card" id="tc-elite" onclick="selectTier('elite')">
+              <div class="tier-name" style="color:var(--elite);">🥇 Elite</div>
+              <div class="tier-price" style="color:var(--elite);">$199<span style="font-size:.8rem;font-weight:600;">/mo</span></div>
+              <ul>
+                <li>Exclusive ZIP</li>
+                <li>Dashboard feature</li>
+                <li>Monthly email blast</li>
+                <li>Co-brand materials</li>
+              </ul>
+            </div>
+          </div>
+          <button class="btn btn-success btn-lg" style="margin-top:6px;" onclick="agentSignup()">Activate My Profile →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MAIN APP                                       -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="app-screen">
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="ins-sidebar">
+      <div class="brand">🛡️ Rent<span>Verified</span></div>
+      <div class="sub-brand" id="sb-mode-label">Insurance Marketplace</div>
+
+      <!-- LANDLORD NAV -->
+      <div id="sb-landlord">
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">Find Coverage</div>
+          <div class="slink active" onclick="showSec('directory',this)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            Agent Directory
+          </div>
+          <div class="slink" onclick="showSec('triggers',this)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            Smart Alerts
+          </div>
+          <div class="slink" onclick="showSec('mypolicies',this)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            My Policies
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">Navigate</div>
+          <a class="slink" href="landlord-signup.html">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+          </a>
+          <a class="slink" href="financial-hub.html">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Financial Hub
+          </a>
+        </div>
+      </div>
+
+      <!-- AGENT NAV -->
+      <div id="sb-agent" style="display:none;">
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">My Business</div>
+          <div class="slink active" onclick="showSec('agt-overview',this)" id="sb-agt-overview">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Overview
+          </div>
+          <div class="slink" onclick="showSec('agt-leads',this)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Hot Leads
+            <span id="lead-count-badge" style="background:#ef4444;color:white;font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:20px;margin-left:auto;">3</span>
+          </div>
+          <div class="slink" onclick="showSec('agt-triggers',this)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            Smart Triggers
+          </div>
+          <div class="slink" onclick="showSec('agt-analytics',this)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Analytics
+          </div>
+          <div class="slink" onclick="showSec('agt-profile',this)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            My Profile
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">Plan</div>
+          <div class="slink" style="pointer-events:none;" id="sb-plan-display">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+            <span id="sb-plan-name">Featured Plan</span>
+            <span class="tier-badge-sidebar tier-featured" id="sb-tier-badge">Featured</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="ins-main">
+
+      <!-- ══ LANDLORD: DIRECTORY ══ -->
+      <div class="sec active" id="sec-directory">
+        <div class="page-header">
+          <div>
+            <h1>🛡️ Find a Verified Insurance Agent</h1>
+            <p>Every agent is license-verified against NIPR. Only active professionals — no expired licenses, ever.</p>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:.8rem;color:#166534;font-weight:700;text-align:center;">
+            <div style="font-size:1.1rem;">✅</div>
+            NIPR Verified<br/>Database Active
+          </div>
+        </div>
+
+        <div class="search-bar-wrap">
+          <input type="text" id="dir-search" placeholder="🔍 Search by name, ZIP, or specialty…" oninput="filterAgents()" />
+          <select id="dir-county" onchange="filterAgents()">
+            <option value="">All Counties</option>
+            <option value="Salt Lake">Salt Lake County</option>
+            <option value="Utah">Utah County</option>
+            <option value="Davis">Davis County</option>
+            <option value="Weber">Weber County</option>
+            <option value="Washington">Washington County</option>
+          </select>
+          <select id="dir-specialty" onchange="filterAgents()">
+            <option value="">All Specialties</option>
+            <option value="Landlord Insurance">Landlord Insurance</option>
+            <option value="Renters Insurance">Renters Insurance</option>
+            <option value="Umbrella">Umbrella Liability</option>
+            <option value="Commercial">Commercial Property</option>
+          </select>
+          <select id="dir-tier" onchange="filterAgents()">
+            <option value="">All Tiers</option>
+            <option value="elite">Elite Only</option>
+            <option value="featured">Featured+</option>
+          </select>
+        </div>
+
+        <div id="agent-directory-grid" class="grid-3"></div>
+        <div id="dir-empty" style="display:none;text-align:center;padding:3rem;color:var(--gray);">
+          <div style="font-size:2.5rem;margin-bottom:10px;">🔍</div>
+          <p>No agents match your search. Try a different ZIP or specialty.</p>
+        </div>
+      </div>
+
+      <!-- ══ LANDLORD: SMART ALERTS ══ -->
+      <div class="sec" id="sec-triggers">
+        <div class="page-header">
+          <div>
+            <h1>🔔 Smart Insurance Alerts</h1>
+            <p>RentVerified automatically notifies you — and connects you to verified agents — at exactly the right moment.</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+          <span>Smart triggers automatically deliver warm leads to your matched agents. <strong>Featured and Elite agents</strong> receive all triggers in their ZIP codes.</span>
+        </div>
+
+        <!-- Active Triggers -->
+        <h3 style="font-weight:700;margin-bottom:12px;color:var(--dark);">Active Alerts for Your Properties</h3>
+
+        <div class="trigger-card fade-up" style="border-color:#fde68a;background:#fffbeb;">
+          <div class="trigger-icon-wrap" style="background:#fef3c7;">🚨</div>
+          <div class="trigger-body">
+            <div class="trigger-title">Insurance Expiring Soon — 123 Maple Street</div>
+            <div class="trigger-desc">Your landlord policy expires in <strong>28 days</strong>. 3 verified agents in your area can provide renewal quotes today.</div>
+            <button class="btn btn-primary btn-sm" onclick="showAgentModal('renewal')">Get Renewal Quotes →</button>
+          </div>
+        </div>
+
+        <div class="trigger-card fade-up" style="border-color:#bbf7d0;background:#f0fdf4;">
+          <div class="trigger-icon-wrap" style="background:#dcfce7;">🏠</div>
+          <div class="trigger-body">
+            <div class="trigger-title">New Property Added — 456 Oak Avenue</div>
+            <div class="trigger-desc">Do you have landlord insurance on this new property? 2 Elite agents are ready to quote.</div>
+            <button class="btn btn-primary btn-sm" onclick="showAgentModal('new-property')">Get Coverage →</button>
+          </div>
+        </div>
+
+        <div class="trigger-card fade-up" style="border-color:#bfdbfe;background:#eff6ff;">
+          <div class="trigger-icon-wrap" style="background:#dbeafe;">🔨</div>
+          <div class="trigger-body">
+            <div class="trigger-title">Large Maintenance Claim — $3,200 Repair</div>
+            <div class="trigger-desc">The HVAC repair at 123 Maple Street exceeded $2,500. This may be covered by your landlord insurance. Contact your agent now.</div>
+            <button class="btn btn-primary btn-sm" onclick="showAgentModal('claim')">Contact My Agent →</button>
+          </div>
+        </div>
+
+        <div class="trigger-card fade-up" style="border-color:#e9d5ff;background:#faf5ff;">
+          <div class="trigger-icon-wrap" style="background:#ede9fe;">🏡</div>
+          <div class="trigger-body">
+            <div class="trigger-title">Rent-to-Own Tenant Eligible — Jane Doe</div>
+            <div class="trigger-desc">Jane's credit score hit 645 — she's mortgage-ready! She may need homeowners insurance. Local agents available.</div>
+            <button class="btn btn-primary btn-sm" onclick="showAgentModal('rto')">Connect Jane to Agent →</button>
+          </div>
+        </div>
+
+        <div class="trigger-card fade-up" style="border-color:#fbcfe8;background:#fdf2f8;">
+          <div class="trigger-icon-wrap" style="background:#fce7f3;">🔑</div>
+          <div class="trigger-body">
+            <div class="trigger-title">New Tenant Moving In — 456 Oak Avenue</div>
+            <div class="trigger-desc">Maria Lopez moves in March 15. Remind her that <strong>renters insurance is required</strong>. 2 verified agents offer same-day policies.</div>
+            <button class="btn btn-primary btn-sm" onclick="showAgentModal('renters')">Send Renters Insurance Link →</button>
+          </div>
+        </div>
+
+        <!-- Configure triggers section -->
+        <h3 style="font-weight:700;margin:24px 0 12px;color:var(--dark);">Configure Alert Settings</h3>
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-weight:700;font-size:.9rem;">Insurance expiring in 30 days</div>
+                  <div style="font-size:.8rem;color:var(--gray);">Notify me and send leads to local agents</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)" title="Toggle"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-weight:700;font-size:.9rem;">New property added</div>
+                  <div style="font-size:.8rem;color:var(--gray);">Prompt coverage check for new rentals</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)" title="Toggle"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-weight:700;font-size:.9rem;">Maintenance claim over $2,500</div>
+                  <div style="font-size:.8rem;color:var(--gray);">Alert for potential insurance-covered repairs</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)" title="Toggle"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-weight:700;font-size:.9rem;">Tenant reaches mortgage eligibility</div>
+                  <div style="font-size:.8rem;color:var(--gray);">Connect rent-to-own tenants to agents</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)" title="Toggle"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-weight:700;font-size:.9rem;">New tenant move-in</div>
+                  <div style="font-size:.8rem;color:var(--gray);">Remind tenants about renters insurance</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)" title="Toggle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ LANDLORD: MY POLICIES ══ -->
+      <div class="sec" id="sec-mypolicies">
+        <div class="page-header"><div><h1>📋 My Insurance Policies</h1><p>All your coverage in one place. Expiration alerts auto-enabled.</p></div></div>
+        <div class="card"><div class="card-body">
+          <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+            <thead><tr style="background:#f8fafc;">
+              <th style="padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;">Property</th>
+              <th style="padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;">Policy Type</th>
+              <th style="padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;">Carrier</th>
+              <th style="padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;">Premium</th>
+              <th style="padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;">Expires</th>
+              <th style="padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;">Status</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:10px;border-bottom:1px solid #f1f5f9;">123 Maple Street</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Landlord / Dwelling</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">State Farm</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">$125/mo</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;color:#d97706;font-weight:700;">Apr 5, 2026</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;"><span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:8px;font-size:.75rem;font-weight:700;">⚠️ Expiring</span></td></tr>
+              <tr><td style="padding:10px;border-bottom:1px solid #f1f5f9;">456 Oak Avenue</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Landlord / Dwelling</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Farmers</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">$98/mo</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Nov 15, 2026</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;"><span style="background:#f0fdf4;color:#166534;padding:2px 8px;border-radius:8px;font-size:.75rem;font-weight:700;">✅ Active</span></td></tr>
+              <tr><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Portfolio</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Umbrella Liability</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Liberty Mutual</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">$42/mo</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;">Jul 1, 2026</td><td style="padding:10px;border-bottom:1px solid #f1f5f9;"><span style="background:#f0fdf4;color:#166534;padding:2px 8px;border-radius:8px;font-size:.75rem;font-weight:700;">✅ Active</span></td></tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary" style="margin-top:16px;" onclick="showSec('directory',null)">+ Find Agent for New Coverage</button>
+        </div></div>
+      </div>
+
+      <!-- ══ AGENT: OVERVIEW ══ -->
+      <div class="sec" id="sec-agt-overview">
+        <div class="page-header">
+          <div><h1 id="agt-welcome-h1">👋 Welcome, Sarah!</h1><p id="agt-welcome-sub">Your RentVerified agent dashboard. Landlords in your ZIP codes are waiting.</p></div>
+          <div id="agt-tier-badge-hdr" style="text-align:center;padding:10px 16px;border-radius:10px;background:#eff6ff;border:1.5px solid #bfdbfe;">
+            <div style="font-size:1.3rem;">🥈</div>
+            <div style="font-size:.75rem;font-weight:800;color:var(--primary);">FEATURED</div>
+            <div style="font-size:.72rem;color:var(--gray);">$99/mo</div>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="an-card">
+            <div class="an-val" style="color:var(--red);">3</div>
+            <div class="an-lbl">Hot Leads This Week</div>
+            <div class="an-trend up">↑ 2 from last week</div>
+          </div>
+          <div class="an-card">
+            <div class="an-val" style="color:var(--green);">47</div>
+            <div class="an-lbl">Landlords in Your ZIPs</div>
+            <div class="an-trend up">↑ 5 new this month</div>
+          </div>
+          <div class="an-card">
+            <div class="an-val" style="color:var(--primary);">12</div>
+            <div class="an-lbl">Policies Written</div>
+            <div class="an-trend up">↑ 3 this quarter</div>
+          </div>
+          <div class="an-card">
+            <div class="an-val" style="color:var(--amber-d);">4.9 ⭐</div>
+            <div class="an-lbl">Average Rating</div>
+            <div class="an-trend up">32 reviews</div>
+          </div>
+        </div>
+
+        <!-- Revenue Estimate -->
+        <div class="card" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;">
+          <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="flex:1;">
+              <div style="color:#93c5fd;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Estimated Annual Revenue from RentVerified Clients</div>
+              <div style="font-size:2.2rem;font-weight:900;margin:6px 0;">$37,800</div>
+              <div style="color:#94a3b8;font-size:.85rem;">12 policies × avg $3,150/year premium × 100% retention</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:2rem;">🏆</div>
+              <div style="color:#fbbf24;font-weight:700;font-size:.8rem;">Top Agent</div>
+              <div style="color:#64748b;font-size:.72rem;">Utah County</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incoming Leads Preview -->
+        <h3 style="font-weight:700;margin-bottom:12px;color:var(--dark);">🔥 Latest Hot Leads</h3>
+        <div class="lead-card fade-up">
+          <div class="lead-icon">🏠</div>
+          <div class="lead-body">
+            <div class="lead-title">New Property Lead — Landlord Insurance Needed</div>
+            <div class="lead-detail">Sanders PM just added a property at 456 Oak Ave, Utah County. They need landlord/dwelling coverage.</div>
+            <div class="lead-meta">
+              <span class="lead-tag hot">🔥 HOT</span>
+              <span class="lead-tag">Utah County</span>
+              <span class="lead-tag">Landlord Insurance</span>
+              <span style="font-size:.78rem;color:var(--gray);">2 hours ago</span>
+              <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="claimLead(this,'new-property')">Claim Lead →</button>
+            </div>
+          </div>
+        </div>
+        <div class="lead-card fade-up">
+          <div class="lead-icon">⚠️</div>
+          <div class="lead-body">
+            <div class="lead-title">Policy Renewal Lead — Landlord Insurance Expiring</div>
+            <div class="lead-detail">A verified landlord's policy at 123 Maple St expires in 28 days. Actively shopping for renewal quotes.</div>
+            <div class="lead-meta">
+              <span class="lead-tag warm">🌡️ WARM</span>
+              <span class="lead-tag">Salt Lake County</span>
+              <span class="lead-tag">Renewal</span>
+              <span style="font-size:.78rem;color:var(--gray);">6 hours ago</span>
+              <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="claimLead(this,'renewal')">Claim Lead →</button>
+            </div>
+          </div>
+        </div>
+        <div class="lead-card fade-up">
+          <div class="lead-icon">🏡</div>
+          <div class="lead-body">
+            <div class="lead-title">Rent-to-Own Lead — Tenant Reaching Mortgage Eligibility</div>
+            <div class="lead-detail">Jane Doe (tenant, 123 Maple St) just crossed 640 credit score. Needs homeowners insurance for upcoming purchase.</div>
+            <div class="lead-meta">
+              <span class="lead-tag warm">🌡️ WARM</span>
+              <span class="lead-tag">Utah County</span>
+              <span class="lead-tag">Homeowners</span>
+              <span style="font-size:.78rem;color:var(--gray);">1 day ago</span>
+              <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="claimLead(this,'rto')">Claim Lead →</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-outline" onclick="showSec('agt-leads',null)" style="margin-top:4px;">View All Leads →</button>
+      </div>
+
+      <!-- ══ AGENT: LEADS ══ -->
+      <div class="sec" id="sec-agt-leads">
+        <div class="page-header"><div><h1>⚡ Hot Leads</h1><p>Real-time leads from verified landlords in your coverage area. Claim before another agent does.</p></div></div>
+        <div class="alert alert-warm">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          <span>These are <strong>high-value rental property leads</strong> — confirmed landlords who own investment property. Average landlord client = $5,000–15,000/year in premiums.</span>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <select style="padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;" id="lead-filter" onchange="filterLeads()">
+            <option value="all">All Leads</option>
+            <option value="hot">🔥 Hot Only</option>
+            <option value="warm">🌡️ Warm</option>
+            <option value="closed">✅ Closed</option>
+          </select>
+        </div>
+
+        <div id="leads-list">
+          <div class="lead-card fade-up">
+            <div class="lead-icon">🏠</div>
+            <div class="lead-body">
+              <div class="lead-title">New Property Added — Landlord Insurance Needed</div>
+              <div class="lead-detail">Sanders Property Management • 456 Oak Ave, Provo UT 84601 • 3-bed single family</div>
+              <div style="font-size:.82rem;color:#374151;margin:6px 0;line-height:1.5;"><strong>Lead Value:</strong> Est. $1,200–2,400/year premium · <strong>Properties:</strong> 2 confirmed · <strong>Potential:</strong> Multi-property umbrella</div>
+              <div class="lead-meta">
+                <span class="lead-tag hot">🔥 HOT</span>
+                <span class="lead-tag">Utah County</span>
+                <span class="lead-tag">New Property</span>
+                <span class="lead-tag">Landlord Insurance</span>
+                <span style="font-size:.78rem;color:var(--gray);">2 hrs ago</span>
+                <button class="btn btn-success btn-sm" style="margin-left:auto;" onclick="claimLead(this,'lead1')">Claim — $35 Lead Fee →</button>
+              </div>
+            </div>
+          </div>
+          <div class="lead-card fade-up">
+            <div class="lead-icon">⚠️</div>
+            <div class="lead-body">
+              <div class="lead-title">Landlord Policy Expiring in 28 Days</div>
+              <div class="lead-detail">Verified landlord • 123 Maple St, Salt Lake City UT • Currently with State Farm (another agent)</div>
+              <div style="font-size:.82rem;color:#374151;margin:6px 0;line-height:1.5;"><strong>Lead Value:</strong> $1,500/year renewal · <strong>Shopping:</strong> Yes, actively comparing · <strong>Umbrella:</strong> Likely add-on</div>
+              <div class="lead-meta">
+                <span class="lead-tag warm">🌡️ WARM</span>
+                <span class="lead-tag">Salt Lake County</span>
+                <span class="lead-tag">Renewal</span>
+                <span style="font-size:.78rem;color:var(--gray);">6 hrs ago</span>
+                <button class="btn btn-success btn-sm" style="margin-left:auto;" onclick="claimLead(this,'lead2')">Claim — $35 Lead Fee →</button>
+              </div>
+            </div>
+          </div>
+          <div class="lead-card fade-up">
+            <div class="lead-icon">🏡</div>
+            <div class="lead-body">
+              <div class="lead-title">Rent-to-Own Tenant Ready — Homeowners Insurance</div>
+              <div class="lead-detail">Jane Doe • Credit score 645 (just crossed 640 threshold) • Looking at homes in Utah County</div>
+              <div style="font-size:.82rem;color:#374151;margin:6px 0;line-height:1.5;"><strong>Lead Value:</strong> $800–1,600/year HO-3 policy · <strong>Timeline:</strong> Purchase in 2–6 months · <strong>Cross-sell:</strong> Auto bundling possible</div>
+              <div class="lead-meta">
+                <span class="lead-tag warm">🌡️ WARM</span>
+                <span class="lead-tag">Rent-to-Own</span>
+                <span class="lead-tag">Homeowners</span>
+                <span style="font-size:.78rem;color:var(--gray);">1 day ago</span>
+                <button class="btn btn-success btn-sm" style="margin-left:auto;" onclick="claimLead(this,'lead3')">Claim — $25 Lead Fee →</button>
+              </div>
+            </div>
+          </div>
+          <div class="lead-card fade-up" style="opacity:.6;">
+            <div class="lead-icon">🔑</div>
+            <div class="lead-body">
+              <div class="lead-title">New Tenant Move-In — Renters Insurance Required</div>
+              <div class="lead-detail">Maria Lopez moves into 456 Oak Ave March 15. Landlord requires renters insurance proof at move-in.</div>
+              <div class="lead-meta">
+                <span class="lead-tag closed">✅ Closed</span>
+                <span class="lead-tag">Renters Insurance</span>
+                <span style="font-size:.78rem;color:var(--gray);">3 days ago</span>
+                <span style="font-size:.78rem;color:var(--green);font-weight:700;margin-left:auto;">Policy written ✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ AGENT: SMART TRIGGERS ══ -->
+      <div class="sec" id="sec-agt-triggers">
+        <div class="page-header"><div><h1>⚡ Smart Trigger Settings</h1><p>Configure which events automatically deliver leads to you. Featured & Elite: all triggers active in your ZIPs.</p></div></div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-body">
+            <div style="font-weight:700;margin-bottom:4px;">Your Coverage ZIPs</div>
+            <div style="font-size:.85rem;color:var(--gray);margin-bottom:12px;">Leads are delivered for landlords in these ZIP codes.</div>
+            <input type="text" id="trigger-zips" value="84601, 84604, 84097, 84062, 84003" style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;" />
+            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="alert('ZIP codes saved!')">Save ZIPs</button>
+          </div>
+        </div>
+
+        <div class="trigger-card" style="border-color:#fde68a;background:#fffbeb;">
+          <div class="trigger-icon-wrap" style="background:#fef3c7;">🚨</div>
+          <div class="trigger-body">
+            <div class="trigger-title">Insurance Policy Expiring (30 days)</div>
+            <div class="trigger-desc">You receive a lead when any landlord in your ZIPs has a policy expiring within 30 days. <span style="font-weight:700;color:#92400e;">Highest close rate of any trigger.</span></div>
+            <div class="trigger-toggle">
+              <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              <span style="color:var(--green);">Active — 2 leads this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="trigger-card" style="border-color:#bbf7d0;background:#f0fdf4;">
+          <div class="trigger-icon-wrap" style="background:#dcfce7;">🏠</div>
+          <div class="trigger-body">
+            <div class="trigger-title">New Rental Property Added</div>
+            <div class="trigger-desc">Triggered when a verified landlord adds a new property in your ZIPs. They need landlord insurance immediately.</div>
+            <div class="trigger-toggle">
+              <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              <span style="color:var(--green);">Active — 1 lead this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="trigger-card" style="border-color:#bfdbfe;background:#eff6ff;">
+          <div class="trigger-icon-wrap" style="background:#dbeafe;">🔨</div>
+          <div class="trigger-body">
+            <div class="trigger-title">Large Maintenance Claim (+$2,500)</div>
+            <div class="trigger-desc">Triggered when a maintenance repair exceeds $2,500. Landlord may need to file an insurance claim — warm intro moment.</div>
+            <div class="trigger-toggle">
+              <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              <span style="color:var(--green);">Active — 0 leads this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="trigger-card" style="border-color:#e9d5ff;background:#faf5ff;">
+          <div class="trigger-icon-wrap" style="background:#ede9fe;">🏡</div>
+          <div class="trigger-body">
+            <div class="trigger-title">Rent-to-Own Tenant Reaches Mortgage Eligibility</div>
+            <div class="trigger-desc">Triggered when a tenant's credit score crosses 640. They need homeowners insurance. Warm personal referral from landlord.</div>
+            <div class="trigger-toggle">
+              <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              <span style="color:var(--green);">Active — 1 lead this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="trigger-card" style="border-color:#fbcfe8;background:#fdf2f8;">
+          <div class="trigger-icon-wrap" style="background:#fce7f3;">🔑</div>
+          <div class="trigger-body">
+            <div class="trigger-title">New Tenant Move-In</div>
+            <div class="trigger-desc">Triggered when a new tenant's move-in date is set. They're required to show renters insurance proof — easy warm sale.</div>
+            <div class="trigger-toggle">
+              <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              <span style="color:var(--green);">Active — 1 lead this month</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ AGENT: ANALYTICS ══ -->
+      <div class="sec" id="sec-agt-analytics">
+        <div class="page-header"><div><h1>📊 Performance Analytics</h1><p>Your lead-to-policy conversion stats. Available on Featured and Elite plans.</p></div></div>
+
+        <div class="analytics-grid">
+          <div class="an-card"><div class="an-val" style="color:var(--red);">8</div><div class="an-lbl">Leads Received (30d)</div><div class="an-trend up">↑ 3 vs. last month</div></div>
+          <div class="an-card"><div class="an-val" style="color:var(--green);">5</div><div class="an-lbl">Leads Contacted</div><div class="an-trend up">63% contact rate</div></div>
+          <div class="an-card"><div class="an-val" style="color:var(--primary);">2</div><div class="an-lbl">Policies Written (30d)</div><div class="an-trend up">40% close rate</div></div>
+          <div class="an-card"><div class="an-val" style="color:var(--amber-d);">$6,200</div><div class="an-lbl">Premium Written (30d)</div><div class="an-trend up">↑ 18% vs. last month</div></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:20px;">
+          <div class="card"><div class="card-body">
+            <div style="font-weight:700;margin-bottom:14px;">Lead Sources This Month</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:3px;"><span>🔔 Policy Expiring</span><span style="font-weight:700;">3 leads</span></div><div style="background:#e2e8f0;border-radius:4px;height:8px;"><div style="background:var(--amber);border-radius:4px;height:8px;width:37.5%;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:3px;"><span>🏠 New Property</span><span style="font-weight:700;">2 leads</span></div><div style="background:#e2e8f0;border-radius:4px;height:8px;"><div style="background:var(--green);border-radius:4px;height:8px;width:25%;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:3px;"><span>🔑 Move-In</span><span style="font-weight:700;">2 leads</span></div><div style="background:#e2e8f0;border-radius:4px;height:8px;"><div style="background:var(--primary);border-radius:4px;height:8px;width:25%;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:3px;"><span>🏡 Rent-to-Own</span><span style="font-weight:700;">1 lead</span></div><div style="background:#e2e8f0;border-radius:4px;height:8px;"><div style="background:var(--elite);border-radius:4px;height:8px;width:12.5%;"></div></div></div>
+            </div>
+          </div></div>
+
+          <div class="card"><div class="card-body">
+            <div style="font-weight:700;margin-bottom:14px;">Policies Written by Type</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;background:#f8fafc;border-radius:8px;">
+                <span style="font-size:.85rem;">🏠 Landlord / Dwelling</span>
+                <span style="font-weight:700;color:var(--primary);">8 policies</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;background:#f8fafc;border-radius:8px;">
+                <span style="font-size:.85rem;">🏡 Renters Insurance</span>
+                <span style="font-weight:700;color:var(--green);">3 policies</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;background:#f8fafc;border-radius:8px;">
+                <span style="font-size:.85rem;">☂️ Umbrella Liability</span>
+                <span style="font-weight:700;color:var(--amber-d);">1 policy</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;background:#f8fafc;border-radius:8px;">
+                <span style="font-size:.85rem;">🏢 Commercial</span>
+                <span style="font-weight:700;color:var(--elite);">0 policies</span>
+              </div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="card"><div class="card-body">
+          <div style="font-weight:700;margin-bottom:4px;">Profile Views</div>
+          <div style="font-size:.83rem;color:var(--gray);margin-bottom:14px;">How many landlords viewed your profile this month</div>
+          <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;background:var(--primary);border-radius:3px 3px 0 0;opacity:.7;" style-height="40%;" style="height:40%;"></div></div>
+              <div style="font-size:.7rem;color:var(--gray);">Feb 9</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:55%;background:var(--primary);border-radius:3px 3px 0 0;opacity:.75;"></div></div>
+              <div style="font-size:.7rem;color:var(--gray);">Feb 16</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:70%;background:var(--primary);border-radius:3px 3px 0 0;opacity:.8;"></div></div>
+              <div style="font-size:.7rem;color:var(--gray);">Feb 23</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:90%;background:var(--primary);border-radius:3px 3px 0 0;"></div></div>
+              <div style="font-size:.7rem;color:var(--gray);">Mar 1</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:80%;background:var(--primary);border-radius:3px 3px 0 0;opacity:.9;"></div></div>
+              <div style="font-size:.7rem;color:var(--gray);">Mar 8</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- ══ AGENT: PROFILE ══ -->
+      <div class="sec" id="sec-agt-profile">
+        <div class="page-header"><div><h1>👤 My Public Profile</h1><p>This is what landlords see when they search for agents in your area.</p></div></div>
+
+        <div class="profile-header">
+          <div class="profile-avatar-lg">👩‍💼</div>
+          <div class="profile-info">
+            <div class="name" id="pf-name">Sarah Johnson</div>
+            <div class="company" id="pf-company">State Farm Insurance Agent</div>
+            <div class="license-row">
+              <span class="license-badge">✅ UT License #<span id="pf-license">12345678</span></span>
+              <span class="license-badge" style="background:rgba(37,99,235,.2);color:#93c5fd;">✅ Active License Confirmed</span>
+              <span class="license-badge" style="background:rgba(251,191,36,.2);color:#fde68a;">🤝 RentVerified Partner</span>
+            </div>
+            <div style="margin-top:10px;color:#93c5fd;font-size:.85rem;">📍 Utah County · Salt Lake County &nbsp;|&nbsp; ⭐ 4.9 (32 reviews) &nbsp;|&nbsp; ⏱ Under 2 hrs response</div>
+          </div>
+        </div>
+
+        <!-- Profile preview card -->
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:700;font-size:.85rem;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;">Profile Preview — What Landlords See</div>
+            <div class="agent-card" style="max-width:380px;">
+              <div class="featured-crown">🥈</div>
+              <div class="agt-avatar" style="background:#eff6ff;">👩‍💼</div>
+              <div class="agt-name">Sarah Johnson Insurance</div>
+              <div class="agt-company">State Farm Agent</div>
+              <div style="color:#f59e0b;font-size:.85rem;">⭐⭐⭐⭐⭐ <span style="color:var(--gray);">4.9 (32 reviews)</span></div>
+              <div class="verified-row">
+                <span class="badge-nipr">✅ UT #12345678</span>
+                <span class="badge-featured">🥈 Featured</span>
+                <span class="badge-partner">🤝 Partner</span>
+              </div>
+              <div class="agt-specialties">
+                <span class="spec-tag">🏠 Landlord Insurance</span>
+                <span class="spec-tag">🏡 Renters Insurance</span>
+                <span class="spec-tag">☂️ Umbrella</span>
+              </div>
+              <div class="agt-stats">
+                <div class="agt-stat-item">⏱ Under 2 hrs response</div>
+                <div class="agt-stat-item">🏆 47 landlords served</div>
+              </div>
+              <div class="agt-actions">
+                <button class="btn-get-quote">Get Quote</button>
+                <button class="btn-contact">Contact</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Profile -->
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:700;margin-bottom:14px;">Edit Profile Details</div>
+            <div class="grid-2">
+              <div class="form-group"><label>Full Name</label><input type="text" value="Sarah Johnson" /></div>
+              <div class="form-group"><label>Agency Name</label><input type="text" value="State Farm Insurance" /></div>
+              <div class="form-group"><label>Phone</label><input type="tel" value="(801) 555-0100" /></div>
+              <div class="form-group"><label>Email</label><input type="email" value="sarah@statefarmagent.com" /></div>
+              <div class="form-group"><label>Response Time</label><select><option>Under 2 hours</option><option>Same day</option><option>Within 24 hours</option></select></div>
+              <div class="form-group"><label>Coverage ZIPs</label><input type="text" value="84601, 84604, 84097, 84062" /></div>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Profile saved!')">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:700;margin-bottom:14px;">⭐ Reviews (32)</div>
+            <div class="review-item">
+              <div class="review-meta"><span>⭐⭐⭐⭐⭐ <strong>Sanders PM</strong></span><span>Feb 15, 2026</span></div>
+              <div class="review-text">Sarah has been our go-to agent for 3 years. Fast quotes, great rates, and she actually understands rental property insurance. Saved us $400/year on umbrella coverage.</div>
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span>⭐⭐⭐⭐⭐ <strong>Provo Rental Group</strong></span><span>Jan 28, 2026</span></div>
+              <div class="review-text">Added a new property and Sarah had a quote to me in 45 minutes. Professional, thorough, and no pressure. Highly recommend for any landlord.</div>
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span>⭐⭐⭐⭐⭐ <strong>Davis County Landlord</strong></span><span>Jan 10, 2026</span></div>
+              <div class="review-text">Switched from my old agent to Sarah after seeing her on RentVerified. She handles my entire portfolio now — 5 properties, umbrella, everything. Worth every penny.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══ MODAL: Agent Quote Request ══ -->
+<div class="modal-overlay" id="agent-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <h2 id="modal-title">🛡️ Get a Quote from Verified Agents</h2>
+    <div id="modal-body">
+      <p style="color:var(--gray);font-size:.87rem;margin-bottom:16px;">3 verified agents in your area will be notified and will contact you with quotes within 2 hours.</p>
+      <div id="modal-agents-preview"></div>
+      <div class="form-group" style="margin-top:14px;">
+        <label>Best time to contact you</label>
+        <select><option>Anytime</option><option>Morning (8am–12pm)</option><option>Afternoon (12pm–5pm)</option><option>Evening (5pm–8pm)</option></select>
+      </div>
+      <div class="form-group">
+        <label>Notes for agents (optional)</label>
+        <input type="text" placeholder="e.g. Have 2 properties, need landlord + umbrella" />
+      </div>
+      <button class="btn btn-primary btn-lg" style="margin-top:6px;" onclick="sendLeadRequest()">Send My Request to 3 Agents →</button>
+      <button class="btn btn-outline" style="margin-top:10px;width:100%;justify-content:center;" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+let currentMode = 'landlord';
+let currentTier = 'featured';
+let licenseTimer = null;
+
+// ── SAMPLE AGENT DATA ──────────────────────────────────
+const AGENTS = [
+  {
+    id: 1, name: 'Sarah Johnson Insurance', company: 'State Farm', avatar: '👩‍💼',
+    license: 'UT #12345678', licenseActive: true, tier: 'elite',
+    counties: ['Utah', 'Salt Lake'], zips: ['84601','84604','84097','84003'],
+    specialties: ['Landlord Insurance','Renters Insurance','Umbrella Liability','Commercial Property'],
+    stars: 4.9, reviewCount: 32, responseTime: 'Under 2 hrs', landlordCount: 47,
+    phone: '(801) 555-0100', email: 'sarah@statefarmagent.com',
+    products: ['Landlord/Dwelling','Renters Insurance','Commercial Property','Umbrella Liability','Workers Compensation']
+  },
+  {
+    id: 2, name: 'Mike Torres — Farmers Agent', company: 'Farmers Insurance', avatar: '👨‍💼',
+    license: 'UT #87654321', licenseActive: true, tier: 'featured',
+    counties: ['Salt Lake', 'Davis'], zips: ['84101','84103','84010','84015'],
+    specialties: ['Landlord Insurance','Umbrella Liability','Commercial Property'],
+    stars: 4.7, reviewCount: 19, responseTime: 'Same day', landlordCount: 31,
+    phone: '(801) 555-0200', email: 'mike@farmersagent.com',
+    products: ['Landlord/Dwelling','Commercial Property','Umbrella Liability','Business Owner (BOP)']
+  },
+  {
+    id: 3, name: 'Lisa Chen — Allstate', company: 'Allstate Insurance', avatar: '👩‍💼',
+    license: 'UT #11223344', licenseActive: true, tier: 'featured',
+    counties: ['Utah', 'Washington'], zips: ['84770','84790','84604','84097'],
+    specialties: ['Landlord Insurance','Renters Insurance','Umbrella Liability'],
+    stars: 4.8, reviewCount: 24, responseTime: 'Under 4 hrs', landlordCount: 28,
+    phone: '(435) 555-0300', email: 'lisa@allstateagent.com',
+    products: ['Landlord/Dwelling','Renters Insurance','Umbrella Liability']
+  },
+  {
+    id: 4, name: 'Dave Olsen Insurance', company: 'Liberty Mutual', avatar: '🧑‍💼',
+    license: 'UT #55667788', licenseActive: true, tier: 'basic',
+    counties: ['Weber', 'Davis'], zips: ['84401','84404','84010'],
+    specialties: ['Landlord Insurance','Commercial Property','Workers Comp'],
+    stars: 4.5, reviewCount: 11, responseTime: 'Within 24 hrs', landlordCount: 14,
+    phone: '(801) 555-0400', email: 'dave@libertymutualagent.com',
+    products: ['Landlord/Dwelling','Commercial Property','Workers Compensation']
+  },
+  {
+    id: 5, name: 'Provo Insurance Group', company: 'Independent Broker', avatar: '🏢',
+    license: 'UT #99887766', licenseActive: true, tier: 'elite',
+    counties: ['Utah'], zips: ['84601','84604','84062','84003'],
+    specialties: ['Landlord Insurance','Renters Insurance','Umbrella Liability','Commercial Property'],
+    stars: 5.0, reviewCount: 8, responseTime: 'Under 1 hr', landlordCount: 22,
+    phone: '(801) 555-0500', email: 'info@provoinsgroup.com',
+    products: ['Landlord/Dwelling','Renters Insurance','Commercial Property','Umbrella Liability','Business Owner (BOP)','Workers Compensation']
+  }
+];
+
+// ── LOGIN ──────────────────────────────────────────────
+function setLoginRole(role, btn) {
+  currentMode = role;
+  document.querySelectorAll('.role-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-landlord').style.display = role === 'landlord' ? 'block' : 'none';
+  document.getElementById('panel-agent').style.display = role === 'agent' ? 'block' : 'none';
+}
+
+function loginLandlord() {
+  currentMode = 'landlord';
+  launchApp('landlord');
+}
+
+// ── NIPR LICENSE VERIFICATION ──────────────────────────
+function onLicenseInput(el) {
+  const bar = document.getElementById('nipr-bar');
+  const msg = document.getElementById('nipr-msg');
+  const extra = document.getElementById('agt-step1-extra');
+  bar.className = 'verify-bar';
+  extra.style.display = 'none';
+  clearTimeout(licenseTimer);
+
+  if (el.value.length >= 6) {
+    bar.classList.add('show');
+    msg.textContent = 'Checking NIPR national database…';
+    // Step 1: checking state registry
+    licenseTimer = setTimeout(() => {
+      msg.textContent = 'Verifying with Utah Insurance Commissioner…';
+      licenseTimer = setTimeout(() => {
+        msg.textContent = 'Confirming license is active and in good standing…';
+        licenseTimer = setTimeout(() => {
+          bar.classList.add('verify-success');
+          bar.innerHTML = '<span style="font-size:1.2rem;">✅</span><div><strong>License Verified!</strong> Utah Insurance License #' + el.value + ' — Active · Property &amp; Casualty · Life &amp; Health · Last renewed Jan 2026</div>';
+          extra.style.display = 'block';
+        }, 900);
+      }, 800);
+    }, 700);
+  }
+}
+
+function selectTier(t) {
+  currentTier = t;
+  ['basic','featured','elite'].forEach(x => document.getElementById('tc-'+x).classList.remove('selected'));
+  document.getElementById('tc-'+t).classList.add('selected');
+}
+
+function agentSignup() {
+  const name = document.getElementById('agt-name').value || 'Agent';
+  const company = document.getElementById('agt-company').value || 'Insurance Agency';
+  const license = document.getElementById('agt-license').value || '12345678';
+  localStorage.setItem('rv_ins_agent', JSON.stringify({ name, company, license, tier: currentTier }));
+  launchApp('agent', { name, company, license, tier: currentTier });
+}
+
+// ── LAUNCH APP ──────────────────────────────────────────
+function launchApp(mode, agentData) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  currentMode = mode;
+
+  if (mode === 'landlord') {
+    document.getElementById('sb-landlord').style.display = 'block';
+    document.getElementById('sb-agent').style.display = 'none';
+    document.getElementById('sb-mode-label').textContent = 'Insurance Marketplace';
+    showSec('directory', null);
+    renderAgentDirectory();
+  } else {
+    document.getElementById('sb-landlord').style.display = 'none';
+    document.getElementById('sb-agent').style.display = 'block';
+    document.getElementById('sb-mode-label').textContent = 'Agent Dashboard';
+    const a = agentData || JSON.parse(localStorage.getItem('rv_ins_agent') || '{}');
+    if (a.name) {
+      document.getElementById('agt-welcome-h1').textContent = '👋 Welcome, ' + a.name.split(' ')[0] + '!';
+      document.getElementById('pf-name').textContent = a.name;
+      if (a.company) document.getElementById('pf-company').textContent = a.company;
+      if (a.license) document.getElementById('pf-license').textContent = a.license;
+    }
+    setAgentTierUI(a.tier || 'featured');
+    showSec('agt-overview', document.getElementById('sb-agt-overview'));
+  }
+}
+
+function setAgentTierUI(tier) {
+  const names = { basic: '🥉 Basic', featured: '🥈 Featured', elite: '🥇 Elite' };
+  const icons = { basic: '🥉', featured: '🥈', elite: '🥇' };
+  const prices = { basic: '$49/mo', featured: '$99/mo', elite: '$199/mo' };
+  const colors = { basic: 'var(--gray)', featured: 'var(--primary)', elite: 'var(--elite)' };
+  const tierClasses = { basic: 'tier-basic', featured: 'tier-featured', elite: 'tier-elite' };
+
+  document.getElementById('sb-plan-name').textContent = names[tier] || 'Featured Plan';
+  const badge = document.getElementById('sb-tier-badge');
+  badge.className = 'tier-badge-sidebar ' + (tierClasses[tier] || 'tier-featured');
+  badge.textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
+
+  const hdr = document.getElementById('agt-tier-badge-hdr');
+  if (hdr) {
+    hdr.querySelector('div:first-child').textContent = icons[tier];
+    hdr.querySelectorAll('div')[1].textContent = tier.toUpperCase();
+    hdr.querySelectorAll('div')[2].textContent = prices[tier];
+    hdr.querySelector('div:nth-child(2)').style.color = colors[tier];
+  }
+}
+
+// ── NAV ────────────────────────────────────────────────
+function showSec(id, link) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('sec-' + id);
+  if (el) el.classList.add('active');
+  if (link) {
+    const container = link.closest('#sb-landlord, #sb-agent');
+    if (container) container.querySelectorAll('.slink').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+  }
+}
+
+// ── AGENT DIRECTORY ─────────────────────────────────────
+function renderAgentDirectory(list) {
+  const grid = document.getElementById('agent-directory-grid');
+  const agents = list !== undefined ? list : [...AGENTS].sort((a,b) => {
+    const tierOrder = { elite: 0, featured: 1, basic: 2 };
+    return (tierOrder[a.tier] || 1) - (tierOrder[b.tier] || 1);
+  });
+
+  if (!agents.length) {
+    grid.innerHTML = '';
+    document.getElementById('dir-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('dir-empty').style.display = 'none';
+
+  grid.innerHTML = agents.map(a => {
+    const tierBadge = a.tier === 'elite'
+      ? `<span class="badge-elite">🥇 Elite</span>`
+      : a.tier === 'featured' ? `<span class="badge-featured">🥈 Featured</span>` : '';
+    const crown = a.tier === 'elite' ? `<div class="featured-crown">🥇</div>` : a.tier === 'featured' ? `<div class="featured-crown">🥈</div>` : '';
+    const stars = '⭐'.repeat(Math.round(a.stars)) + ` <span style="color:var(--gray);">${a.stars} (${a.reviewCount})</span>`;
+    const specs = a.specialties.slice(0,3).map(s => `<span class="spec-tag">${s}</span>`).join('');
+    const products = a.products.map(p => `<div style="font-size:.75rem;color:#374151;padding:2px 0;">✅ ${p}</div>`).join('');
+    return `<div class="agent-card fade-up">
+      ${crown}
+      <div class="agt-avatar" style="background:#eff6ff;">${a.avatar}</div>
+      <div class="agt-name">${a.name}</div>
+      <div class="agt-company">${a.company}</div>
+      <div class="stars">${stars}</div>
+      <div class="verified-row">
+        <span class="badge-nipr">✅ ${a.license}</span>
+        ${tierBadge}
+        <span class="badge-partner">🤝 Partner</span>
+      </div>
+      <div style="font-size:.75rem;color:var(--gray);margin:6px 0;">📍 ${a.counties.join(', ')}</div>
+      <div class="agt-specialties">${specs}</div>
+      <div style="font-size:.78rem;font-weight:700;margin:8px 0 4px;color:#374151;">Products:</div>
+      <div style="margin-bottom:10px;">${products}</div>
+      <div class="agt-stats">
+        <div class="agt-stat-item">⏱ ${a.responseTime}</div>
+        <div class="agt-stat-item">🏆 ${a.landlordCount} landlords</div>
+      </div>
+      <div class="agt-actions">
+        <button class="btn-get-quote" onclick="showAgentModal('quote',${a.id})">Get Quote</button>
+        <button class="btn-contact" onclick="alert('Opening chat with ${a.name.split(' ')[0]}…\\n\\nPhone: ${a.phone}\\nEmail: ${a.email}')">Contact</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterAgents() {
+  const search = document.getElementById('dir-search').value.toLowerCase();
+  const county = document.getElementById('dir-county').value;
+  const specialty = document.getElementById('dir-specialty').value;
+  const tierFilter = document.getElementById('dir-tier').value;
+
+  let filtered = AGENTS.filter(a => {
+    const matchSearch = !search || a.name.toLowerCase().includes(search) || a.company.toLowerCase().includes(search) || a.zips.some(z => z.includes(search)) || a.specialties.some(s => s.toLowerCase().includes(search));
+    const matchCounty = !county || a.counties.includes(county);
+    const matchSpec = !specialty || a.specialties.includes(specialty);
+    const matchTier = !tierFilter || (tierFilter === 'elite' ? a.tier === 'elite' : a.tier !== 'basic');
+    return matchSearch && matchCounty && matchSpec && matchTier;
+  }).sort((a,b) => {
+    const o = { elite: 0, featured: 1, basic: 2 };
+    return o[a.tier] - o[b.tier];
+  });
+
+  renderAgentDirectory(filtered);
+}
+
+// ── LEAD CLAIM ──────────────────────────────────────────
+function claimLead(btn, leadId) {
+  btn.textContent = '✅ Lead Claimed!';
+  btn.style.background = 'var(--green)';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '📞 Contact Details Unlocked';
+    const detailBox = document.createElement('div');
+    detailBox.style = 'font-size:.8rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 10px;margin-top:8px;';
+    detailBox.innerHTML = '<strong>📞 Contact:</strong> Sanders Property Management<br/><strong>📧</strong> daniel@sanderspm.com &nbsp; <strong>📱</strong> (801) 555-9876<br/><span style="color:var(--green);font-weight:700;font-size:.75rem;">Lead fee charged: $35</span>';
+    btn.parentNode.parentNode.appendChild(detailBox);
+  }, 1200);
+  const badge = document.getElementById('lead-count-badge');
+  if (badge && parseInt(badge.textContent) > 0) badge.textContent = parseInt(badge.textContent) - 1;
+}
+
+// ── MODAL ────────────────────────────────────────────────
+function showAgentModal(type, agentId) {
+  const titles = {
+    quote: '🛡️ Get Quotes from Verified Agents',
+    renewal: '🔄 Get Renewal Quotes',
+    'new-property': '🏠 Get Coverage for New Property',
+    claim: '🔨 Contact Your Agent for Claim Help',
+    rto: '🏡 Connect Tenant to Homeowners Insurance',
+    renters: '🔑 Send Renters Insurance to Tenant'
+  };
+  document.getElementById('modal-title').textContent = titles[type] || '🛡️ Get Quotes';
+
+  // Show top 3 agents (elite + featured first)
+  const top3 = [...AGENTS].sort((a,b) => (['elite','featured','basic'].indexOf(a.tier)) - (['elite','featured','basic'].indexOf(b.tier))).slice(0,3);
+  document.getElementById('modal-agents-preview').innerHTML = top3.map(a =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:8px;background:#f8fafc;border-radius:8px;margin-bottom:6px;">
+      <span style="font-size:1.3rem;">${a.avatar}</span>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:.85rem;">${a.name}</div>
+        <div style="font-size:.77rem;color:var(--gray);">${a.license} · ⭐ ${a.stars} · ${a.responseTime}</div>
+      </div>
+      <span style="font-size:.72rem;font-weight:700;color:var(--green);">✅ Notified</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('agent-modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('agent-modal').classList.remove('show');
+}
+
+function sendLeadRequest() {
+  document.getElementById('modal-body').innerHTML = `
+    <div style="text-align:center;padding:2rem;">
+      <div style="font-size:3rem;margin-bottom:10px;">🎉</div>
+      <h3 style="font-weight:800;margin-bottom:8px;">Request Sent!</h3>
+      <p style="color:var(--gray);font-size:.88rem;">3 verified agents have been notified and will contact you within 2 hours with personalized quotes.</p>
+      <div style="margin:16px 0;padding:12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+        <div style="font-size:.82rem;color:#166534;">✅ Sarah Johnson — State Farm (notified)</div>
+        <div style="font-size:.82rem;color:#166534;">✅ Lisa Chen — Allstate (notified)</div>
+        <div style="font-size:.82rem;color:#166534;">✅ Provo Insurance Group (notified)</div>
+      </div>
+      <button class="btn btn-primary" onclick="closeModal()">Done</button>
+    </div>`;
+}
+
+// ── TOGGLES ──────────────────────────────────────────────
+function toggleSwitch(el) {
+  el.classList.toggle('off');
+}
+
+// ── INIT ─────────────────────────────────────────────────
+(function init() {
+  // Check if coming from landlord dashboard (auto-login landlord)
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('mode') === 'landlord') {
+    loginLandlord();
+    return;
+  }
+  // Check saved agent session
+  const savedAgent = localStorage.getItem('rv_ins_agent');
+  if (savedAgent) {
+    try {
+      const a = JSON.parse(savedAgent);
+      // Don't auto-login — let them choose. Could enable:
+      // launchApp('agent', a);
+    } catch(e) {}
+  }
+  // Make all toggles default to ON
+  setTimeout(() => {
+    document.querySelectorAll('.toggle-switch:not(.off)').forEach(t => {
+      // already on by default (no .off class)
+    });
+  }, 100);
+})();
+</script>
+</body>
+</html>
