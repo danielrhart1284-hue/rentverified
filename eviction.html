@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Workflow Center – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background:#f3f4f6; }
+    .ev-wrapper { display:grid; grid-template-columns:240px 1fr; min-height:100vh; padding-top:64px; }
+
+    /* Sidebar */
+    .ev-sidebar { background:#1e293b; color:#cbd5e1; padding:1.5rem 0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; }
+    .ev-sidebar h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.5rem 1.5rem; margin:1rem 0 .25rem; }
+    .ev-sidebar a { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.9rem; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
+    .ev-sidebar a:hover, .ev-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#ef4444; }
+
+    /* Main */
+    .ev-main { padding:2rem; max-width:1100px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+    .page-header h1 { font-size:1.5rem; font-weight:700; color:#1e293b; margin:0 0 .25rem; }
+    .page-header p { color:#64748b; font-size:.9rem; margin:0; }
+
+    /* Cards */
+    .card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:1.25rem; }
+    .card h3 { font-size:1rem; font-weight:700; color:#1e293b; margin:0 0 1rem; }
+
+    /* Stats */
+    .stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem 1.5rem; }
+    .stat-label { font-size:.78rem; color:#64748b; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.35rem; }
+    .stat-value { font-size:1.6rem; font-weight:700; color:#1e293b; }
+
+    /* Buttons */
+    .btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1rem; border-radius:8px; font-size:.88rem; font-weight:600; cursor:pointer; border:1.5px solid transparent; transition:all .15s; }
+    .btn-red { background:#dc2626; color:#fff; border-color:#dc2626; }
+    .btn-red:hover { background:#b91c1c; }
+    .btn-primary { background:#1a56db; color:#fff; border-color:#1a56db; }
+    .btn-primary:hover { background:#1e40af; }
+    .btn-outline { background:#fff; color:#374151; border-color:#d1d5db; }
+    .btn-outline:hover { background:#f9fafb; }
+    .btn-green { background:#16a34a; color:#fff; border-color:#16a34a; }
+    .btn-sm { padding:.3rem .65rem; font-size:.8rem; }
+    .btn-amber { background:#d97706; color:#fff; border-color:#d97706; }
+
+    /* Wizard */
+    .wizard-steps { display:flex; gap:0; margin-bottom:2rem; }
+    .wstep { flex:1; text-align:center; padding:.6rem .25rem; font-size:.78rem; font-weight:600; color:#94a3b8; border-bottom:3px solid #e2e8f0; position:relative; }
+    .wstep.active { color:#dc2626; border-bottom-color:#dc2626; }
+    .wstep.done { color:#16a34a; border-bottom-color:#16a34a; }
+    .wstep-num { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#e2e8f0; color:#64748b; font-size:.72rem; font-weight:700; margin-right:.35rem; }
+    .wstep.active .wstep-num { background:#dc2626; color:#fff; }
+    .wstep.done .wstep-num { background:#16a34a; color:#fff; }
+
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+    .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.85rem; }
+    .form-group { display:flex; flex-direction:column; gap:.3rem; }
+    .form-group label { font-size:.8rem; font-weight:600; color:#64748b; }
+    .form-group input, .form-group select, .form-group textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.5rem .75rem; font-size:.9rem; color:#1e293b; outline:none; font-family:inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:#dc2626; }
+    .form-group.full { grid-column:1/-1; }
+
+    /* Violation type chips */
+    .vtype-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; }
+    .vtype-chip { border:2px solid #e2e8f0; border-radius:10px; padding:.75rem 1rem; cursor:pointer; text-align:center; font-size:.88rem; font-weight:600; color:#374151; transition:all .15s; }
+    .vtype-chip:hover { border-color:#dc2626; color:#dc2626; background:#fff5f5; }
+    .vtype-chip.selected { border-color:#dc2626; background:#fee2e2; color:#dc2626; }
+    .vtype-chip .vicon { font-size:1.4rem; display:block; margin-bottom:.25rem; }
+
+    /* Case summary / case file */
+    .case-file { background:#f8fafc; border:2px solid #1e293b; border-radius:0; padding:1.75rem; font-size:.88rem; line-height:1.7; }
+    .case-file-header { border-bottom:2px solid #1e293b; padding-bottom:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:flex-start; }
+    .case-file-logo { font-weight:800; font-size:1.1rem; color:#dc2626; }
+    .cf-section { margin-bottom:1.25rem; }
+    .cf-section-title { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; font-weight:700; margin-bottom:.5rem; border-bottom:1px solid #e2e8f0; padding-bottom:.25rem; }
+    .cf-row { display:flex; justify-content:space-between; padding:.2rem 0; font-size:.85rem; }
+    .cf-label { color:#64748b; }
+    .cf-val { font-weight:600; color:#1e293b; }
+    .cf-checklist { list-style:none; padding:0; margin:0; }
+    .cf-checklist li { padding:.2rem 0; font-size:.85rem; }
+    .cf-checklist li::before { content:'✅ '; }
+    .cf-ai-box { background:#fffbeb; border:1px solid #fcd34d; border-radius:8px; padding:1rem; margin:1rem 0; font-size:.85rem; }
+    .cf-ai-box strong { color:#92400e; }
+
+    /* Attorney cards */
+    .attorney-card { border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem; margin-bottom:.85rem; background:#fff; transition:all .15s; }
+    .attorney-card:hover { border-color:#1a56db; box-shadow:0 2px 12px rgba(26,86,219,.08); }
+    .attorney-card.featured { border-color:#f59e0b; background:#fffbeb; }
+    .atty-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:.75rem; }
+    .atty-name { font-weight:700; font-size:1rem; color:#1e293b; }
+    .atty-spec { font-size:.8rem; color:#64748b; margin-top:.15rem; }
+    .atty-rating { display:flex; align-items:center; gap:.35rem; font-weight:700; color:#f59e0b; }
+    .atty-meta { display:flex; gap:1rem; font-size:.8rem; color:#64748b; margin-bottom:.85rem; flex-wrap:wrap; }
+    .atty-meta span { display:flex; align-items:center; gap:.25rem; }
+    .atty-fee-row { background:#f8fafc; border-radius:8px; padding:.75rem 1rem; font-size:.85rem; margin-bottom:.85rem; }
+    .fee-item { display:flex; justify-content:space-between; padding:.2rem 0; }
+    .fee-label { color:#64748b; }
+    .fee-val { font-weight:600; color:#1e293b; }
+
+    /* Case tracker */
+    .case-timeline { display:flex; align-items:center; gap:0; margin:1.25rem 0; overflow-x:auto; padding-bottom:.5rem; }
+    .ct-step { flex:1; min-width:80px; text-align:center; position:relative; }
+    .ct-step:not(:last-child)::after { content:''; position:absolute; top:14px; left:50%; width:100%; height:2px; background:#e2e8f0; z-index:0; }
+    .ct-step.done:not(:last-child)::after { background:#16a34a; }
+    .ct-dot { width:28px; height:28px; border-radius:50%; background:#e2e8f0; color:#94a3b8; display:inline-flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; position:relative; z-index:1; margin-bottom:.4rem; }
+    .ct-step.done .ct-dot { background:#16a34a; color:#fff; }
+    .ct-step.active .ct-dot { background:#dc2626; color:#fff; animation:pulse 2s infinite; }
+    .ct-label { font-size:.7rem; color:#64748b; font-weight:600; line-height:1.2; }
+    .ct-step.done .ct-label { color:#16a34a; }
+    .ct-step.active .ct-label { color:#dc2626; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4);} 50%{box-shadow:0 0 0 6px rgba(220,38,38,0);} }
+
+    /* Secure messaging */
+    .msg-thread { background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:1rem; max-height:300px; overflow-y:auto; margin-bottom:.75rem; }
+    .msg-bubble { margin-bottom:.75rem; }
+    .msg-bubble.landlord { text-align:right; }
+    .msg-bubble.attorney { text-align:left; }
+    .msg-text { display:inline-block; padding:.5rem .85rem; border-radius:12px; font-size:.88rem; max-width:75%; }
+    .msg-bubble.landlord .msg-text { background:#1a56db; color:#fff; border-radius:12px 12px 0 12px; }
+    .msg-bubble.attorney .msg-text { background:#fff; border:1.5px solid #e2e8f0; color:#1e293b; border-radius:12px 12px 12px 0; }
+    .msg-meta { font-size:.72rem; color:#94a3b8; margin-top:.2rem; }
+
+    /* Notice preview */
+    .notice-doc { background:#fff; border:2px solid #1e293b; padding:2rem; font-family:Georgia,serif; font-size:.9rem; line-height:1.8; max-width:680px; }
+    .notice-doc h2 { text-align:center; font-size:1rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:1.5rem; border-bottom:2px solid #1e293b; padding-bottom:.5rem; }
+    .notice-doc p { margin:.75rem 0; }
+    .notice-doc .sig-block { margin-top:2rem; }
+    .notice-doc .sig-line { border-top:1px solid #1e293b; width:240px; margin:.5rem 0 .15rem; }
+
+    /* Workflow grid */
+    .workflow-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.85rem; }
+    .wf-card { border:1.5px solid #e2e8f0; border-radius:12px; padding:1.1rem; background:#fff; cursor:pointer; transition:all .15s; }
+    .wf-card:hover { border-color:#dc2626; background:#fff5f5; }
+    .wf-icon { font-size:1.5rem; margin-bottom:.35rem; }
+    .wf-title { font-weight:700; font-size:.9rem; color:#1e293b; margin-bottom:.2rem; }
+    .wf-desc { font-size:.78rem; color:#64748b; }
+
+    /* Badge */
+    .badge { display:inline-block; padding:.15rem .55rem; border-radius:99px; font-size:.72rem; font-weight:700; }
+    .badge-red { background:#fee2e2; color:#991b1b; }
+    .badge-amber { background:#fef3c7; color:#92400e; }
+    .badge-green { background:#dcfce7; color:#166534; }
+    .badge-blue { background:#dbeafe; color:#1e40af; }
+
+    /* Case list */
+    .case-item { display:flex; align-items:center; justify-content:space-between; padding:.85rem 1.25rem; border:1.5px solid #e2e8f0; border-radius:10px; margin-bottom:.6rem; background:#fff; }
+    .case-addr { font-weight:700; font-size:.95rem; color:#1e293b; }
+    .case-meta { font-size:.78rem; color:#64748b; margin-top:.1rem; }
+
+    /* Toast */
+    #ev-toast { position:fixed; bottom:1.5rem; right:1.5rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; font-weight:600; opacity:0; transition:opacity .3s; z-index:9999; pointer-events:none; }
+    #ev-toast.show { opacity:1; }
+
+    /* Empty state */
+    .empty-state { text-align:center; padding:3rem; color:#94a3b8; }
+    .empty-state .icon { font-size:2.5rem; margin-bottom:.75rem; }
+
+    /* Print */
+    @media print {
+      .ev-sidebar, nav, .no-print { display:none !important; }
+      .ev-wrapper { display:block; padding:0; }
+      .ev-main { padding:0; max-width:100%; }
+      body { background:#fff; }
+    }
+
+    @media(max-width:700px) {
+      .ev-wrapper { grid-template-columns:1fr; }
+      .ev-sidebar { display:none; }
+      .stat-row, .vtype-grid, .workflow-grid { grid-template-columns:1fr 1fr; }
+      .form-grid, .form-grid-3 { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="nav-logo">✓</span>
+    <span class="nav-name">RentVerified</span>
+  </div>
+  <div class="nav-links">
+    <a href="landlord-signup.html" class="nav-link">Dashboard</a>
+    <a href="accounting.html" class="nav-link">Accounting</a>
+  </div>
+</nav>
+
+<div class="ev-wrapper">
+  <!-- SIDEBAR -->
+  <aside class="ev-sidebar">
+    <h3>Legal Center</h3>
+    <a class="active" onclick="showSection('dashboard',this)">⚖️ Dashboard</a>
+    <a onclick="showSection('start',this)">🚫 Start Eviction</a>
+    <a onclick="showSection('notices',this)">📋 Generate Notice</a>
+    <a onclick="showSection('cases',this)">📁 Active Cases</a>
+    <a onclick="showSection('attorneys',this)">👨‍⚖️ Find Attorney</a>
+    <h3>More Legal</h3>
+    <a onclick="showSection('smallclaims',this)">💰 Small Claims</a>
+    <a onclick="showSection('workflows',this)">📂 All Workflows</a>
+    <h3>Navigation</h3>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+    <a href="maintenance.html">🔨 Maintenance</a>
+    <a href="tenant-portal.html">👤 Tenant Portal</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ev-main">
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  DASHBOARD                                  -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-dashboard">
+      <div class="page-header">
+        <div>
+          <h1>⚖️ Legal Workflow Center</h1>
+          <p>Utah-compliant eviction tools, notice generation, attorney matching, and case management.</p>
+        </div>
+        <button class="btn btn-red" onclick="showSection('start', document.querySelector('.ev-sidebar a:nth-child(3)'))">🚫 Start Eviction</button>
+      </div>
+
+      <div style="background:#fff5f5;border:1.5px solid #fca5a5;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;">
+        <span style="font-size:1.5rem;">⚠️</span>
+        <div>
+          <strong style="color:#991b1b;">Legal Disclaimer</strong>
+          <span style="color:#b91c1c;font-size:.85rem;margin-left:.5rem;">RentVerified generates Utah-compliant documents as a starting point. Always consult a licensed Utah attorney before filing. Laws change — verify current statutes before serving any notice.</span>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-label">Active Cases</div><div class="stat-value" id="dash-active-cases">—</div></div>
+        <div class="stat-card"><div class="stat-label">Notices Sent</div><div class="stat-value" id="dash-notices-sent">—</div></div>
+        <div class="stat-card"><div class="stat-label">Cases Resolved</div><div class="stat-value" style="color:#16a34a;" id="dash-resolved">—</div></div>
+        <div class="stat-card"><div class="stat-label">Attorneys Available</div><div class="stat-value" id="dash-attys">3</div></div>
+      </div>
+
+      <!-- Quick workflow cards -->
+      <div class="card">
+        <h3>What do you need to do?</h3>
+        <div class="workflow-grid">
+          <div class="wf-card" onclick="showSection('start', null)">
+            <div class="wf-icon">🚫</div>
+            <div class="wf-title">Start Eviction</div>
+            <div class="wf-desc">Non-payment, lease violation, holdover, damage</div>
+          </div>
+          <div class="wf-card" onclick="startNoticeFlow('pay-quit')">
+            <div class="wf-icon">📄</div>
+            <div class="wf-title">3-Day Pay or Quit</div>
+            <div class="wf-desc">Tenant hasn't paid rent</div>
+          </div>
+          <div class="wf-card" onclick="startNoticeFlow('cure-quit')">
+            <div class="wf-icon">📄</div>
+            <div class="wf-title">3-Day Cure or Quit</div>
+            <div class="wf-desc">Lease violation — give chance to fix</div>
+          </div>
+          <div class="wf-card" onclick="startNoticeFlow('no-cause')">
+            <div class="wf-icon">📄</div>
+            <div class="wf-title">15-Day No-Cause Notice</div>
+            <div class="wf-desc">Month-to-month termination</div>
+          </div>
+          <div class="wf-card" onclick="startNoticeFlow('entry')">
+            <div class="wf-icon">🔑</div>
+            <div class="wf-title">Notice of Entry</div>
+            <div class="wf-desc">24-hour notice before entering unit</div>
+          </div>
+          <div class="wf-card" onclick="startNoticeFlow('rent-increase')">
+            <div class="wf-icon">💰</div>
+            <div class="wf-title">Rent Increase Notice</div>
+            <div class="wf-desc">Utah requires proper written notice</div>
+          </div>
+          <div class="wf-card" onclick="showSection('smallclaims', null)">
+            <div class="wf-icon">🏛️</div>
+            <div class="wf-title">Small Claims</div>
+            <div class="wf-desc">Security deposit, unpaid rent, damages</div>
+          </div>
+          <div class="wf-card" onclick="showSection('attorneys', null)">
+            <div class="wf-icon">👨‍⚖️</div>
+            <div class="wf-title">Find Attorney</div>
+            <div class="wf-desc">Smart matching by ZIP, type, availability</div>
+          </div>
+          <div class="wf-card" onclick="showSection('workflows', null)">
+            <div class="wf-icon">📂</div>
+            <div class="wf-title">All Workflows</div>
+            <div class="wf-desc">Emergency, disputes, abandonment</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active cases preview -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;">Active Cases</h3>
+          <button class="btn btn-outline btn-sm" onclick="showSection('cases', null)">View All →</button>
+        </div>
+        <div id="dash-cases-preview"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  START EVICTION WIZARD                      -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-start" style="display:none;">
+      <div class="page-header">
+        <div><h1>🚫 Start Eviction</h1><p>We'll build your complete case file automatically.</p></div>
+      </div>
+
+      <!-- Step indicators -->
+      <div class="wizard-steps no-print" id="ev-wizard-steps">
+        <div class="wstep active" id="ws-1"><span class="wstep-num">1</span>Select Property</div>
+        <div class="wstep" id="ws-2"><span class="wstep-num">2</span>Violation Type</div>
+        <div class="wstep" id="ws-3"><span class="wstep-num">3</span>Questionnaire</div>
+        <div class="wstep" id="ws-4"><span class="wstep-num">4</span>Case Summary</div>
+        <div class="wstep" id="ws-5"><span class="wstep-num">5</span>Documents</div>
+        <div class="wstep" id="ws-6"><span class="wstep-num">6</span>Find Attorney</div>
+      </div>
+
+      <!-- Step 1: Select Property -->
+      <div id="ev-step-1" class="card">
+        <h3>Step 1 — Select Property &amp; Tenant</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Property Address</label>
+            <select id="ev-property">
+              <option value="">— Select Property —</option>
+              <option value="119 E 600 S #119, Orem, UT">119 E 600 S #119, Orem, UT</option>
+              <option value="5041 Doren Dr. S. Ogden, UT">5041 Doren Dr. S. Ogden, UT</option>
+              <option value="268 Highland Dr. Tooele, UT">268 Highland Dr. Tooele, UT</option>
+              <option value="other">+ Enter address manually</option>
+            </select>
+          </div>
+          <div class="form-group" id="ev-manual-addr-group" style="display:none;">
+            <label>Enter Address</label>
+            <input type="text" id="ev-manual-addr" placeholder="Full property address">
+          </div>
+          <div class="form-group">
+            <label>Tenant Name</label>
+            <input type="text" id="ev-tenant-name" placeholder="John Smith">
+          </div>
+          <div class="form-group">
+            <label>Tenant Email</label>
+            <input type="email" id="ev-tenant-email" placeholder="tenant@email.com">
+          </div>
+          <div class="form-group">
+            <label>Monthly Rent ($)</label>
+            <input type="number" id="ev-monthly-rent" placeholder="1200" min="0">
+          </div>
+          <div class="form-group">
+            <label>Amount Past Due ($) <span style="color:#94a3b8;font-weight:400;">(if applicable)</span></label>
+            <input type="number" id="ev-amount-due" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Lease Start Date</label>
+            <input type="date" id="ev-lease-start">
+          </div>
+          <div class="form-group">
+            <label>Lease End Date</label>
+            <input type="date" id="ev-lease-end">
+          </div>
+        </div>
+        <div style="margin-top:1.25rem;">
+          <button class="btn btn-red" onclick="evNext(1)">Next: Select Violation Type →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Violation Type -->
+      <div id="ev-step-2" class="card" style="display:none;">
+        <h3>Step 2 — What is the violation?</h3>
+        <div class="vtype-grid">
+          <div class="vtype-chip" onclick="selectViolation('nonpayment',this)">
+            <span class="vicon">💸</span>Non-Payment of Rent
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('lease-violation',this)">
+            <span class="vicon">📋</span>Lease Violation
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('property-damage',this)">
+            <span class="vicon">🔨</span>Property Damage
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('nuisance',this)">
+            <span class="vicon">🔊</span>Nuisance / Disturbance
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('illegal-activity',this)">
+            <span class="vicon">🚔</span>Illegal Activity
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('holdover',this)">
+            <span class="vicon">🏠</span>Holdover Tenant
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('unauthorized',this)">
+            <span class="vicon">👥</span>Unauthorized Occupants/Pets
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('abandonment',this)">
+            <span class="vicon">🚪</span>Abandonment
+          </div>
+          <div class="vtype-chip" onclick="selectViolation('other',this)">
+            <span class="vicon">📝</span>Other Violation
+          </div>
+        </div>
+        <div id="ev-selected-vtype" style="display:none;margin-top:.85rem;background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:.75rem 1rem;font-size:.88rem;color:#991b1b;font-weight:600;"></div>
+        <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+          <button class="btn btn-outline" onclick="evBack(2)">← Back</button>
+          <button class="btn btn-red" onclick="evNext(2)">Next: Questionnaire →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Questionnaire -->
+      <div id="ev-step-3" class="card" style="display:none;">
+        <h3>Step 3 — Case Details</h3>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Describe the violation in detail</label>
+            <textarea id="ev-violation-desc" rows="3" placeholder="e.g. Tenant has not paid rent for March 2026. Multiple requests via text and email were ignored..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Date of First Incident / First Missed Payment</label>
+            <input type="date" id="ev-incident-date">
+          </div>
+          <div class="form-group">
+            <label>Date of Most Recent Incident</label>
+            <input type="date" id="ev-recent-date">
+          </div>
+          <div class="form-group">
+            <label>Notices Already Given</label>
+            <select id="ev-prior-notices">
+              <option value="none">None — this is the first notice</option>
+              <option value="verbal">Verbal warning only</option>
+              <option value="one-written">One written notice</option>
+              <option value="multiple">Multiple written notices</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Desired Outcome</label>
+            <select id="ev-desired-outcome">
+              <option value="cure">Tenant cures violation and stays</option>
+              <option value="pay-stay">Tenant pays and stays</option>
+              <option value="vacate">Tenant vacates property</option>
+              <option value="eviction">Full eviction / court filing</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>How many photos / pieces of evidence do you have?</label>
+            <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.25rem;">
+              <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+                <input type="checkbox" id="ev-has-photos"> Photos of violation
+              </label>
+              <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+                <input type="checkbox" id="ev-has-texts"> Text/email communication logs
+              </label>
+              <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+                <input type="checkbox" id="ev-has-lease"> Signed lease on file
+              </label>
+              <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+                <input type="checkbox" id="ev-has-payment-history"> Payment history records
+              </label>
+              <label style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;cursor:pointer;">
+                <input type="checkbox" id="ev-has-inspection"> Inspection report
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Property ZIP Code</label>
+            <input type="text" id="ev-zip" placeholder="84601" maxlength="5">
+          </div>
+          <div class="form-group">
+            <label>Urgency</label>
+            <select id="ev-urgency">
+              <option value="standard">Standard (7-14 days)</option>
+              <option value="urgent">Urgent (3-5 days)</option>
+              <option value="emergency">Emergency (immediate)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+          <button class="btn btn-outline" onclick="evBack(3)">← Back</button>
+          <button class="btn btn-red" onclick="evNext(3)">🤖 Generate AI Case Summary →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: AI Case Summary -->
+      <div id="ev-step-4" class="card" style="display:none;">
+        <h3>Step 4 — AI Case Summary</h3>
+        <div id="ev-ai-generating" style="text-align:center;padding:2rem;color:#64748b;">
+          <div style="font-size:2rem;margin-bottom:.5rem;">🤖</div>
+          <div style="font-weight:600;">Analyzing case &amp; generating summary...</div>
+        </div>
+        <div id="ev-case-summary" style="display:none;"></div>
+        <div id="ev-step4-btns" style="display:none;display:flex;gap:.75rem;margin-top:1.25rem;" class="no-print">
+          <button class="btn btn-outline" onclick="evBack(4)">← Back</button>
+          <button class="btn btn-red" onclick="evNext(4)">Next: Generate Documents →</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Documents -->
+      <div id="ev-step-5" class="card" style="display:none;">
+        <h3>Step 5 — Generated Documents</h3>
+        <p style="color:#64748b;font-size:.88rem;margin-top:-.5rem;margin-bottom:1.25rem;">The following Utah-compliant documents have been generated for your case. Review each one, then print or share with your attorney.</p>
+        <div id="ev-documents-list"></div>
+        <div style="display:flex;gap:.75rem;margin-top:1.25rem;" class="no-print">
+          <button class="btn btn-outline" onclick="evBack(5)">← Back</button>
+          <button class="btn btn-outline" onclick="window.print()">🖨 Print All Documents</button>
+          <button class="btn btn-red" onclick="evNext(5)">Next: Find Attorney →</button>
+        </div>
+      </div>
+
+      <!-- Step 6: Find Attorney -->
+      <div id="ev-step-6" class="card" style="display:none;">
+        <h3>Step 6 — Matched Attorneys</h3>
+        <p style="color:#64748b;font-size:.88rem;margin-top:-.5rem;margin-bottom:1.25rem;">Based on your property ZIP code, violation type, and urgency — here are your best matches:</p>
+        <div id="ev-attorney-matches"></div>
+        <div style="margin-top:1.25rem;padding:1rem;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:10px;font-size:.85rem;color:#065f46;" class="no-print">
+          <strong>✅ Your case file is ready.</strong> When you click "Send Case File &amp; Retain Attorney", the attorney receives your complete documentation package instantly — no intake forms, no back-and-forth.
+        </div>
+        <div style="margin-top:1rem;" class="no-print">
+          <button class="btn btn-outline" onclick="evBack(6)">← Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  GENERATE NOTICE                            -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-notices" style="display:none;">
+      <div class="page-header">
+        <div><h1>📋 Generate Notice</h1><p>Utah-compliant notices ready to print and serve.</p></div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.25rem;">
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label>Notice Type</label>
+            <select id="notice-type" onchange="updateNoticePreview()">
+              <option value="pay-quit">3-Day Pay or Quit (Utah Code § 78B-6-802)</option>
+              <option value="cure-quit">3-Day Cure or Quit (§ 78B-6-802)</option>
+              <option value="no-cause">15-Day No-Cause Notice (§ 78B-6-802)</option>
+              <option value="entry">24-Hour Notice of Entry (§ 57-22-4)</option>
+              <option value="rent-increase">Rent Increase Notice</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tenant Name</label>
+            <input type="text" id="n-tenant" placeholder="John Smith" oninput="updateNoticePreview()">
+          </div>
+          <div class="form-group">
+            <label>Property Address</label>
+            <input type="text" id="n-address" placeholder="119 E 600 S #119, Orem, UT" oninput="updateNoticePreview()">
+          </div>
+          <div class="form-group" id="n-amount-group">
+            <label>Amount Owed ($)</label>
+            <input type="text" id="n-amount" placeholder="$1,200.00" oninput="updateNoticePreview()">
+          </div>
+          <div class="form-group">
+            <label>Notice Date</label>
+            <input type="date" id="n-date" oninput="updateNoticePreview()">
+          </div>
+          <div class="form-group">
+            <label>Landlord / Agent Name</label>
+            <input type="text" id="n-landlord" value="Daniel Hart — Sanders Property Management" oninput="updateNoticePreview()">
+          </div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:.75rem;" class="no-print">
+          <button class="btn btn-primary" onclick="updateNoticePreview()">🔄 Preview</button>
+          <button class="btn btn-outline" onclick="window.print()">🖨 Print Notice</button>
+          <button class="btn btn-green" onclick="saveNotice()">✅ Save Notice</button>
+        </div>
+      </div>
+
+      <div id="notice-preview-area"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  ACTIVE CASES                               -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-cases" style="display:none;">
+      <div class="page-header">
+        <div><h1>📁 Active Cases</h1><p>Track every case from first notice to possession restored.</p></div>
+        <button class="btn btn-red" onclick="showSection('start', null)">+ New Case</button>
+      </div>
+      <div id="cases-list"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  FIND ATTORNEY                              -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-attorneys" style="display:none;">
+      <div class="page-header">
+        <div><h1>👨‍⚖️ Find an Attorney</h1><p>Smart matching by ZIP code, case type, and availability.</p></div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.25rem;">
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label>Property ZIP Code</label>
+            <input type="text" id="atty-zip" placeholder="84601" maxlength="5">
+          </div>
+          <div class="form-group">
+            <label>Case Type</label>
+            <select id="atty-case-type">
+              <option value="">All Types</option>
+              <option>Non-Payment of Rent</option>
+              <option>Lease Violation</option>
+              <option>Property Damage</option>
+              <option>Emergency Eviction</option>
+              <option>Small Claims</option>
+            </select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="renderAttorneys()" style="width:100%;">🔍 Find Attorneys</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="attorney-list-section"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  SMALL CLAIMS                               -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-smallclaims" style="display:none;">
+      <div class="page-header">
+        <div><h1>🏛️ Small Claims</h1><p>Utah small claims court — claims up to $11,000.</p></div>
+      </div>
+
+      <div class="card">
+        <h3>What are you claiming?</h3>
+        <div class="workflow-grid">
+          <div class="wf-card" onclick="startSmallClaim('deposit')">
+            <div class="wf-icon">🔑</div>
+            <div class="wf-title">Security Deposit Dispute</div>
+            <div class="wf-desc">Tenant claims you wrongfully withheld deposit</div>
+          </div>
+          <div class="wf-card" onclick="startSmallClaim('unpaid-rent')">
+            <div class="wf-icon">💸</div>
+            <div class="wf-title">Unpaid Rent After Move-Out</div>
+            <div class="wf-desc">Tenant vacated owing rent</div>
+          </div>
+          <div class="wf-card" onclick="startSmallClaim('damage')">
+            <div class="wf-icon">🔨</div>
+            <div class="wf-title">Property Damage Claim</div>
+            <div class="wf-desc">Tenant caused damage beyond normal wear</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Small Claims Checklist — Utah</h3>
+        <div style="font-size:.88rem;line-height:2;">
+          <div>✅ Claims must be $11,000 or less (Utah Code § 78A-8-101)</div>
+          <div>✅ File in the Justice Court of the county where defendant lives or where contract was made</div>
+          <div>✅ Filing fee: ~$60-185 depending on claim amount</div>
+          <div>✅ You must attempt to serve defendant (personal service or certified mail)</div>
+          <div>✅ Bring all documentation: lease, receipts, photos, payment records</div>
+          <div>✅ Hearing typically scheduled 14-30 days after filing</div>
+          <div>✅ Judgment can be collected via wage garnishment or bank levy</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <button class="btn btn-primary" onclick="showSection('notices', null)">📄 Generate Demand Letter First</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  ALL WORKFLOWS                              -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-workflows" style="display:none;">
+      <div class="page-header">
+        <div><h1>📂 All Legal Workflows</h1><p>Every legal situation a landlord might face.</p></div>
+      </div>
+
+      <div class="card">
+        <h3>🚫 Eviction Workflows</h3>
+        <div class="workflow-grid" style="margin-bottom:1.5rem;">
+          <div class="wf-card" onclick="showSection('start',null);selectViolation('nonpayment',null)"><div class="wf-icon">💸</div><div class="wf-title">Non-Payment of Rent</div></div>
+          <div class="wf-card" onclick="showSection('start',null);selectViolation('lease-violation',null)"><div class="wf-icon">📋</div><div class="wf-title">Lease Violation</div></div>
+          <div class="wf-card" onclick="showSection('start',null);selectViolation('property-damage',null)"><div class="wf-icon">🔨</div><div class="wf-title">Property Damage</div></div>
+          <div class="wf-card" onclick="showSection('start',null);selectViolation('illegal-activity',null)"><div class="wf-icon">🚔</div><div class="wf-title">Illegal Activity</div></div>
+          <div class="wf-card" onclick="showSection('start',null);selectViolation('holdover',null)"><div class="wf-icon">🏠</div><div class="wf-title">Holdover Tenant</div></div>
+          <div class="wf-card" onclick="showSection('start',null);selectViolation('abandonment',null)"><div class="wf-icon">🚪</div><div class="wf-title">Abandonment</div></div>
+        </div>
+        <h3>📋 Notices</h3>
+        <div class="workflow-grid" style="margin-bottom:1.5rem;">
+          <div class="wf-card" onclick="startNoticeFlow('pay-quit')"><div class="wf-icon">📄</div><div class="wf-title">3-Day Pay or Quit</div></div>
+          <div class="wf-card" onclick="startNoticeFlow('cure-quit')"><div class="wf-icon">📄</div><div class="wf-title">3-Day Cure or Quit</div></div>
+          <div class="wf-card" onclick="startNoticeFlow('no-cause')"><div class="wf-icon">📄</div><div class="wf-title">15-Day No-Cause</div></div>
+          <div class="wf-card" onclick="startNoticeFlow('entry')"><div class="wf-icon">🔑</div><div class="wf-title">Notice of Entry</div></div>
+          <div class="wf-card" onclick="startNoticeFlow('rent-increase')"><div class="wf-icon">💰</div><div class="wf-title">Rent Increase Notice</div></div>
+        </div>
+        <h3>🆘 Emergency Situations</h3>
+        <div class="workflow-grid">
+          <div class="wf-card" onclick="alert('Emergency workflow: Contact law enforcement for illegal lockout, then file an emergency motion. Call a Utah attorney immediately.')"><div class="wf-icon">🔐</div><div class="wf-title">Tenant Illegally Locked Out Property</div></div>
+          <div class="wf-card" onclick="startNoticeFlow('abandonment-notice')"><div class="wf-icon">🚪</div><div class="wf-title">Abandoned Property Handling</div></div>
+          <div class="wf-card" onclick="showSection('attorneys',null)"><div class="wf-icon">🆘</div><div class="wf-title">Emergency — Need Attorney Now</div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="ev-toast"></div>
+
+<script>
+// ════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════
+let cases = [];
+let savedNotices = [];
+let currentViolationType = '';
+let currentCaseData = {};
+
+const ATTORNEYS = [
+  {
+    id:'atty1', name:'Johnson & Associates', rating:4.9, responseTime:'~2 hrs',
+    specialties:['Lease Violations','Non-Payment','Emergency Evictions'],
+    location:'Provo, UT — Serving Utah County',
+    bio:'15 years Utah landlord-tenant law. Over 800 evictions handled. Flat fee pricing available.',
+    fees:{ consult:'Free', uncontested:'$550–$750', contested:'$1,500–$2,800', emergency:'$800+' },
+    available:true, featured:true, phone:'801-555-2100', email:'johnson@utaheviction.law',
+    zips:['84601','84602','84603','84604','84043','84058','84057']
+  },
+  {
+    id:'atty2', name:'Smith Legal Group', rating:4.7, responseTime:'~4 hrs',
+    specialties:['Non-Payment','Property Damage','Small Claims'],
+    location:'Orem, UT — Serving Utah &amp; Salt Lake Counties',
+    bio:'Top-rated eviction attorney Utah County. No hidden fees. Online case tracking.',
+    fees:{ consult:'Free 30 min', uncontested:'$500–$700', contested:'$1,400–$2,500', emergency:'$900+' },
+    available:true, featured:false, phone:'801-555-3300', email:'smith@smithlegalut.com',
+    zips:['84058','84097','84604','84043','84020','84101','84102']
+  },
+  {
+    id:'atty3', name:'Utah Eviction Pros', rating:4.8, responseTime:'~1 hr',
+    specialties:['Emergency Evictions','Lease Violations','Illegal Activity'],
+    location:'Salt Lake City — Serving All of Utah',
+    bio:'Emergency evictions available 7 days/week. Fastest response time in Utah.',
+    fees:{ consult:'$150', uncontested:'$600–$800', contested:'$1,600–$3,000', emergency:'$750 flat' },
+    available:true, featured:false, phone:'801-555-4400', email:'help@utahevictionpros.com',
+    zips:['all']
+  }
+];
+
+const VIOLATION_LABELS = {
+  'nonpayment':      { label:'Non-Payment of Rent',     notice:'3-Day Pay or Quit',  statute:'Utah Code § 78B-6-802' },
+  'lease-violation': { label:'Lease Violation',          notice:'3-Day Cure or Quit', statute:'Utah Code § 78B-6-802' },
+  'property-damage': { label:'Property Damage',          notice:'3-Day Cure or Quit', statute:'Utah Code § 78B-6-802' },
+  'nuisance':        { label:'Nuisance / Disturbance',   notice:'3-Day Cure or Quit', statute:'Utah Code § 78B-6-802' },
+  'illegal-activity':{ label:'Illegal Activity',         notice:'3-Day Unconditional Quit', statute:'Utah Code § 78B-6-802' },
+  'holdover':        { label:'Holdover Tenant',          notice:'15-Day No-Cause',    statute:'Utah Code § 78B-6-802' },
+  'unauthorized':    { label:'Unauthorized Occupants/Pets', notice:'3-Day Cure or Quit', statute:'Utah Code § 78B-6-802' },
+  'abandonment':     { label:'Abandonment',              notice:'Notice of Abandonment', statute:'Utah Code § 78B-6-810' },
+  'other':           { label:'Other Violation',          notice:'3-Day Cure or Quit', statute:'Utah Code § 78B-6-802' }
+};
+
+function loadData() {
+  try { cases = JSON.parse(localStorage.getItem('rv_ev_cases') || '[]'); } catch(e){ cases=[]; }
+  try { savedNotices = JSON.parse(localStorage.getItem('rv_ev_notices') || '[]'); } catch(e){ savedNotices=[]; }
+}
+function saveData() {
+  localStorage.setItem('rv_ev_cases', JSON.stringify(cases));
+  localStorage.setItem('rv_ev_notices', JSON.stringify(savedNotices));
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+const SECTIONS = ['dashboard','start','notices','cases','attorneys','smallclaims','workflows'];
+
+function showSection(name, el) {
+  SECTIONS.forEach(s => {
+    const sec = document.getElementById('section-' + s);
+    if (sec) sec.style.display = (s===name) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ev-sidebar a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (name === 'dashboard') refreshDashboard();
+  if (name === 'cases') renderCases();
+  if (name === 'attorneys') renderAttorneys();
+  if (name === 'notices') {
+    const nd = document.getElementById('n-date');
+    if (nd && !nd.value) nd.value = new Date().toISOString().slice(0,10);
+    updateNoticePreview();
+  }
+}
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+function refreshDashboard() {
+  const active = cases.filter(c=>c.status !== 'resolved').length;
+  const notices = savedNotices.length;
+  const resolved = cases.filter(c=>c.status === 'resolved').length;
+  document.getElementById('dash-active-cases').textContent = active;
+  document.getElementById('dash-notices-sent').textContent = notices;
+  document.getElementById('dash-resolved').textContent = resolved;
+
+  const preview = document.getElementById('dash-cases-preview');
+  if (!cases.length) {
+    preview.innerHTML = '<div class="empty-state"><div class="icon">📁</div><p>No active cases.</p></div>';
+  } else {
+    preview.innerHTML = cases.slice(0,3).map(c => renderCaseItem(c)).join('');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  EVICTION WIZARD
+// ════════════════════════════════════════════════
+function evNext(fromStep) {
+  if (fromStep === 1) {
+    const prop = document.getElementById('ev-property').value;
+    const tenant = document.getElementById('ev-tenant-name').value.trim();
+    if (!prop) { toast('⚠️ Select a property'); return; }
+    if (!tenant) { toast('⚠️ Enter tenant name'); return; }
+    currentCaseData.property = prop === 'other' ? document.getElementById('ev-manual-addr').value.trim() : prop;
+    currentCaseData.tenant = tenant;
+    currentCaseData.email = document.getElementById('ev-tenant-email').value.trim();
+    currentCaseData.rent = document.getElementById('ev-monthly-rent').value;
+    currentCaseData.amountDue = document.getElementById('ev-amount-due').value;
+    currentCaseData.leaseStart = document.getElementById('ev-lease-start').value;
+    currentCaseData.leaseEnd = document.getElementById('ev-lease-end').value;
+  }
+  if (fromStep === 2) {
+    if (!currentViolationType) { toast('⚠️ Select a violation type'); return; }
+    currentCaseData.violationType = currentViolationType;
+  }
+  if (fromStep === 3) {
+    const desc = document.getElementById('ev-violation-desc').value.trim();
+    if (!desc) { toast('⚠️ Describe the violation'); return; }
+    currentCaseData.description = desc;
+    currentCaseData.incidentDate = document.getElementById('ev-incident-date').value;
+    currentCaseData.recentDate = document.getElementById('ev-recent-date').value;
+    currentCaseData.priorNotices = document.getElementById('ev-prior-notices').value;
+    currentCaseData.desiredOutcome = document.getElementById('ev-desired-outcome').value;
+    currentCaseData.hasPhotos = document.getElementById('ev-has-photos').checked;
+    currentCaseData.hasTexts = document.getElementById('ev-has-texts').checked;
+    currentCaseData.hasLease = document.getElementById('ev-has-lease').checked;
+    currentCaseData.hasPaymentHistory = document.getElementById('ev-has-payment-history').checked;
+    currentCaseData.hasInspection = document.getElementById('ev-has-inspection').checked;
+    currentCaseData.zip = document.getElementById('ev-zip').value;
+    currentCaseData.urgency = document.getElementById('ev-urgency').value;
+  }
+  if (fromStep === 4) {
+    // Save case
+    const existing = cases.findIndex(c=>c.id===currentCaseData.id);
+    if (!currentCaseData.id) {
+      currentCaseData.id = uid();
+      currentCaseData.createdAt = new Date().toISOString();
+      currentCaseData.status = 'Notice Pending';
+      currentCaseData.messages = [];
+    }
+    if (existing >= 0) cases[existing] = currentCaseData;
+    else cases.push(currentCaseData);
+    saveData();
+  }
+
+  setWizardStep(fromStep + 1);
+}
+
+function evBack(fromStep) { setWizardStep(fromStep - 1); }
+
+function setWizardStep(step) {
+  for (let i=1; i<=6; i++) {
+    const s = document.getElementById('ev-step-' + i);
+    const w = document.getElementById('ws-' + i);
+    if (s) s.style.display = (i===step) ? 'block' : 'none';
+    if (w) {
+      w.className = 'wstep' + (i < step ? ' done' : i === step ? ' active' : '');
+    }
+  }
+  if (step === 4) generateAISummary();
+  if (step === 5) generateDocuments();
+  if (step === 6) renderMatchedAttorneys();
+}
+
+function selectViolation(type, el) {
+  currentViolationType = type;
+  document.querySelectorAll('.vtype-chip').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  const info = VIOLATION_LABELS[type];
+  const display = document.getElementById('ev-selected-vtype');
+  if (display && info) {
+    display.style.display = 'block';
+    display.innerHTML = `Selected: <strong>${info.label}</strong> — Recommended Notice: <strong>${info.notice}</strong> (${info.statute})`;
+  }
+}
+
+function generateAISummary() {
+  const gen = document.getElementById('ev-ai-generating');
+  const summ = document.getElementById('ev-case-summary');
+  const btns = document.getElementById('ev-step4-btns');
+  gen.style.display = 'block';
+  summ.style.display = 'none';
+  btns.style.display = 'none';
+
+  setTimeout(() => {
+    gen.style.display = 'none';
+    const info = VIOLATION_LABELS[currentCaseData.violationType] || {};
+    const evidence = [];
+    if (currentCaseData.hasLease) evidence.push('Signed lease agreement');
+    if (currentCaseData.hasPhotos) evidence.push('Photographic evidence of violation');
+    if (currentCaseData.hasTexts) evidence.push('Written communication logs');
+    if (currentCaseData.hasPaymentHistory) evidence.push('Complete payment history');
+    if (currentCaseData.hasInspection) evidence.push('Inspection report on file');
+    const today = new Date().toLocaleDateString();
+
+    summ.innerHTML = `
+      <div class="case-file">
+        <div class="case-file-header">
+          <div>
+            <div class="case-file-logo">✓ RentVerified</div>
+            <div style="font-size:.8rem;color:#64748b;">Legal Case File — Confidential</div>
+          </div>
+          <div style="text-align:right;font-size:.82rem;color:#374151;">
+            <strong>Case ID:</strong> ${currentCaseData.id||uid()}<br>
+            <strong>Generated:</strong> ${today}
+          </div>
+        </div>
+
+        <div class="cf-section">
+          <div class="cf-section-title">Property &amp; Tenant</div>
+          <div class="cf-row"><span class="cf-label">Property</span><span class="cf-val">${currentCaseData.property}</span></div>
+          <div class="cf-row"><span class="cf-label">Tenant</span><span class="cf-val">${currentCaseData.tenant}</span></div>
+          <div class="cf-row"><span class="cf-label">Monthly Rent</span><span class="cf-val">${currentCaseData.rent?'$'+currentCaseData.rent:'—'}</span></div>
+          ${currentCaseData.amountDue?`<div class="cf-row"><span class="cf-label">Amount Past Due</span><span class="cf-val" style="color:#dc2626;font-weight:700;">$${currentCaseData.amountDue}</span></div>`:''}
+          <div class="cf-row"><span class="cf-label">Lease Period</span><span class="cf-val">${currentCaseData.leaseStart||'—'} to ${currentCaseData.leaseEnd||'—'}</span></div>
+        </div>
+
+        <div class="cf-section">
+          <div class="cf-section-title">Violation</div>
+          <div class="cf-row"><span class="cf-label">Type</span><span class="cf-val">${info.label||currentCaseData.violationType}</span></div>
+          <div class="cf-row"><span class="cf-label">Applicable Statute</span><span class="cf-val">${info.statute||'Utah Code § 78B-6-802'}</span></div>
+          <div class="cf-row"><span class="cf-label">First Incident</span><span class="cf-val">${currentCaseData.incidentDate||'—'}</span></div>
+          <div class="cf-row"><span class="cf-label">Most Recent</span><span class="cf-val">${currentCaseData.recentDate||'—'}</span></div>
+          <div class="cf-row"><span class="cf-label">Prior Notices Given</span><span class="cf-val">${currentCaseData.priorNotices||'None'}</span></div>
+        </div>
+
+        <div class="cf-ai-box">
+          <strong>🤖 AI Case Summary:</strong><br>
+          Tenant <strong>${currentCaseData.tenant}</strong> at <strong>${currentCaseData.property}</strong> is in violation of their rental agreement
+          for <strong>${info.label||currentCaseData.violationType}</strong>${currentCaseData.incidentDate?' beginning '+currentCaseData.incidentDate:''}.
+          ${currentCaseData.description}
+          ${currentCaseData.amountDue?`The tenant owes a total of <strong>$${currentCaseData.amountDue}</strong> in unpaid rent.`:''}
+          Prior notices given: <strong>${currentCaseData.priorNotices||'None'}</strong>.
+          Recommended action: <strong>${info.notice}</strong>. Desired outcome: <strong>${currentCaseData.desiredOutcome}</strong>.
+          ${evidence.length?'Documentation on file: '+evidence.join(', ')+'.'  :''}
+        </div>
+
+        <div class="cf-section">
+          <div class="cf-section-title">Evidence on File</div>
+          <ul class="cf-checklist">
+            ${evidence.map(e=>`<li>${e}</li>`).join('')}
+            ${!evidence.length?'<li style="list-style:none;color:#94a3b8;">No evidence logged — add documentation in the Document Center</li>':''}
+          </ul>
+        </div>
+
+        <div class="cf-section">
+          <div class="cf-section-title">Recommended Next Steps</div>
+          <div style="font-size:.85rem;line-height:1.8;color:#374151;">
+            1. Serve <strong>${info.notice}</strong> to tenant immediately<br>
+            2. Document delivery method (certified mail, hand delivery, posting)<br>
+            3. ${currentCaseData.desiredOutcome==='eviction'?'File with Utah district court if tenant does not comply within notice period':'Allow tenant opportunity to comply within notice period'}<br>
+            4. Retain an eviction attorney for court filing if needed
+          </div>
+        </div>
+      </div>`;
+    summ.style.display = 'block';
+    btns.style.display = 'flex';
+  }, 1500);
+}
+
+function generateDocuments() {
+  const list = document.getElementById('ev-documents-list');
+  const info = VIOLATION_LABELS[currentCaseData.violationType] || {};
+  const today = new Date().toLocaleDateString();
+  const noticeType = currentCaseData.violationType === 'nonpayment' ? 'pay-quit' :
+                     currentCaseData.violationType === 'holdover' ? 'no-cause' : 'cure-quit';
+
+  list.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;">
+      <div class="card" style="margin:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+          <div style="font-weight:700;">📄 ${info.notice||'3-Day Notice'}</div>
+          <button class="btn btn-outline btn-sm" onclick="showSection('notices',null);document.getElementById('notice-type').value='${noticeType}';document.getElementById('n-tenant').value='${currentCaseData.tenant}';document.getElementById('n-address').value='${currentCaseData.property}';${currentCaseData.amountDue?`document.getElementById('n-amount').value='$${currentCaseData.amountDue}';`:''}updateNoticePreview();">View &amp; Print</button>
+        </div>
+        <div style="font-size:.82rem;color:#64748b;">Utah Code ${info.statute||'§ 78B-6-802'}<br>Required first step before court filing</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+          <div style="font-weight:700;">📊 Violation Timeline</div>
+          <button class="btn btn-outline btn-sm" onclick="printTimeline()">Print</button>
+        </div>
+        <div style="font-size:.82rem;color:#64748b;">Chronological log of all incidents, notices given, and tenant responses</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+          <div style="font-weight:700;">📁 Complete Case File</div>
+          <button class="btn btn-outline btn-sm" onclick="printCaseFile()">Print</button>
+        </div>
+        <div style="font-size:.82rem;color:#64748b;">Full case summary + all evidence — ready to hand to attorney</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+          <div style="font-weight:700;">💰 Payment History Export</div>
+          <button class="btn btn-outline btn-sm" onclick="toast('📥 Payment history exported!')">Export CSV</button>
+        </div>
+        <div style="font-size:.82rem;color:#64748b;">Full rent payment record for this tenant pulled from accounting</div>
+      </div>
+    </div>`;
+}
+
+function renderMatchedAttorneys() {
+  const container = document.getElementById('ev-attorney-matches');
+  const zip = currentCaseData.zip || '';
+  const urgency = currentCaseData.urgency || 'standard';
+  const matched = ATTORNEYS.filter(a => a.zips.includes('all') || !zip || a.zips.some(z=>z===zip||z.startsWith(zip.slice(0,3))));
+  const sorted = matched.sort((a,b) => {
+    if (urgency === 'emergency') return (a.responseTime < b.responseTime ? -1 : 1);
+    return b.rating - a.rating;
+  });
+  container.innerHTML = sorted.map(a => attorneyCardHTML(a, true)).join('');
+}
+
+// ════════════════════════════════════════════════
+//  NOTICE GENERATOR
+// ════════════════════════════════════════════════
+function startNoticeFlow(type) {
+  showSection('notices', null);
+  document.getElementById('notice-type').value = type;
+  const nd = document.getElementById('n-date');
+  if (!nd.value) nd.value = new Date().toISOString().slice(0,10);
+  updateNoticePreview();
+}
+
+function updateNoticePreview() {
+  const type = document.getElementById('notice-type').value;
+  const tenant = document.getElementById('n-tenant').value || '[Tenant Name]';
+  const address = document.getElementById('n-address').value || '[Property Address]';
+  const amount = document.getElementById('n-amount').value || '[Amount Owed]';
+  const date = document.getElementById('n-date').value || new Date().toISOString().slice(0,10);
+  const landlord = document.getElementById('n-landlord').value || 'Sanders Property Management';
+  const dateFormatted = date ? new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '[Date]';
+
+  // Show/hide amount field
+  document.getElementById('n-amount-group').style.display = (type==='pay-quit') ? 'block' : 'none';
+
+  let noticeHTML = '';
+
+  if (type === 'pay-quit') {
+    noticeHTML = `
+      <div class="notice-doc">
+        <h2>Three-Day Notice to Pay Rent or Quit</h2>
+        <p>Date: <strong>${dateFormatted}</strong></p>
+        <p>To: <strong>${tenant}</strong><br>
+        Premises: <strong>${address}</strong></p>
+        <p>PLEASE TAKE NOTICE that you are in default of your rental agreement for the above-described premises. You are hereby notified that you owe the sum of <strong>${amount}</strong> for unpaid rent.</p>
+        <p>You are required to pay the full amount owed OR vacate the premises within <strong>THREE (3) DAYS</strong> of service of this notice (excluding Saturdays, Sundays, and legal holidays).</p>
+        <p>If you fail to pay the amount owed or vacate the premises within three (3) days, legal proceedings will be commenced against you to recover possession of the premises, to declare your rental agreement forfeited, and to recover damages, court costs, and attorney's fees as allowed by law.</p>
+        <p><em>Pursuant to Utah Code § 78B-6-802.</em></p>
+        <div class="sig-block">
+          <p>Landlord / Agent: <strong>${landlord}</strong></p>
+          <div class="sig-line"></div>
+          <p style="font-size:.8rem;">Signature &amp; Date</p>
+        </div>
+        <div style="margin-top:1.5rem;font-size:.8rem;border-top:1px solid #e2e8f0;padding-top:.75rem;color:#64748b;">
+          Service Method: ☐ Personal Service &nbsp;&nbsp; ☐ Certified Mail &nbsp;&nbsp; ☐ Posted on Door + Mailed<br>
+          Date Served: __________________ &nbsp;&nbsp; Served By: __________________
+        </div>
+      </div>`;
+  } else if (type === 'cure-quit') {
+    noticeHTML = `
+      <div class="notice-doc">
+        <h2>Three-Day Notice to Cure or Quit</h2>
+        <p>Date: <strong>${dateFormatted}</strong></p>
+        <p>To: <strong>${tenant}</strong><br>
+        Premises: <strong>${address}</strong></p>
+        <p>PLEASE TAKE NOTICE that you are in violation of your rental agreement for the above-described premises. The violation is as follows:</p>
+        <p style="border-left:3px solid #dc2626;padding-left:1rem;color:#374151;"><em>[Describe the specific lease violation here]</em></p>
+        <p>You are required to <strong>CURE the above violation OR VACATE the premises</strong> within <strong>THREE (3) DAYS</strong> of service of this notice (excluding Saturdays, Sundays, and legal holidays).</p>
+        <p>If you fail to cure the violation or vacate within three (3) days, legal proceedings will be commenced against you to recover possession of the premises and to recover damages, costs, and attorney's fees.</p>
+        <p><em>Pursuant to Utah Code § 78B-6-802.</em></p>
+        <div class="sig-block">
+          <p>Landlord / Agent: <strong>${landlord}</strong></p>
+          <div class="sig-line"></div>
+          <p style="font-size:.8rem;">Signature &amp; Date</p>
+        </div>
+        <div style="margin-top:1.5rem;font-size:.8rem;border-top:1px solid #e2e8f0;padding-top:.75rem;color:#64748b;">
+          Service Method: ☐ Personal Service &nbsp;&nbsp; ☐ Certified Mail &nbsp;&nbsp; ☐ Posted on Door + Mailed<br>
+          Date Served: __________________ &nbsp;&nbsp; Served By: __________________
+        </div>
+      </div>`;
+  } else if (type === 'no-cause') {
+    noticeHTML = `
+      <div class="notice-doc">
+        <h2>Fifteen-Day Notice to Quit</h2>
+        <p>Date: <strong>${dateFormatted}</strong></p>
+        <p>To: <strong>${tenant}</strong><br>
+        Premises: <strong>${address}</strong></p>
+        <p>PLEASE TAKE NOTICE that you are required to quit and deliver up possession of the above-described premises within <strong>FIFTEEN (15) DAYS</strong> from the date of service of this notice.</p>
+        <p>This notice is given pursuant to your month-to-month rental agreement and is not based on any fault or violation on your part. This notice constitutes termination of your tenancy effective fifteen (15) days from the date of service.</p>
+        <p>If you fail to vacate the premises within fifteen (15) days, legal proceedings will be commenced against you to recover possession.</p>
+        <p><em>Pursuant to Utah Code § 78B-6-802.</em></p>
+        <div class="sig-block">
+          <p>Landlord / Agent: <strong>${landlord}</strong></p>
+          <div class="sig-line"></div>
+          <p style="font-size:.8rem;">Signature &amp; Date</p>
+        </div>
+        <div style="margin-top:1.5rem;font-size:.8rem;border-top:1px solid #e2e8f0;padding-top:.75rem;color:#64748b;">
+          Service Method: ☐ Personal Service &nbsp;&nbsp; ☐ Certified Mail &nbsp;&nbsp; ☐ Posted on Door + Mailed<br>
+          Date Served: __________________ &nbsp;&nbsp; Served By: __________________
+        </div>
+      </div>`;
+  } else if (type === 'entry') {
+    noticeHTML = `
+      <div class="notice-doc">
+        <h2>Notice of Intent to Enter Premises</h2>
+        <p>Date: <strong>${dateFormatted}</strong></p>
+        <p>To: <strong>${tenant}</strong><br>
+        Premises: <strong>${address}</strong></p>
+        <p>This notice is to inform you that the landlord or landlord's authorized agent will need to enter the above-described premises.</p>
+        <p><strong>Date of Entry:</strong> __________________ &nbsp;&nbsp; <strong>Time:</strong> Between ________ and ________</p>
+        <p><strong>Purpose:</strong> ☐ Repairs/Maintenance &nbsp; ☐ Inspection &nbsp; ☐ Show to Prospective Tenant &nbsp; ☐ Other: __________</p>
+        <p>Entry will be made at a reasonable time. This notice is provided in accordance with Utah law, which requires at least <strong>24 hours advance notice</strong> except in cases of emergency.</p>
+        <p><em>Pursuant to Utah Code § 57-22-4.</em></p>
+        <div class="sig-block">
+          <p>Landlord / Agent: <strong>${landlord}</strong></p>
+          <div class="sig-line"></div>
+          <p style="font-size:.8rem;">Signature &amp; Date</p>
+        </div>
+      </div>`;
+  } else if (type === 'rent-increase') {
+    noticeHTML = `
+      <div class="notice-doc">
+        <h2>Notice of Rent Increase</h2>
+        <p>Date: <strong>${dateFormatted}</strong></p>
+        <p>To: <strong>${tenant}</strong><br>
+        Premises: <strong>${address}</strong></p>
+        <p>This notice is to inform you that your monthly rent will be increased effective <strong>[Effective Date]</strong> as follows:</p>
+        <p>Current Rent: <strong>$__________</strong> per month<br>
+        New Rent: <strong>$__________</strong> per month<br>
+        Increase Amount: <strong>$__________</strong> per month</p>
+        <p>All other terms and conditions of your rental agreement remain in full force and effect. If you do not wish to continue your tenancy under the new rent amount, please provide written notice of your intent to vacate in accordance with your rental agreement.</p>
+        <p>This notice is provided with at least <strong>15 days advance notice</strong> as required for month-to-month tenancies under Utah law.</p>
+        <div class="sig-block">
+          <p>Landlord / Agent: <strong>${landlord}</strong></p>
+          <div class="sig-line"></div>
+          <p style="font-size:.8rem;">Signature &amp; Date</p>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('notice-preview-area').innerHTML = noticeHTML;
+}
+
+function saveNotice() {
+  const type = document.getElementById('notice-type').value;
+  const tenant = document.getElementById('n-tenant').value.trim();
+  const address = document.getElementById('n-address').value.trim();
+  if (!tenant || !address) { toast('⚠️ Enter tenant name and address first'); return; }
+  savedNotices.push({
+    id: uid(), type, tenant, address,
+    date: document.getElementById('n-date').value,
+    savedAt: new Date().toISOString()
+  });
+  saveData();
+  toast('✅ Notice saved!');
+}
+
+// ════════════════════════════════════════════════
+//  CASES
+// ════════════════════════════════════════════════
+const CASE_STAGES = ['Notice Pending','Notice Sent','Filed in Court','Hearing Scheduled','Judgment','Writ Issued','Possession Restored'];
+
+function renderCases() {
+  const container = document.getElementById('cases-list');
+  if (!cases.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📁</div><p>No active cases.</p><p>Click <strong>Start Eviction</strong> to begin a new case.</p></div>';
+    return;
+  }
+  container.innerHTML = cases.map(c => renderCaseItem(c) + renderCaseTracker(c)).join('');
+}
+
+function renderCaseItem(c) {
+  const info = VIOLATION_LABELS[c.violationType] || {};
+  const urgencyBadge = c.urgency==='emergency' ? '<span class="badge badge-red">🆘 Emergency</span>' :
+                       c.urgency==='urgent' ? '<span class="badge badge-amber">⚡ Urgent</span>' : '';
+  return `<div class="case-item" style="flex-direction:column;align-items:flex-start;">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:.5rem;">
+      <div>
+        <div class="case-addr">${c.property}</div>
+        <div class="case-meta">${c.tenant} · ${info.label||c.violationType} · Started ${new Date(c.createdAt).toLocaleDateString()}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        ${urgencyBadge}
+        <span class="badge badge-blue">${c.status||'Notice Pending'}</span>
+        <button class="btn btn-outline btn-sm" onclick="advanceCaseStatus('${c.id}')">Advance →</button>
+        <button class="btn btn-outline btn-sm" onclick="openCaseMessages('${c.id}')">💬 Messages</button>
+      </div>
+    </div>`;
+}
+
+function renderCaseTracker(c) {
+  const currentIdx = CASE_STAGES.indexOf(c.status||'Notice Pending');
+  const stepsHTML = CASE_STAGES.map((stage, i) => `
+    <div class="ct-step ${i < currentIdx ? 'done' : i === currentIdx ? 'active' : ''}">
+      <div class="ct-dot">${i < currentIdx ? '✓' : i+1}</div>
+      <div class="ct-label">${stage}</div>
+    </div>`).join('');
+  return `<div class="case-timeline">${stepsHTML}</div></div>`;
+}
+
+function advanceCaseStatus(id) {
+  const c = cases.find(c=>c.id===id);
+  if (!c) return;
+  const idx = CASE_STAGES.indexOf(c.status||'Notice Pending');
+  if (idx < CASE_STAGES.length - 1) {
+    c.status = CASE_STAGES[idx+1];
+    saveData(); renderCases();
+    toast(`✅ Case advanced to: ${c.status}`);
+  } else {
+    toast('ℹ️ Case is fully resolved.');
+  }
+}
+
+function openCaseMessages(id) {
+  const c = cases.find(c=>c.id===id);
+  if (!c) return;
+  const w = window.open('','_blank','width=600,height=500');
+  const msgs = (c.messages||[]).map(m=>`
+    <div style="text-align:${m.from==='landlord'?'right':'left'};margin-bottom:.75rem;">
+      <div style="display:inline-block;padding:.5rem .85rem;border-radius:12px;background:${m.from==='landlord'?'#1a56db':'#f1f5f9'};color:${m.from==='landlord'?'#fff':'#1e293b'};font-size:.88rem;max-width:75%;">${m.text}</div>
+      <div style="font-size:.72rem;color:#94a3b8;margin-top:.2rem;">${m.from==='landlord'?'You':'Attorney'} · ${new Date(m.at).toLocaleString()}</div>
+    </div>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><title>Case Messages</title>
+    <style>body{font-family:system-ui,sans-serif;padding:1.5rem;background:#f8fafc;}</style></head>
+    <body>
+    <h3 style="margin:0 0 1rem;color:#1e293b;">💬 Case Messages — ${c.property}</h3>
+    <div style="background:#fff;border-radius:10px;padding:1rem;min-height:200px;margin-bottom:1rem;">${msgs||'<p style="color:#94a3b8;text-align:center;padding:2rem 0;">No messages yet.</p>'}</div>
+    <div style="display:flex;gap:.5rem;">
+      <input id="msg-input" type="text" placeholder="Type a message..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.88rem;outline:none;">
+      <button onclick="sendMsg()" style="padding:.5rem 1rem;background:#1a56db;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Send</button>
+    </div>
+    <script>
+    function sendMsg(){
+      const t=document.getElementById('msg-input').value.trim();
+      if(!t)return;
+      const msgs=JSON.parse(localStorage.getItem('rv_ev_cases')||'[]');
+      const c=msgs.find(c=>c.id==='${id}');
+      if(c){
+        if(!c.messages)c.messages=[];
+        c.messages.push({from:'landlord',text:t,at:new Date().toISOString()});
+        localStorage.setItem('rv_ev_cases',JSON.stringify(msgs));
+      }
+      document.getElementById('msg-input').value='';
+      alert('✅ Message sent!');
+    }
+    <\/script></body></html>`);
+  w.document.close();
+}
+
+function printTimeline() {
+  const w = window.open('','_blank','width=700,height=600');
+  const stages = CASE_STAGES.map((s,i)=>`<tr><td style="padding:.5rem;font-weight:600;">${s}</td><td style="padding:.5rem;color:#64748b;">${i===0?currentCaseData.incidentDate||new Date().toLocaleDateString():''}</td><td style="padding:.5rem;color:#64748b;">Pending</td></tr>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><title>Case Timeline</title>
+    <style>body{font-family:system-ui,sans-serif;padding:2rem;} table{width:100%;border-collapse:collapse;} th{background:#1e293b;color:#fff;padding:.5rem;text-align:left;} td{border-bottom:1px solid #e2e8f0;}</style></head>
+    <body><h2>Violation Timeline — ${currentCaseData.property}</h2><p>Tenant: ${currentCaseData.tenant}</p>
+    <table><thead><tr><th>Stage</th><th>Date</th><th>Notes</th></tr></thead><tbody>${stages}</tbody></table>
+    <script>window.onload=function(){window.print();}<\/script></body></html>`);
+  w.document.close();
+}
+
+function printCaseFile() {
+  const gen = document.getElementById('ev-case-summary');
+  if (!gen) return;
+  const w = window.open('','_blank','width=800,height:900');
+  w.document.write(`<!DOCTYPE html><html><head><title>Case File</title>
+    <style>body{font-family:system-ui,sans-serif;padding:2rem;font-size:.88rem;line-height:1.7;} .case-file{border:2px solid #1e293b;padding:1.5rem;} .case-file-header{border-bottom:2px solid #1e293b;padding-bottom:.75rem;margin-bottom:1rem;display:flex;justify-content:space-between;} .cf-section-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#64748b;font-weight:700;margin-bottom:.5rem;border-bottom:1px solid #e2e8f0;padding-bottom:.25rem;margin-top:1rem;} .cf-row{display:flex;justify-content:space-between;padding:.2rem 0;} .cf-ai-box{background:#fffbeb;border:1px solid #fcd34d;padding:1rem;margin:1rem 0;} .cf-checklist{padding:0;list-style:none;} .cf-checklist li::before{content:"✅ ";} @media print{body{padding:.5rem;}}</style></head>
+    <body>
+    <button onclick="window.print()" style="margin-bottom:1rem;padding:.4rem .9rem;background:#1a56db;color:#fff;border:none;border-radius:6px;cursor:pointer;">🖨 Print / Save PDF</button>
+    ${gen.innerHTML}
+    </body></html>`);
+  w.document.close();
+}
+
+// ════════════════════════════════════════════════
+//  ATTORNEY DIRECTORY
+// ════════════════════════════════════════════════
+function renderAttorneys() {
+  const container = document.getElementById('attorney-list-section');
+  if (container) container.innerHTML = ATTORNEYS.map(a => attorneyCardHTML(a, false)).join('');
+}
+
+function attorneyCardHTML(a, showRetain) {
+  const stars = '⭐'.repeat(Math.floor(a.rating)) + (a.rating % 1 >= 0.5 ? '½' : '');
+  return `
+    <div class="attorney-card ${a.featured?'featured':''}">
+      ${a.featured ? '<div style="font-size:.72rem;font-weight:700;color:#92400e;background:#fef3c7;display:inline-block;padding:.15rem .5rem;border-radius:4px;margin-bottom:.5rem;">⭐ TOP MATCH</div>' : ''}
+      <div class="atty-header">
+        <div>
+          <div class="atty-name">${a.name}</div>
+          <div class="atty-spec">${a.specialties.join(' · ')}</div>
+        </div>
+        <div class="atty-rating">${a.rating}★</div>
+      </div>
+      <div class="atty-meta">
+        <span>📍 ${a.location}</span>
+        <span>⏱ Responds ${a.responseTime}</span>
+        <span>📞 ${a.phone}</span>
+      </div>
+      <div style="font-size:.85rem;color:#374151;margin-bottom:.85rem;">${a.bio}</div>
+      <div class="atty-fee-row">
+        <div class="fee-item"><span class="fee-label">Consultation</span><span class="fee-val">${a.fees.consult}</span></div>
+        <div class="fee-item"><span class="fee-label">Uncontested Eviction</span><span class="fee-val">${a.fees.uncontested}</span></div>
+        <div class="fee-item"><span class="fee-label">Contested Eviction</span><span class="fee-val">${a.fees.contested}</span></div>
+        <div class="fee-item"><span class="fee-label">Emergency</span><span class="fee-val">${a.fees.emergency}</span></div>
+      </div>
+      <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="toast('📧 Profile request sent to ${a.name}!')">View Full Profile</button>
+        ${showRetain ? `<button class="btn btn-primary btn-sm" onclick="retainAttorney('${a.id}')">📁 Send Case File &amp; Retain</button>` : `<button class="btn btn-primary btn-sm" onclick="toast('📁 Opening retain flow for ${a.name}...')">Retain Attorney</button>`}
+        <button class="btn btn-green btn-sm" onclick="toast('📞 Calling ${a.phone}...')">Call Now</button>
+      </div>
+    </div>`;
+}
+
+function retainAttorney(attyId) {
+  const a = ATTORNEYS.find(a=>a.id===attyId);
+  if (!a) return;
+  const w = window.open('','_blank','width=700,height:600');
+  w.document.write(`<!DOCTYPE html><html><head><title>Retain Attorney</title>
+    <style>body{font-family:system-ui,sans-serif;padding:2rem;background:#f8fafc;color:#1e293b;} .card{background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:1.5rem;margin-bottom:1rem;} h2{margin-top:0;} .fee-row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #f1f5f9;font-size:.9rem;} .btn{padding:.6rem 1.25rem;border-radius:8px;border:none;font-weight:600;cursor:pointer;font-size:.9rem;} .btn-primary{background:#1a56db;color:#fff;} .btn-green{background:#16a34a;color:#fff;}</style></head>
+    <body>
+    <h2>Retain ${a.name}</h2>
+    <div class="card">
+      <h3>Fee Schedule</h3>
+      <div class="fee-row"><span>Consultation</span><strong>${a.fees.consult}</strong></div>
+      <div class="fee-row"><span>Uncontested Eviction</span><strong>${a.fees.uncontested}</strong></div>
+      <div class="fee-row"><span>Contested Eviction</span><strong>${a.fees.contested}</strong></div>
+      <div class="fee-row"><span>Emergency</span><strong>${a.fees.emergency}</strong></div>
+    </div>
+    <div class="card">
+      <h3>What will be sent to ${a.name}:</h3>
+      <div>✅ Complete case summary &amp; AI analysis</div>
+      <div>✅ All uploaded documentation &amp; photos</div>
+      <div>✅ Lease copy &amp; payment history</div>
+      <div>✅ Generated notice documents</div>
+      <div>✅ Timeline of violations</div>
+    </div>
+    <div class="card" style="background:#fffbeb;border-color:#fcd34d;">
+      <strong>💳 Payment via RentVerified</strong><br>
+      <div style="font-size:.85rem;color:#92400e;margin-top:.5rem;">Stripe payment integration coming soon. For now, contact the attorney directly at <strong>${a.email}</strong></div>
+    </div>
+    <button class="btn btn-green" onclick="alert('✅ Case file sent to ${a.name}! They will respond within ${a.responseTime}. Check your messages.');window.close();">✅ Send Case File &amp; Retain Attorney</button>
+    </body></html>`);
+  w.document.close();
+}
+
+function startSmallClaim(type) {
+  const labels = { deposit:'Security Deposit Dispute', 'unpaid-rent':'Unpaid Rent After Move-Out', damage:'Property Damage Claim' };
+  showSection('notices', null);
+  toast('📋 Generating ' + labels[type] + ' documents...');
+}
+
+// ════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════
+function toast(msg) {
+  const el = document.getElementById('ev-toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  refreshDashboard();
+  document.getElementById('ev-property').addEventListener('change', function() {
+    document.getElementById('ev-manual-addr-group').style.display = this.value==='other' ? 'block' : 'none';
+  });
+  // Load sample case
+  if (!cases.length) {
+    cases.push({
+      id: uid(), property: '119 E 600 S #119, Orem, UT', tenant: 'Sample Tenant',
+      violationType: 'nonpayment', status: 'Notice Sent', urgency: 'standard',
+      amountDue: '1200', rent: '1200', description: 'Sample case — replace with real data',
+      createdAt: new Date().toISOString(), messages: [
+        { from:'attorney', text:'I have received your case file. I will review and follow up within 24 hours.', at: new Date().toISOString() }
+      ]
+    });
+    saveData();
+  }
+  refreshDashboard();
+});
+</script>
+</body>
+</html>
