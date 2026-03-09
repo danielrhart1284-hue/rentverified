@@ -126,6 +126,7 @@
   </div>
   <div class="nav-cta">
     <a href="tenant-portal.html" class="btn btn-outline btn-sm">Tenant Login</a>
+    <button class="btn btn-primary btn-sm" onclick="showLogin()" style="margin-left:.5rem;">Landlord Sign In</button>
   </div>
 </nav>
 
@@ -272,6 +273,7 @@
             <input type="password" placeholder="At least 8 characters" />
           </div>
           <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="formNext(2)">Continue →</button>
+          <p style="text-align:center;margin-top:1rem;font-size:.875rem;color:var(--gray-500);">Already have an account? <a href="#" onclick="showLogin();return false;" style="color:var(--primary);font-weight:600;">Sign In</a></p>
         </div>
 
         <!-- Form Step 2: Business -->
@@ -426,6 +428,45 @@
         </div>
 
         </div><!-- end signup-panel -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="display:none;min-height:100vh;background:var(--gray-100);">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 68px);padding:2rem;">
+    <div style="background:white;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);width:100%;max-width:440px;padding:2.5rem;">
+
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div style="font-size:2rem;margin-bottom:.5rem;">🏠</div>
+        <h2 style="font-weight:800;font-size:1.5rem;margin-bottom:.25rem;">Welcome Back</h2>
+        <p style="color:var(--gray-500);font-size:.9rem;">Sign in to your RentVerified landlord dashboard</p>
+      </div>
+
+      <div id="login-error" style="display:none;background:#FEF2F2;border:1px solid #EF4444;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.875rem;color:#B91C1C;"></div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div style="position:relative;">
+          <input type="password" id="login-password" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:2.5rem;" />
+          <button onclick="togglePwVis()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);padding:0;font-size:.85rem;" id="pw-vis-btn">👁</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:.5rem;" onclick="doLogin()">Sign In →</button>
+
+      <div style="text-align:center;margin-top:1.25rem;font-size:.875rem;color:var(--gray-500);">
+        New to RentVerified? <a href="#" onclick="showSignup();return false;" style="color:var(--primary);font-weight:600;">Create Account</a>
+      </div>
+
+      <!-- Demo hint (remove in production) -->
+      <div style="margin-top:1.5rem;padding:.75rem 1rem;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;font-size:.78rem;color:#0369A1;">
+        <strong>Demo mode:</strong> Complete the signup once to set your credentials, or use<br/>
+        <strong>Email:</strong> daniel@sanderspm.com &nbsp;·&nbsp; <strong>Password:</strong> Sanders2026
       </div>
     </div>
   </div>
@@ -1244,8 +1285,72 @@
   });
 
   function submitSignup() {
+    // Save credentials from step-1 inputs to localStorage
+    const inputs = document.querySelectorAll('#form-step-1 input');
+    const acct = {
+      firstName: inputs[0] ? inputs[0].value || 'Daniel'  : 'Daniel',
+      lastName:  inputs[1] ? inputs[1].value || 'Sanders' : 'Sanders',
+      email:     inputs[2] ? inputs[2].value.toLowerCase() : 'daniel@sanderspm.com',
+      phone:     inputs[3] ? inputs[3].value : '',
+      password:  inputs[4] ? inputs[4].value || 'Sanders2026' : 'Sanders2026',
+      company:   'Sanders Property Management',
+    };
+    localStorage.setItem('rv_account', JSON.stringify(acct));
     document.getElementById('signup-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
+  }
+
+  function showLogin() {
+    document.getElementById('signup-screen').style.display  = 'none';
+    document.getElementById('login-screen').style.display   = 'block';
+    document.getElementById('dashboard-screen').style.display = 'none';
+    setTimeout(() => { const el = document.getElementById('login-email'); if(el) el.focus(); }, 100);
+  }
+
+  function showSignup() {
+    document.getElementById('login-screen').style.display   = 'none';
+    document.getElementById('signup-screen').style.display  = 'block';
+    document.getElementById('dashboard-screen').style.display = 'none';
+  }
+
+  function togglePwVis() {
+    const inp = document.getElementById('login-password');
+    if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function doLogin() {
+    const email    = (document.getElementById('login-email').value || '').toLowerCase().trim();
+    const password = document.getElementById('login-password').value || '';
+    const errEl    = document.getElementById('login-error');
+
+    // Demo / hardcoded fallback credentials
+    const DEMO = { email: 'daniel@sanderspm.com', password: 'Sanders2026' };
+
+    // Check stored account first
+    const stored = JSON.parse(localStorage.getItem('rv_account') || 'null');
+    const matchStored = stored && stored.email === email && stored.password === password;
+    const matchDemo   = email === DEMO.email && password === DEMO.password;
+
+    if (matchStored || matchDemo) {
+      errEl.style.display = 'none';
+      // Ensure demo account is seeded
+      if (!stored) {
+        localStorage.setItem('rv_account', JSON.stringify({
+          firstName:'Daniel', lastName:'Sanders',
+          email: DEMO.email, password: DEMO.password,
+          company:'Sanders Property Management'
+        }));
+      }
+      document.getElementById('login-screen').style.display   = 'none';
+      document.getElementById('dashboard-screen').style.display = 'block';
+      renderLeaseExpiry();
+      loadFeePolicy();
+    } else {
+      errEl.textContent = 'Incorrect email or password. Please try again.';
+      errEl.style.display = 'block';
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-password').focus();
+    }
   }
 
   /* ── FEE POLICY FUNCTIONS ── */
@@ -1424,6 +1529,13 @@
       }
     } catch(e) {}
   }
+  document.addEventListener('DOMContentLoaded', function() {
+    // If an account already exists, show login instead of signup
+    if (localStorage.getItem('rv_account')) {
+      document.getElementById('signup-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display  = 'block';
+    }
+  });
   document.addEventListener('DOMContentLoaded', loadAssistanceNotifications);
   document.addEventListener('DOMContentLoaded', loadFeePolicy);
 
