@@ -875,7 +875,7 @@
 
       <!-- PAYMENTS TAB -->
       <div id="dtab-payments" class="tab-content">
-        <div class="page-header"><h1>Rent Payments</h1><p>Confirm Cash App and Zelle payments from your tenants.</p></div>
+        <div class="page-header"><h1>Rent Payments</h1><p>Confirm incoming payments and configure your fee policy for card transactions.</p></div>
         <div class="alert alert-warning" style="margin-bottom:1.5rem;">
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
           2 payments are awaiting your confirmation. Review the screenshots and confirm once you've received the funds.
@@ -930,6 +930,106 @@
           </div>
         </div>
       </div>
+
+      <!-- PAYMENT SETTINGS -->
+      <div style="margin-top:1.5rem;">
+        <h2 style="font-size:1.15rem;font-weight:700;color:var(--gray-800);margin-bottom:1rem;">💳 Payment Settings</h2>
+        <div class="grid-2" style="align-items:start;gap:1.25rem;">
+
+          <!-- Card Fee Policy card -->
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:0.25rem;">Card Processing Fees</h3>
+              <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:1.25rem;">By default, tenants who pay by debit or credit card pay a 2.9% + $0.30 convenience fee. You can absorb that fee so tenants pay only their rent — the fee comes out of your payout.</p>
+              <!-- Toggle row -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.1rem;background:var(--gray-100);border-radius:10px;margin-bottom:1rem;">
+                <div>
+                  <div style="font-weight:700;font-size:0.95rem;">Absorb card fees for tenants</div>
+                  <div id="fee-toggle-status" style="font-size:0.8rem;margin-top:2px;color:var(--gray-500);">Tenants pay convenience fee (default)</div>
+                </div>
+                <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;flex-shrink:0;">
+                  <input type="checkbox" id="absorb-toggle" onchange="updateFeePolicy()" style="opacity:0;width:0;height:0;position:absolute;" />
+                  <span id="toggle-track" style="position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:background 0.2s;"></span>
+                  <span id="toggle-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:transform 0.2s;"></span>
+                </label>
+              </div>
+              <!-- Live impact calculator -->
+              <div id="fee-impact-box" style="border:1px solid #e5e7eb;border-radius:10px;padding:1rem;background:white;">
+                <div style="font-weight:700;font-size:0.85rem;color:var(--gray-600);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Live Payout Impact</div>
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+                  <span style="font-size:0.85rem;color:var(--gray-600);">Example rent:</span>
+                  <span style="font-size:0.8rem;color:var(--gray-500);">$</span>
+                  <input type="number" id="example-rent" value="1200" min="100" max="9999" step="50"
+                    oninput="refreshImpact()"
+                    style="width:80px;padding:3px 6px;border:1px solid #d1d5db;border-radius:6px;font-size:0.9rem;font-weight:700;text-align:right;" />
+                </div>
+                <div style="border-top:1px solid #f3f4f6;padding-top:0.75rem;display:flex;flex-direction:column;gap:0.45rem;">
+                  <div style="display:flex;justify-content:space-between;font-size:0.875rem;">
+                    <span style="color:var(--gray-600);">Tenant pays</span>
+                    <span id="impact-tenant-pays" style="font-weight:700;">—</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.875rem;">
+                    <span style="color:var(--gray-600);">Card fee (2.9% + $0.30)</span>
+                    <span id="impact-card-fee" style="font-weight:600;">—</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.875rem;padding-top:0.45rem;border-top:1px solid #e5e7eb;">
+                    <span style="font-weight:700;">You receive</span>
+                    <span id="impact-you-receive" style="font-weight:800;font-size:1rem;">—</span>
+                  </div>
+                </div>
+                <div id="impact-note" style="margin-top:0.75rem;font-size:0.78rem;color:var(--gray-500);padding:0.5rem 0.75rem;background:var(--gray-50);border-radius:6px;">
+                  Loading…
+                </div>
+              </div>
+              <div style="margin-top:1rem;display:flex;align-items:center;justify-content:space-between;">
+                <span id="fee-save-status" style="font-size:0.82rem;color:var(--success);opacity:0;transition:opacity 0.4s;">✓ Settings saved</span>
+                <button class="btn btn-primary btn-sm" onclick="saveFeePolicy()">Save Payment Settings</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Zero-fee methods info card -->
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">✅ Zero-Fee Payment Methods</h3>
+              <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:1rem;">These methods are always free for both you and your tenant — no processing fees ever.</p>
+              <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+                  <span style="font-size:1.2rem;">🏦</span>
+                  <div>
+                    <div style="font-weight:700;font-size:0.9rem;">Bank Transfer (ACH)</div>
+                    <div style="font-size:0.78rem;color:#15803d;">FREE · 2–3 business days · Recommended</div>
+                  </div>
+                  <span style="margin-left:auto;background:#dcfce7;color:#15803d;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:999px;">$0 fee</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+                  <span style="font-size:1.2rem;">💚</span>
+                  <div>
+                    <div style="font-weight:700;font-size:0.9rem;">Cash App</div>
+                    <div style="font-size:0.78rem;color:#15803d;">FREE · Instant</div>
+                  </div>
+                  <span style="margin-left:auto;background:#dcfce7;color:#15803d;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:999px;">$0 fee</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+                  <span style="font-size:1.2rem;">💜</span>
+                  <div>
+                    <div style="font-weight:700;font-size:0.9rem;">Zelle</div>
+                    <div style="font-size:0.78rem;color:#15803d;">FREE · Instant</div>
+                  </div>
+                  <span style="margin-left:auto;background:#dcfce7;color:#15803d;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:999px;">$0 fee</span>
+                </div>
+              </div>
+              <div style="margin-top:1rem;padding:0.75rem 1rem;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:0.82rem;color:#92400e;">
+                💡 <strong>Tip:</strong> Encourage tenants to use ACH (bank transfer) for the smoothest, fee-free rent collection experience.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!-- /dtab-payments end of extra content -->
+
+      </div><!-- /dtab-payments outer -->
 
       <!-- AI SETTINGS TAB -->
       <div id="dtab-ai" class="tab-content">
@@ -1145,6 +1245,80 @@
     document.getElementById('dashboard-screen').style.display = 'block';
   }
 
+  /* ── FEE POLICY FUNCTIONS ── */
+  function loadFeePolicy() {
+    const p = JSON.parse(localStorage.getItem('rv_fee_policy') || '{}');
+    const toggle = document.getElementById('absorb-toggle');
+    if (!toggle) return;
+    toggle.checked = !!p.absorbCard;
+    applyToggleVisual(!!p.absorbCard);
+    refreshImpact();
+  }
+
+  function applyToggleVisual(absorb) {
+    const track = document.getElementById('toggle-track');
+    const thumb = document.getElementById('toggle-thumb');
+    const statusEl = document.getElementById('fee-toggle-status');
+    if (!track) return;
+    if (absorb) {
+      track.style.background = '#10b981';
+      thumb.style.transform = 'translateX(22px)';
+      statusEl.textContent = 'You cover card fees — tenants pay rent only';
+      statusEl.style.color = '#059669';
+    } else {
+      track.style.background = '#d1d5db';
+      thumb.style.transform = 'translateX(0)';
+      statusEl.textContent = 'Tenants pay convenience fee (default)';
+      statusEl.style.color = 'var(--gray-500)';
+    }
+  }
+
+  function updateFeePolicy() {
+    const absorb = document.getElementById('absorb-toggle').checked;
+    applyToggleVisual(absorb);
+    refreshImpact();
+  }
+
+  function refreshImpact() {
+    const absorb = document.getElementById('absorb-toggle') ? document.getElementById('absorb-toggle').checked : false;
+    const rent = parseFloat((document.getElementById('example-rent') || {}).value || 1200) || 1200;
+    const fee = Math.round((rent * 0.029 + 0.30) * 100) / 100;
+    const tpEl = document.getElementById('impact-tenant-pays');
+    const cfEl = document.getElementById('impact-card-fee');
+    const yrEl = document.getElementById('impact-you-receive');
+    const nEl  = document.getElementById('impact-note');
+    if (!tpEl) return;
+    if (absorb) {
+      const recv = Math.round((rent - fee) * 100) / 100;
+      tpEl.textContent = '$' + rent.toFixed(2);
+      cfEl.textContent = '−$' + fee.toFixed(2) + ' (from your payout)';
+      cfEl.style.color = 'var(--danger)';
+      yrEl.textContent = '$' + recv.toFixed(2);
+      yrEl.style.color = '#f59e0b';
+      nEl.textContent = '⚠ You absorb the fee. On this rent you receive $' + recv.toFixed(2) + ' instead of $' + rent.toFixed(2) + '.';
+      nEl.style.background = '#fffbeb';
+    } else {
+      const total = Math.round((rent + fee) * 100) / 100;
+      tpEl.textContent = '$' + total.toFixed(2) + ' (rent + fee)';
+      cfEl.textContent = '+$' + fee.toFixed(2) + ' (charged to tenant)';
+      cfEl.style.color = 'var(--gray-500)';
+      yrEl.textContent = '$' + rent.toFixed(2);
+      yrEl.style.color = 'var(--success)';
+      nEl.textContent = '✓ Tenants pay the convenience fee — your payout is the full rent amount.';
+      nEl.style.background = 'var(--gray-50)';
+    }
+  }
+
+  function saveFeePolicy() {
+    const absorb = document.getElementById('absorb-toggle').checked;
+    const p = JSON.parse(localStorage.getItem('rv_fee_policy') || '{}');
+    p.absorbCard = absorb;
+    localStorage.setItem('rv_fee_policy', JSON.stringify(p));
+    const el = document.getElementById('fee-save-status');
+    el.style.opacity = '1';
+    setTimeout(() => { el.style.opacity = '0'; }, 2500);
+  }
+
   function dashTab(name) {
     document.querySelectorAll('#dashboard-screen .tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-link').forEach(l => l.classList.remove('active'));
@@ -1181,6 +1355,7 @@
     } catch(e) {}
   }
   document.addEventListener('DOMContentLoaded', loadAssistanceNotifications);
+  document.addEventListener('DOMContentLoaded', loadFeePolicy);
 
   // Referral CTA — show after 4s on dashboard, once per session
   document.addEventListener('DOMContentLoaded', function() {

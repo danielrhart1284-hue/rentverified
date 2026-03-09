@@ -370,7 +370,7 @@
       <div id="tab-pay" class="tab-content">
         <div class="page-header">
           <h1>Pay Rent</h1>
-          <p>Choose your payment method. No processing fees — ever.</p>
+          <p id="pay-hdr-sub">Bank transfer is always free. Card payments include a disclosed convenience fee.</p>
         </div>
 
         <!-- Steps -->
@@ -380,26 +380,37 @@
           <div class="step-dot" id="step2">2</div>
           <div class="step-line" id="line2"></div>
           <div class="step-dot" id="step3">3</div>
+          <div class="step-line" id="line3"></div>
+          <div class="step-dot" id="step4">4</div>
         </div>
 
-        <!-- Step 1: Choose method -->
+        <!-- ── STEP 1: Choose method ── -->
         <div id="pay-step-1">
+
+          <!-- Amount card (live update) -->
           <div class="card" style="margin-bottom:1.5rem;">
             <div class="card-body">
-              <h3 style="font-weight:700;margin-bottom:0.4rem;">Amount Due</h3>
-              <p style="color:var(--gray-600);font-size:0.9rem;margin-bottom:1.25rem;">March 2026 Rent · 123 Maple Street, Unit 2A</p>
-              <div style="display:flex;align-items:center;justify-content:space-between;background:var(--gray-100);padding:1rem 1.25rem;border-radius:var(--radius);">
+              <h3 style="font-weight:700;margin-bottom:.4rem;">Amount Due</h3>
+              <p style="color:var(--gray-600);font-size:.9rem;margin-bottom:1.25rem;">March 2026 · 123 Maple Street, Unit 2A</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:var(--gray-100);padding:.9rem 1.25rem;border-radius:var(--radius);">
                 <span style="font-weight:600;">Monthly Rent</span>
-                <span style="font-weight:700;font-size:1.2rem;">$1,200.00</span>
+                <span style="font-weight:700;font-size:1.15rem;" id="disp-rent">$1,200.00</span>
               </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1.25rem;color:var(--success);">
-                <span style="font-size:0.875rem;">Processing Fee</span>
-                <span style="font-weight:600;">$0.00 FREE</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 1.25rem;" id="fee-row">
+                <span style="font-size:.875rem;" id="fee-label">Convenience Fee</span>
+                <span style="font-weight:600;" id="fee-amount" style="color:var(--success);">$0.00</span>
               </div>
-              <div style="height:1px;background:var(--gray-200);margin:0.5rem 0;"></div>
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1.25rem;">
-                <span style="font-weight:700;">Total</span>
-                <span style="font-weight:800;font-size:1.4rem;color:var(--primary);">$1,200.00</span>
+              <div id="landlord-absorb-note" style="display:none;padding:0 1.25rem .4rem;font-size:.78rem;color:#2563eb;">
+                ✓ Your property manager has agreed to cover card processing fees.
+              </div>
+              <div style="height:1px;background:var(--gray-200);margin:.4rem 0;"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 1.25rem;">
+                <span style="font-weight:700;">Total Charged to You</span>
+                <span style="font-weight:800;font-size:1.4rem;color:var(--primary);" id="disp-total">$1,200.00</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem .5rem;">
+                <span style="font-size:.78rem;color:var(--gray-500);">Amount landlord receives</span>
+                <span style="font-size:.82rem;font-weight:600;color:var(--gray-600);" id="disp-landlord">$1,200.00</span>
               </div>
             </div>
           </div>
@@ -409,125 +420,312 @@
             <span style="font-size:1.75rem;flex-shrink:0;">🛡️</span>
             <div style="flex:1;min-width:180px;">
               <div style="color:#93c5fd;font-weight:700;font-size:.85rem;margin-bottom:2px;">RENT GUARANTEE PROTECTION ACTIVE</div>
-              <div style="color:#bfdbfe;font-size:.82rem;line-height:1.4;">Running behind this month? Your landlord has <strong style="color:white;">Rent Guarantee insurance</strong> — they can file a zero-hassle claim so you get extra time without late fees or eviction risk.</div>
+              <div style="color:#bfdbfe;font-size:.82rem;line-height:1.4;">Running behind? Your landlord has <strong style="color:white;">Rent Guarantee insurance</strong> — they can file a zero-hassle claim so you get extra time without late fees or eviction risk.</div>
             </div>
             <a href="financial-hub.html#rent-guarantee" style="background:#2563eb;color:white;font-weight:700;font-size:.8rem;padding:.5rem 1rem;border-radius:8px;white-space:nowrap;text-decoration:none;flex-shrink:0;">Notify Landlord → File Claim</a>
           </div>
 
           <h3 style="font-weight:700;margin-bottom:1rem;">Choose Payment Method</h3>
-          <div class="grid-2" style="max-width:500px;">
-            <div class="pay-method selected" id="method-cashapp" onclick="selectMethod('cashapp')">
-              <div class="pay-method-icon">💚</div>
-              <h4>Cash App</h4>
-              <p>Send to $cashtag<br/>Instant · Free</p>
+
+          <!-- ACH — Recommended -->
+          <div class="pay-method selected" id="method-ach" onclick="selectMethod('ach')" style="display:flex;align-items:center;gap:14px;padding:1rem 1.25rem;margin-bottom:.6rem;max-width:520px;border-color:#2563eb;background:#eff6ff;">
+            <div style="font-size:1.8rem;">🏦</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <h4 style="margin:0;font-size:.95rem;">Bank Transfer (ACH)</h4>
+                <span style="background:#2563eb;color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px;">★ RECOMMENDED</span>
+              </div>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);">Direct from your bank account · 2–3 business days</p>
             </div>
-            <div class="pay-method" id="method-zelle" onclick="selectMethod('zelle')">
-              <div class="pay-method-icon">💜</div>
-              <h4>Zelle</h4>
-              <p>Send to phone/email<br/>Instant · Free</p>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-weight:800;font-size:1rem;color:#16a34a;">FREE</div>
+              <div style="font-size:.7rem;color:var(--gray-500);">No fees ever</div>
             </div>
+          </div>
+
+          <!-- Cash App -->
+          <div class="pay-method" id="method-cashapp" onclick="selectMethod('cashapp')" style="display:flex;align-items:center;gap:14px;padding:1rem 1.25rem;margin-bottom:.6rem;max-width:520px;">
+            <div style="font-size:1.8rem;">💚</div>
+            <div style="flex:1;">
+              <h4 style="margin:0;font-size:.95rem;">Cash App</h4>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);">Send to $SandersRentals · Instant</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-weight:800;font-size:1rem;color:#16a34a;">FREE</div>
+              <div style="font-size:.7rem;color:var(--gray-500);">No fees</div>
+            </div>
+          </div>
+
+          <!-- Zelle -->
+          <div class="pay-method" id="method-zelle" onclick="selectMethod('zelle')" style="display:flex;align-items:center;gap:14px;padding:1rem 1.25rem;margin-bottom:.6rem;max-width:520px;">
+            <div style="font-size:1.8rem;">💜</div>
+            <div style="flex:1;">
+              <h4 style="margin:0;font-size:.95rem;">Zelle</h4>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);">Send to (555) 000-0000 · Instant</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-weight:800;font-size:1rem;color:#16a34a;">FREE</div>
+              <div style="font-size:.7rem;color:var(--gray-500);">No fees</div>
+            </div>
+          </div>
+
+          <!-- Debit Card -->
+          <div class="pay-method" id="method-debit" onclick="selectMethod('debit')" style="display:flex;align-items:center;gap:14px;padding:1rem 1.25rem;margin-bottom:.6rem;max-width:520px;">
+            <div style="font-size:1.8rem;">💳</div>
+            <div style="flex:1;">
+              <h4 style="margin:0;font-size:.95rem;">Debit Card</h4>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);">Visa, Mastercard, Discover · Instant</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;" id="debit-fee-display">
+              <div style="font-weight:800;font-size:.9rem;color:#d97706;" id="debit-fee-val">+$35.10</div>
+              <div style="font-size:.7rem;color:var(--gray-500);">2.9% + $0.30</div>
+            </div>
+          </div>
+
+          <!-- Credit Card -->
+          <div class="pay-method" id="method-credit" onclick="selectMethod('credit')" style="display:flex;align-items:center;gap:14px;padding:1rem 1.25rem;margin-bottom:.6rem;max-width:520px;">
+            <div style="font-size:1.8rem;">💳</div>
+            <div style="flex:1;">
+              <h4 style="margin:0;font-size:.95rem;">Credit Card</h4>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);">Visa, Mastercard, Amex, Discover · Instant</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;" id="credit-fee-display">
+              <div style="font-weight:800;font-size:.9rem;color:#d97706;" id="credit-fee-val">+$35.10</div>
+              <div style="font-size:.7rem;color:var(--gray-500);">2.9% + $0.30</div>
+            </div>
+          </div>
+
+          <!-- Disclosure -->
+          <div style="max-width:520px;margin-top:.8rem;padding:.75rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:.75rem;color:var(--gray-500);line-height:1.5;">
+            <strong style="color:var(--gray-700);">Fee Disclosure:</strong> Convenience fees are charged by Stripe, our payment processor, and passed through at cost. Bank transfers are always free. Fees are shown before you confirm — you will never be surprised.
           </div>
 
           <button class="btn btn-primary btn-lg" style="margin-top:1.5rem;" onclick="nextPayStep(2)">Continue →</button>
         </div>
 
-        <!-- Step 2: Send payment + instructions -->
+        <!-- ── STEP 2: Payment details ── -->
         <div id="pay-step-2" style="display:none;">
-          <div class="alert alert-warning" style="margin-bottom:1.5rem;">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-            <div><strong>Important:</strong> Only send payment to the info below. Sanders Property Management will never ask you to pay via gift cards, wire transfer, or any other method.</div>
-          </div>
 
-          <!-- Cash App Instructions -->
-          <div id="cashapp-instructions">
+          <!-- ACH Form -->
+          <div id="form-ach">
             <div class="card" style="margin-bottom:1.5rem;">
               <div class="card-body">
-                <h3 style="font-weight:700;margin-bottom:1rem;">💚 Send via Cash App</h3>
-                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
-                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">CASH APP $CASHTAG</div>
-                  <div style="font-size:1.8rem;font-weight:900;color:#15803d;font-family:monospace;">$SandersRentals</div>
-                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:4px;">Sanders Property Management</div>
+                <h3 style="font-weight:700;margin-bottom:.3rem;">🏦 Bank Account Details</h3>
+                <p style="color:var(--gray-600);font-size:.85rem;margin-bottom:1.25rem;">Your information is encrypted and never stored on our servers. Powered by Stripe.</p>
+                <div class="form-group">
+                  <label>Account Holder Name</label>
+                  <input type="text" placeholder="Full name as it appears on your account" />
                 </div>
-                <div style="background:var(--gray-100);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;">
-                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
-                  <div style="font-size:1.4rem;font-weight:800;">$1,200.00</div>
+                <div class="form-group">
+                  <label>Routing Number</label>
+                  <input type="text" placeholder="9-digit routing number" maxlength="9" />
                 </div>
-                <p style="color:var(--gray-700);font-size:0.9rem;"><strong>In the note field, include:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
+                <div class="form-group">
+                  <label>Account Number</label>
+                  <input type="text" placeholder="Your checking or savings account number" />
+                </div>
+                <div class="form-group">
+                  <label>Account Type</label>
+                  <select><option>Checking</option><option>Savings</option></select>
+                </div>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:.85rem 1rem;margin-top:1rem;font-size:.78rem;color:#166534;display:flex;gap:8px;align-items:flex-start;">
+                  <span style="flex-shrink:0;">🔒</span>
+                  <span>ACH transfers are processed by Stripe and protected by 256-bit encryption. Your bank credentials are never stored by RentVerified.</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Zelle Instructions (hidden) -->
-          <div id="zelle-instructions" style="display:none;">
+          <!-- Cash App instructions -->
+          <div id="form-cashapp" style="display:none;">
+            <div class="card" style="margin-bottom:1.5rem;">
+              <div class="card-body">
+                <h3 style="font-weight:700;margin-bottom:1rem;">💚 Send via Cash App</h3>
+                <div class="alert alert-warning" style="margin-bottom:1rem;">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                  <span><strong>Important:</strong> Sanders Property Management will never ask you to pay via gift cards or any other method.</span>
+                </div>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
+                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">CASH APP $CASHTAG</div>
+                  <div style="font-size:1.8rem;font-weight:900;color:#15803d;font-family:monospace;">$SandersRentals</div>
+                </div>
+                <div style="background:var(--gray-100);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;">
+                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
+                  <div style="font-size:1.4rem;font-weight:800;">$1,200.00</div>
+                </div>
+                <p style="font-size:.9rem;"><strong>In the note field:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Zelle instructions -->
+          <div id="form-zelle" style="display:none;">
             <div class="card" style="margin-bottom:1.5rem;">
               <div class="card-body">
                 <h3 style="font-weight:700;margin-bottom:1rem;">💜 Send via Zelle</h3>
+                <div class="alert alert-warning" style="margin-bottom:1rem;">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                  <span><strong>Important:</strong> Only send to the number/email below — verify carefully before sending.</span>
+                </div>
                 <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
-                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">SEND TO PHONE NUMBER</div>
+                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">SEND TO PHONE NUMBER</div>
                   <div style="font-size:1.8rem;font-weight:900;color:#7c3aed;font-family:monospace;">(555) 000-0000</div>
-                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:4px;">OR email: payments@sanderspm.com</div>
+                  <div style="font-size:.8rem;color:var(--gray-600);margin-top:4px;">OR email: payments@sanderspm.com</div>
                 </div>
                 <div style="background:var(--gray-100);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;">
-                  <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
+                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
                   <div style="font-size:1.4rem;font-weight:800;">$1,200.00</div>
                 </div>
-                <p style="color:var(--gray-700);font-size:0.9rem;"><strong>In the memo field, include:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
+                <p style="font-size:.9rem;"><strong>In the memo:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card form -->
+          <div id="form-card" style="display:none;">
+            <div class="card" style="margin-bottom:1.5rem;">
+              <div class="card-body">
+                <h3 style="font-weight:700;margin-bottom:.3rem;">💳 Card Details</h3>
+                <p style="color:var(--gray-600);font-size:.85rem;margin-bottom:1.25rem;">Encrypted and processed by Stripe. RentVerified never stores your card number.</p>
+                <div class="form-group">
+                  <label>Cardholder Name</label>
+                  <input type="text" placeholder="Name as it appears on card" />
+                </div>
+                <div class="form-group">
+                  <label>Card Number</label>
+                  <input type="text" placeholder="1234  5678  9012  3456" maxlength="19" />
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                  <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="text" placeholder="MM / YY" maxlength="7" />
+                  </div>
+                  <div class="form-group">
+                    <label>CVV</label>
+                    <input type="text" placeholder="123" maxlength="4" />
+                  </div>
+                </div>
+                <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:.85rem 1rem;margin-top:1rem;font-size:.78rem;color:#9a3412;display:flex;gap:8px;align-items:flex-start;">
+                  <span style="flex-shrink:0;">ℹ️</span>
+                  <span>A convenience fee is added to cover Stripe's processing cost. This is disclosed on every transaction — you will see the exact total before confirming.</span>
+                </div>
               </div>
             </div>
           </div>
 
           <div style="display:flex;gap:1rem;flex-wrap:wrap;">
             <button class="btn btn-outline" onclick="nextPayStep(1)">← Back</button>
-            <button class="btn btn-primary btn-lg" onclick="nextPayStep(3)">I've Sent the Payment – Upload Confirmation →</button>
+            <button class="btn btn-primary btn-lg" id="step2-next-btn" onclick="nextPayStep(3)">Review Payment →</button>
           </div>
         </div>
 
-        <!-- Step 3: Upload confirmation -->
+        <!-- ── STEP 3: Review with full fee disclosure ── -->
         <div id="pay-step-3" style="display:none;">
-          <div class="card">
+          <div class="card" style="margin-bottom:1.5rem;">
             <div class="card-body">
-              <h3 style="font-weight:700;margin-bottom:0.4rem;">📸 Upload Payment Screenshot</h3>
-              <p style="color:var(--gray-600);margin-bottom:1.5rem;font-size:0.9rem;">Take a screenshot of your payment confirmation and upload it here. This is how we verify your payment.</p>
+              <h3 style="font-weight:700;margin-bottom:1.25rem;">📋 Review &amp; Confirm Payment</h3>
 
-              <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                <p style="font-weight:600;margin-top:0.5rem;color:var(--gray-700);">Click to upload screenshot</p>
-                <p style="font-size:0.8rem;color:var(--gray-400);">PNG, JPG, or PDF · Max 10MB</p>
+              <!-- Transaction breakdown -->
+              <div style="border:2px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:1.25rem;">
+                <div style="background:#f8fafc;padding:.75rem 1.25rem;border-bottom:1px solid #e2e8f0;">
+                  <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;">Transaction Breakdown</div>
+                </div>
+                <div style="padding:.25rem 0;">
+                  <div style="display:flex;justify-content:space-between;padding:.6rem 1.25rem;">
+                    <span style="font-size:.88rem;color:#475569;">Monthly Rent · March 2026</span>
+                    <span style="font-weight:700;">$1,200.00</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;padding:.6rem 1.25rem;" id="review-fee-row">
+                    <span style="font-size:.88rem;color:#475569;" id="review-fee-label">Convenience Fee (2.9% + $0.30)</span>
+                    <span style="font-weight:700;color:#d97706;" id="review-fee-val">$0.00</span>
+                  </div>
+                  <div style="height:1px;background:#e2e8f0;margin:.2rem 0;"></div>
+                  <div style="display:flex;justify-content:space-between;padding:.75rem 1.25rem;">
+                    <span style="font-weight:700;font-size:1rem;">Total Charged to You</span>
+                    <span style="font-weight:800;font-size:1.2rem;color:var(--primary);" id="review-total">$1,200.00</span>
+                  </div>
+                </div>
+                <div style="background:#f0fdf4;padding:.65rem 1.25rem;border-top:1px solid #d1fae5;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:.82rem;color:#166534;font-weight:600;">Amount your landlord receives</span>
+                  <span style="font-weight:700;color:#166534;" id="review-landlord">$1,200.00</span>
+                </div>
               </div>
-              <input type="file" id="file-input" accept="image/*,.pdf" style="display:none;" onchange="handleUpload(this)" />
 
-              <div id="upload-preview" style="display:none;margin-top:1rem;">
-                <div style="display:flex;align-items:center;gap:10px;background:var(--gray-100);padding:0.75rem 1rem;border-radius:8px;">
-                  <span style="font-size:1.5rem;">📎</span>
-                  <div>
-                    <div style="font-weight:600;font-size:0.9rem;" id="upload-filename">screenshot.png</div>
-                    <div style="font-size:0.8rem;color:var(--success);">✓ Ready to submit</div>
+              <!-- Payment method summary -->
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:.9rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;">
+                <span style="font-size:1.4rem;" id="review-method-icon">🏦</span>
+                <div>
+                  <div style="font-size:.72rem;color:#64748b;font-weight:600;text-transform:uppercase;">Payment Method</div>
+                  <div style="font-weight:700;margin-top:2px;" id="review-method-name">Bank Transfer (ACH)</div>
+                  <div style="font-size:.75rem;color:#94a3b8;margin-top:1px;" id="review-method-timing">2–3 business days</div>
+                </div>
+              </div>
+
+              <!-- Legal disclosure -->
+              <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.76rem;color:#78350f;line-height:1.6;">
+                <strong>Fee Disclosure:</strong> The convenience fee shown above is charged by Stripe, our PCI-compliant payment processor, and passed through to you at cost with no markup. Bank transfers (ACH) are always free. By confirming, you authorize this exact charge to your selected payment method.
+              </div>
+
+              <!-- For peer-to-peer: upload confirmation -->
+              <div id="p2p-upload-section">
+                <h4 style="font-weight:700;margin-bottom:.75rem;">📸 Upload Payment Screenshot</h4>
+                <p style="color:var(--gray-600);margin-bottom:1rem;font-size:.85rem;">After sending via Cash App or Zelle, upload your confirmation screenshot here.</p>
+                <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                  <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                  <p style="font-weight:600;margin-top:.5rem;color:var(--gray-700);">Click to upload screenshot</p>
+                  <p style="font-size:.8rem;color:var(--gray-400);">PNG, JPG, or PDF · Max 10MB</p>
+                </div>
+                <input type="file" id="file-input" accept="image/*,.pdf" style="display:none;" onchange="handleUpload(this)" />
+                <div id="upload-preview" style="display:none;margin-top:1rem;">
+                  <div style="display:flex;align-items:center;gap:10px;background:var(--gray-100);padding:.75rem 1rem;border-radius:8px;">
+                    <span style="font-size:1.5rem;">📎</span>
+                    <div>
+                      <div style="font-weight:600;font-size:.9rem;" id="upload-filename">screenshot.png</div>
+                      <div style="font-size:.8rem;color:var(--success);">✓ Ready to submit</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="form-group" style="margin-top:1.5rem;">
-                <label>Additional Notes (optional)</label>
-                <input type="text" placeholder="e.g. Sent via Cash App on March 4, 2026 at 2:15pm" />
+              <!-- For Stripe: no upload needed -->
+              <div id="stripe-confirm-section" style="display:none;">
+                <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:#0c4a6e;display:flex;gap:10px;align-items:flex-start;">
+                  <span style="flex-shrink:0;">🔒</span>
+                  <span>Your payment is processed securely by <strong>Stripe</strong> — the same technology used by Amazon, Shopify, and Lyft. You'll receive an email receipt immediately upon confirmation.</span>
+                </div>
               </div>
 
-              <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+              <div class="form-group" style="margin-top:1.25rem;" id="notes-field">
+                <label>Notes (optional)</label>
+                <input type="text" placeholder="e.g. March rent, sending early" />
+              </div>
+
+              <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.25rem;">
                 <button class="btn btn-outline" onclick="nextPayStep(2)">← Back</button>
-                <button class="btn btn-success btn-lg" onclick="submitPayment()">✓ Submit Payment Confirmation</button>
+                <button class="btn btn-success btn-lg" onclick="submitPayment()" id="confirm-btn">
+                  ✓ Confirm &amp; Pay <span id="confirm-total-btn">$1,200.00</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 4: Success -->
+        <!-- ── STEP 4: Success ── -->
         <div id="pay-step-4" style="display:none;">
           <div class="card" style="text-align:center;padding:3rem;">
             <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
-            <h2 style="font-weight:800;margin-bottom:0.5rem;">Payment Submitted!</h2>
-            <p style="color:var(--gray-600);max-width:400px;margin:0 auto 2rem;">Your payment confirmation has been received. Sanders Property Management will verify it within 24 hours and mark your rent as paid.</p>
-            <div class="alert alert-success" style="max-width:400px;margin:0 auto 2rem;text-align:left;">
+            <h2 style="font-weight:800;margin-bottom:.5rem;">Payment Submitted!</h2>
+            <p style="color:var(--gray-600);max-width:400px;margin:0 auto 2rem;" id="success-msg">Your payment has been received and is being processed.</p>
+            <div class="alert alert-success" style="max-width:420px;margin:0 auto 1.5rem;text-align:left;">
               <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-              You'll receive an email confirmation once verified.
+              <div id="success-detail">You'll receive an email confirmation within 24 hours once verified.</div>
+            </div>
+            <!-- Receipt summary -->
+            <div style="max-width:420px;margin:0 auto 1.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:1rem;text-align:left;font-size:.83rem;">
+              <div style="font-weight:700;margin-bottom:.6rem;color:#475569;font-size:.72rem;text-transform:uppercase;">Receipt Summary</div>
+              <div style="display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #f1f5f9;"><span>Rent</span><span style="font-weight:600;">$1,200.00</span></div>
+              <div style="display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #f1f5f9;"><span id="rcpt-fee-lbl">Convenience Fee</span><span style="font-weight:600;" id="rcpt-fee-val">$0.00</span></div>
+              <div style="display:flex;justify-content:space-between;padding:.4rem 0;"><span style="font-weight:700;">Total Paid</span><span style="font-weight:800;color:var(--primary);" id="rcpt-total">$1,200.00</span></div>
             </div>
             <button class="btn btn-primary" onclick="showTab('history')">View Payment History</button>
             <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--gray-200);">
@@ -538,14 +736,13 @@
                   <div style="font-size:.8rem;font-weight:700;color:#6ee7b7;">KNOW A LANDLORD?</div>
                   <div style="font-size:.77rem;color:#a7f3d0;">Tell them about RentVerified — your landlord earns $20 in credit for every referral.</div>
                 </div>
-                <a href="referral.html" style="background:rgba(255,255,255,.15);color:white;font-size:.76rem;font-weight:700;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;">Share &amp; Earn →</a>
+                <a href="referral.html" style="background:rgba(255,255,255,.15);color:white;font-size:.76rem;font-weight:700;padding:.4rem .9rem;border-radius:7px;text-decoration:none;white-space:nowrap;">Share →</a>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- PAYMENT HISTORY TAB -->
+      </div>
       <div id="tab-history" class="tab-content">
         <div class="page-header">
           <h1>Payment History</h1>
@@ -939,32 +1136,121 @@
     },1200);
   }
 
-  let selectedMethod = 'cashapp';
+  // ── Fee engine ────────────────────────────────────────────────────────────
+  const RENT_AMOUNT = 1200;
+  const METHOD_META = {
+    ach:    { label:'Bank Transfer (ACH)', icon:'🏦', timing:'2–3 business days', pct:0,     flat:0,    free:true  },
+    cashapp:{ label:'Cash App',            icon:'💚', timing:'Instant',           pct:0,     flat:0,    free:true  },
+    zelle:  { label:'Zelle',               icon:'💜', timing:'Instant',           pct:0,     flat:0,    free:true  },
+    debit:  { label:'Debit Card',          icon:'💳', timing:'Instant',           pct:0.029, flat:0.30, free:false },
+    credit: { label:'Credit Card',         icon:'💳', timing:'Instant',           pct:0.029, flat:0.30, free:false },
+  };
+  const feePolicy  = JSON.parse(localStorage.getItem('rv_fee_policy') || '{}');
+  const absorbCard = !!feePolicy.absorbCard;
+
+  function calcFee(method, amount) {
+    const m = METHOD_META[method];
+    if (!m || m.free) return 0;
+    if (absorbCard) return 0;
+    return Math.round((amount * m.pct + m.flat) * 100) / 100;
+  }
+  function fmtMoney(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+  function updateFeeDisplay(method) {
+    const fee   = calcFee(method, RENT_AMOUNT);
+    const total = RENT_AMOUNT + fee;
+    const m     = METHOD_META[method];
+    const landlordAmt = m.free ? RENT_AMOUNT : (absorbCard ? RENT_AMOUNT - fee : RENT_AMOUNT);
+
+    const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+    const setStyle = (id, prop, val) => { const el=document.getElementById(id); if(el) el.style[prop]=val; };
+
+    set('fee-amount', fee===0 ? '$0.00 FREE' : fmtMoney(fee));
+    setStyle('fee-amount','color', fee===0 ? 'var(--success)' : '#d97706');
+    set('fee-label', fee===0 ? 'Convenience Fee' : 'Convenience Fee ('+((m.pct||0)*100)+'% + $'+(m.flat||0).toFixed(2)+')');
+    set('disp-total', fmtMoney(total));
+    set('disp-landlord', fmtMoney(landlordAmt));
+
+    const cardFee = absorbCard ? 0 : calcFee('debit', RENT_AMOUNT);
+    set('debit-fee-val',  absorbCard ? '$0.00' : '+'+fmtMoney(cardFee));
+    set('credit-fee-val', absorbCard ? '$0.00' : '+'+fmtMoney(cardFee));
+    setStyle('debit-fee-val','color',  absorbCard ? 'var(--success)' : '#d97706');
+    setStyle('credit-fee-val','color', absorbCard ? 'var(--success)' : '#d97706');
+    const absorbNote = document.getElementById('landlord-absorb-note');
+    if (absorbNote) absorbNote.style.display = (absorbCard && (method==='debit'||method==='credit')) ? 'block' : 'none';
+
+    set('review-fee-label', fee===0 ? 'Convenience Fee' : 'Convenience Fee ('+((m.pct||0)*100)+'% + $'+(m.flat||0).toFixed(2)+')');
+    set('review-fee-val',   fee===0 ? '$0.00' : fmtMoney(fee));
+    setStyle('review-fee-val','color', fee===0 ? 'var(--success)' : '#d97706');
+    set('review-total',         fmtMoney(total));
+    set('review-landlord',      fmtMoney(landlordAmt));
+    set('review-method-icon',   m.icon);
+    set('review-method-name',   m.label);
+    set('review-method-timing', m.timing);
+    set('confirm-total-btn',    fmtMoney(total));
+    set('rcpt-fee-lbl',  'Convenience Fee');
+    set('rcpt-fee-val',  fee===0 ? '$0.00' : fmtMoney(fee));
+    set('rcpt-total',    fmtMoney(total));
+  }
+
+  let selectedMethod = 'ach';
+
   function selectMethod(m) {
     selectedMethod = m;
-    document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
-    document.getElementById('method-' + m).classList.add('selected');
+    document.querySelectorAll('.pay-method').forEach(el => {
+      el.classList.remove('selected');
+      el.style.borderColor = '';
+      el.style.background  = '';
+    });
+    const sel = document.getElementById('method-'+m);
+    if (sel) {
+      sel.classList.add('selected');
+      if (m==='ach') { sel.style.borderColor='#2563eb'; sel.style.background='#eff6ff'; }
+    }
+    updateFeeDisplay(m);
   }
 
   function nextPayStep(n) {
-    for (let i = 1; i <= 4; i++) {
-      const el = document.getElementById('pay-step-' + i);
-      if (el) el.style.display = i === n ? 'block' : 'none';
+    for (let i=1; i<=4; i++) {
+      const el = document.getElementById('pay-step-'+i);
+      if (el) el.style.display = i===n ? 'block' : 'none';
     }
-    // Update step dots
-    [1,2,3].forEach(i => {
-      const dot = document.getElementById('step' + i);
-      const line = document.getElementById('line' + i);
-      if (i < n) { dot.className = 'step-dot done'; dot.innerHTML = '✓'; }
-      else if (i === n) { dot.className = 'step-dot active'; dot.innerHTML = i; }
-      else { dot.className = 'step-dot'; dot.innerHTML = i; }
-      if (line && i < n) line.classList.add('done');
-      else if (line) line.classList.remove('done');
+    [1,2,3,4].forEach(i => {
+      const dot  = document.getElementById('step'+i);
+      const line = document.getElementById('line'+i);
+      if (!dot) return;
+      if (i<n)       { dot.className='step-dot done';   dot.innerHTML='✓'; }
+      else if (i===n) { dot.className='step-dot active'; dot.innerHTML=i; }
+      else            { dot.className='step-dot';        dot.innerHTML=i; }
+      if (line) { if (i<n) line.classList.add('done'); else line.classList.remove('done'); }
     });
-    // Show correct payment instructions
-    if (n === 2) {
-      document.getElementById('cashapp-instructions').style.display = selectedMethod === 'cashapp' ? 'block' : 'none';
-      document.getElementById('zelle-instructions').style.display = selectedMethod === 'zelle' ? 'block' : 'none';
+    if (n===2) {
+      ['ach','cashapp','zelle','card'].forEach(k => {
+        const el = document.getElementById('form-'+k);
+        if (el) el.style.display='none';
+      });
+      const formKey = (selectedMethod==='debit'||selectedMethod==='credit') ? 'card' : selectedMethod;
+      const formEl = document.getElementById('form-'+formKey);
+      if (formEl) formEl.style.display='block';
+      const btn = document.getElementById('step2-next-btn');
+      if (btn) btn.textContent = (selectedMethod==='cashapp'||selectedMethod==='zelle') ? "I've Sent the Payment →" : 'Review Payment →';
+    }
+    if (n===3) {
+      updateFeeDisplay(selectedMethod);
+      const isP2P = (selectedMethod==='cashapp'||selectedMethod==='zelle');
+      const uploadSec = document.getElementById('p2p-upload-section');
+      const stripeSec = document.getElementById('stripe-confirm-section');
+      if (uploadSec) uploadSec.style.display = isP2P ? 'block' : 'none';
+      if (stripeSec) stripeSec.style.display = isP2P ? 'none'  : 'block';
+    }
+    if (n===4) {
+      const isACH = selectedMethod==='ach';
+      const isP2P = (selectedMethod==='cashapp'||selectedMethod==='zelle');
+      const msgEl = document.getElementById('success-msg');
+      const detEl = document.getElementById('success-detail');
+      if (msgEl) msgEl.textContent = isACH ? 'Your ACH transfer has been initiated.' : isP2P ? 'Your payment confirmation has been received.' : 'Your card payment has been processed.';
+      if (detEl) detEl.textContent = isACH ? 'Funds arrive in 2–3 business days. Your landlord will be notified.' : isP2P ? 'Sanders Property Management will verify within 24 hours.' : "Your landlord has been notified. You'll receive a receipt by email.";
+      updateFeeDisplay(selectedMethod);
     }
   }
 
@@ -975,9 +1261,9 @@
     }
   }
 
-  function submitPayment() {
-    nextPayStep(4);
-  }
+  function submitPayment() { nextPayStep(4); }
+
+  document.addEventListener('DOMContentLoaded', () => { updateFeeDisplay('ach'); });
 </script>
 </body>
 </html>
