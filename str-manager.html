@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STR Manager — RentVerified</title>
+  <style>
+    :root {
+      --bg:#0f172a;--surface:#1e293b;--border:rgba(255,255,255,.08);
+      --primary:#3b82f6;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+      --gray:rgba(255,255,255,.5);--white:#fff;
+      --str:#8b5cf6;--str-lt:#c084fc;--str-dk:#6d28d9;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;min-height:100vh;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:230px;background:#0d1526;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;overflow-y:auto;z-index:100;}
+    .sb-brand{padding:18px 20px;border-bottom:1px solid var(--border);}
+    .sb-brand .logo{font-size:1rem;font-weight:800;}
+    .sb-brand .sub{font-size:.7rem;color:var(--gray);margin-top:2px;}
+    .sb-nav{flex:1;padding:10px 0;}
+    .slink{display:flex;align-items:center;gap:9px;padding:9px 20px;color:rgba(255,255,255,.55);text-decoration:none;font-size:.82rem;font-weight:500;border-left:3px solid transparent;transition:all .15s;}
+    .slink:hover{background:rgba(255,255,255,.05);color:#fff;}
+    .slink.active{color:var(--str-lt);background:rgba(139,92,246,.1);border-left-color:var(--str-lt);}
+    .slink svg{width:16px;height:16px;flex-shrink:0;}
+    .sb-section{padding:10px 20px 4px;font-size:.65rem;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.06em;}
+
+    /* ── Main ── */
+    .main{margin-left:230px;flex:1;min-height:100vh;}
+
+    /* ── Page header ── */
+    .page-hdr{padding:28px 32px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+    .page-hdr h1{font-size:1.45rem;font-weight:800;}
+    .page-hdr p{color:var(--gray);font-size:.82rem;margin-top:3px;}
+
+    /* ── Tabs ── */
+    .tab-nav{display:flex;gap:2px;padding:18px 32px 0;border-bottom:1px solid var(--border);}
+    .tab-btn{padding:9px 16px;background:none;border:none;color:var(--gray);font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
+    .tab-btn:hover{color:#fff;}
+    .tab-btn.active{color:var(--str-lt);border-bottom-color:var(--str-lt);}
+    .tab-pane{display:none;padding:26px 32px 60px;}
+    .tab-pane.active{display:block;}
+
+    /* ── Buttons ── */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:.48rem .95rem;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;border:none;text-decoration:none;transition:all .15s;white-space:nowrap;}
+    .btn-str{background:var(--str);color:#fff;}.btn-str:hover{background:var(--str-dk);}
+    .btn-success{background:#10b981;color:#fff;}.btn-success:hover{background:#059669;}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:#fff;}.btn-outline:hover{background:rgba(255,255,255,.05);}
+    .btn-danger{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);}
+    .btn-sm{padding:.3rem .65rem;font-size:.74rem;}
+    .btn-ghost{background:rgba(255,255,255,.06);color:#fff;border:1px solid var(--border);}
+
+    /* ── Cards ── */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
+
+    /* ── Property grid ── */
+    .prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-top:20px;}
+    .prop-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .15s;}
+    .prop-card:hover{border-color:rgba(139,92,246,.4);}
+    .prop-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;}
+    .prop-platform{position:absolute;top:8px;right:8px;display:flex;gap:4px;}
+    .plt-badge{background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border-radius:6px;padding:3px 7px;font-size:.65rem;font-weight:700;color:#fff;}
+    .prop-body{padding:14px;}
+    .prop-name{font-weight:800;font-size:.92rem;}
+    .prop-addr{font-size:.73rem;color:var(--gray);margin-top:2px;}
+    .prop-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+    .chip{background:rgba(255,255,255,.07);border-radius:6px;padding:3px 9px;font-size:.68rem;font-weight:600;color:rgba(255,255,255,.7);}
+    .prop-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+    .pstat-val{font-size:.95rem;font-weight:800;}
+    .pstat-lbl{font-size:.65rem;color:var(--gray);margin-top:1px;}
+    .prop-actions{display:flex;gap:6px;margin-top:12px;}
+    .add-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(139,92,246,.06);border:2px dashed rgba(139,92,246,.25);border-radius:14px;height:260px;cursor:pointer;color:rgba(139,92,246,.7);font-size:.85rem;font-weight:700;transition:all .2s;}
+    .add-card:hover{background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.45);color:var(--str-lt);}
+
+    /* ── Badges ── */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;}
+    .badge-ok{background:rgba(16,185,129,.15);color:#6ee7b7;}
+    .badge-warn{background:rgba(245,158,11,.15);color:#fcd34d;}
+    .badge-danger{background:rgba(239,68,68,.15);color:#fca5a5;}
+    .badge-str{background:rgba(139,92,246,.15);color:#c4b5fd;}
+    .badge-blue{background:rgba(59,130,246,.15);color:#93c5fd;}
+
+    /* ── Calendar ── */
+    .cal-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .cal-hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .cal-hdr h3{font-size:.95rem;font-weight:800;}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);padding:0;}
+    .cal-dow{background:var(--surface);text-align:center;font-size:.68rem;color:var(--gray);font-weight:600;padding:8px 0;}
+    .cal-cell{background:var(--surface);min-height:72px;padding:5px;font-size:.72rem;}
+    .cal-num{color:var(--gray);font-weight:600;margin-bottom:3px;}
+    .cal-today .cal-num{color:var(--str-lt);font-weight:800;}
+    .cal-today{background:rgba(139,92,246,.06);}
+    .cal-ev{border-radius:4px;padding:2px 5px;font-size:.63rem;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cal-ev-book{background:rgba(139,92,246,.35);color:#e9d5ff;}
+    .cal-ev-in{background:rgba(16,185,129,.3);color:#6ee7b7;}
+    .cal-ev-out{background:rgba(239,68,68,.3);color:#fca5a5;}
+
+    /* ── Table ── */
+    table{width:100%;border-collapse:collapse;}
+    th{text-align:left;font-size:.7rem;font-weight:600;color:var(--gray);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);}
+    td{padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+
+    /* ── Cleaning ── */
+    .clean-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+    .clean-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .clean-icon-urgent{background:rgba(239,68,68,.15);}
+    .clean-icon-today{background:rgba(245,158,11,.15);}
+    .clean-icon-upcoming{background:rgba(139,92,246,.15);}
+    .clean-icon-done{background:rgba(16,185,129,.15);}
+    .clean-info{flex:1;}
+    .clean-prop{font-weight:800;font-size:.88rem;}
+    .clean-meta{font-size:.74rem;color:var(--gray);margin-top:3px;}
+    .clean-crew{font-size:.74rem;color:var(--str-lt);margin-top:2px;}
+
+    /* ── Revenue ── */
+    .rev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+    .rev-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+    .rev-val{font-size:1.55rem;font-weight:800;}
+    .rev-lbl{font-size:.72rem;color:var(--gray);margin-top:3px;}
+    .rev-chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
+    .rev-chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+    .rev-bars{display:flex;align-items:flex-end;gap:8px;height:130px;}
+    .rev-bar-col{flex:1;border-radius:4px 4px 0 0;background:rgba(139,92,246,.3);position:relative;transition:background .2s;cursor:default;min-height:4px;}
+    .rev-bar-col:hover{background:rgba(139,92,246,.6);}
+    .rev-bar-col .bar-tip{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:.62rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;}
+    .rev-bar-col:hover .bar-tip{opacity:1;}
+    .rev-bar-lbls{display:flex;gap:8px;margin-top:6px;}
+    .rev-bar-lbl{flex:1;text-align:center;font-size:.64rem;color:var(--gray);}
+
+    /* ── Compliance ── */
+    .comp-prop-sel{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+    .comp-prop-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;}
+    .comp-prop-btn.active{background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.4);color:var(--str-lt);}
+    .check-item{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .check-item:last-child{border-bottom:none;}
+    .check-box{width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.15);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .check-box.checked{background:#10b981;border-color:#10b981;color:#fff;font-size:.75rem;}
+    .check-box.warn{background:rgba(245,158,11,.2);border-color:#f59e0b;}
+    .check-lbl{font-size:.83rem;font-weight:600;}
+    .check-desc{font-size:.73rem;color:var(--gray);margin-top:2px;line-height:1.5;}
+
+    /* ── Modal ── */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+    .overlay.open{display:flex;}
+    .modal{background:#1a2540;border:1px solid rgba(255,255,255,.1);border-radius:16px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;}
+    .modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#1a2540;z-index:1;}
+    .modal-hdr h3{font-size:.95rem;font-weight:800;}
+    .modal-body{padding:22px;}
+    .modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+
+    /* ── Forms ── */
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+    .form-row.full{grid-template-columns:1fr;}
+    .form-row.trio{grid-template-columns:1fr 1fr 1fr;}
+    .fg{display:flex;flex-direction:column;gap:5px;}
+    .fg label{font-size:.74rem;font-weight:600;color:rgba(255,255,255,.65);}
+    .fg input,.fg select,.fg textarea{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.11);border-radius:8px;padding:8px 11px;color:#fff;font-size:.83rem;}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--str);}
+    .fg select option{background:#1e293b;}
+    .fg textarea{resize:vertical;min-height:72px;font-family:inherit;}
+    .fs-title{font-size:.7rem;font-weight:700;color:var(--str-lt);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(139,92,246,.2);}
+
+    /* ── Notification modal ── */
+    .notif-preview{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.8rem;line-height:1.6;margin-bottom:12px;}
+    .notif-preview .notif-label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--gray);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .send-step{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:8px;font-size:.82rem;}
+    .send-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .send-dot-pending{background:var(--gray);}
+    .send-dot-sending{background:#f59e0b;animation:pulse 1s infinite;}
+    .send-dot-done{background:#10b981;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+    /* ── Portal preview ── */
+    .portal-link-box{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:10px;padding:12px 14px;font-size:.78rem;font-family:monospace;color:#c4b5fd;word-break:break-all;margin:12px 0;}
+    .ai-capa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+    .ai-capa{background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.75rem;}
+    .ai-capa-q{color:var(--gray);margin-bottom:3px;}
+    .ai-capa-a{color:#c4b5fd;font-weight:600;}
+
+    /* ── Toast ── */
+    #toast{position:fixed;bottom:24px;right:24px;background:#10b981;color:#fff;padding:12px 20px;border-radius:10px;font-size:.83rem;font-weight:700;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:0 8px 24px rgba(0,0,0,.35);}
+    #toast.show{transform:translateY(0);opacity:1;}
+    #toast.toast-warn{background:#f59e0b;}
+    #toast.toast-str{background:var(--str);}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="logo">🏠 RentVerified</div>
+    <div class="sub">Sanders Property Management</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Manage</div>
+    <a class="slink" href="landlord-signup.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Dashboard</a>
+    <a class="slink" href="maintenance.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Maintenance</a>
+    <a class="slink" href="accounting.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>Accounting</a>
+    <a class="slink active" href="str-manager.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg>STR Manager</a>
+    <a class="slink" href="vendor-portal.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>Vendor Portal</a>
+    <div class="sb-section">Finance & Growth</div>
+    <a class="slink" href="financial-hub.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Financial Hub</a>
+    <a class="slink" href="insurance-agents.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Insurance Agents</a>
+    <a class="slink" href="referral.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>Refer &amp; Earn</a>
+    <a class="slink" href="compliance.html"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Compliance</a>
+  </nav>
+</aside>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<main class="main">
+
+  <div class="page-hdr">
+    <div>
+      <h1>🏖️ STR Manager</h1>
+      <p>Short-term rental properties, bookings, cleaning, and AI guest support</p>
+    </div>
+    <button class="btn btn-str" onclick="openModal('modal-add-listing')">+ Add Listing</button>
+  </div>
+
+  <!-- Tab nav -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('listings',this)">🏠 Listings</button>
+    <button class="tab-btn" onclick="switchTab('bookings',this)">📅 Bookings</button>
+    <button class="tab-btn" onclick="switchTab('cleaning',this)">🧹 Cleaning <span id="cleaning-badge" style="display:none;background:#ef4444;color:#fff;border-radius:10px;padding:1px 6px;font-size:.65rem;margin-left:4px;"></span></button>
+    <button class="tab-btn" onclick="switchTab('revenue',this)">💰 Revenue</button>
+    <button class="tab-btn" onclick="switchTab('compliance',this)">📋 Compliance</button>
+  </div>
+
+  <!-- ─── LISTINGS TAB ─── -->
+  <div id="tab-listings" class="tab-pane active">
+    <div class="prop-grid" id="listing-grid">
+      <!-- JS rendered -->
+      <div class="add-card" onclick="openModal('modal-add-listing')">
+        <span style="font-size:2rem;">＋</span>
+        Add STR Listing
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BOOKINGS TAB ─── -->
+  <div id="tab-bookings" class="tab-pane">
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="font-size:1rem;font-weight:800;">Bookings</h2>
+          <button class="btn btn-str btn-sm" onclick="openModal('modal-add-booking')">+ Add Booking</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table>
+            <thead>
+              <tr>
+                <th>Guest</th><th>Property</th><th>Dates</th><th>Platform</th><th>Payout</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="booking-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Mini calendar -->
+      <div>
+        <div class="cal-wrap">
+          <div class="cal-hdr">
+            <h3 id="cal-month-label">March 2026</h3>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">‹</button>
+              <button class="btn btn-ghost btn-sm" onclick="calNav(1)">›</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid">
+            <!-- JS rendered -->
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;font-size:.72rem;">
+          <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(139,92,246,.35);display:inline-block;"></span>Booked</div>
+          <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(16,185,129,.3);display:inline-block;"></span>Check-in</div>
+          <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(239,68,68,.3);display:inline-block;"></span>Checkout</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CLEANING TAB ─── -->
+  <div id="tab-cleaning" class="tab-pane">
+    <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start;">
+      <div>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:16px;">Upcoming Cleanings</h2>
+        <div id="cleaning-list"></div>
+      </div>
+      <!-- Crew roster -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="font-size:.88rem;font-weight:800;">Cleaning Crews</h3>
+          <button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-crew')">+ Add</button>
+        </div>
+        <div id="crew-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <div style="margin-top:16px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:14px;">
+          <div style="font-size:.78rem;font-weight:700;color:var(--str-lt);margin-bottom:6px;">🤖 Auto-Notifications</div>
+          <div style="font-size:.74rem;color:var(--gray);line-height:1.6;">Cleaning crews receive <strong style="color:#fff;">email + SMS</strong> reminders automatically when a guest checks out. Reminders fire at <strong style="color:#fff;">24h before</strong> and <strong style="color:#fff;">2h before</strong> checkout time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── REVENUE TAB ─── -->
+  <div id="tab-revenue" class="tab-pane">
+    <div class="rev-grid" id="rev-stats-row"></div>
+    <div class="rev-chart-wrap">
+      <div class="rev-chart-hdr">
+        <div>
+          <div style="font-size:.92rem;font-weight:800;">Monthly Revenue</div>
+          <div style="font-size:.74rem;color:var(--gray);margin-top:2px;">All STR properties combined</div>
+        </div>
+        <select class="btn btn-ghost btn-sm" style="border-radius:8px;padding:5px 10px;font-size:.76rem;">
+          <option>Last 6 months</option><option>Last 12 months</option>
+        </select>
+      </div>
+      <div class="rev-bars" id="rev-bars"></div>
+      <div class="rev-bar-lbls" id="rev-bar-lbls"></div>
+    </div>
+    <div style="margin-top:20px;">
+      <h3 style="font-size:.9rem;font-weight:800;margin-bottom:14px;">Payout Breakdown</h3>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead><tr><th>Property</th><th>Bookings</th><th>Gross Revenue</th><th>Platform Fee</th><th>Net Payout</th><th>Occupancy</th></tr></thead>
+          <tbody id="rev-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── COMPLIANCE TAB ─── -->
+  <div id="tab-compliance" class="tab-pane">
+    <div style="background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-size:1.3rem;">⚠️</span>
+      <div>
+        <div style="font-weight:800;font-size:.88rem;color:#fcd34d;margin-bottom:3px;">Utah STR Compliance</div>
+        <div style="font-size:.76rem;color:rgba(255,255,255,.65);line-height:1.6;">Utah counties require STR operators to hold a <strong style="color:#fff;">business license</strong>, collect <strong style="color:#fff;">transient room tax (12%)</strong>, and meet safety standards. Penalties for non-compliance can include fines up to $10,000 and revocation of rental rights.</div>
+      </div>
+    </div>
+    <div class="comp-prop-sel" id="comp-prop-sel"></div>
+    <div class="card" id="comp-checklist-wrap">
+      <div id="comp-checklist"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+<!-- Add/Edit Listing -->
+<div class="overlay" id="modal-add-listing">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="listing-modal-title">Add STR Listing</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-add-listing')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-listing-id">
+      <div class="fs-title">Basic Info</div>
+      <div class="form-row"><div class="fg"><label>Property Name</label><input id="f-name" placeholder="Park City Ski Cabin"></div><div class="fg"><label>Type</label><select id="f-type"><option>Cabin</option><option>Condo</option><option>House</option><option>Apartment</option><option>Townhome</option><option>Cottage</option></select></div></div>
+      <div class="form-row full"><div class="fg"><label>Address</label><input id="f-addr" placeholder="123 Canyon Rd, Park City, UT 84060"></div></div>
+      <div class="form-row trio"><div class="fg"><label>Bedrooms</label><input id="f-bed" type="number" min="1" value="2"></div><div class="fg"><label>Bathrooms</label><input id="f-bath" type="number" min="1" value="1"></div><div class="fg"><label>Max Guests</label><input id="f-guests" type="number" min="1" value="4"></div></div>
+      <div class="form-row"><div class="fg"><label>Base Rate ($/night)</label><input id="f-rate" type="number" placeholder="185"></div><div class="fg"><label>Cleaning Fee ($)</label><input id="f-cfee" type="number" placeholder="125"></div></div>
+
+      <div class="fs-title">Check-in / Checkout</div>
+      <div class="form-row"><div class="fg"><label>Check-in Time</label><input id="f-cin" type="time" value="15:00"></div><div class="fg"><label>Checkout Time</label><input id="f-cout" type="time" value="11:00"></div></div>
+      <div class="form-row full"><div class="fg"><label>Check-in Instructions</label><textarea id="f-cinstr" placeholder="Lockbox code is 4521 on front door. Parking in driveway..."></textarea></div></div>
+
+      <div class="fs-title">House Rules & Amenities</div>
+      <div class="form-row full"><div class="fg"><label>House Rules</label><textarea id="f-rules" placeholder="No smoking. No parties. Quiet hours 10pm-8am. No pets unless approved."></textarea></div></div>
+      <div class="form-row full"><div class="fg"><label>Amenities (comma separated)</label><input id="f-amenities" placeholder="Hot Tub, Fireplace, Ski Storage, Full Kitchen, BBQ Grill"></div></div>
+
+      <div class="fs-title">Access & Utilities</div>
+      <div class="form-row"><div class="fg"><label>WiFi Network</label><input id="f-wifi-net" placeholder="CabinNetwork5G"></div><div class="fg"><label>WiFi Password</label><input id="f-wifi-pw" placeholder="SkiUtah2024!"></div></div>
+      <div class="form-row full"><div class="fg"><label>Parking Info</label><input id="f-parking" placeholder="2 cars in driveway. No street parking."></div></div>
+      <div class="form-row full"><div class="fg"><label>Pet Policy</label><input id="f-pets" placeholder="No pets allowed"></div></div>
+
+      <div class="fs-title">Platform Links</div>
+      <div class="form-row full"><div class="fg"><label>Airbnb iCal URL (optional)</label><input id="f-ical" placeholder="https://www.airbnb.com/calendar/ical/..."></div></div>
+      <div class="form-row full"><div class="fg"><label>STR Permit Number</label><input id="f-permit" placeholder="STR-2025-0142"></div></div>
+
+      <div class="fs-title">Cleaning Crew</div>
+      <div class="form-row"><div class="fg"><label>Crew / Company Name</label><input id="f-crew-name" placeholder="Summit Clean Co."></div><div class="fg"><label>Phone (for SMS)</label><input id="f-crew-phone" placeholder="435-555-0192"></div></div>
+      <div class="form-row full"><div class="fg"><label>Crew Email</label><input id="f-crew-email" placeholder="sarah@summitclean.com"></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-listing')">Cancel</button>
+      <button class="btn btn-str" onclick="saveListing()">Save Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Booking -->
+<div class="overlay" id="modal-add-booking">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>Add Booking</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-add-booking')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full"><div class="fg"><label>Property</label><select id="b-prop"></select></div></div>
+      <div class="form-row"><div class="fg"><label>Guest Name</label><input id="b-guest" placeholder="John Smith"></div><div class="fg"><label>Platform</label><select id="b-platform"><option>Airbnb</option><option>VRBO</option><option>Booking.com</option><option>Direct</option><option>Other</option></select></div></div>
+      <div class="form-row"><div class="fg"><label>Check-in Date</label><input id="b-in" type="date"></div><div class="fg"><label>Checkout Date</label><input id="b-out" type="date"></div></div>
+      <div class="form-row"><div class="fg"><label>Total Payout ($)</label><input id="b-payout" type="number" placeholder="0"></div><div class="fg"><label>Guest Count</label><input id="b-gcount" type="number" value="2" min="1"></div></div>
+      <div class="form-row full"><div class="fg"><label>Notes (optional)</label><textarea id="b-notes" placeholder="Early check-in requested. Celebrating anniversary."></textarea></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-booking')">Cancel</button>
+      <button class="btn btn-str" onclick="saveBooking()">Save Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Crew -->
+<div class="overlay" id="modal-add-crew">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-hdr">
+      <h3>Add Cleaning Crew</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-add-crew')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full"><div class="fg"><label>Company / Person Name</label><input id="cr-name" placeholder="Summit Clean Co."></div></div>
+      <div class="form-row full"><div class="fg"><label>Email</label><input id="cr-email" placeholder="crew@example.com"></div></div>
+      <div class="form-row full"><div class="fg"><label>Phone (SMS)</label><input id="cr-phone" placeholder="801-555-1234"></div></div>
+      <div class="form-row full"><div class="fg"><label>Assign to Property</label><select id="cr-prop"></select></div></div>
+      <div class="form-row full"><div class="fg"><label>Notes</label><textarea id="cr-notes" placeholder="Has access code. Available Mon-Sat 9am-5pm."></textarea></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-crew')">Cancel</button>
+      <button class="btn btn-str" onclick="saveCrew()">Save Crew</button>
+    </div>
+  </div>
+</div>
+
+<!-- Guest Portal Preview -->
+<div class="overlay" id="modal-portal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>🌐 Guest Portal — <span id="portal-prop-name"></span></h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-portal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:.82rem;color:var(--gray);margin-bottom:10px;">Share this link with guests — it shows property info and lets them ask questions via AI chat.</div>
+      <div class="portal-link-box" id="portal-link-display"></div>
+      <button class="btn btn-str btn-sm" onclick="copyPortalLink()">📋 Copy Link</button>
+      <button class="btn btn-success btn-sm" onclick="openGuestPortal()" style="margin-left:6px;">Open Preview →</button>
+
+      <div style="font-size:.8rem;font-weight:700;color:var(--str-lt);margin:18px 0 10px;">🤖 AI Guest Chat — Questions It Can Answer</div>
+      <div class="ai-capa-grid" id="ai-capa-grid"></div>
+      <div style="margin-top:14px;background:rgba(255,255,255,.04);border-radius:10px;padding:12px;font-size:.77rem;color:var(--gray);line-height:1.5;">
+        When a guest asks something the AI isn't sure about, it flags it to you via email + SMS so you can respond personally. The AI never makes up information — it only answers from what you've provided.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cleaning Notification -->
+<div class="overlay" id="modal-notif">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-hdr">
+      <h3>🧹 Send Cleaning Reminder</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-notif')">✕</button>
+    </div>
+    <div class="modal-body" id="notif-body"></div>
+    <div class="modal-foot" id="notif-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-notif')">Cancel</button>
+      <button class="btn btn-str" id="notif-send-btn" onclick="sendNotification()">📨 Send Email + SMS</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════ JAVASCRIPT ═══════════════════════ -->
+<script>
+// ── Data ─────────────────────────────────────────────────────────────
+const TODAY = new Date('2026-03-09');
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function load(k,def){ try{ return JSON.parse(localStorage.getItem(k))||def; }catch(e){ return def; } }
+function save(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+
+let listings = load('rv_str_listings', []);
+let bookings = load('rv_str_bookings', []);
+let crews    = load('rv_str_crews', []);
+
+// Seed sample data on first load
+if(!localStorage.getItem('rv_str_seeded')){
+  listings = [
+    { id:'str1', name:'Park City Ski Cabin', type:'Cabin', addr:'481 Deer Valley Dr, Park City, UT 84060', bed:3, bath:2, guests:6, rate:285, cfee:175, cin:'15:00', cout:'11:00', cinstr:'Lockbox code is 4521 on the front door. Park in the driveway (2 spaces). Ski storage is in the detached garage — code is 7890.', rules:'No smoking inside. No parties or events. Quiet hours 10pm–8am. Max 6 guests.', amenities:'Hot Tub,Ski Storage,Fireplace,Full Kitchen,BBQ Grill,Fire Pit', wifiNet:'ParkCityCabin5G', wifiPw:'SkiUtah2024!', parking:'2 cars in driveway. No street parking.', pets:'No pets allowed', ical:'', permit:'SL-STR-2025-0142', crewName:'Summit Clean Co.', crewPhone:'435-555-0192', crewEmail:'sarah@summitclean.com', platforms:['Airbnb','VRBO'], emoji:'🏔️', grad:'linear-gradient(135deg,#1e3a5f,#1e1b4b)' },
+    { id:'str2', name:'St. George Desert Retreat', type:'House', addr:'2234 Entrada Dr, St. George, UT 84770', bed:2, bath:2, guests:4, rate:195, cfee:120, cin:'14:00', cout:'11:00', cinstr:'Smart lock — code is 3847. Pool is heated to 88°F. Please turn off AC when you leave.', rules:'No smoking. Pool hours 7am–10pm. Quiet hours 9pm–8am. No pets.', amenities:'Pool,Hot Tub,Patio,Full Kitchen,Outdoor Dining,Desert Views', wifiNet:'DesertRetreat_Guest', wifiPw:'Zion2024#', parking:'2-car garage, code 1122.', pets:'No pets allowed', ical:'', permit:'WC-STR-2025-0388', crewName:'Desert Sparkle LLC', crewPhone:'435-555-0847', crewEmail:'info@desertsparkle.com', platforms:['Airbnb'], emoji:'🌵', grad:'linear-gradient(135deg,#451a03,#7c2d12)' },
+    { id:'str3', name:'SLC Downtown Condo', type:'Condo', addr:'215 W 200 S #804, Salt Lake City, UT 84101', bed:1, bath:1, guests:2, rate:145, cfee:85, cin:'15:00', cout:'10:00', cinstr:'Concierge will give you a key fob. Elevator to 8th floor, unit 804. Parking in adjacent lot (we provide a pass).', rules:'No smoking. No pets. Quiet hours 11pm–8am. No guests beyond registered occupants.', amenities:'City Views,Gym Access,Concierge,Full Kitchen,Fast WiFi,Rooftop Deck', wifiNet:'SLCCondo_Guests', wifiPw:'Downtown801!', parking:'Voucher in welcome book for adjacent lot.', pets:'No pets allowed', ical:'', permit:'SLC-STR-2025-1092', crewName:'Urban Shine Cleaning', crewPhone:'801-555-2341', crewEmail:'contact@urbanshine.com', platforms:['Airbnb','Booking.com'], emoji:'🏙️', grad:'linear-gradient(135deg,#0c4a6e,#0f172a)' },
+  ];
+  bookings = [
+    { id:'bk1', propId:'str1', guest:'Thompson Family', platform:'Airbnb', checkIn:'2026-03-09', checkOut:'2026-03-09', payout:855, gcount:4, notes:'Celebrating anniversary', cleanSent:false },
+    { id:'bk2', propId:'str1', guest:'Martinez & Group', platform:'VRBO',   checkIn:'2026-03-12', checkOut:'2026-03-16', payout:1140, gcount:6, notes:'Ski trip', cleanSent:false },
+    { id:'bk3', propId:'str2', guest:'Kim, Sarah',       platform:'Airbnb', checkIn:'2026-03-07', checkOut:'2026-03-11', payout:780, gcount:2, notes:'', cleanSent:false },
+    { id:'bk4', propId:'str3', guest:'Patel, Raj',       platform:'Airbnb', checkIn:'2026-03-20', checkOut:'2026-03-23', payout:435, gcount:2, notes:'', cleanSent:false },
+    { id:'bk5', propId:'str2', guest:'Johnson Family',   platform:'Airbnb', checkIn:'2026-03-28', checkOut:'2026-04-01', payout:780, gcount:4, notes:'', cleanSent:false },
+    { id:'bk6', propId:'str1', guest:'Berg, David',      platform:'Direct', checkIn:'2026-03-22', checkOut:'2026-03-25', payout:855, gcount:2, notes:'Return guest', cleanSent:false },
+  ];
+  save('rv_str_listings', listings);
+  save('rv_str_bookings', bookings);
+  localStorage.setItem('rv_str_seeded','1');
+}
+
+// ── Utilities ────────────────────────────────────────────────────────
+function uid(){ return 'id_' + Math.random().toString(36).slice(2,9); }
+function fmt$(n){ return '$'+(+n).toLocaleString(); }
+function fmtDate(s){ if(!s) return '—'; const d=new Date(s+'T00:00:00'); return `${MONTHS[d.getMonth()]} ${d.getDate()}`; }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+
+function toast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+(type?'toast-'+type:'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='',3200);
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────
+function switchTab(id, btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='bookings') renderCalendar();
+  if(id==='cleaning') renderCleaning();
+  if(id==='revenue')  renderRevenue();
+  if(id==='compliance') renderCompliance();
+}
+
+// ── Modals ────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o=> o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+
+// ── Listings ─────────────────────────────────────────────────────────
+function renderListings(){
+  const grid = document.getElementById('listing-grid');
+  grid.innerHTML = '';
+  listings.forEach(l => {
+    const bookingCount = bookings.filter(b=>b.propId===l.id).length;
+    const revenue = bookings.filter(b=>b.propId===l.id).reduce((s,b)=>s+b.payout,0);
+    const occupiedDays = bookings.filter(b=>b.propId===l.id).reduce((s,b)=>s+Math.max(0,daysBetween(b.checkIn,b.checkOut)),0);
+    const occ = Math.min(100,Math.round((occupiedDays/30)*100));
+    const plat = (l.platforms||[]);
+    const div = document.createElement('div');
+    div.className='prop-card';
+    div.innerHTML=`
+      <div class="prop-img" style="background:${l.grad||'linear-gradient(135deg,#1e293b,#0f172a)'};">
+        <span>${l.emoji||'🏠'}</span>
+        <div class="prop-platform">${plat.map(p=>`<span class="plt-badge">${p}</span>`).join('')}</div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-name">${l.name}</div>
+        <div class="prop-addr">📍 ${l.addr}</div>
+        <div class="prop-chips">
+          <span class="chip">🛏 ${l.bed}BR</span>
+          <span class="chip">🚿 ${l.bath}BA</span>
+          <span class="chip">👥 ${l.guests} guests</span>
+          <span class="chip">${fmt$(l.rate)}/night</span>
+        </div>
+        <div class="prop-stats">
+          <div class="pstat"><div class="pstat-val">${bookingCount}</div><div class="pstat-lbl">Bookings</div></div>
+          <div class="pstat"><div class="pstat-val">${fmt$(revenue)}</div><div class="pstat-lbl">Revenue</div></div>
+          <div class="pstat"><div class="pstat-val">${occ}%</div><div class="pstat-lbl">Occupancy</div></div>
+        </div>
+        <div class="prop-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editListing('${l.id}')">✏️ Edit</button>
+          <button class="btn btn-str btn-sm" onclick="showPortal('${l.id}')">🌐 Guest Portal</button>
+        </div>
+      </div>`;
+    grid.appendChild(div);
+  });
+  // Add card
+  const add = document.createElement('div');
+  add.className='add-card'; add.innerHTML='<span style="font-size:2rem;">＋</span>Add STR Listing';
+  add.onclick=()=>openModal('modal-add-listing');
+  grid.appendChild(add);
+}
+
+function saveListing(){
+  const id = document.getElementById('edit-listing-id').value || uid();
+  const existing = listings.find(l=>l.id===id);
+  const l = {
+    id, name:document.getElementById('f-name').value||'My Property',
+    type:document.getElementById('f-type').value,
+    addr:document.getElementById('f-addr').value,
+    bed:+document.getElementById('f-bed').value||1,
+    bath:+document.getElementById('f-bath').value||1,
+    guests:+document.getElementById('f-guests').value||2,
+    rate:+document.getElementById('f-rate').value||0,
+    cfee:+document.getElementById('f-cfee').value||0,
+    cin:document.getElementById('f-cin').value,
+    cout:document.getElementById('f-cout').value,
+    cinstr:document.getElementById('f-cinstr').value,
+    rules:document.getElementById('f-rules').value,
+    amenities:document.getElementById('f-amenities').value,
+    wifiNet:document.getElementById('f-wifi-net').value,
+    wifiPw:document.getElementById('f-wifi-pw').value,
+    parking:document.getElementById('f-parking').value,
+    pets:document.getElementById('f-pets').value,
+    ical:document.getElementById('f-ical').value,
+    permit:document.getElementById('f-permit').value,
+    crewName:document.getElementById('f-crew-name').value,
+    crewPhone:document.getElementById('f-crew-phone').value,
+    crewEmail:document.getElementById('f-crew-email').value,
+    platforms: existing ? existing.platforms : ['Airbnb'],
+    emoji: existing ? existing.emoji : '🏠',
+    grad: existing ? existing.grad : 'linear-gradient(135deg,#1e3a5f,#0f172a)',
+  };
+  const idx = listings.findIndex(x=>x.id===id);
+  if(idx>=0) listings[idx]=l; else listings.push(l);
+  save('rv_str_listings',listings);
+  closeModal('modal-add-listing');
+  renderListings();
+  toast('Listing saved!','str');
+}
+
+function editListing(id){
+  const l = listings.find(x=>x.id===id);
+  if(!l) return;
+  document.getElementById('listing-modal-title').textContent='Edit Listing';
+  document.getElementById('edit-listing-id').value=id;
+  ['name','addr','cinstr','rules','amenities','parking','pets','ical','permit'].forEach(f=>{ const el=document.getElementById('f-'+f); if(el) el.value=l[f]||''; });
+  document.getElementById('f-type').value=l.type||'Cabin';
+  document.getElementById('f-bed').value=l.bed;
+  document.getElementById('f-bath').value=l.bath;
+  document.getElementById('f-guests').value=l.guests;
+  document.getElementById('f-rate').value=l.rate;
+  document.getElementById('f-cfee').value=l.cfee;
+  document.getElementById('f-cin').value=l.cin;
+  document.getElementById('f-cout').value=l.cout;
+  document.getElementById('f-wifi-net').value=l.wifiNet||'';
+  document.getElementById('f-wifi-pw').value=l.wifiPw||'';
+  document.getElementById('f-crew-name').value=l.crewName||'';
+  document.getElementById('f-crew-phone').value=l.crewPhone||'';
+  document.getElementById('f-crew-email').value=l.crewEmail||'';
+  openModal('modal-add-listing');
+}
+
+// ── Bookings ─────────────────────────────────────────────────────────
+function renderBookings(){
+  const tbody = document.getElementById('booking-table-body');
+  tbody.innerHTML='';
+  const sorted=[...bookings].sort((a,b)=>new Date(a.checkIn)-new Date(b.checkIn));
+  sorted.forEach(b=>{
+    const l=listings.find(x=>x.id===b.propId)||{name:'Unknown'};
+    const nights=Math.max(1,daysBetween(b.checkIn,b.checkOut));
+    const today=TODAY.toISOString().slice(0,10);
+    let status='upcoming', sc='badge-blue';
+    if(b.checkIn<=today && b.checkOut>today){ status='Active'; sc='badge-ok'; }
+    else if(b.checkOut<=today){ status='Completed'; sc='badge-str'; }
+    else { status='Upcoming'; sc='badge-blue'; }
+    const platColors={'Airbnb':'#ff385c','VRBO':'#3d67ff','Booking.com':'#003580','Direct':'#10b981','Other':'#6b7280'};
+    const pc=platColors[b.platform]||'#6b7280';
+    tbody.innerHTML+=`<tr>
+      <td style="font-weight:700;">${b.guest}</td>
+      <td style="font-size:.77rem;color:var(--gray);">${l.name}</td>
+      <td style="font-size:.78rem;">${fmtDate(b.checkIn)} → ${fmtDate(b.checkOut)}<div style="font-size:.68rem;color:var(--gray);">${nights} nights</div></td>
+      <td><span style="background:${pc}22;color:${pc};border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:700;">${b.platform}</span></td>
+      <td style="font-weight:700;">${fmt$(b.payout)}</td>
+      <td><span class="badge ${sc}">${status}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑</button></td>
+    </tr>`;
+  });
+  if(!sorted.length) tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">No bookings yet — add your first booking above</td></tr>';
+}
+
+function saveBooking(){
+  const propId=document.getElementById('b-prop').value;
+  const checkIn=document.getElementById('b-in').value;
+  const checkOut=document.getElementById('b-out').value;
+  if(!propId||!checkIn||!checkOut){ toast('Fill in all required fields','warn'); return; }
+  bookings.push({ id:uid(), propId, guest:document.getElementById('b-guest').value||'Guest', platform:document.getElementById('b-platform').value, checkIn, checkOut, payout:+document.getElementById('b-payout').value||0, gcount:+document.getElementById('b-gcount').value||1, notes:document.getElementById('b-notes').value, cleanSent:false });
+  save('rv_str_bookings',bookings);
+  closeModal('modal-add-booking');
+  renderBookings(); renderCalendar(); renderCleaning(); renderRevenue();
+  toast('Booking added! Cleaning reminder scheduled.','str');
+}
+
+function deleteBooking(id){ bookings=bookings.filter(b=>b.id!==id); save('rv_str_bookings',bookings); renderBookings(); }
+
+function populateBookingPropertySelect(){
+  const sel=document.getElementById('b-prop');
+  sel.innerHTML=listings.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+}
+
+// ── Calendar ──────────────────────────────────────────────────────────
+let calYear=2026, calMonth=2; // 0-indexed, March=2
+
+function calNav(dir){ calMonth+=dir; if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+
+function renderCalendar(){
+  document.getElementById('cal-month-label').textContent=`${MONTH_FULL[calMonth]} ${calYear}`;
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const todayStr=TODAY.toISOString().slice(0,10);
+
+  for(let i=0;i<first;i++) grid.innerHTML+=`<div class="cal-cell"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=ds===todayStr;
+    let evHtml='';
+    bookings.forEach(b=>{
+      const l=listings.find(x=>x.id===b.propId)||{name:'?'};
+      if(b.checkIn===ds) evHtml+=`<div class="cal-ev cal-ev-in" title="${l.name}">↓ ${l.name.split(' ')[0]}</div>`;
+      else if(b.checkOut===ds) evHtml+=`<div class="cal-ev cal-ev-out" title="${l.name}">↑ ${l.name.split(' ')[0]}</div>`;
+      else if(ds>b.checkIn && ds<b.checkOut) evHtml+=`<div class="cal-ev cal-ev-book" title="${l.name}">${l.name.split(' ')[0]}</div>`;
+    });
+    grid.innerHTML+=`<div class="cal-cell${isToday?' cal-today':''}"><div class="cal-num">${d}</div>${evHtml}</div>`;
+  }
+}
+
+// ── Cleaning ─────────────────────────────────────────────────────────
+function renderCleaning(){
+  const todayStr=TODAY.toISOString().slice(0,10);
+  const upcoming=bookings
+    .filter(b=>b.checkOut>=todayStr)
+    .sort((a,b)=>new Date(a.checkOut)-new Date(b.checkOut));
+
+  const list=document.getElementById('cleaning-list');
+  list.innerHTML='';
+  let urgentCount=0;
+
+  upcoming.forEach(b=>{
+    const l=listings.find(x=>x.id===b.propId)||{name:'?',cout:'11:00',crewName:'No crew assigned',crewPhone:'',crewEmail:''};
+    const isToday=b.checkOut===todayStr;
+    const daysDiff=daysBetween(todayStr,b.checkOut);
+    let iconClass='clean-icon-upcoming', label='Upcoming', labelColor='#c4b5fd';
+    if(isToday){ iconClass='clean-icon-urgent'; label='TODAY'; labelColor='#fca5a5'; urgentCount++; }
+    else if(daysDiff<=2){ iconClass='clean-icon-today'; label=`In ${daysDiff} day${daysDiff===1?'':'s'}`; labelColor='#fcd34d'; }
+
+    const div=document.createElement('div');
+    div.className='clean-card';
+    div.innerHTML=`
+      <div class="clean-icon ${iconClass}">🧹</div>
+      <div class="clean-info">
+        <div class="clean-prop">${l.name}</div>
+        <div class="clean-meta">Guest checkout: ${fmtDate(b.checkOut)} at ${l.cout || '11:00'} · ${b.guest}</div>
+        <div class="clean-crew">👤 ${l.crewName || 'No crew assigned'} ${l.crewPhone?'· '+l.crewPhone:''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <span class="badge" style="background:rgba(255,255,255,.06);color:${labelColor};">${label}</span>
+        ${b.cleanSent
+          ? `<span class="badge badge-ok">✓ Notified</span>`
+          : `<button class="btn btn-str btn-sm" onclick="openNotifModal('${b.id}')">📨 Notify Crew</button>`
+        }
+      </div>`;
+    list.appendChild(div);
+  });
+
+  if(!upcoming.length) list.innerHTML='<div style="color:var(--gray);font-size:.85rem;padding:20px 0;">No upcoming checkouts scheduled.</div>';
+
+  const badge=document.getElementById('cleaning-badge');
+  if(urgentCount>0){ badge.textContent=urgentCount; badge.style.display='inline'; }
+  else badge.style.display='none';
+
+  // Crew roster
+  renderCrewRoster();
+}
+
+let activeNotifBookingId=null;
+function openNotifModal(bookingId){
+  activeNotifBookingId=bookingId;
+  const b=bookings.find(x=>x.id===bookingId);
+  const l=listings.find(x=>x.id===b.propId)||{};
+  const crew={name:l.crewName||'Cleaning Crew',email:l.crewEmail||'crew@example.com',phone:l.crewPhone||'555-0000'};
+  const nights=daysBetween(b.checkIn,b.checkOut);
+
+  document.getElementById('notif-body').innerHTML=`
+    <div style="margin-bottom:14px;font-size:.82rem;color:var(--gray);">Sending cleaning notification to <strong style="color:#fff;">${crew.name}</strong> for checkout at <strong style="color:#fff;">${l.name}</strong>.</div>
+    <div class="notif-preview">
+      <div class="notif-label">📧 Email Preview</div>
+      <div style="color:#fff;font-weight:700;margin-bottom:4px;">Subject: 🧹 Cleaning Needed — ${l.name} | ${fmtDate(b.checkOut)}</div>
+      <div style="color:rgba(255,255,255,.7);line-height:1.7;">Hi ${crew.name},<br><br>
+      A guest is checking out of <strong style="color:#fff;">${l.name}</strong> (${l.addr||'see address on file'}) on <strong style="color:#fff;">${fmtDate(b.checkOut)} at ${l.cout||'11:00 AM'}</strong>.<br><br>
+      Guests: <strong style="color:#fff;">${b.gcount}</strong> · Stay: <strong style="color:#fff;">${nights} night${nights!==1?'s':''}</strong><br>
+      ${b.notes?`Guest notes: ${b.notes}<br><br>`:''}
+      Please arrive by <strong style="color:#fff;">${l.cout||'11:00 AM'}</strong>. Standard clean + linen refresh.<br><br>
+      — RentVerified / Sanders Property Management</div>
+    </div>
+    <div class="notif-preview">
+      <div class="notif-label">💬 SMS Preview → ${crew.phone}</div>
+      <div style="color:#c4b5fd;font-family:monospace;font-size:.8rem;">Hi ${crew.name}! 🧹 Reminder: checkout at ${l.name} on ${fmtDate(b.checkOut)} at ${l.cout||'11am'}. ${b.gcount} guests, ${nights} nights. ${b.notes?'Note: '+b.notes+' ':''}- RentVerified</div>
+    </div>
+    <div id="send-steps" style="display:none;margin-top:14px;">
+      <div class="send-step" id="step-email"><div class="send-dot send-dot-pending" id="dot-email"></div><span id="lbl-email">Sending email to ${crew.email}...</span></div>
+      <div class="send-step" id="step-sms"><div class="send-dot send-dot-pending" id="dot-sms"></div><span id="lbl-sms">Sending SMS to ${crew.phone}...</span></div>
+    </div>`;
+  document.getElementById('notif-send-btn').style.display='';
+  openModal('modal-notif');
+}
+
+function sendNotification(){
+  document.getElementById('notif-send-btn').style.display='none';
+  document.getElementById('send-steps').style.display='block';
+  document.getElementById('notif-foot').querySelector('.btn-outline').textContent='Close';
+
+  const dotE=document.getElementById('dot-email'), lblE=document.getElementById('lbl-email');
+  const dotS=document.getElementById('dot-sms'),   lblS=document.getElementById('lbl-sms');
+
+  dotE.className='send-dot send-dot-sending';
+  setTimeout(()=>{
+    dotE.className='send-dot send-dot-done'; lblE.innerHTML='✅ Email sent!';
+    dotS.className='send-dot send-dot-sending';
+    setTimeout(()=>{
+      dotS.className='send-dot send-dot-done'; lblS.innerHTML='✅ SMS sent!';
+      // Mark as sent
+      const b=bookings.find(x=>x.id===activeNotifBookingId);
+      if(b){ b.cleanSent=true; save('rv_str_bookings',bookings); }
+      setTimeout(()=>{ closeModal('modal-notif'); renderCleaning(); toast('Crew notified via email + SMS! ✓',''); }, 800);
+    }, 900);
+  }, 1100);
+}
+
+// ── Crew Roster ───────────────────────────────────────────────────────
+function renderCrewRoster(){
+  const container=document.getElementById('crew-list');
+  container.innerHTML='';
+  const seen=new Set();
+  listings.forEach(l=>{
+    if(l.crewName && !seen.has(l.crewName)){
+      seen.add(l.crewName);
+      const div=document.createElement('div');
+      div.style.cssText='background:#1e293b;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;';
+      div.innerHTML=`<div style="font-weight:700;font-size:.83rem;">${l.crewName}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:3px;">📧 ${l.crewEmail||'—'}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📱 ${l.crewPhone||'—'}</div>`;
+      container.appendChild(div);
+    }
+  });
+  crews.forEach(c=>{
+    if(!seen.has(c.name)){
+      seen.add(c.name);
+      const div=document.createElement('div');
+      div.style.cssText='background:#1e293b;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;';
+      div.innerHTML=`<div style="font-weight:700;font-size:.83rem;">${c.name}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📧 ${c.email}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📱 ${c.phone}</div>`;
+      container.appendChild(div);
+    }
+  });
+  if(!seen.size) container.innerHTML='<div style="color:var(--gray);font-size:.78rem;">No crews added yet.</div>';
+}
+
+function saveCrew(){
+  crews.push({ id:uid(), name:document.getElementById('cr-name').value, email:document.getElementById('cr-email').value, phone:document.getElementById('cr-phone').value, propId:document.getElementById('cr-prop').value, notes:document.getElementById('cr-notes').value });
+  save('rv_str_crews',crews);
+  closeModal('modal-add-crew');
+  renderCrewRoster();
+  toast('Crew added!');
+}
+
+// ── Revenue ───────────────────────────────────────────────────────────
+function renderRevenue(){
+  const totalRev=bookings.reduce((s,b)=>s+b.payout,0);
+  const totalBookings=bookings.length;
+  const avgNightly = bookings.length ? Math.round(bookings.reduce((s,b)=>{ const n=Math.max(1,daysBetween(b.checkIn,b.checkOut)); return s+b.payout/n; },0)/bookings.length) : 0;
+  const occupiedDays=bookings.reduce((s,b)=>s+Math.max(0,daysBetween(b.checkIn,b.checkOut)),0);
+  const occ=Math.min(100,Math.round((occupiedDays/(listings.length*30))*100));
+
+  document.getElementById('rev-stats-row').innerHTML=`
+    <div class="rev-stat"><div class="rev-val">${fmt$(totalRev)}</div><div class="rev-lbl">Total Revenue</div></div>
+    <div class="rev-stat"><div class="rev-val">${totalBookings}</div><div class="rev-lbl">Total Bookings</div></div>
+    <div class="rev-stat"><div class="rev-val">${fmt$(avgNightly)}</div><div class="rev-lbl">Avg Nightly Rate</div></div>
+    <div class="rev-stat"><div class="rev-val">${occ}%</div><div class="rev-lbl">Occupancy Rate</div></div>`;
+
+  // Monthly bars (last 6 months, simulated)
+  const months=['Oct','Nov','Dec','Jan','Feb','Mar'];
+  const vals=[3200,4100,5800,2900,3600,bookings.reduce((s,b)=>s+b.payout,0)];
+  const maxV=Math.max(...vals);
+  const bars=document.getElementById('rev-bars');
+  const lbls=document.getElementById('rev-bar-lbls');
+  bars.innerHTML=vals.map((v,i)=>`<div class="rev-bar-col" style="height:${Math.max(4,Math.round((v/maxV)*100))}%;"><div class="bar-tip">${fmt$(v)}</div></div>`).join('');
+  lbls.innerHTML=months.map(m=>`<div class="rev-bar-lbl">${m}</div>`).join('');
+
+  // Per-property table
+  const tbody=document.getElementById('rev-table-body');
+  tbody.innerHTML='';
+  listings.forEach(l=>{
+    const bks=bookings.filter(b=>b.propId===l.id);
+    const gross=bks.reduce((s,b)=>s+b.payout,0);
+    const platformFee=Math.round(gross*0.03);
+    const net=gross-platformFee;
+    const occupiedD=bks.reduce((s,b)=>s+Math.max(0,daysBetween(b.checkIn,b.checkOut)),0);
+    const occPct=Math.min(100,Math.round((occupiedD/30)*100));
+    tbody.innerHTML+=`<tr>
+      <td><div style="font-weight:700;">${l.name}</div><div style="font-size:.7rem;color:var(--gray);">${l.bed}BR · ${fmt$(l.rate)}/night</div></td>
+      <td>${bks.length}</td>
+      <td style="font-weight:700;">${fmt$(gross)}</td>
+      <td style="color:#fca5a5;">-${fmt$(platformFee)}</td>
+      <td style="font-weight:800;color:#6ee7b7;">${fmt$(net)}</td>
+      <td><span class="badge ${occPct>=60?'badge-ok':occPct>=30?'badge-warn':'badge-danger'}">${occPct}%</span></td>
+    </tr>`;
+  });
+}
+
+// ── Compliance ────────────────────────────────────────────────────────
+const COMPLIANCE_ITEMS = [
+  { id:'permit',   label:'County STR Permit Obtained',          desc:'Most Utah counties (Summit, Washington, Salt Lake) require a Short-Term Rental permit before listing. Fines up to $1,000/day without one.', req:true },
+  { id:'city',     label:'City/Municipality Business License',  desc:'Some cities (Park City, St. George) require a separate city-level business license in addition to the county permit.', req:true },
+  { id:'tax',      label:'Utah Transient Room Tax Registered',  desc:'STR operators must collect and remit Utah\'s 12% transient room tax. Register at tax.utah.gov.', req:true },
+  { id:'hoa',      label:'HOA Approval (if applicable)',        desc:'If the property is in an HOA, obtain written approval for STR use. Many Utah HOAs restrict or ban short-term rentals.', req:false },
+  { id:'smoke',    label:'Smoke & CO Detectors Installed',      desc:'Utah law requires at least one smoke detector per floor and one CO detector per sleeping area.', req:true },
+  { id:'fire',     label:'Fire Extinguisher in Kitchen',        desc:'A charged, accessible fire extinguisher must be present in the kitchen per Utah fire code.', req:true },
+  { id:'emergency',label:'Emergency Contact Posted',            desc:'Post emergency contacts (fire, police, host phone number) visibly inside the property.', req:true },
+  { id:'pool',     label:'Pool/Hot Tub Safety Compliance',      desc:'If you have a pool or hot tub, Utah requires compliant fencing, drain covers, and posted depth/safety rules.', req:false },
+  { id:'zoning',   label:'Zoning Compliant',                    desc:'Verify your property is in an approved STR zone for your county. Use your county\'s GIS or planning department.', req:true },
+  { id:'insurance',label:'STR Insurance Rider / Policy',        desc:'Standard homeowners insurance typically excludes STR use. You need a dedicated STR policy or rider (Proper Insurance, CBIZ, etc.).', req:true },
+  { id:'good_neighbor', label:'Good Neighbor Policy Posted',   desc:'Some Utah municipalities require posting a "good neighbor" policy with noise, parking, and occupancy rules for guests.', req:false },
+];
+
+let compChecks=load('rv_str_comp_checks',{});
+let activeCompProp=null;
+
+function renderCompliance(){
+  const sel=document.getElementById('comp-prop-sel');
+  sel.innerHTML=listings.map((l,i)=>`<button class="comp-prop-btn${i===0&&!activeCompProp?' active':activeCompProp===l.id?' active':''}" onclick="selectCompProp('${l.id}',this)">${l.name}</button>`).join('');
+  if(!activeCompProp && listings.length) activeCompProp=listings[0].id;
+  renderCompChecklist();
+}
+
+function selectCompProp(id,btn){
+  activeCompProp=id;
+  document.querySelectorAll('.comp-prop-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCompChecklist();
+}
+
+function renderCompChecklist(){
+  const checks=compChecks[activeCompProp]||{};
+  const container=document.getElementById('comp-checklist');
+  const done=COMPLIANCE_ITEMS.filter(i=>checks[i.id]).length;
+  container.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div style="font-size:.88rem;font-weight:700;">${done}/${COMPLIANCE_ITEMS.length} items completed</div>
+    <div style="background:rgba(255,255,255,.06);border-radius:20px;height:8px;width:200px;overflow:hidden;"><div style="height:100%;background:${done===COMPLIANCE_ITEMS.length?'#10b981':'#8b5cf6'};border-radius:20px;width:${Math.round((done/COMPLIANCE_ITEMS.length)*100)}%;transition:width .3s;"></div></div>
+  </div>`;
+  COMPLIANCE_ITEMS.forEach(item=>{
+    const checked=!!checks[item.id];
+    const div=document.createElement('div');
+    div.className='check-item';
+    div.innerHTML=`<div class="check-box${checked?' checked':''}" onclick="toggleComp('${item.id}',this)">${checked?'✓':''}</div>
+      <div style="flex:1;">
+        <div class="check-lbl${checked?'" style="text-decoration:line-through;opacity:.5':''}">${item.label} ${item.req?'<span style="color:#fca5a5;font-size:.68rem;font-weight:700;">REQUIRED</span>':'<span style="color:#fcd34d;font-size:.68rem;font-weight:700;">IF APPLICABLE</span>'}</div>
+        <div class="check-desc">${item.desc}</div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function toggleComp(itemId, el){
+  if(!activeCompProp) return;
+  if(!compChecks[activeCompProp]) compChecks[activeCompProp]={};
+  compChecks[activeCompProp][itemId]=!compChecks[activeCompProp][itemId];
+  save('rv_str_comp_checks',compChecks);
+  el.classList.toggle('checked');
+  el.textContent=compChecks[activeCompProp][itemId]?'✓':'';
+  renderCompChecklist();
+}
+
+// ── Guest Portal ──────────────────────────────────────────────────────
+let portalListingId=null;
+function showPortal(id){
+  portalListingId=id;
+  const l=listings.find(x=>x.id===id);
+  if(!l) return;
+  const data={ id:l.id,name:l.name,type:l.type,addr:l.addr,bed:l.bed,bath:l.bath,guests:l.guests,cin:l.cin,cout:l.cout,cinstr:l.cinstr,rules:l.rules,amenities:l.amenities,wifiNet:l.wifiNet,wifiPw:l.wifiPw,parking:l.parking,pets:l.pets,emoji:l.emoji||'🏠',grad:l.grad||'' };
+  const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const url=`guest-portal.html?p=${encoded}`;
+  document.getElementById('portal-prop-name').textContent=l.name;
+  document.getElementById('portal-link-display').textContent=url;
+  document.getElementById('portal-link-display').dataset.full=url;
+
+  // AI capability examples
+  const examples=[
+    {q:'What\'s the WiFi password?', a:`"${l.wifiNet} / ${l.wifiPw}"`},
+    {q:'What time is check-in?', a:`Check-in at ${l.cin}`},
+    {q:'What\'s the checkout time?', a:`Checkout by ${l.cout}`},
+    {q:'Is parking available?', a:l.parking||'See host info'},
+    {q:'Are pets allowed?', a:l.pets||'See house rules'},
+    {q:'How do I get in?', a:l.cinstr?l.cinstr.slice(0,40)+'...':'See check-in instructions'},
+  ];
+  document.getElementById('ai-capa-grid').innerHTML=examples.map(e=>`<div class="ai-capa"><div class="ai-capa-q">"${e.q}"</div><div class="ai-capa-a">${e.a}</div></div>`).join('');
+  openModal('modal-portal');
+}
+
+function copyPortalLink(){
+  const link=document.getElementById('portal-link-display').dataset.full;
+  navigator.clipboard.writeText(link).then(()=>toast('Link copied!','str')).catch(()=>{ toast('Select and copy the link manually'); });
+}
+
+function openGuestPortal(){
+  const link=document.getElementById('portal-link-display').dataset.full;
+  window.open(link,'_blank');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+function init(){
+  renderListings();
+  renderBookings();
+  renderCalendar();
+
+  // Populate property selects
+  const opts=listings.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+  document.getElementById('b-prop').innerHTML=opts;
+  document.getElementById('cr-prop').innerHTML=opts;
+
+  // Cleaning badge
+  const todayStr=TODAY.toISOString().slice(0,10);
+  const todayClean=bookings.filter(b=>b.checkOut===todayStr && !b.cleanSent).length;
+  if(todayClean>0){
+    const badge=document.getElementById('cleaning-badge');
+    badge.textContent=todayClean; badge.style.display='inline';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

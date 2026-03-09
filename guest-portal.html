@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guest Portal — RentVerified</title>
+  <style>
+    :root{
+      --bg:#0a0f1e;--surface:#131d35;--surface2:#1a2540;--border:rgba(255,255,255,.08);
+      --primary:#6366f1;--success:#10b981;--white:#fff;--gray:rgba(255,255,255,.5);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+
+    /* ── Hero ── */
+    .hero{min-height:280px;display:flex;align-items:flex-end;padding:28px 32px;position:relative;overflow:hidden;}
+    .hero-bg{position:absolute;inset:0;z-index:0;}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,15,30,.95) 0%,rgba(10,15,30,.4) 100%);z-index:1;}
+    .hero-content{position:relative;z-index:2;width:100%;}
+    .hero-emoji{font-size:3.5rem;margin-bottom:10px;}
+    .hero-name{font-size:2rem;font-weight:800;line-height:1.15;}
+    .hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+    .hero-chip{background:rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:20px;padding:4px 12px;font-size:.76rem;font-weight:600;}
+    .rv-badge{position:absolute;top:20px;right:20px;z-index:3;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:7px 12px;display:flex;align-items:center;gap:7px;font-size:.75rem;font-weight:700;}
+
+    /* ── Layout ── */
+    .page-wrap{max-width:900px;margin:0 auto;padding:0 20px 80px;}
+
+    /* ── Quick info bar ── */
+    .quick-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:24px;border-radius:14px;overflow:hidden;}
+    .quick-item{background:var(--surface);padding:18px 14px;text-align:center;}
+    .quick-val{font-size:1.1rem;font-weight:800;}
+    .quick-lbl{font-size:.7rem;color:var(--gray);margin-top:3px;}
+
+    /* ── Section ── */
+    .section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px;}
+    .section-title{font-size:.95rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+    /* ── Amenity grid ── */
+    .amenity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+    .amenity-item{background:rgba(255,255,255,.05);border-radius:8px;padding:10px 12px;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:7px;}
+
+    /* ── Info rows ── */
+    .info-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .info-row:last-child{border-bottom:none;}
+    .info-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+    .info-lbl{font-size:.72rem;color:var(--gray);font-weight:600;}
+    .info-val{font-size:.85rem;font-weight:600;margin-top:2px;line-height:1.5;}
+
+    /* ── Rules ── */
+    .rule-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.83rem;}
+    .rule-item:last-child{border-bottom:none;}
+    .rule-bullet{color:#fca5a5;flex-shrink:0;margin-top:1px;}
+
+    /* ── AI Chat ── */
+    .chat-wrap{position:fixed;bottom:20px;right:20px;z-index:200;width:340px;}
+    .chat-toggle{background:var(--primary);color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(99,102,241,.5);transition:all .2s;width:100%;justify-content:center;}
+    .chat-toggle:hover{background:#4f46e5;transform:translateY(-1px);}
+    .chat-box{background:#1a2540;border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden;margin-bottom:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:none;}
+    .chat-box.open{display:block;}
+    .chat-hdr{background:linear-gradient(135deg,var(--primary),#4f46e5);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+    .chat-hdr-left{display:flex;align-items:center;gap:10px;}
+    .ai-avatar{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+    .chat-hdr h4{font-size:.88rem;font-weight:800;}
+    .chat-hdr p{font-size:.7rem;opacity:.8;margin-top:1px;}
+    .chat-close{background:none;border:none;color:#fff;cursor:pointer;font-size:1.1rem;opacity:.7;}
+    .chat-msgs{height:260px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
+    .msg{max-width:85%;padding:10px 13px;border-radius:12px;font-size:.8rem;line-height:1.5;}
+    .msg-ai{background:rgba(255,255,255,.07);border-radius:12px 12px 12px 3px;align-self:flex-start;color:#fff;}
+    .msg-user{background:var(--primary);border-radius:12px 12px 3px 12px;align-self:flex-end;color:#fff;}
+    .msg-typing{display:flex;align-items:center;gap:4px;padding:10px 13px;background:rgba(255,255,255,.07);border-radius:12px 12px 12px 3px;width:fit-content;}
+    .typing-dot{width:6px;height:6px;background:var(--gray);border-radius:50%;animation:typingBounce 1.2s infinite;}
+    .typing-dot:nth-child(2){animation-delay:.2s;}
+    .typing-dot:nth-child(3){animation-delay:.4s;}
+    @keyframes typingBounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-6px);}}
+    .chat-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;}
+    .chat-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 11px;color:#fff;font-size:.8rem;}
+    .chat-input:focus{outline:none;border-color:var(--primary);}
+    .chat-send{background:var(--primary);border:none;border-radius:8px;padding:8px 13px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;}
+    .chat-send:hover{background:#4f46e5;}
+
+    /* ── Suggestions ── */
+    .suggestions{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 10px;}
+    .sug-btn{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:4px 11px;color:#a5b4fc;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;}
+    .sug-btn:hover{background:rgba(99,102,241,.3);}
+
+    /* ── Loading ── */
+    #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px;}
+    .spin{width:32px;height:32px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── Contact ── */
+    .contact-btn{width:100%;padding:14px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+    .contact-btn:hover{background:rgba(255,255,255,.1);}
+
+    /* ── Footer ── */
+    .portal-footer{text-align:center;padding:24px;font-size:.72rem;color:rgba(255,255,255,.25);}
+    .portal-footer a{color:rgba(255,255,255,.35);text-decoration:none;}
+  </style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="spin"></div>
+  <div style="font-size:.85rem;color:var(--gray);">Loading your stay info...</div>
+</div>
+
+<div id="portal-content" style="display:none;">
+
+  <!-- Hero -->
+  <div class="hero" id="hero-section">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="rv-badge">🏠 Powered by RentVerified</div>
+    <div class="hero-content">
+      <div class="hero-emoji" id="hero-emoji">🏠</div>
+      <div class="hero-name" id="hero-name">Welcome!</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.7);margin-top:4px;" id="hero-addr"></div>
+      <div class="hero-chips" id="hero-chips"></div>
+    </div>
+  </div>
+
+  <div class="page-wrap">
+
+    <!-- Quick bar -->
+    <div class="quick-bar" id="quick-bar"></div>
+
+    <!-- Check-in/out -->
+    <div class="section">
+      <div class="section-title">🔑 Check-in & Checkout</div>
+      <div id="checkin-section"></div>
+    </div>
+
+    <!-- Amenities -->
+    <div class="section" id="amenities-section">
+      <div class="section-title">✨ Amenities</div>
+      <div class="amenity-grid" id="amenities-grid"></div>
+    </div>
+
+    <!-- Access & Utilities -->
+    <div class="section">
+      <div class="section-title">🔒 Access & Utilities</div>
+      <div id="access-section"></div>
+    </div>
+
+    <!-- House Rules -->
+    <div class="section">
+      <div class="section-title">📋 House Rules</div>
+      <div id="rules-section"></div>
+    </div>
+
+    <!-- Contact -->
+    <div class="section">
+      <div class="section-title">💬 Questions?</div>
+      <p style="font-size:.82rem;color:var(--gray);margin-bottom:14px;line-height:1.6;">Use the chat button in the bottom right to ask your AI assistant — it knows everything about this property. For anything it can't answer, your host will be notified right away.</p>
+      <button class="contact-btn" onclick="openChat()">💬 Ask the AI Assistant →</button>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="portal-footer">
+    Guest portal powered by <a href="index.html">RentVerified</a> · Property information provided by host
+  </div>
+
+</div>
+
+<!-- ── AI Chat Widget ── -->
+<div class="chat-wrap" id="chat-wrap" style="display:none;">
+  <div class="chat-box" id="chat-box">
+    <div class="chat-hdr">
+      <div class="chat-hdr-left">
+        <div class="ai-avatar">🤖</div>
+        <div>
+          <h4>Property Assistant</h4>
+          <p id="chat-prop-subline">Here to help with your stay</p>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="suggestions" id="chat-suggestions">
+      <button class="sug-btn" onclick="askSuggestion(this)">WiFi password?</button>
+      <button class="sug-btn" onclick="askSuggestion(this)">Check-in time?</button>
+      <button class="sug-btn" onclick="askSuggestion(this)">Parking info?</button>
+      <button class="sug-btn" onclick="askSuggestion(this)">Are pets allowed?</button>
+      <button class="sug-btn" onclick="askSuggestion(this)">Checkout time?</button>
+      <button class="sug-btn" onclick="askSuggestion(this)">House rules?</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chat-input" placeholder="Ask anything about your stay..." onkeydown="if(event.key==='Enter') sendChat()">
+      <button class="chat-send" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()" id="chat-toggle-btn">
+    🤖 Ask the Property AI
+  </button>
+</div>
+
+<script>
+// ── Parse property from URL ─────────────────────────────────────────────
+let prop = null;
+
+try {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('p');
+  if(encoded){
+    prop = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+  }
+} catch(e) {
+  console.error('Failed to parse property data', e);
+}
+
+// Fallback demo property if no param
+if(!prop){
+  prop = {
+    id:'demo', name:'Park City Ski Cabin', type:'Cabin',
+    addr:'481 Deer Valley Dr, Park City, UT 84060',
+    bed:3, bath:2, guests:6,
+    cin:'3:00 PM', cout:'11:00 AM',
+    cinstr:'Lockbox code is 4521 on the front door. Park in the driveway (2 spaces). Ski storage is in the detached garage — code is 7890.',
+    rules:'No smoking inside or on decks. No parties or events over max occupancy. Quiet hours 10pm–8am. Max 6 guests per reservation.',
+    amenities:'Hot Tub,Ski Storage,Fireplace,Full Kitchen,BBQ Grill,Fire Pit,Smart TV,High-Speed WiFi',
+    wifiNet:'ParkCityCabin5G', wifiPw:'SkiUtah2024!',
+    parking:'2 cars in driveway. No street parking permitted in this neighborhood.',
+    pets:'No pets allowed',
+    emoji:'🏔️',
+    grad:'linear-gradient(135deg,#1e3a5f,#1e1b4b)'
+  };
+}
+
+// ── Render property ─────────────────────────────────────────────────────
+function fmt12(t){
+  if(!t) return '—';
+  if(t.includes('AM')||t.includes('PM')) return t;
+  const [h,m]=t.split(':').map(Number);
+  const ap=h>=12?'PM':'AM', h12=h%12||12;
+  return `${h12}:${String(m).padStart(2,'0')} ${ap}`;
+}
+
+function renderPortal(){
+  document.title = prop.name + ' — Guest Portal';
+
+  // Hero
+  document.getElementById('hero-emoji').textContent = prop.emoji||'🏠';
+  document.getElementById('hero-name').textContent = prop.name;
+  document.getElementById('hero-addr').textContent = '📍 ' + (prop.addr||'');
+  document.getElementById('hero-bg').style.background = prop.grad||'linear-gradient(135deg,#1e3a5f,#0f172a)';
+  document.getElementById('hero-chips').innerHTML = [
+    `🛏 ${prop.bed} bed`, `🚿 ${prop.bath} bath`, `👥 Up to ${prop.guests} guests`, prop.type
+  ].map(c=>`<span class="hero-chip">${c}</span>`).join('');
+
+  // Quick bar
+  document.getElementById('quick-bar').innerHTML = [
+    {val: fmt12(prop.cin)||'3:00 PM',  lbl:'Check-in'},
+    {val: fmt12(prop.cout)||'11:00 AM', lbl:'Checkout'},
+    {val: prop.bed+'BR / '+prop.bath+'BA', lbl:'Size'},
+    {val: 'Max '+prop.guests,           lbl:'Guests'},
+  ].map(i=>`<div class="quick-item"><div class="quick-val">${i.val}</div><div class="quick-lbl">${i.lbl}</div></div>`).join('');
+
+  // Check-in section
+  const cinEl = document.getElementById('checkin-section');
+  cinEl.innerHTML = `
+    <div class="info-row"><div class="info-icon">🕒</div><div><div class="info-lbl">CHECK-IN TIME</div><div class="info-val">${fmt12(prop.cin)||'3:00 PM'} or later</div></div></div>
+    <div class="info-row"><div class="info-icon">🕙</div><div><div class="info-lbl">CHECKOUT TIME</div><div class="info-val">${fmt12(prop.cout)||'11:00 AM'} or earlier</div></div></div>
+    ${prop.cinstr ? `<div class="info-row"><div class="info-icon">📖</div><div><div class="info-lbl">GETTING IN</div><div class="info-val">${prop.cinstr}</div></div></div>` : ''}`;
+
+  // Amenities
+  const amenities = (prop.amenities||'').split(',').map(a=>a.trim()).filter(Boolean);
+  const amenityIcons = {'Hot Tub':'🛁','Fireplace':'🔥','Ski Storage':'⛷️','Full Kitchen':'🍳','BBQ Grill':'🍖','Fire Pit':'🔥','Smart TV':'📺','WiFi':'📶','High-Speed WiFi':'📶','Pool':'🏊','Patio':'🌿','Outdoor Dining':'🍽️','City Views':'🏙️','Gym Access':'💪','Concierge':'🛎️','Rooftop Deck':'🌇','Desert Views':'🌵','Hot Tub ':'🛁'};
+  document.getElementById('amenities-grid').innerHTML = amenities.map(a=>{
+    const icon = Object.keys(amenityIcons).find(k=>a.toLowerCase().includes(k.toLowerCase()));
+    return `<div class="amenity-item">${amenityIcons[icon]||'✓'} ${a}</div>`;
+  }).join('');
+  if(!amenities.length) document.getElementById('amenities-section').style.display='none';
+
+  // Access & utilities
+  const accessEl = document.getElementById('access-section');
+  accessEl.innerHTML = `
+    ${prop.wifiNet ? `<div class="info-row"><div class="info-icon">📶</div><div><div class="info-lbl">WIFI NETWORK</div><div class="info-val">${prop.wifiNet}</div></div></div>` : ''}
+    ${prop.wifiPw  ? `<div class="info-row"><div class="info-icon">🔑</div><div><div class="info-lbl">WIFI PASSWORD</div><div class="info-val" style="font-family:monospace;letter-spacing:.05em;background:rgba(99,102,241,.1);padding:4px 10px;border-radius:6px;display:inline-block;">${prop.wifiPw}</div></div></div>` : ''}
+    ${prop.parking ? `<div class="info-row"><div class="info-icon">🚗</div><div><div class="info-lbl">PARKING</div><div class="info-val">${prop.parking}</div></div></div>` : ''}
+    ${prop.pets    ? `<div class="info-row"><div class="info-icon">🐾</div><div><div class="info-lbl">PET POLICY</div><div class="info-val">${prop.pets}</div></div></div>` : ''}`;
+
+  // Rules
+  const rules = (prop.rules||'No specific rules provided. Please treat the property with care.').split('.').map(r=>r.trim()).filter(r=>r.length>3);
+  document.getElementById('rules-section').innerHTML = rules.map(r=>`<div class="rule-item"><span class="rule-bullet">✕</span>${r}.</div>`).join('');
+
+  // Chat subline
+  document.getElementById('chat-prop-subline').textContent = prop.name;
+
+  // Show content
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('portal-content').style.display='block';
+  document.getElementById('chat-wrap').style.display='block';
+}
+
+// ── AI Chat ─────────────────────────────────────────────────────────────
+let chatOpen = false;
+const msgs = document.getElementById('chat-msgs');
+
+function toggleChat(){ chatOpen=!chatOpen; document.getElementById('chat-box').classList.toggle('open',chatOpen); if(chatOpen&&msgs.children.length===0) sendAiMsg(`Hi! 👋 I'm the AI assistant for **${prop.name}**. I know everything about this property — WiFi, check-in, parking, house rules, and more. What can I help you with?`); }
+function openChat(){ chatOpen=false; toggleChat(); }
+
+function sendAiMsg(text, delay=0){
+  const typing = document.createElement('div');
+  typing.className='msg-typing';
+  typing.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  msgs.appendChild(typing);
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    typing.remove();
+    const m=document.createElement('div');
+    m.className='msg msg-ai';
+    m.innerHTML=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    msgs.appendChild(m);
+    msgs.scrollTop=msgs.scrollHeight;
+  }, delay||(600+Math.random()*600));
+}
+
+function addUserMsg(text){
+  const m=document.createElement('div');
+  m.className='msg msg-user';
+  m.textContent=text;
+  msgs.appendChild(m);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function askSuggestion(btn){ sendChat(btn.textContent); }
+
+function sendChat(overrideText){
+  const input=document.getElementById('chat-input');
+  const text=(overrideText||input.value).trim();
+  if(!text) return;
+  input.value='';
+  addUserMsg(text);
+  // Hide suggestions after first real question
+  document.getElementById('chat-suggestions').style.display='none';
+  const answer = getAIAnswer(text);
+  sendAiMsg(answer, 800+Math.random()*500);
+}
+
+function getAIAnswer(q){
+  const ql=q.toLowerCase();
+
+  // WiFi
+  if(/wi.?fi|wifi|internet|password|network/i.test(ql) && prop.wifiNet)
+    return `📶 **WiFi Network:** ${prop.wifiNet}\n🔑 **Password:** ${prop.wifiPw||'See welcome book'}`;
+
+  // Check-in
+  if(/check.?in|arrive|arrival|get in|how do i get|access|door|lock|code/i.test(ql))
+    return `Check-in time is **${fmt12(prop.cin)||'3:00 PM'}**.\n\n${prop.cinstr||'Your host will provide access instructions.'}`;
+
+  // Checkout
+  if(/check.?out|leave|departure|when do i|check out time/i.test(ql))
+    return `Checkout is at **${fmt12(prop.cout)||'11:00 AM'}**. Please make sure all doors and windows are locked, return keys to their original location, and start the dishwasher if used. Thank you for staying!`;
+
+  // Parking
+  if(/park|car|vehicle|garage|driveway/i.test(ql) && prop.parking)
+    return `🚗 **Parking:** ${prop.parking}`;
+
+  // Pets
+  if(/pet|dog|cat|animal|puppy|kitten/i.test(ql) && prop.pets)
+    return `🐾 **Pet Policy:** ${prop.pets}`;
+
+  // WiFi just password
+  if(/password|pw|pass/i.test(ql) && prop.wifiPw)
+    return `🔑 **WiFi Password:** ${prop.wifiPw}`;
+
+  // Rules
+  if(/rule|quiet|smoke|smok|party|noise|hours|guest/i.test(ql) && prop.rules)
+    return `📋 **House Rules:**\n${prop.rules}`;
+
+  // Amenities
+  if(/hot.?tub|jacuzzi|spa/i.test(ql))
+    return prop.amenities?.toLowerCase().includes('hot tub') ? `✅ Yes! There's a hot tub. ${prop.cinstr?.toLowerCase().includes('hot tub')?'':'Please check the welcome book for instructions on using it.'}` : `There doesn't appear to be a hot tub at this property. Check the amenities list to see what's available.`;
+
+  if(/pool/i.test(ql))
+    return prop.amenities?.toLowerCase().includes('pool') ? `🏊 Yes, there is a pool! Pool hours and rules are listed in the house rules. Please supervise children at all times.` : `There is no pool at this property.`;
+
+  if(/fireplace|fire place/i.test(ql))
+    return prop.amenities?.toLowerCase().includes('fireplace') ? `🔥 Yes, there's a fireplace! Instructions for use are in the welcome book inside. Please make sure the flue is open before lighting and extinguish fully before sleeping.` : `There doesn't appear to be a fireplace at this property.`;
+
+  if(/kitchen|cook|dish|washer|microwave|coffee/i.test(ql))
+    return prop.amenities?.toLowerCase().includes('kitchen') ? `🍳 The property has a **full kitchen** stocked with basic cookware, utensils, and appliances. Dish soap and a starter supply of basics are provided.` : `The kitchen details are in your welcome book.`;
+
+  if(/tv|television|streaming|netflix|cable/i.test(ql))
+    return prop.amenities?.toLowerCase().includes('tv') ? `📺 Yes, there's a Smart TV. Use your own streaming account logins — and don't forget to log out before you leave!` : `TV information can be found in the welcome book.`;
+
+  // Bed/bath
+  if(/bed|bedroom|sleep/i.test(ql))
+    return `🛏 This property has **${prop.bed} bedroom${prop.bed!==1?'s':''}** and can sleep up to **${prop.guests} guests**.`;
+
+  if(/bath|shower|bathroom/i.test(ql))
+    return `🚿 There ${prop.bath===1?'is':'are'} **${prop.bath} bathroom${prop.bath!==1?'s':''}**. Towels and basic toiletries are provided.`;
+
+  // Address/location
+  if(/address|where|location|directions/i.test(ql) && prop.addr)
+    return `📍 **Address:** ${prop.addr}\n\nYou can enter this directly into Google Maps or Apple Maps for directions.`;
+
+  // Cleaning
+  if(/clean|towel|sheet|linen|supply|laundry|washer|dryer/i.test(ql))
+    return `🧺 The property is professionally cleaned before your arrival. Fresh towels and bed linens are provided. There's also a washer and dryer available for your use during the stay.`;
+
+  // Early check-in / late checkout
+  if(/early|late check/i.test(ql))
+    return `For early check-in or late checkout requests, please contact your host directly through the platform you booked on. We'll do our best to accommodate based on availability!`;
+
+  // Emergency
+  if(/emergency|fire|police|911|urgent/i.test(ql))
+    return `🚨 **For emergencies, call 911 immediately.**\n\nFor property emergencies (water leak, lock issue, etc.), contact your host directly through the platform you booked on.`;
+
+  // Trash/recycling
+  if(/trash|garbage|recycl|waste/i.test(ql))
+    return `🗑 Trash and recycling info is in the welcome book inside. Trash pickup day and bin locations are noted there.`;
+
+  // Noise
+  if(/noise|loud|party|neighbor/i.test(ql))
+    return `🤫 **Quiet hours** are in effect as listed in the house rules. Please be respectful of neighbors — excessive noise can result in a fine or early departure per the rental agreement.`;
+
+  // Default - escalate to host
+  return `That's a great question! I want to make sure you get the right answer, so I'm **flagging this to your host** right now. They'll typically respond within a few hours. \n\nIs there anything else I can help with from the property info I have?`;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+setTimeout(renderPortal, 600);
+</script>
+</body>
+</html>
