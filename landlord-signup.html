@@ -515,6 +515,10 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
           🎁 Refer &amp; Earn
         </a>
+        <a href="compliance.html" class="dash-link" style="color:#fb923c;background:rgba(251,146,60,0.08);border-left:3px solid #fb923c;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          📋 Compliance
+        </a>
         <a href="tenant-assistance.html" class="dash-link" style="color:var(--gray-400);">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           🤝 Tenant Assistance
@@ -670,6 +674,96 @@
           </div>
         </div>
       </div>
+
+      <!-- CONTRACTOR COMPLIANCE WIDGET -->
+      <div id="comp-widget" style="margin:0 24px 24px;background:#1e293b;border:1px solid rgba(251,146,60,0.3);border-radius:14px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,rgba(251,146,60,0.15),rgba(251,146,60,0.05));padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(251,146,60,0.2);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.3rem;">📋</span>
+            <div>
+              <div style="font-weight:800;font-size:.95rem;color:#fff;">Contractor Compliance</div>
+              <div style="font-size:.75rem;color:rgba(255,255,255,.5);">License &amp; insurance status for your team</div>
+            </div>
+          </div>
+          <a href="compliance.html" style="background:#fb923c;color:#fff;padding:.4rem .9rem;border-radius:8px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;">View All →</a>
+        </div>
+        <div style="padding:14px 20px;">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" id="comp-stat-row">
+            <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:1.4rem;font-weight:800;color:#10b981;" id="cw-ok">—</div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px;">Fully Compliant</div>
+            </div>
+            <div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:1.4rem;font-weight:800;color:#fbbf24;" id="cw-warn">—</div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px;">Expiring Soon</div>
+            </div>
+            <div style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:1.4rem;font-weight:800;color:#f97316;" id="cw-urgent">—</div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px;">Action Needed</div>
+            </div>
+            <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:1.4rem;font-weight:800;color:#ef4444;" id="cw-exp">—</div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px;">Expired</div>
+            </div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:.8rem;" id="comp-mini-table">
+            <thead>
+              <tr style="color:rgba(255,255,255,.4);text-transform:uppercase;font-size:.68rem;">
+                <th style="padding:6px 8px;text-align:left;font-weight:600;">Contractor</th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;">License</th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;">GL Insurance</th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="comp-mini-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <script>
+      (function(){
+        const TODAY = new Date('2026-03-09');
+        function daysUntil(d){ return Math.round((new Date(d)-TODAY)/86400000); }
+        function statusOf(d){
+          const n=daysUntil(d);
+          if(n<0) return 'expired';
+          if(n<=14) return 'urgent';
+          if(n<=45) return 'warn';
+          return 'ok';
+        }
+        const STATUS_LABEL = {ok:'✅ OK',warn:'⚠️ Expiring',urgent:'🔴 Urgent',expired:'❌ Expired'};
+        const STATUS_COLOR = {ok:'#10b981',warn:'#fbbf24',urgent:'#f97316',expired:'#ef4444'};
+        const contractors = [
+          {name:"Mike's Plumbing",  lic:'2026-08-15', gl:'2026-04-23'},
+          {name:'Elite Electric',   lic:'2026-11-30', gl:'2026-10-15'},
+          {name:'Handyman Dave',    lic:'2026-04-08', gl:'2026-09-01'},
+          {name:'ComfortPro HVAC',  lic:'2026-12-01', gl:'2026-02-14'},
+          {name:'FastFix Appliance',lic:'2026-09-20', gl:'2026-07-31'},
+          {name:'ProPaint Utah',    lic:'2026-07-14', gl:'2026-01-31'},
+        ];
+        let ok=0,warn=0,urgent=0,exp=0;
+        const tbody = document.getElementById('comp-mini-body');
+        contractors.forEach(c => {
+          const ls=statusOf(c.lic), gs=statusOf(c.gl);
+          const worst = ['expired','urgent','warn','ok'].find(s=>[ls,gs].includes(s));
+          if(worst==='ok') ok++;
+          else if(worst==='warn') warn++;
+          else if(worst==='urgent') urgent++;
+          else exp++;
+          const tr = document.createElement('tr');
+          tr.style.borderTop='1px solid rgba(255,255,255,.05)';
+          tr.innerHTML = `<td style="padding:8px;color:#fff;font-weight:600;">${c.name}</td>
+            <td style="padding:8px;color:${STATUS_COLOR[ls]};">${STATUS_LABEL[ls]}</td>
+            <td style="padding:8px;color:${STATUS_COLOR[gs]};">${STATUS_LABEL[gs]}</td>
+            <td style="padding:8px;"><a href="compliance.html" style="color:#fb923c;font-size:.75rem;font-weight:700;text-decoration:none;">Details →</a></td>`;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('cw-ok').textContent=ok;
+        document.getElementById('cw-warn').textContent=warn;
+        document.getElementById('cw-urgent').textContent=urgent;
+        document.getElementById('cw-exp').textContent=exp;
+      })();
+      </script>
 
       <!-- PROPERTIES TAB -->
       <div id="dtab-properties" class="tab-content">
