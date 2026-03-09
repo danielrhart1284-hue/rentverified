@@ -505,7 +505,7 @@
         </div>
         <div class="dash-link" onclick="dashTab('clients')" style="border-left:2px solid #10b981;background:rgba(16,185,129,0.08);color:#059669;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-          All Clients
+          Accounts
         </div>
         <div class="dash-link" onclick="dashTab('inquiries')">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
@@ -890,19 +890,20 @@
         </div>
       </div>
 
-      <!-- ALL CLIENTS TAB (admin: see each person's data/listings) -->
+      <!-- ACCOUNTS TAB (admin: see each account, suspend/unsuspend) -->
       <div id="dtab-clients" class="tab-content">
         <div class="page-header">
-          <div><h1>All Clients</h1><p>View each client's data and listings. Click a client to see and edit their listings.</p></div>
+          <div><h1>Accounts</h1><p>See every account. View listings, suspend or unsuspend access from this page.</p></div>
         </div>
         <div class="card" style="margin-bottom:1.5rem;">
           <div class="card-body" style="padding:0;">
             <div class="property-row" style="background:var(--gray-100);font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray-600);">
               <div style="width:48px;"></div>
-              <div style="flex:2;">Client</div>
+              <div style="flex:2;">Account</div>
               <div style="flex:1;">Email</div>
               <div style="flex:1;">Listings</div>
-              <div style="width:120px;">Action</div>
+              <div style="flex:1;">Status</div>
+              <div style="width:180px;">Actions</div>
             </div>
             <div id="all-clients-list-body"></div>
           </div>
@@ -1437,6 +1438,7 @@
       document.getElementById('dashboard-screen').style.display = 'block';
       if (document.querySelector('.plan-chip')) document.querySelector('.plan-chip').textContent = (testAcct && testAcct.plan) ? testAcct.plan : 'Pro Plan';
       renderPropertiesList();
+      renderAllClientsList();
       renderLeaseExpiry();
       loadFeePolicy();
     } else {
@@ -1619,6 +1621,19 @@
     localStorage.setItem('rv_clients', JSON.stringify(arr));
     renderAllClientsList();
   }
+  function getSuspendedAccounts() {
+    try { return JSON.parse(localStorage.getItem('rv_suspended_accounts') || '[]'); } catch(e) { return []; }
+  }
+  function toggleAccountSuspended(clientId) {
+    const list = getSuspendedAccounts();
+    const idx = list.indexOf(clientId);
+    if (idx >= 0) list.splice(idx, 1); else list.push(clientId);
+    localStorage.setItem('rv_suspended_accounts', JSON.stringify(list));
+    renderAllClientsList();
+  }
+  function isAccountSuspended(clientId) {
+    return getSuspendedAccounts().indexOf(clientId) >= 0;
+  }
   function getListingsForClient(clientId) {
     if (clientId === 'sanders-pm') {
       const raw = localStorage.getItem('rv_sanders_listings');
@@ -1643,17 +1658,30 @@
   }
   function renderAllClientsList() {
     const clients = getClients();
+    const suspended = getSuspendedAccounts();
     const container = document.getElementById('all-clients-list-body');
     if (!container) return;
     container.innerHTML = clients.map(c => {
       const list = getListingsForClient(c.id);
       const count = list.length;
-      return `<div class="property-row" style="cursor:pointer;align-items:center;" onclick="selectClient('${c.id}')" title="View listings">
+      const suspendedState = suspended.indexOf(c.id) >= 0;
+      const statusBadge = suspendedState
+        ? '<span class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">Suspended</span>'
+        : '<span class="badge badge-available">Active</span>';
+      const suspendBtn = suspendedState
+        ? '<button class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;" onclick="event.stopPropagation();toggleAccountSuspended(\'' + c.id + '\')">Unsuspend</button>'
+        : '<button class="btn btn-sm" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;" onclick="event.stopPropagation();toggleAccountSuspended(\'' + c.id + '\')">Suspend</button>';
+      const rowStyle = suspendedState ? 'cursor:pointer;align-items:center;opacity:0.85;background:#fafafa;' : 'cursor:pointer;align-items:center;';
+      return `<div class="property-row" style="${rowStyle}" onclick="selectClient('${c.id}')" title="View listings">
         <div class="prop-thumb" style="width:48px;height:48px;background:#e0f2fe;font-size:1.25rem;">👤</div>
         <div style="flex:2;"><div style="font-weight:600;">${(c.companyName||'').replace(/</g,'&lt;')}</div><div style="font-size:0.8rem;color:var(--gray-600);">ID: ${(c.id||'').replace(/</g,'&lt;')}</div></div>
         <div style="flex:1;font-size:0.875rem;">${(c.email||'').replace(/</g,'&lt;')}</div>
         <div style="flex:1;"><span class="badge badge-available">${count} listing${count!==1?'s':''}</span></div>
-        <div style="width:120px;"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();selectClient('${c.id}')">View / Edit</button></div>
+        <div style="flex:1;">${statusBadge}</div>
+        <div style="width:180px;display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();selectClient('${c.id}')">View / Edit</button>
+          ${suspendBtn}
+        </div>
       </div>`;
     }).join('');
   }

@@ -1143,6 +1143,12 @@
       errEl.style.display = 'block';
       return;
     }
+    const suspended = (function(){ try { return JSON.parse(localStorage.getItem('rv_suspended_accounts') || '[]'); } catch(e){ return []; } })();
+    if (suspended.indexOf(acct.landlordId) >= 0) {
+      errEl.textContent = 'This account has been suspended. Please contact your property manager or support.';
+      errEl.style.display = 'block';
+      return;
+    }
     errEl.style.display = 'none';
     showPortal(acct.name);
   }
