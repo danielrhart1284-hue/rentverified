@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tenant Portal – RentVerified</title>
+  <title>Tenant Portal – Sanders Property Management | RentVerified</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     .portal-layout {
@@ -138,11 +138,16 @@
 </head>
 <body>
 
+<!-- Sanders PM live banner -->
+<div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
+  🏢 Sanders Property Management · Tenant Portal · <a href="index.html" style="color:#93c5fd;">Back to listings</a>
+</div>
+
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
     <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
-    Rent<span>Verified</span>
+    Sanders PM <span style="opacity:0.85;">· Tenant Portal</span>
   </a>
   <div class="nav-links">
     <a href="index.html">← Back to Home</a>
@@ -1060,10 +1065,13 @@
 
 <script src="app.js"></script>
 <script>
-  // Tenant accounts — landlord can add tenants here
+  // Landlords who are clients (have listed properties under their account). Tenant login only allowed if their unit is under one of these.
+  const CLIENT_LANDLORDS = [
+    { id: 'sanders-pm', company: 'Sanders Property Management' }
+  ];
+  // Tenant accounts — each tenant must belong to a client landlord (landlordId matches CLIENT_LANDLORDS[].id)
   const TENANT_ACCOUNTS = [
-    { email: 'danielrhart1284@gmail.com', password: 'SPMis#1!', name: 'Daniel (Admin View)', unit: '119 E 600 S #119, Orem UT' },
-    { email: 'tenant@example.com', password: 'tenant123', name: 'Current Tenant', unit: '119 E 600 S #119, Orem UT' }
+    { email: 'tenant@example.com', password: 'tenant123', name: 'Current Tenant', unit: '119 E 600 S #119, Orem UT', landlordId: 'sanders-pm' }
   ];
 
   /* ── LEASE EXPIRY REMINDER (tenant) ── */
@@ -1118,12 +1126,20 @@
 
   document.addEventListener('DOMContentLoaded', renderTenantLeaseReminder);
 
-  function switchTab(name) {   const email = document.getElementById('tLoginEmail').value.trim().toLowerCase();
+  function switchTab(name) {}
+  function doTenantLogin() {
+    const email = document.getElementById('tLoginEmail').value.trim().toLowerCase();
     const pw    = document.getElementById('tLoginPw').value;
     const errEl = document.getElementById('tLoginErr');
     const acct  = TENANT_ACCOUNTS.find(a => a.email.toLowerCase() === email && a.password === pw);
     if (!acct) {
-      errEl.textContent = '⚠️ Incorrect email or password. Please try again.';
+      errEl.textContent = 'Incorrect email or password. Please try again.';
+      errEl.style.display = 'block';
+      return;
+    }
+    const landlord = CLIENT_LANDLORDS.find(c => c.id === acct.landlordId);
+    if (!landlord) {
+      errEl.textContent = 'This property is not under a current client account. Please request access from your landlord.';
       errEl.style.display = 'block';
       return;
     }

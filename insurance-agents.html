@@ -1412,26 +1412,32 @@ function toggleSwitch(el) {
 
 // ── INIT ─────────────────────────────────────────────────
 (function init() {
-  // Check if coming from landlord dashboard (auto-login landlord)
   const params = new URLSearchParams(window.location.search);
   if (params.get('mode') === 'landlord') {
     loginLandlord();
     return;
   }
-  // Check saved agent session
+  // Test account redirect: Business login sends insagent@ to this page with #agent after setting rv_ins_agent
+  if (window.location.hash === '#agent') {
+    try {
+      const a = JSON.parse(localStorage.getItem('rv_ins_agent') || '{}');
+      if (a.name) {
+        launchApp('agent', a);
+        return;
+      }
+    } catch(e) {}
+    launchApp('agent', { name: 'Test Ins Agent', company: 'Test Insurance Co', license: '12345678', tier: 'featured' });
+    return;
+  }
   const savedAgent = localStorage.getItem('rv_ins_agent');
   if (savedAgent) {
     try {
       const a = JSON.parse(savedAgent);
-      // Don't auto-login — let them choose. Could enable:
-      // launchApp('agent', a);
+      // Don't auto-login by default — let them choose
     } catch(e) {}
   }
-  // Make all toggles default to ON
   setTimeout(() => {
-    document.querySelectorAll('.toggle-switch:not(.off)').forEach(t => {
-      // already on by default (no .off class)
-    });
+    document.querySelectorAll('.toggle-switch:not(.off)').forEach(t => {});
   }, 100);
 })();
 </script>
