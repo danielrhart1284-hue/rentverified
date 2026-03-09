@@ -881,9 +881,22 @@
             <div class="form-group"><label>Tenant name (or leave blank if vacant)</label><input type="text" id="edit-tenant" placeholder="Jane Doe or Vacant" /></div>
             <div class="form-group"><label>Status</label><select id="edit-status"><option value="available">Available</option><option value="rented">Rented</option><option value="coming_soon">Coming soon</option></select></div>
             <div class="form-group"><label>Listing ID</label><input type="text" id="edit-listing-id" placeholder="RV-2026-0001" /></div>
-            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="edit-description" rows="3" placeholder="Beautiful updated unit with hardwood floors, modern kitchen..." style="resize:vertical;"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Property Photos</label>
+              <div id="photo-preview-strip" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;min-height:0;"></div>
+              <label for="photo-upload-input" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1rem;border:2px dashed #d1d5db;border-radius:8px;cursor:pointer;font-size:.875rem;color:#6B7280;transition:border-color .2s;" onmouseover="this.style.borderColor='#1a56db'" onmouseout="this.style.borderColor='#d1d5db'">
+                <span style="font-size:1.1rem;">📷</span> Click to upload photos (JPG, PNG — up to 5)
+              </label>
+              <input type="file" id="photo-upload-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(this)" />
+            </div>
+            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
               <button class="btn btn-primary" onclick="saveEditListing()">Save changes</button>
               <button class="btn btn-outline" onclick="closeEditListing()">Cancel</button>
+              <button class="btn btn-sm" id="broadcast-btn" onclick="openBroadcast()" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac;font-weight:700;display:flex;align-items:center;gap:.4rem;">📣 Broadcast</button>
               <button class="btn btn-outline" id="edit-delete-btn" style="margin-left:auto;color:var(--danger);border-color:var(--danger);display:none;" onclick="deleteListing()">Delete</button>
             </div>
           </div>
@@ -1288,7 +1301,8 @@
 
   // ── AUTH ──────────────────────────────────────────
   const ACCOUNTS = [
-    { email: 'danielrhart1284@gmail.com', password: 'SPMis#1!', name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' }
+    { email: 'danielrhart1284@gmail.com', password: 'SPMis#1!',   name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' },
+    { email: 'danielhart1284',            password: 'Mayais#1dog!', name: 'Daniel', company: 'Sanders Property Management', role: 'admin',    username: 'danielhart1284' },
   ];
 
   let currentLoginRole = 'landlord';
@@ -1311,7 +1325,7 @@
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const pw    = document.getElementById('loginPw').value;
     const errEl = document.getElementById('loginErr');
-    const acct  = ACCOUNTS.find(a => a.email.toLowerCase() === email && a.password === pw);
+    const acct  = ACCOUNTS.find(a => (a.email.toLowerCase() === email || (a.username && a.username.toLowerCase() === email)) && a.password === pw);
     if (!acct) {
       errEl.textContent = '⚠️ Incorrect email or password. Please try again.';
       errEl.style.display = 'block';
@@ -1590,6 +1604,119 @@
 
   document.addEventListener('DOMContentLoaded', renderLeaseExpiry);
 
+  /* ── PHOTO UPLOAD ── */
+  let editPhotos = []; // base64 array for current edit session
+
+  function handlePhotoUpload(input) {
+    const files = Array.from(input.files).slice(0, 5);
+    editPhotos = [];
+    const strip = document.getElementById('photo-preview-strip');
+    strip.innerHTML = '';
+    files.forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        editPhotos[i] = e.target.result;
+        const img = document.createElement('div');
+        img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
+        img.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" />' +
+          '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
+        strip.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function removePhoto(idx) {
+    editPhotos.splice(idx, 1);
+    // Re-render strip
+    const strip = document.getElementById('photo-preview-strip');
+    strip.innerHTML = '';
+    editPhotos.forEach((src, i) => {
+      const img = document.createElement('div');
+      img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
+      img.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />' +
+        '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
+      strip.appendChild(img);
+    });
+  }
+
+  /* ── BROADCAST ── */
+  function openBroadcast() {
+    const addr  = document.getElementById('edit-address').value || 'Property';
+    const beds  = document.getElementById('edit-beds').value || '?';
+    const baths = document.getElementById('edit-baths').value || '?';
+    const sqft  = document.getElementById('edit-sqft').value || '';
+    const rent  = document.getElementById('edit-rent').value || '?';
+    const desc  = document.getElementById('edit-description') ? document.getElementById('edit-description').value : '';
+    const listId = document.getElementById('edit-listing-id').value || '';
+
+    const copy = `🏠 FOR RENT — ${addr}
+${beds} bed | ${baths} bath${sqft ? ' | ' + sqft + ' sq ft' : ''} | $${rent}/mo
+
+${desc || 'Well-maintained rental property in a great location. Contact us for a showing!'}
+
+✅ Verified listing on RentVerified
+📋 Listing ID: ${listId}
+🌐 View & apply: rentrealverified.com
+📞 Contact: Sanders Property Management`;
+
+    document.getElementById('broadcast-address').textContent = addr;
+    document.getElementById('broadcast-copy').value = copy;
+    document.getElementById('copy-confirm').style.display = 'none';
+    
+    // Load posted status
+    const posted = JSON.parse(localStorage.getItem('rv_broadcast_' + listId) || '{}');
+    ['fb','cl','zl','ap','ksl'].forEach(p => {
+      const el = document.getElementById(p + '-status');
+      if (el) el.textContent = posted[p] ? '✓ Posted' : '';
+      if (el && posted[p]) el.style.color = '#15803d';
+    });
+
+    const modal = document.getElementById('broadcast-modal');
+    modal.style.display = 'flex';
+  }
+
+  function closeBroadcast() {
+    document.getElementById('broadcast-modal').style.display = 'none';
+  }
+
+  function copyBroadcastText() {
+    const ta = document.getElementById('broadcast-copy');
+    navigator.clipboard.writeText(ta.value).then(() => {
+      const conf = document.getElementById('copy-confirm');
+      conf.style.display = 'block';
+      setTimeout(() => { conf.style.display = 'none'; }, 2500);
+    });
+  }
+
+  const PLATFORM_URLS = {
+    fb:  'https://www.facebook.com/marketplace/create/rental',
+    cl:  'https://post.craigslist.org/c/slc?category=apa',
+    zl:  'https://www.zillow.com/rental-manager/properties/new/',
+    ap:  'https://www.apartments.com/list-your-property/',
+    ksl: 'https://classifieds.ksl.com/post/?category=Apartment+for+Rent&subCategory=Apartment+for+Rent'
+  };
+
+  function broadcastTo(platform) {
+    const listId = document.getElementById('edit-listing-id').value || 'unknown';
+    copyBroadcastText();
+    window.open(PLATFORM_URLS[platform], '_blank');
+    // Mark as posted
+    const key = 'rv_broadcast_' + listId;
+    const posted = JSON.parse(localStorage.getItem(key) || '{}');
+    posted[platform] = new Date().toISOString();
+    localStorage.setItem(key, JSON.stringify(posted));
+    const el = document.getElementById(platform + '-status');
+    if (el) { el.textContent = '✓ Posted'; el.style.color = '#15803d'; }
+  }
+
+  function broadcastAll() {
+    copyBroadcastText();
+    Object.keys(PLATFORM_URLS).forEach((p, i) => {
+      setTimeout(() => broadcastTo(p), i * 400);
+    });
+  }
+
   function dashTab(name) {
     document.querySelectorAll('#dashboard-screen .tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-link').forEach(l => l.classList.remove('active'));
@@ -1742,6 +1869,19 @@
       document.getElementById('edit-tenant').value = p.tenant || '';
       document.getElementById('edit-status').value = p.status || (p.tenant ? 'rented' : 'available');
       document.getElementById('edit-listing-id').value = p.listingId || '';
+    document.getElementById('edit-description').value = p.description || '';
+    // Load existing photos
+    editPhotos = p.photos || [];
+    const strip = document.getElementById('photo-preview-strip');
+    if (strip) {
+      strip.innerHTML = '';
+      editPhotos.forEach((src, i) => {
+        const img = document.createElement('div');
+        img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
+        img.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />';
+        strip.appendChild(img);
+      });
+    }
     } else {
       document.getElementById('edit-address').value = '';
       document.getElementById('edit-beds').value = '';
@@ -1834,7 +1974,9 @@
       rent: parseInt(document.getElementById('edit-rent').value, 10) || 0,
       tenant: document.getElementById('edit-tenant').value.trim(),
       status: document.getElementById('edit-status').value,
-      listingId: document.getElementById('edit-listing-id').value.trim()
+      listingId: document.getElementById('edit-listing-id').value.trim(),
+      description: (document.getElementById('edit-description') || {}).value || '',
+      photos: (typeof editPhotos !== 'undefined') ? editPhotos.slice(0, 5) : []
     };
     if (!p.address) { alert('Please enter an address.'); return; }
     if (idx >= 0 && idx < list.length) {
@@ -1906,5 +2048,98 @@
     }
   });
 </script>
+
+  <!-- BROADCAST MODAL -->
+  <div id="broadcast-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center;padding:1.5rem;">
+    <div style="background:white;border-radius:16px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.25);">
+      <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:800;font-size:1.1rem;">📣 Broadcast Listing</div>
+          <div id="broadcast-address" style="font-size:.82rem;color:#6B7280;margin-top:2px;"></div>
+        </div>
+        <button onclick="closeBroadcast()" style="background:none;border:none;cursor:pointer;font-size:1.5rem;color:#9ca3af;">×</button>
+      </div>
+      <div style="padding:1.25rem 1.5rem;">
+
+        <!-- Auto-generated copy -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-weight:700;font-size:.875rem;margin-bottom:.4rem;">Auto-Generated Listing Copy</div>
+          <div style="position:relative;">
+            <textarea id="broadcast-copy" rows="5" readonly style="width:100%;padding:.75rem;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;line-height:1.5;background:#f9fafb;resize:none;"></textarea>
+            <button onclick="copyBroadcastText()" style="position:absolute;top:.5rem;right:.5rem;background:#1a56db;color:white;border:none;border-radius:6px;padding:3px 10px;font-size:.75rem;cursor:pointer;">Copy</button>
+          </div>
+          <div id="copy-confirm" style="font-size:.75rem;color:#15803d;margin-top:4px;display:none;">✓ Copied to clipboard!</div>
+        </div>
+
+        <!-- Platform buttons -->
+        <div style="font-weight:700;font-size:.875rem;margin-bottom:.75rem;">Post to Platforms</div>
+        <div style="display:flex;flex-direction:column;gap:.6rem;" id="platform-list">
+
+          <!-- Facebook Marketplace -->
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1px solid #e5e7eb;border-radius:10px;">
+            <span style="font-size:1.4rem;">📘</span>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:.875rem;">Facebook Marketplace</div>
+              <div style="font-size:.75rem;color:#6B7280;">Opens create-rental page · paste your copy</div>
+            </div>
+            <span id="fb-status" style="font-size:.75rem;color:#6B7280;"></span>
+            <button onclick="broadcastTo('fb')" class="btn btn-sm" style="background:#1877f2;color:white;border:none;white-space:nowrap;">Open →</button>
+          </div>
+
+          <!-- Craigslist -->
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1px solid #e5e7eb;border-radius:10px;">
+            <span style="font-size:1.4rem;">📋</span>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:.875rem;">Craigslist</div>
+              <div style="font-size:.75rem;color:#6B7280;">Opens Salt Lake City housing · paste your copy</div>
+            </div>
+            <span id="cl-status" style="font-size:.75rem;color:#6B7280;"></span>
+            <button onclick="broadcastTo('cl')" class="btn btn-sm" style="background:#7f0000;color:white;border:none;white-space:nowrap;">Open →</button>
+          </div>
+
+          <!-- Zillow -->
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1px solid #e5e7eb;border-radius:10px;">
+            <span style="font-size:1.4rem;">🏡</span>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:.875rem;">Zillow Rental Manager</div>
+              <div style="font-size:.75rem;color:#6B7280;">Opens Zillow post-a-rental · paste your copy</div>
+            </div>
+            <span id="zl-status" style="font-size:.75rem;color:#6B7280;"></span>
+            <button onclick="broadcastTo('zl')" class="btn btn-sm" style="background:#006aff;color:white;border:none;white-space:nowrap;">Open →</button>
+          </div>
+
+          <!-- Apartments.com -->
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1px solid #e5e7eb;border-radius:10px;">
+            <span style="font-size:1.4rem;">🏢</span>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:.875rem;">Apartments.com</div>
+              <div style="font-size:.75rem;color:#6B7280;">Opens landlord listing page · paste your copy</div>
+            </div>
+            <span id="ap-status" style="font-size:.75rem;color:#6B7280;"></span>
+            <button onclick="broadcastTo('ap')" class="btn btn-sm" style="background:#e84118;color:white;border:none;white-space:nowrap;">Open →</button>
+          </div>
+
+          <!-- KSL Classifieds (Utah-specific) -->
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1px solid #e5e7eb;border-radius:10px;background:#fffbeb;">
+            <span style="font-size:1.4rem;">⭐</span>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:.875rem;">KSL Classifieds <span style="font-size:.7rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;margin-left:4px;">Utah #1</span></div>
+              <div style="font-size:.75rem;color:#6B7280;">Top rental site in Utah · opens post page</div>
+            </div>
+            <span id="ksl-status" style="font-size:.75rem;color:#6B7280;"></span>
+            <button onclick="broadcastTo('ksl')" class="btn btn-sm" style="background:#e67e22;color:white;border:none;white-space:nowrap;">Open →</button>
+          </div>
+
+        </div>
+
+        <!-- Broadcast All button -->
+        <button onclick="broadcastAll()" style="width:100%;margin-top:1rem;padding:.8rem;background:linear-gradient(135deg,#1a56db,#7c3aed);color:white;border:none;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+          🚀 Open All Platforms at Once
+        </button>
+        <div style="font-size:.72rem;color:#9ca3af;text-align:center;margin-top:.5rem;">Each platform opens in a new tab. Your listing copy is ready to paste.</div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
