@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ad Builder – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .builder-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .builder-left { }
+    .builder-right { }
+
+    .platform-tab {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .ptab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.6rem 1.1rem;
+      border-radius: 8px;
+      border: 2px solid var(--gray-200);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: white;
+    }
+    .ptab:hover { border-color: var(--primary); color: var(--primary); }
+    .ptab.active { border-color: var(--primary); background: var(--primary); color: white; }
+    .ptab-icon { font-size: 1.1rem; }
+
+    .ad-preview {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: sticky;
+      top: 88px;
+    }
+    .ad-preview-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ad-preview-body {
+      padding: 1.5rem;
+    }
+
+    /* Platform previews */
+    .fb-preview {
+      border: 1px solid #dddfe2;
+      border-radius: 8px;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .fb-header {
+      background: #1877f2;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .fb-header svg { width: 20px; height: 20px; }
+    .fb-img {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+    .fb-content { padding: 0.75rem 1rem; }
+    .fb-price { font-size: 1.3rem; font-weight: 800; color: #1877f2; }
+    .fb-address { font-size: 0.85rem; color: #65676b; margin-top: 2px; }
+    .fb-desc { font-size: 0.85rem; color: #1c1e21; margin-top: 0.5rem; line-height: 1.5; }
+    .fb-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .fb-tag {
+      background: #e7f3ff;
+      color: #1877f2;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .fb-actions {
+      border-top: 1px solid #dddfe2;
+      padding: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .fb-btn {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #dddfe2;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+      color: #606770;
+      background: white;
+      cursor: pointer;
+    }
+    .fb-btn.primary { background: #1877f2; color: white; border-color: #1877f2; }
+
+    /* Zillow preview */
+    .zillow-preview {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+    .zillow-header {
+      background: #006aff;
+      padding: 0.5rem 1rem;
+      color: white;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: -0.5px;
+    }
+    .zillow-img {
+      background: linear-gradient(135deg, #006aff22, #006aff44);
+      height: 150px;
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+    }
+    .zillow-content { padding: 0.75rem; }
+    .zillow-price { font-size: 1.4rem; font-weight: 800; color: #1a1a1a; }
+    .zillow-details { font-size: 0.82rem; color: #555; margin-top: 2px; }
+    .zillow-address { font-size: 0.82rem; color: #006aff; margin-top: 4px; }
+    .zillow-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #006aff; color: white;
+      padding: 2px 8px; border-radius: 3px;
+      font-size: 0.72rem; font-weight: 700;
+      margin-top: 6px;
+    }
+
+    /* Apartments.com preview */
+    .apts-preview { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .apts-header { background: #e84042; padding: 0.5rem 1rem; color: white; font-weight: 800; }
+    .apts-img { background: linear-gradient(135deg, #e8404222, #e8404244); height: 150px; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+    .apts-content { padding: 0.75rem; }
+    .apts-price { font-size: 1.3rem; font-weight: 800; color: #e84042; }
+    .apts-name { font-weight: 700; font-size: 0.95rem; margin-top: 4px; }
+    .apts-address { font-size: 0.8rem; color: #666; }
+    .apts-details { font-size: 0.82rem; color: #444; margin-top: 6px; display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    /* Realtor.com preview */
+    .realtor-preview { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .realtor-header { background: #d0021b; padding: 0.5rem 1rem; color: white; font-weight: 800; }
+    .realtor-img { background: linear-gradient(135deg, #d0021b22, #d0021b44); height: 150px; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+    .realtor-content { padding: 0.75rem; }
+    .realtor-price { font-size: 1.3rem; font-weight: 800; color: #d0021b; }
+    .realtor-address { font-size: 0.82rem; color: #555; margin-top: 3px; }
+    .realtor-tags { display: flex; gap: 0.4rem; margin-top: 6px; flex-wrap: wrap; }
+    .realtor-tag { background: #fef2f2; color: #d0021b; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
+
+    /* Copy text area */
+    .copy-block {
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--gray-700);
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--gray-200);
+    }
+
+    .deploy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 0.75rem;
+      text-decoration: none;
+    }
+    .deploy-fb { background: #1877f2; color: white; }
+    .deploy-fb:hover { background: #1464d8; }
+    .deploy-zillow { background: #006aff; color: white; }
+    .deploy-zillow:hover { background: #0055cc; }
+    .deploy-apts { background: #e84042; color: white; }
+    .deploy-apts:hover { background: #c73234; }
+    .deploy-realtor { background: #d0021b; color: white; }
+    .deploy-realtor:hover { background: #a80016; }
+
+    /* Step sections */
+    .form-section {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-section h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* AI polish button */
+    .ai-polish-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .ai-polish-btn:hover { opacity: 0.9; }
+
+    /* Status badges for deploy */
+    .deploy-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .ds-ready { background: #d1fae5; color: #065f46; }
+    .ds-pending { background: #fef3c7; color: #92400e; }
+    .ds-live { background: #dbeafe; color: #1e40af; }
+
+    @media (max-width: 1024px) {
+      .builder-layout { grid-template-columns: 1fr; }
+      .ad-preview { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    Rent<span>Verified</span>
+  </a>
+  <div class="nav-links">
+    <a href="landlord-signup.html">← Dashboard</a>
+  </div>
+  <div class="nav-cta">
+    <span class="plan-chip" style="background:var(--primary-light);color:var(--primary);border:1px solid #bfdbfe;border-radius:999px;padding:4px 14px;font-size:0.8rem;font-weight:700;">Pro Plan</span>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div style="background:white;border-bottom:1px solid var(--gray-200);padding:1.5rem 2rem;">
+  <div style="max-width:1300px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;">
+      <div>
+        <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:0.25rem;">📣 Ad Builder</h1>
+        <p style="color:var(--gray-600);font-size:0.9rem;">Build your listing once — select which platforms to deploy to, then launch with one click.</p>
+      </div>
+      <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+        <div class="deploy-status ds-ready" id="header-status">● 4 Platforms Selected</div>
+        <button class="btn btn-primary btn-lg" onclick="deployAll()">🚀 Deploy to Selected Platforms</button>
+      </div>
+    </div>
+
+    <!-- PLATFORM SELECTOR CHECKBOXES -->
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:0.8rem;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Deploy to:</span>
+
+      <label id="chip-fb" onclick="togglePlatform('fb')" style="display:flex;align-items:center;gap:8px;padding:0.5rem 1rem;border-radius:8px;border:2px solid #1877f2;background:#1877f2;color:white;cursor:pointer;font-weight:600;font-size:0.875rem;user-select:none;transition:all 0.15s;">
+        <input type="checkbox" id="chk-fb" checked style="display:none;" />
+        <span id="chip-fb-icon">✓</span> 📘 Facebook
+      </label>
+
+      <label id="chip-zillow" onclick="togglePlatform('zillow')" style="display:flex;align-items:center;gap:8px;padding:0.5rem 1rem;border-radius:8px;border:2px solid #006aff;background:#006aff;color:white;cursor:pointer;font-weight:600;font-size:0.875rem;user-select:none;transition:all 0.15s;">
+        <input type="checkbox" id="chk-zillow" checked style="display:none;" />
+        <span id="chip-zillow-icon">✓</span> 🏠 Zillow
+      </label>
+
+      <label id="chip-apts" onclick="togglePlatform('apts')" style="display:flex;align-items:center;gap:8px;padding:0.5rem 1rem;border-radius:8px;border:2px solid #e84042;background:#e84042;color:white;cursor:pointer;font-weight:600;font-size:0.875rem;user-select:none;transition:all 0.15s;">
+        <input type="checkbox" id="chk-apts" checked style="display:none;" />
+        <span id="chip-apts-icon">✓</span> 🏢 Apartments.com
+      </label>
+
+      <label id="chip-realtor" onclick="togglePlatform('realtor')" style="display:flex;align-items:center;gap:8px;padding:0.5rem 1rem;border-radius:8px;border:2px solid #d0021b;background:#d0021b;color:white;cursor:pointer;font-weight:600;font-size:0.875rem;user-select:none;transition:all 0.15s;">
+        <input type="checkbox" id="chk-realtor" checked style="display:none;" />
+        <span id="chip-realtor-icon">✓</span> 🔴 Realtor.com
+      </label>
+
+      <span style="font-size:0.8rem;color:var(--gray-500);margin-left:0.5rem;">Click to toggle on/off</span>
+    </div>
+  </div>
+</div>
+
+<div class="builder-layout">
+
+  <!-- LEFT: Form -->
+  <div class="builder-left">
+
+    <!-- Section 1: Property Info -->
+    <div class="form-section">
+      <h3><div class="section-num">1</div> Property Details</h3>
+
+      <!-- Listing Category selector -->
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label>Listing Category</label>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.25rem;">
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;" id="lc-res-lbl">
+            <input type="radio" name="listing-cat" value="residential" checked onchange="onListingCatChange()"> 🏠 Residential Rental
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;" id="lc-com-lbl">
+            <input type="radio" name="listing-cat" value="commercial" onchange="onListingCatChange()"> 🏢 Commercial
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;" id="lc-rto-lbl">
+            <input type="radio" name="listing-cat" value="rent-to-own" onchange="onListingCatChange()"> 🔑 Rent-to-Own
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Property Address</label>
+        <input type="text" id="f-address" placeholder="119 E 600 S #119, Orem, UT 84058" value="119 E 600 S #119, Orem, UT 84058" oninput="updatePreviews()" />
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label id="f-rent-label">Monthly Rent</label>
+          <input type="text" id="f-rent" placeholder="$1,200" value="$1,200" oninput="updatePreviews()" />
+        </div>
+        <div class="form-group" id="f-deposit-group">
+          <label>Security Deposit</label>
+          <input type="text" id="f-deposit" placeholder="$1,200" value="$1,200" oninput="updatePreviews()" />
+        </div>
+
+        <!-- Residential-only -->
+        <div class="form-group" id="f-beds-group">
+          <label>Bedrooms</label>
+          <select id="f-beds" oninput="updatePreviews()">
+            <option>Studio</option>
+            <option selected>2 Bedrooms</option>
+            <option>3 Bedrooms</option>
+            <option>4 Bedrooms</option>
+            <option>5+ Bedrooms</option>
+          </select>
+        </div>
+        <div class="form-group" id="f-baths-group">
+          <label>Bathrooms</label>
+          <select id="f-baths" oninput="updatePreviews()">
+            <option selected>1 Bathroom</option>
+            <option>1.5 Bathrooms</option>
+            <option>2 Bathrooms</option>
+            <option>2.5 Bathrooms</option>
+            <option>3+ Bathrooms</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label id="f-type-label">Property Type</label>
+          <select id="f-type" oninput="updatePreviews()">
+            <!-- Residential options -->
+            <optgroup label="Residential" id="f-type-res">
+              <option>Apartment</option>
+              <option selected>Condo</option>
+              <option>House</option>
+              <option>Townhouse</option>
+              <option>Duplex</option>
+              <option>Mobile Home</option>
+            </optgroup>
+            <!-- Commercial options (hidden by default) -->
+            <optgroup label="Commercial" id="f-type-com" style="display:none;">
+              <option>Retail Space</option>
+              <option>Office Space</option>
+              <option>Warehouse / Industrial</option>
+              <option>Restaurant / Food Service</option>
+              <option>Medical / Dental Office</option>
+              <option>Mixed Use</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Available Date</label>
+          <input type="text" id="f-avail" value="Available Now" oninput="updatePreviews()" />
+        </div>
+
+        <!-- Commercial-only fields -->
+        <div class="form-group" id="f-sqft-group" style="display:none;">
+          <label>Square Footage</label>
+          <input type="text" id="f-sqft" placeholder="2,500 sq ft" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-lease-type-group" style="display:none;">
+          <label>Lease Type</label>
+          <select id="f-lease-type" oninput="updatePreviews()">
+            <option value="gross">Gross Lease</option>
+            <option value="nnn">Triple Net (NNN)</option>
+            <option value="modified">Modified Gross</option>
+          </select>
+        </div>
+        <div class="form-group" id="f-zoning-group" style="display:none;">
+          <label>Zoning</label>
+          <input type="text" id="f-zoning" placeholder="C-1, C-2, M-1…" oninput="updatePreviews()">
+        </div>
+
+        <!-- Rent-to-Own fields -->
+        <div class="form-group" id="f-purchase-price-group" style="display:none;">
+          <label>Purchase Price (Option)</label>
+          <input type="text" id="f-purchase-price" placeholder="$320,000" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-option-fee-group" style="display:none;">
+          <label>Option Fee</label>
+          <input type="text" id="f-option-fee" placeholder="$5,000" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-credit-group" style="display:none;">
+          <label>Monthly Rent Credit</label>
+          <input type="text" id="f-credit" placeholder="$200/mo toward purchase" oninput="updatePreviews()">
+        </div>
+        <div class="form-group" id="f-option-period-group" style="display:none;">
+          <label>Option Period</label>
+          <input type="text" id="f-option-period" placeholder="2 years" oninput="updatePreviews()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Description -->
+    <div class="form-section">
+      <h3><div class="section-num">2</div> Listing Description</h3>
+      <div class="form-group">
+        <label>Property Description</label>
+        <textarea id="f-desc" rows="5" oninput="updatePreviews()" style="resize:vertical;">This 2-bedroom, 1-bathroom condo in Orem offers a clean, versatile living space perfect for modern lifestyles. The unit features a mix of durable wood-style flooring and tile throughout the main living areas, complemented by neutral tones and updated fixtures. Close to UVU and BYU. Tenant is responsible for internet, natural gas, and electricity.</textarea>
+      </div>
+      <button class="ai-polish-btn" onclick="aiPolish()">✨ AI Polish Description</button>
+      <p style="font-size:0.78rem;color:var(--gray-500);margin-top:0.4rem;">AI will optimize your description for each platform automatically</p>
+    </div>
+
+    <!-- Section 3: Amenities & Requirements -->
+    <div class="form-section">
+      <h3><div class="section-num">3</div> Amenities & Tenant Requirements</h3>
+      <div class="grid-2" style="margin-bottom:1rem;">
+        <label class="filter-option" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="checkbox" id="a-parking" onchange="updatePreviews()" /> Parking Included</label>
+        <label class="filter-option" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="checkbox" id="a-wd" onchange="updatePreviews()" /> W/D In Unit</label>
+        <label class="filter-option" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="checkbox" id="a-ac" onchange="updatePreviews()" checked /> A/C Included</label>
+        <label class="filter-option" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="checkbox" id="a-pets" onchange="updatePreviews()" /> Pets Welcome</label>
+        <label class="filter-option" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="checkbox" id="a-utils" onchange="updatePreviews()" /> Utilities Included</label>
+        <label class="filter-option" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="checkbox" id="a-furnished" onchange="updatePreviews()" /> Furnished</label>
+      </div>
+      <div class="divider"></div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Min. Credit Score</label>
+          <input type="text" id="f-credit" placeholder="e.g. 600" oninput="updatePreviews()" />
+        </div>
+        <div class="form-group">
+          <label>Min. Monthly Income</label>
+          <input type="text" id="f-income" placeholder="e.g. $3,600 (3x rent)" oninput="updatePreviews()" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Smoking Policy</label>
+        <select id="f-smoking" oninput="updatePreviews()">
+          <option>No Smoking</option>
+          <option>Smoking Outside Only</option>
+          <option>Smoking Allowed</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Additional Requirements</label>
+        <input type="text" id="f-reqs" placeholder="e.g. Background check, references required" oninput="updatePreviews()" />
+      </div>
+    </div>
+
+    <!-- Section 4: Contact / Zillow Link -->
+    <div class="form-section">
+      <h3><div class="section-num">4</div> Links & Contact</h3>
+      <div class="form-group">
+        <label>Zillow Listing URL</label>
+        <input type="text" id="f-zillow" value="https://www.zillow.com/homedetails/119-E-600-S-119-Orem-UT-84058/460566670_zpid/" oninput="updatePreviews()" />
+      </div>
+      <div class="form-group">
+        <label>RentVerified Listing URL (auto-generated)</label>
+        <input type="text" id="f-rv" value="https://rentrealverified.com/property-detail.html" readonly style="background:var(--gray-100);color:var(--gray-600);" />
+      </div>
+      <div class="form-group">
+        <label>Contact Phone / SMS</label>
+        <input type="text" id="f-phone" placeholder="(555) 000-0000 — Tenants text this for AI replies" oninput="updatePreviews()" />
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Live Previews -->
+  <div class="builder-right">
+    <div class="ad-preview">
+      <div class="ad-preview-header">
+        <div style="font-weight:700;">Live Ad Preview</div>
+        <div id="preview-updated" style="font-size:0.8rem;color:var(--success);">● Auto-updating</div>
+      </div>
+      <div class="ad-preview-body">
+
+        <!-- Platform tabs -->
+        <div class="platform-tab">
+          <div class="ptab active" onclick="switchPlatform('fb', this)"><span class="ptab-icon">📘</span> Facebook</div>
+          <div class="ptab" onclick="switchPlatform('zillow', this)"><span class="ptab-icon">🏠</span> Zillow</div>
+          <div class="ptab" onclick="switchPlatform('apts', this)"><span class="ptab-icon">🏢</span> Apts.com</div>
+          <div class="ptab" onclick="switchPlatform('realtor', this)"><span class="ptab-icon">🔴</span> Realtor</div>
+        </div>
+
+        <!-- FACEBOOK PREVIEW -->
+        <div id="preview-fb">
+          <div class="fb-preview">
+            <div class="fb-header">
+              <svg fill="white" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              Facebook Marketplace Listing
+            </div>
+            <div class="fb-img">🏠</div>
+            <div class="fb-content">
+              <div class="fb-price" id="fb-price">$1,200/month</div>
+              <div class="fb-address" id="fb-address">119 E 600 S #119, Orem, UT 84058</div>
+              <div class="fb-tags" id="fb-tags">
+                <span class="fb-tag">2 Beds</span>
+                <span class="fb-tag">1 Bath</span>
+                <span class="fb-tag">Condo</span>
+                <span class="fb-tag">Available Now</span>
+              </div>
+              <div class="fb-desc" id="fb-desc">This 2-bedroom, 1-bathroom condo in Orem offers a clean, versatile living space perfect for modern lifestyles. Close to UVU and BYU.</div>
+            </div>
+            <div class="fb-actions">
+              <div class="fb-btn">👍 Like</div>
+              <div class="fb-btn">💬 Comment</div>
+              <div class="fb-btn primary">📩 Message</div>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <label style="font-size:0.8rem;font-weight:700;color:var(--gray-600);">COPY-READY AD TEXT</label>
+              <button class="btn btn-outline btn-sm" onclick="copyText('fb-copy-text')">📋 Copy</button>
+            </div>
+            <div class="copy-block" id="fb-copy-text">🏠 FOR RENT — $1,200/mo | 2 Bed / 1 Bath Condo
+📍 119 E 600 S #119, Orem, UT 84058
+✅ Available Now | $1,200 Deposit
+
+This 2-bedroom, 1-bathroom condo in Orem offers a clean, versatile living space perfect for modern lifestyles. The unit features durable wood-style flooring and tile, neutral tones, and updated fixtures. Close to UVU & BYU!
+
+🚫 No Smoking
+📋 Background check & references required
+💚 Pay rent via Cash App or Zelle — NO FEES
+
+🔗 View verified listing & apply: https://rentrealverified.com/property-detail.html
+✅ This listing is VERIFIED at RentVerified — not a scam.
+
+DM to schedule a showing or ask questions — AI available 24/7!</div>
+            <button class="deploy-btn deploy-fb" onclick="deployFacebook()">📘 Post to Facebook Page & Marketplace</button>
+          </div>
+        </div>
+
+        <!-- ZILLOW PREVIEW -->
+        <div id="preview-zillow" style="display:none;">
+          <div class="zillow-preview">
+            <div class="zillow-header">zillow rental manager</div>
+            <div class="zillow-img">🏠</div>
+            <div class="zillow-content">
+              <div class="zillow-price" id="zillow-price">$1,200/mo</div>
+              <div class="zillow-details" id="zillow-details">2 bd · 1 ba · Condo</div>
+              <div class="zillow-address" id="zillow-address">119 E 600 S #119, Orem, UT 84058</div>
+              <div class="zillow-badge">✓ Verified by RentVerified</div>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <label style="font-size:0.8rem;font-weight:700;color:var(--gray-600);">COPY-READY ZILLOW DESCRIPTION</label>
+              <button class="btn btn-outline btn-sm" onclick="copyText('zillow-copy-text')">📋 Copy</button>
+            </div>
+            <div class="copy-block" id="zillow-copy-text">This 2-bedroom, 1-bathroom condo in Orem offers a clean, versatile living space perfect for modern lifestyles. The unit features a mix of durable wood-style flooring and tile throughout the main living areas, complemented by neutral tones and updated fixtures.
+
+LOCATION: Conveniently located close to Utah Valley University (UVU) and Brigham Young University (BYU).
+
+UTILITIES: Tenant responsible for internet, natural gas, and electricity.
+
+REQUIREMENTS:
+- No smoking
+- Background check required
+- References required
+- Application available at: https://rentrealverified.com
+
+RENT: $1,200/month | DEPOSIT: $1,200
+AVAILABLE: Now
+
+Questions? AI assistant available 24/7 at rentrealverified.com</div>
+            <button class="deploy-btn deploy-zillow" onclick="window.open('https://www.zillow.com/rental-manager/', '_blank')">🏠 Open Zillow Rental Manager →</button>
+          </div>
+        </div>
+
+        <!-- APARTMENTS.COM PREVIEW -->
+        <div id="preview-apts" style="display:none;">
+          <div class="apts-preview">
+            <div class="apts-header">apartments.com</div>
+            <div class="apts-img">🏠</div>
+            <div class="apts-content">
+              <div class="apts-price" id="apts-price">$1,200/mo</div>
+              <div class="apts-name" id="apts-name">119 E 600 S #119</div>
+              <div class="apts-address" id="apts-address">Orem, UT 84058</div>
+              <div class="apts-details">
+                <span>🛏 2 Beds</span>
+                <span>🚿 1 Bath</span>
+                <span>🏢 Condo</span>
+                <span>📅 Available Now</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <label style="font-size:0.8rem;font-weight:700;color:var(--gray-600);">COPY-READY APARTMENTS.COM TEXT</label>
+              <button class="btn btn-outline btn-sm" onclick="copyText('apts-copy-text')">📋 Copy</button>
+            </div>
+            <div class="copy-block" id="apts-copy-text">Property: 119 E 600 S #119, Orem, UT 84058
+Type: Condo | Bedrooms: 2 | Bathrooms: 1
+Rent: $1,200/month | Deposit: $1,200
+Available: Now
+
+DESCRIPTION:
+This 2-bedroom, 1-bathroom condo in Orem offers a clean, versatile living space perfect for modern lifestyles. The unit features a mix of durable wood-style flooring and tile throughout the main living areas, complemented by neutral tones and updated fixtures. Ideally located close to Utah Valley University (UVU) and Brigham Young University (BYU).
+
+UTILITIES: Tenant pays internet, natural gas, and electricity.
+
+LEASE TERMS:
+- 12-month lease
+- No smoking policy
+- Background check & references required
+- $1,200 security deposit
+
+Managed by Sanders Property Management
+Apply at: https://rentrealverified.com</div>
+            <button class="deploy-btn deploy-apts" onclick="window.open('https://www.apartments.com/add-listing/', '_blank')">🏢 Open Apartments.com →</button>
+          </div>
+        </div>
+
+        <!-- REALTOR.COM PREVIEW -->
+        <div id="preview-realtor" style="display:none;">
+          <div class="realtor-preview">
+            <div class="realtor-header">realtor.com rentals</div>
+            <div class="realtor-img">🏠</div>
+            <div class="realtor-content">
+              <div class="realtor-price" id="realtor-price">$1,200/mo</div>
+              <div class="realtor-address" id="realtor-address">119 E 600 S #119, Orem, UT 84058</div>
+              <div class="realtor-tags">
+                <span class="realtor-tag">2 Beds</span>
+                <span class="realtor-tag">1 Bath</span>
+                <span class="realtor-tag">Condo</span>
+                <span class="realtor-tag">For Rent</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <label style="font-size:0.8rem;font-weight:700;color:var(--gray-600);">COPY-READY REALTOR.COM TEXT</label>
+              <button class="btn btn-outline btn-sm" onclick="copyText('realtor-copy-text')">📋 Copy</button>
+            </div>
+            <div class="copy-block" id="realtor-copy-text">FOR RENT: 119 E 600 S #119, Orem, UT 84058
+2 Bedroom · 1 Bathroom · Condo
+$1,200/month | $1,200 Deposit | Available Now
+
+This 2-bedroom, 1-bathroom condo in Orem offers a clean, versatile living space perfect for modern lifestyles. The unit features durable wood-style flooring and tile, neutral tones, and updated fixtures throughout.
+
+Perfectly situated near Utah Valley University (UVU) and Brigham Young University (BYU) — ideal for students or professionals.
+
+Tenant responsibilities: Internet, natural gas, electricity.
+
+Rental Requirements:
+✓ No smoking
+✓ Background check required
+✓ References required
+✓ $1,200 security deposit
+
+Managed by: Sanders Property Management
+Verified listing: https://rentrealverified.com
+Apply online: https://rentrealverified.com/property-detail.html</div>
+            <button class="deploy-btn deploy-realtor" onclick="window.open('https://www.realtor.com/rental-manager/', '_blank')">🔴 Open Realtor.com →</button>
+          </div>
+        </div>
+
+        <!-- DEPLOY ALL STATUS -->
+        <div id="deploy-all-panel" style="display:none;margin-top:1.5rem;">
+          <div class="alert alert-success">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            <div>
+              <strong>Listing ready to deploy!</strong><br/>
+              <span style="font-size:0.85rem;">Your RentVerified listing is live. Copy-ready ads are generated for all platforms below.</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.75rem;">
+            <div id="deploy-row-fb" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+              <span style="font-weight:600;font-size:0.875rem;">📘 Facebook</span>
+              <div style="display:flex;gap:0.5rem;">
+                <span class="deploy-status ds-ready">● Ready</span>
+                <button class="btn btn-sm" style="background:#1877f2;color:white;" onclick="deployFacebook()">Post Now</button>
+              </div>
+            </div>
+            <div id="deploy-row-zillow" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+              <span style="font-weight:600;font-size:0.875rem;">🏠 Zillow</span>
+              <div style="display:flex;gap:0.5rem;">
+                <span class="deploy-status ds-ready">● Ready</span>
+                <button class="btn btn-sm" style="background:#006aff;color:white;" onclick="window.open('https://www.zillow.com/rental-manager/','_blank')">Open Zillow</button>
+              </div>
+            </div>
+            <div id="deploy-row-apts" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+              <span style="font-weight:600;font-size:0.875rem;">🏢 Apartments.com</span>
+              <div style="display:flex;gap:0.5rem;">
+                <span class="deploy-status ds-ready">● Ready</span>
+                <button class="btn btn-sm" style="background:#e84042;color:white;" onclick="window.open('https://www.apartments.com/add-listing/','_blank')">Open</button>
+              </div>
+            </div>
+            <div id="deploy-row-realtor" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--gray-100);border-radius:8px;">
+              <span style="font-weight:600;font-size:0.875rem;">🔴 Realtor.com</span>
+              <div style="display:flex;gap:0.5rem;">
+                <span class="deploy-status ds-ready">● Ready</span>
+                <button class="btn btn-sm" style="background:#d0021b;color:white;" onclick="window.open('https://www.realtor.com/rental-manager/','_blank')">Open</button>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+              <span style="font-weight:600;font-size:0.875rem;">✅ RentVerified</span>
+              <span class="deploy-status ds-live">● Live on rentrealverified.com</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+<script>
+  // Platform colors
+  const platformColors = {
+    fb: '#1877f2', zillow: '#006aff', apts: '#e84042', realtor: '#d0021b'
+  };
+
+  // Toggle platform on/off from header chips
+  function togglePlatform(p) {
+    const chk = document.getElementById('chk-' + p);
+    const chip = document.getElementById('chip-' + p);
+    const icon = document.getElementById('chip-' + p + '-icon');
+    const isChecked = !chk.checked;
+    chk.checked = isChecked;
+    if (isChecked) {
+      chip.style.background = platformColors[p];
+      chip.style.borderColor = platformColors[p];
+      chip.style.color = 'white';
+      icon.textContent = '✓';
+    } else {
+      chip.style.background = 'white';
+      chip.style.borderColor = '#d1d5db';
+      chip.style.color = '#6b7280';
+      icon.textContent = '○';
+    }
+    updateSelectedCount();
+    // Auto-switch preview tab to a selected platform
+    updatePreviewTabs();
+  }
+
+  function updateSelectedCount() {
+    const platforms = ['fb','zillow','apts','realtor'];
+    const selected = platforms.filter(p => document.getElementById('chk-' + p).checked);
+    const el = document.getElementById('header-status');
+    if (selected.length === 0) {
+      el.textContent = '○ No Platforms Selected';
+      el.style.background = '#fee2e2'; el.style.color = '#991b1b';
+    } else {
+      el.textContent = '● ' + selected.length + ' Platform' + (selected.length > 1 ? 's' : '') + ' Selected';
+      el.style.background = '#d1fae5'; el.style.color = '#065f46';
+    }
+  }
+
+  function updatePreviewTabs() {
+    const platforms = ['fb','zillow','apts','realtor'];
+    const labels = { fb:'📘 Facebook', zillow:'🏠 Zillow', apts:'🏢 Apts.com', realtor:'🔴 Realtor' };
+    const selected = platforms.filter(p => document.getElementById('chk-' + p).checked);
+
+    // Rebuild tab bar
+    const tabBar = document.querySelector('.platform-tab');
+    tabBar.innerHTML = '';
+    selected.forEach((p, i) => {
+      const tab = document.createElement('div');
+      tab.className = 'ptab' + (i === 0 ? ' active' : '');
+      tab.innerHTML = labels[p];
+      tab.onclick = () => switchPlatform(p, tab);
+      tabBar.appendChild(tab);
+    });
+
+    // Show first selected platform preview
+    platforms.forEach(p => {
+      document.getElementById('preview-' + p).style.display = 'none';
+    });
+    if (selected.length > 0) {
+      document.getElementById('preview-' + selected[0]).style.display = 'block';
+    }
+  }
+
+  function switchPlatform(platform, el) {
+    ['fb','zillow','apts','realtor'].forEach(p => {
+      document.getElementById('preview-' + p).style.display = p === platform ? 'block' : 'none';
+    });
+    document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function onListingCatChange() {
+    const cat = document.querySelector('input[name="listing-cat"]:checked')?.value || 'residential';
+    const isRes = cat === 'residential';
+    const isCom = cat === 'commercial';
+    const isRTO = cat === 'rent-to-own';
+
+    // Show/hide residential fields
+    ['f-beds-group','f-baths-group','f-deposit-group'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isRes||isRTO ? 'block' : 'none';
+    });
+
+    // Show/hide commercial fields
+    ['f-sqft-group','f-lease-type-group','f-zoning-group'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isCom ? 'block' : 'none';
+    });
+
+    // Show/hide RTO fields
+    ['f-purchase-price-group','f-option-fee-group','f-credit-group','f-option-period-group'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isRTO ? 'block' : 'none';
+    });
+
+    // Swap property type optgroups
+    const resGroup = document.getElementById('f-type-res');
+    const comGroup = document.getElementById('f-type-com');
+    if (resGroup) resGroup.style.display = isCom ? 'none' : '';
+    if (comGroup) comGroup.style.display = isCom ? '' : 'none';
+
+    // Update labels
+    document.getElementById('f-rent-label').textContent = isCom ? 'Monthly Base Rent' : isRTO ? 'Monthly Rent' : 'Monthly Rent';
+    document.getElementById('f-type-label').textContent = isCom ? 'Space Type' : 'Property Type';
+
+    updatePreviews();
+  }
+
+  function updatePreviews() {
+    const address = document.getElementById('f-address').value || '119 E 600 S #119, Orem, UT 84058';
+    const rent = document.getElementById('f-rent').value || '$1,200';
+    const deposit = document.getElementById('f-deposit').value || '$1,200';
+    const beds = document.getElementById('f-beds').value || '2 Bedrooms';
+    const baths = document.getElementById('f-baths').value || '1 Bathroom';
+    const type = document.getElementById('f-type').value || 'Condo';
+    const avail = document.getElementById('f-avail').value || 'Available Now';
+    const desc = document.getElementById('f-desc').value || '';
+    const shortDesc = desc.length > 120 ? desc.substring(0, 120) + '...' : desc;
+    const cat = document.querySelector('input[name="listing-cat"]:checked')?.value || 'residential';
+    const isCom = cat === 'commercial';
+    const isRTO = cat === 'rent-to-own';
+
+    // Build detail line based on category
+    let detailLine = '';
+    if (isCom) {
+      const sqft = document.getElementById('f-sqft').value;
+      const leaseT = document.getElementById('f-lease-type')?.value || 'gross';
+      detailLine = (sqft?sqft+' · ':'') + type + ' · ' + leaseT.toUpperCase();
+    } else if (isRTO) {
+      const pp = document.getElementById('f-purchase-price').value;
+      detailLine = beds.replace(' Bedrooms','') + ' bd · ' + baths.replace(' Bathroom','') + ' ba' + (pp?' · Option: '+pp:'');
+    } else {
+      detailLine = beds.replace(' Bedrooms','') + ' bd · ' + baths.replace(' Bathroom','') + ' ba · ' + type;
+    }
+
+    const priceLabel = isRTO ? rent + '/mo 🔑 RTO' : isCom ? rent + '/mo 🏢' : rent + '/month';
+
+    // Facebook
+    document.getElementById('fb-price').textContent = priceLabel;
+    document.getElementById('fb-address').textContent = '📍 ' + address;
+    document.getElementById('fb-desc').textContent = shortDesc;
+
+    // Zillow
+    document.getElementById('zillow-price').textContent = rent + '/mo' + (isRTO?' · RTO':'') + (isCom?' · Commercial':'');
+    document.getElementById('zillow-details').textContent = detailLine;
+    document.getElementById('zillow-address').textContent = address;
+
+    // Apartments.com
+    document.getElementById('apts-price').textContent = rent + '/mo';
+    document.getElementById('apts-address').textContent = address.split(',').slice(1).join(',').trim();
+
+    // Realtor
+    document.getElementById('realtor-price').textContent = rent + '/mo';
+    document.getElementById('realtor-address').textContent = address;
+  }
+
+  function aiPolish() {
+    const btn = document.querySelector('.ai-polish-btn');
+    btn.textContent = '✨ Polishing...';
+    btn.disabled = true;
+    setTimeout(() => {
+      const current = document.getElementById('f-desc').value;
+      const polished = current
+        + '\n\nThis is a professionally managed property by Sanders Property Management — a verified landlord on RentVerified. All inquiries receive a same-day response. Apply securely online with no hidden fees.';
+      document.getElementById('f-desc').value = polished;
+      updatePreviews();
+      btn.textContent = '✨ AI Polish Description';
+      btn.disabled = false;
+    }, 1200);
+  }
+
+  function copyText(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('✅ Copied to clipboard! Paste it into ' + id.split('-')[0].toUpperCase());
+    });
+  }
+
+  function deployFacebook() {
+    const text = document.getElementById('fb-copy-text').textContent;
+    const url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://rentrealverified.com/property-detail.html') + '&quote=' + encodeURIComponent(text.substring(0, 200));
+    window.open(url, '_blank', 'width=600,height=400');
+  }
+
+  function deployAll() {
+    const platforms = ['fb','zillow','apts','realtor'];
+    const selected = platforms.filter(p => document.getElementById('chk-' + p).checked);
+
+    if (selected.length === 0) {
+      alert('Please select at least one platform to deploy to.');
+      return;
+    }
+
+    // Show/hide rows in deploy panel based on selection
+    const rowMap = { fb: 'deploy-row-fb', zillow: 'deploy-row-zillow', apts: 'deploy-row-apts', realtor: 'deploy-row-realtor' };
+    platforms.forEach(p => {
+      const row = document.getElementById('deploy-row-' + p);
+      if (row) row.style.display = selected.includes(p) ? 'flex' : 'none';
+    });
+
+    document.getElementById('deploy-all-panel').style.display = 'block';
+    document.getElementById('deploy-all-panel').scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

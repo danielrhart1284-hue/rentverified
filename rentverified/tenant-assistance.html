@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenant Assistance Center — RentVerified</title>
+<style>
+  :root {
+    --primary:#3b82f6; --primary-dark:#2563eb; --success:#10b981; --warning:#f59e0b;
+    --danger:#ef4444; --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0;
+    --gray-300:#cbd5e1; --gray-400:#94a3b8; --gray-500:#64748b; --gray-600:#475569;
+    --gray-700:#334155; --gray-800:#1e293b; --gray-900:#0f172a;
+    --sidebar-bg:#0f172a; --sidebar-w:240px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--gray-50);color:var(--gray-800);display:flex;flex-direction:column;min-height:100vh;}
+
+  /* NAV */
+  nav{background:var(--gray-900);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .nav-logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:white;font-weight:700;font-size:1.1rem;}
+  .nav-logo span{color:var(--primary);}
+  .nav-links{display:flex;align-items:center;gap:.5rem;}
+  .nav-link{color:var(--gray-300);text-decoration:none;font-size:.875rem;padding:.4rem .75rem;border-radius:6px;transition:all .15s;}
+  .nav-link:hover{color:white;background:rgba(255,255,255,.07);}
+
+  /* LAYOUT */
+  .wrapper{display:grid;grid-template-columns:var(--sidebar-w) 1fr;flex:1;}
+  .ta-sidebar{background:var(--sidebar-bg);min-height:calc(100vh - 52px);padding:1.25rem 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+  .ta-sidebar h3{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748b;padding:.5rem 1.5rem;margin:1rem 0 .25rem;}
+  .ta-sidebar a{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.5rem;color:#94a3b8;text-decoration:none;font-size:.875rem;border-left:3px solid transparent;transition:all .15s;cursor:pointer;}
+  .ta-sidebar a:hover,.ta-sidebar a.active{background:rgba(255,255,255,.06);color:#fff;border-left-color:#3b82f6;}
+  .ta-sidebar .badge{margin-left:auto;background:var(--danger);color:white;font-size:.7rem;padding:1px 7px;border-radius:999px;font-weight:700;}
+  .ta-sidebar .badge.green{background:var(--success);}
+
+  .ta-main{padding:1.75rem 2rem;max-width:1100px;}
+
+  /* SECTIONS */
+  .section{display:none;}
+  .section.active{display:block;}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
+  .page-header h1{font-size:1.4rem;font-weight:700;color:var(--gray-900);}
+  .page-header p{color:var(--gray-500);font-size:.9rem;margin-top:.25rem;}
+
+  /* CARDS / PANELS */
+  .panel{background:white;border-radius:12px;border:1px solid var(--gray-200);overflow:hidden;margin-bottom:1.25rem;}
+  .panel-header{padding:1rem 1.25rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:.75rem;}
+  .panel-header h2{font-size:1rem;font-weight:600;color:var(--gray-800);}
+  .panel-body{padding:1.25rem;}
+
+  /* STATS */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;}
+  .stat-card{background:white;border-radius:10px;border:1px solid var(--gray-200);padding:1rem 1.25rem;}
+  .stat-card .lbl{font-size:.75rem;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;}
+  .stat-card .val{font-size:1.75rem;font-weight:800;color:var(--gray-900);}
+  .stat-card .sub{font-size:.78rem;color:var(--gray-400);margin-top:.25rem;}
+  .stat-card.green .val{color:var(--success);}
+  .stat-card.blue .val{color:var(--primary);}
+  .stat-card.yellow .val{color:var(--warning);}
+  .stat-card.red .val{color:var(--danger);}
+
+  /* INTAKE WIZARD */
+  .wizard-wrap{max-width:680px;margin:0 auto;}
+  .wizard-steps{display:flex;align-items:center;margin-bottom:2rem;position:relative;}
+  .wizard-steps::before{content:'';position:absolute;top:18px;left:0;right:0;height:2px;background:var(--gray-200);z-index:0;}
+  .w-step{display:flex;flex-direction:column;align-items:center;gap:.4rem;position:relative;z-index:1;flex:1;}
+  .w-step .dot{width:36px;height:36px;border-radius:50%;border:2px solid var(--gray-300);background:white;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--gray-400);transition:all .3s;}
+  .w-step.done .dot{background:var(--success);border-color:var(--success);color:white;}
+  .w-step.active .dot{background:var(--primary);border-color:var(--primary);color:white;}
+  .w-step .lbl{font-size:.72rem;color:var(--gray-500);font-weight:500;text-align:center;white-space:nowrap;}
+  .w-step.active .lbl{color:var(--primary);font-weight:600;}
+
+  .wizard-card{background:white;border-radius:12px;border:1px solid var(--gray-200);padding:2rem;}
+  .wizard-card h2{font-size:1.15rem;font-weight:700;margin-bottom:.5rem;color:var(--gray-900);}
+  .wizard-card p{color:var(--gray-500);font-size:.9rem;margin-bottom:1.5rem;}
+  .opt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+  .opt-btn{padding:1rem;border:2px solid var(--gray-200);border-radius:10px;cursor:pointer;text-align:left;background:white;transition:all .2s;display:flex;flex-direction:column;gap:.35rem;}
+  .opt-btn:hover{border-color:var(--primary);background:#eff6ff;}
+  .opt-btn.selected{border-color:var(--primary);background:#eff6ff;}
+  .opt-btn .icon{font-size:1.5rem;}
+  .opt-btn .title{font-weight:600;font-size:.875rem;color:var(--gray-800);}
+  .opt-btn .desc{font-size:.78rem;color:var(--gray-500);}
+  .wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--gray-100);}
+
+  /* RESOURCE CARDS */
+  .resource-list{display:flex;flex-direction:column;gap:.75rem;}
+  .resource-card{border:1px solid var(--gray-200);border-radius:10px;padding:1rem 1.25rem;background:white;display:flex;align-items:flex-start;gap:.75rem;}
+  .resource-card .rc-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;}
+  .resource-card .rc-icon.green{background:#d1fae5;}
+  .resource-card .rc-icon.blue{background:#dbeafe;}
+  .resource-card .rc-icon.purple{background:#ede9fe;}
+  .resource-card .rc-icon.orange{background:#ffedd5;}
+  .resource-card .rc-icon.red{background:#fee2e2;}
+  .resource-card .rc-body{flex:1;}
+  .resource-card .rc-name{font-weight:600;font-size:.9rem;color:var(--gray-800);}
+  .resource-card .rc-desc{font-size:.8rem;color:var(--gray-500);margin-top:.25rem;}
+  .resource-card .rc-meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem;}
+  .resource-card .tag{font-size:.72rem;padding:2px 8px;border-radius:999px;font-weight:600;}
+  .resource-card .tag.green{background:#d1fae5;color:#065f46;}
+  .resource-card .tag.blue{background:#dbeafe;color:#1e40af;}
+  .resource-card .tag.orange{background:#ffedd5;color:#9a3412;}
+  .resource-card .rc-action{margin-left:auto;display:flex;gap:.5rem;align-items:center;flex-shrink:0;}
+
+  /* PAYMENT PLAN */
+  .pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .installment-row{display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--gray-50);border-radius:8px;margin-bottom:.5rem;}
+  .installment-row .inst-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:white;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .installment-row .inst-info{flex:1;}
+  .installment-row .inst-amt{font-weight:700;color:var(--gray-900);}
+  .installment-row .inst-date{font-size:.8rem;color:var(--gray-500);}
+  .inst-paid{padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700;}
+  .inst-paid.yes{background:#d1fae5;color:#065f46;}
+  .inst-paid.no{background:#fee2e2;color:#991b1b;}
+
+  /* CASE TABLE */
+  .case-table{width:100%;border-collapse:collapse;}
+  .case-table th{text-align:left;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray-500);padding:.6rem 1rem;background:var(--gray-50);border-bottom:1px solid var(--gray-200);}
+  .case-table td{padding:.85rem 1rem;border-bottom:1px solid var(--gray-100);font-size:.875rem;vertical-align:middle;}
+  .case-table tr:last-child td{border-bottom:none;}
+  .case-table tr:hover td{background:var(--gray-50);}
+
+  /* STATUS BADGES */
+  .status{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .65rem;border-radius:999px;font-size:.75rem;font-weight:700;}
+  .status::before{content:'';width:6px;height:6px;border-radius:50%;}
+  .status.seeking{background:#eff6ff;color:#1d4ed8;} .status.seeking::before{background:#3b82f6;}
+  .status.applied{background:#fef3c7;color:#92400e;} .status.applied::before{background:#f59e0b;}
+  .status.approved{background:#d1fae5;color:#065f46;} .status.approved::before{background:#10b981;}
+  .status.plan{background:#f3e8ff;color:#6b21a8;} .status.plan::before{background:#a855f7;}
+  .status.resolved{background:#d1fae5;color:#065f46;} .status.resolved::before{background:#10b981;}
+  .status.eviction{background:#fee2e2;color:#991b1b;} .status.eviction::before{background:#ef4444;}
+
+  /* BUTTONS */
+  .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font-size:.875rem;font-weight:600;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;}
+  .btn-primary{background:var(--primary);color:white;} .btn-primary:hover{background:var(--primary-dark);}
+  .btn-success{background:var(--success);color:white;} .btn-success:hover{background:#059669;}
+  .btn-outline{background:white;color:var(--gray-700);border:1px solid var(--gray-300);} .btn-outline:hover{background:var(--gray-50);}
+  .btn-danger{background:var(--danger);color:white;} .btn-danger:hover{background:#dc2626;}
+  .btn-sm{padding:.35rem .75rem;font-size:.8rem;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* FORMS */
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+  .form-group{margin-bottom:1rem;}
+  .form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--gray-700);margin-bottom:.35rem;}
+  .form-group input,.form-group select,.form-group textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--gray-300);border-radius:8px;font-size:.875rem;color:var(--gray-800);outline:none;transition:border .15s;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+  .form-group textarea{resize:vertical;min-height:80px;}
+
+  /* UPLOAD ZONE */
+  .upload-zone{border:2px dashed var(--gray-300);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;}
+  .upload-zone:hover{border-color:var(--primary);background:#eff6ff;}
+  .upload-zone .uz-icon{font-size:2rem;margin-bottom:.5rem;}
+  .upload-zone h3{font-size:.9rem;font-weight:600;color:var(--gray-700);}
+  .upload-zone p{font-size:.8rem;color:var(--gray-400);margin-top:.25rem;}
+
+  /* DOC ROW */
+  .doc-row{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--gray-50);border-radius:8px;margin-bottom:.5rem;}
+  .doc-row .doc-icon{font-size:1.25rem;}
+  .doc-row .doc-info{flex:1;}
+  .doc-row .doc-name{font-weight:600;font-size:.875rem;color:var(--gray-800);}
+  .doc-row .doc-meta{font-size:.75rem;color:var(--gray-400);}
+
+  /* NOTIFICATION BANNER */
+  .notif-banner{background:linear-gradient(135deg,#1e3a5f,#1e40af);border-radius:12px;padding:1.25rem 1.5rem;color:white;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
+  .notif-banner .nb-icon{font-size:2rem;flex-shrink:0;}
+  .notif-banner h3{font-size:1rem;font-weight:700;}
+  .notif-banner p{font-size:.85rem;opacity:.85;margin-top:.25rem;}
+
+  /* SIGNATURE BOX */
+  .sig-box{border:2px solid var(--gray-200);border-radius:10px;padding:1.5rem;background:var(--gray-50);text-align:center;}
+  .sig-box .sig-name{font-size:1.5rem;font-family:Georgia,serif;font-style:italic;color:var(--gray-700);padding:.5rem;}
+  .sig-meta{font-size:.75rem;color:var(--gray-400);margin-top:.25rem;}
+  .sig-line{border-top:1px solid var(--gray-400);padding-top:.5rem;margin-top:.5rem;}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:2rem;}
+  .timeline::before{content:'';position:absolute;left:.45rem;top:0;bottom:0;width:2px;background:var(--gray-200);}
+  .tl-item{position:relative;margin-bottom:1.25rem;}
+  .tl-item::before{content:'';position:absolute;left:-1.75rem;top:.3rem;width:10px;height:10px;border-radius:50%;background:var(--primary);border:2px solid white;box-shadow:0 0 0 2px var(--primary);}
+  .tl-item .tl-time{font-size:.75rem;color:var(--gray-400);}
+  .tl-item .tl-text{font-size:.875rem;color:var(--gray-700);font-weight:500;}
+
+  /* AI SUMMARY */
+  .ai-card{background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:1.5rem;color:white;margin-bottom:1rem;}
+  .ai-card .ai-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#60a5fa;margin-bottom:.75rem;}
+  .ai-card .ai-text{font-size:.9rem;line-height:1.6;opacity:.9;}
+
+  /* INFO ALERT */
+  .info-alert{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:.9rem 1.1rem;display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem;}
+  .info-alert .ia-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem;}
+  .info-alert p{font-size:.85rem;color:#1e40af;line-height:1.5;}
+  .success-alert{background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:.9rem 1.1rem;display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem;}
+  .success-alert p{font-size:.85rem;color:#065f46;}
+  .warning-alert{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:.9rem 1.1rem;display:flex;gap:.75rem;margin-bottom:1rem;}
+  .warning-alert p{font-size:.85rem;color:#92400e;}
+
+  /* HOLD BADGE */
+  .hold-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;border-radius:999px;font-size:.8rem;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+
+  @media(max-width:768px){.wrapper{grid-template-columns:1fr;}.ta-sidebar{display:none;}.form-row,.pp-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Rent<span>Verified</span></a>
+  <div class="nav-links">
+    <a href="tenant-portal.html" class="nav-link">← Tenant Portal</a>
+    <a href="landlord-signup.html" class="nav-link">Dashboard</a>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="ta-sidebar">
+    <h3>Tenant Assistance</h3>
+    <a class="active" onclick="showSection('dashboard',this)">📊 Overview</a>
+    <a onclick="showSection('intake',this)">🆘 Request Help</a>
+    <a onclick="showSection('resources',this)">🏘 Find Resources</a>
+    <a onclick="showSection('plans',this)">📅 Payment Plans <span class="badge green" id="sb-plans">0</span></a>
+    <a onclick="showSection('docs',this)">📎 Hardship Docs</a>
+    <a onclick="showSection('tracker',this)">🔎 App Tracker <span class="badge" id="sb-tracker">0</span></a>
+    <h3>Landlord View</h3>
+    <a onclick="showSection('landlord',this)">🏠 Tenant Status Feed</a>
+    <a onclick="showSection('history',this)">📋 Case History</a>
+    <h3>Navigate</h3>
+    <a href="eviction.html">⚖️ Legal Center</a>
+    <a href="accounting.html">💰 Accounting</a>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ta-main">
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  OVERVIEW DASHBOARD                            -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-dashboard" class="section active">
+      <div class="page-header">
+        <div>
+          <h1>🤝 Tenant Assistance Center</h1>
+          <p>Help tenants stay housed — protect landlords from costly evictions.</p>
+        </div>
+        <button class="btn btn-primary" onclick="showSection('intake',document.querySelector('.ta-sidebar a:nth-child(3)'))">+ Request Help</button>
+      </div>
+
+      <div class="notif-banner">
+        <div class="nb-icon">💡</div>
+        <div>
+          <h3>Eviction costs $3,500–$7,000 on average. Assistance costs $0.</h3>
+          <p>RentVerified connects tenants to emergency funds, payment plans, and housing counselors — automatically. Every resource referral is logged and timestamped for legal protection.</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="lbl">Active Cases</div><div class="val" id="stat-active">0</div><div class="sub">seeking assistance</div></div>
+        <div class="stat-card green"><div class="lbl">Resolved</div><div class="val" id="stat-resolved">0</div><div class="sub">stayed housed</div></div>
+        <div class="stat-card yellow"><div class="lbl">Pending Apps</div><div class="val" id="stat-pending">0</div><div class="sub">awaiting approval</div></div>
+        <div class="stat-card red"><div class="lbl">Eviction Holds</div><div class="val" id="stat-holds">0</div><div class="sub">recommended wait</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Active Assistance Cases</h2>
+          <button class="btn btn-outline btn-sm" onclick="showSection('intake',document.querySelector('.ta-sidebar a:nth-child(3)'))">+ New Case</button>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <table class="case-table">
+            <thead><tr>
+              <th>Tenant</th><th>Property</th><th>Issue</th><th>Status</th><th>Hold?</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="case-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>📊 Why This Works</h2></div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+            <div style="padding:1rem;background:var(--gray-50);border-radius:10px;">
+              <div style="font-size:1.5rem;margin-bottom:.5rem;">⚖️</div>
+              <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.35rem;">Legal Protection</h3>
+              <p style="font-size:.82rem;color:var(--gray-500);">Courts favor landlords who documented good-faith efforts. Every referral, plan, and document is timestamped automatically.</p>
+            </div>
+            <div style="padding:1rem;background:var(--gray-50);border-radius:10px;">
+              <div style="font-size:1.5rem;margin-bottom:.5rem;">💰</div>
+              <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.35rem;">Save $3,500–$7,000</h3>
+              <p style="font-size:.82rem;color:var(--gray-500);">Average eviction cost in Utah. Emergency assistance programs often pay directly to landlords within 2–6 weeks.</p>
+            </div>
+            <div style="padding:1rem;background:var(--gray-50);border-radius:10px;">
+              <div style="font-size:1.5rem;margin-bottom:.5rem;">🏘</div>
+              <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.35rem;">Community First</h3>
+              <p style="font-size:.82rem;color:var(--gray-500);">Utah has $40M+ in emergency rental assistance annually. Most tenants never know it exists. RentVerified changes that.</p>
+            </div>
+            <div style="padding:1rem;background:var(--gray-50);border-radius:10px;">
+              <div style="font-size:1.5rem;margin-bottom:.5rem;">🤝</div>
+              <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.35rem;">Attorney Advantage</h3>
+              <p style="font-size:.82rem;color:var(--gray-500);">When eviction IS necessary, this paper trail makes cases cleaner, faster, and cheaper to litigate.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  INTAKE WIZARD                                 -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-intake" class="section">
+      <div class="page-header">
+        <div><h1>🆘 Request Rental Assistance</h1><p>Answer 3 quick questions to get a personalized resource list for your situation.</p></div>
+      </div>
+
+      <div class="wizard-wrap">
+        <div class="wizard-steps">
+          <div class="w-step active" id="ws0"><div class="dot">1</div><div class="lbl">Your Info</div></div>
+          <div class="w-step" id="ws1"><div class="dot">2</div><div class="lbl">Situation</div></div>
+          <div class="w-step" id="ws2"><div class="dot">3</div><div class="lbl">Prior Help</div></div>
+          <div class="w-step" id="ws3"><div class="dot">4</div><div class="lbl">Resources</div></div>
+        </div>
+
+        <!-- Step 0: Tenant Info -->
+        <div id="wiz-step-0" class="wizard-card">
+          <h2>Let's find you help</h2>
+          <p>This is completely confidential. Your information is only shared with assistance programs you choose to apply to.</p>
+          <div class="form-row">
+            <div class="form-group"><label>Your Name</label><input id="w-name" placeholder="Jane Smith"></div>
+            <div class="form-group"><label>Your Email</label><input id="w-email" type="email" placeholder="jane@email.com"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Phone Number</label><input id="w-phone" placeholder="(801) 555-0000"></div>
+            <div class="form-group">
+              <label>Which county do you live in?</label>
+              <select id="w-county">
+                <option value="">Select your county...</option>
+                <option value="salt-lake">Salt Lake County</option>
+                <option value="utah">Utah County</option>
+                <option value="davis">Davis County</option>
+                <option value="weber">Weber County</option>
+                <option value="washington">Washington County</option>
+                <option value="cache">Cache County</option>
+                <option value="box-elder">Box Elder County</option>
+                <option value="tooele">Tooele County</option>
+                <option value="other-ut">Other Utah County</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label>Rental Property Address</label><input id="w-address" placeholder="123 Main St, Salt Lake City, UT 84101"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Monthly Rent Amount</label><input id="w-rent" type="number" placeholder="1200"></div>
+            <div class="form-group"><label>Amount Behind</label><input id="w-behind" type="number" placeholder="1200"></div>
+          </div>
+          <div class="wizard-nav">
+            <span style="font-size:.82rem;color:var(--gray-400);">Step 1 of 4</span>
+            <button class="btn btn-primary" onclick="wizNext(0)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 1: Situation Type -->
+        <div id="wiz-step-1" class="wizard-card" style="display:none;">
+          <h2>What's your situation?</h2>
+          <p>Choose the option that best describes your current hardship. This helps us find the right programs for you.</p>
+          <div class="opt-grid">
+            <div class="opt-btn" onclick="selectOpt(this,'sit','job-loss')">
+              <div class="icon">💼</div><div class="title">Job Loss / Reduced Hours</div><div class="desc">Recently laid off, furloughed, or had hours cut</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'sit','medical')">
+              <div class="icon">🏥</div><div class="title">Medical Emergency</div><div class="desc">Medical bills, illness, or disability affecting income</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'sit','domestic')">
+              <div class="icon">🛡</div><div class="title">Domestic Violence / Safety</div><div class="desc">Fleeing abuse or unsafe living situation</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'sit','covid')">
+              <div class="icon">😷</div><div class="title">COVID-19 Related</div><div class="desc">Ongoing impact from pandemic on income or housing</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'sit','other-temp')">
+              <div class="icon">⏳</div><div class="title">Temporary Hardship</div><div class="desc">Short-term issue — expecting to recover</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'sit','ongoing')">
+              <div class="icon">📉</div><div class="title">Ongoing Financial Stress</div><div class="desc">Income consistently not covering expenses</div>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button class="btn btn-outline" onclick="wizBack(1)">← Back</button>
+            <button class="btn btn-primary" onclick="wizNext(1)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Prior Assistance -->
+        <div id="wiz-step-2" class="wizard-card" style="display:none;">
+          <h2>Have you applied for assistance before?</h2>
+          <p>This helps us avoid duplicate applications and find programs you haven't tried yet.</p>
+          <div class="opt-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="opt-btn" onclick="selectOpt(this,'prior','never')">
+              <div class="icon">🆕</div><div class="title">Never Applied</div><div class="desc">First time seeking rental assistance</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'prior','denied')">
+              <div class="icon">❌</div><div class="title">Applied & Denied</div><div class="desc">Previous application was rejected</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'prior','pending')">
+              <div class="icon">⏳</div><div class="title">Application Pending</div><div class="desc">Currently waiting on a decision</div>
+            </div>
+            <div class="opt-btn" onclick="selectOpt(this,'prior','received')">
+              <div class="icon">✅</div><div class="title">Received Before</div><div class="desc">Previously received assistance, need more help</div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:1rem;">
+            <label>Any additional context that might help? (optional)</label>
+            <textarea id="w-notes" placeholder="e.g. I was laid off 2 months ago and just got a new job — I need help with 2 months of back rent while I get back on my feet..."></textarea>
+          </div>
+          <div class="wizard-nav">
+            <button class="btn btn-outline" onclick="wizBack(2)">← Back</button>
+            <button class="btn btn-success" onclick="wizGenerate()">🤖 Generate My Resource List →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: AI Results -->
+        <div id="wiz-step-3" class="wizard-card" style="display:none;">
+          <h2>Your Personalized Resource List</h2>
+          <p id="wiz-summary-line">Based on your situation, here are the best resources for you:</p>
+
+          <div id="wiz-generating" style="text-align:center;padding:2rem;">
+            <div style="font-size:2.5rem;margin-bottom:1rem;animation:spin 1s linear infinite;display:inline-block;">🤖</div>
+            <p style="color:var(--gray-500);">Matching you with resources in your county…</p>
+          </div>
+
+          <div id="wiz-results" style="display:none;">
+            <div class="ai-card" id="wiz-ai-summary"></div>
+            <div id="wiz-resource-list" class="resource-list" style="margin-top:1rem;"></div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem;">
+              <div style="padding:1rem;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;">
+                <div style="font-weight:700;font-size:.9rem;color:#065f46;margin-bottom:.35rem;">📞 Universal Helpline</div>
+                <div style="font-size:1.5rem;font-weight:800;color:#065f46;">2-1-1</div>
+                <div style="font-size:.8rem;color:#047857;margin-top:.25rem;">Call or text 24/7 — Utah & nationwide resource navigator</div>
+              </div>
+              <div style="padding:1rem;background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;">
+                <div style="font-weight:700;font-size:.9rem;color:#1e40af;margin-bottom:.35rem;">🌐 Online Database</div>
+                <div style="font-size:1rem;font-weight:700;color:#1d4ed8;">211utah.org</div>
+                <div style="font-size:.8rem;color:#1e40af;margin-top:.25rem;">Search every assistance program by ZIP code, updated weekly</div>
+              </div>
+            </div>
+
+            <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:1rem 1.25rem;margin-top:1rem;">
+              <div style="font-weight:700;font-size:.875rem;color:#92400e;margin-bottom:.5rem;">⚡ Recommended Next Steps</div>
+              <div id="wiz-next-steps" style="font-size:.85rem;color:#78350f;"></div>
+            </div>
+
+            <div class="wizard-nav" style="padding-top:1.25rem;">
+              <button class="btn btn-outline" onclick="wizBack(3)">Start Over</button>
+              <div style="display:flex;gap:.5rem;">
+                <button class="btn btn-outline" onclick="saveCase()">💾 Save Case</button>
+                <button class="btn btn-success" onclick="createPaymentPlan()">📅 Create Payment Plan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  RESOURCE LIBRARY                              -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-resources" class="section">
+      <div class="page-header">
+        <div><h1>🏘 Resource Library</h1><p>Verified assistance programs for Utah renters — updated quarterly.</p></div>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <select id="filter-county" onchange="renderResources()" style="padding:.5rem .8rem;border:1px solid var(--gray-300);border-radius:8px;font-size:.875rem;">
+          <option value="all">All Counties</option>
+          <option value="salt-lake">Salt Lake County</option>
+          <option value="utah">Utah County</option>
+          <option value="davis">Davis County</option>
+          <option value="weber">Weber County</option>
+          <option value="washington">Washington County</option>
+          <option value="statewide">Statewide</option>
+          <option value="national">National</option>
+        </select>
+        <select id="filter-type" onchange="renderResources()" style="padding:.5rem .8rem;border:1px solid var(--gray-300);border-radius:8px;font-size:.875rem;">
+          <option value="all">All Types</option>
+          <option value="rent">Emergency Rent</option>
+          <option value="utility">Utilities</option>
+          <option value="food">Food</option>
+          <option value="counseling">Housing Counseling</option>
+          <option value="legal">Legal Aid</option>
+        </select>
+      </div>
+      <div id="resource-library" class="resource-list"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  PAYMENT PLANS                                 -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-plans" class="section">
+      <div class="page-header">
+        <div><h1>📅 Payment Plans</h1><p>Digital payment agreements between tenant and landlord — legally documented.</p></div>
+        <button class="btn btn-primary" onclick="openNewPlanModal()">+ New Plan</button>
+      </div>
+
+      <div id="plans-list"></div>
+
+      <div style="display:none;" id="new-plan-form">
+        <div class="panel">
+          <div class="panel-header"><h2>✏️ Create Payment Plan Agreement</h2></div>
+          <div class="panel-body">
+            <div class="info-alert"><div class="ia-icon">ℹ️</div><p>Both parties must "sign" (confirm) this plan. Once signed, automated reminders will be sent on each due date. A broken plan automatically triggers an eviction recommendation.</p></div>
+            <div class="form-row">
+              <div class="form-group"><label>Tenant Name</label><input id="pp-tenant" placeholder="Jane Smith"></div>
+              <div class="form-group"><label>Property Address</label><input id="pp-address" placeholder="123 Main St"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Total Amount Owed ($)</label><input id="pp-total" type="number" placeholder="2400" oninput="generateInstallments()"></div>
+              <div class="form-group"><label>Number of Payments</label>
+                <select id="pp-payments" onchange="generateInstallments()">
+                  <option value="2">2 Payments</option>
+                  <option value="3">3 Payments</option>
+                  <option value="4">4 Payments</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group"><label>First Payment Due Date</label><input id="pp-startdate" type="date"></div>
+            <div class="form-group"><label>Reason for Plan</label><textarea id="pp-reason" placeholder="e.g. Tenant experienced temporary job loss — agreed to repayment schedule while maintaining current rent payments"></textarea></div>
+            <h3 style="font-size:.9rem;font-weight:700;margin:1rem 0 .75rem;">Generated Schedule</h3>
+            <div id="pp-schedule"></div>
+            <div class="form-row" style="margin-top:1.25rem;">
+              <div class="sig-box">
+                <div style="font-size:.75rem;font-weight:600;color:var(--gray-500);margin-bottom:.5rem;">TENANT SIGNATURE</div>
+                <div class="sig-name" id="pp-sig-tenant">Jane Smith</div>
+                <div class="sig-line"><div class="sig-meta">Signed digitally on <span id="pp-sig-date">—</span></div></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:.75rem;" onclick="signPlan('tenant')">Sign as Tenant</button>
+              </div>
+              <div class="sig-box">
+                <div style="font-size:.75rem;font-weight:600;color:var(--gray-500);margin-bottom:.5rem;">LANDLORD / PM SIGNATURE</div>
+                <div class="sig-name">Daniel Hart</div>
+                <div class="sig-line"><div class="sig-meta">Signed digitally on <span id="pp-sig-ll-date">—</span></div></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:.75rem;" onclick="signPlan('landlord')">Sign as Landlord</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:.75rem;margin-top:1.25rem;justify-content:flex-end;">
+              <button class="btn btn-outline" onclick="document.getElementById('new-plan-form').style.display='none'">Cancel</button>
+              <button class="btn btn-success" id="save-plan-btn" onclick="savePlan()" disabled>✅ Save Agreement</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  HARDSHIP DOCUMENTS                            -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-docs" class="section">
+      <div class="page-header">
+        <div><h1>📎 Hardship Documentation</h1><p>Upload proof of hardship — protects both tenant and landlord legally.</p></div>
+      </div>
+
+      <div class="info-alert"><div class="ia-icon">⚖️</div><p>In Utah courts, documentation showing a tenant's hardship and the landlord's good-faith response significantly strengthens the landlord's position if eviction ultimately becomes necessary. Upload and timestamp everything.</p></div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Upload Document</h2></div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div class="form-group"><label>Related Tenant</label><input id="doc-tenant" placeholder="Jane Smith — 123 Main St"></div>
+            <div class="form-group"><label>Document Type</label>
+              <select id="doc-type">
+                <option value="job-loss">Job Loss / Termination Letter</option>
+                <option value="medical">Medical Bills / Records</option>
+                <option value="assistance-app">Assistance Application Confirmation</option>
+                <option value="assistance-approval">Assistance Approval Letter</option>
+                <option value="bank">Bank Statement (showing hardship)</option>
+                <option value="dv">Domestic Violence Documentation</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="upload-zone" onclick="simulateUpload()">
+            <div class="uz-icon">📄</div>
+            <h3>Click to upload or drag & drop</h3>
+            <p>PDF, JPG, PNG — max 10MB</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Uploaded Documents</h2></div>
+        <div class="panel-body" id="doc-list">
+          <p style="color:var(--gray-400);font-size:.875rem;text-align:center;padding:1.5rem 0;">No documents uploaded yet. Upload hardship documentation above.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  APPLICATION TRACKER                           -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-tracker" class="section">
+      <div class="page-header">
+        <div><h1>🔎 Assistance Application Tracker</h1><p>Track every application — landlord sees status so they know to wait.</p></div>
+        <button class="btn btn-primary" onclick="openNewAppModal()">+ Log Application</button>
+      </div>
+
+      <div class="success-alert"><div class="ia-icon">✅</div><p><strong>Landlord notifications are live.</strong> When you log a pending application, your landlord automatically sees: "Tenant assistance application pending — estimated decision: [timeframe]" and receives an eviction hold recommendation.</p></div>
+
+      <div id="app-tracker-list"></div>
+
+      <div id="new-app-form" style="display:none;">
+        <div class="panel">
+          <div class="panel-header"><h2>Log Assistance Application</h2></div>
+          <div class="panel-body">
+            <div class="form-row">
+              <div class="form-group"><label>Program Name</label><input id="app-prog" placeholder="Community Action Services of Utah"></div>
+              <div class="form-group"><label>Application Date</label><input id="app-date" type="date"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Amount Requested ($)</label><input id="app-amount" type="number" placeholder="2400"></div>
+              <div class="form-group"><label>Estimated Decision Timeframe</label>
+                <select id="app-timeframe">
+                  <option value="1-2 weeks">1–2 weeks</option>
+                  <option value="2-4 weeks">2–4 weeks</option>
+                  <option value="4-6 weeks">4–6 weeks</option>
+                  <option value="6-8 weeks">6–8 weeks</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group"><label>Confirmation / Case Number (if received)</label><input id="app-case" placeholder="Optional"></div>
+            <div class="form-row">
+              <div class="form-group"><label>Tenant Name</label><input id="app-tenant" placeholder="Jane Smith"></div>
+              <div class="form-group"><label>Notes</label><input id="app-notes" placeholder="Optional — any details about the application"></div>
+            </div>
+            <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:.5rem;">
+              <button class="btn btn-outline" onclick="document.getElementById('new-app-form').style.display='none'">Cancel</button>
+              <button class="btn btn-success" onclick="saveApp()">✅ Log Application + Notify Landlord</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  LANDLORD VIEW                                 -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-landlord" class="section">
+      <div class="page-header">
+        <div><h1>🏠 Tenant Assistance Status Feed</h1><p>Real-time view of tenants actively seeking help — with recommended actions.</p></div>
+      </div>
+
+      <div class="warning-alert"><div class="ia-icon">⚠️</div><p><strong>Eviction Hold Policy:</strong> When a tenant has an active assistance application, RentVerified recommends a 30–45 day eviction hold. Acting in good faith protects you legally and often results in direct payment from the assistance program to you.</p></div>
+
+      <div id="landlord-feed"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!--  CASE HISTORY                                  -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div id="section-history" class="section">
+      <div class="page-header">
+        <div><h1>📋 Case History & Audit Trail</h1><p>Complete documented record — every action timestamped for legal protection.</p></div>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)this.style.display='none'">
+  <div id="modal-box" style="background:white;border-radius:14px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;padding:1.75rem;"></div>
+</div>
+
+<style>
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeIn .3s ease;}
+</style>
+
+<script>
+/* ================================================================
+   DATA & RESOURCES
+   ================================================================ */
+const RESOURCES_DB = [
+  /* ── SALT LAKE COUNTY ── */
+  {id:'cas-sl',name:'Community Action Services & Food Bank',org:'Community Action Services',county:'salt-lake',type:'rent',icon:'🏘',color:'green',
+   desc:'Emergency rental and utility assistance for Salt Lake County residents facing a housing crisis.',
+   tags:['Rent','Utilities','Food'],phone:'(801) 691-5200',website:'https://www.communityactionprogram.org',processing:'2–4 weeks',pays:'Directly to landlord'},
+  {id:'ccs-sl',name:'Catholic Community Services — Emergency Assistance',org:'Catholic Community Services',county:'salt-lake',type:'rent',icon:'✝️',color:'blue',
+   desc:'Short-term rental and utility assistance for individuals and families regardless of religion.',
+   tags:['Rent','Utilities','Ecumenical'],phone:'(801) 977-9119',website:'https://www.ccsutah.org',processing:'1–3 weeks',pays:'Directly to landlord'},
+  {id:'salvation-sl',name:'Salvation Army — Emergency Rental Assistance',org:'Salvation Army',county:'salt-lake',type:'rent',icon:'🔔',color:'red',
+   desc:'One-time emergency rental assistance for individuals and families in crisis.',
+   tags:['Rent','One-time'],phone:'(801) 323-2055',website:'https://www.salvationarmyutah.org',processing:'1–2 weeks',pays:'Directly to landlord'},
+  {id:'uca-sl',name:'Utah Community Action',org:'Utah Community Action',county:'salt-lake',type:'utility',icon:'⚡',color:'orange',
+   desc:'HEAT program — energy and utility assistance for low-income households in Salt Lake County.',
+   tags:['Utilities','HEAT Program'],phone:'(801) 359-2444',website:'https://www.utahcommunityaction.org',processing:'2–3 weeks',pays:'Direct to utility'},
+
+  /* ── UTAH COUNTY ── */
+  {id:'cas-ut',name:'Community Action Services — Utah County',org:'Community Action Services',county:'utah',type:'rent',icon:'🏘',color:'green',
+   desc:'Emergency rental assistance, utility help, and housing services for Utah County residents.',
+   tags:['Rent','Utilities','Food'],phone:'(801) 691-5224',website:'https://www.communityactionprogram.org',processing:'2–4 weeks',pays:'Directly to landlord'},
+  {id:'ccs-ut',name:'Catholic Community Services — Provo',org:'Catholic Community Services',county:'utah',type:'rent',icon:'✝️',color:'blue',
+   desc:'Emergency financial assistance for rent and utilities in Utah County.',
+   tags:['Rent','Utilities'],phone:'(801) 375-2272',website:'https://www.ccsutah.org',processing:'1–3 weeks',pays:'Directly to landlord'},
+  {id:'dws-ut',name:'DWS — Utah County Emergency Assistance',org:'Utah DWS',county:'utah',type:'rent',icon:'🏛',color:'purple',
+   desc:'State emergency assistance through the Utah Department of Workforce Services.',
+   tags:['Rent','Utilities','Government'],phone:'(801) 526-4400',website:'https://jobs.utah.gov',processing:'3–5 weeks',pays:'Directly to landlord'},
+
+  /* ── DAVIS COUNTY ── */
+  {id:'dca',name:'Davis Community Action',org:'Davis Community Action',county:'davis',type:'rent',icon:'🏘',color:'green',
+   desc:'Emergency financial assistance for Davis County residents facing eviction or housing instability.',
+   tags:['Rent','Utilities'],phone:'(801) 451-4065',website:'https://www.daviscommaction.org',processing:'2–3 weeks',pays:'Directly to landlord'},
+  {id:'ch-davis',name:'Community Help — Davis County',org:'Community Help Inc.',county:'davis',type:'rent',icon:'🤝',color:'blue',
+   desc:'Neighbor-helping-neighbor emergency assistance for Davis County households.',
+   tags:['Rent','Food','Clothing'],phone:'(801) 295-8080',website:'https://communityhelp.org',processing:'1–2 weeks',pays:'Directly to landlord'},
+
+  /* ── WEBER COUNTY ── */
+  {id:'oca-weber',name:'Ogden City Community Development',org:'Ogden City',county:'weber',type:'rent',icon:'🏛',color:'purple',
+   desc:'Emergency rental assistance for Ogden and Weber County residents.',
+   tags:['Rent','Government'],phone:'(801) 629-8980',website:'https://www.ogdencity.com',processing:'3–4 weeks',pays:'Directly to landlord'},
+  {id:'ccs-ogden',name:'Catholic Community Services — Ogden',org:'Catholic Community Services',county:'weber',type:'rent',icon:'✝️',color:'blue',
+   desc:'Emergency financial assistance for Weber County residents regardless of faith.',
+   tags:['Rent','Utilities'],phone:'(801) 394-5944',website:'https://www.ccsutah.org',processing:'1–3 weeks',pays:'Directly to landlord'},
+
+  /* ── WASHINGTON COUNTY ── */
+  {id:'ihc-wash',name:'Five County Community Action Agency',org:'Five County CAA',county:'washington',type:'rent',icon:'🏘',color:'green',
+   desc:'Emergency rental and utility assistance for Washington County and surrounding rural counties.',
+   tags:['Rent','Utilities'],phone:'(435) 673-3548',website:'https://www.fivecounty.utah.gov',processing:'2–4 weeks',pays:'Directly to landlord'},
+
+  /* ── STATEWIDE ── */
+  {id:'heat',name:'HEAT Program — Utah Home Energy Assistance',org:'Utah Community Action',county:'statewide',type:'utility',icon:'🔥',color:'orange',
+   desc:'Federally funded LIHEAP program helping low-income Utah households with heating and cooling costs.',
+   tags:['Utilities','Federal','LIHEAP'],phone:'1-800-662-6500',website:'https://www.utahcommunityaction.org/heat',processing:'2–4 weeks',pays:'Direct to utility'},
+  {id:'uhc',name:'Utah Housing Corporation — Rental Assistance',org:'Utah Housing Corporation',county:'statewide',type:'rent',icon:'🏠',color:'blue',
+   desc:'State-administered emergency rental assistance programs and housing stability services.',
+   tags:['Rent','State Program'],phone:'(801) 902-8200',website:'https://www.utahhousingcorp.org',processing:'3–6 weeks',pays:'Directly to landlord'},
+  {id:'dws-state',name:'Utah DWS — Financial Assistance',org:'Utah Department of Workforce Services',county:'statewide',type:'rent',icon:'🏛',color:'purple',
+   desc:'State emergency financial assistance — rental, utility, and other housing costs for qualifying households.',
+   tags:['Rent','Utilities','Government'],phone:'1-866-435-7414',website:'https://jobs.utah.gov/assistance',processing:'3–5 weeks',pays:'Directly to landlord'},
+  {id:'ihc-financial',name:'Intermountain Healthcare — Financial Assistance',org:'Intermountain Healthcare',county:'statewide',type:'rent',icon:'🏥',color:'red',
+   desc:'For households where medical bills are driving housing instability — IHC financial assistance frees up money for rent.',
+   tags:['Medical','Indirect Rent Help'],phone:'1-800-442-8850',website:'https://intermountainhealthcare.org',processing:'1–3 weeks',pays:'Bill forgiveness/reduction'},
+
+  /* ── NATIONAL ── */
+  {id:'211',name:'211 Utah — Complete Resource Navigator',org:'United Way of Utah',county:'national',type:'rent',icon:'📞',color:'green',
+   desc:'Call or text 2-1-1 for a live navigator who will match you with every program available in your area. Available 24/7.',
+   tags:['Rent','Utilities','Food','Counseling','Referral'],phone:'2-1-1',website:'https://www.211utah.org',processing:'Immediate referral',pays:'Referral service'},
+  {id:'hud-counsel',name:'HUD-Approved Housing Counselors',org:'U.S. Dept. of Housing & Urban Development',county:'national',type:'counseling',icon:'🏛',color:'purple',
+   desc:'Free or low-cost housing counseling to help tenants understand their rights, negotiate with landlords, and access assistance.',
+   tags:['Free','Counseling','Rights'],phone:'1-800-569-4287',website:'https://www.hud.gov/counseling',processing:'Appointment within 1 week',pays:'Free service'},
+  {id:'nlihc',name:'National Low Income Housing Coalition',org:'NLIHC',county:'national',type:'counseling',icon:'📋',color:'blue',
+   desc:'National database of emergency rental assistance programs updated in real time. Search by state and county.',
+   tags:['Database','National','ERA'],phone:'N/A',website:'https://nlihc.org/rental-assistance',processing:'Referral only',pays:'Referral service'},
+  {id:'salvation-nat',name:'Salvation Army — National Emergency Assistance',org:'Salvation Army',county:'national',type:'rent',icon:'🔔',color:'red',
+   desc:'National emergency financial assistance including rent, utilities, and food. Contact your local branch.',
+   tags:['Rent','Utilities','Food'],phone:'1-800-725-2769',website:'https://www.salvationarmyusa.org',processing:'1–2 weeks',pays:'Directly to landlord'},
+  {id:'usda-rural',name:'USDA Rural Development — Rental Assistance',org:'USDA',county:'national',type:'rent',icon:'🌾',color:'green',
+   desc:'For tenants in rural Utah properties — USDA has dedicated rental assistance for qualifying rural households.',
+   tags:['Rural','Federal','Rent'],phone:'1-800-670-6553',website:'https://www.rd.usda.gov',processing:'4–8 weeks',pays:'Directly to landlord'},
+];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let wizData = {name:'',email:'',phone:'',county:'',address:'',rent:0,behind:0,sit:'',prior:'',notes:''};
+let ppSigned = {tenant:false,landlord:false};
+let ppSigDates = {tenant:'',landlord:''};
+
+function load(k,d=[]){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch{return d;}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtDateFull(d){return new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});}
+function fmtMoney(n){return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+/* ================================================================
+   SECTION NAV
+   ================================================================ */
+function showSection(id, el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.ta-sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(id==='dashboard') renderDashboard();
+  if(id==='resources') renderResources();
+  if(id==='plans') renderPlans();
+  if(id==='docs') renderDocs();
+  if(id==='tracker') renderTracker();
+  if(id==='landlord') renderLandlordFeed();
+  if(id==='history') renderHistory();
+}
+
+/* ================================================================
+   WIZARD
+   ================================================================ */
+let wizStep = 0;
+let wizSelections = {};
+
+function wizNext(step){
+  if(step === 0){
+    const n=document.getElementById('w-name').value.trim();
+    const c=document.getElementById('w-county').value;
+    if(!n||!c){alert('Please fill in your name and county.');return;}
+    wizData.name=n; wizData.email=document.getElementById('w-email').value;
+    wizData.phone=document.getElementById('w-phone').value;
+    wizData.county=c; wizData.address=document.getElementById('w-address').value;
+    wizData.rent=parseFloat(document.getElementById('w-rent').value)||0;
+    wizData.behind=parseFloat(document.getElementById('w-behind').value)||0;
+  }
+  if(step === 1 && !wizSelections.sit){alert('Please select your situation type.');return;}
+  if(step === 2 && !wizSelections.prior){alert('Please select your prior assistance history.');return;}
+  document.getElementById('wiz-step-'+step).style.display='none';
+  document.getElementById('wiz-step-'+(step+1)).style.display='block';
+  document.getElementById('ws'+step).classList.remove('active');
+  document.getElementById('ws'+step).classList.add('done');
+  document.getElementById('ws'+(step+1)).classList.add('active');
+  wizStep = step+1;
+}
+
+function wizBack(step){
+  document.getElementById('wiz-step-'+step).style.display='none';
+  document.getElementById('wiz-step-'+(step-1)).style.display='block';
+  document.getElementById('ws'+step).classList.remove('active','done');
+  document.getElementById('ws'+(step-1)).classList.remove('done');
+  document.getElementById('ws'+(step-1)).classList.add('active');
+  if(step===3){
+    document.getElementById('wiz-results').style.display='none';
+    document.getElementById('wiz-generating').style.display='block';
+    wizSelections={};
+  }
+  wizStep=step-1;
+}
+
+function selectOpt(el, key, val){
+  document.querySelectorAll('[onclick*="selectOpt(this,\''+key+'\'"]').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  wizSelections[key]=val;
+  if(key==='sit') wizData.sit=val;
+  if(key==='prior') wizData.prior=val;
+}
+
+function wizGenerate(){
+  wizData.notes=document.getElementById('w-notes').value;
+  document.getElementById('wiz-step-2').style.display='none';
+  document.getElementById('wiz-step-3').style.display='block';
+  document.getElementById('ws2').classList.remove('active'); document.getElementById('ws2').classList.add('done');
+  document.getElementById('ws3').classList.add('active');
+  wizStep=3;
+  document.getElementById('wiz-generating').style.display='block';
+  document.getElementById('wiz-results').style.display='none';
+  setTimeout(()=>{
+    document.getElementById('wiz-generating').style.display='none';
+    buildWizResults();
+    document.getElementById('wiz-results').style.display='block';
+  },1800);
+}
+
+function buildWizResults(){
+  const county = wizData.county;
+  const sit = wizData.sit;
+  const prior = wizData.prior;
+  const behind = wizData.behind || 'an unknown amount';
+  const countyName = document.getElementById('w-county').selectedOptions[0]?.text || county;
+
+  // Filter resources
+  let resources = RESOURCES_DB.filter(r=>r.county===county||r.county==='statewide'||r.county==='national');
+  // Prioritize by type
+  if(sit==='medical') resources = [...resources.filter(r=>r.id==='ihc-financial'), ...resources.filter(r=>r.id!=='ihc-financial')];
+  if(prior==='pending') resources = resources.filter(r=>r.county!==county); // skip local if already applied
+  resources = resources.slice(0,6);
+
+  // AI summary
+  const sitLabels={'job-loss':'job loss','medical':'medical hardship','domestic':'domestic violence situation','covid':'COVID-19 impact','other-temp':'temporary hardship','ongoing':'ongoing financial stress'};
+  const priorLabels={'never':'this is your first time seeking assistance','denied':'your previous application was denied — many programs have different eligibility criteria, so don\'t give up','pending':'you have a pending application — we\'ll focus on programs you haven\'t tried yet','received':'you\'ve received assistance before — there are additional programs available'};
+  document.getElementById('wiz-ai-summary').innerHTML=`
+    <div class="ai-label">🤖 AI Match Summary</div>
+    <div class="ai-text">
+      Based on your ${sitLabels[sit]||'situation'} in <strong>${countyName}</strong>, I found <strong>${resources.length} programs</strong>
+      that match your profile. Since ${priorLabels[prior]||'you are seeking help'}, I've prioritized the programs most
+      likely to approve your application quickly. ${behind ? `You're behind $${Number(behind).toLocaleString()} —
+      most of these programs can cover that amount.` : ''} Call 2-1-1 first for the fastest routing.
+    </div>`;
+
+  // Resource list
+  const rl = document.getElementById('wiz-resource-list');
+  rl.innerHTML = resources.map(r=>`
+    <div class="resource-card fade-in">
+      <div class="rc-icon ${r.color}">${r.icon}</div>
+      <div class="rc-body">
+        <div class="rc-name">${r.name}</div>
+        <div class="rc-desc">${r.desc}</div>
+        <div class="rc-meta">
+          ${r.tags.map(t=>`<span class="tag ${r.color}">${t}</span>`).join('')}
+          <span class="tag blue">⏱ ${r.processing}</span>
+          <span class="tag green">💸 ${r.pays}</span>
+        </div>
+        <div style="margin-top:.5rem;font-size:.8rem;color:var(--gray-600);">📞 ${r.phone}</div>
+      </div>
+      <div class="rc-action">
+        <button class="btn btn-outline btn-sm" onclick="logApp('${r.name}')">Log App</button>
+      </div>
+    </div>`).join('');
+
+  // Summary line
+  document.getElementById('wiz-summary-line').textContent = `Found ${resources.length} programs matching your ${sitLabels[sit]||'situation'} in ${countyName}:`;
+
+  // Next steps
+  const steps=['1. Call <strong>2-1-1</strong> right now — a live navigator will confirm the best program for your exact situation.'];
+  if(prior==='never') steps.push('2. Apply to <strong>2–3 programs simultaneously</strong> — it\'s not double-dipping, it\'s smart. First approval pays your landlord.');
+  if(prior==='pending') steps.push('2. <strong>Log your pending application below</strong> — this notifies your landlord and triggers a recommended eviction hold.');
+  if(sit==='job-loss') steps.push('3. Bring proof of job loss (termination letter or employer statement) to every application — it speeds up approval.');
+  if(sit==='medical') steps.push('3. Contact <strong>IHC Financial Assistance</strong> first — reducing your medical bills directly frees up rent money.');
+  steps.push(`${steps.length+1}. <strong>Document everything</strong> — save every confirmation number, upload it below, and share with your landlord.`);
+  document.getElementById('wiz-next-steps').innerHTML = '<ol style="padding-left:1.25rem;">' + steps.map(s=>`<li style="margin-bottom:.4rem;">${s}</li>`).join('') + '</ol>';
+}
+
+function saveCase(){
+  const cases = load('rv_assistance_cases',[]);
+  const c = {
+    id:genId(), status:'seeking', createdAt:new Date().toISOString(),
+    tenantName:wizData.name, email:wizData.email, phone:wizData.phone,
+    county:wizData.county, address:wizData.address,
+    rent:wizData.rent, behind:wizData.behind,
+    sit:wizData.sit, prior:wizData.prior, notes:wizData.notes,
+    evictionHold:true, holdDays:30,
+    timeline:[{ts:new Date().toISOString(), text:'Assistance request opened — eviction hold recommended (30 days)'}]
+  };
+  cases.push(c);
+  save('rv_assistance_cases', cases);
+  // Notify landlord via rv_notifications
+  const notifs = load('rv_notifications',[]);
+  notifs.unshift({id:genId(), type:'assistance', ts:new Date().toISOString(),
+    msg:`${wizData.name||'Tenant'} at ${wizData.address||'your property'} is actively seeking rental assistance. Eviction hold recommended for 30 days.`,
+    caseId:c.id, read:false});
+  save('rv_notifications', notifs);
+  updateSidebarBadges();
+  alert(`Case saved! ✅\n\nEviction hold recommended: 30 days\nYour landlord has been notified.\n\nNext: Log assistance applications in the App Tracker to keep your landlord updated.`);
+  showSection('dashboard', document.querySelector('.ta-sidebar a'));
+}
+
+function createPaymentPlan(){
+  showSection('plans', document.querySelector('.ta-sidebar a:nth-child(5)'));
+  setTimeout(()=>openNewPlanModal(),100);
+  document.getElementById('pp-tenant').value = wizData.name || '';
+  document.getElementById('pp-address').value = wizData.address || '';
+  document.getElementById('pp-total').value = wizData.behind || '';
+  generateInstallments();
+}
+
+/* ================================================================
+   RESOURCES LIBRARY
+   ================================================================ */
+function renderResources(){
+  const county = document.getElementById('filter-county').value;
+  const type   = document.getElementById('filter-type').value;
+  let list = RESOURCES_DB.filter(r=>{
+    const cMatch = county==='all'||(r.county===county);
+    const tMatch = type==='all'||(r.type===type);
+    return cMatch&&tMatch;
+  });
+  document.getElementById('resource-library').innerHTML = list.length ? list.map(r=>`
+    <div class="resource-card">
+      <div class="rc-icon ${r.color}">${r.icon}</div>
+      <div class="rc-body">
+        <div class="rc-name">${r.name}</div>
+        <div style="font-size:.75rem;color:var(--gray-400);margin-bottom:.3rem;">${r.org}</div>
+        <div class="rc-desc">${r.desc}</div>
+        <div class="rc-meta">
+          ${r.tags.map(t=>`<span class="tag blue">${t}</span>`).join('')}
+          <span class="tag orange">⏱ ${r.processing}</span>
+        </div>
+        <div style="margin-top:.5rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:.8rem;color:var(--gray-600);">
+          <span>📞 ${r.phone}</span>
+          <span>💸 ${r.pays}</span>
+        </div>
+      </div>
+      <div class="rc-action">
+        <button class="btn btn-outline btn-sm" onclick="logApp('${r.name}')">Log App</button>
+      </div>
+    </div>`).join('')
+  : '<p style="color:var(--gray-400);text-align:center;padding:2rem;">No resources found for selected filters.</p>';
+}
+
+function logApp(name){
+  showSection('tracker', document.querySelector('.ta-sidebar a:nth-child(6)'));
+  document.getElementById('new-app-form').style.display='block';
+  document.getElementById('app-prog').value=name;
+  document.getElementById('app-date').value=new Date().toISOString().split('T')[0];
+  window.scrollTo(0,0);
+}
+
+/* ================================================================
+   PAYMENT PLANS
+   ================================================================ */
+function openNewPlanModal(){
+  document.getElementById('new-plan-form').style.display='block';
+  document.getElementById('pp-startdate').value=new Date().toISOString().split('T')[0];
+  ppSigned={tenant:false,landlord:false};
+  ppSigDates={tenant:'',landlord:''};
+  document.getElementById('pp-sig-date').textContent='—';
+  document.getElementById('pp-sig-ll-date').textContent='—';
+  document.getElementById('save-plan-btn').disabled=true;
+  generateInstallments();
+}
+
+function generateInstallments(){
+  const total = parseFloat(document.getElementById('pp-total').value)||0;
+  const n = parseInt(document.getElementById('pp-payments').value)||2;
+  const startRaw = document.getElementById('pp-startdate').value;
+  const start = startRaw ? new Date(startRaw) : new Date();
+  const perPayment = total/n;
+  let html='';
+  for(let i=0;i<n;i++){
+    const d = new Date(start); d.setDate(d.getDate()+(i*14));
+    html+=`<div class="installment-row">
+      <div class="inst-num">${i+1}</div>
+      <div class="inst-info">
+        <div class="inst-amt">${fmtMoney(perPayment)}</div>
+        <div class="inst-date">Due: ${d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+      </div>
+      <span class="inst-paid no">Pending</span>
+    </div>`;
+  }
+  document.getElementById('pp-schedule').innerHTML=html||'<p style="color:var(--gray-400);">Enter amount above to generate schedule.</p>';
+}
+
+function signPlan(who){
+  ppSigned[who]=true;
+  const ts = new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  ppSigDates[who]=ts;
+  document.getElementById(who==='tenant'?'pp-sig-date':'pp-sig-ll-date').textContent=ts;
+  if(ppSigned.tenant && ppSigned.landlord) document.getElementById('save-plan-btn').disabled=false;
+}
+
+function savePlan(){
+  const tenant  = document.getElementById('pp-tenant').value.trim();
+  const address = document.getElementById('pp-address').value.trim();
+  const total   = parseFloat(document.getElementById('pp-total').value)||0;
+  const n       = parseInt(document.getElementById('pp-payments').value)||2;
+  const start   = document.getElementById('pp-startdate').value;
+  const reason  = document.getElementById('pp-reason').value;
+  if(!tenant||!total){alert('Please fill in tenant name and amount owed.');return;}
+  const plans=load('rv_payment_plans',[]);
+  const perPayment=total/n;
+  const installments=[];
+  for(let i=0;i<n;i++){
+    const d=new Date(start||new Date()); d.setDate(d.getDate()+(i*14));
+    installments.push({amount:perPayment,dueDate:d.toISOString(),paid:false,paidAt:null});
+  }
+  const plan={id:genId(),tenant,address,total,n,reason,installments,signedTenant:ppSigned.tenant,signedLandlord:ppSigned.landlord,signedTenantAt:ppSigDates.tenant,signedLandlordAt:ppSigDates.landlord,createdAt:new Date().toISOString(),status:'active'};
+  plans.push(plan);
+  save('rv_payment_plans',plans);
+  // Update case if exists
+  const cases=load('rv_assistance_cases',[]);
+  const c=cases.find(x=>x.tenantName===tenant||x.address===address);
+  if(c){c.status='plan';c.timeline.push({ts:new Date().toISOString(),text:`Payment plan created — ${n} payments of ${fmtMoney(perPayment)}`});save('rv_assistance_cases',cases);}
+  document.getElementById('new-plan-form').style.display='none';
+  updateSidebarBadges();
+  renderPlans();
+  alert('✅ Payment plan saved!\n\nBoth parties have signed. Automated reminders will fire on each due date.\n\nIf any payment is missed, an eviction recommendation will be generated automatically.');
+}
+
+function renderPlans(){
+  const plans=load('rv_payment_plans',[]);
+  const el=document.getElementById('plans-list');
+  if(!plans.length){el.innerHTML='<div class="info-alert"><div class="ia-icon">📅</div><p>No payment plans yet. Create a plan when a tenant needs a repayment schedule.</p></div>';return;}
+  el.innerHTML=plans.map(p=>{
+    const paidCount=p.installments.filter(i=>i.paid).length;
+    const progress=Math.round((paidCount/p.installments.length)*100);
+    return `<div class="panel" style="margin-bottom:1rem;">
+      <div class="panel-header">
+        <div>
+          <h2>${p.tenant} — ${p.address}</h2>
+          <div style="font-size:.8rem;color:var(--gray-400);margin-top:.25rem;">Created ${fmtDate(p.createdAt)} · ${p.n} payments · Total ${fmtMoney(p.total)}</div>
+        </div>
+        <div>
+          <span class="status ${p.status==='active'?'plan':'resolved'}">${p.status==='active'?'Active':'Completed'}</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div style="background:var(--gray-200);border-radius:999px;height:8px;margin-bottom:1rem;overflow:hidden;">
+          <div style="background:var(--success);height:100%;width:${progress}%;border-radius:999px;transition:width .3s;"></div>
+        </div>
+        ${p.installments.map((inst,i)=>`
+          <div class="installment-row">
+            <div class="inst-num">${i+1}</div>
+            <div class="inst-info">
+              <div class="inst-amt">${fmtMoney(inst.amount)}</div>
+              <div class="inst-date">Due: ${fmtDate(inst.dueDate)}${inst.paidAt?' — Paid: '+fmtDate(inst.paidAt):''}</div>
+            </div>
+            ${inst.paid
+              ?'<span class="inst-paid yes">✅ Paid</span>'
+              :`<button class="btn btn-success btn-sm" onclick="markInstPaid('${p.id}',${i})">Mark Paid</button>`}
+          </div>`).join('')}
+        <div style="margin-top:1rem;display:flex;gap:.5rem;">
+          <button class="btn btn-outline btn-sm" onclick="printPlan('${p.id}')">🖨️ Print Agreement</button>
+          ${p.signedTenant&&p.signedLandlord?'<span style="font-size:.8rem;color:var(--success);align-self:center;">✅ Both parties signed</span>':'<span style="font-size:.8rem;color:var(--warning);align-self:center;">⚠️ Awaiting signatures</span>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markInstPaid(planId,idx){
+  const plans=load('rv_payment_plans',[]);
+  const p=plans.find(x=>x.id===planId);
+  if(!p)return;
+  p.installments[idx].paid=true; p.installments[idx].paidAt=new Date().toISOString();
+  if(p.installments.every(i=>i.paid)) p.status='completed';
+  save('rv_payment_plans',plans);
+  renderPlans();
+}
+
+function printPlan(planId){
+  const plans=load('rv_payment_plans',[]);
+  const p=plans.find(x=>x.id===planId);
+  if(!p)return;
+  const w=window.open('','_blank','width=700,height=600');
+  w.document.write(`<html><head><title>Payment Plan Agreement</title><style>body{font-family:Georgia,serif;max-width:600px;margin:40px auto;color:#333;}h1{font-size:1.4rem;text-align:center;}h2{font-size:1rem;border-bottom:1px solid #ccc;padding-bottom:.5rem;margin-top:1.5rem;}.row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #eee;font-size:.9rem;}.sig{margin-top:2rem;display:flex;gap:2rem;}.sig-block{flex:1;}.sig-name{font-size:1.3rem;font-family:Georgia,serif;font-style:italic;border-bottom:1px solid #333;padding-bottom:.25rem;}</style></head><body>
+  <h1>📅 Payment Plan Agreement</h1>
+  <p style="text-align:center;color:#666;font-size:.9rem;">RentVerified — ${new Date().toLocaleDateString()}</p>
+  <h2>Parties</h2>
+  <div class="row"><span>Tenant</span><span>${p.tenant}</span></div>
+  <div class="row"><span>Property</span><span>${p.address}</span></div>
+  <div class="row"><span>Total Owed</span><span>${fmtMoney(p.total)}</span></div>
+  <div class="row"><span>Reason</span><span>${p.reason||'Temporary hardship'}</span></div>
+  <h2>Payment Schedule</h2>
+  ${p.installments.map((i,n)=>`<div class="row"><span>Payment ${n+1}</span><span>${fmtMoney(i.amount)} due ${fmtDate(i.dueDate)}</span></div>`).join('')}
+  <p style="font-size:.8rem;color:#666;margin-top:1rem;">If any payment is missed, the landlord reserves the right to proceed with eviction proceedings. Both parties agree to this schedule.</p>
+  <div class="sig">
+    <div class="sig-block"><div class="sig-name">${p.tenant}</div><div style="font-size:.75rem;color:#999;">Tenant — Signed ${p.signedTenantAt||'pending'}</div></div>
+    <div class="sig-block"><div class="sig-name">Daniel Hart</div><div style="font-size:.75rem;color:#999;">Landlord/PM — Signed ${p.signedLandlordAt||'pending'}</div></div>
+  </div>
+  </body></html>`);
+  w.document.close(); w.print();
+}
+
+/* ================================================================
+   HARDSHIP DOCS
+   ================================================================ */
+function simulateUpload(){
+  const tenant=document.getElementById('doc-tenant').value.trim()||'Unknown Tenant';
+  const type=document.getElementById('doc-type').value;
+  const typeLabels={'job-loss':'Job Loss Letter','medical':'Medical Documents','assistance-app':'Assistance Application Confirmation','assistance-approval':'Assistance Approval Letter','bank':'Bank Statement','dv':'DV Documentation','other':'Other Document'};
+  const docs=load('rv_hardship_docs',[]);
+  docs.push({id:genId(),tenant,type,typeName:typeLabels[type]||type,fileName:typeLabels[type]+'_'+tenant.replace(/\s+/g,'_')+'.pdf',uploadedAt:new Date().toISOString(),size:'124 KB'});
+  save('rv_hardship_docs',docs);
+  // Add to case timeline
+  const cases=load('rv_assistance_cases',[]);
+  const c=cases.find(x=>x.tenantName===tenant);
+  if(c){c.timeline.push({ts:new Date().toISOString(),text:`Document uploaded: ${typeLabels[type]}`});save('rv_assistance_cases',cases);}
+  renderDocs();
+  alert('✅ Document uploaded and timestamped!\n\nThis document has been added to the tenant\'s file and is available for court proceedings if needed.');
+}
+
+function renderDocs(){
+  const docs=load('rv_hardship_docs',[]);
+  const el=document.getElementById('doc-list');
+  if(!docs.length){el.innerHTML='<p style="color:var(--gray-400);font-size:.875rem;text-align:center;padding:1.5rem 0;">No documents uploaded yet.</p>';return;}
+  el.innerHTML=docs.map(d=>`
+    <div class="doc-row">
+      <div class="doc-icon">📄</div>
+      <div class="doc-info">
+        <div class="doc-name">${d.fileName}</div>
+        <div class="doc-meta">${d.typeName} · ${d.tenant} · Uploaded ${fmtDateFull(d.uploadedAt)} · ${d.size}</div>
+      </div>
+      <span class="tag green" style="padding:4px 10px;">✅ Verified</span>
+    </div>`).join('');
+}
+
+/* ================================================================
+   APP TRACKER
+   ================================================================ */
+function openNewAppModal(){document.getElementById('new-app-form').style.display='block';}
+
+function saveApp(){
+  const prog=document.getElementById('app-prog').value.trim();
+  if(!prog){alert('Please enter the program name.');return;}
+  const apps=load('rv_app_tracker',[]);
+  const app={id:genId(),program:prog,date:document.getElementById('app-date').value,amount:document.getElementById('app-amount').value,timeframe:document.getElementById('app-timeframe').value,caseNum:document.getElementById('app-case').value,tenant:document.getElementById('app-tenant').value,notes:document.getElementById('app-notes').value,status:'pending',createdAt:new Date().toISOString()};
+  apps.push(app);
+  save('rv_app_tracker',apps);
+  // Notify landlord
+  const notifs=load('rv_notifications',[]);
+  notifs.unshift({id:genId(),type:'assistance-app',ts:new Date().toISOString(),msg:`${app.tenant||'Tenant'} submitted an application to ${prog}. Estimated decision: ${app.timeframe}. Eviction hold recommended.`,read:false});
+  save('rv_notifications',notifs);
+  document.getElementById('new-app-form').style.display='none';
+  document.getElementById('app-prog').value=''; document.getElementById('app-amount').value='';
+  document.getElementById('app-case').value=''; document.getElementById('app-notes').value=''; document.getElementById('app-tenant').value='';
+  updateSidebarBadges();
+  renderTracker();
+  alert(`✅ Application logged!\n\nYour landlord has been notified. They see:\n"Tenant has a pending application with ${prog} — estimated decision in ${app.timeframe}. Eviction hold recommended."`);
+}
+
+function renderTracker(){
+  const apps=load('rv_app_tracker',[]);
+  const el=document.getElementById('app-tracker-list');
+  if(!apps.length){el.innerHTML='<div class="info-alert"><div class="ia-icon">🔎</div><p>No applications logged yet. Log an assistance application to notify your landlord and start the eviction hold clock.</p></div>';return;}
+  el.innerHTML=apps.map(a=>`
+    <div class="panel" style="margin-bottom:.75rem;">
+      <div class="panel-body" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <div style="font-weight:700;font-size:.95rem;">${a.program}</div>
+          <div style="font-size:.8rem;color:var(--gray-500);margin-top:.25rem;">${a.tenant ? a.tenant+' · ':''} Applied ${a.date?fmtDate(a.date):'Unknown date'}${a.caseNum?' · Case #'+a.caseNum:''}</div>
+          ${a.notes?`<div style="font-size:.8rem;color:var(--gray-400);margin-top:.25rem;">${a.notes}</div>`:''}
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          ${a.amount?`<div style="font-weight:700;color:var(--gray-800);">$${Number(a.amount).toLocaleString()}</div>`:''}
+          <div style="font-size:.8rem;color:var(--gray-500);">Est. ${a.timeframe}</div>
+          <div class="hold-badge" style="margin-top:.35rem;">⏸ Hold Recommended</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.4rem;">
+          <span class="status applied">Pending</span>
+          <button class="btn btn-success btn-sm" onclick="markAppApproved('${a.id}')">✅ Mark Approved</button>
+          <button class="btn btn-outline btn-sm" onclick="markAppDenied('${a.id}')">❌ Denied</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function markAppApproved(id){
+  const apps=load('rv_app_tracker',[]);
+  const a=apps.find(x=>x.id===id); if(!a)return;
+  a.status='approved'; a.approvedAt=new Date().toISOString();
+  save('rv_app_tracker',apps);
+  const notifs=load('rv_notifications',[]);
+  notifs.unshift({id:genId(),type:'assistance-approved',ts:new Date().toISOString(),msg:`GREAT NEWS: ${a.tenant||'Tenant'}\'s application with ${a.program} has been APPROVED. Funds will be sent directly to you. Eviction hold lifted.`,read:false});
+  save('rv_notifications',notifs);
+  updateSidebarBadges(); renderTracker();
+  alert(`🎉 Application approved!\n\nYour landlord has been notified. Expect direct payment from ${a.program} within 5–10 business days.\n\nThe eviction hold has been lifted.`);
+}
+
+function markAppDenied(id){
+  const apps=load('rv_app_tracker',[]);
+  const a=apps.find(x=>x.id===id); if(!a)return;
+  a.status='denied'; a.deniedAt=new Date().toISOString();
+  save('rv_app_tracker',apps);
+  renderTracker(); updateSidebarBadges();
+  if(confirm('Application denied. Would you like to find other programs to apply to?')) showSection('resources',document.querySelector('.ta-sidebar a:nth-child(4)'));
+}
+
+/* ================================================================
+   LANDLORD FEED
+   ================================================================ */
+function renderLandlordFeed(){
+  const cases=load('rv_assistance_cases',[]);
+  const apps=load('rv_app_tracker',[]);
+  const el=document.getElementById('landlord-feed');
+  if(!cases.length&&!apps.length){el.innerHTML='<div class="info-alert"><div class="ia-icon">🏠</div><p>No active assistance cases. When tenants request help, their status will appear here with recommended actions.</p></div>';return;}
+  let html='';
+  cases.forEach(c=>{
+    const pendingApps=apps.filter(a=>a.tenant===c.tenantName&&a.status==='pending');
+    html+=`<div class="panel" style="margin-bottom:1rem;">
+      <div class="panel-header">
+        <div>
+          <h2>${c.tenantName||'Tenant'} — ${c.address||'Property'}</h2>
+          <div style="font-size:.8rem;color:var(--gray-400);margin-top:.25rem;">Case opened ${fmtDate(c.createdAt)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <span class="status ${c.status}">${c.status}</span>
+          ${c.evictionHold?`<span class="hold-badge">⏸ ${c.holdDays}d Hold</span>`:''}
+        </div>
+      </div>
+      <div class="panel-body">
+        ${c.evictionHold?`<div class="warning-alert" style="margin-bottom:1rem;"><div class="ia-icon">⚠️</div><p><strong>Eviction Hold Recommended:</strong> This tenant is actively seeking assistance. Waiting ${c.holdDays} days before filing protects you legally and often results in direct payment from assistance programs.</p></div>`:''}
+        ${pendingApps.length?`<div class="success-alert" style="margin-bottom:1rem;"><div class="ia-icon">✅</div><p><strong>${pendingApps.length} application(s) pending</strong> with: ${pendingApps.map(a=>a.program).join(', ')}. Estimated decisions: ${[...new Set(pendingApps.map(a=>a.timeframe))].join(', ')}.</p></div>`:''}
+        <div class="timeline">
+          ${c.timeline.map(t=>`<div class="tl-item"><div class="tl-time">${fmtDateFull(t.ts)}</div><div class="tl-text">${t.text}</div></div>`).join('')}
+        </div>
+        <div style="display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="addCaseNote('${c.id}')">+ Add Note</button>
+          <button class="btn btn-outline btn-sm" onclick="showSection('plans',document.querySelector('.ta-sidebar a:nth-child(5)'))">📅 Create Payment Plan</button>
+          ${c.evictionHold?`<button class="btn btn-danger btn-sm" onclick="liftHold('${c.id}')">⚖️ Lift Hold & Start Eviction</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function liftHold(caseId){
+  if(!confirm('Are you sure you want to lift the eviction hold and proceed with eviction?\n\nMake sure you have documented your good-faith efforts to help this tenant first.'))return;
+  const cases=load('rv_assistance_cases',[]);
+  const c=cases.find(x=>x.id===caseId); if(!c)return;
+  c.evictionHold=false; c.status='eviction';
+  c.timeline.push({ts:new Date().toISOString(),text:'Eviction hold lifted by landlord/PM — proceeding to legal action'});
+  save('rv_assistance_cases',cases);
+  renderLandlordFeed();
+  window.location.href='eviction.html';
+}
+
+function addCaseNote(caseId){
+  const note=prompt('Add a note to this case (visible to both parties):');
+  if(!note)return;
+  const cases=load('rv_assistance_cases',[]);
+  const c=cases.find(x=>x.id===caseId); if(!c)return;
+  c.timeline.push({ts:new Date().toISOString(),text:'Note: '+note});
+  save('rv_assistance_cases',cases);
+  renderLandlordFeed();
+}
+
+/* ================================================================
+   DASHBOARD & HISTORY
+   ================================================================ */
+function renderDashboard(){
+  const cases=load('rv_assistance_cases',[]);
+  const apps=load('rv_app_tracker',[]);
+  document.getElementById('stat-active').textContent=cases.filter(c=>c.status==='seeking'||c.status==='applied'||c.status==='plan').length;
+  document.getElementById('stat-resolved').textContent=cases.filter(c=>c.status==='resolved').length;
+  document.getElementById('stat-pending').textContent=apps.filter(a=>a.status==='pending').length;
+  document.getElementById('stat-holds').textContent=cases.filter(c=>c.evictionHold).length;
+  const tbody=document.getElementById('case-tbody');
+  if(!cases.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:2rem;">No active cases. <a href="#" onclick="showSection(\'intake\',null);return false;" style="color:var(--primary);">Start a new request →</a></td></tr>';return;}
+  const sitLabels={'job-loss':'Job Loss','medical':'Medical','domestic':'Domestic Violence','covid':'COVID','other-temp':'Temp Hardship','ongoing':'Ongoing'};
+  tbody.innerHTML=cases.map(c=>`<tr>
+    <td><div style="font-weight:600;">${c.tenantName||'—'}</div><div style="font-size:.78rem;color:var(--gray-400);">${c.email||''}</div></td>
+    <td style="font-size:.875rem;">${c.address||'—'}</td>
+    <td>${sitLabels[c.sit]||c.sit||'—'}</td>
+    <td><span class="status ${c.status}">${c.status}</span></td>
+    <td>${c.evictionHold?`<span class="hold-badge">⏸ ${c.holdDays}d</span>`:'<span style="color:var(--gray-400);font-size:.8rem;">—</span>'}</td>
+    <td><div style="display:flex;gap:.35rem;"><button class="btn btn-outline btn-sm" onclick="showSection('landlord',document.querySelector('.ta-sidebar a:nth-child(8)'))">View</button><button class="btn btn-success btn-sm" onclick="resolveCase('${c.id}')">✅ Resolve</button></div></td>
+  </tr>`).join('');
+}
+
+function resolveCase(id){
+  if(!confirm('Mark this case as resolved? This means the tenant\'s housing situation has stabilized.'))return;
+  const cases=load('rv_assistance_cases',[]);
+  const c=cases.find(x=>x.id===id); if(!c)return;
+  c.status='resolved'; c.evictionHold=false; c.resolvedAt=new Date().toISOString();
+  c.timeline.push({ts:new Date().toISOString(),text:'Case resolved — tenant housing stabilized ✅'});
+  save('rv_assistance_cases',cases);
+  renderDashboard();
+  alert('✅ Case resolved! Great outcome — tenant stays housed, you keep a good tenant.');
+}
+
+function renderHistory(){
+  const cases=load('rv_assistance_cases',[]);
+  const el=document.getElementById('history-list');
+  if(!cases.length){el.innerHTML='<div class="info-alert"><div class="ia-icon">📋</div><p>No case history yet. Every assistance request will be logged here with a full timestamped audit trail.</p></div>';return;}
+  el.innerHTML=cases.map(c=>`
+    <div class="panel" style="margin-bottom:.75rem;">
+      <div class="panel-header">
+        <h2>${c.tenantName||'Tenant'} — ${c.address||'Property'}</h2>
+        <span class="status ${c.status}">${c.status}</span>
+      </div>
+      <div class="panel-body">
+        <div class="timeline">
+          ${c.timeline.map(t=>`<div class="tl-item"><div class="tl-time">${fmtDateFull(t.ts)}</div><div class="tl-text">${t.text}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ================================================================
+   SIDEBAR BADGES
+   ================================================================ */
+function updateSidebarBadges(){
+  const apps=load('rv_app_tracker',[]);
+  const plans=load('rv_payment_plans',[]);
+  document.getElementById('sb-plans').textContent=plans.filter(p=>p.status==='active').length;
+  document.getElementById('sb-tracker').textContent=apps.filter(a=>a.status==='pending').length;
+}
+
+/* ================================================================
+   SAMPLE DATA
+   ================================================================ */
+function seedSampleData(){
+  if(load('rv_assistance_cases',[]).length) return;
+  const sample=[{
+    id:'sample1', status:'applied', createdAt:new Date(Date.now()-5*864e5).toISOString(),
+    tenantName:'Maria Lopez', email:'maria@email.com', phone:'(801) 555-0042',
+    county:'salt-lake', address:'2847 West Temple St, Salt Lake City, UT',
+    rent:1050, behind:2100, sit:'job-loss', prior:'never', notes:'Recently laid off from warehouse job — has a new job starting in 3 weeks.',
+    evictionHold:true, holdDays:30,
+    timeline:[
+      {ts:new Date(Date.now()-5*864e5).toISOString(),text:'Assistance request opened — eviction hold recommended (30 days)'},
+      {ts:new Date(Date.now()-4*864e5).toISOString(),text:'Resource list generated — matched with 5 programs in Salt Lake County'},
+      {ts:new Date(Date.now()-3*864e5).toISOString(),text:'Application submitted to Community Action Services'},
+      {ts:new Date(Date.now()-2*864e5).toISOString(),text:'Document uploaded: Job Loss Letter'},
+    ]
+  }];
+  save('rv_assistance_cases',sample);
+  const sampleApps=[{id:'sapp1',program:'Community Action Services of Utah',date:new Date(Date.now()-3*864e5).toISOString().split('T')[0],amount:2100,timeframe:'2-4 weeks',caseNum:'CAS-2025-4471',tenant:'Maria Lopez',notes:'Application complete — awaiting review',status:'pending',createdAt:new Date(Date.now()-3*864e5).toISOString()}];
+  save('rv_app_tracker',sampleApps);
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+document.addEventListener('DOMContentLoaded',()=>{
+  seedSampleData();
+  updateSidebarBadges();
+  renderDashboard();
+  // Set default date fields
+  document.getElementById('app-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('pp-startdate').value=new Date().toISOString().split('T')[0];
+});
+</script>
+</body>
+</html>

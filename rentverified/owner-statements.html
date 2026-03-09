@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Statements – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background:#f3f4f6; }
+    .os-wrapper { display:grid; grid-template-columns:240px 1fr; min-height:100vh; padding-top:64px; }
+
+    /* Sidebar */
+    .os-sidebar { background:#1e293b; color:#cbd5e1; padding:1.5rem 0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; }
+    .os-sidebar h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.5rem 1.5rem; margin:1rem 0 .25rem; }
+    .os-sidebar a { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.9rem; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
+    .os-sidebar a:hover, .os-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#3b82f6; }
+
+    /* Main */
+    .os-main { padding:2rem; max-width:1200px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+    .page-header h1 { font-size:1.5rem; font-weight:700; color:#1e293b; margin:0 0 .25rem; }
+    .page-header p { color:#64748b; font-size:.9rem; margin:0; }
+
+    /* Cards */
+    .card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:1.25rem; }
+    .card h3 { font-size:1rem; font-weight:700; color:#1e293b; margin:0 0 1rem; }
+
+    /* Stat cards */
+    .stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem 1.5rem; }
+    .stat-label { font-size:.78rem; color:#64748b; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.35rem; }
+    .stat-value { font-size:1.6rem; font-weight:700; color:#1e293b; }
+
+    /* Buttons */
+    .btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1rem; border-radius:8px; font-size:.88rem; font-weight:600; cursor:pointer; border:1.5px solid transparent; transition:all .15s; }
+    .btn-primary { background:#1a56db; color:#fff; border-color:#1a56db; }
+    .btn-primary:hover { background:#1e40af; }
+    .btn-outline { background:#fff; color:#374151; border-color:#d1d5db; }
+    .btn-outline:hover { background:#f9fafb; }
+    .btn-green { background:#16a34a; color:#fff; border-color:#16a34a; }
+    .btn-green:hover { background:#15803d; }
+    .btn-red { background:#fff; color:#dc2626; border-color:#fca5a5; }
+    .btn-sm { padding:.3rem .65rem; font-size:.8rem; }
+
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+    .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.85rem; }
+    .form-group { display:flex; flex-direction:column; gap:.3rem; }
+    .form-group label { font-size:.8rem; font-weight:600; color:#64748b; }
+    .form-group input, .form-group select, .form-group textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.5rem .75rem; font-size:.9rem; color:#1e293b; outline:none; font-family:inherit; }
+    .form-group input:focus, .form-group select:focus { border-color:#3b82f6; }
+    .form-group.full { grid-column:1/-1; }
+
+    /* Owner list */
+    .owner-list-item { display:flex; align-items:center; justify-content:space-between; padding:.85rem 1rem; border:1.5px solid #e2e8f0; border-radius:10px; margin-bottom:.6rem; background:#fff; }
+    .owner-list-item:hover { border-color:#3b82f6; }
+    .owner-avatar { width:40px; height:40px; background:#dbeafe; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1a56db; font-size:1rem; flex-shrink:0; }
+    .owner-info { flex:1; margin-left:.85rem; }
+    .owner-name { font-weight:700; font-size:.95rem; color:#1e293b; }
+    .owner-meta { font-size:.78rem; color:#64748b; }
+    .prop-tag { display:inline-block; background:#eff6ff; color:#1a56db; border-radius:5px; font-size:.75rem; font-weight:600; padding:.15rem .45rem; margin:.1rem .1rem 0 0; }
+
+    /* Expense entry */
+    .quick-exp-bar { background:linear-gradient(135deg,#1e3a5f,#1a56db); border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; color:#fff; }
+    .quick-exp-bar h3 { color:#fff; margin:0 0 1rem; font-size:1rem; }
+    .quick-exp-bar .form-group label { color:#bfdbfe; }
+    .quick-exp-bar input, .quick-exp-bar select { background:#fff; }
+
+    /* Statement preview */
+    .stmt-preview { background:#fff; border:2px solid #1e293b; border-radius:0; padding:2rem; font-size:.88rem; }
+    .stmt-title { font-size:1.1rem; font-weight:700; text-align:center; margin-bottom:1.25rem; color:#1e293b; }
+    .stmt-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    .stmt-table th { background:#1e293b; color:#fff; padding:.5rem .6rem; text-align:right; font-weight:600; font-size:.78rem; white-space:nowrap; }
+    .stmt-table th:first-child { text-align:left; }
+    .stmt-table td { padding:.45rem .6rem; border-bottom:1px solid #e2e8f0; text-align:right; }
+    .stmt-table td:first-child { text-align:left; font-weight:600; }
+    .stmt-table tr.total-row td { background:#f8fafc; font-weight:700; border-top:2px solid #1e293b; font-size:.88rem; }
+    .stmt-table tr.total-row td:first-child { color:#1e293b; }
+    .stmt-table .income-cell { color:#16a34a; font-weight:600; }
+    .stmt-table .expense-cell { color:#dc2626; }
+    .stmt-table .net-cell { color:#1a56db; font-weight:700; }
+    .stmt-footer { margin-top:1rem; font-size:.75rem; color:#94a3b8; border-top:1px solid #e2e8f0; padding-top:.75rem; }
+
+    /* Archive */
+    .archive-item { display:flex; align-items:center; justify-content:space-between; padding:.85rem 1.25rem; border:1.5px solid #e2e8f0; border-radius:10px; margin-bottom:.6rem; background:#fff; }
+    .archive-period { font-weight:700; color:#1e293b; font-size:.95rem; }
+    .archive-meta { font-size:.78rem; color:#64748b; margin-top:.1rem; }
+    .badge { display:inline-block; padding:.15rem .55rem; border-radius:99px; font-size:.72rem; font-weight:700; }
+    .badge-pending { background:#fef3c7; color:#92400e; }
+    .badge-sent { background:#dcfce7; color:#166534; }
+    .badge-draft { background:#f1f5f9; color:#64748b; }
+
+    /* Tabs within sections */
+    .tab-bar { display:flex; gap:.5rem; margin-bottom:1.25rem; border-bottom:2px solid #e2e8f0; padding-bottom:.5rem; }
+    .tab-btn { padding:.4rem .9rem; border-radius:8px 8px 0 0; font-size:.88rem; font-weight:600; cursor:pointer; border:none; background:transparent; color:#64748b; }
+    .tab-btn.active { background:#1a56db; color:#fff; }
+
+    /* Toast */
+    #os-toast { position:fixed; bottom:1.5rem; right:1.5rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; font-weight:600; opacity:0; transition:opacity .3s; z-index:9999; pointer-events:none; }
+    #os-toast.show { opacity:1; }
+
+    /* Empty state */
+    .empty-state { text-align:center; padding:3rem; color:#94a3b8; }
+    .empty-state .icon { font-size:2.5rem; margin-bottom:.75rem; }
+    .empty-state p { font-size:.9rem; margin:.25rem 0; }
+
+    /* Print styles */
+    @media print {
+      .os-sidebar, .os-main .page-header .btn, nav, .no-print { display:none !important; }
+      .os-wrapper { display:block; padding:0; }
+      .os-main { padding:0; max-width:100%; }
+      .stmt-preview { border:none; padding:0; }
+      body { background:#fff; }
+    }
+
+    @media(max-width:700px) {
+      .os-wrapper { grid-template-columns:1fr; }
+      .os-sidebar { display:none; }
+      .stat-row { grid-template-columns:1fr 1fr; }
+      .form-grid, .form-grid-3 { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="nav-logo">✓</span>
+    <span class="nav-name">RentVerified</span>
+  </div>
+  <div class="nav-links">
+    <a href="accounting.html" class="nav-link">Accounting</a>
+    <a href="landlord-signup.html" class="nav-link">Dashboard</a>
+  </div>
+</nav>
+
+<div class="os-wrapper">
+  <!-- SIDEBAR -->
+  <aside class="os-sidebar">
+    <h3>Owner Statements</h3>
+    <a class="active" onclick="showSection('dashboard',this)">📊 Dashboard</a>
+    <a onclick="showSection('owners',this)">👤 Owners &amp; Properties</a>
+    <a onclick="showSection('expenses',this)">➕ Enter Expenses</a>
+    <a onclick="showSection('monthly',this)">📋 Monthly Statements</a>
+    <a onclick="showSection('eoy',this)">📅 End of Year</a>
+    <a onclick="showSection('archive',this)">🗂 Archive</a>
+    <h3>Navigation</h3>
+    <a href="accounting.html">💰 Accounting</a>
+    <a href="eviction.html">⚖️ Legal Center</a>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+    <a href="tenant-portal.html">👤 Tenant Portal</a>
+    <a href="financial-hub.html">💼 Financial Hub</a>
+    <a href="insurance-agents.html">🛡️ Insurance Agents</a>
+    <a href="referral.html">🎁 Refer &amp; Earn</a>
+    <a href="compliance.html">📋 Compliance</a>
+    <a href="str-manager.html">🏖️ STR Manager</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="os-main">
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  DASHBOARD                                  -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-dashboard">
+      <div class="page-header">
+        <div>
+          <h1>📊 Owner Statements</h1>
+          <p>Generate, review, and send monthly and annual statements to your property owners.</p>
+        </div>
+        <button class="btn btn-primary" onclick="showSection('monthly', document.querySelector('.os-sidebar a:nth-child(5)'))">➕ New Statement</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-label">Total Owners</div><div class="stat-value" id="dash-owner-count">—</div></div>
+        <div class="stat-card"><div class="stat-label">Total Properties</div><div class="stat-value" id="dash-prop-count">—</div></div>
+        <div class="stat-card"><div class="stat-label">Statements This Month</div><div class="stat-value" id="dash-stmt-month">—</div></div>
+        <div class="stat-card"><div class="stat-label">Statements Saved</div><div class="stat-value" id="dash-stmt-total">—</div></div>
+      </div>
+
+      <!-- Owner quick view -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;">Your Owners</h3>
+          <button class="btn btn-outline btn-sm" onclick="showSection('owners', document.querySelector('.os-sidebar a:nth-child(3)'))">Manage Owners →</button>
+        </div>
+        <div id="dash-owner-list"><div class="empty-state"><div class="icon">👤</div><p>No owners yet.</p><p>Go to <strong>Owners &amp; Properties</strong> to add your first owner.</p></div></div>
+      </div>
+
+      <!-- Recent statements -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;">Recent Statements</h3>
+          <button class="btn btn-outline btn-sm" onclick="showSection('archive', document.querySelector('.os-sidebar a:nth-child(7)'))">View Archive →</button>
+        </div>
+        <div id="dash-recent-stmts"><div class="empty-state"><div class="icon">📋</div><p>No statements saved yet.</p></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  OWNERS & PROPERTIES                        -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-owners" style="display:none;">
+      <div class="page-header">
+        <div><h1>👤 Owners &amp; Properties</h1><p>Add property owners and the properties you manage for them.</p></div>
+        <button class="btn btn-primary" onclick="toggleOwnerForm()">➕ Add Owner</button>
+      </div>
+
+      <!-- Add owner form -->
+      <div id="owner-form" class="card" style="display:none;">
+        <h3>New Property Owner</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Owner Full Name *</label><input id="of-name" type="text" placeholder="Mike Payne"></div>
+          <div class="form-group"><label>Email Address</label><input id="of-email" type="email" placeholder="owner@email.com"></div>
+          <div class="form-group"><label>Phone</label><input id="of-phone" type="tel" placeholder="801-555-0000"></div>
+          <div class="form-group"><label>PM Management Fee (%)</label><input id="of-fee" type="number" placeholder="9" min="0" max="100" step="0.5" value="9"></div>
+          <div class="form-group full"><label>Mailing Address</label><input id="of-address" type="text" placeholder="123 Main St, City, UT 84XXX"></div>
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:1rem;">
+          <button class="btn btn-primary" onclick="saveOwner()">Save Owner</button>
+          <button class="btn btn-outline" onclick="toggleOwnerForm()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Owner list -->
+      <div id="owner-list-container"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  ENTER EXPENSES                             -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-expenses" style="display:none;">
+      <div class="page-header">
+        <div><h1>➕ Enter Expenses</h1><p>Log an expense or rent payment for any owner and property.</p></div>
+      </div>
+
+      <!-- Auto-sync banner -->
+      <div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:10px;padding:.85rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+        <div>
+          <span style="font-weight:700;color:#065f46;">🔄 Auto-Sync Rent Payments</span>
+          <span style="color:#059669;font-size:.85rem;margin-left:.5rem;">Pull rent payments from the tenant portal automatically.</span>
+        </div>
+        <button class="btn btn-green btn-sm" onclick="syncRentFromTenantPortal()">Sync Now</button>
+      </div>
+
+      <div class="quick-exp-bar">
+        <h3>⚡ Quick Entry</h3>
+        <div class="form-grid-3">
+          <div class="form-group"><label>Owner</label>
+            <select id="exp-owner" onchange="populateExpProps()"><option value="">— Select Owner —</option></select>
+          </div>
+          <div class="form-group"><label>Property</label>
+            <select id="exp-prop"><option value="">— Select Owner First —</option></select>
+          </div>
+          <div class="form-group"><label>Month</label>
+            <input type="month" id="exp-month">
+          </div>
+          <div class="form-group"><label>Type</label>
+            <select id="exp-type" onchange="toggleExpType()">
+              <option value="expense">Expense</option>
+              <option value="rent">Rent Payment</option>
+            </select>
+          </div>
+          <div class="form-group" id="exp-cat-group"><label>Expense Category</label>
+            <select id="exp-cat">
+              <option>Supplies</option>
+              <option>HVAC</option>
+              <option>Plumbing</option>
+              <option>Electrical</option>
+              <option>Repairs &amp; Maintenance</option>
+              <option>Cleaning</option>
+              <option>Landscaping / Sprinklers</option>
+              <option>Pest Control</option>
+              <option>Utilities (Power)</option>
+              <option>Utilities (Gas)</option>
+              <option>Utilities (Water/Sewer)</option>
+              <option>Insurance</option>
+              <option>HOA Fee</option>
+              <option>Mortgage</option>
+              <option>Business License</option>
+              <option>Haul Away / Junk Removal</option>
+              <option>Appliances</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Amount ($)</label>
+            <input type="number" id="exp-amount" placeholder="0.00" step="0.01" min="0">
+          </div>
+          <div class="form-group full"><label>Notes / Vendor</label>
+            <input type="text" id="exp-notes" placeholder="e.g. Fixed leaky faucet — ABC Plumbing">
+          </div>
+          <div class="form-group"><label>Date</label>
+            <input type="date" id="exp-date">
+          </div>
+          <div class="form-group" style="justify-content:flex-end;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="saveExpense()" style="width:100%;background:#fff;color:#1a56db;border-color:#93c5fd;">✅ Add Entry</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent entries for this owner/month -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;" id="recent-exp-title">Recent Entries</h3>
+          <button class="btn btn-outline btn-sm" onclick="clearExpFilter()">Show All</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+          <thead><tr style="background:#f8fafc;">
+            <th style="padding:.5rem;text-align:left;">Date</th>
+            <th style="padding:.5rem;text-align:left;">Owner</th>
+            <th style="padding:.5rem;text-align:left;">Property</th>
+            <th style="padding:.5rem;text-align:left;">Type / Category</th>
+            <th style="padding:.5rem;text-align:left;">Notes</th>
+            <th style="padding:.5rem;text-align:right;">Amount</th>
+            <th style="padding:.5rem;"></th>
+          </tr></thead>
+          <tbody id="exp-table-body"><tr><td colspan="7" style="text-align:center;padding:2rem;color:#94a3b8;">No entries yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  MONTHLY STATEMENTS                         -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-monthly" style="display:none;">
+      <div class="page-header">
+        <div><h1>📋 Monthly Statement</h1><p>Select an owner and month to preview, review, and finalize their statement.</p></div>
+      </div>
+
+      <!-- Selector -->
+      <div class="card">
+        <div class="form-grid-3">
+          <div class="form-group"><label>Owner</label>
+            <select id="stmt-owner" onchange="loadStmtPreview()"><option value="">— Select Owner —</option></select>
+          </div>
+          <div class="form-group"><label>Statement Month</label>
+            <input type="month" id="stmt-month" onchange="loadStmtPreview()">
+          </div>
+          <div class="form-group" style="justify-content:flex-end;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="loadStmtPreview()" style="width:100%;">🔄 Load Statement</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview area -->
+      <div id="stmt-preview-area" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;" class="no-print">
+          <h3 style="margin:0;color:#1e293b;">Statement Preview</h3>
+          <div style="display:flex;gap:.75rem;">
+            <button class="btn btn-outline" onclick="window.print()">🖨 Print / Save PDF</button>
+            <button class="btn btn-green" onclick="finalizeStatement()">✅ Finalize &amp; Save</button>
+          </div>
+        </div>
+        <div class="stmt-preview" id="stmt-preview-content"></div>
+      </div>
+
+      <div id="stmt-empty" class="card" style="display:none;">
+        <div class="empty-state"><div class="icon">📋</div><p id="stmt-empty-msg">Select an owner and month to generate a statement.</p></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  END OF YEAR                                -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-eoy" style="display:none;">
+      <div class="page-header">
+        <div><h1>📅 End of Year Statement</h1><p>Generate an annual YTD summary for any owner.</p></div>
+      </div>
+
+      <div class="card">
+        <div class="form-grid-3">
+          <div class="form-group"><label>Owner</label>
+            <select id="eoy-owner"><option value="">— Select Owner —</option></select>
+          </div>
+          <div class="form-group"><label>Tax Year</label>
+            <select id="eoy-year"></select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="loadEOYPreview()" style="width:100%;">📊 Generate YTD</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="eoy-preview-area" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;" class="no-print">
+          <h3 style="margin:0;">Year-End Preview</h3>
+          <div style="display:flex;gap:.75rem;">
+            <button class="btn btn-outline" onclick="window.print()">🖨 Print / Save PDF</button>
+            <button class="btn btn-green" onclick="finalizeEOY()">✅ Save YTD Statement</button>
+          </div>
+        </div>
+        <div class="stmt-preview" id="eoy-preview-content"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  ARCHIVE                                    -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="section-archive" style="display:none;">
+      <div class="page-header">
+        <div><h1>🗂 Statement Archive</h1><p>All saved and sent statements, organized by owner.</p></div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+          <div class="form-group" style="flex:1;min-width:160px;">
+            <label>Filter by Owner</label>
+            <select id="archive-filter-owner" onchange="renderArchive()"><option value="">All Owners</option></select>
+          </div>
+          <div class="form-group" style="flex:1;min-width:120px;">
+            <label>Type</label>
+            <select id="archive-filter-type" onchange="renderArchive()">
+              <option value="">All</option>
+              <option value="monthly">Monthly</option>
+              <option value="annual">Annual</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="archive-list"><div class="empty-state"><div class="icon">🗂</div><p>No saved statements yet.</p><p>Finalize a monthly or annual statement to save it here.</p></div></div>
+    </div>
+
+  </main>
+</div>
+
+<div id="os-toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  PROPERTY MODAL (add/edit property for an owner)       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="prop-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:1.75rem;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <h3 style="margin:0;font-size:1.1rem;" id="prop-modal-title">Add Property</h3>
+      <button onclick="closePropModal()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:#64748b;">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Property Address *</label><input id="pm-address" type="text" placeholder="5041 Doren Dr. S. Ogden, UT"></div>
+
+      <!-- Property Type selector -->
+      <div class="form-group full">
+        <label>Property Type</label>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.15rem;">
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;transition:all .15s;" id="pt-res-lbl">
+            <input type="radio" name="pm-prop-type" value="residential" checked onchange="onPropTypeChange()"> 🏠 Residential
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;transition:all .15s;" id="pt-com-lbl">
+            <input type="radio" name="pm-prop-type" value="commercial" onchange="onPropTypeChange()"> 🏢 Commercial
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:.45rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-weight:600;transition:all .15s;" id="pt-rto-lbl">
+            <input type="radio" name="pm-prop-type" value="rent-to-own" onchange="onPropTypeChange()"> 🔑 Rent-to-Own
+          </label>
+        </div>
+      </div>
+
+      <!-- Common fields -->
+      <div class="form-group"><label id="pm-rent-label">Monthly Rent ($)</label><input id="pm-rent" type="number" placeholder="1900" step="0.01" min="0"></div>
+      <div class="form-group"><label>Tenant / Business Name</label><input id="pm-tenant" type="text" placeholder="Current Tenant"></div>
+      <div class="form-group"><label>Unit / Suite (optional)</label><input id="pm-unit" type="text" placeholder="#1"></div>
+      <div class="form-group"><label>PM Fee Override % (leave blank for owner default)</label><input id="pm-fee-override" type="number" placeholder="(use owner default)" step="0.5" min="0" max="100"></div>
+
+      <!-- Commercial-only fields -->
+      <div id="pm-commercial-fields" style="display:none;grid-column:1/-1;">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:1rem;margin-top:.5rem;">
+          <div style="font-size:.8rem;font-weight:700;color:#1e40af;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;">🏢 Commercial Details</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Square Footage</label><input id="pm-sqft" type="number" placeholder="2500" min="0"></div>
+            <div class="form-group"><label>Lease Type</label>
+              <select id="pm-lease-type">
+                <option value="gross">Gross (Landlord pays expenses)</option>
+                <option value="nnn">Triple Net — NNN (Tenant pays taxes, insurance, CAM)</option>
+                <option value="modified">Modified Gross (Split expenses)</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Property Type / Use</label>
+              <select id="pm-com-use">
+                <option>Retail</option>
+                <option>Office</option>
+                <option>Warehouse / Industrial</option>
+                <option>Restaurant / Food Service</option>
+                <option>Medical / Dental</option>
+                <option>Mixed Use</option>
+                <option>Other Commercial</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Monthly NNN / CAM Charges ($)<br><span style="font-size:.74rem;color:#64748b;font-weight:400;">(if NNN — tenant-paid pass-throughs)</span></label>
+              <input id="pm-cam" type="number" placeholder="0.00" step="0.01" min="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rent-to-Own fields -->
+      <div id="pm-rto-fields" style="display:none;grid-column:1/-1;">
+        <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:8px;padding:1rem;margin-top:.5rem;">
+          <div style="font-size:.8rem;font-weight:700;color:#7e22ce;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;">🔑 Rent-to-Own Terms</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Agreed Purchase Price ($)</label><input id="pm-purchase-price" type="number" placeholder="320000" step="100" min="0"></div>
+            <div class="form-group"><label>Option Fee Collected ($)</label><input id="pm-option-fee" type="number" placeholder="5000" step="100" min="0"></div>
+            <div class="form-group"><label>Monthly Rent Credit (%)<br><span style="font-size:.74rem;color:#64748b;font-weight:400;">(% of rent credited toward purchase)</span></label>
+              <input id="pm-credit-pct" type="number" placeholder="20" min="0" max="100" step="1">
+            </div>
+            <div class="form-group"><label>Option Period End Date</label><input id="pm-option-end" type="date"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+      <button class="btn btn-primary" onclick="saveProperty()">Save Property</button>
+      <button class="btn btn-outline" onclick="closePropModal()">Cancel</button>
+    </div>
+    <input type="hidden" id="pm-owner-id">
+    <input type="hidden" id="pm-prop-id">
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════
+let owners = [];
+let expenses = []; // expenses + rent payments per property/owner/month
+let savedStatements = [];
+let currentPropOwnerId = null;
+
+const EXPENSE_CATS = [
+  'Supplies','HVAC','Plumbing','Electrical','Repairs & Maintenance',
+  'Cleaning','Landscaping / Sprinklers','Pest Control',
+  'Utilities (Power)','Utilities (Gas)','Utilities (Water/Sewer)',
+  'Insurance','HOA Fee','Mortgage','Business License',
+  'Haul Away / Junk Removal','Appliances','Other'
+];
+
+function loadAll() {
+  try { owners = JSON.parse(localStorage.getItem('rv_stmt_owners') || '[]'); } catch(e){ owners=[]; }
+  try { expenses = JSON.parse(localStorage.getItem('rv_stmt_expenses') || '[]'); } catch(e){ expenses=[]; }
+  try { savedStatements = JSON.parse(localStorage.getItem('rv_saved_statements') || '[]'); } catch(e){ savedStatements=[]; }
+  if (!owners.length) loadSampleOwners();
+}
+
+function saveAll() {
+  localStorage.setItem('rv_stmt_owners', JSON.stringify(owners));
+  localStorage.setItem('rv_stmt_expenses', JSON.stringify(expenses));
+  localStorage.setItem('rv_saved_statements', JSON.stringify(savedStatements));
+}
+
+function loadSampleOwners() {
+  owners = [
+    {
+      id:'owner_sample1', name:'Mike Payne', email:'mike@email.com', phone:'801-555-0001',
+      address:'', mgmtFeePercent:9,
+      properties:[
+        { id:'prop_s1', address:'5041 Doren Dr. S. Ogden, UT', rent:1900, tenant:'Current Tenant', unit:'', feeOverride:null }
+      ]
+    },
+    {
+      id:'owner_sample2', name:'Garth (IRA)', email:'garth@email.com', phone:'801-555-0002',
+      address:'', mgmtFeePercent:7,
+      properties:[
+        { id:'prop_s2', address:'1593 W. Orem, UT', rent:1500, tenant:'Tenant A', unit:'', feeOverride:null },
+        { id:'prop_s3', address:'268 Highland Dr. Tooele, UT', rent:1200, tenant:'Tenant B', unit:'', feeOverride:null },
+      ]
+    }
+  ];
+  // Seed sample expenses for Mike Payne
+  const now = new Date();
+  const m = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  expenses = [
+    { id:uid(), ownerId:'owner_sample1', propId:'prop_s1', month:m, type:'rent', category:'Rent Payment', amount:1900, notes:'March rent', date: m+'-01' },
+    { id:uid(), ownerId:'owner_sample1', propId:'prop_s1', month:m, type:'expense', category:'Plumbing', amount:145, notes:'Fixed leaky faucet', date: m+'-05' },
+    { id:uid(), ownerId:'owner_sample1', propId:'prop_s1', month:m, type:'expense', category:'Business License', amount:10, notes:'Annual fee pro-rated', date: m+'-01' },
+  ];
+  saveAll();
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+const SECTIONS = ['dashboard','owners','expenses','monthly','eoy','archive'];
+
+function showSection(name, el) {
+  SECTIONS.forEach(s => {
+    const sec = document.getElementById('section-' + s);
+    if (sec) sec.style.display = (s===name) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.os-sidebar a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (name === 'dashboard') refreshDashboard();
+  if (name === 'owners') renderOwnerList();
+  if (name === 'expenses') { populateOwnerDropdowns(); renderExpTable(); setDefaultExpDate(); }
+  if (name === 'monthly') { populateOwnerDropdowns(); setDefaultStmtMonth(); }
+  if (name === 'eoy') { populateOwnerDropdowns(); populateYearDropdown('eoy-year'); }
+  if (name === 'archive') { populateOwnerDropdowns(); renderArchive(); }
+}
+
+function populateOwnerDropdowns() {
+  const ids = ['exp-owner','stmt-owner','eoy-owner','archive-filter-owner'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    const isFilter = id === 'archive-filter-owner';
+    el.innerHTML = isFilter ? '<option value="">All Owners</option>' : '<option value="">— Select Owner —</option>';
+    owners.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.id; opt.textContent = o.name;
+      el.appendChild(opt);
+    });
+    if (cur) el.value = cur;
+  });
+}
+
+function setDefaultExpDate() {
+  const el = document.getElementById('exp-date');
+  if (el && !el.value) el.value = new Date().toISOString().slice(0,10);
+  const mel = document.getElementById('exp-month');
+  if (mel && !mel.value) {
+    const now = new Date();
+    mel.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  }
+}
+
+function setDefaultStmtMonth() {
+  const el = document.getElementById('stmt-month');
+  if (el && !el.value) {
+    const now = new Date();
+    el.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  }
+}
+
+function populateYearDropdown(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = '';
+  const cur = new Date().getFullYear();
+  for (let y = cur; y >= cur-6; y--) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    sel.appendChild(opt);
+  }
+}
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+function refreshDashboard() {
+  const propCount = owners.reduce((s,o)=>s+(o.properties||[]).length, 0);
+  const now = new Date();
+  const curMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  const thisMonthStmts = savedStatements.filter(s=>s.period===curMonth).length;
+  document.getElementById('dash-owner-count').textContent = owners.length;
+  document.getElementById('dash-prop-count').textContent = propCount;
+  document.getElementById('dash-stmt-month').textContent = thisMonthStmts;
+  document.getElementById('dash-stmt-total').textContent = savedStatements.length;
+
+  // Owner quick view
+  const ownerList = document.getElementById('dash-owner-list');
+  if (!owners.length) {
+    ownerList.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>No owners yet.</p></div>';
+  } else {
+    ownerList.innerHTML = owners.map(o => `
+      <div class="owner-list-item">
+        <div class="owner-avatar">${o.name.charAt(0)}</div>
+        <div class="owner-info">
+          <div class="owner-name">${o.name}</div>
+          <div class="owner-meta">${o.email||'No email'} · PM Fee: ${o.mgmtFeePercent}%</div>
+          <div style="margin-top:.3rem;">${(o.properties||[]).map(p=>`<span class="prop-tag">🏠 ${p.address.split(',')[0]}</span>`).join('')}</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="showSection('monthly', document.querySelector('.os-sidebar a:nth-child(5)')); document.getElementById('stmt-owner').value='${o.id}'; loadStmtPreview();">Generate Statement →</button>
+      </div>`).join('');
+  }
+
+  // Recent statements
+  const recentEl = document.getElementById('dash-recent-stmts');
+  const recent = [...savedStatements].sort((a,b)=>new Date(b.savedAt)-new Date(a.savedAt)).slice(0,5);
+  if (!recent.length) {
+    recentEl.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No statements saved yet.</p></div>';
+  } else {
+    recentEl.innerHTML = recent.map(s => `
+      <div class="archive-item">
+        <div>
+          <div class="archive-period">${s.ownerName} — ${s.type==='annual' ? s.period+' Annual' : fmtMonth(s.period)}</div>
+          <div class="archive-meta">Saved ${new Date(s.savedAt).toLocaleDateString()} · Net: <strong style="color:${s.netDisbursement>=0?'#16a34a':'#dc2626'}">${fmtDollar(s.netDisbursement)}</strong></div>
+        </div>
+        <span class="badge ${s.sentAt?'badge-sent':'badge-pending'}">${s.sentAt?'Sent':'Ready to Send'}</span>
+      </div>`).join('');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  OWNERS & PROPERTIES
+// ════════════════════════════════════════════════
+function toggleOwnerForm() {
+  const f = document.getElementById('owner-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  if (f.style.display === 'block') {
+    document.getElementById('of-name').focus();
+  }
+}
+
+function saveOwner() {
+  const name = document.getElementById('of-name').value.trim();
+  if (!name) { toast('⚠️ Owner name is required'); return; }
+  const owner = {
+    id: uid(),
+    name,
+    email: document.getElementById('of-email').value.trim(),
+    phone: document.getElementById('of-phone').value.trim(),
+    address: document.getElementById('of-address').value.trim(),
+    mgmtFeePercent: parseFloat(document.getElementById('of-fee').value) || 9,
+    properties: []
+  };
+  owners.push(owner);
+  saveAll();
+  document.getElementById('owner-form').style.display = 'none';
+  ['of-name','of-email','of-phone','of-address'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('of-fee').value = '9';
+  renderOwnerList();
+  populateOwnerDropdowns();
+  toast('✅ Owner ' + name + ' added!');
+}
+
+function renderOwnerList() {
+  const container = document.getElementById('owner-list-container');
+  if (!owners.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>No owners yet. Click <strong>Add Owner</strong> to get started.</p></div>';
+    return;
+  }
+  container.innerHTML = owners.map(o => `
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem;">
+        <div style="display:flex;align-items:center;gap:.85rem;">
+          <div class="owner-avatar" style="width:48px;height:48px;font-size:1.2rem;">${o.name.charAt(0)}</div>
+          <div>
+            <div style="font-weight:700;font-size:1rem;color:#1e293b;">${o.name}</div>
+            <div style="font-size:.82rem;color:#64748b;">${o.email||'No email'} ${o.phone?'· '+o.phone:''} · PM Fee: ${o.mgmtFeePercent}%</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+          <button class="btn btn-primary btn-sm" onclick="openPropModal('${o.id}')">➕ Add Property</button>
+          <button class="btn btn-red btn-sm" onclick="deleteOwner('${o.id}')">✕</button>
+        </div>
+      </div>
+      <!-- Properties -->
+      <div style="padding-left:.5rem;">
+        ${(o.properties||[]).length === 0 ? '<div style="color:#94a3b8;font-size:.85rem;padding:.5rem;">No properties yet — click Add Property.</div>' :
+          (o.properties||[]).map(p => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;background:#f8fafc;border-radius:8px;margin-bottom:.4rem;">
+              <div>
+                <div style="font-weight:600;font-size:.9rem;">${propTypeIcon(p.type)} ${p.address}${p.unit?' '+p.unit:''}</div>
+                <div style="font-size:.78rem;color:#64748b;">${propTypeBadge(p.type)} Rent: ${fmtDollar(p.rent)}${p.type==='commercial'&&p.camCharges?' + '+fmtDollar(p.camCharges)+' CAM':''} · ${p.type==='commercial'?'Tenant':'Tenant'}: ${p.tenant||'Vacant'}${p.type==='rent-to-own'&&p.purchasePrice?' · Option Price: '+fmtDollar(p.purchasePrice):''}</div>
+              </div>
+              <div style="display:flex;gap:.4rem;">
+                <button class="btn btn-outline btn-sm" onclick="openPropModal('${o.id}','${p.id}')">Edit</button>
+                <button class="btn btn-red btn-sm" onclick="deleteProp('${o.id}','${p.id}')">✕</button>
+              </div>
+            </div>`).join('')
+        }
+      </div>
+    </div>`).join('');
+}
+
+function deleteOwner(id) {
+  if (!confirm('Remove this owner and all their data?')) return;
+  owners = owners.filter(o=>o.id!==id);
+  saveAll(); renderOwnerList(); populateOwnerDropdowns();
+  toast('Owner removed.');
+}
+
+function deleteProp(ownerId, propId) {
+  if (!confirm('Remove this property?')) return;
+  const owner = owners.find(o=>o.id===ownerId);
+  if (owner) owner.properties = owner.properties.filter(p=>p.id!==propId);
+  saveAll(); renderOwnerList();
+  toast('Property removed.');
+}
+
+// Property modal
+function openPropModal(ownerId, propId) {
+  currentPropOwnerId = ownerId;
+  document.getElementById('pm-owner-id').value = ownerId;
+  document.getElementById('pm-prop-id').value = propId || '';
+  const owner = owners.find(o=>o.id===ownerId);
+  if (propId && owner) {
+    const prop = owner.properties.find(p=>p.id===propId);
+    if (prop) {
+      document.getElementById('pm-address').value = prop.address;
+      document.getElementById('pm-rent').value = prop.rent || '';
+      document.getElementById('pm-tenant').value = prop.tenant || '';
+      document.getElementById('pm-unit').value = prop.unit || '';
+      document.getElementById('pm-fee-override').value = prop.feeOverride != null ? prop.feeOverride : '';
+      // Restore type
+      const t = prop.type || 'residential';
+      const radio = document.querySelector(`input[name="pm-prop-type"][value="${t}"]`);
+      if (radio) radio.checked = true;
+      onPropTypeChange();
+      // Commercial extras
+      if (t === 'commercial') {
+        document.getElementById('pm-sqft').value = prop.sqft || '';
+        document.getElementById('pm-lease-type').value = prop.leaseType || 'gross';
+        document.getElementById('pm-com-use').value = prop.comUse || 'Retail';
+        document.getElementById('pm-cam').value = prop.camCharges || '';
+      }
+      // RTO extras
+      if (t === 'rent-to-own') {
+        document.getElementById('pm-purchase-price').value = prop.purchasePrice || '';
+        document.getElementById('pm-option-fee').value = prop.optionFee || '';
+        document.getElementById('pm-credit-pct').value = prop.creditPct || '';
+        document.getElementById('pm-option-end').value = prop.optionEnd || '';
+      }
+      document.getElementById('prop-modal-title').textContent = 'Edit Property';
+    }
+  } else {
+    ['pm-address','pm-rent','pm-tenant','pm-unit','pm-fee-override','pm-sqft','pm-cam','pm-purchase-price','pm-option-fee','pm-credit-pct','pm-option-end'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    const defRadio = document.querySelector('input[name="pm-prop-type"][value="residential"]');
+    if (defRadio) defRadio.checked = true;
+    onPropTypeChange();
+    document.getElementById('prop-modal-title').textContent = 'Add Property';
+  }
+  document.getElementById('prop-modal-overlay').style.display = 'flex';
+}
+
+function closePropModal() { document.getElementById('prop-modal-overlay').style.display = 'none'; }
+
+function onPropTypeChange() {
+  const type = document.querySelector('input[name="pm-prop-type"]:checked')?.value || 'residential';
+  document.getElementById('pm-commercial-fields').style.display = type === 'commercial' ? 'block' : 'none';
+  document.getElementById('pm-rto-fields').style.display = type === 'rent-to-own' ? 'block' : 'none';
+  document.getElementById('pm-rent-label').textContent = type === 'commercial' ? 'Monthly Base Rent ($)' : 'Monthly Rent ($)';
+}
+
+function saveProperty() {
+  const addr = document.getElementById('pm-address').value.trim();
+  if (!addr) { toast('⚠️ Property address is required'); return; }
+  const ownerId = document.getElementById('pm-owner-id').value;
+  const propId = document.getElementById('pm-prop-id').value;
+  const owner = owners.find(o=>o.id===ownerId);
+  if (!owner) return;
+  const feeOverrideVal = document.getElementById('pm-fee-override').value;
+  const propType = document.querySelector('input[name="pm-prop-type"]:checked')?.value || 'residential';
+  const propData = {
+    id: propId || uid(),
+    address: addr,
+    type: propType,
+    rent: parseFloat(document.getElementById('pm-rent').value) || 0,
+    tenant: document.getElementById('pm-tenant').value.trim(),
+    unit: document.getElementById('pm-unit').value.trim(),
+    feeOverride: feeOverrideVal !== '' ? parseFloat(feeOverrideVal) : null
+  };
+  // Commercial extras
+  if (propType === 'commercial') {
+    propData.sqft = parseInt(document.getElementById('pm-sqft').value) || 0;
+    propData.leaseType = document.getElementById('pm-lease-type').value;
+    propData.comUse = document.getElementById('pm-com-use').value;
+    propData.camCharges = parseFloat(document.getElementById('pm-cam').value) || 0;
+  }
+  // Rent-to-Own extras
+  if (propType === 'rent-to-own') {
+    propData.purchasePrice = parseFloat(document.getElementById('pm-purchase-price').value) || 0;
+    propData.optionFee = parseFloat(document.getElementById('pm-option-fee').value) || 0;
+    propData.creditPct = parseFloat(document.getElementById('pm-credit-pct').value) || 0;
+    propData.optionEnd = document.getElementById('pm-option-end').value;
+  }
+  if (propId) {
+    const idx = owner.properties.findIndex(p=>p.id===propId);
+    if (idx >= 0) owner.properties[idx] = propData;
+  } else {
+    owner.properties.push(propData);
+  }
+  saveAll(); closePropModal(); renderOwnerList(); populateOwnerDropdowns();
+  toast('✅ ' + (propType === 'commercial' ? '🏢' : propType === 'rent-to-own' ? '🔑' : '🏠') + ' Property saved!');
+}
+
+// ════════════════════════════════════════════════
+//  EXPENSE ENTRY
+// ════════════════════════════════════════════════
+function populateExpProps() {
+  const ownerId = document.getElementById('exp-owner').value;
+  const propSel = document.getElementById('exp-prop');
+  propSel.innerHTML = '<option value="">— Select Property —</option>';
+  if (!ownerId) return;
+  const owner = owners.find(o=>o.id===ownerId);
+  if (!owner) return;
+  (owner.properties||[]).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = p.address + (p.unit?' '+p.unit:'');
+    propSel.appendChild(opt);
+  });
+  // Auto-select if only one property
+  if ((owner.properties||[]).length === 1) propSel.value = owner.properties[0].id;
+  renderExpTable();
+}
+
+function toggleExpType() {
+  const type = document.getElementById('exp-type').value;
+  document.getElementById('exp-cat-group').style.display = type === 'rent' ? 'none' : 'block';
+}
+
+function saveExpense() {
+  const ownerId = document.getElementById('exp-owner').value;
+  const propId = document.getElementById('exp-prop').value;
+  const month = document.getElementById('exp-month').value;
+  const type = document.getElementById('exp-type').value;
+  const category = type === 'rent' ? 'Rent Payment' : document.getElementById('exp-cat').value;
+  const amount = parseFloat(document.getElementById('exp-amount').value);
+  const notes = document.getElementById('exp-notes').value.trim();
+  const date = document.getElementById('exp-date').value;
+
+  if (!ownerId) { toast('⚠️ Select an owner'); return; }
+  if (!propId) { toast('⚠️ Select a property'); return; }
+  if (!month) { toast('⚠️ Select a month'); return; }
+  if (!amount || amount <= 0) { toast('⚠️ Enter a valid amount'); return; }
+
+  expenses.push({ id:uid(), ownerId, propId, month, type, category, amount, notes, date });
+  saveAll();
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-notes').value = '';
+  renderExpTable();
+  toast(`✅ ${type==='rent'?'Rent payment':'Expense'} of ${fmtDollar(amount)} added!`);
+}
+
+function renderExpTable(filterOwner, filterMonth) {
+  const tbody = document.getElementById('exp-table-body');
+  let list = [...expenses].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const curOwner = filterOwner || document.getElementById('exp-owner')?.value;
+  const curMonth = filterMonth || document.getElementById('exp-month')?.value;
+  if (curOwner) list = list.filter(e=>e.ownerId===curOwner);
+  if (curMonth) list = list.filter(e=>e.month===curMonth);
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:#94a3b8;">No entries for this selection.</td></tr>';
+    document.getElementById('recent-exp-title').textContent = 'Entries' + (curMonth?' — '+fmtMonth(curMonth):'');
+    return;
+  }
+  document.getElementById('recent-exp-title').textContent = 'Entries — ' + (curMonth ? fmtMonth(curMonth) : 'All Months') + (curOwner ? ' · ' + (owners.find(o=>o.id===curOwner)||{}).name : '');
+  tbody.innerHTML = list.map(e => {
+    const owner = owners.find(o=>o.id===e.ownerId);
+    const prop = owner?.properties?.find(p=>p.id===e.propId);
+    const isRent = e.type === 'rent';
+    return `<tr>
+      <td style="font-size:.82rem;">${e.date}</td>
+      <td style="font-size:.82rem;">${owner?.name||'—'}</td>
+      <td style="font-size:.82rem;">${prop?.address?.split(',')[0]||'—'}</td>
+      <td><span style="background:${isRent?'#dcfce7':'#fee2e2'};color:${isRent?'#166534':'#991b1b'};border-radius:5px;padding:.1rem .45rem;font-size:.75rem;font-weight:700;">${e.category}</span></td>
+      <td style="font-size:.82rem;color:#64748b;">${e.notes||''}</td>
+      <td style="text-align:right;font-weight:600;color:${isRent?'#16a34a':'#dc2626'};">${isRent?'+':'-'}${fmtDollar(e.amount)}</td>
+      <td><button class="btn btn-red btn-sm" onclick="deleteExpense('${e.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteExpense(id) {
+  expenses = expenses.filter(e=>e.id!==id);
+  saveAll(); renderExpTable();
+  toast('Entry removed.');
+}
+
+function clearExpFilter() {
+  document.getElementById('exp-owner').value = '';
+  document.getElementById('exp-month').value = '';
+  document.getElementById('exp-prop').innerHTML = '<option value="">— Select Owner First —</option>';
+  renderExpTable('', '');
+}
+
+// ════════════════════════════════════════════════
+//  STATEMENT BUILDER
+// ════════════════════════════════════════════════
+function loadStmtPreview() {
+  const ownerId = document.getElementById('stmt-owner').value;
+  const month = document.getElementById('stmt-month').value;
+  const previewArea = document.getElementById('stmt-preview-area');
+  const emptyEl = document.getElementById('stmt-empty');
+
+  if (!ownerId || !month) {
+    previewArea.style.display = 'none';
+    emptyEl.style.display = 'block';
+    document.getElementById('stmt-empty-msg').textContent = 'Select an owner and month above to generate a statement.';
+    return;
+  }
+  const owner = owners.find(o=>o.id===ownerId);
+  if (!owner || !(owner.properties||[]).length) {
+    previewArea.style.display = 'none';
+    emptyEl.style.display = 'block';
+    document.getElementById('stmt-empty-msg').textContent = 'This owner has no properties. Add properties first.';
+    return;
+  }
+
+  const html = buildStatementHTML(owner, month, 'monthly');
+  document.getElementById('stmt-preview-content').innerHTML = html;
+  previewArea.style.display = 'block';
+  emptyEl.style.display = 'none';
+}
+
+function buildStatementHTML(owner, period, type) {
+  const isAnnual = type === 'annual';
+  const periodLabel = isAnnual ? 'YTD ' + period : fmtMonth(period);
+  const props = owner.properties || [];
+
+  // Collect all expense categories used
+  const ownerExp = expenses.filter(e => {
+    if (e.ownerId !== owner.id) return false;
+    if (isAnnual) return e.date.startsWith(period);
+    return e.month === period;
+  });
+
+  // Gather unique expense categories (excluding rent)
+  const usedCats = [...new Set(ownerExp.filter(e=>e.type==='expense').map(e=>e.category))];
+
+  // Check if any commercial or RTO properties exist
+  const hasCommercial = props.some(p => p.type === 'commercial');
+  const hasRTO = props.some(p => p.type === 'rent-to-own');
+
+  // Build rows per property
+  const rows = props.map(prop => {
+    const propExp = ownerExp.filter(e=>e.propId===prop.id);
+    const rent = propExp.filter(e=>e.type==='rent').reduce((s,e)=>s+e.amount, 0);
+    const feeRate = prop.feeOverride != null ? prop.feeOverride : owner.mgmtFeePercent;
+    const mgmtFee = rent * (feeRate / 100);
+    const catTotals = {};
+    usedCats.forEach(cat => {
+      catTotals[cat] = propExp.filter(e=>e.type==='expense'&&e.category===cat).reduce((s,e)=>s+e.amount, 0);
+    });
+    // Commercial: NNN/CAM charges are pass-through income (or manual entries)
+    const camIncome = (prop.type==='commercial' && prop.leaseType==='nnn') ? (prop.camCharges || 0) : 0;
+    // Rent-to-Own: monthly credit toward purchase
+    const rtoCredit = (prop.type==='rent-to-own') ? rent * ((prop.creditPct||0)/100) : 0;
+    const totalExp = mgmtFee + Object.values(catTotals).reduce((s,v)=>s+v, 0);
+    const totalIncome = rent + camIncome;
+    const net = totalIncome - totalExp - rtoCredit;
+    return { prop, rent, camIncome, rtoCredit, mgmtFee, catTotals, totalExp, totalIncome, net };
+  });
+
+  // Totals
+  const totRent = rows.reduce((s,r)=>s+r.rent, 0);
+  const totCAM  = rows.reduce((s,r)=>s+r.camIncome, 0);
+  const totRTOCredit = rows.reduce((s,r)=>s+r.rtoCredit, 0);
+  const totMgmt = rows.reduce((s,r)=>s+r.mgmtFee, 0);
+  const totExp  = rows.reduce((s,r)=>s+r.totalExp, 0);
+  const totNet  = rows.reduce((s,r)=>s+r.net, 0);
+
+  // Build category columns header
+  const camHeader  = hasCommercial ? '<th>NNN/CAM Income</th>' : '';
+  const rtoHeader  = hasRTO ? '<th>RTO Credit</th>' : '';
+  const catHeaders = usedCats.map(c=>`<th>${c}</th>`).join('');
+  const camFooter  = hasCommercial ? `<td class="income-cell">${totCAM>0?fmtDollar(totCAM):''}</td>` : '';
+  const rtoFooter  = hasRTO ? `<td class="expense-cell">${totRTOCredit>0?fmtDollar(totRTOCredit):''}</td>` : '';
+  const catFooters = usedCats.map(cat => {
+    const t = rows.reduce((s,r)=>s+(r.catTotals[cat]||0),0);
+    return `<td class="expense-cell">${t>0?fmtDollar(t):''}</td>`;
+  }).join('');
+
+  // Build data rows
+  const dataRows = rows.map(r => {
+    const catCells  = usedCats.map(cat=>`<td class="expense-cell">${r.catTotals[cat]>0?fmtDollar(r.catTotals[cat]):''}</td>`).join('');
+    const camCell   = hasCommercial ? `<td class="income-cell">${r.camIncome>0?fmtDollar(r.camIncome):''}</td>` : '';
+    const rtoCell   = hasRTO ? `<td class="expense-cell" title="Option credit withheld from disbursement">${r.rtoCredit>0?fmtDollar(r.rtoCredit):''}</td>` : '';
+    const typeIcon  = propTypeIcon(r.prop.type);
+    const typeNote  = r.prop.type==='commercial' ? ` <span style="font-size:.72rem;color:#1a56db;font-weight:600;">[${(r.prop.leaseType||'gross').toUpperCase()}]</span>` :
+                      r.prop.type==='rent-to-own' ? ` <span style="font-size:.72rem;color:#7e22ce;font-weight:600;">[RTO]</span>` : '';
+    return `<tr>
+      <td>${typeIcon} ${r.prop.address}${r.prop.unit?' '+r.prop.unit:''}${typeNote}</td>
+      <td class="income-cell">${r.rent > 0 ? fmtDollar(r.rent) : ''}</td>
+      <td class="expense-cell">${r.mgmtFee > 0 ? fmtDollar(r.mgmtFee) : ''}</td>
+      ${camCell}${rtoCell}${catCells}
+      <td class="expense-cell">${fmtDollar(r.totalExp)}</td>
+      <td class="net-cell">${fmtDollar(r.net)}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div class="stmt-title">
+      ${owner.name} — ${periodLabel}<br>
+      <span style="font-size:.78rem;font-weight:400;color:#64748b;">Managed by Sanders Property Management · RentVerified</span>
+    </div>
+    <table class="stmt-table">
+      <thead>
+        <tr>
+          <th>Property Address</th>
+          <th>Rent</th>
+          <th>Mgt. Fee</th>
+          ${camHeader}${rtoHeader}${catHeaders}
+          <th>Total Expenses</th>
+          <th>Paid to Owner</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${dataRows}
+      </tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td>Owed to Owner</td>
+          <td class="income-cell">${fmtDollar(totRent)}</td>
+          <td class="expense-cell">${fmtDollar(totMgmt)}</td>
+          ${camFooter}${rtoFooter}
+          ${catFooters}
+          <td class="expense-cell">${fmtDollar(totExp)}</td>
+          <td class="net-cell">${fmtDollar(totNet)}</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="stmt-footer">
+      Generated: ${new Date().toLocaleDateString()} · Statement Period: ${periodLabel} · PM Fee: ${owner.mgmtFeePercent}%<br>
+      ${owner.email ? 'Owner Email: '+owner.email+' · ' : ''}Sanders Property Management · Daniel Hart · danielrhart1284@gmail.com
+    </div>`;
+}
+
+function finalizeStatement() {
+  const ownerId = document.getElementById('stmt-owner').value;
+  const month = document.getElementById('stmt-month').value;
+  if (!ownerId || !month) return;
+  const owner = owners.find(o=>o.id===ownerId);
+  const ownerExp = expenses.filter(e=>e.ownerId===ownerId && e.month===month);
+  const totRent = ownerExp.filter(e=>e.type==='rent').reduce((s,e)=>s+e.amount, 0);
+  const totExpenses = ownerExp.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount, 0);
+  const mgmtFee = totRent * (owner.mgmtFeePercent / 100);
+  const net = totRent - totExpenses - mgmtFee;
+
+  const existing = savedStatements.findIndex(s=>s.ownerId===ownerId&&s.period===month&&s.type==='monthly');
+  const stmt = {
+    id: existing >= 0 ? savedStatements[existing].id : uid(),
+    ownerId, ownerName: owner.name, period: month, type: 'monthly',
+    savedAt: new Date().toISOString(), sentAt: null,
+    totalRent: totRent, totalExpenses: totExpenses + mgmtFee, netDisbursement: net
+  };
+  if (existing >= 0) savedStatements[existing] = stmt;
+  else savedStatements.push(stmt);
+  saveAll();
+  toast('✅ Statement saved to archive!');
+}
+
+// ════════════════════════════════════════════════
+//  END OF YEAR
+// ════════════════════════════════════════════════
+function loadEOYPreview() {
+  const ownerId = document.getElementById('eoy-owner').value;
+  const year = document.getElementById('eoy-year').value;
+  if (!ownerId || !year) { toast('⚠️ Select an owner and year'); return; }
+  const owner = owners.find(o=>o.id===ownerId);
+  if (!owner || !(owner.properties||[]).length) { toast('⚠️ This owner has no properties'); return; }
+  const html = buildStatementHTML(owner, year, 'annual');
+  document.getElementById('eoy-preview-content').innerHTML = html;
+  document.getElementById('eoy-preview-area').style.display = 'block';
+  document.getElementById('eoy-preview-area').scrollIntoView({behavior:'smooth'});
+}
+
+function finalizeEOY() {
+  const ownerId = document.getElementById('eoy-owner').value;
+  const year = document.getElementById('eoy-year').value;
+  if (!ownerId || !year) return;
+  const owner = owners.find(o=>o.id===ownerId);
+  const ownerExp = expenses.filter(e=>e.ownerId===ownerId && e.date.startsWith(year));
+  const totRent = ownerExp.filter(e=>e.type==='rent').reduce((s,e)=>s+e.amount, 0);
+  const totExpenses = ownerExp.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount, 0);
+  const mgmtFee = totRent * (owner.mgmtFeePercent / 100);
+  const net = totRent - totExpenses - mgmtFee;
+
+  const existing = savedStatements.findIndex(s=>s.ownerId===ownerId&&s.period===year&&s.type==='annual');
+  const stmt = {
+    id: existing >= 0 ? savedStatements[existing].id : uid(),
+    ownerId, ownerName: owner.name, period: year, type: 'annual',
+    savedAt: new Date().toISOString(), sentAt: null,
+    totalRent: totRent, totalExpenses: totExpenses + mgmtFee, netDisbursement: net
+  };
+  if (existing >= 0) savedStatements[existing] = stmt;
+  else savedStatements.push(stmt);
+  saveAll();
+  toast('✅ Annual statement saved!');
+}
+
+// ════════════════════════════════════════════════
+//  ARCHIVE
+// ════════════════════════════════════════════════
+function renderArchive() {
+  const filterOwner = document.getElementById('archive-filter-owner').value;
+  const filterType = document.getElementById('archive-filter-type').value;
+  let list = [...savedStatements].sort((a,b)=>new Date(b.savedAt)-new Date(a.savedAt));
+  if (filterOwner) list = list.filter(s=>s.ownerId===filterOwner);
+  if (filterType) list = list.filter(s=>s.type===filterType);
+  const container = document.getElementById('archive-list');
+  if (!list.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">🗂</div><p>No statements match your filter.</p></div>';
+    return;
+  }
+  container.innerHTML = list.map(s => `
+    <div class="archive-item">
+      <div>
+        <div class="archive-period">${s.ownerName} — ${s.type==='annual'?s.period+' Annual YTD':fmtMonth(s.period)}</div>
+        <div class="archive-meta">
+          Saved ${new Date(s.savedAt).toLocaleDateString()} ·
+          Rent: <strong style="color:#16a34a;">${fmtDollar(s.totalRent)}</strong> ·
+          Expenses: <strong style="color:#dc2626;">${fmtDollar(s.totalExpenses)}</strong> ·
+          Net: <strong style="color:${s.netDisbursement>=0?'#1a56db':'#dc2626'}">${fmtDollar(s.netDisbursement)}</strong>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.65rem;">
+        <span class="badge ${s.sentAt?'badge-sent':'badge-pending'}">${s.sentAt?'✅ Sent':'Ready'}</span>
+        <button class="btn btn-outline btn-sm" onclick="viewArchiveStmt('${s.id}')">👁 View</button>
+        <button class="btn btn-outline btn-sm" onclick="markSent('${s.id}')" ${s.sentAt?'style="color:#94a3b8;"':''}>📧 ${s.sentAt?'Resend':'Mark Sent'}</button>
+        <button class="btn btn-red btn-sm" onclick="deleteStmt('${s.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function viewArchiveStmt(id) {
+  const stmt = savedStatements.find(s=>s.id===id);
+  if (!stmt) return;
+  const owner = owners.find(o=>o.id===stmt.ownerId);
+  if (!owner) return;
+  const html = buildStatementHTML(owner, stmt.period, stmt.type);
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><title>${owner.name} Statement</title>
+    <style>
+      body{font-family:system-ui,sans-serif;padding:2rem;color:#1e293b;font-size:.88rem;}
+      table{width:100%;border-collapse:collapse;font-size:.82rem;}
+      th{background:#1e293b;color:#fff;padding:.5rem .6rem;text-align:right;font-size:.78rem;}
+      th:first-child{text-align:left;}
+      td{padding:.45rem .6rem;border-bottom:1px solid #e2e8f0;text-align:right;}
+      td:first-child{text-align:left;font-weight:600;}
+      tfoot td{background:#f8fafc;font-weight:700;border-top:2px solid #1e293b;}
+      .income-cell{color:#16a34a;font-weight:600;}
+      .expense-cell{color:#dc2626;}
+      .net-cell{color:#1a56db;font-weight:700;}
+      .stmt-title{font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:1.25rem;}
+      .stmt-footer{margin-top:1rem;font-size:.75rem;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:.75rem;}
+      @media print{body{padding:.5rem;}}
+    </style></head>
+    <body>
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem;">
+      <button onclick="window.print()" style="padding:.4rem .9rem;background:#1a56db;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.85rem;">🖨 Print / Save PDF</button>
+    </div>
+    ${html}
+    </body></html>`);
+  w.document.close();
+}
+
+function markSent(id) {
+  const stmt = savedStatements.find(s=>s.id===id);
+  if (!stmt) return;
+  stmt.sentAt = new Date().toISOString();
+  saveAll(); renderArchive();
+  toast('📧 Marked as sent!');
+}
+
+function deleteStmt(id) {
+  if (!confirm('Delete this statement from the archive?')) return;
+  savedStatements = savedStatements.filter(s=>s.id!==id);
+  saveAll(); renderArchive();
+  toast('Statement deleted.');
+}
+
+// ════════════════════════════════════════════════
+//  RENT AUTO-SYNC FROM TENANT PORTAL
+// ════════════════════════════════════════════════
+function syncRentFromTenantPortal() {
+  // Pull payments from rv_accounting (tenant portal / accounting module)
+  let acctTx = [];
+  try { acctTx = JSON.parse(localStorage.getItem('rv_accounting') || '[]'); } catch(e){}
+  const rentTx = acctTx.filter(t => t.type==='income' && t.category==='Rent Payment');
+  let added = 0;
+  rentTx.forEach(tx => {
+    // Try to match to an owner's property by address
+    const month = tx.date.slice(0,7);
+    owners.forEach(owner => {
+      (owner.properties||[]).forEach(prop => {
+        const propKey = prop.address.toLowerCase().slice(0,10);
+        const txProp = (tx.property||'').toLowerCase();
+        if (txProp.includes(propKey.slice(0,8))) {
+          // Check not already entered
+          const exists = expenses.find(e=>e.ownerId===owner.id&&e.propId===prop.id&&e.month===month&&e.type==='rent'&&Math.abs(e.amount-tx.amount)<1);
+          if (!exists) {
+            expenses.push({ id:uid(), ownerId:owner.id, propId:prop.id, month, type:'rent', category:'Rent Payment', amount:tx.amount, notes:'Auto-synced from tenant portal', date:tx.date });
+            added++;
+          }
+        }
+      });
+    });
+  });
+  if (added > 0) { saveAll(); renderExpTable(); toast(`✅ Synced ${added} rent payment(s) from tenant portal!`); }
+  else toast('ℹ️ No new rent payments to sync.');
+}
+
+// ════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════
+function propTypeIcon(type) {
+  if (type === 'commercial') return '🏢';
+  if (type === 'rent-to-own') return '🔑';
+  return '🏠';
+}
+
+function propTypeBadge(type) {
+  if (type === 'commercial') return '<span style="background:#dbeafe;color:#1e40af;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">COMMERCIAL</span>';
+  if (type === 'rent-to-own') return '<span style="background:#f3e8ff;color:#7e22ce;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">RENT-TO-OWN</span>';
+  return '<span style="background:#f0fdf4;color:#166534;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">RESIDENTIAL</span>';
+}
+
+function fmtDollar(n) {
+  return '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function fmtMonth(m) {
+  if (!m) return '';
+  const [y,mo] = m.split('-');
+  const d = new Date(parseInt(y), parseInt(mo)-1, 1);
+  return d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+}
+
+function toast(msg) {
+  const el = document.getElementById('os-toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadAll();
+  refreshDashboard();
+  // Close modal on overlay click
+  document.getElementById('prop-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('prop-modal-overlay')) closePropModal();
+  });
+});
+</script>
+</body>
+</html>

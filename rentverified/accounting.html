@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accounting – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Layout ─────────────────────────────────────────── */
+    body { background: #f3f4f6; }
+    .acc-wrapper {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+      padding-top: 64px;
+    }
+    /* ── Sidebar ────────────────────────────────────────── */
+    .acc-sidebar {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+    .acc-sidebar h3 {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #64748b;
+      padding: .5rem 1.5rem;
+      margin: 1rem 0 .25rem;
+    }
+    .acc-sidebar a {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .6rem 1.5rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: .9rem;
+      border-left: 3px solid transparent;
+      transition: all .15s;
+    }
+    .acc-sidebar a:hover, .acc-sidebar a.active {
+      background: rgba(255,255,255,.06);
+      color: #fff;
+      border-left-color: #3b82f6;
+    }
+    /* ── Main Content ───────────────────────────────────── */
+    .acc-main { padding: 2rem; max-width: 1200px; }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+    }
+    .page-header h1 { font-size: 1.5rem; color: #1e293b; }
+    .page-header p  { color: #64748b; font-size: .9rem; margin-top: .2rem; }
+    /* ── Stat Cards ─────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border-left: 4px solid #e2e8f0;
+    }
+    .stat-card.income  { border-left-color: #10b981; }
+    .stat-card.expense { border-left-color: #ef4444; }
+    .stat-card.profit  { border-left-color: #3b82f6; }
+    .stat-card.overdue { border-left-color: #f59e0b; }
+    .stat-card .label  { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-card .value  { font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-top: .25rem; }
+    .stat-card .sub    { font-size: .78rem; color: #94a3b8; margin-top: .2rem; }
+    /* ── Section Panels ─────────────────────────────────── */
+    .panel {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .panel-header h2 { font-size: 1rem; color: #1e293b; }
+    .panel-body { padding: 1.5rem; }
+    /* ── Form Grid ──────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 1rem;
+    }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; }
+    .form-group label { font-size: .82rem; font-weight: 600; color: #374151; }
+    .form-group input, .form-group select, .form-group textarea {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: .55rem .8rem;
+      font-size: .9rem;
+      color: #1e293b;
+      outline: none;
+      transition: border .15s;
+      background: #fff;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #3b82f6;
+    }
+    .form-group textarea { resize: vertical; min-height: 68px; }
+    .type-toggle {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: .25rem;
+    }
+    .type-btn {
+      flex: 1;
+      padding: .55rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #f8fafc;
+      color: #64748b;
+      transition: all .15s;
+    }
+    .type-btn.income.active  { background: #ecfdf5; border-color: #10b981; color: #059669; }
+    .type-btn.expense.active { background: #fef2f2; border-color: #ef4444; color: #dc2626; }
+    /* ── Table ──────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .data-table th {
+      text-align: left;
+      padding: .65rem 1rem;
+      background: #f8fafc;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table td {
+      padding: .75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: #374151;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f8fafc; }
+    .badge-income  { background: #ecfdf5; color: #059669; padding: .2rem .6rem; border-radius: 99px; font-size: .75rem; font-weight: 600; }
+    .badge-expense { background: #fef2f2; color: #dc2626; padding: .2rem .6rem; border-radius: 99px; font-size: .75rem; font-weight: 600; }
+    .amount-income  { color: #059669; font-weight: 600; }
+    .amount-expense { color: #ef4444; font-weight: 600; }
+    /* ── Filter Bar ─────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      background: #fafafa;
+    }
+    .filter-bar select, .filter-bar input {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 7px;
+      padding: .4rem .75rem;
+      font-size: .85rem;
+      color: #374151;
+      outline: none;
+      background: #fff;
+    }
+    .filter-bar label { font-size: .82rem; color: #64748b; }
+    /* ── Reports ────────────────────────────────────────── */
+    .report-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
+    .rtab {
+      padding: .45rem 1rem;
+      border-radius: 7px;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      color: #64748b;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      transition: all .15s;
+    }
+    .rtab.active { background: #1a56db; color: #fff; border-color: #1a56db; }
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .report-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      border: 1px solid #e2e8f0;
+    }
+    .report-card h3 { font-size: .85rem; color: #64748b; margin-bottom: .75rem; }
+    .report-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .4rem 0;
+      font-size: .88rem;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .report-row:last-child { border-bottom: none; }
+    .report-row .cat { color: #374151; }
+    .report-row .amt { font-weight: 600; }
+    .report-total {
+      display: flex;
+      justify-content: space-between;
+      margin-top: .75rem;
+      padding-top: .75rem;
+      border-top: 2px solid #cbd5e1;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    /* ── Bar Chart ──────────────────────────────────────── */
+    .chart-wrap { padding: 1rem 0; }
+    .chart-month { display: flex; align-items: flex-end; gap: .25rem; margin-bottom: .5rem; }
+    .chart-bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .bar-pair { display: flex; gap: 3px; align-items: flex-end; height: 100px; }
+    .bar {
+      width: 14px;
+      border-radius: 4px 4px 0 0;
+      min-height: 3px;
+      transition: height .4s ease;
+    }
+    .bar.in  { background: #10b981; }
+    .bar.out { background: #ef4444; }
+    .chart-label { font-size: .7rem; color: #94a3b8; margin-top: .4rem; text-align: center; }
+    .chart-legend { display: flex; gap: 1rem; font-size: .78rem; color: #64748b; margin-top: .5rem; }
+    .chart-legend span { display: flex; align-items: center; gap: .35rem; }
+    .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    /* ── Property Breakdown ─────────────────────────────── */
+    .prop-bar-row { margin-bottom: .75rem; }
+    .prop-bar-label { display: flex; justify-content: space-between; font-size: .82rem; margin-bottom: .25rem; color: #374151; }
+    .prop-bar-track { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+    .prop-bar-fill  { height: 100%; background: #3b82f6; border-radius: 99px; transition: width .5s ease; }
+    /* ── Buttons ────────────────────────────────────────── */
+    .btn { padding: .55rem 1.1rem; border-radius: 8px; border: none; cursor: pointer; font-size: .88rem; font-weight: 600; transition: all .15s; }
+    .btn-primary { background: #1a56db; color: #fff; }
+    .btn-primary:hover { background: #1e40af; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger  { background: #ef4444; color: #fff; font-size: .78rem; padding: .3rem .7rem; border-radius: 6px; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-outline { background: transparent; border: 1.5px solid #e2e8f0; color: #374151; }
+    .btn-outline:hover { border-color: #94a3b8; }
+    .btn-export { background: #f0fdf4; border: 1.5px solid #10b981; color: #059669; }
+    .btn-export:hover { background: #dcfce7; }
+    /* ── Empty State ────────────────────────────────────── */
+    .empty-state { text-align: center; padding: 2.5rem; color: #94a3b8; }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .empty-state p { font-size: .9rem; }
+    /* ── Toast ──────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      color: #fff;
+      padding: .75rem 1.25rem;
+      border-radius: 10px;
+      font-size: .88rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all .3s;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .acc-wrapper { grid-template-columns: 1fr; }
+      .acc-sidebar { display: none; }
+      .report-grid { grid-template-columns: 1fr; }
+    }
+  /* ── Advanced Accounting Sections ──────────────────── */
+  .recon-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.5rem; }
+  .recon-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem 1.5rem; }
+  .recon-card h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.07em; color:#64748b; margin:0 0 .5rem; }
+  .recon-balance { font-size:1.75rem; font-weight:700; color:#1e293b; }
+  .recon-diff-ok { color:#16a34a; }
+  .recon-diff-bad { color:#dc2626; }
+  .cleared-row td { background:#f0fdf4 !important; }
+  .cleared-badge { background:#dcfce7; color:#166534; font-size:.72rem; font-weight:600; padding:.15rem .5rem; border-radius:99px; }
+  .owner-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1rem; }
+  .owner-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+  .owner-name { font-weight:700; font-size:1.05rem; color:#1e293b; }
+  .owner-props { font-size:.8rem; color:#64748b; }
+  .disbursement-table { width:100%; font-size:.88rem; border-collapse:collapse; }
+  .disbursement-table td { padding:.5rem .75rem; border-bottom:1px solid #f1f5f9; }
+  .disbursement-table .label { color:#64748b; }
+  .disbursement-table .amount-pos { color:#16a34a; font-weight:600; text-align:right; }
+  .disbursement-table .amount-neg { color:#dc2626; font-weight:600; text-align:right; }
+  .disbursement-table .amount-net { color:#1e293b; font-weight:700; font-size:1rem; text-align:right; border-top:2px solid #e2e8f0; }
+  .disbursement-table .total-row td { border-top:2px solid #e2e8f0; padding-top:.75rem; }
+  .print-stmt { background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px; padding:1.5rem; margin-top:1rem; font-size:.85rem; }
+  .print-stmt-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; border-bottom:2px solid #1e293b; padding-bottom:.75rem; }
+  .stmt-logo { font-weight:800; font-size:1.1rem; color:#1a56db; }
+  .nec-flag { background:#fef3c7; color:#92400e; font-size:.72rem; font-weight:700; padding:.15rem .55rem; border-radius:99px; }
+  .nec-ok { background:#dcfce7; color:#166534; font-size:.72rem; font-weight:600; padding:.15rem .55rem; border-radius:99px; }
+  .tax-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
+  .owner-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  @media(max-width:700px) {
+    .recon-grid,.tax-summary-grid,.owner-form-grid { grid-template-columns:1fr; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="nav-logo">✓</span>
+    <span>RentVerified</span>
+  </div>
+  <div class="nav-links">
+    <a href="landlord-signup.html">← Dashboard</a>
+    <a href="listings.html">Listings</a>
+    <a href="index.html">Home</a>
+  </div>
+</nav>
+
+<div class="acc-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="acc-sidebar">
+    <h3>Accounting</h3>
+    <a href="#dashboard" class="active" onclick="showSection('dashboard',this)">📊 Overview</a>
+    <a href="#add" onclick="showSection('add',this)">➕ Add Transaction</a>
+    <a href="#transactions" onclick="showSection('transactions',this)">📋 All Transactions</a>
+    <a href="#reports" onclick="showSection('reports',this)">📈 Reports</a>
+
+    <h3>Advanced</h3>
+    <a href="#reconcile" onclick="showSection('reconcile',this)">🏦 Bank Reconciliation</a>
+    <a href="#disbursements" onclick="showSection('disbursements',this)">💸 Owner Disbursements</a>
+    <a href="#tax1099" onclick="showSection('tax1099',this)">📋 1099s &amp; Tax</a>
+
+    <h3>Owner Statements</h3>
+    <a href="owner-statements.html" style="color:#fbbf24;border-left-color:#fbbf24;">💸 Owner Statements</a>
+
+    <h3>Manage</h3>
+    <a href="landlord-signup.html">🏠 My Properties</a>
+    <a href="ad-builder.html">📣 Ad Builder</a>
+    <a href="eviction.html">⚖️ Legal Center</a>
+    <a href="tenant-portal.html">👤 Tenant Portal</a>
+    <a href="financial-hub.html">💼 Financial Hub</a>
+    <a href="insurance-agents.html">🛡️ Insurance Agents</a>
+    <a href="referral.html">🎁 Refer &amp; Earn</a>
+    <a href="compliance.html">📋 Compliance</a>
+    <a href="str-manager.html">🏖️ STR Manager</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="acc-main">
+
+    <!-- ────────────────────────────────────────────────── -->
+    <!--  SECTION: OVERVIEW                                 -->
+    <!-- ────────────────────────────────────────────────── -->
+    <div id="section-dashboard">
+      <div class="page-header">
+        <div>
+          <h1>📊 Accounting Overview</h1>
+          <p>Track income, expenses, and profitability across all properties.</p>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center;">
+          <select id="dashYear" onchange="refreshDashboard()" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .8rem;font-size:.88rem;color:#374151;outline:none;">
+          </select>
+          <button class="btn btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card income">
+          <div class="label">Total Income</div>
+          <div class="value" id="totalIncome">$0</div>
+          <div class="sub" id="incomeCount">0 transactions</div>
+        </div>
+        <div class="stat-card expense">
+          <div class="label">Total Expenses</div>
+          <div class="value" id="totalExpense">$0</div>
+          <div class="sub" id="expenseCount">0 transactions</div>
+        </div>
+        <div class="stat-card profit">
+          <div class="label">Net Profit</div>
+          <div class="value" id="netProfit">$0</div>
+          <div class="sub" id="profitMargin">0% margin</div>
+        </div>
+        <div class="stat-card overdue">
+          <div class="label">This Month</div>
+          <div class="value" id="thisMonth">$0</div>
+          <div class="sub" id="thisMonthLabel">net income</div>
+        </div>
+      </div>
+
+      <!-- MONTHLY CHART -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Monthly Income vs Expenses</h2>
+          <div class="chart-legend">
+            <span><span class="dot" style="background:#10b981"></span> Income</span>
+            <span><span class="dot" style="background:#ef4444"></span> Expenses</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="chartWrap" class="chart-wrap">
+            <div style="display:flex;align-items:flex-end;gap:.5rem;" id="barChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROPERTY BREAKDOWN -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Income by Property</h2>
+        </div>
+        <div class="panel-body" id="propBreakdown">
+          <div class="empty-state"><div class="icon">🏠</div><p>No transactions yet.</p></div>
+        </div>
+      </div>
+
+      <!-- RECENT TRANSACTIONS -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Recent Transactions</h2>
+          <button class="btn btn-outline" onclick="showSection('transactions', document.querySelector('.acc-sidebar a:nth-child(4)'))">View All</button>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Date</th><th>Description</th><th>Category</th><th>Property</th><th>Type</th><th>Amount</th>
+            </tr></thead>
+            <tbody id="recentTbody">
+              <tr><td colspan="6"><div class="empty-state"><div class="icon">💰</div><p>No transactions yet. Add your first one!</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ────────────────────────────────────────────────── -->
+    <!--  SECTION: ADD TRANSACTION                          -->
+    <!-- ────────────────────────────────────────────────── -->
+    <div id="section-add" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>➕ Add Transaction</h1>
+          <p>Record income or an expense for any property.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Transaction Details</h2></div>
+        <div class="panel-body">
+
+          <!-- Type Toggle -->
+          <div style="margin-bottom:1.25rem;">
+            <label style="font-size:.82rem;font-weight:600;color:#374151;display:block;margin-bottom:.5rem;">Transaction Type</label>
+            <div class="type-toggle">
+              <button class="type-btn income active" id="btnIncome"  onclick="setType('income')">💚 Income</button>
+              <button class="type-btn expense"        id="btnExpense" onclick="setType('expense')">🔴 Expense</button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Date *</label>
+              <input type="date" id="txDate">
+            </div>
+            <div class="form-group">
+              <label>Amount ($) *</label>
+              <input type="number" id="txAmount" placeholder="0.00" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="txCategory">
+                <option value="">— Select Category —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Property</label>
+              <select id="txProperty">
+                <option value="119 E 600 S #119, Orem UT">119 E 600 S #119, Orem UT</option>
+                <option value="General / Multi-Property">General / Multi-Property</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tenant / Vendor</label>
+              <input type="text" id="txParty" placeholder="e.g. John Smith, ABC Plumbing">
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select id="txMethod">
+                <option value="Cash App">Cash App</option>
+                <option value="Zelle">Zelle</option>
+                <option value="Check">Check</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cash">Cash</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Description / Notes</label>
+              <textarea id="txNotes" placeholder="Add any details, receipt numbers, notes…"></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+            <button class="btn btn-primary" onclick="saveTransaction()">💾 Save Transaction</button>
+            <button class="btn btn-outline" onclick="clearForm()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ADD PRESETS -->
+      <div class="panel">
+        <div class="panel-header"><h2>⚡ Quick Add Presets</h2></div>
+        <div class="panel-body">
+          <p style="font-size:.85rem;color:#64748b;margin-bottom:1rem;">Click a preset to pre-fill the form — then just confirm the amount and date.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:.6rem;" id="presetBtns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ────────────────────────────────────────────────── -->
+    <!--  SECTION: ALL TRANSACTIONS                         -->
+    <!-- ────────────────────────────────────────────────── -->
+    <div id="section-transactions" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>📋 All Transactions</h1>
+          <p>Filter, search, and manage every transaction.</p>
+        </div>
+        <button class="btn btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+
+      <div class="panel">
+        <div class="filter-bar">
+          <label>Filter:</label>
+          <select id="filterType" onchange="renderTransactionTable()">
+            <option value="">All Types</option>
+            <option value="income">Income Only</option>
+            <option value="expense">Expenses Only</option>
+          </select>
+          <select id="filterProp" onchange="renderTransactionTable()">
+            <option value="">All Properties</option>
+          </select>
+          <select id="filterCat" onchange="renderTransactionTable()">
+            <option value="">All Categories</option>
+          </select>
+          <select id="filterMonth" onchange="renderTransactionTable()">
+            <option value="">All Months</option>
+          </select>
+          <input type="text" id="filterSearch" placeholder="Search…" oninput="renderTransactionTable()" style="flex:1;min-width:140px;">
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Date</th><th>Description</th><th>Category</th><th>Property</th><th>Party</th><th>Method</th><th>Type</th><th style="text-align:right;">Amount</th><th></th>
+            </tr></thead>
+            <tbody id="allTbody"></tbody>
+          </table>
+        </div>
+        <div id="tableSummary" style="padding:1rem 1.5rem;border-top:1px solid #f1f5f9;font-size:.85rem;color:#64748b;display:flex;gap:2rem;"></div>
+      </div>
+    </div>
+
+    <!-- ────────────────────────────────────────────────── -->
+    <!--  SECTION: REPORTS                                  -->
+    <!-- ────────────────────────────────────────────────── -->
+    <div id="section-reports" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>📈 Reports</h1>
+          <p>Monthly and annual summaries for tax time and planning.</p>
+        </div>
+        <button class="btn btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+
+      <div class="report-tabs">
+        <button class="rtab active" onclick="showReport('monthly',this)">Monthly</button>
+        <button class="rtab" onclick="showReport('annual',this)">Annual</button>
+        <button class="rtab" onclick="showReport('category',this)">By Category</button>
+        <button class="rtab" onclick="showReport('property',this)">By Property</button>
+      </div>
+
+      <!-- Monthly Report -->
+      <div id="rpt-monthly">
+        <div style="margin-bottom:1rem;display:flex;gap:.75rem;align-items:center;">
+          <select id="rptYear" onchange="renderMonthlyReport()"></select>
+          <select id="rptMonth" onchange="renderMonthlyReport()">
+            <option value="0">January</option><option value="1">February</option>
+            <option value="2">March</option><option value="3">April</option>
+            <option value="4">May</option><option value="5">June</option>
+            <option value="6">July</option><option value="7">August</option>
+            <option value="8">September</option><option value="9">October</option>
+            <option value="10">November</option><option value="11">December</option>
+          </select>
+        </div>
+        <div class="report-grid" id="monthlyGrid"></div>
+      </div>
+
+      <!-- Annual Report -->
+      <div id="rpt-annual" style="display:none;">
+        <div style="margin-bottom:1rem;display:flex;gap:.75rem;align-items:center;">
+          <select id="annualYear" onchange="renderAnnualReport()"></select>
+        </div>
+        <div class="report-grid" id="annualGrid"></div>
+      </div>
+
+      <!-- Category Report -->
+      <div id="rpt-category" style="display:none;">
+        <div style="margin-bottom:1rem;display:flex;gap:.75rem;">
+          <select id="catYear" onchange="renderCategoryReport()"></select>
+        </div>
+        <div class="report-grid" id="categoryGrid"></div>
+      </div>
+
+      <!-- Property Report -->
+      <div id="rpt-property" style="display:none;">
+        <div style="margin-bottom:1rem;display:flex;gap:.75rem;">
+          <select id="propYear" onchange="renderPropertyReport()"></select>
+        </div>
+        <div id="propertyGrid"></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: BANK RECONCILIATION                       -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-reconcile" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>🏦 Bank Reconciliation</h1>
+          <p>Match your transactions to your bank statement to verify accuracy.</p>
+        </div>
+        <button class="btn btn-primary" onclick="markReconciled()" style="background:#16a34a;border-color:#16a34a;">✅ Save Reconciliation</button>
+      </div>
+
+      <!-- Statement inputs -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;align-items:end;">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Statement End Date</label>
+            <input type="date" id="reconDate" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;" oninput="renderReconTable()">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Bank Statement Balance</label>
+            <input type="number" id="bankStmtBalance" placeholder="0.00" step="0.01" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;" oninput="renderReconSummary()">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Starting Book Balance</label>
+            <input type="number" id="startingBalance" placeholder="0.00" step="0.01" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;" oninput="renderReconSummary()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="recon-grid">
+        <div class="recon-card">
+          <h4>Book Balance (Cleared)</h4>
+          <div class="recon-balance" id="reconBookBal">$0.00</div>
+          <div style="font-size:.8rem;color:#64748b;margin-top:.25rem;" id="reconClearedCount">0 transactions cleared</div>
+        </div>
+        <div class="recon-card">
+          <h4>Bank Statement Balance</h4>
+          <div class="recon-balance" id="reconBankBal">$0.00</div>
+          <div style="font-size:.8rem;color:#64748b;margin-top:.25rem;">Entered from your bank</div>
+        </div>
+        <div class="recon-card">
+          <h4>Outstanding Deposits</h4>
+          <div class="recon-balance" id="reconOutDeposits" style="color:#16a34a;">$0.00</div>
+          <div style="font-size:.8rem;color:#64748b;margin-top:.25rem;" id="reconOutDepCount">0 uncleared income items</div>
+        </div>
+        <div class="recon-card">
+          <h4>Difference</h4>
+          <div class="recon-balance recon-diff-bad" id="reconDiff">$0.00</div>
+          <div style="font-size:.8rem;margin-top:.25rem;" id="reconDiffMsg">Enter your bank balance to begin</div>
+        </div>
+      </div>
+
+      <!-- Transaction checklist -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;font-size:1rem;">Check Off Cleared Transactions</h3>
+          <div style="display:flex;gap:.5rem;">
+            <button class="btn btn-outline" onclick="reconSelectAll(true)">Select All</button>
+            <button class="btn btn-outline" onclick="reconSelectAll(false)">Clear All</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th style="width:2rem;">✓</th><th>Date</th><th>Description</th><th>Property</th><th>Method</th><th style="text-align:right;">Amount</th></tr></thead>
+          <tbody id="reconTbody"><tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">Set a statement date above to load transactions.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: OWNER DISBURSEMENTS                       -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-disbursements" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>💸 Owner Disbursements</h1>
+          <p>Calculate net proceeds and generate owner statements for each property owner.</p>
+        </div>
+        <button class="btn btn-primary" onclick="toggleAddOwner()">➕ Add Owner</button>
+      </div>
+
+      <!-- Add owner form -->
+      <div id="addOwnerForm" class="card" style="display:none;margin-bottom:1.5rem;">
+        <h3 style="margin:0 0 1rem;font-size:1rem;">New Property Owner</h3>
+        <div class="owner-form-grid">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Owner Full Name</label>
+            <input id="ownerName" type="text" placeholder="Jane Smith" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Email</label>
+            <input id="ownerEmail" type="email" placeholder="jane@email.com" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Properties (comma-separated address keywords)</label>
+            <input id="ownerProps" type="text" placeholder="119 E 600 S, 234 Main" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">PM Management Fee (%)</label>
+            <input id="ownerFee" type="number" placeholder="10" min="0" max="100" step="0.5" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#64748b;display:block;margin-bottom:.35rem;">Statement Month</label>
+            <input id="ownerStmtMonth" type="month" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.9rem;">
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="saveOwner()" style="width:100%;">Save Owner</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month selector -->
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+        <label style="font-size:.88rem;font-weight:600;color:#374151;">Disbursement Month:</label>
+        <input type="month" id="disbMonth" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .8rem;font-size:.88rem;" onchange="renderDisbursements()">
+      </div>
+
+      <!-- Owner cards -->
+      <div id="ownerCardsContainer">
+        <div style="text-align:center;padding:3rem;color:#94a3b8;">No owners added yet. Click <strong>Add Owner</strong> to get started.</div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: 1099s & TAX                               -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-tax1099" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>📋 1099s &amp; Tax</h1>
+          <p>Identify vendors paid $600+ and generate 1099-NEC summaries for tax filing.</p>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center;">
+          <select id="taxYear" onchange="render1099()" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .8rem;font-size:.88rem;color:#374151;"></select>
+          <button class="btn btn-export" onclick="export1099CSV()">⬇ Export 1099 CSV</button>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="tax-summary-grid">
+        <div class="stat-card" style="background:#fff;">
+          <div class="stat-label">Total Vendors Paid</div>
+          <div class="stat-value" id="taxTotalVendors">—</div>
+        </div>
+        <div class="stat-card" style="background:#fff;">
+          <div class="stat-label">Require 1099-NEC ($600+)</div>
+          <div class="stat-value" style="color:#dc2626;" id="taxNECCount">—</div>
+        </div>
+        <div class="stat-card" style="background:#fff;">
+          <div class="stat-label">Total Contractor Payments</div>
+          <div class="stat-value" id="taxTotalPaid">—</div>
+        </div>
+      </div>
+
+      <!-- Info banner -->
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.87rem;color:#1e40af;">
+        <strong>📌 1099-NEC Rule:</strong> You must file a 1099-NEC for any unincorporated contractor, handyman, or service provider paid <strong>$600 or more</strong> in the tax year. Corporations (Inc./LLC taxed as corp) are generally exempt. Deadline: <strong>January 31</strong> of the following year.
+      </div>
+
+      <!-- Vendor table -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="margin:0;font-size:1rem;">Vendor Payment Summary</h3>
+          <span style="font-size:.8rem;color:#64748b;">Sourced from expense transactions — add TIN/EIN below for each vendor</span>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Vendor / Payee</th><th style="text-align:right;">Total Paid</th><th>1099 Required?</th><th>TIN / EIN</th><th>Type</th><th>Actions</th></tr></thead>
+          <tbody id="necTbody"><tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- 1099 Print Preview -->
+      <div id="nec-preview-wrapper" style="display:none;margin-top:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+          <h3 style="margin:0;">1099-NEC Summary (Print Preview)</h3>
+          <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
+        </div>
+        <div class="print-stmt" id="necPrintArea"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────────────────────
+const INCOME_CATS = [
+  'Rent Payment','Security Deposit','Late Fee','Pet Fee',
+  'Parking Fee','Laundry Income','Other Income'
+];
+const EXPENSE_CATS = [
+  'Mortgage / Loan','Property Tax','Insurance',
+  'Repairs & Maintenance','Landscaping','Utilities Paid',
+  'Property Management Fee','HOA Dues','Advertising',
+  'Legal / Accounting','Cleaning','Supplies','Travel',
+  'Other Expense'
+];
+const PRESETS = [
+  { label:'🏠 Rent Received',   type:'income',  cat:'Rent Payment',          method:'Cash App' },
+  { label:'🔑 Deposit Received',type:'income',  cat:'Security Deposit',       method:'Cash App' },
+  { label:'⚠️ Late Fee',         type:'income',  cat:'Late Fee',               method:'Cash App' },
+  { label:'🔧 Repair Bill',      type:'expense', cat:'Repairs & Maintenance',  method:'Credit Card' },
+  { label:'💧 Utility Bill',     type:'expense', cat:'Utilities Paid',         method:'Bank Transfer' },
+  { label:'🛡 Insurance',        type:'expense', cat:'Insurance',              method:'Bank Transfer' },
+  { label:'🏦 Mortgage',         type:'expense', cat:'Mortgage / Loan',        method:'Bank Transfer' },
+  { label:'📢 Advertising',      type:'expense', cat:'Advertising',            method:'Credit Card' },
+];
+
+let txType = 'income';
+let transactions = [];
+
+function loadData() {
+  try { transactions = JSON.parse(localStorage.getItem('rv_accounting') || '[]'); } catch(e){ transactions=[]; }
+}
+function saveData() {
+  localStorage.setItem('rv_accounting', JSON.stringify(transactions));
+}
+
+// ─────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  loadSampleDataIfEmpty();
+  populateYearDropdowns();
+  setTodayDate();
+  setType('income');
+  renderPresets();
+  refreshDashboard();
+  renderTransactionTable();
+  populateFilterDropdowns();
+  renderMonthlyReport();
+  renderAnnualReport();
+  renderCategoryReport();
+  renderPropertyReport();
+});
+
+function loadSampleDataIfEmpty() {
+  if (transactions.length > 0) return;
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const pm = String(now.getMonth()).padStart(2,'0') || '01';
+  transactions = [
+    { id: uid(), date:`${y}-${m}-01`, type:'income',  category:'Rent Payment',         property:'119 E 600 S #119, Orem UT', party:'Current Tenant', method:'Cash App', notes:'March rent', amount:1200 },
+    { id: uid(), date:`${y}-${pm}-01`, type:'income', category:'Rent Payment',         property:'119 E 600 S #119, Orem UT', party:'Current Tenant', method:'Cash App', notes:'February rent', amount:1200 },
+    { id: uid(), date:`${y}-01-15`,    type:'income', category:'Security Deposit',     property:'119 E 600 S #119, Orem UT', party:'Current Tenant', method:'Zelle',    notes:'Move-in deposit', amount:1200 },
+    { id: uid(), date:`${y}-${m}-05`,  type:'expense',category:'Mortgage / Loan',      property:'119 E 600 S #119, Orem UT', party:'Mountain West Bank', method:'Bank Transfer', notes:'Monthly mortgage', amount:680 },
+    { id: uid(), date:`${y}-${m}-10`,  type:'expense',category:'Insurance',            property:'119 E 600 S #119, Orem UT', party:'State Farm', method:'Bank Transfer', notes:'Landlord policy', amount:95 },
+    { id: uid(), date:`${y}-02-20`,    type:'expense',category:'Repairs & Maintenance',property:'119 E 600 S #119, Orem UT', party:'Fix-It Plumbing', method:'Credit Card', notes:'Leaky faucet repair', amount:145 },
+    { id: uid(), date:`${y}-01-05`,    type:'expense',category:'Mortgage / Loan',      property:'119 E 600 S #119, Orem UT', party:'Mountain West Bank', method:'Bank Transfer', notes:'January mortgage', amount:680 },
+  ];
+  saveData();
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function setTodayDate() {
+  const d = document.getElementById('txDate');
+  if(d) d.valueAsDate = new Date();
+}
+
+function populateYearDropdowns() {
+  const years = getAvailableYears();
+  const cur = new Date().getFullYear();
+  ['dashYear','rptYear','annualYear','catYear','propYear'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = '';
+    years.forEach(y => {
+      const o = document.createElement('option');
+      o.value = y; o.textContent = y;
+      if(y === cur) o.selected = true;
+      el.appendChild(o);
+    });
+  });
+  // Set rptMonth to current month
+  const rm = document.getElementById('rptMonth');
+  if(rm) rm.value = new Date().getMonth();
+}
+
+function getAvailableYears() {
+  const cur = new Date().getFullYear();
+  const txYears = transactions.map(t => new Date(t.date).getFullYear());
+  const set = new Set([cur-1, cur, ...txYears]);
+  return Array.from(set).sort((a,b)=>b-a);
+}
+
+function populateFilterDropdowns() {
+  const props = [...new Set(transactions.map(t => t.property))];
+  const cats  = [...new Set(transactions.map(t => t.category))];
+  const months = [...new Set(transactions.map(t => t.date.slice(0,7)))].sort().reverse();
+
+  const fp = document.getElementById('filterProp');
+  props.forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; fp.appendChild(o); });
+
+  const fc = document.getElementById('filterCat');
+  cats.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; fc.appendChild(o); });
+
+  const fm = document.getElementById('filterMonth');
+  months.forEach(m => {
+    const o=document.createElement('option'); o.value=m;
+    const d=new Date(m+'-01');
+    o.textContent=d.toLocaleString('default',{month:'long',year:'numeric'});
+    fm.appendChild(o);
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+//  SECTION NAVIGATION
+// ─────────────────────────────────────────────────────────
+function showSection(name, el) {
+  ['dashboard','add','transactions','reports'].forEach(s => {
+    document.getElementById('section-'+s).style.display = (s===name)?'block':'none';
+  });
+  document.querySelectorAll('.acc-sidebar a').forEach(a => a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ─────────────────────────────────────────────────────────
+//  TRANSACTION TYPE
+// ─────────────────────────────────────────────────────────
+function setType(t) {
+  txType = t;
+  document.getElementById('btnIncome').className  = 'type-btn income'  + (t==='income'?' active':'');
+  document.getElementById('btnExpense').className = 'type-btn expense' + (t==='expense'?' active':'');
+  const cats = t==='income' ? INCOME_CATS : EXPENSE_CATS;
+  const sel = document.getElementById('txCategory');
+  sel.innerHTML = '<option value="">— Select Category —</option>';
+  cats.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+}
+
+// ─────────────────────────────────────────────────────────
+//  PRESETS
+// ─────────────────────────────────────────────────────────
+function renderPresets() {
+  const wrap = document.getElementById('presetBtns');
+  wrap.innerHTML = '';
+  PRESETS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'btn ' + (p.type==='income'?'btn-success':'btn-danger');
+    btn.style.fontSize='.82rem';
+    btn.textContent = p.label;
+    btn.onclick = () => applyPreset(p);
+    wrap.appendChild(btn);
+  });
+}
+
+function applyPreset(p) {
+  setType(p.type);
+  setTimeout(() => {
+    document.getElementById('txCategory').value = p.cat;
+    document.getElementById('txMethod').value   = p.method;
+    document.getElementById('txDate').valueAsDate = new Date();
+    document.getElementById('txAmount').focus();
+  }, 50);
+}
+
+// ─────────────────────────────────────────────────────────
+//  SAVE TRANSACTION
+// ─────────────────────────────────────────────────────────
+function saveTransaction() {
+  const date   = document.getElementById('txDate').value;
+  const amount = parseFloat(document.getElementById('txAmount').value);
+  const cat    = document.getElementById('txCategory').value;
+  const prop   = document.getElementById('txProperty').value;
+  const party  = document.getElementById('txParty').value.trim();
+  const method = document.getElementById('txMethod').value;
+  const notes  = document.getElementById('txNotes').value.trim();
+
+  if(!date)       return toast('⚠️ Please select a date.');
+  if(!amount||amount<=0) return toast('⚠️ Please enter a valid amount.');
+  if(!cat)        return toast('⚠️ Please select a category.');
+
+  const tx = { id:uid(), date, type:txType, category:cat, property:prop, party, method, notes, amount };
+  transactions.unshift(tx);
+  saveData();
+  toast('✅ Transaction saved!');
+  clearForm();
+  refreshDashboard();
+  renderTransactionTable();
+  populateFilterDropdowns();
+}
+
+function clearForm() {
+  document.getElementById('txAmount').value = '';
+  document.getElementById('txCategory').value = '';
+  document.getElementById('txParty').value = '';
+  document.getElementById('txNotes').value = '';
+  setTodayDate();
+}
+
+// ─────────────────────────────────────────────────────────
+//  DELETE TRANSACTION
+// ─────────────────────────────────────────────────────────
+function deleteTransaction(id) {
+  if(!confirm('Delete this transaction? This cannot be undone.')) return;
+  transactions = transactions.filter(t => t.id !== id);
+  saveData();
+  refreshDashboard();
+  renderTransactionTable();
+  toast('🗑 Transaction deleted.');
+}
+
+// ─────────────────────────────────────────────────────────
+//  DASHBOARD
+// ─────────────────────────────────────────────────────────
+function refreshDashboard() {
+  const year = parseInt(document.getElementById('dashYear')?.value || new Date().getFullYear());
+  const yearTx = transactions.filter(t => new Date(t.date).getFullYear() === year);
+
+  const income  = yearTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = yearTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const net     = income - expense;
+  const margin  = income > 0 ? Math.round((net/income)*100) : 0;
+
+  const now = new Date();
+  const thisMoTx = yearTx.filter(t => {
+    const d = new Date(t.date);
+    return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  });
+  const thisMoInc = thisMoTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const thisMoExp = thisMoTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const thisMoNet = thisMoInc - thisMoExp;
+
+  document.getElementById('totalIncome').textContent  = fmt(income);
+  document.getElementById('totalExpense').textContent = fmt(expense);
+  document.getElementById('netProfit').textContent    = fmt(net);
+  document.getElementById('netProfit').style.color    = net>=0?'#059669':'#dc2626';
+  document.getElementById('incomeCount').textContent  = yearTx.filter(t=>t.type==='income').length + ' transactions';
+  document.getElementById('expenseCount').textContent = yearTx.filter(t=>t.type==='expense').length + ' transactions';
+  document.getElementById('profitMargin').textContent = margin + '% margin';
+  document.getElementById('thisMonth').textContent    = fmt(thisMoNet);
+  document.getElementById('thisMonth').style.color    = thisMoNet>=0?'#059669':'#dc2626';
+  document.getElementById('thisMonthLabel').textContent = now.toLocaleString('default',{month:'long'}) + ' net';
+
+  renderBarChart(year);
+  renderPropertyBreakdown(yearTx);
+  renderRecentTable(yearTx.slice(0,8));
+}
+
+function renderBarChart(year) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const chart = document.getElementById('barChart');
+  chart.innerHTML = '';
+
+  const maxVal = Math.max(...months.map((_,i) => {
+    const mo = transactions.filter(t => {
+      const d=new Date(t.date); return d.getFullYear()===year && d.getMonth()===i;
+    });
+    return Math.max(
+      mo.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0),
+      mo.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0)
+    );
+  }), 1);
+
+  months.forEach((m, i) => {
+    const mo = transactions.filter(t => {
+      const d=new Date(t.date); return d.getFullYear()===year && d.getMonth()===i;
+    });
+    const inc = mo.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const exp = mo.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const maxH = 100;
+
+    const group = document.createElement('div');
+    group.className = 'chart-bar-group';
+    group.title = `${m}: Income ${fmt(inc)}, Expenses ${fmt(exp)}`;
+    group.innerHTML = `
+      <div class="bar-pair">
+        <div class="bar in"  style="height:${Math.round((inc/maxVal)*maxH)}px"></div>
+        <div class="bar out" style="height:${Math.round((exp/maxVal)*maxH)}px"></div>
+      </div>
+      <div class="chart-label">${m}</div>`;
+    chart.appendChild(group);
+  });
+}
+
+function renderPropertyBreakdown(yearTx) {
+  const props = [...new Set(yearTx.map(t=>t.property))];
+  const el = document.getElementById('propBreakdown');
+  if(!props.length) { el.innerHTML='<div class="empty-state"><div class="icon">🏠</div><p>No transactions yet.</p></div>'; return; }
+  const totals = props.map(p => ({
+    prop: p,
+    income:  yearTx.filter(t=>t.property===p&&t.type==='income').reduce((s,t)=>s+t.amount,0),
+    expense: yearTx.filter(t=>t.property===p&&t.type==='expense').reduce((s,t)=>s+t.amount,0),
+  }));
+  const maxInc = Math.max(...totals.map(t=>t.income), 1);
+  el.innerHTML = totals.map(t => `
+    <div class="prop-bar-row">
+      <div class="prop-bar-label">
+        <span>🏠 ${t.prop}</span>
+        <span style="color:#059669">+${fmt(t.income)} &nbsp;<span style="color:#ef4444">−${fmt(t.expense)}</span> &nbsp; <strong style="color:#1e293b">Net: ${fmt(t.income-t.expense)}</strong></span>
+      </div>
+      <div class="prop-bar-track"><div class="prop-bar-fill" style="width:${Math.round((t.income/maxInc)*100)}%"></div></div>
+    </div>`).join('');
+}
+
+function renderRecentTable(txs) {
+  const tbody = document.getElementById('recentTbody');
+  if(!txs.length) {
+    tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="icon">💰</div><p>No transactions yet.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = txs.map(t => txRow(t, false)).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+//  TRANSACTIONS TABLE
+// ─────────────────────────────────────────────────────────
+function renderTransactionTable() {
+  let filtered = [...transactions];
+  const type   = document.getElementById('filterType')?.value;
+  const prop   = document.getElementById('filterProp')?.value;
+  const cat    = document.getElementById('filterCat')?.value;
+  const month  = document.getElementById('filterMonth')?.value;
+  const search = (document.getElementById('filterSearch')?.value||'').toLowerCase();
+
+  if(type)   filtered = filtered.filter(t=>t.type===type);
+  if(prop)   filtered = filtered.filter(t=>t.property===prop);
+  if(cat)    filtered = filtered.filter(t=>t.category===cat);
+  if(month)  filtered = filtered.filter(t=>t.date.startsWith(month));
+  if(search) filtered = filtered.filter(t =>
+    (t.notes+t.party+t.category+t.property+t.amount).toLowerCase().includes(search));
+
+  filtered.sort((a,b)=>b.date.localeCompare(a.date));
+
+  const tbody = document.getElementById('allTbody');
+  tbody.innerHTML = filtered.length
+    ? filtered.map(t=>txRow(t,true)).join('')
+    : '<tr><td colspan="9"><div class="empty-state"><div class="icon">🔍</div><p>No transactions match your filters.</p></div></td></tr>';
+
+  const income  = filtered.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = filtered.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const sumEl = document.getElementById('tableSummary');
+  sumEl.innerHTML = `
+    <span>${filtered.length} transactions</span>
+    <span style="color:#059669">Income: <strong>${fmt(income)}</strong></span>
+    <span style="color:#ef4444">Expenses: <strong>${fmt(expense)}</strong></span>
+    <span>Net: <strong style="color:${income-expense>=0?'#059669':'#ef4444'}">${fmt(income-expense)}</strong></span>`;
+}
+
+function txRow(t, showDelete) {
+  const dateStr = new Date(t.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  return `<tr>
+    <td>${dateStr}</td>
+    <td>${t.notes||'—'}</td>
+    <td>${t.category}</td>
+    <td style="font-size:.8rem;color:#64748b;">${t.property}</td>
+    ${showDelete?`<td style="font-size:.8rem;">${t.party||'—'}</td><td style="font-size:.8rem;">${t.method||'—'}</td>`:''}
+    <td><span class="badge-${t.type}">${t.type==='income'?'Income':'Expense'}</span></td>
+    <td class="amount-${t.type}" style="${showDelete?'text-align:right;':''}">
+      ${t.type==='income'?'+':'-'}${fmt(t.amount)}
+    </td>
+    ${showDelete?`<td><button class="btn btn-danger" onclick="deleteTransaction('${t.id}')">✕</button></td>`:''}
+  </tr>`;
+}
+
+// ─────────────────────────────────────────────────────────
+//  REPORTS
+// ─────────────────────────────────────────────────────────
+function showReport(name, el) {
+  ['monthly','annual','category','property'].forEach(r => {
+    document.getElementById('rpt-'+r).style.display = (r===name)?'block':'none';
+  });
+  document.querySelectorAll('.rtab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function getYearTx(selectId) {
+  const y = parseInt(document.getElementById(selectId)?.value || new Date().getFullYear());
+  return { year:y, txs: transactions.filter(t=>new Date(t.date).getFullYear()===y) };
+}
+
+function renderMonthlyReport() {
+  const y = parseInt(document.getElementById('rptYear')?.value||new Date().getFullYear());
+  const mo= parseInt(document.getElementById('rptMonth')?.value||new Date().getMonth());
+  const txs = transactions.filter(t => { const d=new Date(t.date); return d.getFullYear()===y&&d.getMonth()===mo; });
+  const grid = document.getElementById('monthlyGrid');
+  grid.innerHTML = buildReportCards(txs);
+}
+
+function renderAnnualReport() {
+  const { txs } = getYearTx('annualYear');
+  document.getElementById('annualGrid').innerHTML = buildReportCards(txs);
+}
+
+function renderCategoryReport() {
+  const { txs } = getYearTx('catYear');
+  document.getElementById('categoryGrid').innerHTML = buildReportCards(txs);
+}
+
+function renderPropertyReport() {
+  const { txs } = getYearTx('propYear');
+  const props = [...new Set(txs.map(t=>t.property))];
+  if(!props.length) { document.getElementById('propertyGrid').innerHTML='<div class="empty-state"><div class="icon">🏠</div><p>No transactions for this year.</p></div>'; return; }
+  document.getElementById('propertyGrid').innerHTML = props.map(p => {
+    const ptx = txs.filter(t=>t.property===p);
+    return `<div class="panel"><div class="panel-header"><h2>🏠 ${p}</h2></div><div class="panel-body"><div class="report-grid">${buildReportCards(ptx)}</div></div></div>`;
+  }).join('');
+}
+
+function buildReportCards(txs) {
+  const incTx  = txs.filter(t=>t.type==='income');
+  const expTx  = txs.filter(t=>t.type==='expense');
+  const totalI = incTx.reduce((s,t)=>s+t.amount,0);
+  const totalE = expTx.reduce((s,t)=>s+t.amount,0);
+  const net    = totalI - totalE;
+
+  const incByCat  = groupBy(incTx,'category');
+  const expByCat  = groupBy(expTx,'category');
+
+  const incRows  = Object.entries(incByCat).map(([c,v])=>`<div class="report-row"><span class="cat">${c}</span><span class="amt" style="color:#059669">+${fmt(v)}</span></div>`).join('');
+  const expRows  = Object.entries(expByCat).map(([c,v])=>`<div class="report-row"><span class="cat">${c}</span><span class="amt" style="color:#ef4444">-${fmt(v)}</span></div>`).join('');
+
+  return `
+    <div class="report-card">
+      <h3>💚 Income (${incTx.length} txns)</h3>
+      ${incRows||'<p style="color:#94a3b8;font-size:.83rem;">No income recorded.</p>'}
+      <div class="report-total"><span>Total Income</span><span style="color:#059669">${fmt(totalI)}</span></div>
+    </div>
+    <div class="report-card">
+      <h3>🔴 Expenses (${expTx.length} txns)</h3>
+      ${expRows||'<p style="color:#94a3b8;font-size:.83rem;">No expenses recorded.</p>'}
+      <div class="report-total"><span>Total Expenses</span><span style="color:#ef4444">${fmt(totalE)}</span></div>
+    </div>
+    <div class="report-card" style="grid-column:1/-1;background:${net>=0?'#f0fdf4':'#fef2f2'};border:1.5px solid ${net>=0?'#10b981':'#ef4444'};">
+      <h3>📊 Net Summary</h3>
+      <div class="report-row"><span>Total Income</span><span class="amt" style="color:#059669">+${fmt(totalI)}</span></div>
+      <div class="report-row"><span>Total Expenses</span><span class="amt" style="color:#ef4444">-${fmt(totalE)}</span></div>
+      <div class="report-total"><span>Net Profit / Loss</span><span style="color:${net>=0?'#059669':'#dc2626'};font-size:1.1rem;">${net>=0?'+':''}${fmt(net)}</span></div>
+    </div>`;
+}
+
+function groupBy(txs, key) {
+  return txs.reduce((acc, t) => {
+    acc[t[key]] = (acc[t[key]]||0) + t.amount;
+    return acc;
+  }, {});
+}
+
+// ═════════════════════════════════════════════════════════
+//  BANK RECONCILIATION
+// ═════════════════════════════════════════════════════════
+let clearedSet = new Set(); // ids of cleared transactions
+
+function renderReconTable() {
+  const dateVal = document.getElementById('reconDate').value;
+  const tbody = document.getElementById('reconTbody');
+  if (!dateVal) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">Set a statement date above.</td></tr>'; return; }
+  const cutoff = new Date(dateVal);
+  const filtered = transactions.filter(t => new Date(t.date) <= cutoff).sort((a,b) => new Date(a.date)-new Date(b.date));
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">No transactions on or before this date.</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(t => {
+    const cleared = clearedSet.has(t.id);
+    const sign = t.type === 'income' ? '+' : '-';
+    const color = t.type === 'income' ? '#16a34a' : '#dc2626';
+    return `<tr class="${cleared ? 'cleared-row' : ''}">
+      <td><input type="checkbox" ${cleared ? 'checked' : ''} onchange="toggleCleared('${t.id}',this.checked)"></td>
+      <td>${t.date}</td>
+      <td>${t.category}${t.notes ? ' — <span style="color:#64748b;font-size:.82rem;">' + t.notes + '</span>' : ''}</td>
+      <td style="font-size:.82rem;color:#64748b;">${t.property.split(',')[0]}</td>
+      <td style="font-size:.82rem;">${t.method||''}</td>
+      <td style="text-align:right;font-weight:600;color:${color};">${sign}${fmt(t.amount)}</td>
+    </tr>`;
+  }).join('');
+  renderReconSummary();
+}
+
+function toggleCleared(id, checked) {
+  if (checked) clearedSet.add(id); else clearedSet.delete(id);
+  renderReconSummary();
+}
+
+function reconSelectAll(select) {
+  const dateVal = document.getElementById('reconDate').value;
+  if (!dateVal) return;
+  const cutoff = new Date(dateVal);
+  transactions.filter(t => new Date(t.date) <= cutoff).forEach(t => {
+    if (select) clearedSet.add(t.id); else clearedSet.delete(t.id);
+  });
+  renderReconTable();
+}
+
+function renderReconSummary() {
+  const startingBal = parseFloat(document.getElementById('startingBalance').value) || 0;
+  const bankBal = parseFloat(document.getElementById('bankStmtBalance').value) || 0;
+  const cleared = transactions.filter(t => clearedSet.has(t.id));
+  const clearedNet = cleared.reduce((s,t) => s + (t.type==='income' ? t.amount : -t.amount), 0);
+  const bookBal = startingBal + clearedNet;
+  const dateVal = document.getElementById('reconDate').value;
+  const cutoff = dateVal ? new Date(dateVal) : null;
+  const uncleared = cutoff ? transactions.filter(t => new Date(t.date)<=cutoff && !clearedSet.has(t.id)) : [];
+  const outDeposits = uncleared.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const diff = bookBal - bankBal;
+  document.getElementById('reconBookBal').textContent = fmt(bookBal);
+  document.getElementById('reconBankBal').textContent = fmt(bankBal);
+  document.getElementById('reconOutDeposits').textContent = '$' + outDeposits.toLocaleString('en-US',{minimumFractionDigits:2});
+  document.getElementById('reconClearedCount').textContent = cleared.length + ' transactions cleared';
+  document.getElementById('reconOutDepCount').textContent = uncleared.filter(t=>t.type==='income').length + ' uncleared income items';
+  const diffEl = document.getElementById('reconDiff');
+  const msgEl = document.getElementById('reconDiffMsg');
+  diffEl.textContent = (diff === 0 ? '' : (diff > 0 ? '+' : '-')) + fmt(diff);
+  if (diff === 0 && bankBal !== 0) {
+    diffEl.className = 'recon-balance recon-diff-ok';
+    msgEl.style.color = '#16a34a'; msgEl.textContent = '✅ Fully reconciled!';
+  } else {
+    diffEl.className = 'recon-balance recon-diff-bad';
+    msgEl.style.color = '#dc2626'; msgEl.textContent = diff !== 0 ? 'Difference must be $0.00 to reconcile' : 'Enter balances above';
+  }
+}
+
+function markReconciled() {
+  const diff = parseFloat(document.getElementById('reconDiff').textContent.replace(/[^0-9.-]/g,''));
+  if (diff !== 0) { toast('⚠️ Difference must be $0.00 before saving reconciliation'); return; }
+  const month = document.getElementById('reconDate').value.slice(0,7);
+  const rec = JSON.parse(localStorage.getItem('rv_reconciliations')||'[]');
+  rec.push({ date: new Date().toISOString(), statementDate: document.getElementById('reconDate').value, cleared: [...clearedSet] });
+  localStorage.setItem('rv_reconciliations', JSON.stringify(rec));
+  toast('✅ Reconciliation saved for ' + month + '!');
+}
+
+// ═════════════════════════════════════════════════════════
+//  OWNER DISBURSEMENTS
+// ═════════════════════════════════════════════════════════
+let owners = [];
+
+function loadOwners() {
+  try { owners = JSON.parse(localStorage.getItem('rv_owners') || '[]'); } catch(e){ owners=[]; }
+  if (!owners.length) {
+    owners = [
+      { id:'owner1', name:'Daniel Hart (Self-Managed)', email:'danielrhart1284@gmail.com', props:['119 E 600 S'], fee:0 },
+    ];
+  }
+}
+
+function saveOwners() { localStorage.setItem('rv_owners', JSON.stringify(owners)); }
+
+function toggleAddOwner() {
+  const f = document.getElementById('addOwnerForm');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  // set default month to current
+  const now = new Date();
+  document.getElementById('ownerStmtMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+}
+
+function saveOwner() {
+  const name  = document.getElementById('ownerName').value.trim();
+  const email = document.getElementById('ownerEmail').value.trim();
+  const props = document.getElementById('ownerProps').value.trim();
+  const fee   = parseFloat(document.getElementById('ownerFee').value) || 0;
+  if (!name) { toast('⚠️ Owner name required'); return; }
+  owners.push({ id: uid(), name, email, props: props.split(',').map(p=>p.trim()).filter(Boolean), fee });
+  saveOwners();
+  document.getElementById('addOwnerForm').style.display = 'none';
+  renderDisbursements();
+  toast('✅ Owner ' + name + ' added!');
+}
+
+function renderDisbursements() {
+  loadOwners();
+  const monthVal = document.getElementById('disbMonth').value;
+  const container = document.getElementById('ownerCardsContainer');
+  if (!owners.length) { container.innerHTML = '<div style="text-align:center;padding:3rem;color:#94a3b8;">No owners yet.</div>'; return; }
+  container.innerHTML = owners.map(o => buildOwnerCard(o, monthVal)).join('');
+}
+
+function buildOwnerCard(owner, monthVal) {
+  // Filter transactions for owner's properties and selected month
+  let ownerTx = transactions;
+  if (owner.props && owner.props.length) {
+    ownerTx = transactions.filter(t => owner.props.some(p => t.property.toLowerCase().includes(p.toLowerCase())));
+  }
+  if (monthVal) {
+    ownerTx = ownerTx.filter(t => t.date.startsWith(monthVal));
+  }
+  const grossRent = ownerTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expenses  = ownerTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const mgmtFee   = grossRent * (owner.fee / 100);
+  const net       = grossRent - expenses - mgmtFee;
+  const monthLabel = monthVal ? new Date(monthVal+'-02').toLocaleDateString('en-US',{month:'long',year:'numeric'}) : 'All Time';
+  const expRows = ownerTx.filter(t=>t.type==='expense').map(t =>
+    `<tr><td class="label" style="padding-left:1.5rem;">↳ ${t.category} — ${t.notes||t.party||''}</td><td class="amount-neg">-${fmt(t.amount)}</td></tr>`
+  ).join('');
+  return `<div class="owner-card">
+    <div class="owner-card-header">
+      <div>
+        <div class="owner-name">${owner.name}</div>
+        <div class="owner-props">${owner.email} · PM Fee: ${owner.fee}% · Properties: ${owner.props.join(', ')||'All'}</div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button class="btn btn-outline" onclick="printStatement('${owner.id}','${monthVal}')">🖨 Print Statement</button>
+        <button class="btn btn-outline" style="color:#dc2626;border-color:#fca5a5;" onclick="deleteOwner('${owner.id}')">✕</button>
+      </div>
+    </div>
+    <table class="disbursement-table">
+      <tr><td class="label">Gross Rent Collected</td><td class="amount-pos">+${fmt(grossRent)}</td></tr>
+      ${expRows}
+      <tr><td class="label">Total Expenses</td><td class="amount-neg">-${fmt(expenses)}</td></tr>
+      ${owner.fee > 0 ? `<tr><td class="label">PM Management Fee (${owner.fee}%)</td><td class="amount-neg">-${fmt(mgmtFee)}</td></tr>` : ''}
+      <tr class="total-row"><td class="label" style="font-weight:700;">Net Owner Disbursement — ${monthLabel}</td><td class="amount-net ${net>=0?'':'amount-neg'}">${net>=0?'+':''}${fmt(net)}</td></tr>
+    </table>
+  </div>`;
+}
+
+function deleteOwner(id) {
+  if (!confirm('Remove this owner?')) return;
+  owners = owners.filter(o => o.id !== id);
+  saveOwners();
+  renderDisbursements();
+}
+
+function printStatement(ownerId, monthVal) {
+  loadOwners();
+  const owner = owners.find(o=>o.id===ownerId);
+  if (!owner) return;
+  let ownerTx = transactions;
+  if (owner.props && owner.props.length) {
+    ownerTx = transactions.filter(t => owner.props.some(p => t.property.toLowerCase().includes(p.toLowerCase())));
+  }
+  if (monthVal) ownerTx = ownerTx.filter(t => t.date.startsWith(monthVal));
+  const grossRent = ownerTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expenses  = ownerTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const mgmtFee   = grossRent * (owner.fee / 100);
+  const net       = grossRent - expenses - mgmtFee;
+  const monthLabel = monthVal ? new Date(monthVal+'-02').toLocaleDateString('en-US',{month:'long',year:'numeric'}) : 'All Time';
+  const expRows = ownerTx.filter(t=>t.type==='expense').map(t =>
+    `<tr><td style="padding:.4rem .5rem;color:#64748b;font-size:.85rem;">↳ ${t.date} · ${t.category} · ${t.notes||t.party||''}</td><td style="text-align:right;color:#dc2626;font-size:.85rem;">-${fmt(t.amount)}</td></tr>`
+  ).join('');
+  const html = `
+    <div class="print-stmt-header">
+      <div><div class="stmt-logo">✓ RentVerified</div><div style="font-size:.8rem;color:#64748b;">Sanders Property Management</div></div>
+      <div style="text-align:right;font-size:.85rem;color:#374151;"><strong>Owner Statement</strong><br>${monthLabel}<br>Generated: ${new Date().toLocaleDateString()}</div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <strong>Owner:</strong> ${owner.name}<br>
+      <span style="color:#64748b;font-size:.85rem;">${owner.email}</span><br>
+      <span style="color:#64748b;font-size:.85rem;">Properties: ${owner.props.join(', ')||'All'}</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+      <tr style="background:#f8fafc;"><td style="padding:.5rem;font-weight:600;">Gross Rent Collected</td><td style="text-align:right;color:#16a34a;font-weight:600;">+${fmt(grossRent)}</td></tr>
+      ${expRows}
+      <tr><td style="padding:.4rem .5rem;font-weight:600;">Total Expenses</td><td style="text-align:right;color:#dc2626;font-weight:600;">-${fmt(expenses)}</td></tr>
+      ${owner.fee > 0 ? `<tr><td style="padding:.4rem .5rem;">PM Fee (${owner.fee}%)</td><td style="text-align:right;color:#dc2626;">-${fmt(mgmtFee)}</td></tr>` : ''}
+      <tr style="border-top:2px solid #1e293b;"><td style="padding:.75rem .5rem;font-size:1rem;font-weight:700;">Net Disbursement</td><td style="text-align:right;font-size:1rem;font-weight:700;color:${net>=0?'#16a34a':'#dc2626'};">${net>=0?'+':''}${fmt(net)}</td></tr>
+    </table>
+    <div style="margin-top:1.5rem;font-size:.75rem;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:.75rem;">
+      This statement is prepared by Sanders Property Management using RentVerified. Please retain for your records.
+    </div>`;
+  document.getElementById('necPrintArea') && (document.getElementById('nec-preview-wrapper').style.display='none');
+  // Open print window
+  const w = window.open('','_blank','width=700,height=900');
+  w.document.write(`<!DOCTYPE html><html><head><title>Owner Statement – ${owner.name}</title>
+    <style>body{font-family:system-ui,sans-serif;padding:2rem;color:#1e293b;} @media print{body{padding:.5rem;}}</style></head>
+    <body>${html}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+  w.document.close();
+}
+
+// ═════════════════════════════════════════════════════════
+//  1099 / TAX
+// ═════════════════════════════════════════════════════════
+let vendorTINs = {};
+
+function loadTINs() {
+  try { vendorTINs = JSON.parse(localStorage.getItem('rv_vendor_tins') || '{}'); } catch(e){ vendorTINs={}; }
+}
+function saveTINs() { localStorage.setItem('rv_vendor_tins', JSON.stringify(vendorTINs)); }
+
+function render1099() {
+  loadTINs();
+  const year = parseInt(document.getElementById('taxYear').value);
+  // Only expense transactions paid to vendors/contractors
+  const yearTx = transactions.filter(t => t.type==='expense' && t.date.startsWith(String(year)));
+  // Group by party name
+  const byParty = {};
+  yearTx.forEach(t => {
+    const key = (t.party||'Unknown Vendor').trim();
+    if (!byParty[key]) byParty[key] = { total:0, txCount:0, categories:new Set() };
+    byParty[key].total += t.amount;
+    byParty[key].txCount++;
+    byParty[key].categories.add(t.category);
+  });
+  const parties = Object.entries(byParty).sort((a,b)=>b[1].total-a[1].total);
+  const necParties = parties.filter(([,v])=>v.total >= 600);
+  // Update stats
+  document.getElementById('taxTotalVendors').textContent = parties.length;
+  document.getElementById('taxNECCount').textContent = necParties.length;
+  document.getElementById('taxTotalPaid').textContent = fmt(yearTx.reduce((s,t)=>s+t.amount,0));
+  // Render table
+  const tbody = document.getElementById('necTbody');
+  if (!parties.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">No expense transactions in ' + year + '.</td></tr>'; return; }
+  tbody.innerHTML = parties.map(([party, data]) => {
+    const needs1099 = data.total >= 600;
+    const tin = vendorTINs[party] || '';
+    const type = vendorTINs[party+'_type'] || 'Individual';
+    return `<tr>
+      <td style="font-weight:600;">${party}<br><span style="font-size:.78rem;color:#64748b;">${[...data.categories].join(', ')}</span></td>
+      <td style="text-align:right;font-weight:600;${needs1099?'color:#dc2626;':'color:#374151;'}">${fmt(data.total)}</td>
+      <td><span class="${needs1099?'nec-flag':'nec-ok'}">${needs1099?'⚠️ YES — File 1099-NEC':'No'}</span></td>
+      <td><input type="text" value="${tin}" placeholder="XX-XXXXXXX" style="width:110px;border:1.5px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.82rem;" onchange="saveTIN('${party}',this.value)"></td>
+      <td>
+        <select style="border:1.5px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.82rem;" onchange="saveTINType('${party}',this.value)">
+          <option ${type==='Individual'?'selected':''}>Individual</option>
+          <option ${type==='LLC'?'selected':''}>LLC</option>
+          <option ${type==='Corporation'?'selected':''}>Corporation</option>
+          <option ${type==='Partnership'?'selected':''}>Partnership</option>
+        </select>
+      </td>
+      <td><button class="btn btn-outline" style="font-size:.78rem;padding:.3rem .65rem;" onclick="preview1099('${party}',${data.total},${year})">Preview</button></td>
+    </tr>`;
+  }).join('');
+  // Show print preview if there are NEC vendors
+  if (necParties.length) renderNECPreview(necParties, year);
+}
+
+function saveTIN(party, val) {
+  loadTINs();
+  vendorTINs[party] = val;
+  saveTINs();
+}
+function saveTINType(party, val) {
+  loadTINs();
+  vendorTINs[party+'_type'] = val;
+  saveTINs();
+}
+
+function preview1099(party, total, year) {
+  const tin = vendorTINs[party] || '___-__-____';
+  const html = `
+    <div class="print-stmt-header">
+      <div><div class="stmt-logo">✓ RentVerified</div><div style="font-size:.8rem;color:#64748b;">Sanders Property Management · EIN: XX-XXXXXXX</div></div>
+      <div style="text-align:right;font-size:.85rem;"><strong>1099-NEC Summary</strong><br>Tax Year ${year}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem;margin-top:.75rem;">
+      <tr style="background:#f8fafc;"><th style="padding:.5rem;text-align:left;">Field</th><th style="padding:.5rem;text-align:left;">Value</th></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Payer (Box — Filer Info)</td><td style="padding:.4rem .5rem;"><strong>Sanders Property Management</strong><br>Daniel Hart · danielrhart1284@gmail.com</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient Name</td><td style="padding:.4rem .5rem;font-weight:600;">${party}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient TIN/EIN</td><td style="padding:.4rem .5rem;">${tin}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Box 1 — Nonemployee Compensation</td><td style="padding:.4rem .5rem;font-weight:700;font-size:1.1rem;color:#dc2626;">${fmt(total)}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Tax Year</td><td style="padding:.4rem .5rem;">${year}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Filing Deadline</td><td style="padding:.4rem .5rem;">January 31, ${year+1}</td></tr>
+    </table>
+    <div style="margin-top:1rem;font-size:.75rem;color:#94a3b8;">This is a summary only. File official 1099-NEC forms through IRS e-file or a licensed tax preparer.</div>`;
+  const wrapper = document.getElementById('nec-preview-wrapper');
+  document.getElementById('necPrintArea').innerHTML = html;
+  wrapper.style.display = 'block';
+  wrapper.scrollIntoView({ behavior:'smooth' });
+}
+
+function renderNECPreview(necParties, year) {
+  const rows = necParties.map(([party, data]) => {
+    const tin = vendorTINs[party] || 'TIN NEEDED';
+    return `<tr><td style="padding:.4rem .5rem;font-weight:600;">${party}</td><td style="padding:.4rem .5rem;">${tin}</td><td style="padding:.4rem .5rem;font-weight:700;color:#dc2626;">${fmt(data.total)}</td></tr>`;
+  }).join('');
+  document.getElementById('necPrintArea').innerHTML = `
+    <div class="print-stmt-header">
+      <div><div class="stmt-logo">✓ RentVerified</div><div style="font-size:.8rem;color:#64748b;">Sanders Property Management</div></div>
+      <div style="text-align:right;font-size:.85rem;"><strong>1099-NEC Filing List</strong><br>Tax Year ${year}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+      <tr style="background:#f8fafc;"><th style="padding:.5rem;text-align:left;">Vendor</th><th style="padding:.5rem;text-align:left;">TIN/EIN</th><th style="padding:.5rem;text-align:left;">Box 1 Amount</th></tr>
+      ${rows}
+    </table>
+    <div style="margin-top:1rem;font-size:.75rem;color:#94a3b8;">File 1099-NEC for each vendor above by January 31, ${year+1}. Verify TINs before filing.</div>`;
+  document.getElementById('nec-preview-wrapper').style.display = 'block';
+}
+
+function export1099CSV() {
+  loadTINs();
+  const year = parseInt(document.getElementById('taxYear').value);
+  const yearTx = transactions.filter(t=>t.type==='expense' && t.date.startsWith(String(year)));
+  const byParty = {};
+  yearTx.forEach(t => {
+    const key = (t.party||'Unknown').trim();
+    byParty[key] = (byParty[key]||0) + t.amount;
+  });
+  const rows = Object.entries(byParty).sort((a,b)=>b[1]-a[1]).map(([party, total]) => [
+    `"${party}"`, vendorTINs[party]||'', vendorTINs[party+'_type']||'Individual', fmt(total).replace('$',''), total>=600?'YES':'NO', year
+  ].join(','));
+  const csv = ['Vendor,TIN/EIN,Type,Total Paid,1099-NEC Required,Tax Year', ...rows].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`1099-NEC-list-${year}.csv`; a.click(); URL.revokeObjectURL(url);
+  toast('📥 1099 CSV exported!');
+}
+
+// init advanced sections on load
+document.addEventListener('DOMContentLoaded', () => {
+  // Recon: set default date to today
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('reconDate').value = today;
+  // Disbursements: set default month
+  const now = new Date();
+  document.getElementById('disbMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  loadOwners();
+  renderDisbursements();
+  // 1099: populate year dropdown
+  const taxSel = document.getElementById('taxYear');
+  const curYear = now.getFullYear();
+  for (let y=curYear; y>=curYear-5; y--) {
+    const opt = document.createElement('option');
+    opt.value=y; opt.textContent=y; taxSel.appendChild(opt);
+  }
+  render1099();
+});
+
+// ─────────────────────────────────────────────────────────
+//  CSV EXPORT
+// ─────────────────────────────────────────────────────────
+function exportCSV() {
+  const headers = ['Date','Type','Category','Property','Party','Method','Notes','Amount'];
+  const rows = transactions.map(t => [
+    t.date, t.type, t.category, `"${t.property}"`, `"${t.party||''}"`,
+    t.method, `"${t.notes||''}"`, t.amount
+  ].join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=`rentverified-accounting-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('📥 CSV exported!');
+}
+
+// ─────────────────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────────────────
+function fmt(n) {
+  return '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

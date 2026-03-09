@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RentVerified – Referral Center</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-d: #1d4ed8;
+    --green: #10b981;
+    --green-d: #059669;
+    --amber: #f59e0b;
+    --amber-d: #d97706;
+    --purple: #7c3aed;
+    --dark: #0f172a;
+    --gray: #6b7280;
+    --light: #f8fafc;
+    --white: #ffffff;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: #1f2937; }
+
+  /* ── LAYOUT ── */
+  .page-wrap { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .ref-sidebar {
+    width: 240px; min-height: 100vh; background: var(--dark);
+    padding: 24px 16px; flex-shrink: 0; display: flex; flex-direction: column;
+  }
+  .brand { color: white; font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .brand span { color: #93c5fd; }
+  .sub-brand { color: #475569; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 28px; }
+  .sec-label { color: #475569; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin: 16px 0 6px 8px; }
+  .slink {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px;
+    border-radius: 8px; color: #94a3b8; font-size: .87rem; font-weight: 600;
+    cursor: pointer; transition: all .2s; text-decoration: none; margin-bottom: 2px;
+  }
+  .slink:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+  .slink.active { background: rgba(16,185,129,.15); color: #6ee7b7; border-left: 3px solid #10b981; }
+  .slink svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+  /* ── MAIN ── */
+  .ref-main { flex: 1; padding: 32px 36px; max-width: 1100px; overflow-x: hidden; }
+  @media(max-width:700px){ .ref-main { padding: 20px 16px; } }
+
+  .sec { display: none; }
+  .sec.active { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #064e3b 60%, #065f46 100%);
+    border-radius: 18px; padding: 36px 36px; color: white;
+    margin-bottom: 28px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; right: -60px; top: -60px;
+    width: 280px; height: 280px; background: rgba(16,185,129,.12);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: ''; position: absolute; right: 40px; bottom: -80px;
+    width: 200px; height: 200px; background: rgba(16,185,129,.08);
+    border-radius: 50%;
+  }
+  .hero h1 { font-size: 1.9rem; font-weight: 900; margin-bottom: 8px; line-height: 1.2; }
+  .hero p { color: #6ee7b7; font-size: .95rem; max-width: 460px; line-height: 1.6; }
+  .hero-stats { display: flex; gap: 28px; margin-top: 24px; flex-wrap: wrap; }
+  .hero-stat { }
+  .hero-stat .val { font-size: 2rem; font-weight: 900; }
+  .hero-stat .lbl { font-size: .78rem; color: #6ee7b7; margin-top: 1px; }
+
+  /* ── REFERRAL LINK BOX ── */
+  .link-box {
+    background: white; border-radius: var(--radius); border: 1.5px solid #e2e8f0;
+    padding: 22px 24px; margin-bottom: 24px;
+  }
+  .link-box-title { font-weight: 800; font-size: 1rem; color: var(--dark); margin-bottom: 4px; }
+  .link-box-sub { font-size: .83rem; color: var(--gray); margin-bottom: 16px; }
+  .link-input-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
+  .link-input {
+    flex: 1; min-width: 240px; padding: 12px 16px;
+    background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: .92rem; font-family: 'Courier New', monospace; color: #374151;
+    font-weight: 600; user-select: all; cursor: text;
+  }
+  .copy-btn {
+    padding: 12px 22px; background: var(--green); color: white;
+    border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+    font-size: .9rem; transition: all .2s; white-space: nowrap;
+  }
+  .copy-btn:hover { background: var(--green-d); }
+  .copy-btn.copied { background: #065f46; }
+
+  .share-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .share-btn {
+    display: flex; align-items: center; gap: 8px; padding: 9px 16px;
+    border-radius: 8px; font-weight: 700; font-size: .82rem;
+    cursor: pointer; border: none; transition: all .2s; text-decoration: none;
+  }
+  .share-sms { background: #dcfce7; color: #166534; }
+  .share-sms:hover { background: #bbf7d0; }
+  .share-email { background: #eff6ff; color: #1e40af; }
+  .share-email:hover { background: #dbeafe; }
+  .share-copy { background: #f1f5f9; color: #374151; }
+  .share-copy:hover { background: #e2e8f0; }
+
+  /* ── CARDS & GRID ── */
+  .card { background: white; border-radius: var(--radius); border: 1px solid #e2e8f0; margin-bottom: 20px; }
+  .card-body { padding: 20px 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+  @media(max-width:900px){ .grid-3 { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width:600px){ .grid-3,.grid-2 { grid-template-columns: 1fr; } }
+
+  .stat-card { background: white; border-radius: var(--radius); border: 1px solid #e2e8f0; padding: 18px 20px; }
+  .stat-val { font-size: 2.2rem; font-weight: 900; }
+  .stat-lbl { font-size: .8rem; color: var(--gray); margin-top: 3px; }
+  .stat-trend { font-size: .75rem; font-weight: 700; margin-top: 5px; }
+  .trend-up { color: var(--green); }
+
+  /* ── REFERRAL TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: .87rem; }
+  th { padding: 10px 12px; text-align: left; border-bottom: 2px solid #e2e8f0; font-weight: 700; color: #374151; background: #f8fafc; }
+  td { padding: 11px 12px; border-bottom: 1px solid #f1f5f9; }
+  tr:last-child td { border-bottom: none; }
+  .status-pill { display: inline-block; font-size: .73rem; font-weight: 700; padding: 2px 9px; border-radius: 12px; }
+  .s-active { background: #dcfce7; color: #166534; }
+  .s-pending { background: #fef3c7; color: #92400e; }
+  .s-credit { background: #eff6ff; color: var(--primary); }
+
+  /* ── CREDIT TRACKER ── */
+  .credit-bar-wrap { margin: 12px 0 6px; }
+  .credit-bar-track { background: #e2e8f0; border-radius: 8px; height: 12px; overflow: hidden; }
+  .credit-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--green), #34d399); transition: width 1s ease; }
+  .credit-milestone { display: flex; justify-content: space-between; font-size: .75rem; color: var(--gray); margin-top: 5px; }
+
+  /* ── LEADERBOARD ── */
+  .lb-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { font-size: 1.3rem; width: 32px; flex-shrink: 0; text-align: center; font-weight: 900; }
+  .lb-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 800; flex-shrink: 0; }
+  .lb-info { flex: 1; }
+  .lb-name { font-weight: 700; font-size: .9rem; }
+  .lb-meta { font-size: .78rem; color: var(--gray); }
+  .lb-credit { font-weight: 800; color: var(--green); font-size: .95rem; white-space: nowrap; }
+
+  /* ── HOW IT WORKS ── */
+  .how-step { display: flex; gap: 16px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+  .how-step:last-child { border-bottom: none; }
+  .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: .95rem; flex-shrink: 0; }
+  .step-body h4 { font-weight: 700; margin-bottom: 3px; color: var(--dark); }
+  .step-body p { font-size: .85rem; color: var(--gray); line-height: 1.5; }
+
+  /* ── TIER REWARDS ── */
+  .tier-row {
+    display: flex; align-items: center; padding: 14px 16px; border-radius: 10px;
+    margin-bottom: 10px; border: 1.5px solid;
+  }
+  .tier-icon { font-size: 1.5rem; margin-right: 14px; flex-shrink: 0; }
+  .tier-info { flex: 1; }
+  .tier-name { font-weight: 800; font-size: .92rem; }
+  .tier-desc { font-size: .8rem; margin-top: 2px; }
+  .tier-reward { font-weight: 900; font-size: 1.1rem; white-space: nowrap; }
+
+  /* ── K-FACTOR WIDGET ── */
+  .kfactor-widget { background: linear-gradient(135deg, #1e3a5f, #1e1b4b); border-radius: 14px; padding: 24px; color: white; }
+  .kfactor-widget .kval { font-size: 3.5rem; font-weight: 900; color: #6ee7b7; line-height: 1; }
+  .kfactor-label { color: #93c5fd; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+  .kfactor-bar { background: rgba(255,255,255,.1); border-radius: 8px; height: 10px; margin: 14px 0 8px; overflow: hidden; }
+  .kfactor-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #6ee7b7, #34d399); width: 0; transition: width 1.5s ease; }
+
+  /* ── CELEBRATION ── */
+  @keyframes pop { 0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+  .pop { animation: pop .4s ease forwards; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .fade-up { animation: fadeUp .35s ease forwards; }
+
+  /* ── ALERT ── */
+  .alert { display: flex; gap: 10px; padding: 12px 16px; border-radius: 8px; font-size: .85rem; margin-bottom: 16px; }
+  .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: white; border-radius: 16px; padding: 28px; max-width: 500px; width: 95vw; max-height: 85vh; overflow-y: auto; }
+
+  /* BTN */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: .88rem; transition: all .2s; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-d); }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: var(--green-d); }
+  .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+  .btn-sm { padding: 6px 14px; font-size: .8rem; }
+  .btn-lg { width: 100%; justify-content: center; padding: 13px; font-size: 1rem; }
+
+  /* confetti dot */
+  .confetti-dot { position: fixed; pointer-events: none; border-radius: 50%; animation: confettiFall linear forwards; z-index: 9999; }
+  @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(600px) rotate(720deg);opacity:0} }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- SIDEBAR -->
+  <nav class="ref-sidebar">
+    <div class="brand">🏠 Rent<span>Verified</span></div>
+    <div class="sub-brand">Referral Center</div>
+
+    <div class="sec-label">My Referrals</div>
+    <div class="slink active" onclick="showSec('overview',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      Dashboard
+    </div>
+    <div class="slink" onclick="showSec('share',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+      Share &amp; Earn
+    </div>
+    <div class="slink" onclick="showSec('tracking',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+      My Referrals
+    </div>
+    <div class="slink" onclick="showSec('credits',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Credits &amp; Rewards
+    </div>
+    <div class="slink" onclick="showSec('leaderboard',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+      Leaderboard
+    </div>
+    <div class="slink" onclick="showSec('howitworks',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      How It Works
+    </div>
+
+    <div class="sec-label" style="margin-top:20px;">Navigate</div>
+    <a class="slink" href="landlord-signup.html">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a class="slink" href="financial-hub.html">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Financial Hub
+    </a>
+    <a class="slink" href="compliance.html">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      📋 Compliance
+    </a>
+    <a class="slink" href="str-manager.html">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg>
+      🏖️ STR Manager
+    </a>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="ref-main">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div class="sec active" id="sec-overview">
+
+      <!-- HERO -->
+      <div class="hero">
+        <h1>🎁 Refer &amp; Earn</h1>
+        <p>Every landlord you refer earns you <strong style="color:#a7f3d0;">$20 in RentVerified credit — instantly</strong>, the moment they sign up. No waiting. No minimums.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="val" id="hero-count">0</div><div class="lbl">Total Referrals</div></div>
+          <div class="hero-stat"><div class="val" id="hero-credits">$0</div><div class="lbl">Credits Earned</div></div>
+          <div class="hero-stat"><div class="val" id="hero-kfactor">0.0</div><div class="lbl">Your K-Factor</div></div>
+          <div class="hero-stat"><div class="val" id="hero-network">0</div><div class="lbl">Network Size</div></div>
+        </div>
+      </div>
+
+      <!-- QUICK SHARE -->
+      <div class="link-box">
+        <div class="link-box-title">🔗 Your Referral Link</div>
+        <div class="link-box-sub">Share this link — when anyone signs up, <strong>$20 credit hits your account instantly.</strong></div>
+        <div class="link-input-row">
+          <div class="link-input" id="ref-link-display">rentverified.com/join?ref=SANDERS47</div>
+          <button class="copy-btn" id="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+        </div>
+        <div class="share-row">
+          <button class="share-btn share-sms" onclick="shareSMS()">💬 Text a Landlord</button>
+          <button class="share-btn share-email" onclick="shareEmail()">📧 Send Email</button>
+          <button class="share-btn share-copy" onclick="shareMessage('pm')">🏢 Share with PM</button>
+          <button class="share-btn share-copy" onclick="shareMessage('contractor')">🔧 Share with Contractor</button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--green);" id="ov-active">0</div>
+          <div class="stat-lbl">Active Referrals</div>
+          <div class="stat-trend trend-up" id="ov-active-trend"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--primary);" id="ov-pending">0</div>
+          <div class="stat-lbl">Pending Sign-ups</div>
+          <div class="stat-trend" style="color:var(--amber);">Awaiting account setup</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--amber-d);" id="ov-credits-display">$0</div>
+          <div class="stat-lbl">Total Credits Earned</div>
+          <div class="stat-trend trend-up" id="ov-credit-trend"></div>
+        </div>
+      </div>
+
+      <!-- GROWTH PROJECTION -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-weight:800;font-size:1rem;margin-bottom:4px;">📈 Your Referral Growth Curve</div>
+          <div style="font-size:.83rem;color:var(--gray);margin-bottom:18px;">Based on your current K-factor — how your network compounds over 6 months</div>
+          <div id="growth-chart" style="display:flex;align-items:flex-end;gap:8px;height:120px;padding:0 4px;">
+            <!-- rendered by JS -->
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;" id="growth-labels"></div>
+          <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;font-size:.8rem;">
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--green);margin-right:5px;"></span>With Referrals</span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#e2e8f0;margin-right:5px;"></span>Without Referrals</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-weight:800;margin-bottom:16px;">🕐 Recent Referral Activity</div>
+          <div id="recent-activity">
+            <div style="text-align:center;padding:2rem;color:var(--gray);">
+              <div style="font-size:2rem;margin-bottom:8px;">📢</div>
+              <p>No referrals yet. Share your link to get started!</p>
+              <button class="btn btn-green" style="margin-top:12px;" onclick="simulateReferral()">🎯 Simulate a Referral</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SHARE & EARN ══ -->
+    <div class="sec" id="sec-share">
+      <div style="margin-bottom:24px;">
+        <h1 style="font-size:1.6rem;font-weight:900;color:var(--dark);">📤 Share &amp; Earn</h1>
+        <p style="color:var(--gray);margin-top:4px;">Pre-written messages for every professional in your network. One click, instantly ready.</p>
+      </div>
+
+      <div class="link-box" style="margin-bottom:20px;">
+        <div class="link-box-title">Your Unique Referral Link</div>
+        <div class="link-input-row">
+          <div class="link-input" id="ref-link-display-2">rentverified.com/join?ref=SANDERS47</div>
+          <button class="copy-btn" onclick="copyLink('copy-btn-2')" id="copy-btn-2">📋 Copy</button>
+        </div>
+      </div>
+
+      <!-- Message Templates -->
+      <div class="grid-2">
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:800;margin-bottom:3px;">💬 Text to a Landlord Friend</div>
+            <div style="font-size:.78rem;color:var(--gray);margin-bottom:12px;">Best for landlord networks, REIA groups, HOAs</div>
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px;font-size:.85rem;line-height:1.7;color:#374151;" id="msg-landlord">
+              Hey! I've been using RentVerified for property management — it handles rent collection, maintenance, leases, tenant screening, and even insurance all in one place. You should check it out, it's been a game changer. Sign up free: <strong>rentverified.com/join?ref=SANDERS47</strong>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-green btn-sm" onclick="copyMsg('msg-landlord')">📋 Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="openSMS('landlord')">💬 Open in Messages</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:800;margin-bottom:3px;">🏢 Text to a Property Manager</div>
+            <div style="font-size:.78rem;color:var(--gray);margin-bottom:12px;">Best for PMs you work with or know</div>
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px;font-size:.85rem;line-height:1.7;color:#374151;" id="msg-pm">
+              Quick question — are you on RentVerified yet? It's a property management platform where landlords find vetted PMs, pay per-job or monthly, and you get verified leads automatically. Worth looking at: <strong>rentverified.com/join?ref=SANDERS47</strong>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-green btn-sm" onclick="copyMsg('msg-pm')">📋 Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="openSMS('pm')">💬 Open in Messages</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:800;margin-bottom:3px;">🔧 Text to a Contractor</div>
+            <div style="font-size:.78rem;color:var(--gray);margin-bottom:12px;">Best for your plumbers, electricians, handymen</div>
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px;font-size:.85rem;line-height:1.7;color:#374151;" id="msg-contractor">
+              Hey, I found a platform where landlords post maintenance jobs and you can bid on them — RentVerified. They verify contractors so landlords trust you right away. Might be worth signing up to get more jobs: <strong>rentverified.com/join?ref=SANDERS47</strong>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-green btn-sm" onclick="copyMsg('msg-contractor')">📋 Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="openSMS('contractor')">💬 Open in Messages</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:800;margin-bottom:3px;">⚖️ Text to an Attorney</div>
+            <div style="font-size:.78rem;color:var(--gray);margin-bottom:12px;">Best for eviction attorneys, real estate lawyers</div>
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px;font-size:.85rem;line-height:1.7;color:#374151;" id="msg-attorney">
+              There's a platform called RentVerified where landlords find verified eviction attorneys. Their landlords are pre-vetted and are already having legal issues — warm leads, no cold calling. Check it out: <strong>rentverified.com/join?ref=SANDERS47</strong>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-green btn-sm" onclick="copyMsg('msg-attorney')">📋 Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="openSMS('attorney')">💬 Open in Messages</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:800;margin-bottom:3px;">🛡️ Text to an Insurance Agent</div>
+            <div style="font-size:.78rem;color:var(--gray);margin-bottom:12px;">Best for agents who want landlord leads</div>
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px;font-size:.85rem;line-height:1.7;color:#374151;" id="msg-agent">
+              RentVerified just added an insurance agent marketplace — they connect verified landlords with local agents. Landlords are high-value clients (multi-property, umbrella policies). Worth checking out: <strong>rentverified.com/join?ref=SANDERS47</strong>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-green btn-sm" onclick="copyMsg('msg-agent')">📋 Copy</button>
+              <button class="btn btn-outline btn-sm" onclick="openSMS('agent')">💬 Open in Messages</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-weight:800;margin-bottom:3px;">📱 Facebook / REIA Group Post</div>
+            <div style="font-size:.78rem;color:var(--gray);margin-bottom:12px;">Best for investor groups, landlord Facebook groups</div>
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px;font-size:.85rem;line-height:1.7;color:#374151;" id="msg-social">
+              Anyone else using RentVerified? It handles everything — tenant screening, rent collection, maintenance tracking, leases, eviction support, and it even reports rent payments to credit bureaus to help tenants build credit. Built specifically for Utah landlords. Free to start: <strong>rentverified.com/join?ref=SANDERS47</strong> 🏠
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-green btn-sm" onclick="copyMsg('msg-social')">📋 Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ TRACKING ══ -->
+    <div class="sec" id="sec-tracking">
+      <div style="margin-bottom:24px;">
+        <h1 style="font-size:1.6rem;font-weight:900;color:var(--dark);">📋 My Referrals</h1>
+        <p style="color:var(--gray);margin-top:4px;">Every person you referred, their status, and when your credit was issued.</p>
+      </div>
+
+      <div class="alert alert-info">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+        <span>Credits are issued <strong>instantly</strong> when a referral signs up — no payment required from them. You earn even on free trials.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+            <div style="font-weight:800;">All Referrals</div>
+            <button class="btn btn-green btn-sm" onclick="simulateReferral()">+ Simulate New Referral</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table id="referral-table">
+              <thead><tr>
+                <th>Name</th><th>Type</th><th>Signed Up</th><th>Status</th><th>Credit</th>
+              </tr></thead>
+              <tbody id="ref-tbody">
+                <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">No referrals yet — share your link to get started!</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CREDITS ══ -->
+    <div class="sec" id="sec-credits">
+      <div style="margin-bottom:24px;">
+        <h1 style="font-size:1.6rem;font-weight:900;color:var(--dark);">💰 Credits &amp; Rewards</h1>
+        <p style="color:var(--gray);margin-top:4px;">Earn credits for every referral. Credits apply instantly to your subscription.</p>
+      </div>
+
+      <!-- Credit balance -->
+      <div class="card" style="background:linear-gradient(135deg,#064e3b,#065f46);color:white;">
+        <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+          <div>
+            <div style="color:#6ee7b7;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Available Credit Balance</div>
+            <div style="font-size:3rem;font-weight:900;" id="credit-balance-display">$0</div>
+            <div style="color:#a7f3d0;font-size:.85rem;margin-top:4px;" id="credit-months-display">0 months free on your current plan</div>
+          </div>
+          <div style="margin-left:auto;text-align:center;">
+            <div style="font-size:2rem;">🎁</div>
+            <div style="font-size:.8rem;color:#6ee7b7;margin-top:4px;">$20 per referral</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress to next milestone -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-weight:800;margin-bottom:4px;">🏆 Milestone Rewards</div>
+          <div style="font-size:.83rem;color:var(--gray);margin-bottom:16px;">Unlock bonus rewards as your referrals grow</div>
+
+          <div class="tier-row" id="tier-bronze" style="border-color:#cd7f32;background:#fdf5e6;">
+            <div class="tier-icon">🥉</div>
+            <div class="tier-info">
+              <div class="tier-name" style="color:#92400e;">Bronze — 3 Referrals</div>
+              <div class="tier-desc" style="color:#b45309;">1 month free + "Verified Referrer" badge on your profile</div>
+            </div>
+            <div class="tier-reward" style="color:#92400e;" id="bronze-status">0/3</div>
+          </div>
+
+          <div class="tier-row" id="tier-silver" style="border-color:#9ca3af;background:#f8fafc;">
+            <div class="tier-icon">🥈</div>
+            <div class="tier-info">
+              <div class="tier-name" style="color:#374151;">Silver — 10 Referrals</div>
+              <div class="tier-desc" style="color:var(--gray);">3 months free + priority support + $50 Amazon gift card</div>
+            </div>
+            <div class="tier-reward" style="color:#374151;" id="silver-status">0/10</div>
+          </div>
+
+          <div class="tier-row" id="tier-gold" style="border-color:#f59e0b;background:#fffbeb;">
+            <div class="tier-icon">🥇</div>
+            <div class="tier-info">
+              <div class="tier-name" style="color:#92400e;">Gold — 25 Referrals</div>
+              <div class="tier-desc" style="color:#b45309;">6 months free + VIP onboarding for referrals + $200 gift card</div>
+            </div>
+            <div class="tier-reward" style="color:#92400e;" id="gold-status">0/25</div>
+          </div>
+
+          <div class="tier-row" id="tier-elite" style="border-color:var(--purple);background:#f5f3ff;">
+            <div class="tier-icon">💎</div>
+            <div class="tier-info">
+              <div class="tier-name" style="color:var(--purple);">Diamond — 50 Referrals</div>
+              <div class="tier-desc" style="color:#6d28d9;">Lifetime free account + revenue share partner + co-branded marketing</div>
+            </div>
+            <div class="tier-reward" style="color:var(--purple);" id="elite-status">0/50</div>
+          </div>
+
+          <div class="credit-bar-wrap" style="margin-top:20px;">
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:600;margin-bottom:6px;">
+              <span>Progress to next milestone</span>
+              <span id="milestone-progress-label">0 referrals — 3 needed for Bronze</span>
+            </div>
+            <div class="credit-bar-track">
+              <div class="credit-bar-fill" id="milestone-bar" style="width:0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Credit history -->
+      <div class="card">
+        <div class="card-body">
+          <div style="font-weight:800;margin-bottom:14px;">📝 Credit History</div>
+          <div id="credit-history">
+            <div style="text-align:center;padding:2rem;color:var(--gray);">No credits yet. Share your referral link to start earning!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LEADERBOARD ══ -->
+    <div class="sec" id="sec-leaderboard">
+      <div style="margin-bottom:24px;">
+        <h1 style="font-size:1.6rem;font-weight:900;color:var(--dark);">🏆 Utah Referral Leaderboard</h1>
+        <p style="color:var(--gray);margin-top:4px;">Top referrers in your region this month. Compete for bonus prizes.</p>
+      </div>
+
+      <div class="alert alert-success">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <span>🎁 Top 3 referrers this month win a <strong>$100 Amazon gift card</strong>. Leaderboard resets on the 1st of each month.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div id="leaderboard-list">
+            <div class="lb-row" style="background:#fffbeb;border-radius:10px;padding:12px 14px;margin-bottom:4px;">
+              <div class="lb-rank">🥇</div>
+              <div class="lb-avatar" style="background:#fef3c7;color:#92400e;">JT</div>
+              <div class="lb-info"><div class="lb-name">Jordan T.</div><div class="lb-meta">Provo UT · 47 referrals all-time</div></div>
+              <div class="lb-credit">$940 earned</div>
+            </div>
+            <div class="lb-row" style="background:#f8fafc;border-radius:10px;padding:12px 14px;margin-bottom:4px;">
+              <div class="lb-rank">🥈</div>
+              <div class="lb-avatar" style="background:#e2e8f0;color:#374151;">MR</div>
+              <div class="lb-info"><div class="lb-name">Maria R.</div><div class="lb-meta">Salt Lake City UT · 31 referrals all-time</div></div>
+              <div class="lb-credit">$620 earned</div>
+            </div>
+            <div class="lb-row" style="background:#f0fdf4;border-radius:10px;padding:12px 14px;margin-bottom:4px;">
+              <div class="lb-rank">🥉</div>
+              <div class="lb-avatar" style="background:#dcfce7;color:#166534;">AP</div>
+              <div class="lb-info"><div class="lb-name">Alex P.</div><div class="lb-meta">Orem UT · 22 referrals all-time</div></div>
+              <div class="lb-credit">$440 earned</div>
+            </div>
+
+            <div id="user-lb-row" class="lb-row" style="border:2px dashed var(--primary);border-radius:10px;padding:12px 14px;margin-top:8px;">
+              <div class="lb-rank" style="color:var(--gray);">—</div>
+              <div class="lb-avatar" style="background:#eff6ff;color:var(--primary);">DS</div>
+              <div class="lb-info"><div class="lb-name">Daniel S. <span style="font-size:.72rem;color:var(--primary);font-weight:700;">(You)</span></div><div class="lb-meta" id="lb-your-meta">0 referrals this month · share your link!</div></div>
+              <div class="lb-credit" id="lb-your-credit" style="color:var(--primary);">$0 earned</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- K-Factor widget -->
+      <div class="kfactor-widget">
+        <div class="kfactor-label">Your Viral K-Factor</div>
+        <div class="kval" id="kfactor-big">0.0</div>
+        <div style="color:#94a3b8;font-size:.83rem;margin-top:6px;">Invites sent × conversion rate = how many new users each of your users brings in</div>
+        <div class="kfactor-bar"><div class="kfactor-fill" id="kfactor-fill"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#64748b;"><span>0.0 (no growth)</span><span>0.5 (strong)</span><span>1.0+ (viral)</span></div>
+        <div id="kfactor-msg" style="margin-top:14px;color:#6ee7b7;font-size:.85rem;font-weight:600;"></div>
+      </div>
+    </div>
+
+    <!-- ══ HOW IT WORKS ══ -->
+    <div class="sec" id="sec-howitworks">
+      <div style="margin-bottom:24px;">
+        <h1 style="font-size:1.6rem;font-weight:900;color:var(--dark);">❓ How It Works</h1>
+        <p style="color:var(--gray);margin-top:4px;">Simple, instant, automatic. Here's exactly what happens when you refer someone.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="how-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>Share your unique referral link</h4>
+              <p>Copy your link and send it to any landlord, property manager, contractor, attorney, or insurance agent. Your link is <strong>rentverified.com/join?ref=SANDERS47</strong> — it works for all user types.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h4>They sign up (free)</h4>
+              <p>Your referral clicks the link, creates an account — no credit card required. The sign-up takes under 2 minutes.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h4>$20 credit hits your account instantly</h4>
+              <p>The moment they sign up, <strong>$20 appears in your credit balance</strong>. No delay. No minimum threshold. No waiting for them to pay. You see it on your dashboard in real-time.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h4>Credits automatically apply to your subscription</h4>
+              <p>Credits are deducted from your next invoice automatically. Refer 4 landlords ($80 credit) on the Landlord Pro plan ($79/mo) and your next month is free.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <h4>Your referrals refer others — it compounds</h4>
+              <p>When Jordan T. signs up through your link and then refers 5 of his landlord friends, your K-factor goes up. RentVerified tracks your full referral tree — you can see the cascade effect in real time.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div style="font-weight:800;margin-bottom:14px;">💡 When to Share Your Link</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#f0fdf4;border-radius:8px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">✅</span>
+              <div><strong>Right after a tenant pays on time</strong> — you're happy, it's natural to talk about your management tools</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#eff6ff;border-radius:8px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">🔧</span>
+              <div><strong>Right after a contractor finishes quickly</strong> — mention you found them through RentVerified</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fef3c7;border-radius:8px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">⚖️</span>
+              <div><strong>Right after an eviction gets resolved</strong> — attorneys and landlords in your network want to know how</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#f5f3ff;border-radius:8px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">🏡</span>
+              <div><strong>At REIA / investor group meetings</strong> — landlords talk to landlords; one mention reaches 20 people</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fdf2f8;border-radius:8px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">📱</span>
+              <div><strong>Facebook landlord groups</strong> — a single post can reach hundreds of potential users at zero cost</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- SMS MODAL -->
+<div class="modal-overlay" id="sms-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <h2 style="margin-bottom:12px;" id="sms-modal-title">💬 Text Message Ready</h2>
+    <p style="font-size:.83rem;color:var(--gray);margin-bottom:14px;">Copy this message and paste it into your messaging app, or click "Open in Messages" to pre-fill it automatically.</p>
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px;font-size:.87rem;line-height:1.7;color:#374151;margin-bottom:16px;" id="sms-modal-msg"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="copySMSModal()">📋 Copy Message</button>
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREDIT TOAST -->
+<div id="credit-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--green);color:white;padding:16px 22px;border-radius:14px;font-weight:700;font-size:.95rem;z-index:9999;box-shadow:0 8px 30px rgba(16,185,129,.5);">
+  🎉 +$20 Credit Added Instantly!
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────
+const REF_CODE = 'SANDERS47';
+const REF_LINK = `rentverified.com/join?ref=${REF_CODE}`;
+let referrals = JSON.parse(localStorage.getItem('rv_referrals') || '[]');
+let creditBalance = parseInt(localStorage.getItem('rv_ref_credits') || '0');
+
+// Sample referrals to make it feel alive on first load
+if (referrals.length === 0 && localStorage.getItem('rv_ref_seeded') !== '1') {
+  referrals = [
+    { name: 'Jake W.', type: 'Landlord', date: '2026-02-28', status: 'active', credit: 20 },
+    { name: 'Mike T.', type: 'Contractor', date: '2026-03-01', status: 'active', credit: 20 },
+    { name: 'Lisa C.', type: 'Landlord', date: '2026-03-05', status: 'active', credit: 20 },
+  ];
+  creditBalance = 60;
+  localStorage.setItem('rv_referrals', JSON.stringify(referrals));
+  localStorage.setItem('rv_ref_credits', '60');
+  localStorage.setItem('rv_ref_seeded', '1');
+}
+
+// ── NAV ───────────────────────────────────────────────────────
+function showSec(id, link) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  if (link) {
+    document.querySelectorAll('.slink').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+  }
+}
+
+// ── COPY LINK ─────────────────────────────────────────────────
+function copyLink(btnId) {
+  const id = btnId || 'copy-btn';
+  navigator.clipboard.writeText('https://' + REF_LINK).catch(() => {});
+  const btn = document.getElementById(id);
+  btn.textContent = '✅ Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = '📋 Copy Link'; btn.classList.remove('copied'); }, 2500);
+}
+
+function copyMsg(elId) {
+  const el = document.getElementById(elId);
+  const text = el.textContent.trim();
+  navigator.clipboard.writeText(text).catch(() => {});
+  const btn = el.nextElementSibling.querySelector('button');
+  if (btn) { const orig = btn.textContent; btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = orig, 2000); }
+}
+
+function copySMSModal() {
+  const text = document.getElementById('sms-modal-msg').textContent.trim();
+  navigator.clipboard.writeText(text).catch(() => {});
+  closeModal();
+  showToast('Message copied! Paste into your SMS app.');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('credit-toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+// ── SMS / EMAIL SHARING ───────────────────────────────────────
+const MSGS = {
+  landlord: `Hey! I've been using RentVerified for property management — rent collection, maintenance, leases, tenant screening, and insurance all in one place. Sign up free: https://${REF_LINK}`,
+  pm: `Quick question — are you on RentVerified yet? Landlords find vetted PMs, pay per-job or monthly, and you get verified leads automatically. Worth looking at: https://${REF_LINK}`,
+  contractor: `Hey, there's a platform where landlords post maintenance jobs and you bid on them — RentVerified. They verify contractors so landlords trust you right away: https://${REF_LINK}`,
+  attorney: `There's a platform called RentVerified where landlords find verified eviction attorneys. Warm leads, no cold calling. Check it out: https://${REF_LINK}`,
+  agent: `RentVerified just added an insurance agent marketplace — connects verified landlords with local agents. Landlords are high-value clients (multi-property, umbrella policies): https://${REF_LINK}`,
+};
+
+function shareSMS() { openSMS('landlord'); }
+
+function openSMS(type) {
+  const msg = MSGS[type] || MSGS.landlord;
+  const encoded = encodeURIComponent(msg);
+  const isMobile = /iPhone|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.open('sms:?body=' + encoded);
+  } else {
+    document.getElementById('sms-modal-title').textContent = { landlord: '💬 Text to a Landlord', pm: '🏢 Text to a PM', contractor: '🔧 Text to a Contractor', attorney: '⚖️ Text to an Attorney', agent: '🛡️ Text to an Insurance Agent' }[type];
+    document.getElementById('sms-modal-msg').textContent = MSGS[type];
+    document.getElementById('sms-modal').classList.add('show');
+  }
+}
+
+function shareEmail() {
+  const subject = 'RentVerified — Property Management That Actually Works';
+  const body = MSGS.landlord;
+  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+}
+
+function shareMessage(type) { openSMS(type); }
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
+// ── SIMULATE REFERRAL ─────────────────────────────────────────
+const FAKE_NAMES = [
+  ['Alex M.','Landlord'],['Chris B.','Property Manager'],['Taylor H.','Landlord'],
+  ['Sam K.','Contractor'],['Jordan F.','Landlord'],['Casey L.','Insurance Agent'],
+  ['Riley D.','Landlord'],['Morgan S.','Eviction Attorney'],['Drew P.','Landlord'],
+  ['Jamie N.','Contractor'],
+];
+
+function simulateReferral() {
+  const pick = FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
+  const now = new Date();
+  const ref = {
+    name: pick[0],
+    type: pick[1],
+    date: now.toISOString().split('T')[0],
+    status: 'active',
+    credit: 20
+  };
+  referrals.unshift(ref);
+  creditBalance += 20;
+  localStorage.setItem('rv_referrals', JSON.stringify(referrals));
+  localStorage.setItem('rv_ref_credits', String(creditBalance));
+  renderAll();
+  // Show toast
+  const toast = document.getElementById('credit-toast');
+  toast.textContent = `🎉 +$20 Credit — ${ref.name} just joined!`;
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 4000);
+  // Confetti
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const colors = ['#10b981','#2563eb','#f59e0b','#7c3aed','#ef4444'];
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => {
+      const dot = document.createElement('div');
+      dot.className = 'confetti-dot';
+      const size = 6 + Math.random() * 8;
+      dot.style.cssText = `width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${20+Math.random()*60}%;top:${Math.random()*30}%;animation-duration:${1.2+Math.random()*1.2}s;`;
+      document.body.appendChild(dot);
+      setTimeout(() => dot.remove(), 2500);
+    }, i * 40);
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderAll() {
+  const count = referrals.length;
+  const credits = creditBalance;
+  const kfactor = Math.min(count > 0 ? (count * 0.45 / Math.max(count, 1)).toFixed(2) : 0, 1.2);
+  const network = Math.round(count + count * 0.45);
+
+  // Hero stats
+  animateNum('hero-count', count);
+  document.getElementById('hero-credits').textContent = '$' + credits;
+  document.getElementById('hero-kfactor').textContent = (count * 0.07 + 0.3).toFixed(2);
+  animateNum('hero-network', network);
+
+  // Overview stats
+  document.getElementById('ov-active').textContent = count;
+  document.getElementById('ov-pending').textContent = Math.max(0, Math.floor(count * 0.15));
+  document.getElementById('ov-credits-display').textContent = '$' + credits;
+  document.getElementById('ov-active-trend').textContent = count > 0 ? `↑ ${count} total joined` : '';
+
+  // Credit displays
+  document.getElementById('credit-balance-display').textContent = '$' + credits;
+  const monthsFree = (credits / 79).toFixed(1);
+  document.getElementById('credit-months-display').textContent = `${monthsFree} months free on Landlord Pro plan`;
+
+  // Milestone progress
+  const milestones = [3, 10, 25, 50];
+  const achieved = milestones.filter(m => count >= m).length;
+  const nextMilestone = milestones.find(m => count < m) || 50;
+  const prevMilestone = milestones[milestones.indexOf(nextMilestone) - 1] || 0;
+  const pct = Math.min(100, ((count - prevMilestone) / (nextMilestone - prevMilestone)) * 100);
+
+  document.getElementById('milestone-bar').style.width = pct + '%';
+  document.getElementById('milestone-progress-label').textContent = count >= 50
+    ? '💎 Diamond achieved!'
+    : `${count} referrals — ${nextMilestone - count} more for ${['Bronze','Silver','Gold','Diamond'][milestones.indexOf(nextMilestone)]}`;
+
+  // Milestone row statuses
+  document.getElementById('bronze-status').textContent = count >= 3 ? '✅ Done!' : `${count}/3`;
+  document.getElementById('silver-status').textContent = count >= 10 ? '✅ Done!' : `${count}/10`;
+  document.getElementById('gold-status').textContent = count >= 25 ? '✅ Done!' : `${count}/25`;
+  document.getElementById('elite-status').textContent = count >= 50 ? '✅ Done!' : `${count}/50`;
+
+  // Leaderboard your row
+  document.getElementById('lb-your-meta').textContent = `${count} referrals · $${credits} earned`;
+  document.getElementById('lb-your-credit').textContent = '$' + credits;
+
+  // K-factor
+  const kf = count > 0 ? Math.min(1.2, 0.3 + count * 0.05) : 0;
+  document.getElementById('kfactor-big').textContent = kf.toFixed(2);
+  document.getElementById('kfactor-fill').style.width = Math.min(100, kf / 1.2 * 100) + '%';
+  document.getElementById('kfactor-msg').textContent = kf >= 1.0
+    ? '🚀 Viral! Your network is growing on its own.'
+    : kf >= 0.5 ? '📈 Strong growth! Keep sharing to approach viral.'
+    : kf > 0 ? '🌱 Growing. Each referral compounds your impact.'
+    : 'Share your first referral link to get your K-factor started!';
+
+  // Referral table
+  const tbody = document.getElementById('ref-tbody');
+  if (referrals.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">No referrals yet — share your link to get started!</td></tr>';
+  } else {
+    tbody.innerHTML = referrals.map((r, i) => `
+      <tr class="fade-up" style="animation-delay:${i*0.04}s">
+        <td style="font-weight:700;">${r.name}</td>
+        <td>${r.type}</td>
+        <td>${r.date}</td>
+        <td><span class="status-pill s-active">✅ Active</span></td>
+        <td style="font-weight:700;color:var(--green);">+$${r.credit}</td>
+      </tr>`).join('');
+  }
+
+  // Recent activity
+  const actEl = document.getElementById('recent-activity');
+  if (referrals.length === 0) {
+    actEl.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--gray);"><div style="font-size:2rem;margin-bottom:8px;">📢</div><p>No referrals yet. Share your link to get started!</p><button class="btn btn-green" style="margin-top:12px;" onclick="simulateReferral()">🎯 Simulate a Referral</button></div>`;
+  } else {
+    actEl.innerHTML = referrals.slice(0,5).map((r,i) => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9;" class="fade-up">
+        <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#166534;flex-shrink:0;">${r.name.charAt(0)}${r.name.split(' ')[1]?.charAt(0)||''}</div>
+        <div style="flex:1;"><div style="font-weight:700;font-size:.88rem;">${r.name} joined as a ${r.type}</div><div style="font-size:.78rem;color:var(--gray);">${r.date}</div></div>
+        <div style="font-weight:800;color:var(--green);white-space:nowrap;">+$${r.credit}</div>
+      </div>`).join('') + (referrals.length > 5 ? `<div style="text-align:center;padding-top:10px;"><button class="btn btn-outline btn-sm" onclick="showSec('tracking',null)">View All ${referrals.length} Referrals →</button></div>` : '');
+  }
+
+  // Credit history
+  const ch = document.getElementById('credit-history');
+  if (referrals.length === 0) {
+    ch.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">No credits yet. Share your referral link to start earning!</div>';
+  } else {
+    ch.innerHTML = referrals.map(r => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+        <div><div style="font-weight:700;font-size:.87rem;">Referral Credit — ${r.name} (${r.type})</div><div style="font-size:.77rem;color:var(--gray);">${r.date} · Instant credit issued</div></div>
+        <div style="font-weight:900;color:var(--green);">+$${r.credit}</div>
+      </div>`).join('') + `<div style="display:flex;justify-content:space-between;padding:12px 0;font-weight:800;font-size:1rem;"><span>Total Credits</span><span style="color:var(--green);">$${credits}</span></div>`;
+  }
+
+  // Growth chart
+  renderGrowthChart(count);
+}
+
+function animateNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let start = 0;
+  const step = Math.ceil(target / 20);
+  const timer = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = start;
+    if (start >= target) clearInterval(timer);
+  }, 40);
+}
+
+function renderGrowthChart(baseRefs) {
+  const chart = document.getElementById('growth-chart');
+  const labels = document.getElementById('growth-labels');
+  const k = 0.45;
+  let withRef = Math.max(baseRefs, 1);
+  let noRef = Math.max(baseRefs, 1);
+  const months = ['Now','Mo 1','Mo 2','Mo 3','Mo 4','Mo 5','Mo 6'];
+  const withData = [withRef];
+  const noData = [noRef];
+
+  for (let i = 0; i < 6; i++) {
+    withRef = Math.round(withRef + withRef * k);
+    noRef = Math.round(noRef + 2);
+    withData.push(withRef);
+    noData.push(noRef);
+  }
+
+  const maxVal = Math.max(...withData, 10);
+  chart.innerHTML = withData.map((v, i) => {
+    const hWith = Math.max(8, (v / maxVal) * 100);
+    const hNo = Math.max(4, (noData[i] / maxVal) * 100);
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;min-width:0;">
+      <div style="width:100%;display:flex;align-items:flex-end;gap:2px;height:100px;">
+        <div style="flex:1;height:${hWith}%;background:var(--green);border-radius:3px 3px 0 0;min-height:4px;" title="${v} users with referrals"></div>
+        <div style="flex:1;height:${hNo}%;background:#e2e8f0;border-radius:3px 3px 0 0;min-height:2px;" title="${noData[i]} users without"></div>
+      </div>
+    </div>`;
+  }).join('');
+  labels.innerHTML = months.map(m => `<div style="flex:1;font-size:.7rem;color:var(--gray);text-align:center;">${m}</div>`).join('');
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+(function() {
+  // Populate referral link displays
+  document.querySelectorAll('.link-input').forEach(el => el.textContent = REF_LINK);
+  renderAll();
+  // Animate K-factor bar after page load
+  setTimeout(() => {
+    const kfBig = document.getElementById('kfactor-big');
+    if (kfBig) {
+      const kf = parseFloat(kfBig.textContent) || 0;
+      document.getElementById('kfactor-fill').style.width = Math.min(100, kf / 1.2 * 100) + '%';
+    }
+  }, 600);
+})();
+</script>
+</body>
+</html>

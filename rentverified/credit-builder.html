@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Credit Builder — RentVerified</title>
+<style>
+  :root {
+    --primary:#3b82f6; --primary-dark:#2563eb; --success:#10b981; --warning:#f59e0b;
+    --danger:#ef4444; --purple:#8b5cf6; --indigo:#6366f1;
+    --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0; --gray-300:#cbd5e1;
+    --gray-400:#94a3b8; --gray-500:#64748b; --gray-600:#475569; --gray-700:#334155;
+    --gray-800:#1e293b; --gray-900:#0f172a;
+    --sidebar-bg:#0f172a; --sidebar-w:240px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh;display:flex;flex-direction:column;}
+
+  /* NAV */
+  nav{background:var(--gray-900);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .nav-logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:white;font-weight:700;font-size:1.1rem;}
+  .nav-logo span{color:var(--primary);}
+  .nav-link{color:var(--gray-300);text-decoration:none;font-size:.875rem;padding:.4rem .75rem;border-radius:6px;transition:all .15s;}
+  .nav-link:hover{color:white;background:rgba(255,255,255,.07);}
+
+  /* LAYOUT */
+  .wrapper{display:grid;grid-template-columns:var(--sidebar-w) 1fr;flex:1;}
+  .cb-sidebar{background:var(--sidebar-bg);min-height:calc(100vh - 52px);padding:1.25rem 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+  .cb-sidebar h3{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748b;padding:.5rem 1.5rem;margin:1rem 0 .25rem;}
+  .cb-sidebar a{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.5rem;color:#94a3b8;text-decoration:none;font-size:.875rem;border-left:3px solid transparent;transition:all .15s;cursor:pointer;}
+  .cb-sidebar a:hover,.cb-sidebar a.active{background:rgba(255,255,255,.06);color:#fff;border-left-color:var(--purple);}
+  .cb-main{padding:1.75rem 2rem;max-width:1100px;}
+
+  /* SECTIONS */
+  .section{display:none;} .section.active{display:block;}
+
+  /* BUTTONS */
+  .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font-size:.875rem;font-weight:600;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;}
+  .btn-primary{background:var(--primary);color:white;} .btn-primary:hover{background:var(--primary-dark);}
+  .btn-purple{background:var(--purple);color:white;} .btn-purple:hover{background:#7c3aed;}
+  .btn-success{background:var(--success);color:white;} .btn-success:hover{background:#059669;}
+  .btn-outline{background:white;color:var(--gray-700);border:1px solid var(--gray-300);} .btn-outline:hover{background:var(--gray-50);}
+  .btn-lg{padding:.75rem 1.75rem;font-size:1rem;}
+  .btn-sm{padding:.35rem .75rem;font-size:.8rem;}
+
+  /* OPT-IN HERO */
+  .optin-hero{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%);border-radius:16px;padding:3rem 2rem;text-align:center;color:white;margin-bottom:1.5rem;position:relative;overflow:hidden;}
+  .optin-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='20' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3C/svg%3E");opacity:.5;}
+  .optin-hero h1{font-size:2rem;font-weight:900;margin-bottom:.5rem;position:relative;}
+  .optin-hero p{font-size:1rem;opacity:.8;position:relative;max-width:540px;margin:0 auto;}
+  .optin-hero .hero-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:.35rem .85rem;border-radius:999px;font-size:.8rem;font-weight:600;margin-bottom:1rem;}
+
+  /* PRICING CARDS */
+  .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin:2rem 0;}
+  .pricing-card{background:white;border-radius:14px;border:2px solid var(--gray-200);padding:1.75rem;text-align:center;transition:all .2s;position:relative;overflow:hidden;}
+  .pricing-card.featured{border-color:var(--purple);box-shadow:0 0 0 4px rgba(139,92,246,.15);}
+  .pricing-card .best-tag{position:absolute;top:0;right:0;background:var(--purple);color:white;font-size:.7rem;font-weight:700;padding:.3rem .75rem;border-bottom-left-radius:8px;}
+  .pricing-card .price{font-size:2.5rem;font-weight:900;color:var(--gray-900);margin:.75rem 0 .25rem;}
+  .pricing-card .price sup{font-size:1.2rem;vertical-align:top;margin-top:.5rem;}
+  .pricing-card .price sub{font-size:.9rem;font-weight:400;color:var(--gray-500);}
+  .pricing-card .feature-list{text-align:left;margin:.75rem 0 1.5rem;}
+  .pricing-card .feat{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.5rem;font-size:.85rem;color:var(--gray-700);}
+  .pricing-card .feat .ck{color:var(--success);font-weight:700;flex-shrink:0;}
+
+  /* SCORE GAUGE */
+  .gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:1.5rem 0;}
+  .gauge-svg{width:220px;height:120px;}
+  .score-num{font-size:3rem;font-weight:900;text-align:center;margin-top:-10px;}
+  .score-label{font-size:.8rem;color:var(--gray-500);text-align:center;margin-top:.25rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+
+  /* CREDIT RANGE LABELS */
+  .range-bar{background:linear-gradient(to right,#ef4444,#f59e0b,#eab308,#84cc16,#22c55e);border-radius:999px;height:10px;position:relative;margin:.75rem 0 .25rem;}
+  .range-bar .indicator{position:absolute;top:-3px;width:16px;height:16px;border-radius:50%;background:var(--gray-900);border:3px solid white;transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.3);transition:left .5s ease;}
+  .range-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--gray-500);}
+
+  /* SCORE HISTORY CHART */
+  .chart-wrap{background:white;border-radius:12px;border:1px solid var(--gray-200);padding:1.25rem;}
+  .chart-svg{width:100%;height:160px;display:block;}
+
+  /* BUREAU CARDS */
+  .bureau-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:1rem 0;}
+  .bureau-card{border:1px solid var(--gray-200);border-radius:10px;padding:1rem;text-align:center;background:white;}
+  .bureau-card .b-logo{font-size:1.5rem;margin-bottom:.35rem;}
+  .bureau-card .b-name{font-size:.8rem;font-weight:700;color:var(--gray-700);}
+  .bureau-card .b-status{font-size:.72rem;margin-top:.35rem;padding:2px 8px;border-radius:999px;font-weight:700;display:inline-block;}
+  .bureau-card .b-status.reported{background:#d1fae5;color:#065f46;}
+  .bureau-card .b-status.pending{background:#fef3c7;color:#92400e;}
+  .bureau-card .b-months{font-size:.75rem;color:var(--gray-400);margin-top:.25rem;}
+
+  /* PAYMENT HISTORY TABLE */
+  .ph-table{width:100%;border-collapse:collapse;}
+  .ph-table th{text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray-500);padding:.6rem 1rem;background:var(--gray-50);border-bottom:1px solid var(--gray-200);}
+  .ph-table td{padding:.75rem 1rem;border-bottom:1px solid var(--gray-100);font-size:.875rem;}
+  .ph-table tr:last-child td{border-bottom:none;}
+  .ph-table tr:hover td{background:var(--gray-50);}
+
+  /* BADGES */
+  .badge-wrap{display:flex;flex-wrap:wrap;gap:.75rem;margin:.75rem 0;}
+  .badge-card{border:1px solid var(--gray-200);border-radius:10px;padding:.85rem 1.1rem;display:flex;align-items:center;gap:.75rem;background:white;}
+  .badge-card.earned{border-color:var(--purple);background:#faf5ff;}
+  .badge-icon{font-size:1.75rem;flex-shrink:0;}
+  .badge-title{font-weight:700;font-size:.875rem;color:var(--gray-800);}
+  .badge-desc{font-size:.78rem;color:var(--gray-500);margin-top:.15rem;}
+  .badge-locked{opacity:.45;}
+
+  /* AI TIPS */
+  .tip-card{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;padding:1.25rem 1.5rem;color:white;margin-bottom:.75rem;}
+  .tip-card .tip-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a5b4fc;margin-bottom:.5rem;}
+  .tip-card .tip-text{font-size:.9rem;line-height:1.6;}
+  .tip-card .tip-impact{display:inline-flex;align-items:center;gap:.35rem;margin-top:.75rem;background:rgba(255,255,255,.1);padding:.25rem .65rem;border-radius:999px;font-size:.75rem;font-weight:600;}
+
+  /* PROJECTION */
+  .proj-card{background:linear-gradient(135deg,#064e3b,#065f46);border-radius:12px;padding:1.5rem;color:white;}
+  .proj-card h3{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6ee7b7;margin-bottom:1rem;}
+  .proj-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;}
+  .proj-item{background:rgba(255,255,255,.08);border-radius:8px;padding:.75rem .5rem;text-align:center;}
+  .proj-item .pm{font-size:.72rem;color:#6ee7b7;font-weight:700;}
+  .proj-item .ps{font-size:1.25rem;font-weight:800;color:white;margin:.25rem 0;}
+  .proj-item .pl{font-size:.7rem;color:rgba(255,255,255,.6);}
+  .proj-item.current{border:1.5px solid #10b981;}
+  .proj-item.milestone{background:rgba(16,185,129,.2);border:1.5px solid #10b981;}
+
+  /* RTO PATHWAY */
+  .rto-card{background:linear-gradient(135deg,#1e3a5f,#1e40af);border-radius:12px;padding:1.5rem;color:white;margin-top:1.25rem;}
+  .rto-locked{opacity:.6;}
+  .rto-unlocked{animation:pulse-glow 2s infinite;}
+  @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.4);}50%{box-shadow:0 0 0 12px rgba(59,130,246,0);}}
+
+  /* PANELS */
+  .panel{background:white;border-radius:12px;border:1px solid var(--gray-200);overflow:hidden;margin-bottom:1.25rem;}
+  .panel-header{padding:1rem 1.25rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;}
+  .panel-header h2{font-size:1rem;font-weight:600;color:var(--gray-800);}
+  .panel-body{padding:1.25rem;}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
+  .page-header h1{font-size:1.4rem;font-weight:700;color:var(--gray-900);}
+  .page-header p{color:var(--gray-500);font-size:.9rem;margin-top:.25rem;}
+
+  /* STAT GRID */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem;}
+  .stat-card{background:white;border-radius:10px;border:1px solid var(--gray-200);padding:1rem 1.25rem;}
+  .stat-card .lbl{font-size:.72rem;color:var(--gray-500);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem;}
+  .stat-card .val{font-size:1.6rem;font-weight:800;color:var(--gray-900);}
+  .stat-card .sub{font-size:.75rem;color:var(--gray-400);margin-top:.2rem;}
+  .stat-card.purple .val{color:var(--purple);}
+  .stat-card.green .val{color:var(--success);}
+  .stat-card.blue .val{color:var(--primary);}
+
+  /* FORMS */
+  .form-group{margin-bottom:1rem;}
+  .form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--gray-700);margin-bottom:.35rem;}
+  .form-group input,.form-group select{width:100%;padding:.6rem .8rem;border:1px solid var(--gray-300);border-radius:8px;font-size:.875rem;color:var(--gray-800);outline:none;transition:border .15s;}
+  .form-group input:focus,.form-group select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,.1);}
+
+  /* INFO ALERTS */
+  .info-alert{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:.9rem 1.1rem;display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem;}
+  .info-alert p{font-size:.85rem;color:#1e40af;line-height:1.5;}
+  .purple-alert{background:#faf5ff;border:1px solid #ddd6fe;border-radius:8px;padding:.9rem 1.1rem;display:flex;gap:.75rem;margin-bottom:1rem;}
+  .purple-alert p{font-size:.85rem;color:#5b21b6;line-height:1.5;}
+
+  /* COMPARISON TABLE */
+  .compare-table{width:100%;border-collapse:collapse;margin:1rem 0;}
+  .compare-table th{text-align:left;padding:.75rem 1rem;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray-500);background:var(--gray-50);border-bottom:2px solid var(--gray-200);}
+  .compare-table td{padding:.85rem 1rem;border-bottom:1px solid var(--gray-100);font-size:.875rem;}
+  .compare-table tr:last-child td{border-bottom:none;}
+  .compare-table .before{color:var(--danger);font-weight:600;}
+  .compare-table .after{color:var(--success);font-weight:600;}
+
+  /* SCORE COLORS */
+  .score-poor{color:#ef4444;}
+  .score-fair{color:#f59e0b;}
+  .score-good{color:#eab308;}
+  .score-vgood{color:#84cc16;}
+  .score-exc{color:#22c55e;}
+
+  @media(max-width:768px){.wrapper{grid-template-columns:1fr;}.cb-sidebar{display:none;}.bureau-grid{grid-template-columns:1fr;}.proj-timeline{grid-template-columns:repeat(2,1fr);}}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .fade-up{animation:fadeUp .4s ease forwards;}
+  @keyframes countUp{from{opacity:0;}to{opacity:1;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Rent<span>Verified</span></a>
+  <div style="display:flex;align-items:center;gap:.5rem;">
+    <a href="tenant-portal.html" class="nav-link">← Tenant Portal</a>
+    <a href="tenant-assistance.html" class="nav-link">🤝 Assistance</a>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="cb-sidebar">
+    <h3>Credit Builder</h3>
+    <a class="active" onclick="showSection('dashboard',this)">📊 My Credit</a>
+    <a onclick="showSection('history',this)">📋 Reporting History</a>
+    <a onclick="showSection('tips',this)">🤖 AI Credit Tips</a>
+    <a onclick="showSection('projection',this)">📈 Score Projection</a>
+    <a onclick="showSection('badges',this)">🏆 My Badges</a>
+    <a onclick="showSection('rto',this)">🏠 Path to Ownership</a>
+    <h3>Account</h3>
+    <a onclick="showSection('plan',this)">💳 My Plan</a>
+    <a onclick="showSection('compare',this)">💡 Why It Matters</a>
+    <h3>Navigate</h3>
+    <a href="tenant-portal.html">👤 Tenant Portal</a>
+    <a href="tenant-assistance.html">🤝 Assistance</a>
+    <a href="landlord-signup.html">🏠 Dashboard</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="cb-main">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  OPT-IN SCREEN (shown when not opted in) -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="optin-screen">
+      <div class="optin-hero">
+        <div class="hero-badge">✨ New Feature</div>
+        <h1>💳 RentVerified Credit Builder</h1>
+        <p>Your rent is your biggest monthly payment. It should build your credit. Starting today, it does.</p>
+        <div style="margin-top:1.75rem;display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;position:relative;">
+          <div style="text-align:center;">
+            <div style="font-size:2rem;font-weight:900;">3</div>
+            <div style="font-size:.8rem;opacity:.7;">Credit Bureaus</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:2rem;font-weight:900;">20–100+</div>
+            <div style="font-size:.8rem;opacity:.7;">Points in 12 months</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:2rem;font-weight:900;">$8,000+</div>
+            <div style="font-size:.8rem;opacity:.7;">Saved on future loans</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--gray-800);">Basic</div>
+          <div style="font-size:.85rem;color:var(--gray-500);margin-top:.25rem;">Just get started</div>
+          <div class="price"><sup>$</sup>4<sub>.99/mo</sub></div>
+          <div class="feature-list">
+            <div class="feat"><span class="ck">✓</span> Report to 1 bureau (Experian)</div>
+            <div class="feat"><span class="ck">✓</span> Monthly payment reporting</div>
+            <div class="feat"><span class="ck">✓</span> On-Time Payment badge</div>
+            <div class="feat" style="opacity:.4;"><span>✗</span> All 3 bureaus</div>
+            <div class="feat" style="opacity:.4;"><span>✗</span> Score tracker</div>
+            <div class="feat" style="opacity:.4;"><span>✗</span> AI credit tips</div>
+          </div>
+          <button class="btn btn-outline" style="width:100%;" onclick="optIn('basic')">Start Basic</button>
+        </div>
+
+        <div class="pricing-card featured">
+          <div class="best-tag">MOST POPULAR</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--purple);">Credit Builder</div>
+          <div style="font-size:.85rem;color:var(--gray-500);margin-top:.25rem;">The full experience</div>
+          <div class="price" style="color:var(--purple);"><sup>$</sup>6<span style="font-size:1.5rem;font-weight:900;">.99</span><sub>/mo</sub></div>
+          <div class="feature-list">
+            <div class="feat"><span class="ck">✓</span> Report to <strong>all 3 bureaus</strong></div>
+            <div class="feat"><span class="ck">✓</span> Monthly credit score tracker</div>
+            <div class="feat"><span class="ck">✓</span> AI credit improvement tips</div>
+            <div class="feat"><span class="ck">✓</span> 12-month score projection</div>
+            <div class="feat"><span class="ck">✓</span> On-Time Payment badge</div>
+            <div class="feat"><span class="ck">✓</span> Rent-to-own pathway tracker</div>
+          </div>
+          <button class="btn btn-purple" style="width:100%;font-size:.95rem;" onclick="optIn('full')">Start Building Credit →</button>
+        </div>
+
+        <div class="pricing-card">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--gray-800);">Credit Builder+</div>
+          <div style="font-size:.85rem;color:var(--gray-500);margin-top:.25rem;">Maximum impact</div>
+          <div class="price"><sup>$</sup>9<sub>.99/mo</sub></div>
+          <div class="feature-list">
+            <div class="feat"><span class="ck">✓</span> Everything in Credit Builder</div>
+            <div class="feat"><span class="ck">✓</span> Utility payment reporting</div>
+            <div class="feat"><span class="ck">✓</span> Financial health score</div>
+            <div class="feat"><span class="ck">✓</span> Personalized savings plan</div>
+            <div class="feat"><span class="ck">✓</span> Mortgage readiness report</div>
+            <div class="feat"><span class="ck">✓</span> Priority support</div>
+          </div>
+          <button class="btn btn-outline" style="width:100%;" onclick="optIn('plus')">Start Builder+</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>💡 How It Works</h2></div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;text-align:center;">
+            <div style="padding:1rem;">
+              <div style="font-size:2rem;margin-bottom:.5rem;">💸</div>
+              <div style="font-weight:700;font-size:.9rem;margin-bottom:.35rem;">Pay Rent</div>
+              <div style="font-size:.82rem;color:var(--gray-500);">Pay through RentVerified as normal</div>
+            </div>
+            <div style="color:var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">→</div>
+            <div style="padding:1rem;">
+              <div style="font-size:2rem;margin-bottom:.5rem;">📡</div>
+              <div style="font-weight:700;font-size:.9rem;margin-bottom:.35rem;">Auto-Reported</div>
+              <div style="font-size:.82rem;color:var(--gray-500);">We report to Experian, TransUnion & Equifax</div>
+            </div>
+            <div style="color:var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">→</div>
+            <div style="padding:1rem;">
+              <div style="font-size:2rem;margin-bottom:.5rem;">📈</div>
+              <div style="font-weight:700;font-size:.9rem;margin-bottom:.35rem;">Score Grows</div>
+              <div style="font-size:.82rem;color:var(--gray-500);">20–100+ points in 12 months</div>
+            </div>
+            <div style="color:var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">→</div>
+            <div style="padding:1rem;">
+              <div style="font-size:2rem;margin-bottom:.5rem;">🏠</div>
+              <div style="font-weight:700;font-size:.9rem;margin-bottom:.35rem;">Own a Home</div>
+              <div style="font-size:.82rem;color:var(--gray-500);">Qualify for a mortgage through your landlord</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  MAIN DASHBOARD (after opt-in)              -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="main-screen" style="display:none;">
+
+      <!-- DASHBOARD -->
+      <div id="section-dashboard" class="section active">
+        <div class="page-header">
+          <div>
+            <h1>📊 My Credit Score</h1>
+            <p>Reported to <span id="bureau-count-label">all 3 bureaus</span> — updated every month on rent payment.</p>
+          </div>
+          <div id="optin-badge" style="display:flex;align-items:center;gap:.5rem;background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:8px;padding:.5rem .85rem;">
+            <span style="font-size:1rem;">💳</span>
+            <div>
+              <div style="font-size:.75rem;font-weight:700;color:var(--purple);">CREDIT BUILDER</div>
+              <div id="plan-label-dash" style="font-size:.72rem;color:var(--gray-500);">Active · $6.99/mo</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.25rem;margin-bottom:1.25rem;align-items:start;">
+          <!-- Score Gauge -->
+          <div class="panel" style="margin:0;">
+            <div class="panel-body" style="padding:1.5rem 1.25rem;">
+              <div class="gauge-wrap">
+                <svg class="gauge-svg" viewBox="0 0 220 120">
+                  <!-- Track arc -->
+                  <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#e2e8f0" stroke-width="14" stroke-linecap="round"/>
+                  <!-- Score arc -->
+                  <path id="score-arc" d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="url(#scoreGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283" style="transition:stroke-dashoffset 1s ease;"/>
+                  <defs>
+                    <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#ef4444"/>
+                      <stop offset="40%" stop-color="#f59e0b"/>
+                      <stop offset="70%" stop-color="#84cc16"/>
+                      <stop offset="100%" stop-color="#22c55e"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="score-num" id="score-display">—</div>
+                <div class="score-label" id="score-range-label">Loading…</div>
+              </div>
+              <div style="padding:0 .75rem;">
+                <div class="range-bar">
+                  <div class="indicator" id="score-indicator" style="left:50%;"></div>
+                </div>
+                <div class="range-labels">
+                  <span>300</span><span>580</span><span>670</span><span>740</span><span>850</span>
+                </div>
+              </div>
+              <div style="margin-top:1rem;text-align:center;">
+                <div style="font-size:.75rem;color:var(--gray-500);">Last updated</div>
+                <div id="last-updated" style="font-size:.8rem;font-weight:600;color:var(--gray-700);">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart + Stats -->
+          <div>
+            <div class="panel" style="margin-bottom:1rem;">
+              <div class="panel-header"><h2>📈 Score History</h2><span id="score-change-badge" style="font-size:.8rem;font-weight:700;color:var(--success);"></span></div>
+              <div class="panel-body" style="padding:.75rem 1.25rem 1.25rem;">
+                <svg id="score-chart" class="chart-svg" viewBox="0 0 500 160" preserveAspectRatio="none"></svg>
+              </div>
+            </div>
+
+            <div class="stat-grid" style="margin-bottom:0;">
+              <div class="stat-card purple"><div class="lbl">Months Reported</div><div class="val" id="stat-months">0</div><div class="sub">on-time payments</div></div>
+              <div class="stat-card green"><div class="lbl">Score Gained</div><div class="val" id="stat-gained">+0</div><div class="sub">since joining</div></div>
+              <div class="stat-card blue"><div class="lbl">Next Report</div><div class="val" id="stat-next">—</div><div class="sub">days away</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bureau Status -->
+        <div class="panel">
+          <div class="panel-header"><h2>📡 Bureau Reporting Status</h2></div>
+          <div class="panel-body">
+            <div class="bureau-grid">
+              <div class="bureau-card">
+                <div class="b-logo">🔵</div>
+                <div class="b-name">Experian</div>
+                <div class="b-status reported" id="exp-status">Reporting</div>
+                <div class="b-months" id="exp-months">0 months reported</div>
+              </div>
+              <div class="bureau-card" id="tu-card">
+                <div class="b-logo">🟢</div>
+                <div class="b-name">TransUnion</div>
+                <div class="b-status reported" id="tu-status">Reporting</div>
+                <div class="b-months" id="tu-months">0 months reported</div>
+              </div>
+              <div class="bureau-card" id="eq-card">
+                <div class="b-logo">🔴</div>
+                <div class="b-name">Equifax</div>
+                <div class="b-status reported" id="eq-status">Reporting</div>
+                <div class="b-months" id="eq-months">0 months reported</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ -->
+      <!--  REPORTING HISTORY             -->
+      <!-- ═══════════════════════════════ -->
+      <div id="section-history" class="section">
+        <div class="page-header"><div><h1>📋 Reporting History</h1><p>Every on-time payment — every month reported to the bureaus.</p></div></div>
+        <div class="panel">
+          <div class="panel-body" style="padding:0;">
+            <table class="ph-table">
+              <thead><tr><th>Month</th><th>Amount</th><th>Bureaus Reported</th><th>Status</th><th>Score Impact</th></tr></thead>
+              <tbody id="history-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ -->
+      <!--  AI CREDIT TIPS                -->
+      <!-- ═══════════════════════════════ -->
+      <div id="section-tips" class="section">
+        <div class="page-header">
+          <div><h1>🤖 AI Credit Tips</h1><p>Personalized advice based on your credit profile — updated monthly.</p></div>
+          <button class="btn btn-purple btn-sm" onclick="refreshTips()">↻ Refresh Tips</button>
+        </div>
+        <div id="tips-container"></div>
+      </div>
+
+      <!-- ═══════════════════════════════ -->
+      <!--  SCORE PROJECTION              -->
+      <!-- ═══════════════════════════════ -->
+      <div id="section-projection" class="section">
+        <div class="page-header"><div><h1>📈 Score Projection</h1><p>Where your credit score is headed if you keep paying on time.</p></div></div>
+        <div class="proj-card fade-up">
+          <h3>📊 12-Month Score Projection</h3>
+          <div class="proj-timeline" id="proj-grid"></div>
+          <div style="margin-top:1.25rem;background:rgba(255,255,255,.08);border-radius:10px;padding:1rem;font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.6;" id="proj-note"></div>
+        </div>
+        <div class="panel" style="margin-top:1.25rem;">
+          <div class="panel-header"><h2>💰 What This Score Unlocks</h2></div>
+          <div class="panel-body">
+            <div id="milestones-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ -->
+      <!--  BADGES                        -->
+      <!-- ═══════════════════════════════ -->
+      <div id="section-badges" class="section">
+        <div class="page-header"><div><h1>🏆 My Badges</h1><p>Earned badges appear on your tenant profile — visible to landlords.</p></div></div>
+        <div class="purple-alert"><div style="font-size:1.1rem;flex-shrink:0;">💡</div><p>Landlords can see your earned badges when you apply for a new rental. On-time payment badges significantly increase your chances of approval — especially for competitive rentals.</p></div>
+        <div class="badge-wrap" id="badges-container"></div>
+      </div>
+
+      <!-- ═══════════════════════════════ -->
+      <!--  PATH TO OWNERSHIP             -->
+      <!-- ═══════════════════════════════ -->
+      <div id="section-rto" class="section">
+        <div class="page-header"><div><h1>🏠 Path to Homeownership</h1><p>Your credit-building journey — every payment is a step toward owning.</p></div></div>
+
+        <div class="panel">
+          <div class="panel-body">
+            <div style="position:relative;padding:0 1rem;">
+              <div style="position:absolute;left:50%;top:24px;bottom:0;width:2px;background:var(--gray-200);transform:translateX(-50%);"></div>
+              <div id="ownership-timeline"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="rto-cta-card" class="rto-card rto-locked" style="margin-top:1.25rem;">
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <div style="font-size:2rem;flex-shrink:0;" id="rto-icon">🔒</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:1rem;color:#93c5fd;" id="rto-title">Rent-to-Own Pathway — Locked</div>
+              <div style="font-size:.85rem;color:#bfdbfe;margin-top:.35rem;" id="rto-desc">Reach a 640+ credit score to unlock the rent-to-own pathway and potentially buy your home.</div>
+            </div>
+            <a href="#" id="rto-btn" style="display:none;background:#3b82f6;color:white;padding:.55rem 1.1rem;border-radius:8px;font-weight:700;font-size:.875rem;text-decoration:none;">Talk to Landlord →</a>
+          </div>
+          <div style="margin-top:1rem;background:rgba(255,255,255,.08);border-radius:8px;padding:.85rem 1rem;">
+            <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#60a5fa;margin-bottom:.5rem;">YOUR PROGRESS</div>
+            <div style="background:rgba(255,255,255,.1);border-radius:999px;height:8px;overflow:hidden;">
+              <div id="rto-progress-bar" style="background:linear-gradient(to right,#3b82f6,#8b5cf6);height:100%;border-radius:999px;width:0%;transition:width 1s ease;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:.72rem;color:#93c5fd;">
+              <span>Current: <strong id="rto-current-score">—</strong></span>
+              <span>Goal: <strong>640</strong> (mortgage eligible)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ -->
+      <!--  PLAN MANAGEMENT               -->
+      <!-- ═══════════════════════════════ -->
+      <div id="section-plan" class="section">
+        <div class="page-header"><div><h1>💳 My Plan</h1><p>Manage your Credit Builder subscription.</p></div></div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Current Plan</h2>
+            <span id="plan-badge-display" style="background:#faf5ff;border:1px solid #ddd6fe;color:var(--purple);padding:.25rem .75rem;border-radius:999px;font-size:.8rem;font-weight:700;"></span>
+          </div>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+              <div><div style="font-size:.75rem;font-weight:600;color:var(--gray-500);margin-bottom:.25rem;">MONTHLY FEE</div><div style="font-size:1.25rem;font-weight:800;" id="plan-fee-display">$6.99</div></div>
+              <div><div style="font-size:.75rem;font-weight:600;color:var(--gray-500);margin-bottom:.25rem;">MEMBER SINCE</div><div style="font-size:.95rem;font-weight:700;" id="plan-since-display">—</div></div>
+              <div><div style="font-size:.75rem;font-weight:600;color:var(--gray-500);margin-bottom:.25rem;">NEXT BILLING</div><div style="font-size:.95rem;font-weight:700;" id="plan-next-display">—</div></div>
+            </div>
+            <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+              <button class="btn btn-purple btn-sm" onclick="upgradePlan()">⬆️ Upgrade Plan</button>
+              <button class="btn btn-outline btn-sm" onclick="cancelPlan()">Cancel Subscription</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ -->
+      <!--  WHY IT MATTERS                -->
+      <!-- ═══════════════════════════════ -->
+      <div id="section-compare" class="section">
+        <div class="page-header"><div><h1>💡 Why Credit Matters</h1><p>The real financial impact of a better credit score.</p></div></div>
+        <div class="panel">
+          <div class="panel-header"><h2>Before vs. After RentVerified Credit Builder</h2></div>
+          <div class="panel-body" style="padding:0;">
+            <table class="compare-table">
+              <thead><tr><th>Situation</th><th class="before">Before (580 score)</th><th class="after">After 12 months (660+)</th><th>Savings</th></tr></thead>
+              <tbody>
+                <tr><td>🚗 $25,000 Car Loan</td><td class="before">24% APR → $649/mo</td><td class="after">8% APR → $507/mo</td><td style="font-weight:700;color:var(--success);">$8,520 saved</td></tr>
+                <tr><td>🏠 $250,000 Mortgage</td><td class="before">7.5% → $1,748/mo</td><td class="after">6.0% → $1,499/mo</td><td style="font-weight:700;color:var(--success);">$89,640 saved</td></tr>
+                <tr><td>💳 Credit Card APR</td><td class="before">29% APR</td><td class="after">15% APR</td><td style="font-weight:700;color:var(--success);">$700+/yr saved</td></tr>
+                <tr><td>📱 Phone plan</td><td class="before">Prepaid only</td><td class="after">Contract eligible</td><td style="font-weight:700;color:var(--success);">$30+/mo saved</td></tr>
+                <tr><td>🏡 New apartment</td><td class="before">Often rejected</td><td class="after">Approved easily</td><td style="font-weight:700;color:var(--success);">Priceless</td></tr>
+                <tr><td>💼 Some employers</td><td class="before">May not hire</td><td class="after">Credit check passes</td><td style="font-weight:700;color:var(--success);">Career security</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;padding:1.75rem;color:white;text-align:center;margin-top:1.25rem;">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">🤯</div>
+          <div style="font-size:1.15rem;font-weight:700;margin-bottom:.5rem;">Your rent is already $1,200/month.</div>
+          <div style="opacity:.8;font-size:.9rem;max-width:500px;margin:0 auto;">For less than a Netflix subscription, you can make every one of those payments count — forever. The math is simple. The impact is real.</div>
+          <button class="btn btn-purple btn-lg" style="margin-top:1.25rem;" onclick="document.getElementById('main-screen').style.display='none';document.getElementById('optin-screen').style.display='block';">Start Building Credit →</button>
+        </div>
+      </div>
+
+    </div><!-- /main-screen -->
+
+  </main>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════ */
+function load(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch{return d;}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+const PLAN_LABELS = {basic:'Basic — $4.99/mo', full:'Credit Builder — $6.99/mo', plus:'Builder+ — $9.99/mo'};
+const PLAN_FEES   = {basic:4.99, full:6.99, plus:9.99};
+const PLAN_BUREAUS = {basic:1, full:3, plus:3};
+
+/* ═══════════════════════════════════════════════
+   SECTION NAV
+   ═══════════════════════════════════════════════ */
+function showSection(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.cb-sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(id==='dashboard')   renderDashboard();
+  if(id==='history')     renderHistory();
+  if(id==='tips')        renderTips();
+  if(id==='projection')  renderProjection();
+  if(id==='badges')      renderBadges();
+  if(id==='rto')         renderRTO();
+  if(id==='plan')        renderPlan();
+  if(id==='compare'){}
+}
+
+/* ═══════════════════════════════════════════════
+   OPT-IN
+   ═══════════════════════════════════════════════ */
+function optIn(plan){
+  const cb = load('rv_credit_builder', null);
+  if(cb){alert('You are already enrolled in the Credit Builder program!');showApp();return;}
+  // Build 8 months of sample history going back in time
+  const baseScore = 582;
+  const history = [];
+  const payments = [];
+  const now = new Date();
+  for(let i=7;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const month = d.toLocaleString('en-US',{month:'long',year:'numeric'});
+    const scoreGain = Math.floor(5 + Math.random()*6);
+    history.push({month, score: baseScore + (7-i)*7 + scoreGain});
+    const bureaus = plan==='basic'?['Experian']:['Experian','TransUnion','Equifax'];
+    payments.push({id:genId(),month,date:d.toISOString(),amount:1200,bureaus,status:'reported',scoreImpact:'+5 to +9 pts'});
+  }
+  const data = {
+    plan, optInDate:new Date().toISOString(),
+    score: history[history.length-1].score,
+    startScore: baseScore,
+    scoreHistory: history,
+    payments,
+    lastUpdated: new Date().toISOString(),
+  };
+  save('rv_credit_builder', data);
+  showApp();
+  renderDashboard();
+  setTimeout(animateScore, 400);
+}
+
+function showApp(){
+  document.getElementById('optin-screen').style.display='none';
+  document.getElementById('main-screen').style.display='block';
+  showSection('dashboard', document.querySelector('.cb-sidebar a'));
+}
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD
+   ═══════════════════════════════════════════════ */
+function renderDashboard(){
+  const cb = load('rv_credit_builder',null); if(!cb) return;
+  const plan = cb.plan||'full';
+  const bureauCount = PLAN_BUREAUS[plan];
+
+  document.getElementById('bureau-count-label').textContent = bureauCount===3?'all 3 bureaus':'Experian (1 bureau)';
+  document.getElementById('plan-label-dash').textContent = 'Active · '+PLAN_FEES[plan].toFixed(2)+'/mo';
+  document.getElementById('last-updated').textContent = fmtDate(cb.lastUpdated||cb.optInDate);
+
+  // Score display
+  const score = cb.score || 580;
+  document.getElementById('score-display').textContent = score;
+  setScoreColor(score);
+
+  // Months reported
+  const months = (cb.payments||[]).length;
+  document.getElementById('stat-months').textContent = months;
+  const gained = score - (cb.startScore||580);
+  document.getElementById('stat-gained').textContent = (gained>=0?'+':'')+gained;
+
+  // Next report (1st of next month)
+  const now = new Date();
+  const nextFirst = new Date(now.getFullYear(), now.getMonth()+1, 1);
+  const daysAway = Math.ceil((nextFirst - now)/(1000*60*60*24));
+  document.getElementById('stat-next').textContent = daysAway;
+
+  // Bureau status
+  if(bureauCount >= 1){ document.getElementById('exp-status').textContent='Reporting'; document.getElementById('exp-months').textContent=months+' months reported'; }
+  if(bureauCount >= 3){
+    document.getElementById('tu-status').textContent='Reporting'; document.getElementById('tu-months').textContent=months+' months reported';
+    document.getElementById('eq-status').textContent='Reporting'; document.getElementById('eq-months').textContent=months+' months reported';
+  } else {
+    document.getElementById('tu-status').textContent='Not Active'; document.getElementById('tu-status').className='b-status pending';
+    document.getElementById('eq-status').textContent='Not Active'; document.getElementById('eq-status').className='b-status pending';
+  }
+
+  // Score history chart
+  renderChart(cb.scoreHistory||[]);
+
+  // Score change
+  const hist = cb.scoreHistory||[];
+  if(hist.length>=2){
+    const diff = hist[hist.length-1].score - hist[0].score;
+    document.getElementById('score-change-badge').textContent = (diff>=0?'↑ +':' ↓ ')+diff+' pts since joining';
+  }
+}
+
+function setScoreColor(score){
+  const el = document.getElementById('score-display');
+  const label = document.getElementById('score-range-label');
+  let cls,txt;
+  if(score<580){cls='score-poor';txt='Poor';}
+  else if(score<670){cls='score-fair';txt='Fair';}
+  else if(score<740){cls='score-good';txt='Good';}
+  else if(score<800){cls='score-vgood';txt='Very Good';}
+  else{cls='score-exc';txt='Exceptional';}
+  el.className='score-num '+cls;
+  label.textContent=txt;
+  label.className='score-label '+cls;
+}
+
+function animateScore(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  const score=cb.score||580;
+  // Animate arc
+  const arc=document.getElementById('score-arc');
+  const pct=Math.max(0,Math.min(1,(score-300)/550));
+  arc.style.strokeDashoffset=283-(pct*283);
+  // Animate indicator
+  const ind=document.getElementById('score-indicator');
+  ind.style.left=(pct*100)+'%';
+  // Count up score
+  const el=document.getElementById('score-display');
+  let cur=300;
+  const target=score;
+  const step=Math.ceil((target-cur)/40);
+  const t=setInterval(()=>{
+    cur=Math.min(cur+step,target);
+    el.textContent=cur;
+    if(cur>=target)clearInterval(t);
+  },25);
+}
+
+function renderChart(history){
+  if(!history.length) return;
+  const svg=document.getElementById('score-chart');
+  const W=500,H=160,pad={t:15,b:25,l:35,r:10};
+  const scores=history.map(h=>h.score);
+  const minS=Math.min(...scores)-20, maxS=Math.max(...scores)+20;
+  const scaleX=(i)=>pad.l+(i/(history.length-1||1))*(W-pad.l-pad.r);
+  const scaleY=(s)=>pad.t+(maxS-s)/(maxS-minS)*(H-pad.t-pad.b);
+  // Grid lines
+  let lines='';
+  [0,.25,.5,.75,1].forEach(t=>{
+    const y=pad.t+t*(H-pad.t-pad.b);
+    lines+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
+  });
+  // Area fill
+  let pts=history.map((h,i)=>`${scaleX(i)},${scaleY(h.score)}`).join(' ');
+  const first=`${scaleX(0)},${scaleY(history[0].score)}`;
+  const last=`${scaleX(history.length-1)},${scaleY(history[history.length-1].score)}`;
+  const area=`<polygon points="${pts} ${last},${H-pad.b} ${scaleX(0)},${H-pad.b}" fill="url(#chartGrad)" opacity="0.3"/>`;
+  // Line
+  const linePath='M'+history.map((h,i)=>`${scaleX(i)},${scaleY(h.score)}`).join('L');
+  // Dots
+  const dots=history.map((h,i)=>`<circle cx="${scaleX(i)}" cy="${scaleY(h.score)}" r="3.5" fill="#8b5cf6" stroke="white" stroke-width="1.5"/>`).join('');
+  // X labels (every other)
+  const labels=history.map((h,i)=>i%2===0?`<text x="${scaleX(i)}" y="${H-5}" text-anchor="middle" font-size="9" fill="#94a3b8">${h.month.split(' ')[0]}</text>`:'').join('');
+  // Y labels
+  const yLabel=`<text x="${pad.l-4}" y="${scaleY(scores[scores.length-1])+4}" text-anchor="end" font-size="9" fill="#8b5cf6" font-weight="bold">${scores[scores.length-1]}</text>`;
+  svg.innerHTML=`
+    <defs><linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient></defs>
+    ${lines}${area}
+    <path d="${linePath}" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}${labels}${yLabel}`;
+}
+
+/* ═══════════════════════════════════════════════
+   REPORTING HISTORY
+   ═══════════════════════════════════════════════ */
+function renderHistory(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  const tbody=document.getElementById('history-tbody');
+  const payments=[...(cb.payments||[])].reverse();
+  tbody.innerHTML=payments.map((p,i)=>`<tr>
+    <td><strong>${p.month}</strong></td>
+    <td>$${Number(p.amount).toLocaleString()}</td>
+    <td>${p.bureaus.map(b=>`<span style="font-size:.75rem;padding:2px 7px;border-radius:999px;background:#ede9fe;color:#5b21b6;font-weight:600;margin-right:3px;">${b}</span>`).join('')}</td>
+    <td><span style="background:#d1fae5;color:#065f46;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:999px;">✅ Reported</span></td>
+    <td style="color:var(--success);font-weight:700;">${p.scoreImpact}</td>
+  </tr>`).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   AI CREDIT TIPS
+   ═══════════════════════════════════════════════ */
+const ALL_TIPS = [
+  {title:'Keep your credit utilization below 30%',icon:'💳',impact:'+15 to +40 pts',text:'Credit utilization (how much of your available credit you\'re using) is the second biggest factor in your score. If you have a $1,000 credit card limit, keep the balance below $300. Paying it down by $200 this month could boost your score within 30 days.',category:'Utilization'},
+  {title:'Never miss a payment — ever',icon:'📅',impact:'+5 to +10 pts/yr',text:'Payment history is 35% of your FICO score — the single biggest factor. Even one missed payment can drop your score 50–100 points and stays on your report for 7 years. RentVerified automatically reports your rent on time every month. Make sure all other bills are on auto-pay.',category:'Payment History'},
+  {title:'Don\'t close old credit accounts',icon:'📂',impact:'+10 to +20 pts',text:'Length of credit history is 15% of your score. Even if you don\'t use an old credit card, keeping it open extends your average account age. Cut up the card if you\'re tempted to overspend, but don\'t close it.',category:'Credit Age'},
+  {title:'Dispute any errors on your credit report',icon:'⚠️',impact:'+20 to +100 pts',text:'1 in 5 Americans has an error on their credit report. Get your free reports at AnnualCreditReport.com (the real one — it\'s federally mandated). Dispute errors directly with each bureau. Errors like accounts that aren\'t yours can be removed and cause immediate score jumps.',category:'Accuracy'},
+  {title:'Apply for a secured credit card',icon:'🔐',impact:'+20 to +40 pts',text:'A secured card (where you put down $200–$500 as collateral) is the easiest credit card to get with a low score. Use it for small purchases like gas or groceries and pay it off in full every month. After 6–12 months of on-time payments, your score will jump noticeably.',category:'Credit Mix'},
+  {title:'Become an authorized user',icon:'🤝',impact:'+20 to +60 pts',text:'If a family member or trusted friend has good credit and adds you as an authorized user on their card, their positive history can immediately boost your score — even if you never use the card. This is one of the fastest legal credit score hacks available.',category:'Credit History'},
+  {title:'Space out new credit applications',icon:'🗓',impact:'-5 to -15 pts avoided',text:'Every time you apply for new credit, a "hard inquiry" appears and drops your score 5–15 points temporarily. Space applications at least 6 months apart. Multiple inquiries for the same type of loan (like mortgage shopping) within 14–45 days count as just one inquiry.',category:'New Credit'},
+  {title:'Set up a credit monitoring alert',icon:'🔔',impact:'Protection',text:'Sign up for free credit monitoring through Credit Karma, Experian, or your bank. You\'ll get instant alerts if a new account is opened in your name — catching identity theft early can save your score from a devastating attack. Free tools are just as good as paid ones for monitoring.',category:'Protection'},
+];
+
+function renderTips(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  const score=cb.score||580;
+  // Select relevant tips based on score
+  let tips=[...ALL_TIPS];
+  if(score>650) tips=tips.filter(t=>t.category!=='Payment History');
+  if(score<600) tips=[tips[0],tips[1],tips[3],tips[4],...tips.slice(5)];
+  tips=tips.slice(0,5);
+  document.getElementById('tips-container').innerHTML=tips.map(t=>`
+    <div class="tip-card fade-up">
+      <div class="tip-label">🤖 AI Credit Tip</div>
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:.35rem;">${t.icon} ${t.title}</div>
+      <div class="tip-text">${t.text}</div>
+      <div class="tip-impact">📈 Potential impact: ${t.impact}</div>
+    </div>`).join('');
+}
+
+function refreshTips(){
+  const container=document.getElementById('tips-container');
+  container.innerHTML='<div style="text-align:center;padding:2rem;color:var(--gray-400);">🤖 Generating personalized tips…</div>';
+  setTimeout(renderTips,1200);
+}
+
+/* ═══════════════════════════════════════════════
+   PROJECTION
+   ═══════════════════════════════════════════════ */
+function renderProjection(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  const score=cb.score||580;
+  const now=new Date();
+  const projection=[];
+  let s=score;
+  for(let i=0;i<=12;i+=3){
+    const m=new Date(now.getFullYear(),now.getMonth()+i,1);
+    const label=i===0?'Now':'+'+i+' mo';
+    const milestone=i===0?'current':s>=740?'milestone':i===12?'milestone':'';
+    projection.push({label,score:Math.round(s),month:m.toLocaleString('en-US',{month:'short',year:'2-digit'}),milestone});
+    s+=Math.floor(12+Math.random()*8);
+  }
+  const grid=document.getElementById('proj-grid');
+  grid.innerHTML=projection.map(p=>`
+    <div class="proj-item ${p.milestone}">
+      <div class="pm">${p.label}</div>
+      <div class="ps">${p.score}</div>
+      <div class="pl">${p.month}</div>
+    </div>`).join('');
+
+  const finalScore=projection[projection.length-1].score;
+  let quality=finalScore>=740?'Very Good':finalScore>=670?'Good':'Fair';
+  document.getElementById('proj-note').innerHTML=`
+    At your current rate of on-time payments, your score is projected to reach <strong>${finalScore} (${quality})</strong> in 12 months — an increase of approximately <strong>+${finalScore-score} points</strong>.
+    ${finalScore>=640?'<br><br>🎉 <strong>You\'ll be mortgage-eligible within 12 months.</strong> Start saving for a down payment now — even $50/month makes a difference. Ask your landlord about rent-to-own options.':'<br><br>Keep paying on time every month. You\'re making real progress.'}`;
+
+  // Milestones
+  const milestones=[
+    {score:580,label:'Secured Credit Card',desc:'Qualify for your first credit-building card'},
+    {score:620,label:'Auto Loan',desc:'Qualify for car financing (rates improve significantly)'},
+    {score:640,label:'FHA Mortgage',desc:'Minimum score for FHA home loans with 3.5% down'},
+    {score:680,label:'Conventional Mortgage',desc:'Better rates on conventional home loans'},
+    {score:720,label:'Best Loan Rates',desc:'Qualify for the lowest interest rates available'},
+    {score:750,label:'Premium Cards',desc:'Rewards cards, travel points, and premium perks'},
+  ];
+  document.getElementById('milestones-grid').innerHTML=milestones.map(m=>{
+    const unlocked=score>=m.score;
+    const projected=projection[projection.length-1].score>=m.score;
+    return `<div style="padding:1rem;border-radius:10px;border:1px solid ${unlocked?'#a7f3d0':projected?'#ddd6fe':''};background:${unlocked?'#f0fdf4':projected?'#faf5ff':'var(--gray-50)'};${unlocked||projected?'':'opacity:.5'}">
+      <div style="font-size:1.25rem;margin-bottom:.35rem;">${unlocked?'✅':projected?'🎯':'🔒'}</div>
+      <div style="font-weight:700;font-size:.875rem;margin-bottom:.25rem;color:${unlocked?'#065f46':projected?'#5b21b6':'var(--gray-600)'};">${m.label}</div>
+      <div style="font-size:.78rem;color:var(--gray-500);">${m.desc}</div>
+      <div style="font-size:.72rem;margin-top:.4rem;font-weight:700;color:var(--gray-400);">Score: ${m.score}+ ${unlocked?'✅ UNLOCKED':projected?'📈 Projected':'Locked'}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   BADGES
+   ═══════════════════════════════════════════════ */
+const BADGE_DEFS=[
+  {id:'first',icon:'🥇',title:'First Payment Reported',desc:'Made your first rent payment via RentVerified',months:1},
+  {id:'three',icon:'🎯',title:'3 Months On-Time',desc:'3 consecutive on-time rent payments reported',months:3},
+  {id:'six',icon:'⭐',title:'6-Month Perfect Record',desc:'Half a year of spotless payment history',months:6},
+  {id:'year',icon:'🏆',title:'1-Year Credit Builder',desc:'Full year of on-time payments — exceptional tenant',months:12},
+  {id:'score600',icon:'📈',title:'600 Club',desc:'Reached a 600 credit score',score:600},
+  {id:'score650',icon:'💪',title:'650 Milestone',desc:'Credit score crossed 650 — loan-eligible',score:650},
+  {id:'score700',icon:'🌟',title:'700 Club',desc:'Credit score above 700 — excellent standing',score:700},
+  {id:'rtoready',icon:'🏠',title:'Homeownership Ready',desc:'Credit score qualifies for FHA mortgage',score:640},
+];
+
+function renderBadges(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  const months=(cb.payments||[]).length;
+  const score=cb.score||580;
+  document.getElementById('badges-container').innerHTML=BADGE_DEFS.map(b=>{
+    const earned=(b.months&&months>=b.months)||(b.score&&score>=b.score);
+    return `<div class="badge-card${earned?'  earned':' badge-locked'}">
+      <div class="badge-icon">${b.icon}</div>
+      <div>
+        <div class="badge-title">${b.title} ${earned?'<span style="background:#d1fae5;color:#065f46;font-size:.7rem;padding:1px 7px;border-radius:999px;font-weight:700;">EARNED</span>':''}</div>
+        <div class="badge-desc">${b.desc}${b.months?' — requires '+b.months+' months':''}${b.score?' — requires '+b.score+' score':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   PATH TO OWNERSHIP
+   ═══════════════════════════════════════════════ */
+function renderRTO(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  const score=cb.score||580;
+  const months=(cb.payments||[]).length;
+
+  const steps=[
+    {icon:'🚪',title:'Move In',desc:'You moved into a RentVerified property',done:true},
+    {icon:'💸',title:'First Rent Payment',desc:'First on-time payment reported to credit bureaus',done:months>=1},
+    {icon:'📈',title:'3 Months Building',desc:'3 consecutive on-time payments — score building momentum',done:months>=3},
+    {icon:'💪',title:'6-Month Mark',desc:'Half year on the record — lenders starting to notice',done:months>=6},
+    {icon:'🎯',title:'Credit Score 640+',desc:'FHA mortgage eligible — you can buy a home',done:score>=640},
+    {icon:'🤝',title:'Rent-to-Own Conversation',desc:'Talk to your landlord about converting to ownership',done:false},
+    {icon:'🏠',title:'Homeowner',desc:'You own the home you used to rent',done:false},
+  ];
+
+  document.getElementById('ownership-timeline').innerHTML=steps.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:1rem;padding:.75rem 0;${i<steps.length-1?'border-bottom:1px solid var(--gray-100);':''}">
+      <div style="width:40px;height:40px;border-radius:50%;background:${s.done?'var(--success)':'var(--gray-200)'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:2px solid ${s.done?'#059669':'var(--gray-300)'};">${s.done?'✅':s.icon}</div>
+      <div>
+        <div style="font-weight:700;font-size:.9rem;color:${s.done?'var(--gray-900)':'var(--gray-500)'};">${s.title}</div>
+        <div style="font-size:.8rem;color:${s.done?'var(--gray-600)':'var(--gray-400)'};">${s.desc}</div>
+      </div>
+    </div>`).join('');
+
+  // RTO card
+  const card=document.getElementById('rto-cta-card');
+  const pct=Math.max(0,Math.min(100,((score-300)/(640-300))*100));
+  document.getElementById('rto-progress-bar').style.width=pct+'%';
+  document.getElementById('rto-current-score').textContent=score;
+  if(score>=640){
+    card.classList.remove('rto-locked'); card.classList.add('rto-unlocked');
+    document.getElementById('rto-icon').textContent='🎉';
+    document.getElementById('rto-title').textContent='Rent-to-Own Pathway — UNLOCKED!';
+    document.getElementById('rto-desc').textContent='Your credit score qualifies you for an FHA mortgage. You may be eligible to purchase the home you\'re renting. Ask your landlord about rent-to-own options today.';
+    document.getElementById('rto-btn').style.display='block';
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   PLAN MANAGEMENT
+   ═══════════════════════════════════════════════ */
+function renderPlan(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  const plan=cb.plan||'full';
+  document.getElementById('plan-badge-display').textContent=PLAN_LABELS[plan];
+  document.getElementById('plan-fee-display').textContent='$'+PLAN_FEES[plan].toFixed(2);
+  document.getElementById('plan-since-display').textContent=fmtDate(cb.optInDate);
+  const nextBilling=new Date(cb.optInDate); nextBilling.setMonth(nextBilling.getMonth()+1);
+  document.getElementById('plan-next-display').textContent=fmtDate(nextBilling.toISOString());
+}
+
+function upgradePlan(){
+  const cb=load('rv_credit_builder',null); if(!cb) return;
+  if(cb.plan==='plus'){alert('You\'re already on the highest plan!');return;}
+  const next=cb.plan==='basic'?'full':'plus';
+  if(confirm(`Upgrade to ${PLAN_LABELS[next]}? You'll be charged $${PLAN_FEES[next].toFixed(2)}/month.`)){
+    cb.plan=next; save('rv_credit_builder',cb);
+    renderPlan();
+    alert('✅ Upgraded! You now report to '+PLAN_BUREAUS[next]+' credit bureau'+(PLAN_BUREAUS[next]>1?'s':'')+'.');
+  }
+}
+
+function cancelPlan(){
+  if(confirm('Cancel your Credit Builder subscription?\n\nImportant: Canceling stops future reporting but does NOT remove existing reported payments. Your credit history stays on your report forever.')){
+    localStorage.removeItem('rv_credit_builder');
+    document.getElementById('main-screen').style.display='none';
+    document.getElementById('optin-screen').style.display='block';
+    alert('Subscription cancelled. Your existing payment history remains on your credit report.');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  const cb=load('rv_credit_builder',null);
+  if(cb){
+    showApp();
+    setTimeout(animateScore,500);
+  }
+  // Set default date in form if any
+});
+</script>
+</body>
+</html>

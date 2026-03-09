@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RentVerified – Vendor Portal</title>
+<style>
+  :root {
+    --amber: #f59e0b;
+    --amber-d: #d97706;
+    --amber-l: #fef3c7;
+    --amber-bg: #fffbeb;
+    --dark: #1e1b4b;
+    --gray: #6b7280;
+    --light: #f9fafb;
+    --white: #ffffff;
+    --green: #10b981;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: #1f2937; }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1e1b4b 0%, #78350f 100%);
+  }
+  .login-box {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 40px;
+    width: 520px;
+    max-width: 96vw;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .login-box .logo { text-align: center; margin-bottom: 28px; }
+  .login-box .logo h1 { font-size: 1.8rem; color: var(--dark); }
+  .login-box .logo p { color: var(--gray); font-size: .9rem; margin-top: 4px; }
+  .login-box .logo .badge {
+    display: inline-block; background: var(--amber-l); color: var(--amber-d);
+    font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    margin-top: 8px;
+  }
+  .tab-row { display: flex; gap: 8px; margin-bottom: 24px; }
+  .tab-row button {
+    flex: 1; padding: 10px; border: 2px solid #e5e7eb; background: var(--white);
+    border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--gray);
+    transition: all .2s;
+  }
+  .tab-row button.active { border-color: var(--amber); color: var(--amber-d); background: var(--amber-l); }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: .85rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 10px 12px; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; font-size: .95rem; transition: border .2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--amber);
+  }
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 40px; }
+  .pw-wrap .eye {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    cursor: pointer; color: var(--gray); background: none; border: none; font-size: 1rem;
+  }
+  .btn-primary {
+    width: 100%; padding: 12px; background: var(--amber); color: var(--white);
+    border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: background .2s;
+  }
+  .btn-primary:hover { background: var(--amber-d); }
+  .login-footer { text-align: center; margin-top: 16px; font-size: .85rem; color: var(--gray); }
+  .login-footer a { color: var(--amber-d); cursor: pointer; font-weight: 600; }
+  .err-msg { color: var(--red); font-size: .85rem; margin-top: 8px; text-align: center; display: none; }
+  .trade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+  .trade-chip {
+    border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 8px 6px;
+    text-align: center; cursor: pointer; font-size: .78rem; font-weight: 600;
+    color: var(--gray); background: var(--white); transition: all .2s;
+  }
+  .trade-chip.sel { border-color: var(--amber); background: var(--amber-l); color: var(--amber-d); }
+  .plan-box {
+    background: var(--amber-bg); border: 2px solid var(--amber); border-radius: 10px;
+    padding: 14px; margin: 12px 0; text-align: center;
+  }
+  .plan-box .plan-name { font-weight: 800; color: var(--amber-d); font-size: 1.05rem; }
+  .plan-box .plan-price { font-size: 1.6rem; font-weight: 900; color: var(--dark); margin: 4px 0; }
+  .plan-box .plan-price span { font-size: .9rem; font-weight: 500; color: var(--gray); }
+  .plan-box .plan-note { font-size: .8rem; color: var(--gray); }
+
+  /* ── SHELL ── */
+  #app { display: none; height: 100vh; overflow: hidden; flex-direction: row; }
+  .sidebar {
+    width: 240px; background: var(--dark); color: var(--white);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 22px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .sidebar-brand h2 { font-size: 1.2rem; font-weight: 800; }
+  .sidebar-brand .sub { font-size: .75rem; color: rgba(255,255,255,.5); margin-top: 2px; }
+  .sidebar-user {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .sidebar-user .uname { font-weight: 700; font-size: .9rem; }
+  .sidebar-user .urole {
+    font-size: .72rem; background: var(--amber); color: var(--dark);
+    border-radius: 10px; padding: 1px 8px; margin-top: 3px; display: inline-block;
+    font-weight: 700;
+  }
+  .sidebar-user .ustatus {
+    font-size: .72rem; color: #6ee7b7; margin-top: 4px;
+  }
+  nav { flex: 1; padding: 12px 0; }
+  nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 20px; color: rgba(255,255,255,.7);
+    text-decoration: none; font-size: .88rem; font-weight: 500;
+    border-left: 3px solid transparent; transition: all .15s;
+  }
+  nav a:hover { background: rgba(255,255,255,.06); color: var(--white); }
+  nav a.active { background: rgba(245,158,11,.12); color: var(--amber); border-left-color: var(--amber); }
+  nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.1); }
+  .sidebar-footer a { color: rgba(255,255,255,.5); font-size: .8rem; cursor: pointer; text-decoration: none; }
+  .sidebar-footer a:hover { color: var(--white); }
+
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar {
+    background: var(--white); border-bottom: 1px solid #e5e7eb;
+    padding: 16px 28px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .topbar h1 { font-size: 1.25rem; font-weight: 800; color: var(--dark); }
+  .topbar .sub { font-size: .83rem; color: var(--gray); margin-top: 2px; }
+  .sub-badge {
+    background: var(--amber-l); color: var(--amber-d);
+    font-size: .78rem; font-weight: 700; padding: 4px 12px; border-radius: 20px;
+  }
+
+  .content { flex: 1; overflow-y: auto; padding: 28px; }
+  section.page { display: none; }
+  section.page.active { display: block; }
+
+  /* ── STAT CARDS ── */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--white); border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    border-left: 4px solid var(--amber);
+  }
+  .stat-card .label { font-size: .78rem; color: var(--gray); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .stat-card .value { font-size: 2rem; font-weight: 900; color: var(--dark); margin-top: 4px; }
+  .stat-card .delta { font-size: .78rem; color: var(--green); margin-top: 2px; }
+
+  /* ── CARDS / GRIDS ── */
+  .card {
+    background: var(--white); border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    padding: 22px; margin-bottom: 22px;
+  }
+  .card h3 { font-size: 1rem; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+
+  /* ── LEAD FEED ── */
+  .lead-card {
+    background: var(--white); border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    border: 1.5px solid #e5e7eb;
+    padding: 18px 20px; margin-bottom: 14px;
+    transition: border-color .2s;
+  }
+  .lead-card:hover { border-color: var(--amber); }
+  .lead-card.accepted { border-color: var(--green); background: #f0fdf4; }
+  .lead-card.declined { opacity: .5; }
+  .lead-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .lead-title { font-weight: 700; font-size: 1rem; color: var(--dark); }
+  .lead-meta { font-size: .8rem; color: var(--gray); margin-top: 4px; }
+  .lead-desc { font-size: .88rem; color: #374151; margin: 10px 0; line-height: 1.5; }
+  .lead-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .tag {
+    font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .tag-trade { background: #dbeafe; color: #1d4ed8; }
+  .tag-priority { background: #fef3c7; color: #92400e; }
+  .tag-priority.high { background: #fee2e2; color: #b91c1c; }
+  .tag-priority.emergency { background: #7f1d1d; color: #fff; }
+  .tag-zip { background: #f3f4f6; color: var(--gray); }
+  .lead-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .btn-accept {
+    flex: 1; padding: 9px; background: var(--green); color: var(--white);
+    border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: .88rem;
+    transition: background .2s;
+  }
+  .btn-accept:hover { background: #059669; }
+  .btn-decline {
+    flex: 1; padding: 9px; background: var(--white); color: var(--gray);
+    border: 1.5px solid #e5e7eb; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: .88rem;
+    transition: all .2s;
+  }
+  .btn-decline:hover { border-color: var(--red); color: var(--red); }
+  .lead-accepted-badge {
+    font-size: .75rem; font-weight: 700; color: var(--green);
+    background: #d1fae5; padding: 3px 10px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .lead-cost { font-size: .8rem; color: var(--amber-d); font-weight: 700; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--gray); }
+  .empty-state .big { font-size: 3rem; margin-bottom: 10px; }
+  .empty-state p { font-size: .95rem; }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  thead th { background: var(--light); font-weight: 700; text-align: left; padding: 10px 14px; color: var(--gray); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; }
+  tbody tr:hover td { background: #fafafa; }
+  .badge {
+    display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-red { background: #fee2e2; color: #b91c1c; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-gray { background: #f3f4f6; color: #374151; }
+
+  /* ── FORMS ── */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-col label { display: block; font-size: .83rem; font-weight: 600; color: #374151; margin-bottom: 5px; }
+  .form-col input, .form-col select, .form-col textarea {
+    width: 100%; padding: 9px 11px; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; font-size: .9rem; transition: border .2s;
+  }
+  .form-col input:focus, .form-col select:focus, .form-col textarea:focus {
+    outline: none; border-color: var(--amber);
+  }
+  .btn-save {
+    padding: 10px 24px; background: var(--amber); color: var(--white);
+    border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+    font-size: .9rem; margin-top: 16px; transition: background .2s;
+  }
+  .btn-save:hover { background: var(--amber-d); }
+
+  /* ── PROFILE / SETTINGS ── */
+  .profile-header {
+    display: flex; align-items: center; gap: 18px; margin-bottom: 24px;
+  }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--amber); display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 900; color: var(--white);
+    flex-shrink: 0;
+  }
+  .profile-info .pname { font-size: 1.2rem; font-weight: 800; }
+  .profile-info .pemail { color: var(--gray); font-size: .85rem; }
+  .sub-status {
+    background: var(--amber-l); border: 1.5px solid var(--amber); border-radius: 10px;
+    padding: 16px; margin-bottom: 20px;
+  }
+  .sub-status .sname { font-weight: 800; color: var(--amber-d); font-size: 1rem; }
+  .sub-status .snext { font-size: .83rem; color: var(--gray); margin-top: 4px; }
+  .sub-status .stotal { font-size: .83rem; color: var(--dark); font-weight: 700; margin-top: 6px; }
+
+  /* ── REVIEWS ── */
+  .review-card {
+    background: var(--light); border-radius: 10px; padding: 14px; margin-bottom: 12px;
+  }
+  .stars { color: var(--amber); font-size: 1rem; margin-bottom: 4px; }
+  .review-text { font-size: .88rem; color: #374151; line-height: 1.5; }
+  .review-meta { font-size: .78rem; color: var(--gray); margin-top: 6px; }
+
+  /* ── EARNINGS ── */
+  .earn-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid #f3f4f6; font-size: .9rem;
+  }
+  .earn-row .job { font-weight: 600; }
+  .earn-row .addr { color: var(--gray); font-size: .8rem; }
+  .earn-row .amt { font-weight: 800; color: var(--green); }
+  .earn-row .dt { color: var(--gray); font-size: .78rem; }
+  .earn-total {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0 0; font-weight: 800; font-size: 1rem;
+  }
+
+  /* ── NOTICE BANNER ── */
+  .notice {
+    background: var(--amber-l); border: 1.5px solid var(--amber); border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 18px; font-size: .88rem; color: #92400e;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LOGIN / SIGNUP SCREEN
+══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="logo">
+      <h1>🔧 RentVerified</h1>
+      <p>Vendor & Handyman Portal</p>
+      <span class="badge">$19/mo + $5 per accepted lead</span>
+    </div>
+
+    <div class="tab-row">
+      <button class="active" onclick="showPanel('login')">Sign In</button>
+      <button onclick="showPanel('signup')">Join as Vendor</button>
+    </div>
+
+    <!-- Login Panel -->
+    <div id="panel-login">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="l-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="l-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="eye" onclick="togglePw('l-pw',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="err-msg" id="login-err">Invalid email or password.</div>
+      <div class="login-footer">Don't have an account? <a onclick="showPanel('signup')">Sign up free →</a></div>
+    </div>
+
+    <!-- Signup Panel -->
+    <div id="panel-signup" style="display:none">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="s-name" placeholder="John Smith">
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:.83rem;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Email</label>
+          <input type="email" id="s-email" placeholder="you@email.com" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.9rem;">
+        </div>
+        <div>
+          <label style="font-size:.83rem;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Phone</label>
+          <input type="tel" id="s-phone" placeholder="(801) 555-0100" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.9rem;">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Trade Specialties <span style="color:var(--gray);font-weight:400;">(select all that apply)</span></label>
+        <div class="trade-grid" id="trade-grid">
+          <div class="trade-chip" onclick="toggleTrade(this,'Plumbing')">🔧 Plumbing</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'Electrical')">⚡ Electrical</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'HVAC')">🌡️ HVAC</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'Carpentry')">🪚 Carpentry</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'Painting')">🎨 Painting</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'Landscaping')">🌿 Landscaping</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'Cleaning')">🧹 Cleaning</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'Appliances')">🍳 Appliances</div>
+          <div class="trade-chip" onclick="toggleTrade(this,'General')">🏠 General</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Service ZIP Codes <span style="color:var(--gray);font-weight:400;">(comma-separated)</span></label>
+        <input type="text" id="s-zips" placeholder="84601, 84604, 84097, 84062">
+      </div>
+
+      <!-- ── CREDENTIALS ── -->
+      <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:12px 14px;margin:16px 0 4px;font-size:.82rem;color:#92400e;">
+        <strong>📋 License & Insurance Required</strong><br>
+        All contractors must hold a valid state license and carry General Liability insurance ($1M minimum). Proof is required before leads are activated.
+      </div>
+
+      <div style="background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:.88rem;font-weight:700;color:#374151;margin-bottom:12px;">🔒 Contractor License</div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">License Number <span style="color:var(--red);">*</span></label>
+            <input type="text" id="s-lic-num" placeholder="e.g. 123456-5501" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Issuing State <span style="color:var(--red);">*</span></label>
+            <select id="s-lic-state" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+              <option value="">Select state</option>
+              <option value="UT" selected>Utah</option><option value="NV">Nevada</option><option value="AZ">Arizona</option><option value="CO">Colorado</option><option value="ID">Idaho</option><option value="WY">Wyoming</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">License Expiration Date <span style="color:var(--red);">*</span></label>
+          <input type="date" id="s-lic-exp" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Upload License Certificate <span style="color:var(--red);">*</span></label>
+          <input type="file" id="s-lic-file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%;padding:7px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.82rem;background:#fff;" onchange="previewFile(this,'lic-preview')">
+          <div id="lic-preview" style="font-size:.75rem;color:var(--green);margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <div style="background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:.88rem;font-weight:700;color:#374151;margin-bottom:12px;">🛡️ General Liability Insurance</div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Insurance Carrier <span style="color:var(--red);">*</span></label>
+            <input type="text" id="s-ins-carrier" placeholder="e.g. State Farm" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Policy Number <span style="color:var(--red);">*</span></label>
+            <input type="text" id="s-ins-policy" placeholder="Policy #" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+          </div>
+        </div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Coverage Amount <span style="color:var(--red);">*</span></label>
+            <select id="s-ins-coverage" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+              <option value="">Select amount</option>
+              <option>$500,000</option><option selected>$1,000,000</option><option>$2,000,000</option><option>$5,000,000</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Policy Expiration <span style="color:var(--red);">*</span></label>
+            <input type="date" id="s-ins-exp" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Upload Certificate of Insurance (COI) <span style="color:var(--red);">*</span></label>
+          <input type="file" id="s-ins-file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%;padding:7px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.82rem;background:#fff;" onchange="previewFile(this,'ins-preview')">
+          <div id="ins-preview" style="font-size:.75rem;color:var(--green);margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <div style="background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:16px;">
+        <div style="font-size:.88rem;font-weight:700;color:#374151;margin-bottom:8px;">🔗 Bonding <span style="font-weight:400;color:var(--gray);">(optional but recommended)</span></div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Bond Amount</label>
+            <input type="text" id="s-bond-amt" placeholder="e.g. $10,000" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Upload Bond Certificate</label>
+            <input type="file" id="s-bond-file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%;padding:7px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.82rem;background:#fff;" onchange="previewFile(this,'bond-preview')">
+            <div id="bond-preview" style="font-size:.75rem;color:var(--green);margin-top:4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;">
+        <input type="checkbox" id="s-certify" style="margin-top:3px;accent-color:var(--amber);">
+        <label for="s-certify" style="font-size:.8rem;color:#374151;cursor:pointer;">
+          I certify that all license and insurance information provided is accurate and current. I understand that providing false credentials will result in immediate account termination and may be reported to state licensing authorities.
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="s-pw" placeholder="Create a password">
+          <button class="eye" onclick="togglePw('s-pw',this)">👁</button>
+        </div>
+      </div>
+      <div class="plan-box">
+        <div class="plan-name">Vendor Pro Plan</div>
+        <div class="plan-price">$19<span>/month</span></div>
+        <div class="plan-note">+ $5 per accepted lead · Cancel anytime · 14-day free trial</div>
+      </div>
+      <button class="btn-primary" onclick="doSignup()">Submit Application →</button>
+      <div class="err-msg" id="signup-err">Please fill in all required fields.</div>
+      <div class="login-footer">Already have an account? <a onclick="showPanel('login')">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════ -->
+<div id="app" style="display:none;flex-direction:row;">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <h2>🔧 RentVerified</h2>
+      <div class="sub">Vendor Portal</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="uname" id="sb-name">Loading...</div>
+      <div class="urole">Verified Vendor</div>
+      <div class="ustatus" id="sb-status">● Active Subscription</div>
+    </div>
+    <nav>
+      <a href="#" class="active" onclick="nav('overview',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Overview
+      </a>
+      <a href="#" onclick="nav('leads',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Lead Feed
+        <span id="lead-count-badge" style="margin-left:auto;background:var(--red);color:#fff;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:10px;display:none;"></span>
+      </a>
+      <a href="#" onclick="nav('jobs',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+        My Jobs
+      </a>
+      <a href="#" onclick="nav('earnings',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Earnings
+      </a>
+      <a href="#" onclick="nav('reviews',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        Reviews
+      </a>
+      <a href="compliance.html" style="color:#fb923c;border-left-color:#fb923c;">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        📋 My Compliance
+        <span style="margin-left:auto;background:#fb923c;color:#fff;font-size:.68rem;font-weight:700;padding:1px 6px;border-radius:8px;" id="comp-badge-vp"></span>
+      </a>
+      <a href="#" onclick="nav('settings',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="landlord-signup.html">← Landlord Portal</a><br><br>
+      <a href="index.html">🏠 Home</a>&nbsp;&nbsp;
+      <a onclick="logout()" style="color:#fca5a5;">Sign Out</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="page-title">Overview</h1>
+        <div class="sub" id="page-sub">Welcome back — here's your activity</div>
+      </div>
+      <div class="sub-badge" id="sub-badge-top">Vendor Pro · Active</div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── OVERVIEW ── -->
+      <section class="page active" id="page-overview">
+        <!-- Verification Status Banner (shown dynamically) -->
+        <div id="verify-banner-pending" style="display:none;background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:16px 20px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.8rem;">⏳</span>
+            <div>
+              <div style="font-weight:800;color:#92400e;font-size:1rem;">Verification Pending — Leads Locked</div>
+              <div style="font-size:.85rem;color:#92400e;margin-top:3px;">Your license and insurance documents have been received and are under review by the RentVerified team. This typically takes 1–2 business days. You will receive an email when approved.</div>
+            </div>
+          </div>
+        </div>
+        <div id="verify-banner-approved" style="display:none;background:#d1fae5;border:2px solid #10b981;border-radius:10px;padding:14px 20px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.5rem;">✅</span>
+            <div style="font-weight:700;color:#065f46;">Verified Contractor — Leads Active</div>
+          </div>
+        </div>
+        <div class="notice">
+          💡 <strong>How leads work:</strong> New work orders from local landlords appear in your Lead Feed. View full job details for free — pay $5 only when you accept a lead. Decline as many as you want at no cost.
+        </div>
+        <div class="stats">
+          <div class="stat-card">
+            <div class="label">New Leads</div>
+            <div class="value" id="stat-new-leads">0</div>
+            <div class="delta">Waiting for you</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Active Jobs</div>
+            <div class="value" id="stat-active">0</div>
+            <div class="delta">In progress</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Completed</div>
+            <div class="value" id="stat-completed">0</div>
+            <div class="delta">All time</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Total Earned</div>
+            <div class="value" id="stat-earned">$0</div>
+            <div class="delta">This month</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>🔔 Recent Lead Activity</h3>
+            <div id="recent-activity">
+              <div style="color:var(--gray);font-size:.88rem;">No activity yet.</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>⭐ Rating Summary</h3>
+            <div style="text-align:center;padding:10px 0;">
+              <div style="font-size:3rem;font-weight:900;color:var(--dark);" id="avg-rating">4.8</div>
+              <div style="color:var(--amber);font-size:1.4rem;" id="star-display">★★★★★</div>
+              <div style="color:var(--gray);font-size:.85rem;margin-top:4px;" id="review-count">3 reviews</div>
+            </div>
+            <div style="margin-top:16px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <span style="font-size:.8rem;color:var(--gray);width:20px;">5★</span>
+                <div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
+                  <div style="height:100%;width:80%;background:var(--amber);border-radius:4px;"></div>
+                </div>
+                <span style="font-size:.78rem;color:var(--gray);">80%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <span style="font-size:.8rem;color:var(--gray);width:20px;">4★</span>
+                <div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
+                  <div style="height:100%;width:15%;background:var(--amber);border-radius:4px;"></div>
+                </div>
+                <span style="font-size:.78rem;color:var(--gray);">15%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:.8rem;color:var(--gray);width:20px;">3★</span>
+                <div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
+                  <div style="height:100%;width:5%;background:var(--amber);border-radius:4px;"></div>
+                </div>
+                <span style="font-size:.78rem;color:var(--gray);">5%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📅 Upcoming Jobs</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Job</th><th>Property</th><th>Scheduled</th><th>Priority</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="upcoming-jobs-table">
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── LEAD FEED ── -->
+      <section class="page" id="page-leads">
+        <div class="notice">
+          🎯 <strong>Matched leads only</strong> — these jobs match your trade(s) and service ZIP codes. Accept a lead for $5 to get the landlord's contact info and property address.
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+          <div>
+            <strong id="lead-feed-count">0 leads</strong>
+            <span style="color:var(--gray);font-size:.85rem;margin-left:6px;">available in your area</span>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <select id="filter-trade" onchange="renderLeads()" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.85rem;">
+              <option value="">All Trades</option>
+              <option>Plumbing</option><option>Electrical</option><option>HVAC</option>
+              <option>Carpentry</option><option>Painting</option><option>Landscaping</option>
+              <option>Cleaning</option><option>Appliances</option><option>General</option>
+            </select>
+            <select id="filter-priority" onchange="renderLeads()" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.85rem;">
+              <option value="">All Priorities</option>
+              <option>Emergency</option><option>High</option><option>Medium</option><option>Low</option>
+            </select>
+          </div>
+        </div>
+        <div id="lead-feed-list"></div>
+      </section>
+
+      <!-- ── MY JOBS ── -->
+      <section class="page" id="page-jobs">
+        <div class="card">
+          <h3>✅ Accepted Jobs</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Job / Property</th><th>Trade</th><th>Priority</th><th>Accepted</th><th>Landlord Contact</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-table">
+              <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:40px;">No accepted jobs yet — browse the Lead Feed!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── EARNINGS ── -->
+      <section class="page" id="page-earnings">
+        <div class="stats" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card">
+            <div class="label">This Month</div>
+            <div class="value" id="earn-month">$0</div>
+            <div class="delta">Jobs completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Lead Fees Paid</div>
+            <div class="value" id="earn-fees">$0</div>
+            <div class="delta">Accepted leads × $5</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">All Time Earned</div>
+            <div class="value" id="earn-total-stat">$0</div>
+            <div class="delta">Since joining</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>💰 Earnings History</h3>
+          <div id="earn-list">
+            <div style="color:var(--gray);font-size:.88rem;text-align:center;padding:40px 0;">Complete jobs to see earnings here.</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>📊 Subscription Billing</h3>
+          <div class="sub-status">
+            <div class="sname">Vendor Pro Plan</div>
+            <div class="snext">Next billing date: April 5, 2026</div>
+            <div class="stotal" id="sub-total-billing">Monthly base: $19.00 + lead fees: $0.00 = <strong>$19.00 due</strong></div>
+          </div>
+          <p style="font-size:.85rem;color:var(--gray);">Lead fees are tallied monthly and charged together with your base subscription. You'll see an itemized receipt each billing cycle.</p>
+        </div>
+      </section>
+
+      <!-- ── REVIEWS ── -->
+      <section class="page" id="page-reviews">
+        <div class="two-col">
+          <div>
+            <div class="card" style="text-align:center;">
+              <h3>Your Overall Rating</h3>
+              <div style="font-size:4rem;font-weight:900;color:var(--dark);margin:10px 0;" id="big-rating">4.8</div>
+              <div style="color:var(--amber);font-size:2rem;">★★★★★</div>
+              <div style="color:var(--gray);margin-top:8px;" id="total-reviews">Based on 3 reviews</div>
+            </div>
+            <div class="card">
+              <h3>Tips to Get More 5-Star Reviews</h3>
+              <ul style="font-size:.88rem;color:#374151;line-height:2;padding-left:16px;">
+                <li>Respond to leads within 1 hour</li>
+                <li>Show up on time or call ahead</li>
+                <li>Send a completion photo when done</li>
+                <li>Follow up 24 hrs after the job</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>Landlord Reviews</h3>
+              <div id="reviews-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SETTINGS ── -->
+      <section class="page" id="page-settings">
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="profile-header">
+                <div class="avatar" id="settings-avatar">J</div>
+                <div class="profile-info">
+                  <div class="pname" id="settings-name">John Smith</div>
+                  <div class="pemail" id="settings-email">john@example.com</div>
+                </div>
+              </div>
+              <h3>Profile Information</h3>
+              <div class="form-row">
+                <div class="form-col">
+                  <label>Full Name</label>
+                  <input type="text" id="set-name" placeholder="Your name">
+                </div>
+                <div class="form-col">
+                  <label>Phone</label>
+                  <input type="tel" id="set-phone" placeholder="(801) 555-0100">
+                </div>
+              </div>
+              <div class="form-row" style="margin-top:12px;">
+                <div class="form-col">
+                  <label>Email</label>
+                  <input type="email" id="set-email" placeholder="you@email.com">
+                </div>
+                <div class="form-col">
+                  <label>Business Name (optional)</label>
+                  <input type="text" id="set-biz" placeholder="Smith Plumbing LLC">
+                </div>
+              </div>
+              <div class="form-col" style="margin-top:12px;">
+                <label>Service ZIP Codes (comma-separated)</label>
+                <input type="text" id="set-zips" placeholder="84601, 84604, 84097">
+              </div>
+              <div style="margin-top:16px;">
+                <label style="font-size:.83rem;font-weight:600;color:#374151;display:block;margin-bottom:8px;">Trade Specialties</label>
+                <div class="trade-grid" id="settings-trade-grid">
+                  <div class="trade-chip" onclick="toggleTrade(this,'Plumbing','settings')">🔧 Plumbing</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'Electrical','settings')">⚡ Electrical</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'HVAC','settings')">🌡️ HVAC</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'Carpentry','settings')">🪚 Carpentry</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'Painting','settings')">🎨 Painting</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'Landscaping','settings')">🌿 Landscaping</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'Cleaning','settings')">🧹 Cleaning</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'Appliances','settings')">🍳 Appliances</div>
+                  <div class="trade-chip" onclick="toggleTrade(this,'General','settings')">🏠 General</div>
+                </div>
+              </div>
+              <button class="btn-save" onclick="saveSettings()">Save Changes</button>
+            </div>
+          </div>
+          <div>
+            <div class="card" id="cred-card">
+              <h3>📋 License & Insurance on File</h3>
+              <div id="cred-display" style="font-size:.88rem;color:#374151;line-height:1.9;">
+                <em style="color:var(--gray);">No credentials on file. Please contact support@rentverified.com to submit documents.</em>
+              </div>
+              <div id="cred-update-note" style="display:none;margin-top:12px;padding:10px 12px;background:#fef3c7;border-radius:8px;font-size:.8rem;color:#92400e;">
+                To update expired or changed credentials, email <strong>support@rentverified.com</strong> with your updated documents. Re-verification takes 1–2 business days.
+              </div>
+            </div>
+            <div class="card">
+              <h3>Subscription & Billing</h3>
+              <div class="sub-status">
+                <div class="sname">Vendor Pro Plan</div>
+                <div class="snext">Active — renews April 5, 2026</div>
+                <div class="stotal">$19/month base + $5 per accepted lead</div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px;">
+                <button class="btn-save" style="flex:1;background:#f3f4f6;color:#374151;margin-top:0;" onclick="alert('Manage billing coming soon.')">Manage Billing</button>
+                <button class="btn-save" style="flex:1;background:var(--red);margin-top:0;" onclick="alert('Please contact support to cancel: support@rentverified.com')">Cancel Plan</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Notification Preferences</h3>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem;">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--amber);">
+                  Email me when a new lead matches my trades
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem;">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--amber);">
+                  SMS alert for Emergency priority leads
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem;">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--amber);">
+                  Monthly billing summary email
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem;">
+                  <input type="checkbox" style="width:16px;height:16px;accent-color:var(--amber);">
+                  Weekly lead digest email
+                </label>
+              </div>
+              <button class="btn-save" onclick="alert('Notification preferences saved!')">Save Preferences</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+/* ══════════════════════════════
+   DATA & ACCOUNTS
+══════════════════════════════ */
+const VENDOR_ACCOUNTS = [
+  {
+    email: 'danielrhart1284@gmail.com',
+    password: 'SPMis#1!',
+    name: 'Daniel Hart',
+    biz: 'Hart Handyman Services',
+    phone: '(801) 555-0199',
+    trades: ['Plumbing','Electrical','General'],
+    zips: ['84601','84604','84097','84062'],
+    joined: '2026-01-10'
+  },
+  {
+    email: 'contractor@rentverified.test',
+    password: 'TestContractor19',
+    name: 'Test Contractor',
+    biz: 'Test Contractor Co',
+    phone: '(801) 555-0000',
+    trades: ['Plumbing','Electrical','HVAC','General'],
+    zips: ['84601','84604','84097','84062','84058'],
+    joined: '2026-01-15'
+  }
+];
+
+/* Sample leads — in production these come from maintenance.html work orders */
+const SAMPLE_LEADS = [
+  {
+    id: 'lead-001',
+    title: 'Kitchen Faucet Leak',
+    address: '119 E 600 S #119, Orem, UT 84601',
+    zip: '84601',
+    trade: 'Plumbing',
+    priority: 'High',
+    description: 'Tenant reports the kitchen faucet has been dripping constantly for 3 days. Getting worse. Needs a plumber to inspect and replace if needed.',
+    submitted: '2026-03-04',
+    status: 'open',
+    landlord: 'Sanders Property Management',
+    contact: 'Daniel Hart — (801) 555-0199'
+  },
+  {
+    id: 'lead-002',
+    title: 'HVAC Unit Not Heating',
+    address: '455 N University Ave #3, Provo, UT 84604',
+    zip: '84604',
+    trade: 'HVAC',
+    priority: 'Emergency',
+    description: 'Heating system completely stopped working. Tenant has a small child. Outside temp dropping below freezing tonight. Needs immediate HVAC technician.',
+    submitted: '2026-03-05',
+    status: 'open',
+    landlord: 'Mays Properties LLC',
+    contact: 'Robert Mays — (801) 555-0211'
+  },
+  {
+    id: 'lead-003',
+    title: 'Bedroom Outlet Sparking',
+    address: '88 W Center St #7, Orem, UT 84097',
+    zip: '84097',
+    trade: 'Electrical',
+    priority: 'High',
+    description: 'Tenant says the bedroom outlet made a popping sound and sparks came out when plugging in a lamp. Outlet is dead now. Possible wiring issue.',
+    submitted: '2026-03-03',
+    status: 'open',
+    landlord: 'Keller Rentals',
+    contact: 'Tom Keller — (801) 555-0144'
+  },
+  {
+    id: 'lead-004',
+    title: 'Paint Touch-Up — Unit Turnover',
+    address: '230 S State St #12, Orem, UT 84601',
+    zip: '84601',
+    trade: 'Painting',
+    priority: 'Medium',
+    description: 'Unit just vacated. Needs full interior paint touch-up before new tenant moves in. Approximately 850 sq ft. Landlord will provide paint. Flexible schedule.',
+    submitted: '2026-03-02',
+    status: 'open',
+    landlord: 'Park Realty',
+    contact: 'Sarah Park — (801) 555-0188'
+  },
+  {
+    id: 'lead-005',
+    title: 'Dishwasher Not Draining',
+    address: '119 E 600 S #119, Orem, UT 84601',
+    zip: '84601',
+    trade: 'Appliances',
+    priority: 'Medium',
+    description: 'Dishwasher fills with water and runs but does not drain. Standing water after every cycle. Possible clog or drain pump issue. Appliance is a Whirlpool WDT730PAHZ.',
+    submitted: '2026-03-01',
+    status: 'open',
+    landlord: 'Sanders Property Management',
+    contact: 'Daniel Hart — (801) 555-0199'
+  },
+  {
+    id: 'lead-006',
+    title: 'Lawn & Landscaping — Spring Cleanup',
+    address: '78 Lakeview Dr, Orem, UT 84097',
+    zip: '84097',
+    trade: 'Landscaping',
+    priority: 'Low',
+    description: 'Single-family rental needs spring yard cleanup: mow, edge, trim shrubs, rake leaves and debris. Approx 0.2 acre lot. Monthly contract possible if work is good.',
+    submitted: '2026-02-28',
+    status: 'open',
+    landlord: 'Keller Rentals',
+    contact: 'Tom Keller — (801) 555-0144'
+  }
+];
+
+const SAMPLE_REVIEWS = [
+  { stars: 5, text: 'Daniel showed up on time and fixed our leaking kitchen faucet in under an hour. Very professional, clean workspace, and fair price. Will definitely call again!', landlord: 'Sanders PM — Orem, UT', date: '2026-02-15' },
+  { stars: 5, text: 'Emergency HVAC call at 9pm and Daniel answered immediately. Had heat back on within 2 hours. Saved us from a very cold night. Above and beyond!', landlord: 'Mays Properties — Provo, UT', date: '2026-01-28' },
+  { stars: 4, text: 'Good electrical work, found the wiring issue quickly. Took a little longer than estimated but communicated well throughout. Would hire again.', landlord: 'Keller Rentals — Orem, UT', date: '2026-01-12' }
+];
+
+const SAMPLE_EARNINGS = [
+  { job: 'Kitchen Faucet Repair', address: '119 E 600 S #119, Orem', date: '2026-02-14', amount: 185, leadFee: 5 },
+  { job: 'HVAC Emergency Repair', address: '455 N University Ave, Provo', date: '2026-01-27', amount: 420, leadFee: 5 },
+  { job: 'Outlet Replacement', address: '88 W Center St, Orem', date: '2026-01-11', amount: 210, leadFee: 5 }
+];
+
+/* ══════════════════════════════
+   STATE
+══════════════════════════════ */
+let currentVendor = null;
+let selectedTrades = []; // for signup form
+let settingsTrades = []; // for settings form
+let leads = JSON.parse(localStorage.getItem('rv_vendor_leads') || 'null');
+if (!leads) {
+  leads = SAMPLE_LEADS.map(l => ({...l}));
+  saveLeads();
+}
+let acceptedJobs = JSON.parse(localStorage.getItem('rv_vendor_jobs') || '[]');
+let earnings = JSON.parse(localStorage.getItem('rv_vendor_earnings') || JSON.stringify(SAMPLE_EARNINGS));
+
+function saveLeads() { localStorage.setItem('rv_vendor_leads', JSON.stringify(leads)); }
+function saveJobs() { localStorage.setItem('rv_vendor_jobs', JSON.stringify(acceptedJobs)); }
+function saveEarnings() { localStorage.setItem('rv_vendor_earnings', JSON.stringify(earnings)); }
+
+/* ══════════════════════════════
+   LOGIN / SIGNUP
+══════════════════════════════ */
+function showPanel(p) {
+  document.getElementById('panel-login').style.display = p === 'login' ? 'block' : 'none';
+  document.getElementById('panel-signup').style.display = p === 'signup' ? 'block' : 'none';
+  document.querySelectorAll('.tab-row button').forEach((b, i) => {
+    b.classList.toggle('active', (p === 'login' && i === 0) || (p === 'signup' && i === 1));
+  });
+}
+
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+  btn.textContent = el.type === 'password' ? '👁' : '🙈';
+}
+
+function toggleTrade(el, trade, context) {
+  if (context === 'settings') {
+    if (settingsTrades.includes(trade)) {
+      settingsTrades = settingsTrades.filter(t => t !== trade);
+      el.classList.remove('sel');
+    } else {
+      settingsTrades.push(trade);
+      el.classList.add('sel');
+    }
+  } else {
+    if (selectedTrades.includes(trade)) {
+      selectedTrades = selectedTrades.filter(t => t !== trade);
+      el.classList.remove('sel');
+    } else {
+      selectedTrades.push(trade);
+      el.classList.add('sel');
+    }
+  }
+}
+
+function doLogin() {
+  const email = document.getElementById('l-email').value.trim().toLowerCase();
+  const pw = document.getElementById('l-pw').value;
+  const err = document.getElementById('login-err');
+  // Check hardcoded accounts
+  let acct = VENDOR_ACCOUNTS.find(a => a.email.toLowerCase() === email && a.password === pw);
+  // Also check localStorage signups
+  const stored = JSON.parse(localStorage.getItem('rv_vendor_accounts') || '[]');
+  if (!acct) acct = stored.find(a => a.email.toLowerCase() === email && a.password === pw);
+  if (!acct) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  currentVendor = acct;
+  localStorage.setItem('rv_vendor_session', JSON.stringify(acct));
+  localStorage.setItem('rv_doc_role', 'vendor');
+  launchApp();
+}
+
+function previewFile(input, previewId) {
+  const el = document.getElementById(previewId);
+  if (input.files && input.files[0]) {
+    el.textContent = '✅ ' + input.files[0].name + ' selected';
+  }
+}
+
+function doSignup() {
+  const name    = document.getElementById('s-name').value.trim();
+  const email   = document.getElementById('s-email').value.trim();
+  const phone   = document.getElementById('s-phone').value.trim();
+  const pw      = document.getElementById('s-pw').value;
+  const zips    = document.getElementById('s-zips').value.trim();
+  const licNum  = document.getElementById('s-lic-num').value.trim();
+  const licState= document.getElementById('s-lic-state').value;
+  const licExp  = document.getElementById('s-lic-exp').value;
+  const licFile = document.getElementById('s-lic-file').files[0];
+  const insCarrier = document.getElementById('s-ins-carrier').value.trim();
+  const insPolicy  = document.getElementById('s-ins-policy').value.trim();
+  const insCoverage= document.getElementById('s-ins-coverage').value;
+  const insExp     = document.getElementById('s-ins-exp').value;
+  const insFile    = document.getElementById('s-ins-file').files[0];
+  const certify    = document.getElementById('s-certify').checked;
+  const err = document.getElementById('signup-err');
+
+  if (!name || !email || !pw || selectedTrades.length === 0) {
+    err.textContent = 'Please fill in your name, email, password, and select at least one trade.';
+    err.style.display = 'block'; return;
+  }
+  if (!licNum || !licState || !licExp || !licFile) {
+    err.textContent = '⚠️ Contractor license number, state, expiration, and certificate are required.';
+    err.style.display = 'block'; return;
+  }
+  if (!insCarrier || !insPolicy || !insCoverage || !insExp || !insFile) {
+    err.textContent = '⚠️ All insurance fields and a Certificate of Insurance (COI) are required.';
+    err.style.display = 'block'; return;
+  }
+  if (!certify) {
+    err.textContent = '⚠️ You must certify that your credentials are accurate to continue.';
+    err.style.display = 'block'; return;
+  }
+  err.style.display = 'none';
+
+  const acct = {
+    name, email, phone, password: pw,
+    trades: [...selectedTrades],
+    zips: zips.split(',').map(z => z.trim()),
+    biz: '',
+    joined: new Date().toISOString().split('T')[0],
+    verificationStatus: 'pending',
+    credentials: {
+      license: { number: licNum, state: licState, expires: licExp, fileName: licFile.name },
+      insurance: { carrier: insCarrier, policy: insPolicy, coverage: insCoverage, expires: insExp, fileName: insFile.name },
+      bondAmount: document.getElementById('s-bond-amt').value.trim(),
+      submittedAt: new Date().toISOString()
+    }
+  };
+  const stored = JSON.parse(localStorage.getItem('rv_vendor_accounts') || '[]');
+  stored.push(acct);
+  localStorage.setItem('rv_vendor_accounts', JSON.stringify(stored));
+  currentVendor = acct;
+  localStorage.setItem('rv_vendor_session', JSON.stringify(acct));
+  launchApp();
+}
+
+function logout() {
+  localStorage.removeItem('rv_vendor_session');
+  localStorage.removeItem('rv_doc_role');
+  location.reload();
+}
+
+/* ══════════════════════════════
+   LAUNCH APP
+══════════════════════════════ */
+function launchApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  const appEl = document.getElementById('app');
+  appEl.style.display = 'flex';
+  // Populate sidebar
+  document.getElementById('sb-name').textContent = currentVendor.name;
+  // Fill settings
+  document.getElementById('set-name').value = currentVendor.name;
+  document.getElementById('set-email').value = currentVendor.email;
+  document.getElementById('set-phone').value = currentVendor.phone || '';
+  document.getElementById('set-biz').value = currentVendor.biz || '';
+  document.getElementById('set-zips').value = (currentVendor.zips || []).join(', ');
+  document.getElementById('settings-name').textContent = currentVendor.name;
+  document.getElementById('settings-email').textContent = currentVendor.email;
+  document.getElementById('settings-avatar').textContent = currentVendor.name.charAt(0).toUpperCase();
+  // Highlight trades in settings
+  settingsTrades = [...(currentVendor.trades || [])];
+  document.querySelectorAll('#settings-trade-grid .trade-chip').forEach(chip => {
+    const t = chip.textContent.trim().split(' ').slice(1).join(' ');
+    if (settingsTrades.includes(t)) chip.classList.add('sel');
+  });
+  // Populate credentials card
+  const creds = currentVendor.credentials;
+  if (creds) {
+    const expColor = (dateStr) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr), now = new Date();
+      const days = (d - now) / 86400000;
+      return days < 30 ? 'color:#ef4444;font-weight:700;' : 'color:#065f46;';
+    };
+    document.getElementById('cred-display').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:#f9fafb;border-radius:8px;padding:12px;">
+          <div style="font-weight:700;color:#374151;margin-bottom:6px;">🔒 Contractor License</div>
+          <div><strong>License #:</strong> ${creds.license.number}</div>
+          <div><strong>State:</strong> ${creds.license.state}</div>
+          <div><strong>Expires:</strong> <span style="${expColor(creds.license.expires)}">${creds.license.expires}</span></div>
+          <div><strong>File:</strong> ${creds.license.fileName}</div>
+        </div>
+        <div style="background:#f9fafb;border-radius:8px;padding:12px;">
+          <div style="font-weight:700;color:#374151;margin-bottom:6px;">🛡️ Insurance</div>
+          <div><strong>Carrier:</strong> ${creds.insurance.carrier}</div>
+          <div><strong>Policy:</strong> ${creds.insurance.policy}</div>
+          <div><strong>Coverage:</strong> ${creds.insurance.coverage}</div>
+          <div><strong>Expires:</strong> <span style="${expColor(creds.insurance.expires)}">${creds.insurance.expires}</span></div>
+          <div><strong>COI File:</strong> ${creds.insurance.fileName}</div>
+          ${creds.bondAmount ? `<div><strong>Bond:</strong> ${creds.bondAmount}</div>` : ''}
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--gray);margin-top:8px;">Submitted: ${new Date(creds.submittedAt).toLocaleDateString()}</div>`;
+    document.getElementById('cred-update-note').style.display = 'block';
+  }
+
+  // Verification status — hardcoded accounts are pre-approved; signups start pending
+  const isApproved = !currentVendor.verificationStatus || currentVendor.verificationStatus === 'approved';
+  document.getElementById('verify-banner-pending').style.display = isApproved ? 'none' : 'block';
+  document.getElementById('verify-banner-approved').style.display = isApproved ? 'block' : 'none';
+  // Sidebar status
+  document.getElementById('sb-status').textContent = isApproved ? '● Active · Verified ✓' : '⏳ Verification Pending';
+  document.getElementById('sb-status').style.color  = isApproved ? '#6ee7b7' : '#fbbf24';
+
+  // Render all sections
+  refreshStats();
+  renderLeads();
+  renderJobs();
+  renderEarnings();
+  renderReviews();
+  renderOverviewActivity();
+}
+
+/* Check for existing session */
+window.addEventListener('DOMContentLoaded', () => {
+  const sess = localStorage.getItem('rv_vendor_session');
+  if (sess) {
+    currentVendor = JSON.parse(sess);
+    launchApp();
+    // Show compliance badge if any credentials expiring/expired
+    (function() {
+      const TODAY = new Date('2026-03-09');
+      const stored = JSON.parse(localStorage.getItem('rv_compliance_creds') || 'null');
+      if (stored && stored.credentials) {
+        const issues = stored.credentials.filter(cr => {
+          const d = Math.round((new Date(cr.exp) - TODAY) / 86400000);
+          return d <= 45;
+        });
+        const badge = document.getElementById('comp-badge-vp');
+        if (badge && issues.length > 0) badge.textContent = issues.length;
+      }
+    })();
+  }
+});
+
+/* ══════════════════════════════
+   NAVIGATION
+══════════════════════════════ */
+const PAGE_TITLES = {
+  overview: ['Overview', 'Welcome back — here\'s your activity'],
+  leads: ['Lead Feed', 'Matched work orders in your service area'],
+  jobs: ['My Jobs', 'All accepted jobs and their status'],
+  earnings: ['Earnings', 'Your income and billing summary'],
+  reviews: ['Reviews', 'Feedback from landlords you\'ve worked with'],
+  settings: ['Settings', 'Update your profile and preferences']
+};
+
+function nav(page, el) {
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('section.page').forEach(s => s.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const [title, sub] = PAGE_TITLES[page];
+  document.getElementById('page-title').textContent = title;
+  document.getElementById('page-sub').textContent = sub;
+  return false;
+}
+
+/* ══════════════════════════════
+   STATS
+══════════════════════════════ */
+function refreshStats() {
+  const openLeads = leads.filter(l => l.status === 'open' && matchesVendor(l)).length;
+  const activeJobs = acceptedJobs.filter(j => j.status !== 'completed').length;
+  const completedJobs = acceptedJobs.filter(j => j.status === 'completed').length;
+  const thisMonth = earnings.filter(e => e.date.startsWith('2026-03')).reduce((s, e) => s + e.amount, 0);
+
+  document.getElementById('stat-new-leads').textContent = openLeads;
+  document.getElementById('stat-active').textContent = activeJobs;
+  document.getElementById('stat-completed').textContent = completedJobs + SAMPLE_EARNINGS.length;
+  document.getElementById('stat-earned').textContent = '$' + (thisMonth || 0);
+
+  // Lead count badge
+  const badge = document.getElementById('lead-count-badge');
+  if (openLeads > 0) {
+    badge.textContent = openLeads;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  // Earnings stats
+  const totalEarned = earnings.reduce((s, e) => s + e.amount, 0);
+  const totalFees = earnings.reduce((s, e) => s + (e.leadFee || 5), 0);
+  document.getElementById('earn-month').textContent = '$' + thisMonth;
+  document.getElementById('earn-fees').textContent = '$' + totalFees;
+  document.getElementById('earn-total-stat').textContent = '$' + totalEarned;
+  document.getElementById('sub-total-billing').innerHTML = 'Monthly base: $19.00 + lead fees: $' + totalFees + '.00 = <strong>$' + (19 + totalFees) + '.00 due</strong>';
+}
+
+function matchesVendor(lead) {
+  if (!currentVendor) return true;
+  const tradeMatch = !currentVendor.trades || currentVendor.trades.length === 0 || currentVendor.trades.includes(lead.trade) || currentVendor.trades.includes('General');
+  const zipMatch = !currentVendor.zips || currentVendor.zips.length === 0 || currentVendor.zips.some(z => z.trim() === lead.zip);
+  return tradeMatch && zipMatch;
+}
+
+/* ══════════════════════════════
+   LEAD FEED
+══════════════════════════════ */
+function renderLeads() {
+  const container = document.getElementById('lead-feed-list');
+  const filterTrade = document.getElementById('filter-trade').value;
+  const filterPri = document.getElementById('filter-priority').value;
+
+  let filtered = leads.filter(l => {
+    if (l.status === 'declined') return false;
+    if (!matchesVendor(l) && l.status === 'open') {
+      // Still show if vendor's trades include it
+    }
+    if (filterTrade && l.trade !== filterTrade) return false;
+    if (filterPri && l.priority !== filterPri) return false;
+    return true;
+  });
+
+  document.getElementById('lead-feed-count').textContent = filtered.filter(l => l.status === 'open').length + ' leads';
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="big">🎯</div><p>No matching leads right now.<br>Check back soon or update your service ZIPs in Settings.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(lead => {
+    const isAccepted = lead.status === 'accepted';
+    const priClass = lead.priority.toLowerCase();
+    return `
+    <div class="lead-card ${isAccepted ? 'accepted' : ''}" id="lc-${lead.id}">
+      <div class="lead-header">
+        <div>
+          <div class="lead-title">${lead.title}</div>
+          <div class="lead-meta">📍 ${isAccepted ? lead.address : lead.zip + ' ZIP area'} &nbsp;·&nbsp; Posted ${lead.submitted} &nbsp;·&nbsp; ${lead.landlord}</div>
+        </div>
+        ${isAccepted ? '<span class="lead-accepted-badge">✓ Accepted</span>' : '<span class="lead-cost">$5 to accept</span>'}
+      </div>
+      <div class="lead-desc">${lead.description}</div>
+      <div class="lead-tags">
+        <span class="tag tag-trade">${lead.trade}</span>
+        <span class="tag tag-priority ${priClass}">${lead.priority}</span>
+        <span class="tag tag-zip">ZIP ${lead.zip}</span>
+      </div>
+      ${isAccepted ? `
+        <div style="margin-top:12px;padding:10px 14px;background:#d1fae5;border-radius:8px;font-size:.88rem;">
+          <strong>📞 Contact Info:</strong> ${lead.contact}<br>
+          <strong>📍 Full Address:</strong> ${lead.address}
+        </div>
+      ` : `
+        <div class="lead-actions">
+          <button class="btn-accept" onclick="acceptLead('${lead.id}')">✓ Accept Lead — $5</button>
+          <button class="btn-decline" onclick="declineLead('${lead.id}')">✗ Not Interested</button>
+        </div>
+      `}
+    </div>`;
+  }).join('');
+}
+
+function acceptLead(id) {
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+  if (!confirm(`Accept this lead for $5?\n\n"${lead.title}" — ${lead.address}\n\nYou'll receive the landlord's contact info immediately.`)) return;
+  lead.status = 'accepted';
+  saveLeads();
+  // Add to accepted jobs
+  const job = {
+    id: 'job-' + Date.now(),
+    leadId: id,
+    title: lead.title,
+    address: lead.address,
+    trade: lead.trade,
+    priority: lead.priority,
+    accepted: new Date().toISOString().split('T')[0],
+    landlord: lead.landlord,
+    contact: lead.contact,
+    status: 'scheduled'
+  };
+  acceptedJobs.push(job);
+  saveJobs();
+  renderLeads();
+  renderJobs();
+  refreshStats();
+  renderOverviewActivity();
+  alert(`✅ Lead accepted! Contact info unlocked:\n\n${lead.contact}\n\n$5 has been added to your next bill.`);
+}
+
+function declineLead(id) {
+  if (!confirm('Decline this lead? It will be removed from your feed.')) return;
+  const lead = leads.find(l => l.id === id);
+  if (lead) { lead.status = 'declined'; saveLeads(); }
+  renderLeads();
+  refreshStats();
+}
+
+/* ══════════════════════════════
+   MY JOBS TABLE
+══════════════════════════════ */
+function renderJobs() {
+  const tbody = document.getElementById('jobs-table');
+  // Also update upcoming jobs on overview
+  const upcoming = document.getElementById('upcoming-jobs-table');
+
+  if (acceptedJobs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:40px;">No accepted jobs yet — browse the Lead Feed!</td></tr>';
+    upcoming.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:20px;">No upcoming jobs.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = acceptedJobs.map(j => {
+    const statusBadge = j.status === 'completed' ? 'badge-green' : j.status === 'scheduled' ? 'badge-blue' : 'badge-yellow';
+    return `<tr>
+      <td><strong>${j.title}</strong><br><span style="font-size:.78rem;color:var(--gray);">${j.address}</span></td>
+      <td>${j.trade}</td>
+      <td><span class="badge badge-yellow">${j.priority}</span></td>
+      <td>${j.accepted}</td>
+      <td style="font-size:.82rem;">${j.contact}</td>
+      <td><span class="badge ${statusBadge}">${j.status}</span></td>
+      <td>
+        ${j.status !== 'completed' ? `<button onclick="markComplete('${j.id}')" style="padding:5px 12px;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:700;">Mark Done</button>` : '✓'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  upcoming.innerHTML = acceptedJobs.filter(j => j.status !== 'completed').slice(0, 5).map(j => `
+    <tr>
+      <td><strong>${j.title}</strong></td>
+      <td style="font-size:.82rem;color:var(--gray);">${j.address}</td>
+      <td>${j.accepted}</td>
+      <td><span class="badge badge-yellow">${j.priority}</span></td>
+      <td><span class="badge badge-blue">${j.status}</span></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:20px;">No upcoming jobs.</td></tr>';
+}
+
+function markComplete(jobId) {
+  const job = acceptedJobs.find(j => j.id === jobId);
+  if (!job) return;
+  const amount = prompt(`Job complete! Enter the invoice amount you charged:\n\n"${job.title}" at ${job.address}`, '150');
+  if (amount === null) return;
+  job.status = 'completed';
+  saveJobs();
+  // Add to earnings
+  earnings.unshift({
+    job: job.title,
+    address: job.address,
+    date: new Date().toISOString().split('T')[0],
+    amount: parseFloat(amount) || 0,
+    leadFee: 5
+  });
+  saveEarnings();
+  renderJobs();
+  renderEarnings();
+  refreshStats();
+  alert('🎉 Job marked complete! Added to your earnings.');
+}
+
+/* ══════════════════════════════
+   EARNINGS
+══════════════════════════════ */
+function renderEarnings() {
+  const container = document.getElementById('earn-list');
+  if (earnings.length === 0) {
+    container.innerHTML = '<div style="color:var(--gray);font-size:.88rem;text-align:center;padding:40px 0;">Complete jobs to see earnings here.</div>';
+    return;
+  }
+  const total = earnings.reduce((s, e) => s + e.amount, 0);
+  container.innerHTML = earnings.map(e => `
+    <div class="earn-row">
+      <div>
+        <div class="job">${e.job}</div>
+        <div class="addr">${e.address}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="amt">+$${e.amount}</div>
+        <div class="dt">${e.date}</div>
+      </div>
+    </div>`).join('') +
+    `<div class="earn-total"><span>Total Earned</span><span style="color:var(--green);">$${total}</span></div>`;
+}
+
+/* ══════════════════════════════
+   REVIEWS
+══════════════════════════════ */
+function renderReviews() {
+  const container = document.getElementById('reviews-list');
+  container.innerHTML = SAMPLE_REVIEWS.map(r => `
+    <div class="review-card">
+      <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>
+      <div class="review-text">"${r.text}"</div>
+      <div class="review-meta">— ${r.landlord} · ${r.date}</div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════
+   OVERVIEW ACTIVITY
+══════════════════════════════ */
+function renderOverviewActivity() {
+  const container = document.getElementById('recent-activity');
+  const accepted = leads.filter(l => l.status === 'accepted');
+  if (accepted.length === 0) {
+    container.innerHTML = '<div style="color:var(--gray);font-size:.88rem;">No activity yet. Accept your first lead!</div>';
+    return;
+  }
+  container.innerHTML = accepted.slice(0, 5).map(l => `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:1.3rem;">✅</span>
+      <div>
+        <div style="font-size:.88rem;font-weight:600;">${l.title}</div>
+        <div style="font-size:.78rem;color:var(--gray);">${l.address} · Lead accepted</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════
+   SETTINGS
+══════════════════════════════ */
+function saveSettings() {
+  if (!currentVendor) return;
+  currentVendor.name = document.getElementById('set-name').value;
+  currentVendor.email = document.getElementById('set-email').value;
+  currentVendor.phone = document.getElementById('set-phone').value;
+  currentVendor.biz = document.getElementById('set-biz').value;
+  currentVendor.zips = document.getElementById('set-zips').value.split(',').map(z => z.trim());
+  currentVendor.trades = [...settingsTrades];
+  localStorage.setItem('rv_vendor_session', JSON.stringify(currentVendor));
+  document.getElementById('sb-name').textContent = currentVendor.name;
+  document.getElementById('settings-name').textContent = currentVendor.name;
+  document.getElementById('settings-avatar').textContent = currentVendor.name.charAt(0).toUpperCase();
+  renderLeads(); // re-filter by new ZIPs/trades
+  refreshStats();
+  alert('✅ Settings saved!');
+}
+</script>
+</body>
+</html>
