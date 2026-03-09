@@ -272,6 +272,9 @@
           <p>Here's a summary of your tenancy at 123 Maple Street, Unit 2A.</p>
         </div>
 
+        <!-- ── LEASE EXPIRY REMINDER (tenant) ── -->
+        <div id="tenant-lease-banner" style="display:none;margin-bottom:1.25rem;"></div>
+
         <!-- Assistance banner (shows when overdue) -->
         <div style="background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
           <div style="font-size:1.75rem;">🆘</div>
@@ -1063,8 +1066,59 @@
     { email: 'tenant@example.com', password: 'tenant123', name: 'Current Tenant', unit: '119 E 600 S #119, Orem UT' }
   ];
 
-  function doTenantLogin() {
-    const email = document.getElementById('tLoginEmail').value.trim().toLowerCase();
+  /* ── LEASE EXPIRY REMINDER (tenant) ── */
+  function renderTenantLeaseReminder() {
+    // Seeded lease data (will read from rv_tenant_lease in future)
+    const lease = JSON.parse(localStorage.getItem('rv_tenant_lease') || 'null') || {
+      end: '2026-05-15',
+      address: '123 Maple Street, Unit 2A',
+      landlord: 'Sanders Property Management'
+    };
+    const today = new Date(); today.setHours(0,0,0,0);
+    const endDate = new Date(lease.end); endDate.setHours(0,0,0,0);
+    const days = Math.ceil((endDate - today) / 86400000);
+
+    const wrap = document.getElementById('tenant-lease-banner');
+    if (!wrap) return;
+
+    let bg, border, icon, headline, sub, btnTxt, btnColor, btnBg;
+    if (days < 0) {
+      bg='#FEF2F2'; border='#EF4444'; icon='⚠️';
+      headline = 'Your lease has expired';
+      sub = 'Please contact your property manager immediately to discuss renewal or next steps.';
+      btnTxt='Contact Manager'; btnColor='#B91C1C'; btnBg='#FEE2E2';
+    } else if (days <= 30) {
+      bg='#FFF7ED'; border='#F97316'; icon='🔔';
+      headline = 'Lease expires in ' + days + ' day' + (days===1?'':'s') + '!';
+      sub = 'Your lease at ' + lease.address + ' ends on ' + new Date(lease.end).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + '. Contact your manager to discuss renewal.';
+      btnTxt='Request Renewal'; btnColor='#C2410C'; btnBg='#FFEDD5';
+    } else if (days <= 60) {
+      bg='#FFFBEB'; border='#F59E0B'; icon='📅';
+      headline = 'Lease expires in ' + days + ' days';
+      sub = 'Your lease at ' + lease.address + ' ends on ' + new Date(lease.end).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + '. Now is a good time to discuss renewal.';
+      btnTxt='Discuss Renewal'; btnColor='#92400E'; btnBg='#FEF3C7';
+    } else {
+      wrap.style.display = 'none'; return;
+    }
+
+    wrap.innerHTML = `
+      <div style="background:${bg};border:1px solid ${border};border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <span style="font-size:1.6rem;flex-shrink:0;">${icon}</span>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-weight:700;font-size:.95rem;color:#111827;">${headline}</div>
+          <div style="font-size:.82rem;color:#6B7280;margin-top:.2rem;">${sub}</div>
+        </div>
+        <button class="btn btn-sm" onclick="showTab('messages')"
+          style="background:${btnBg};color:${btnColor};border:1px solid ${border};font-weight:600;white-space:nowrap;">
+          ${btnTxt}
+        </button>
+      </div>`;
+    wrap.style.display = 'block';
+  }
+
+  document.addEventListener('DOMContentLoaded', renderTenantLeaseReminder);
+
+  function switchTab(name) {   const email = document.getElementById('tLoginEmail').value.trim().toLowerCase();
     const pw    = document.getElementById('tLoginPw').value;
     const errEl = document.getElementById('tLoginErr');
     const acct  = TENANT_ACCOUNTS.find(a => a.email.toLowerCase() === email && a.password === pw);
