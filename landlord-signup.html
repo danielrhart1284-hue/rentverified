@@ -112,6 +112,8 @@
       font-weight: 700;
     }
   </style>
+  <!-- JSZip for photo ZIP download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -889,9 +891,15 @@
               <label>Property Photos</label>
               <div id="photo-preview-strip" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;min-height:0;"></div>
               <label for="photo-upload-input" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1rem;border:2px dashed #d1d5db;border-radius:8px;cursor:pointer;font-size:.875rem;color:#6B7280;transition:border-color .2s;" onmouseover="this.style.borderColor='#1a56db'" onmouseout="this.style.borderColor='#d1d5db'">
-                <span style="font-size:1.1rem;">📷</span> Click to upload photos (JPG, PNG — up to 5)
+                <span style="font-size:1.1rem;">📷</span> Click to upload photos (JPG, PNG · saved to cloud)
               </label>
               <input type="file" id="photo-upload-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(this)" />
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;">
+                <span id="photo-count-label" style="font-size:0.78rem;color:#6b7280;"></span>
+                <button id="download-photos-btn" onclick="downloadPhotosZip()" style="font-size:0.78rem;padding:0.3rem 0.7rem;border:1px solid #d1d5db;background:white;border-radius:6px;cursor:pointer;color:#374151;display:flex;align-items:center;gap:4px;" title="Download all listing photos as a ZIP file for use in ads">
+                  📥 Download Photos ZIP
+                </button>
+              </div>
             </div>
             <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
               <button class="btn btn-primary" onclick="saveEditListing()">Save changes</button>
@@ -948,56 +956,43 @@
 
       <!-- AI CONVERSATIONS TAB -->
       <div id="dtab-inquiries" class="tab-content">
-        <div class="page-header"><h1>AI Conversations</h1><p>Messages handled by your AI across all channels.</p></div>
+        <div class="page-header">
+          <h1>AI Conversations</h1>
+          <p>Questions from your property listing chat widget. The AI answers most automatically — questions it couldn't answer are flagged below for your follow-up.</p>
+        </div>
+        <!-- Unanswered questions from chat widget -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body" style="padding:0;">
+            <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <strong>Unanswered Questions — Need Your Reply</strong>
+                <span id="inbox-badge" style="margin-left:0.5rem;background:var(--danger);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;display:none;"></span>
+              </div>
+              <button onclick="clearChatInbox()" style="font-size:0.78rem;padding:0.3rem 0.75rem;border:1px solid #d1d5db;background:white;border-radius:6px;cursor:pointer;color:#6b7280;">Clear All</button>
+            </div>
+            <div id="chat-inbox-list" style="padding:1rem 1.5rem;">
+              <div style="color:var(--gray-500);font-size:0.875rem;text-align:center;padding:1.5rem 0;">
+                No unanswered questions yet. When prospective tenants ask the chat AI a question it can't answer, it will appear here.
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- AI auto-answered activity (informational) -->
         <div class="card">
           <div class="card-body" style="padding:0;">
             <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--gray-200);">
-              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                <span class="badge" style="background:#e0f2fe;color:#0369a1;cursor:pointer;">All Channels</span>
-                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Website Chat</span>
-                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">SMS</span>
-                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Facebook</span>
-                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Email</span>
-                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">WhatsApp</span>
-              </div>
+              <strong>About the Chat AI</strong>
             </div>
-            <table>
-              <thead><tr><th>Contact</th><th>Message</th><th>Property</th><th>Channel</th><th>Time</th><th>Status</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><strong>Maria R.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">maria@email.com</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"Is 123 Maple still available?"</td>
-                  <td style="font-size:0.875rem;">123 Maple St</td>
-                  <td><span class="badge badge-available">💬 Chat</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">2m ago</td>
-                  <td><span class="badge badge-verified">AI Replied</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Tyler J.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">(555) 201-9876</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"Can I get an application?"</td>
-                  <td style="font-size:0.875rem;">789 Pine Rd</td>
-                  <td><span class="badge badge-pending">📱 SMS</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">1h ago</td>
-                  <td><span class="badge badge-available">App Sent</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Karen P.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">Facebook DM</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"Is the Oak Ave unit pet friendly?"</td>
-                  <td style="font-size:0.875rem;">456 Oak Ave</td>
-                  <td><span class="badge" style="background:#ede9fe;color:#5b21b6;">📘 Facebook</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">3h ago</td>
-                  <td><span class="badge badge-pending">Needs Review</span></td>
-                </tr>
-                <tr>
-                  <td><strong>James W.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">james@email.com</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"What utilities are included?"</td>
-                  <td style="font-size:0.875rem;">123 Maple St</td>
-                  <td><span class="badge" style="background:#fef3c7;color:#92400e;">📧 Email</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">5h ago</td>
-                  <td><span class="badge badge-verified">AI Replied</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <div style="padding:1rem 1.5rem;color:var(--gray-700);font-size:0.9rem;line-height:1.7;">
+              <p>Your property pages have a live chat widget that automatically answers tenant questions 24/7 — rent, availability, pets, how to apply, lease terms, payment methods, and more.</p>
+              <p style="margin-top:0.75rem;">When a tenant asks something the AI doesn't recognize, it flags it here so you can follow up personally. The more you customize your listing descriptions, the better the AI answers.</p>
+              <p style="margin-top:0.75rem;"><strong>For Facebook Messenger / Zillow messages:</strong> You can paste any message a tenant sends you into this chat box to get a suggested reply to copy back to them:</p>
+              <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+                <input id="ai-draft-input" type="text" placeholder="Paste tenant's message here..." style="flex:1;padding:.6rem .9rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;" onkeypress="if(event.key==='Enter')draftReply()" />
+                <button onclick="draftReply()" class="btn btn-primary btn-sm">Get Reply</button>
+              </div>
+              <div id="ai-draft-output" style="display:none;margin-top:0.75rem;padding:0.75rem;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:0.875rem;line-height:1.6;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1605,39 +1600,119 @@
   document.addEventListener('DOMContentLoaded', renderLeaseExpiry);
 
   /* ── PHOTO UPLOAD ── */
-  let editPhotos = []; // base64 array for current edit session
+  // ── CLOUDINARY CONFIG ─────────────────────────────────────────────────────
+  // 1. Sign up FREE at cloudinary.com (25 GB free storage)
+  // 2. Go to Settings → Upload → Add upload preset → set Signing mode: Unsigned
+  //    Name the preset exactly: rentverified_photos
+  // 3. Find your Cloud Name in the top-left of your Cloudinary dashboard
+  // 4. Paste your Cloud Name below (replace YOUR_CLOUD_NAME)
+  const CLOUDINARY_CONFIG = {
+    cloudName:    'YOUR_CLOUD_NAME',      // ← Paste your Cloudinary cloud name here
+    uploadPreset: 'rentverified_photos'   // ← Must match your unsigned preset name
+  };
 
-  function handlePhotoUpload(input) {
-    const files = Array.from(input.files).slice(0, 5);
-    editPhotos = [];
+  let editPhotos = []; // Cloudinary URL array for current edit session
+
+  function refreshPhotoStrip() {
     const strip = document.getElementById('photo-preview-strip');
+    if (!strip) return;
     strip.innerHTML = '';
-    files.forEach((file, i) => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        editPhotos[i] = e.target.result;
-        const img = document.createElement('div');
-        img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
-        img.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" />' +
-          '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
-        strip.appendChild(img);
-      };
-      reader.readAsDataURL(file);
+    editPhotos.forEach((src, i) => {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #d1fae5;flex-shrink:0;';
+      wrap.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />' +
+        '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
+      strip.appendChild(wrap);
     });
+    const countEl = document.getElementById('photo-count-label');
+    if (countEl) countEl.textContent = editPhotos.length ? editPhotos.length + ' photo' + (editPhotos.length > 1 ? 's' : '') + ' uploaded' : '';
+  }
+
+  async function handlePhotoUpload(input) {
+    const files = Array.from(input.files).slice(0, 10);
+    input.value = ''; // reset so same file can be re-added
+    if (!CLOUDINARY_CONFIG.cloudName || CLOUDINARY_CONFIG.cloudName === 'YOUR_CLOUD_NAME') {
+      alert('📸 Cloud photo storage not configured yet.\n\n' +
+        'Quick setup (free):\n' +
+        '1. Go to cloudinary.com → sign up free\n' +
+        '2. Settings → Upload → Add upload preset → set Unsigned → name it "rentverified_photos"\n' +
+        '3. Copy your Cloud Name from the dashboard (top-left)\n' +
+        '4. Open landlord-signup.html and replace YOUR_CLOUD_NAME with your cloud name\n\n' +
+        'Until then, photos are stored locally in your browser.');
+      // Fall back to base64 local storage
+      files.forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = e => { editPhotos.push(e.target.result); refreshPhotoStrip(); };
+        reader.readAsDataURL(file);
+      });
+      return;
+    }
+    const strip = document.getElementById('photo-preview-strip');
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      // Show uploading placeholder
+      const ph = document.createElement('div');
+      ph.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;border:2px dashed #93c5fd;flex-shrink:0;background:#eff6ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;';
+      ph.innerHTML = '<div style="font-size:20px;">📤</div><div style="font-size:9px;color:#3b82f6;font-weight:600;">Uploading...</div>';
+      strip.appendChild(ph);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+        const res = await fetch(
+          'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CONFIG.cloudName + '/image/upload',
+          { method: 'POST', body: formData }
+        );
+        const data = await res.json();
+        if (data.secure_url) {
+          editPhotos.push(data.secure_url);
+          ph.remove();
+          refreshPhotoStrip();
+        } else {
+          ph.remove();
+          alert('Photo upload failed: ' + (data.error ? data.error.message : 'Check Cloudinary config.'));
+        }
+      } catch (err) {
+        ph.remove();
+        alert('Upload failed — check your internet connection.');
+      }
+    }
   }
 
   function removePhoto(idx) {
     editPhotos.splice(idx, 1);
-    // Re-render strip
-    const strip = document.getElementById('photo-preview-strip');
-    strip.innerHTML = '';
-    editPhotos.forEach((src, i) => {
-      const img = document.createElement('div');
-      img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
-      img.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />' +
-        '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
-      strip.appendChild(img);
-    });
+    refreshPhotoStrip();
+  }
+
+  async function downloadPhotosZip() {
+    const listId = (document.getElementById('edit-listing-id') || {}).value || 'listing';
+    if (!editPhotos.length) {
+      alert('No photos uploaded for this listing yet. Upload photos first, then save the listing.');
+      return;
+    }
+    const btn = document.getElementById('download-photos-btn');
+    if (btn) { btn.textContent = '⏳ Building ZIP...'; btn.disabled = true; }
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder('photos-' + listId);
+      for (let i = 0; i < editPhotos.length; i++) {
+        const url = editPhotos[i];
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const ext  = blob.type.includes('png') ? 'png' : blob.type.includes('gif') ? 'gif' : 'jpg';
+        folder.file('photo-' + (i + 1) + '.' + ext, blob);
+      }
+      const content = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(content);
+      a.download = 'rentverified-photos-' + listId + '.zip';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    } catch (err) {
+      alert('Could not build ZIP. Check your internet connection and try again.');
+    } finally {
+      if (btn) { btn.textContent = '📥 Download Photos ZIP'; btn.disabled = false; }
+    }
   }
 
   /* ── BROADCAST ── */
@@ -1724,6 +1799,77 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     if (event && event.currentTarget) event.currentTarget.classList.add('active');
     if (name === 'properties') renderPropertiesList();
     if (name === 'clients') { renderAllClientsList(); clearClientSelection(); }
+    if (name === 'inquiries') loadChatInbox();
+  }
+
+  // ── Chat Inbox (unanswered tenant questions from website AI) ─────────────
+  function loadChatInbox() {
+    const msgs = (() => { try { return JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]'); } catch(e) { return []; } })();
+    const list = document.getElementById('chat-inbox-list');
+    const badge = document.getElementById('inbox-badge');
+    const navBadge = document.querySelector('.dash-link[onclick*="inquiries"] span');
+    const unread = msgs.filter(m => !m.read).length;
+    if (badge) { badge.textContent = unread; badge.style.display = unread ? 'inline' : 'none'; }
+    if (navBadge) { navBadge.textContent = unread; navBadge.style.display = unread ? 'inline' : 'none'; }
+    if (!list) return;
+    if (!msgs.length) {
+      list.innerHTML = '<div style="color:var(--gray-500);font-size:0.875rem;text-align:center;padding:1.5rem 0;">No unanswered questions yet. When prospective tenants ask the chat AI a question it can\'t answer, it will appear here.</div>';
+      return;
+    }
+    list.innerHTML = msgs.map((m, i) => {
+      const dt = new Date(m.timestamp);
+      const age = Math.round((Date.now() - dt) / 60000);
+      const timeStr = age < 60 ? age + 'm ago' : age < 1440 ? Math.round(age / 60) + 'h ago' : Math.round(age / 1440) + 'd ago';
+      return '<div style="padding:0.75rem 0;border-bottom:1px solid var(--gray-100);' + (!m.read ? 'background:#fffbeb;border-left:3px solid #f59e0b;padding-left:0.75rem;' : '') + '">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">' +
+          '<div style="flex:1;">' +
+            '<div style="font-size:0.875rem;font-weight:600;margin-bottom:2px;">' + escHtml(m.property) + '</div>' +
+            '<div style="font-size:0.875rem;color:var(--gray-800);">"' + escHtml(m.text) + '"</div>' +
+            '<div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px;">💬 Website chat · ' + timeStr + (m.listingId ? ' · ' + escHtml(m.listingId) : '') + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:0.4rem;flex-shrink:0;">' +
+            '<button onclick="markChatRead(' + i + ')" style="font-size:0.75rem;padding:0.25rem 0.6rem;border:1px solid #d1d5db;background:white;border-radius:6px;cursor:pointer;color:#374151;">Mark read</button>' +
+            '<button onclick="deleteChatMsg(' + i + ')" style="font-size:0.75rem;padding:0.25rem 0.6rem;border:1px solid #fca5a5;background:white;border-radius:6px;cursor:pointer;color:var(--danger);">Remove</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function markChatRead(idx) {
+    try {
+      const msgs = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
+      if (msgs[idx]) { msgs[idx].read = true; localStorage.setItem('rv_chat_inbox', JSON.stringify(msgs)); }
+    } catch(e) {}
+    loadChatInbox();
+  }
+  function deleteChatMsg(idx) {
+    try {
+      const msgs = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
+      msgs.splice(idx, 1);
+      localStorage.setItem('rv_chat_inbox', JSON.stringify(msgs));
+    } catch(e) {}
+    loadChatInbox();
+  }
+  function clearChatInbox() {
+    if (!confirm('Clear all chat messages?')) return;
+    localStorage.removeItem('rv_chat_inbox');
+    loadChatInbox();
+  }
+  // AI draft reply generator (for copy-pasting to Zillow/Facebook messages)
+  function draftReply() {
+    const input = document.getElementById('ai-draft-input');
+    const output = document.getElementById('ai-draft-output');
+    if (!input || !output) return;
+    const text = input.value.trim();
+    if (!text) return;
+    const response = typeof getAIResponse === 'function' ? getAIResponse(text) :
+      'Thanks for reaching out! Please contact Sanders Property Management directly for more information.';
+    output.style.display = 'block';
+    output.innerHTML = '<strong style="font-size:0.75rem;color:#6b7280;display:block;margin-bottom:0.4rem;">Suggested reply (copy & paste):</strong>' +
+      '<div id="draft-reply-text" style="white-space:pre-wrap;">' + escHtml(response) + '</div>' +
+      '<button onclick="navigator.clipboard.writeText(document.getElementById(\'draft-reply-text\').textContent).then(()=>this.textContent=\'✓ Copied!\').catch(()=>{})" ' +
+      'style="margin-top:0.5rem;font-size:0.75rem;padding:0.25rem 0.75rem;border:1px solid #86efac;background:white;border-radius:6px;cursor:pointer;color:#15803d;">📋 Copy Reply</button>';
   }
 
   // ── All clients (admin: each person's data/listings) ──────────────────
@@ -1872,16 +2018,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     document.getElementById('edit-description').value = p.description || '';
     // Load existing photos
     editPhotos = p.photos || [];
-    const strip = document.getElementById('photo-preview-strip');
-    if (strip) {
-      strip.innerHTML = '';
-      editPhotos.forEach((src, i) => {
-        const img = document.createElement('div');
-        img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
-        img.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />';
-        strip.appendChild(img);
-      });
-    }
+    refreshPhotoStrip();
     } else {
       document.getElementById('edit-address').value = '';
       document.getElementById('edit-beds').value = '';
@@ -2035,6 +2172,15 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   });
   document.addEventListener('DOMContentLoaded', loadAssistanceNotifications);
   document.addEventListener('DOMContentLoaded', loadFeePolicy);
+  document.addEventListener('DOMContentLoaded', function() {
+    // Update chat inbox badge count in nav sidebar
+    try {
+      const msgs = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
+      const unread = msgs.filter(m => !m.read).length;
+      const navBadge = document.querySelector('.dash-link[onclick*="inquiries"] span');
+      if (navBadge) { navBadge.textContent = unread; navBadge.style.display = unread ? 'inline' : 'none'; }
+    } catch(e) {}
+  });
 
   // Referral CTA — show after 4s on dashboard, once per session
   document.addEventListener('DOMContentLoaded', function() {
