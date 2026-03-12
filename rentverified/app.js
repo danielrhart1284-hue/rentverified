@@ -874,7 +874,7 @@ function generateListingId(existingListings) {
 function escapeHtml(str) {
   var div = document.createElement('div');
   div.textContent = str || '';
-  return div.innerHTML;
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // ============================================================================
@@ -1600,14 +1600,25 @@ function _looksLikeCityLine(text) {
 function importSPMToClientHub(xlsxRows) {
   var owners = parseSPMRentCollections(xlsxRows);
   var hub = getClientHub();
-  var existingNames = {};
-  hub.forEach(function(o) { existingNames[o.name.toLowerCase()] = true; });
 
   var imported = 0;
   owners.forEach(function(owner) {
-    if (!existingNames[owner.name.toLowerCase()]) {
+    var existingIdx = -1;
+    for (var i = 0; i < hub.length; i++) {
+      if (hub[i].name.toLowerCase() === owner.name.toLowerCase()) { existingIdx = i; break; }
+    }
+    if (existingIdx === -1) {
       hub.push(owner);
       imported++;
+    } else {
+      // Merge: use existing hub owner's ID and add new properties
+      owner.id = hub[existingIdx].id;
+      owner.properties.forEach(function(p) {
+        var propExists = hub[existingIdx].properties.some(function(ep) {
+          return ep.address === p.address || ep.fullAddress === p.fullAddress;
+        });
+        if (!propExists) hub[existingIdx].properties.push(p);
+      });
     }
   });
   saveClientHub(hub);
