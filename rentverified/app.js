@@ -1429,6 +1429,292 @@ function generateTaxPDF(summary) {
   });
 }
 
+// ============================================================================
+// PHASE 3: CLIENT HUB & RELATIONAL ACCOUNTING
+// SPM Rent Collections Parser + Client CRM + Dynamic Fee Management
+// ============================================================================
+
+var RV_CLIENT_HUB_KEY = 'rv_client_hub';
+var RV_SPM_IMPORTED_KEY = 'rv_spm_imported';
+
+function getClientHub() {
+  return rvGet(RV_CLIENT_HUB_KEY) || [];
+}
+function saveClientHub(data) {
+  rvSet(RV_CLIENT_HUB_KEY, data);
+}
+
+// ── SPM Rent Collections Multi-Row Parser ─────────────────────────────────
+// Owner header rows: name in col A, no numeric rent in col C
+// Property rows: address in A, tenant in B, rent in C, fee% in D, fee$ in E
+// City rows: city/state/zip in A (follows property row)
+// Tim Linford appears twice — merged into single owner.
+function parseSPMRentCollections(rows) {
+  var owners = [];
+  var currentOwner = null;
+  var pendingProperty = null;
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var colA = (row[0] || '').toString().trim();
+    var colB = (row[1] || '').toString().trim();
+    var colC = row[2];
+    var colD = row[3];
+    var colE = row[4];
+    var colF = (row[5] || '').toString().trim();
+    var colG = (row[6] || '').toString().trim();
+    var colH = (row[7] || '').toString().trim();
+    var colJ = row[9];
+
+    // Skip header row and total/summary rows
+    if (colA === 'Property' || colA === 'Rent Collections' || /^Total/i.test(colA)) {
+      if (pendingProperty && currentOwner) {
+        currentOwner.properties.push(pendingProperty);
+        pendingProperty = null;
+      }
+      continue;
+    }
+
+    // Empty col A — flush pending, check for notes
+    if (colA === '') {
+      if (pendingProperty && currentOwner) {
+        currentOwner.properties.push(pendingProperty);
+        pendingProperty = null;
+      }
+      if (colB && currentOwner && currentOwner.properties.length > 0) {
+        var lastP = currentOwner.properties[currentOwner.properties.length - 1];
+        lastP.notes = ((lastP.notes || '') + ' ' + colB).trim();
+      }
+      continue;
+    }
+
+    // Detect rent amount — numeric in col C indicates property row
+    var rentNum = typeof colC === 'number' ? colC : parseFloat(colC);
+    var isPropertyRow = !isNaN(rentNum) && rentNum > 0;
+
+    // Detect owner header: col A has text, no valid rent in col C, not a city line
+    if (!isPropertyRow && colA && !_looksLikeCityLine(colA)) {
+      if (pendingProperty && currentOwner) {
+        currentOwner.properties.push(pendingProperty);
+        pendingProperty = null;
+      }
+      var ownerName = colA.trim();
+      var existingOwner = null;
+      for (var oi = 0; oi < owners.length; oi++) {
+        if (owners[oi].name === ownerName) { existingOwner = owners[oi]; break; }
+      }
+      if (existingOwner) {
+        currentOwner = existingOwner;
+        if (colB) currentOwner.payableTo = ((currentOwner.payableTo || '') + '; ' + colB).trim();
+      } else {
+        currentOwner = {
+          id: 'owner-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+          name: ownerName,
+          rawName: colA,
+          payableTo: colB || '',
+          properties: [],
+          phone: '',
+          email: '',
+          mailingAddress: '',
+          createdAt: new Date().toISOString()
+        };
+        owners.push(currentOwner);
+      }
+      continue;
+    }
+
+    // Property row — has rent amount
+    if (isPropertyRow && currentOwner) {
+      if (pendingProperty) {
+        currentOwner.properties.push(pendingProperty);
+      }
+      var feePercent = typeof colD === 'number' ? colD : parseFloat(colD);
+      if (isNaN(feePercent)) feePercent = 0;
+      var feeDollar = typeof colE === 'number' ? colE : parseFloat(colE);
+      if (isNaN(feeDollar)) feeDollar = 0;
+      var deposit = typeof colJ === 'number' ? colJ : parseFloat(colJ);
+      if (isNaN(deposit)) deposit = 0;
+
+      // feePercent from spreadsheet is already in decimal (e.g. 0.07 = 7%)
+      var feePercentDisplay = feePercent < 1 ? Math.round(feePercent * 100 * 100) / 100 : feePercent;
+
+      pendingProperty = {
+        address: colA,
+        city: '',
+        fullAddress: colA,
+        tenant: colB,
+        rent: rentNum,
+        pmFeePercent: feePercentDisplay,
+        pmFeeDollar: Math.round(feeDollar * 100) / 100,
+        notes: colF,
+        paymentMethod: colG,
+        additionalNotes: colH,
+        securityDeposit: deposit,
+        listingId: generateListingId(),
+        status: colB ? 'rented' : 'available',
+        importedAt: new Date().toISOString()
+      };
+      continue;
+    }
+
+    // City/State/Zip line (follows a property row)
+    if (_looksLikeCityLine(colA) && pendingProperty) {
+      pendingProperty.city = colA;
+      pendingProperty.fullAddress = pendingProperty.address + ', ' + colA;
+      if (colB && colB.trim()) {
+        pendingProperty.notes = ((pendingProperty.notes || '') + ' ' + colB).trim();
+      }
+      if (colF && colF.trim()) pendingProperty.notes = ((pendingProperty.notes || '') + ' ' + colF).trim();
+      currentOwner.properties.push(pendingProperty);
+      pendingProperty = null;
+      continue;
+    }
+
+    // Notes continuation row
+    if (pendingProperty) {
+      if (colB && colB.trim()) pendingProperty.notes = ((pendingProperty.notes || '') + ' ' + colB).trim();
+    } else if (currentOwner && currentOwner.properties.length > 0) {
+      var lp2 = currentOwner.properties[currentOwner.properties.length - 1];
+      if (colB && colB.trim()) lp2.notes = ((lp2.notes || '') + ' ' + colB).trim();
+    }
+  }
+
+  if (pendingProperty && currentOwner) {
+    currentOwner.properties.push(pendingProperty);
+  }
+  return owners;
+}
+
+function _looksLikeCityLine(text) {
+  if (!text) return false;
+  return /\b[A-Z]{2}\s*\d{5}\b/.test(text) || /,\s*[A-Z]{2}\b/.test(text) || /\b(UT|Utah)\b/i.test(text);
+}
+
+// ── Import SPM data into Client Hub ───────────────────────────────────────
+function importSPMToClientHub(xlsxRows) {
+  var owners = parseSPMRentCollections(xlsxRows);
+  var hub = getClientHub();
+  var existingNames = {};
+  hub.forEach(function(o) { existingNames[o.name.toLowerCase()] = true; });
+
+  var imported = 0;
+  owners.forEach(function(owner) {
+    if (!existingNames[owner.name.toLowerCase()]) {
+      hub.push(owner);
+      imported++;
+    }
+  });
+  saveClientHub(hub);
+
+  // Import properties into listings store and ledger
+  var allListings = JSON.parse(localStorage.getItem('rv_sanders_listings') || '[]');
+  owners.forEach(function(owner) {
+    owner.properties.forEach(function(p) {
+      var exists = allListings.some(function(l) {
+        return l.address === p.fullAddress || l.address === p.address;
+      });
+      if (!exists) {
+        allListings.push({
+          address: p.fullAddress, tenant: p.tenant, rent: p.rent,
+          pmFee: p.pmFeeDollar, pmFeePercent: p.pmFeePercent,
+          securityDeposit: p.securityDeposit,
+          beds: 0, baths: 0, sqft: 0, status: p.status,
+          listingId: p.listingId, description: '', photos: [],
+          ownerId: owner.id, ownerName: owner.name,
+          paymentMethod: p.paymentMethod, notes: p.notes,
+          importedAt: p.importedAt
+        });
+      }
+      if (p.tenant && p.rent > 0) {
+        addLedgerEntry({
+          tenant: p.tenant, property: p.fullAddress,
+          month: new Date().toISOString().slice(0, 7),
+          rentDue: p.rent, rentPaid: 0, pmFee: p.pmFeeDollar,
+          pmFeePercent: p.pmFeePercent, status: 'due',
+          method: p.paymentMethod, ownerName: owner.name,
+          securityDeposit: p.securityDeposit
+        });
+      }
+    });
+  });
+  localStorage.setItem('rv_sanders_listings', JSON.stringify(allListings));
+
+  return {
+    ownersImported: imported,
+    totalOwners: hub.length,
+    totalProperties: owners.reduce(function(s, o) { return s + o.properties.length; }, 0)
+  };
+}
+
+// ── Client Hub CRM Functions ──────────────────────────────────────────────
+function getClientHubOwner(ownerId) {
+  var hub = getClientHub();
+  for (var i = 0; i < hub.length; i++) {
+    if (hub[i].id === ownerId) return hub[i];
+  }
+  return null;
+}
+
+function updateClientHubOwner(ownerId, updates) {
+  var hub = getClientHub();
+  for (var i = 0; i < hub.length; i++) {
+    if (hub[i].id === ownerId) {
+      Object.keys(updates).forEach(function(k) { hub[i][k] = updates[k]; });
+      saveClientHub(hub);
+      return hub[i];
+    }
+  }
+  return null;
+}
+
+function getOwnerAggregate(owner) {
+  var totalRent = 0, totalFees = 0, totalDeposits = 0;
+  owner.properties.forEach(function(p) {
+    totalRent += p.rent || 0;
+    totalFees += p.pmFeeDollar || 0;
+    totalDeposits += p.securityDeposit || 0;
+  });
+  return {
+    totalRent: totalRent, totalFees: totalFees, totalDeposits: totalDeposits,
+    netToOwner: totalRent - totalFees, propertyCount: owner.properties.length
+  };
+}
+
+// ── Dynamic Fee Calculator ────────────────────────────────────────────────
+function calculateFee(rent, feePercent) {
+  var fee = Math.round(rent * (feePercent / 100) * 100) / 100;
+  return { feeDollar: fee, netToOwner: Math.round((rent - fee) * 100) / 100 };
+}
+
+function updatePropertyFee(ownerId, propertyIndex, newFeePercent) {
+  var hub = getClientHub();
+  for (var i = 0; i < hub.length; i++) {
+    if (hub[i].id === ownerId && hub[i].properties[propertyIndex]) {
+      var prop = hub[i].properties[propertyIndex];
+      prop.pmFeePercent = newFeePercent;
+      var calc = calculateFee(prop.rent, newFeePercent);
+      prop.pmFeeDollar = calc.feeDollar;
+      saveClientHub(hub);
+      return { property: prop, feeDollar: calc.feeDollar, netToOwner: calc.netToOwner };
+    }
+  }
+  return null;
+}
+
+// ── Search Client Hub ─────────────────────────────────────────────────────
+function searchClientHub(query) {
+  if (!query) return getClientHub();
+  var q = query.toLowerCase();
+  return getClientHub().filter(function(owner) {
+    if (owner.name.toLowerCase().indexOf(q) !== -1) return true;
+    if (owner.rawName && owner.rawName.toLowerCase().indexOf(q) !== -1) return true;
+    return owner.properties.some(function(p) {
+      return (p.fullAddress && p.fullAddress.toLowerCase().indexOf(q) !== -1) ||
+             (p.tenant && p.tenant.toLowerCase().indexOf(q) !== -1);
+    });
+  });
+}
+
 // ── Work In Progress Modal (for dead-click buttons) ───────────────────────
 function showWIP(feature) {
   var modal = document.getElementById('wip-modal');
