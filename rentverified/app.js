@@ -859,10 +859,16 @@ function formatDate(date) {
 }
 
 function generateListingId(existingListings) {
-  var count = (existingListings || []).length;
+  if (existingListings) {
+    var count = existingListings.length;
+    var year = new Date().getFullYear();
+    var num = String(1000 + count + 1).slice(-4);
+    return 'RV-' + year + '-' + num;
+  }
+  // Unique ID when called without args (e.g. during bulk import)
   var year = new Date().getFullYear();
-  var num = String(1000 + count + 1).slice(-4);
-  return 'RV-' + year + '-' + num;
+  var rand = Math.random().toString(36).substr(2, 4).toUpperCase();
+  return 'RV-' + year + '-' + rand;
 }
 
 function escapeHtml(str) {
