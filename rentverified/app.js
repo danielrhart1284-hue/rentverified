@@ -1511,7 +1511,7 @@ function parseSPMRentCollections(rows) {
       }
       if (existingOwner) {
         currentOwner = existingOwner;
-        if (colB) currentOwner.payableTo = ((currentOwner.payableTo || '') + '; ' + colB).trim();
+        if (colB) currentOwner.payableTo = currentOwner.payableTo ? (currentOwner.payableTo + '; ' + colB) : colB;
       } else {
         currentOwner = {
           id: 'owner-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
@@ -1593,7 +1593,7 @@ function parseSPMRentCollections(rows) {
 
 function _looksLikeCityLine(text) {
   if (!text) return false;
-  return /\b[A-Z]{2}\s*\d{5}\b/.test(text) || /,\s*[A-Z]{2}\b/.test(text) || /\b(UT|Utah)\b/i.test(text);
+  return /\b[A-Z]{2}\s*\d{5}\b/.test(text) || /,\s*[A-Z]{2}\s+\d{5}/.test(text);
 }
 
 // ── Import SPM data into Client Hub ───────────────────────────────────────
