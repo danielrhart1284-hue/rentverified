@@ -1013,3 +1013,442 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+
+// ============================================================================
+// PHASE 2: ACCOUNTING, PORTFOLIO IMPORT, ADVANCED ONBOARDING
+// ============================================================================
+
+// ── Rent Ledger System ──────────────────────────────────────────────────────
+function getRentLedger(tenantName, propertyAddress) {
+  var key = 'rv_rent_ledger';
+  var all = JSON.parse(localStorage.getItem(key) || '[]');
+  if (tenantName) {
+    return all.filter(function(e) {
+      return e.tenant === tenantName || e.property === propertyAddress;
+    });
+  }
+  return all;
+}
+
+function addLedgerEntry(entry) {
+  var key = 'rv_rent_ledger';
+  var all = JSON.parse(localStorage.getItem(key) || '[]');
+  entry.id = 'LED-' + Date.now();
+  entry.createdAt = new Date().toISOString();
+  all.push(entry);
+  localStorage.setItem(key, JSON.stringify(all));
+  return entry;
+}
+
+function seedLedgerData() {
+  var key = 'rv_rent_ledger';
+  if (localStorage.getItem(key)) return;
+  var months = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06',
+                '2025-07','2025-08','2025-09','2025-10','2025-11','2025-12',
+                '2026-01','2026-02'];
+  var tenants = [
+    { name: 'Jane Doe', property: '123 Maple Street, Unit 2A', rent: 1200, pmFee: 96 },
+    { name: 'Robert Lee', property: '456 Oak Avenue, Apt 1B', rent: 950, pmFee: 76 },
+  ];
+  var entries = [];
+  tenants.forEach(function(t) {
+    months.forEach(function(m, mi) {
+      var paidDate = m + '-0' + (1 + Math.floor(Math.random() * 5));
+      var paid = mi < months.length - 1;
+      entries.push({
+        id: 'LED-seed-' + t.name.replace(/\s/g,'') + '-' + m,
+        tenant: t.name,
+        property: t.property,
+        month: m,
+        rentDue: t.rent,
+        rentPaid: paid ? t.rent : 0,
+        pmFee: t.pmFee,
+        pmFeePercent: 8,
+        paidDate: paid ? paidDate : null,
+        status: paid ? 'paid' : 'due',
+        method: paid ? ['Cash App','Zelle','ACH'][mi % 3] : null,
+        createdAt: new Date().toISOString()
+      });
+    });
+  });
+  localStorage.setItem(key, JSON.stringify(entries));
+}
+
+// ── Monthly Owner Statement Generator ─────────────────────────────────────
+function generateOwnerStatement(ownerName, propertyAddress, month) {
+  var ledger = getRentLedger(null, null);
+  var monthEntries = ledger.filter(function(e) { return e.month === month && e.property === propertyAddress; });
+  var totalPaid = 0, totalFees = 0;
+  monthEntries.forEach(function(e) {
+    totalPaid += e.rentPaid || 0;
+    totalFees += e.pmFee || 0;
+  });
+  var expenses = JSON.parse(localStorage.getItem('rv_expenses') || '[]');
+  var monthExpenses = expenses.filter(function(e) { return e.month === month && e.property === propertyAddress; });
+  var totalExpenses = 0;
+  monthExpenses.forEach(function(e) { totalExpenses += e.amount || 0; });
+  return {
+    ownerName: ownerName || 'Property Owner',
+    propertyAddress: propertyAddress,
+    month: month,
+    generatedAt: new Date().toISOString(),
+    rentCollected: totalPaid,
+    pmFee: totalFees,
+    expenses: totalExpenses,
+    expenseDetails: monthExpenses,
+    netToOwner: totalPaid - totalFees - totalExpenses,
+    entries: monthEntries
+  };
+}
+
+// ── Year-End Tax Summary Generator ────────────────────────────────────────
+function generateTaxSummary(ownerName, propertyAddress, year) {
+  var ledger = getRentLedger(null, null);
+  var yearEntries = ledger.filter(function(e) {
+    return e.property === propertyAddress && e.month && e.month.indexOf(year) === 0;
+  });
+  var totalRent = 0, totalFees = 0;
+  var monthlyBreakdown = {};
+  yearEntries.forEach(function(e) {
+    totalRent += e.rentPaid || 0;
+    totalFees += e.pmFee || 0;
+    if (!monthlyBreakdown[e.month]) monthlyBreakdown[e.month] = { rent: 0, fees: 0 };
+    monthlyBreakdown[e.month].rent += e.rentPaid || 0;
+    monthlyBreakdown[e.month].fees += e.pmFee || 0;
+  });
+  var expenses = JSON.parse(localStorage.getItem('rv_expenses') || '[]');
+  var yearExpenses = expenses.filter(function(e) {
+    return e.property === propertyAddress && e.month && e.month.indexOf(year) === 0;
+  });
+  var totalExpenses = 0;
+  yearExpenses.forEach(function(e) { totalExpenses += e.amount || 0; });
+  return {
+    ownerName: ownerName || 'Property Owner',
+    propertyAddress: propertyAddress,
+    year: year,
+    generatedAt: new Date().toISOString(),
+    totalRentCollected: totalRent,
+    totalPMFees: totalFees,
+    totalExpenses: totalExpenses,
+    netIncome: totalRent - totalFees - totalExpenses,
+    monthlyBreakdown: monthlyBreakdown,
+    expenseDetails: yearExpenses
+  };
+}
+
+// ── Portfolio Importer (CSV/XLSX) ─────────────────────────────────────────
+function parseCSV(text) {
+  var lines = text.split(/\r?\n/).filter(function(l) { return l.trim(); });
+  if (lines.length < 2) return { headers: [], rows: [] };
+  var headers = lines[0].split(',').map(function(h) { return h.trim().replace(/^"|"$/g, ''); });
+  var rows = [];
+  for (var i = 1; i < lines.length; i++) {
+    var vals = lines[i].split(',').map(function(v) { return v.trim().replace(/^"|"$/g, ''); });
+    var row = {};
+    headers.forEach(function(h, j) { row[h] = vals[j] || ''; });
+    rows.push(row);
+  }
+  return { headers: headers, rows: rows };
+}
+
+function autoMapColumns(headers) {
+  var mapping = { property: null, tenant: null, rent: null, pmFee: null, beds: null, baths: null, sqft: null, status: null };
+  var patterns = {
+    property: /address|property|unit|location|street/i,
+    tenant: /tenant|renter|occupant|resident|name/i,
+    rent: /rent|amount|monthly|payment|price/i,
+    pmFee: /fee|commission|pm.?fee|management/i,
+    beds: /bed|bedroom|br/i,
+    baths: /bath|bathroom|ba/i,
+    sqft: /sq.?ft|square|size|area/i,
+    status: /status|occupied|vacant|available/i
+  };
+  Object.keys(patterns).forEach(function(field) {
+    for (var i = 0; i < headers.length; i++) {
+      if (patterns[field].test(headers[i]) && !mapping[field]) {
+        mapping[field] = headers[i];
+        break;
+      }
+    }
+  });
+  return mapping;
+}
+
+function importPortfolio(parsedData, columnMapping, clientId) {
+  var listings = [];
+  parsedData.rows.forEach(function(row) {
+    var addr = row[columnMapping.property] || '';
+    if (!addr) return;
+    var tenant = row[columnMapping.tenant] || '';
+    var rent = parseFloat(row[columnMapping.rent]) || 0;
+    var pmFee = parseFloat(row[columnMapping.pmFee]) || 0;
+    var beds = parseInt(row[columnMapping.beds]) || 0;
+    var baths = parseInt(row[columnMapping.baths]) || 0;
+    var sqft = parseInt(row[columnMapping.sqft]) || 0;
+    var status = row[columnMapping.status] || '';
+    var normalizedStatus = /vacant|available|empty/i.test(status) ? 'available' : tenant ? 'rented' : 'available';
+    listings.push({
+      address: addr, tenant: tenant, rent: rent, pmFee: pmFee,
+      pmFeePercent: rent > 0 ? Math.round(pmFee / rent * 100) : 0,
+      beds: beds, baths: baths, sqft: sqft,
+      status: normalizedStatus,
+      listingId: generateListingId(),
+      importedAt: new Date().toISOString()
+    });
+  });
+  var cid = clientId || 'sanders-pm';
+  var key = cid === 'sanders-pm' ? 'rv_sanders_listings' : 'rv_listings_' + cid;
+  var existing = JSON.parse(localStorage.getItem(key) || 'null');
+  if (!existing) existing = [];
+  var merged = existing.concat(listings);
+  localStorage.setItem(key, JSON.stringify(merged));
+  listings.forEach(function(l) {
+    if (l.tenant && l.rent > 0) {
+      addLedgerEntry({
+        tenant: l.tenant, property: l.address,
+        month: new Date().toISOString().slice(0, 7),
+        rentDue: l.rent, rentPaid: 0, pmFee: l.pmFee,
+        pmFeePercent: l.pmFeePercent, status: 'due', method: null
+      });
+    }
+  });
+  return { imported: listings.length, total: merged.length };
+}
+
+// ── Google Maps Places Autocomplete Hook ──────────────────────────────────
+function initGooglePlaces(inputId) {
+  if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
+    console.log('Google Maps Places API not loaded. Using manual address entry.');
+    return null;
+  }
+  var input = document.getElementById(inputId);
+  if (!input) return null;
+  var autocomplete = new google.maps.places.Autocomplete(input, {
+    types: ['address'],
+    componentRestrictions: { country: 'us' }
+  });
+  autocomplete.addListener('place_changed', function() {
+    var place = autocomplete.getPlace();
+    if (place && place.formatted_address) {
+      input.value = place.formatted_address;
+      if (window.onPlaceSelected) window.onPlaceSelected(place);
+    }
+  });
+  return autocomplete;
+}
+
+// ── Drag & Drop Photo Handler ─────────────────────────────────────────────
+function initDragDropZone(zoneId, onFilesSelected) {
+  var zone = document.getElementById(zoneId);
+  if (!zone) return;
+  zone.addEventListener('dragover', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    zone.style.borderColor = '#1a56db'; zone.style.background = '#eff6ff';
+  });
+  zone.addEventListener('dragleave', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    zone.style.borderColor = '#d1d5db'; zone.style.background = '';
+  });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    zone.style.borderColor = '#d1d5db'; zone.style.background = '';
+    var files = [];
+    if (e.dataTransfer.items) {
+      for (var i = 0; i < e.dataTransfer.items.length; i++) {
+        var item = e.dataTransfer.items[i];
+        if (item.kind === 'file') {
+          var entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+          if (entry && entry.isDirectory) {
+            readDirectory(entry, function(dirFiles) {
+              files = files.concat(dirFiles);
+              if (onFilesSelected) onFilesSelected(files);
+            });
+            return;
+          } else {
+            var file = item.getAsFile();
+            if (file && /^image\//.test(file.type)) files.push(file);
+          }
+        }
+      }
+    } else {
+      for (var j = 0; j < e.dataTransfer.files.length; j++) {
+        if (/^image\//.test(e.dataTransfer.files[j].type)) files.push(e.dataTransfer.files[j]);
+      }
+    }
+    if (onFilesSelected) onFilesSelected(files);
+  });
+}
+
+function readDirectory(dirEntry, callback) {
+  var reader = dirEntry.createReader();
+  var allFiles = [];
+  function readEntries() {
+    reader.readEntries(function(entries) {
+      if (entries.length === 0) { callback(allFiles); return; }
+      var pending = entries.length;
+      entries.forEach(function(entry) {
+        if (entry.isFile) {
+          entry.file(function(file) {
+            if (/^image\//.test(file.type)) allFiles.push(file);
+            pending--;
+            if (pending === 0) readEntries();
+          });
+        } else {
+          pending--;
+          if (pending === 0) readEntries();
+        }
+      });
+    });
+  }
+  readEntries();
+}
+
+// ── PDF Generator (uses jsPDF from CDN) ───────────────────────────────────
+function loadJsPDF(callback) {
+  if (window.jspdf && window.jspdf.jsPDF) { callback(window.jspdf.jsPDF); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+  s.onload = function() { callback(window.jspdf.jsPDF); };
+  s.onerror = function() { alert('Failed to load PDF library. Please check your internet connection.'); };
+  document.head.appendChild(s);
+}
+
+function generateStatementPDF(statement) {
+  loadJsPDF(function(jsPDF) {
+    var doc = new jsPDF();
+    var y = 20;
+    doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+    doc.text('Monthly Owner Statement', 105, y, { align: 'center' }); y += 8;
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+    doc.text('Sanders Property Management', 105, y, { align: 'center' }); y += 5;
+    doc.text('danielrhart1284@gmail.com', 105, y, { align: 'center' }); y += 10;
+    doc.setDrawColor(200); doc.line(15, y, 195, y); y += 8;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold'); doc.text('Owner:', 15, y);
+    doc.setFont('helvetica', 'normal'); doc.text(statement.ownerName, 50, y); y += 6;
+    doc.setFont('helvetica', 'bold'); doc.text('Property:', 15, y);
+    doc.setFont('helvetica', 'normal'); doc.text(statement.propertyAddress, 50, y); y += 6;
+    doc.setFont('helvetica', 'bold'); doc.text('Period:', 15, y);
+    doc.setFont('helvetica', 'normal'); doc.text(statement.month, 50, y); y += 6;
+    doc.setFont('helvetica', 'bold'); doc.text('Generated:', 15, y);
+    doc.setFont('helvetica', 'normal'); doc.text(new Date(statement.generatedAt).toLocaleDateString(), 50, y); y += 12;
+
+    doc.setDrawColor(200); doc.line(15, y, 195, y); y += 8;
+    doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+    doc.text('Financial Summary', 15, y); y += 10;
+
+    doc.setFontSize(11);
+    var items = [
+      ['Rent Collected', '$' + (statement.rentCollected || 0).toFixed(2)],
+      ['Management Fee (8%)', '-$' + (statement.pmFee || 0).toFixed(2)],
+      ['Maintenance / Expenses', '-$' + (statement.expenses || 0).toFixed(2)],
+    ];
+    items.forEach(function(item) {
+      doc.setFont('helvetica', 'normal');
+      doc.text(item[0], 20, y); doc.text(item[1], 180, y, { align: 'right' }); y += 7;
+    });
+    y += 3; doc.setDrawColor(100); doc.line(15, y, 195, y); y += 8;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text('Net to Owner', 20, y);
+    doc.text('$' + (statement.netToOwner || 0).toFixed(2), 180, y, { align: 'right' }); y += 15;
+
+    if (statement.expenseDetails && statement.expenseDetails.length > 0) {
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('Expense Details', 15, y); y += 8;
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+      statement.expenseDetails.forEach(function(e) {
+        doc.text(e.description || 'Expense', 20, y);
+        doc.text('$' + (e.amount || 0).toFixed(2), 180, y, { align: 'right' }); y += 6;
+      });
+    }
+    y += 10; doc.setFontSize(8); doc.setTextColor(150);
+    doc.text('Generated by RentVerified — Sanders Property Management', 105, y, { align: 'center' });
+    doc.save('Owner_Statement_' + statement.month + '.pdf');
+  });
+}
+
+function generateTaxPDF(summary) {
+  loadJsPDF(function(jsPDF) {
+    var doc = new jsPDF();
+    var y = 20;
+    doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+    doc.text(summary.year + ' Annual Tax Summary', 105, y, { align: 'center' }); y += 8;
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+    doc.text('Sanders Property Management', 105, y, { align: 'center' }); y += 10;
+    doc.setDrawColor(200); doc.line(15, y, 195, y); y += 8;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold'); doc.text('Owner:', 15, y);
+    doc.setFont('helvetica', 'normal'); doc.text(summary.ownerName, 50, y); y += 6;
+    doc.setFont('helvetica', 'bold'); doc.text('Property:', 15, y);
+    doc.setFont('helvetica', 'normal'); doc.text(summary.propertyAddress, 50, y); y += 6;
+    doc.setFont('helvetica', 'bold'); doc.text('Tax Year:', 15, y);
+    doc.setFont('helvetica', 'normal'); doc.text(summary.year, 50, y); y += 12;
+
+    doc.setDrawColor(200); doc.line(15, y, 195, y); y += 8;
+    doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+    doc.text('Annual Summary', 15, y); y += 10;
+
+    doc.setFontSize(11);
+    var items = [
+      ['Total Rent Collected', '$' + (summary.totalRentCollected || 0).toFixed(2)],
+      ['Total Management Fees', '-$' + (summary.totalPMFees || 0).toFixed(2)],
+      ['Total Expenses', '-$' + (summary.totalExpenses || 0).toFixed(2)],
+    ];
+    items.forEach(function(item) {
+      doc.setFont('helvetica', 'normal');
+      doc.text(item[0], 20, y); doc.text(item[1], 180, y, { align: 'right' }); y += 7;
+    });
+    y += 3; doc.setDrawColor(100); doc.line(15, y, 195, y); y += 8;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text('Net Rental Income', 20, y);
+    doc.text('$' + (summary.netIncome || 0).toFixed(2), 180, y, { align: 'right' }); y += 15;
+
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    doc.text('Monthly Breakdown', 15, y); y += 8;
+    doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+    doc.text('Month', 20, y); doc.text('Rent', 80, y); doc.text('PM Fee', 120, y); doc.text('Net', 160, y); y += 6;
+    doc.setFont('helvetica', 'normal');
+    var months = Object.keys(summary.monthlyBreakdown || {}).sort();
+    months.forEach(function(m) {
+      var d = summary.monthlyBreakdown[m];
+      doc.text(m, 20, y);
+      doc.text('$' + (d.rent || 0).toFixed(2), 80, y);
+      doc.text('$' + (d.fees || 0).toFixed(2), 120, y);
+      doc.text('$' + ((d.rent || 0) - (d.fees || 0)).toFixed(2), 160, y);
+      y += 5;
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+    y += 10; doc.setFontSize(8); doc.setTextColor(150);
+    doc.text('For informational purposes only. Consult a tax professional for official filings.', 105, y, { align: 'center' }); y += 5;
+    doc.text('Generated by RentVerified on ' + new Date().toLocaleDateString(), 105, y, { align: 'center' });
+    doc.save('Tax_Summary_' + summary.year + '.pdf');
+  });
+}
+
+// ── Work In Progress Modal (for dead-click buttons) ───────────────────────
+function showWIP(feature) {
+  var modal = document.getElementById('wip-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'wip-modal';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:2rem;';
+    modal.innerHTML = '<div style="background:white;border-radius:16px;max-width:400px;width:100%;padding:2rem;text-align:center;box-shadow:0 25px 50px rgba(0,0,0,.25);">' +
+      '<div style="font-size:2.5rem;margin-bottom:.75rem;">\u{1F6A7}</div>' +
+      '<h3 style="font-size:1.1rem;font-weight:800;margin-bottom:.5rem;">Work in Progress</h3>' +
+      '<p id="wip-feature" style="color:#6B7280;font-size:.9rem;margin-bottom:1.25rem;"></p>' +
+      '<button onclick="document.getElementById(\'wip-modal\').style.display=\'none\'" class="btn btn-primary" style="padding:.6rem 2rem;">Got it</button>' +
+      '</div>';
+    document.body.appendChild(modal);
+  }
+  var featureEl = document.getElementById('wip-feature');
+  if (featureEl) featureEl.textContent = feature || 'This feature is coming soon!';
+  modal.style.display = 'flex';
+}
+
+// Seed ledger data on load
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', seedLedgerData);
+}

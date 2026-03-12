@@ -112,6 +112,12 @@
       font-weight: 700;
     }
   </style>
+  <!-- Google Maps Places API (replace YOUR_API_KEY with actual key to enable autocomplete) -->
+  <script>
+    // Graceful fallback: if Google Maps API key is not configured, autocomplete won't load but manual entry still works
+    window.RV_GOOGLE_MAPS_KEY = '';
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=Function.prototype" onerror="console.log('Google Maps API not loaded - using manual address entry')"></script>
 </head>
 <body>
 
@@ -525,10 +531,14 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
           📣 Ad Builder
         </a>
-        <a href="accounting.html" class="dash-link" style="color:var(--gray-400);">
+        <div class="dash-link" onclick="dashTab('import')" style="color:#f59e0b;background:rgba(245,158,11,0.08);border-left:2px solid #f59e0b;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          📥 Portfolio Import
+        </div>
+        <div class="dash-link" onclick="dashTab('accounting')" style="color:#10b981;background:rgba(16,185,129,0.08);border-left:2px solid #10b981;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V5a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2h-2M9 7h6"/></svg>
           📊 Accounting
-        </a>
+        </div>
         <a href="maintenance.html" class="dash-link" style="color:var(--gray-400);">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
           🔧 Maintenance
@@ -729,7 +739,7 @@
                 </div>
                 <div>
                   <div style="font-weight:800;font-size:1rem;">$1,200</div>
-                  <button class="btn btn-success btn-sm" style="margin-top:6px;">Confirm</button>
+                  <button class="btn btn-success btn-sm" style="margin-top:6px;" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">Confirm</button>
                 </div>
               </div>
               <div class="inquiry-item">
@@ -741,7 +751,7 @@
                 </div>
                 <div>
                   <div style="font-weight:800;font-size:1rem;">$950</div>
-                  <button class="btn btn-success btn-sm" style="margin-top:6px;">Confirm</button>
+                  <button class="btn btn-success btn-sm" style="margin-top:6px;" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">Confirm</button>
                 </div>
               </div>
             </div>
@@ -886,11 +896,29 @@
               <textarea id="edit-description" rows="3" placeholder="Beautiful updated unit with hardwood floors, modern kitchen..." style="resize:vertical;"></textarea>
             </div>
             <div class="form-group">
+              <label>Client (Owner)</label>
+              <div style="display:flex;gap:.5rem;">
+                <select id="edit-client-owner" style="flex:1;">
+                  <option value="">Select existing client...</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" onclick="addNewClientInline()" style="white-space:nowrap;">+ New Client</button>
+              </div>
+              <div id="new-client-inline" style="display:none;margin-top:.5rem;padding:.75rem;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+                  <input type="text" id="new-client-name" placeholder="Client name" style="font-size:.85rem;" />
+                  <input type="email" id="new-client-email" placeholder="Email" style="font-size:.85rem;" />
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveNewClientInline()" style="margin-top:.5rem;">Save Client</button>
+              </div>
+            </div>
+            <div class="form-group">
               <label>Property Photos</label>
               <div id="photo-preview-strip" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;min-height:0;"></div>
-              <label for="photo-upload-input" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1rem;border:2px dashed #d1d5db;border-radius:8px;cursor:pointer;font-size:.875rem;color:#6B7280;transition:border-color .2s;" onmouseover="this.style.borderColor='#1a56db'" onmouseout="this.style.borderColor='#d1d5db'">
-                <span style="font-size:1.1rem;">📷</span> Click to upload photos (JPG, PNG — up to 5)
-              </label>
+              <div id="photo-drop-zone" style="border:2px dashed #d1d5db;border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:.5rem;" onclick="document.getElementById('photo-upload-input').click()">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">📷</div>
+                <div style="font-weight:600;font-size:.875rem;">Drag & drop photos or folders here</div>
+                <div style="color:#9ca3af;font-size:.8rem;">or click to browse — JPG, PNG (select/deselect after upload)</div>
+              </div>
               <input type="file" id="photo-upload-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(this)" />
             </div>
             <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
@@ -1024,8 +1052,8 @@
                   <td><span class="badge badge-pending">Pending</span></td>
                   <td>
                     <div style="display:flex;gap:6px;">
-                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;">View Screenshot</button>
-                      <button class="btn btn-success btn-sm">✓ Confirm</button>
+                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;" onclick="showWIP('Screenshot viewer is coming soon.')">View Screenshot</button>
+                      <button class="btn btn-success btn-sm" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">✓ Confirm</button>
                     </div>
                   </td>
                 </tr>
@@ -1039,8 +1067,8 @@
                   <td><span class="badge badge-pending">Pending</span></td>
                   <td>
                     <div style="display:flex;gap:6px;">
-                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;">View Screenshot</button>
-                      <button class="btn btn-success btn-sm">✓ Confirm</button>
+                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;" onclick="showWIP('Screenshot viewer is coming soon.')">View Screenshot</button>
+                      <button class="btn btn-success btn-sm" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">✓ Confirm</button>
                     </div>
                   </td>
                 </tr>
@@ -1211,7 +1239,7 @@
                 <label>Zelle Phone/Email</label>
                 <input type="text" placeholder="payments@sanderspm.com or phone" />
               </div>
-              <button class="btn btn-primary">Save Settings</button>
+              <button class="btn btn-primary" onclick="showWIP('AI behavior settings will sync to the server when the backend is connected.')">Save Settings</button>
             </div>
           </div>
         </div>
@@ -1224,7 +1252,7 @@
           <div style="display:flex;gap:0.5rem;">
             <button class="btn btn-outline" onclick="generateLeaseUI()">Generate Lease</button>
             <button class="btn btn-outline" onclick="generateEvictionUI()">Generate Eviction Notice</button>
-            <button class="btn btn-primary">+ Upload Document</button>
+            <button class="btn btn-primary" onclick="showWIP('Document upload will be available when cloud storage is connected.')">+ Upload Document</button>
           </div>
         </div>
         <div class="card">
@@ -1237,31 +1265,152 @@
                   <td>Tyler Johnson</td>
                   <td>789 Pine Rd</td>
                   <td>Mar 4, 2026</td>
-                  <td><button class="btn btn-outline btn-sm">Send to Tenant</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Send to Tenant will be available when email integration is connected.')">Send to Tenant</button></td>
                 </tr>
                 <tr>
                   <td>📄 <strong>Lease Agreement</strong></td>
                   <td>Jane Doe</td>
                   <td>123 Maple St 2A</td>
                   <td>Apr 1, 2025</td>
-                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Document viewer is coming soon.')">View</button></td>
                 </tr>
                 <tr>
                   <td>📄 <strong>Lease Agreement</strong></td>
                   <td>Robert Lee</td>
                   <td>456 Oak Ave 1B</td>
                   <td>Jun 1, 2025</td>
-                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Document viewer is coming soon.')">View</button></td>
                 </tr>
                 <tr>
                   <td>🏠 <strong>Move-In Inspection</strong></td>
                   <td>Jane Doe</td>
                   <td>123 Maple St 2A</td>
                   <td>Apr 1, 2025</td>
-                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Document viewer is coming soon.')">View</button></td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORTFOLIO IMPORT TAB -->
+      <div id="dtab-import" class="tab-content">
+        <div class="page-header">
+          <div><h1>📥 Portfolio Import</h1><p>Bulk import properties from CSV or XLSX files. The AI will auto-map your columns.</p></div>
+        </div>
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:1rem;">Upload Your Portfolio File</h3>
+            <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1rem;">Supports CSV and XLSX files. The system will identify columns for Property Address, Tenant, Rent, and PM Fee automatically.</p>
+            <div id="import-drop-zone" style="border:2px dashed #d1d5db;border-radius:12px;padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;" onclick="document.getElementById('import-file-input').click()">
+              <div style="font-size:2.5rem;margin-bottom:.5rem;">📂</div>
+              <div style="font-weight:700;font-size:1rem;margin-bottom:.25rem;">Drop your CSV/XLSX file here</div>
+              <div style="color:var(--gray-500);font-size:.85rem;">or click to browse</div>
+            </div>
+            <input type="file" id="import-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleImportFile(this)" />
+            <div id="import-status" style="display:none;margin-top:1rem;padding:1rem;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;">
+              <div id="import-status-text" style="font-weight:600;color:#15803d;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Column Mapping Preview -->
+        <div id="import-mapping-panel" style="display:none;">
+          <div class="card" style="margin-bottom:1.5rem;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">🤖 AI Column Mapping</h3>
+              <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1rem;">Review the auto-detected column mapping below. Adjust if needed.</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Property Address Column</label><select id="map-property" class="form-control"></select></div>
+                <div class="form-group"><label>Tenant Name Column</label><select id="map-tenant" class="form-control"></select></div>
+                <div class="form-group"><label>Rent Amount Column</label><select id="map-rent" class="form-control"></select></div>
+                <div class="form-group"><label>PM Fee Column</label><select id="map-pmfee" class="form-control"></select></div>
+                <div class="form-group"><label>Beds Column</label><select id="map-beds" class="form-control"></select></div>
+                <div class="form-group"><label>Baths Column</label><select id="map-baths" class="form-control"></select></div>
+              </div>
+              <div style="display:flex;gap:.75rem;margin-top:1rem;">
+                <button class="btn btn-primary" onclick="executeImport()">🚀 Import Properties</button>
+                <button class="btn btn-outline" onclick="document.getElementById('import-mapping-panel').style.display='none'">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <!-- Data Preview -->
+          <div class="card">
+            <div class="card-body" style="padding:0;overflow-x:auto;">
+              <h3 style="font-weight:700;padding:1rem 1.25rem .5rem;">📋 Data Preview (first 5 rows)</h3>
+              <table id="import-preview-table" style="font-size:.85rem;"><thead></thead><tbody></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTING TAB -->
+      <div id="dtab-accounting" class="tab-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div><h1>📊 Accounting & Statements</h1><p>View rent ledgers, generate owner statements, and create tax summaries.</p></div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="showStatementGenerator()">📄 Generate Statement</button>
+            <button class="btn btn-outline" onclick="showTaxGenerator()">📊 Tax Summary</button>
+          </div>
+        </div>
+
+        <!-- Rent Ledger -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+              <h3 style="font-weight:700;">💰 Rent Ledger</h3>
+              <div style="display:flex;gap:.5rem;">
+                <select id="ledger-tenant-filter" onchange="renderLedger()" style="padding:.4rem .75rem;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;">
+                  <option value="">All Tenants</option>
+                </select>
+                <select id="ledger-month-filter" onchange="renderLedger()" style="padding:.4rem .75rem;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;">
+                  <option value="">All Months</option>
+                </select>
+              </div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="font-size:.85rem;">
+                <thead><tr><th>Tenant</th><th>Property</th><th>Month</th><th>Rent Due</th><th>Rent Paid</th><th>PM Fee</th><th>Status</th><th>Method</th></tr></thead>
+                <tbody id="ledger-tbody"></tbody>
+              </table>
+            </div>
+            <div id="ledger-summary" style="margin-top:1rem;padding:1rem;background:#f8fafc;border-radius:10px;display:flex;gap:2rem;flex-wrap:wrap;font-size:.9rem;"></div>
+          </div>
+        </div>
+
+        <!-- Statement Generator Modal -->
+        <div id="statement-generator" style="display:none;">
+          <div class="card" style="margin-bottom:1.5rem;border:2px solid #1a56db;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">📄 Generate Monthly Owner Statement</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Owner Name</label><input type="text" id="stmt-owner" placeholder="Property Owner Name" /></div>
+                <div class="form-group"><label>Property</label><select id="stmt-property"></select></div>
+                <div class="form-group"><label>Month</label><input type="month" id="stmt-month" /></div>
+              </div>
+              <div style="display:flex;gap:.75rem;margin-top:1rem;">
+                <button class="btn btn-primary" onclick="doGenerateStatement()">📥 Download PDF</button>
+                <button class="btn btn-outline" onclick="document.getElementById('statement-generator').style.display='none'">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tax Summary Generator -->
+        <div id="tax-generator" style="display:none;">
+          <div class="card" style="margin-bottom:1.5rem;border:2px solid #10b981;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">📊 Generate Year-End Tax Summary</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Owner Name</label><input type="text" id="tax-owner" placeholder="Property Owner Name" /></div>
+                <div class="form-group"><label>Property</label><select id="tax-property"></select></div>
+                <div class="form-group"><label>Tax Year</label><select id="tax-year"><option value="2025">2025</option><option value="2026">2026</option></select></div>
+              </div>
+              <div style="display:flex;gap:.75rem;margin-top:1rem;">
+                <button class="btn btn-primary" onclick="doGenerateTax()">📥 Download PDF</button>
+                <button class="btn btn-outline" onclick="document.getElementById('tax-generator').style.display='none'">Cancel</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2129,6 +2278,419 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       }, 4000);
     }
   });
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: PORTFOLIO IMPORT UI
+  // ══════════════════════════════════════════════════════════════════════
+  var _importParsedData = null;
+
+  function handleImportFile(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'csv') {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        _importParsedData = parseCSV(e.target.result);
+        showImportMapping(_importParsedData);
+      };
+      reader.readAsText(file);
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      // Load SheetJS for XLSX parsing
+      if (typeof XLSX === 'undefined') {
+        var s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        s.onload = function() { parseXLSX(file); };
+        s.onerror = function() { alert('Failed to load XLSX parser. Please try CSV format.'); };
+        document.head.appendChild(s);
+      } else {
+        parseXLSX(file);
+      }
+    } else {
+      alert('Unsupported file format. Please use CSV or XLSX.');
+    }
+  }
+
+  function parseXLSX(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var firstSheet = workbook.SheetNames[0];
+      var csv = XLSX.utils.sheet_to_csv(workbook.Sheets[firstSheet]);
+      _importParsedData = parseCSV(csv);
+      showImportMapping(_importParsedData);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function showImportMapping(parsed) {
+    if (!parsed || !parsed.headers || parsed.headers.length === 0) {
+      alert('Could not parse file. Please check the format.');
+      return;
+    }
+    var mapping = autoMapColumns(parsed.headers);
+    var fields = ['property','tenant','rent','pmfee','beds','baths'];
+    var mapKeys = ['property','tenant','rent','pmFee','beds','baths'];
+    fields.forEach(function(f, fi) {
+      var sel = document.getElementById('map-' + f);
+      if (!sel) return;
+      sel.innerHTML = '<option value="">(none)</option>';
+      parsed.headers.forEach(function(h) {
+        var opt = document.createElement('option');
+        opt.value = h; opt.textContent = h;
+        if (mapping[mapKeys[fi]] === h) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    });
+    // Preview table
+    var thead = document.querySelector('#import-preview-table thead');
+    var tbody = document.querySelector('#import-preview-table tbody');
+    thead.innerHTML = '<tr>' + parsed.headers.map(function(h) { return '<th>' + escapeHtml(h) + '</th>'; }).join('') + '</tr>';
+    tbody.innerHTML = '';
+    parsed.rows.slice(0, 5).forEach(function(row) {
+      var tr = '<tr>' + parsed.headers.map(function(h) { return '<td>' + escapeHtml(row[h] || '') + '</td>'; }).join('') + '</tr>';
+      tbody.innerHTML += tr;
+    });
+    document.getElementById('import-mapping-panel').style.display = 'block';
+    var status = document.getElementById('import-status');
+    status.style.display = 'block';
+    document.getElementById('import-status-text').textContent = 'File loaded: ' + parsed.rows.length + ' rows detected. ' + parsed.headers.length + ' columns found.';
+  }
+
+  function executeImport() {
+    if (!_importParsedData) { alert('No file loaded.'); return; }
+    var mapping = {
+      property: document.getElementById('map-property').value,
+      tenant: document.getElementById('map-tenant').value,
+      rent: document.getElementById('map-rent').value,
+      pmFee: document.getElementById('map-pmfee').value,
+      beds: document.getElementById('map-beds').value,
+      baths: document.getElementById('map-baths').value,
+    };
+    if (!mapping.property) { alert('Please select the Property Address column.'); return; }
+    var result = importPortfolio(_importParsedData, mapping, 'sanders-pm');
+    document.getElementById('import-status-text').innerHTML = '✅ Successfully imported <strong>' + result.imported + '</strong> properties! Total listings: ' + result.total;
+    document.getElementById('import-status').style.background = '#dcfce7';
+    document.getElementById('import-mapping-panel').style.display = 'none';
+    _importParsedData = null;
+    renderPropertiesList();
+  }
+
+  // Import drop zone drag-and-drop
+  document.addEventListener('DOMContentLoaded', function() {
+    var zone = document.getElementById('import-drop-zone');
+    if (!zone) return;
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='#1a56db'; zone.style.background='#eff6ff'; });
+    zone.addEventListener('dragleave', function(e) { e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background=''; });
+    zone.addEventListener('drop', function(e) {
+      e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background='';
+      if (e.dataTransfer.files.length > 0) {
+        document.getElementById('import-file-input').files = e.dataTransfer.files;
+        handleImportFile(document.getElementById('import-file-input'));
+      }
+    });
+  });
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: ACCOUNTING & STATEMENTS UI
+  // ══════════════════════════════════════════════════════════════════════
+  function renderLedger() {
+    seedLedgerData();
+    var all = getRentLedger(null, null);
+    var tenantFilter = document.getElementById('ledger-tenant-filter').value;
+    var monthFilter = document.getElementById('ledger-month-filter').value;
+    if (tenantFilter) all = all.filter(function(e) { return e.tenant === tenantFilter; });
+    if (monthFilter) all = all.filter(function(e) { return e.month === monthFilter; });
+    all.sort(function(a, b) { return b.month.localeCompare(a.month) || a.tenant.localeCompare(b.tenant); });
+
+    var tbody = document.getElementById('ledger-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = all.map(function(e) {
+      var statusBadge = e.status === 'paid'
+        ? '<span class="badge badge-available">Paid</span>'
+        : '<span class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">Due</span>';
+      return '<tr>' +
+        '<td style="font-weight:600;">' + escapeHtml(e.tenant) + '</td>' +
+        '<td style="font-size:.82rem;">' + escapeHtml(e.property) + '</td>' +
+        '<td>' + escapeHtml(e.month) + '</td>' +
+        '<td>$' + (e.rentDue || 0).toFixed(2) + '</td>' +
+        '<td style="color:' + (e.rentPaid >= e.rentDue ? '#15803d' : '#b91c1c') + ';font-weight:600;">$' + (e.rentPaid || 0).toFixed(2) + '</td>' +
+        '<td>$' + (e.pmFee || 0).toFixed(2) + '</td>' +
+        '<td>' + statusBadge + '</td>' +
+        '<td>' + escapeHtml(e.method || '—') + '</td>' +
+        '</tr>';
+    }).join('');
+
+    // Summary
+    var totalDue = 0, totalPaid = 0, totalFees = 0;
+    all.forEach(function(e) { totalDue += e.rentDue || 0; totalPaid += e.rentPaid || 0; totalFees += e.pmFee || 0; });
+    var summary = document.getElementById('ledger-summary');
+    if (summary) {
+      summary.innerHTML = '<div><strong>Total Due:</strong> $' + totalDue.toFixed(2) + '</div>' +
+        '<div><strong>Total Collected:</strong> <span style="color:#15803d;">$' + totalPaid.toFixed(2) + '</span></div>' +
+        '<div><strong>PM Fees:</strong> $' + totalFees.toFixed(2) + '</div>' +
+        '<div><strong>Collection Rate:</strong> ' + (totalDue > 0 ? Math.round(totalPaid / totalDue * 100) : 0) + '%</div>';
+    }
+  }
+
+  function populateLedgerFilters() {
+    seedLedgerData();
+    var all = getRentLedger(null, null);
+    var tenants = [], months = [];
+    all.forEach(function(e) {
+      if (tenants.indexOf(e.tenant) === -1) tenants.push(e.tenant);
+      if (months.indexOf(e.month) === -1) months.push(e.month);
+    });
+    var tSel = document.getElementById('ledger-tenant-filter');
+    var mSel = document.getElementById('ledger-month-filter');
+    if (tSel) {
+      tSel.innerHTML = '<option value="">All Tenants</option>';
+      tenants.sort().forEach(function(t) { tSel.innerHTML += '<option value="' + escapeHtml(t) + '">' + escapeHtml(t) + '</option>'; });
+    }
+    if (mSel) {
+      mSel.innerHTML = '<option value="">All Months</option>';
+      months.sort().reverse().forEach(function(m) { mSel.innerHTML += '<option value="' + m + '">' + m + '</option>'; });
+    }
+  }
+
+  function populatePropertySelects() {
+    var listings = getListings();
+    var properties = [];
+    listings.forEach(function(l) { if (l.address && properties.indexOf(l.address) === -1) properties.push(l.address); });
+    // Also add properties from ledger
+    var ledger = getRentLedger(null, null);
+    ledger.forEach(function(e) { if (e.property && properties.indexOf(e.property) === -1) properties.push(e.property); });
+    ['stmt-property','tax-property'].forEach(function(id) {
+      var sel = document.getElementById(id);
+      if (!sel) return;
+      sel.innerHTML = '<option value="">Select property</option>';
+      properties.forEach(function(p) { sel.innerHTML += '<option value="' + escapeHtml(p) + '">' + escapeHtml(p) + '</option>'; });
+    });
+  }
+
+  function showStatementGenerator() {
+    populatePropertySelects();
+    document.getElementById('statement-generator').style.display = 'block';
+    document.getElementById('tax-generator').style.display = 'none';
+    var monthInput = document.getElementById('stmt-month');
+    if (monthInput && !monthInput.value) {
+      var now = new Date();
+      monthInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    }
+  }
+
+  function showTaxGenerator() {
+    populatePropertySelects();
+    document.getElementById('tax-generator').style.display = 'block';
+    document.getElementById('statement-generator').style.display = 'none';
+  }
+
+  function doGenerateStatement() {
+    var owner = document.getElementById('stmt-owner').value.trim() || 'Property Owner';
+    var property = document.getElementById('stmt-property').value;
+    var month = document.getElementById('stmt-month').value;
+    if (!property) { alert('Please select a property.'); return; }
+    if (!month) { alert('Please select a month.'); return; }
+    var statement = generateOwnerStatement(owner, property, month);
+    generateStatementPDF(statement);
+  }
+
+  function doGenerateTax() {
+    var owner = document.getElementById('tax-owner').value.trim() || 'Property Owner';
+    var property = document.getElementById('tax-property').value;
+    var year = document.getElementById('tax-year').value;
+    if (!property) { alert('Please select a property.'); return; }
+    var summary = generateTaxSummary(owner, property, year);
+    generateTaxPDF(summary);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: ENHANCED ADD PROPERTY (Google Maps + Drag-Drop + Client)
+  // ══════════════════════════════════════════════════════════════════════
+  var _dragDropPhotos = [];
+
+  // Initialize Google Maps autocomplete on edit-address field
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() { initGooglePlaces('edit-address'); }, 500);
+  });
+
+  // Initialize drag-drop on the photo upload area
+  document.addEventListener('DOMContentLoaded', function() {
+    initDragDropZone('photo-drop-zone', function(files) {
+      files.forEach(function(file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          _dragDropPhotos.push({ src: e.target.result, selected: true, name: file.name });
+          renderDragDropPhotos();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  });
+
+  function renderDragDropPhotos() {
+    var strip = document.getElementById('photo-preview-strip');
+    if (!strip) return;
+    strip.innerHTML = '';
+    _dragDropPhotos.forEach(function(photo, i) {
+      var div = document.createElement('div');
+      div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:2px solid ' + (photo.selected ? '#1a56db' : '#e5e7eb') + ';flex-shrink:0;cursor:pointer;opacity:' + (photo.selected ? '1' : '0.5') + ';';
+      div.innerHTML = '<img src="' + photo.src + '" style="width:100%;height:100%;object-fit:cover;" />' +
+        '<div onclick="event.stopPropagation();togglePhotoSelect(' + i + ')" style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:4px;background:' + (photo.selected ? '#1a56db' : 'rgba(0,0,0,.4)') + ';color:white;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;">' + (photo.selected ? '✓' : '') + '</div>' +
+        '<button onclick="event.stopPropagation();removeDragPhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
+      strip.appendChild(div);
+    });
+    // Update editPhotos to selected ones
+    editPhotos = _dragDropPhotos.filter(function(p) { return p.selected; }).map(function(p) { return p.src; });
+  }
+
+  function togglePhotoSelect(idx) {
+    _dragDropPhotos[idx].selected = !_dragDropPhotos[idx].selected;
+    renderDragDropPhotos();
+  }
+
+  function removeDragPhoto(idx) {
+    _dragDropPhotos.splice(idx, 1);
+    renderDragDropPhotos();
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: CLIENT ASSOCIATION (Add Property modal)
+  // ══════════════════════════════════════════════════════════════════════
+  function populateClientDropdown() {
+    var sel = document.getElementById('edit-client-owner');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Select existing client...</option>';
+    var clients = JSON.parse(localStorage.getItem('rv_clients') || '[]');
+    clients.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.id || c.email || c.name;
+      opt.textContent = c.name + (c.email ? ' (' + c.email + ')' : '');
+      sel.appendChild(opt);
+    });
+    // Also add default Sanders PM
+    var opt2 = document.createElement('option');
+    opt2.value = 'sanders-pm';
+    opt2.textContent = 'Sanders Property Management (Self)';
+    sel.appendChild(opt2);
+  }
+
+  function addNewClientInline() {
+    var panel = document.getElementById('new-client-inline');
+    if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function saveNewClientInline() {
+    var name = document.getElementById('new-client-name').value.trim();
+    var email = document.getElementById('new-client-email').value.trim();
+    if (!name) { alert('Please enter a client name.'); return; }
+    var clients = JSON.parse(localStorage.getItem('rv_clients') || '[]');
+    var newClient = {
+      id: 'client-' + Date.now(),
+      name: name,
+      email: email,
+      createdAt: new Date().toISOString()
+    };
+    clients.push(newClient);
+    localStorage.setItem('rv_clients', JSON.stringify(clients));
+    populateClientDropdown();
+    // Select the new client
+    var sel = document.getElementById('edit-client-owner');
+    if (sel) sel.value = newClient.id;
+    document.getElementById('new-client-inline').style.display = 'none';
+    document.getElementById('new-client-name').value = '';
+    document.getElementById('new-client-email').value = '';
+    alert('Client "' + name + '" added successfully!');
+  }
+
+  // Populate client dropdown when edit modal opens
+  var _origOpenEditListing = typeof openEditListing === 'function' ? openEditListing : null;
+  if (_origOpenEditListing) {
+    var _origOpen = openEditListing;
+    openEditListing = function(idx, cid) {
+      _origOpen(idx, cid);
+      populateClientDropdown();
+      _dragDropPhotos = [];
+      renderDragDropPhotos();
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: FACEBOOK GRAPH API INTEGRATION
+  // ══════════════════════════════════════════════════════════════════════
+  window.RV_FACEBOOK_API = null; // Set to { pageId: '...', accessToken: '...' } to enable
+  function publishToFacebook(listing) {
+    if (!window.RV_FACEBOOK_API || !window.RV_FACEBOOK_API.accessToken) {
+      return false; // Fallback to clipboard method
+    }
+    var api = window.RV_FACEBOOK_API;
+    var message = listing.address + '\n' +
+      (listing.beds || '?') + ' bed / ' + (listing.baths || '?') + ' bath' +
+      (listing.sqft ? ' · ' + listing.sqft + ' sq ft' : '') + '\n' +
+      '$' + (listing.rent || '?') + '/mo\n\n' +
+      (listing.description || '') + '\n\n' +
+      'Listing ID: ' + (listing.listingId || 'N/A') + '\n' +
+      'Verify at: https://rentverified.com\n' +
+      'Managed by Sanders Property Management';
+    // Post to Facebook Page via Graph API
+    fetch('https://graph.facebook.com/v18.0/' + api.pageId + '/feed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, access_token: api.accessToken })
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.id) {
+          var fbStatus = document.getElementById('fb-status');
+          if (fbStatus) { fbStatus.textContent = 'Published!'; fbStatus.style.color = '#15803d'; }
+          alert('Successfully published to Facebook Page!');
+        } else {
+          alert('Facebook publish error: ' + (data.error ? data.error.message : 'Unknown error'));
+        }
+      })
+      .catch(function(err) { alert('Facebook API error: ' + err.message); });
+    return true;
+  }
+
+  // Publish to Facebook from broadcast modal using Graph API
+  function publishToFacebookFromBroadcast() {
+    if (!window._broadcastListing) { alert('No listing selected.'); return; }
+    var listing = window._broadcastListing;
+    var published = publishToFacebook(listing);
+    if (!published) {
+      alert('Facebook Graph API is not configured. Use the "Open →" button to post manually via clipboard.');
+    }
+  }
+
+  // Show Facebook Graph API button if configured
+  function updateFbGraphBtn() {
+    var btn = document.getElementById('fb-graph-btn');
+    if (btn && window.RV_FACEBOOK_API && window.RV_FACEBOOK_API.accessToken) {
+      btn.style.display = '';
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: DASHBOARD TAB ROUTING UPDATE
+  // ══════════════════════════════════════════════════════════════════════
+  var _origDashTab = dashTab;
+  dashTab = function(name) {
+    _origDashTab(name);
+    if (name === 'accounting') {
+      populateLedgerFilters();
+      renderLedger();
+      populatePropertySelects();
+    }
+    if (name === 'import') {
+      // Reset import state
+      var mp = document.getElementById('import-mapping-panel');
+      var is = document.getElementById('import-status');
+      if (mp) mp.style.display = 'none';
+      if (is) is.style.display = 'none';
+    }
+  };
+
 </script>
 
   <!-- BROADCAST MODAL -->
@@ -2166,6 +2728,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
             </div>
             <span id="fb-status" style="font-size:.75rem;color:#6B7280;"></span>
             <button onclick="broadcastTo('fb')" class="btn btn-sm" style="background:#1877f2;color:white;border:none;white-space:nowrap;">Open →</button>
+            <button onclick="publishToFacebookFromBroadcast()" class="btn btn-sm" style="background:#42b72a;color:white;border:none;white-space:nowrap;display:none;" id="fb-graph-btn">Publish to Page</button>
           </div>
 
           <!-- Craigslist -->
