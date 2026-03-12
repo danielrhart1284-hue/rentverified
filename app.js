@@ -1567,7 +1567,7 @@ function parseSPMRentCollections(rows) {
         city: '',
         fullAddress: colA,
         tenant: colB,
-        rent: rentNum,
+        rent: isNaN(rentNum) ? 0 : rentNum,
         pmFeePercent: feePercentDisplay,
         pmFeeDollar: Math.round(feeDollar * 100) / 100,
         notes: colF,
