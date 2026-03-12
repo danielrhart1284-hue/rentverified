@@ -1495,9 +1495,11 @@ function initMLClassifier(statusCallback) {
   if (RV_ML.ready) return Promise.resolve(RV_ML.classifier);
   if (RV_ML.loading) {
     return new Promise(function(resolve) {
+      var attempts = 0;
       var check = setInterval(function() {
+        attempts++;
         if (RV_ML.ready) { clearInterval(check); resolve(RV_ML.classifier); }
-        if (RV_ML.error) { clearInterval(check); resolve(null); }
+        if (RV_ML.error || attempts > 120) { clearInterval(check); resolve(null); }
       }, 500);
     });
   }
