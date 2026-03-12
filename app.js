@@ -1205,7 +1205,7 @@ function importPortfolio(parsedData, columnMapping, clientId) {
     });
   });
   var cid = clientId || 'sanders-pm';
-  var key = cid === 'sanders-pm' ? 'rv_sanders_listings' : 'rv_listings_' + cid;
+  var key = RV_KEYS.LISTINGS + cid;
   var existing = JSON.parse(localStorage.getItem(key) || 'null');
   if (!existing) existing = [];
   var merged = existing.concat(listings);
@@ -1649,7 +1649,8 @@ function importSPMToClientHub(xlsxRows) {
   saveClientHub(hub);
 
   // Import properties into listings store and ledger
-  var allListings = JSON.parse(localStorage.getItem('rv_sanders_listings') || '[]');
+  var listingsKey = RV_KEYS.LISTINGS + 'sanders-pm';
+  var allListings = JSON.parse(localStorage.getItem(listingsKey) || '[]');
   owners.forEach(function(owner) {
     owner.properties.forEach(function(p) {
       var exists = allListings.some(function(l) {
@@ -1686,7 +1687,7 @@ function importSPMToClientHub(xlsxRows) {
       }
     });
   });
-  localStorage.setItem('rv_sanders_listings', JSON.stringify(allListings));
+  localStorage.setItem(listingsKey, JSON.stringify(allListings));
 
   return {
     ownersImported: imported,
