@@ -1,6 +1,7 @@
 // RentVerified - Shared Application JavaScript
 // AI Chat Widget + localStorage Data Layer + Cloudinary Upload + Broadcast + Utilities
-// Version 2.0 - Full Platform Build
+// ML-Powered Document Parsing & Scam Detection (Hugging Face Transformers.js)
+// Version 3.0 - Full Platform Build + Open-Source ML Models
 
 // ============================================================================
 // CONFIGURATION
@@ -1446,6 +1447,440 @@ function showWIP(feature) {
   var featureEl = document.getElementById('wip-feature');
   if (featureEl) featureEl.textContent = feature || 'This feature is coming soon!';
   modal.style.display = 'flex';
+}
+
+// ============================================================================
+// HUGGING FACE TRANSFORMERS.JS — OPEN-SOURCE ML MODELS (Browser-Side)
+// Uses zero-shot classification for document parsing & scam detection
+// Models run entirely in-browser via ONNX Runtime Web — zero API costs
+// ============================================================================
+
+var RV_ML = {
+  classifier: null,
+  loading: false,
+  ready: false,
+  error: null,
+  pipeline: null,
+  env: null,
+  MODEL_ID: 'Xenova/nli-deberta-v3-xsmall',
+};
+
+// Load Transformers.js dynamically from CDN
+function loadTransformersJS() {
+  if (RV_ML.pipeline) return Promise.resolve();
+  return new Promise(function(resolve, reject) {
+    var script = document.createElement('script');
+    script.type = 'module';
+    // Use inline module to import and expose Transformers.js globally
+    var blob = new Blob([
+      'import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2";\n' +
+      'env.allowLocalModels = false;\n' +
+      'env.useBrowserCache = true;\n' +
+      'window.__RV_TRANSFORMERS__ = { pipeline: pipeline, env: env };\n' +
+      'window.dispatchEvent(new Event("rv-transformers-loaded"));\n'
+    ], { type: 'text/javascript' });
+    script.src = URL.createObjectURL(blob);
+    script.onerror = function() { reject(new Error('Failed to load Transformers.js')); };
+    window.addEventListener('rv-transformers-loaded', function() {
+      RV_ML.pipeline = window.__RV_TRANSFORMERS__.pipeline;
+      RV_ML.env = window.__RV_TRANSFORMERS__.env;
+      resolve();
+    }, { once: true });
+    document.head.appendChild(script);
+  });
+}
+
+// Initialize the zero-shot classification pipeline
+function initMLClassifier(statusCallback) {
+  if (RV_ML.ready) return Promise.resolve(RV_ML.classifier);
+  if (RV_ML.loading) {
+    return new Promise(function(resolve) {
+      var check = setInterval(function() {
+        if (RV_ML.ready) { clearInterval(check); resolve(RV_ML.classifier); }
+        if (RV_ML.error) { clearInterval(check); resolve(null); }
+      }, 500);
+    });
+  }
+
+  RV_ML.loading = true;
+  if (statusCallback) statusCallback('loading-lib', 'Loading Transformers.js library...');
+
+  return loadTransformersJS().then(function() {
+    if (statusCallback) statusCallback('loading-model', 'Downloading ML model (' + RV_ML.MODEL_ID + ')...');
+    return RV_ML.pipeline('zero-shot-classification', RV_ML.MODEL_ID, {
+      progress_callback: function(progress) {
+        if (statusCallback && progress.status === 'progress') {
+          var pct = Math.round((progress.progress || 0));
+          statusCallback('downloading', 'Downloading model... ' + pct + '%');
+        }
+      }
+    });
+  }).then(function(classifier) {
+    RV_ML.classifier = classifier;
+    RV_ML.ready = true;
+    RV_ML.loading = false;
+    if (statusCallback) statusCallback('ready', 'ML model ready');
+    return classifier;
+  }).catch(function(err) {
+    console.warn('ML model failed to load:', err);
+    RV_ML.error = err;
+    RV_ML.loading = false;
+    if (statusCallback) statusCallback('error', 'ML model unavailable — using regex fallback');
+    return null;
+  });
+}
+
+// ── ML-Enhanced Document Parsing (Portfolio Import) ──────────────────────
+// Uses zero-shot classification to understand column semantics
+var ML_COLUMN_LABELS = {
+  property: ['property address', 'street address', 'unit location', 'building address'],
+  tenant: ['tenant name', 'renter name', 'occupant name', 'resident'],
+  rent: ['monthly rent', 'rent amount', 'rent payment', 'rent price'],
+  pmFee: ['management fee', 'PM fee', 'property management commission', 'manager fee'],
+  beds: ['number of bedrooms', 'bedroom count'],
+  baths: ['number of bathrooms', 'bathroom count'],
+  sqft: ['square footage', 'property size', 'area in square feet'],
+  status: ['occupancy status', 'vacancy status', 'rental status', 'available or rented'],
+};
+
+function mlAutoMapColumns(headers, statusCallback) {
+  return initMLClassifier(statusCallback).then(function(classifier) {
+    if (!classifier) {
+      if (statusCallback) statusCallback('fallback', 'Using regex-based column mapping');
+      return autoMapColumns(headers);
+    }
+
+    var mapping = { property: null, tenant: null, rent: null, pmFee: null, beds: null, baths: null, sqft: null, status: null };
+    var fields = Object.keys(ML_COLUMN_LABELS);
+    var allLabels = [];
+    var labelToField = {};
+
+    for (var f = 0; f < fields.length; f++) {
+      var labels = ML_COLUMN_LABELS[fields[f]];
+      for (var lb = 0; lb < labels.length; lb++) {
+        allLabels.push(labels[lb]);
+        labelToField[labels[lb]] = fields[f];
+      }
+    }
+
+    if (statusCallback) statusCallback('classifying', 'Analyzing ' + headers.length + ' columns with ML...');
+
+    var chain = Promise.resolve();
+    var results = [];
+
+    for (var h = 0; h < headers.length; h++) {
+      (function(header) {
+        chain = chain.then(function() {
+          return classifier(header, allLabels, { multi_label: false }).then(function(result) {
+            results.push({ header: header, topLabel: result.labels[0], topScore: result.scores[0] });
+          });
+        });
+      })(headers[h]);
+    }
+
+    return chain.then(function() {
+      // Sort by confidence descending to assign best matches first
+      results.sort(function(a, b) { return b.topScore - a.topScore; });
+      var assigned = {};
+
+      for (var r = 0; r < results.length; r++) {
+        var res = results[r];
+        var field = labelToField[res.topLabel];
+        if (field && !mapping[field] && !assigned[res.header] && res.topScore > 0.3) {
+          mapping[field] = res.header;
+          assigned[res.header] = true;
+        }
+      }
+
+      // Fall back to regex for any unmapped fields
+      var regexMapping = autoMapColumns(headers);
+      for (var key in regexMapping) {
+        if (!mapping[key] && regexMapping[key]) {
+          mapping[key] = regexMapping[key];
+        }
+      }
+
+      if (statusCallback) statusCallback('done', 'ML column mapping complete');
+      return mapping;
+    });
+  });
+}
+
+// ── ML-Powered Scam Detection ────────────────────────────────────────────
+// Analyzes listing descriptions for fraud indicators using zero-shot classification
+
+var SCAM_INDICATORS = [
+  'requests wire transfer or Western Union payment',
+  'asks for payment before viewing the property',
+  'requests gift cards as payment',
+  'price is suspiciously below market rate',
+  'uses urgency pressure tactics like act now or limited time',
+  'asks for personal financial information upfront',
+  'refuses to meet in person or show the property',
+  'listing copied from another source or generic description',
+  'no verifiable contact information provided',
+  'legitimate rental listing with normal terms',
+];
+
+var SCAM_SAFE_LABEL = 'legitimate rental listing with normal terms';
+
+function analyzeListingForFraud(listingText, statusCallback) {
+  if (!listingText || listingText.trim().length < 20) {
+    return Promise.resolve({
+      score: 0, level: 'insufficient', flags: [],
+      summary: 'Not enough text to analyze. Please provide a full listing description.'
+    });
+  }
+
+  return initMLClassifier(statusCallback).then(function(classifier) {
+    if (!classifier) {
+      // Fallback to keyword-based scam detection
+      return keywordScamDetection(listingText);
+    }
+
+    if (statusCallback) statusCallback('analyzing', 'Running ML scam analysis...');
+
+    return classifier(listingText, SCAM_INDICATORS, { multi_label: true }).then(function(result) {
+      var flags = [];
+      var riskScore = 0;
+
+      for (var i = 0; i < result.labels.length; i++) {
+        if (result.labels[i] === SCAM_SAFE_LABEL) continue;
+        if (result.scores[i] > 0.35) {
+          flags.push({
+            indicator: result.labels[i],
+            confidence: Math.round(result.scores[i] * 100),
+          });
+          riskScore += result.scores[i] * 15;
+        }
+      }
+
+      // Find the safe label score
+      var safeIdx = result.labels.indexOf(SCAM_SAFE_LABEL);
+      var safeScore = safeIdx !== -1 ? result.scores[safeIdx] : 0;
+
+      // Adjust risk: high safe score reduces risk
+      riskScore = Math.max(0, riskScore - (safeScore * 20));
+      riskScore = Math.min(100, Math.round(riskScore));
+
+      // Also run keyword checks and combine
+      var keywordResult = keywordScamDetection(listingText);
+      for (var k = 0; k < keywordResult.flags.length; k++) {
+        var kFlag = keywordResult.flags[k];
+        var isDuplicate = flags.some(function(f) {
+          return f.indicator.toLowerCase().indexOf(kFlag.indicator.toLowerCase().split(' ')[0]) !== -1;
+        });
+        if (!isDuplicate) {
+          flags.push(kFlag);
+          riskScore = Math.min(100, riskScore + kFlag.confidence * 0.3);
+        }
+      }
+
+      riskScore = Math.round(Math.min(100, riskScore));
+
+      var level = riskScore < 25 ? 'low' : riskScore < 55 ? 'medium' : 'high';
+      var summary = level === 'low'
+        ? 'This listing appears legitimate. No significant fraud indicators detected.'
+        : level === 'medium'
+          ? 'Some potential concerns detected. Review the flagged items below before proceeding.'
+          : 'High risk of fraud detected. Multiple scam indicators found. Proceed with extreme caution.';
+
+      if (statusCallback) statusCallback('done', 'Analysis complete');
+
+      return {
+        score: riskScore,
+        level: level,
+        flags: flags.sort(function(a, b) { return b.confidence - a.confidence; }),
+        summary: summary,
+        mlPowered: true,
+        safeScore: Math.round(safeScore * 100),
+      };
+    });
+  }).catch(function(err) {
+    console.warn('ML scam analysis failed, falling back to keywords:', err);
+    return keywordScamDetection(listingText);
+  });
+}
+
+// Keyword-based fallback scam detection (no ML required)
+function keywordScamDetection(text) {
+  var lower = (text || '').toLowerCase();
+  var flags = [];
+
+  var patterns = [
+    { pattern: /wire\s*transfer|western\s*union|moneygram/i, indicator: 'Mentions wire transfer or money order services', weight: 30 },
+    { pattern: /gift\s*card|itunes|google\s*play\s*card|steam\s*card/i, indicator: 'Requests gift card payment', weight: 35 },
+    { pattern: /pay\s*(before|without)\s*(seeing|viewing|visit)|deposit\s*before\s*tour/i, indicator: 'Asks for payment before viewing', weight: 30 },
+    { pattern: /act\s*now|hurry|limited\s*time|won't\s*last|going\s*fast|urgent/i, indicator: 'Uses urgency pressure tactics', weight: 15 },
+    { pattern: /send\s*(your|me)\s*(ssn|social\s*security|bank\s*account|credit\s*card)/i, indicator: 'Requests sensitive financial information', weight: 35 },
+    { pattern: /can't\s*show|cannot\s*meet|out\s*of\s*(town|country|state)|overseas/i, indicator: 'Claims inability to meet or show property', weight: 25 },
+    { pattern: /too\s*good\s*to\s*be\s*true|unbelievable\s*(price|deal)/i, indicator: 'Language suggesting unrealistic deal', weight: 15 },
+    { pattern: /no\s*credit\s*check.*no\s*background|guaranteed\s*approval/i, indicator: 'Promises no screening (unusual for legitimate rentals)', weight: 15 },
+    { pattern: /\$(1|2|3|4)\d{2}\s*\/?\s*(mo|month)/i, indicator: 'Price appears significantly below market rate', weight: 20 },
+    { pattern: /refundable\s*deposit.*right\s*away|deposit.*immediately/i, indicator: 'Pressures for immediate deposit', weight: 20 },
+  ];
+
+  var riskScore = 0;
+  for (var i = 0; i < patterns.length; i++) {
+    if (patterns[i].pattern.test(lower)) {
+      flags.push({
+        indicator: patterns[i].indicator,
+        confidence: patterns[i].weight,
+      });
+      riskScore += patterns[i].weight;
+    }
+  }
+
+  riskScore = Math.min(100, riskScore);
+  var level = riskScore < 25 ? 'low' : riskScore < 55 ? 'medium' : 'high';
+  var summary = riskScore === 0
+    ? 'No fraud indicators detected by keyword analysis.'
+    : level === 'low'
+      ? 'Minor concerns detected. This may be legitimate but review flagged items.'
+      : level === 'medium'
+        ? 'Multiple potential concerns found. Verify the listing carefully before proceeding.'
+        : 'High risk! Multiple scam indicators detected. Do not send money or personal information.';
+
+  return {
+    score: riskScore,
+    level: level,
+    flags: flags,
+    summary: summary,
+    mlPowered: false,
+  };
+}
+
+// ── ML-Enhanced Accounting: Document Text Extraction ─────────────────────
+// Classify extracted text snippets into accounting categories
+var ACCOUNTING_CATEGORIES = [
+  'rent payment received',
+  'maintenance or repair expense',
+  'property management fee',
+  'insurance payment',
+  'property tax payment',
+  'utility bill payment',
+  'security deposit transaction',
+  'late fee or penalty',
+  'lease-related income',
+  'capital improvement expense',
+];
+
+function classifyAccountingEntry(textDescription, statusCallback) {
+  return initMLClassifier(statusCallback).then(function(classifier) {
+    if (!classifier) {
+      return { category: 'unknown', confidence: 0, mlPowered: false };
+    }
+
+    return classifier(textDescription, ACCOUNTING_CATEGORIES, { multi_label: false }).then(function(result) {
+      return {
+        category: result.labels[0],
+        confidence: Math.round(result.scores[0] * 100),
+        allCategories: result.labels.map(function(label, idx) {
+          return { label: label, score: Math.round(result.scores[idx] * 100) };
+        }).slice(0, 3),
+        mlPowered: true,
+      };
+    });
+  }).catch(function() {
+    return { category: 'unknown', confidence: 0, mlPowered: false };
+  });
+}
+
+// ── Scam Detection UI Integration (homepage verify tool) ─────────────────
+function renderScamAnalysis(containerId, result) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+
+  var levelColors = { low: '#22c55e', medium: '#f59e0b', high: '#ef4444', insufficient: '#9ca3af' };
+  var levelBgs = { low: '#f0fdf4', medium: '#fffbeb', high: '#fef2f2', insufficient: '#f9fafb' };
+  var levelIcons = { low: '\u{1F6E1}\uFE0F', medium: '\u26A0\uFE0F', high: '\u{1F6A8}', insufficient: '\u2139\uFE0F' };
+  var levelLabels = { low: 'Low Risk', medium: 'Medium Risk', high: 'High Risk', insufficient: 'Insufficient Data' };
+
+  var color = levelColors[result.level] || '#9ca3af';
+  var bg = levelBgs[result.level] || '#f9fafb';
+  var icon = levelIcons[result.level] || '';
+  var label = levelLabels[result.level] || 'Unknown';
+
+  var html = '<div style="background:' + bg + ';border:2px solid ' + color + ';border-radius:12px;padding:1.25rem;margin-top:1rem;">';
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:0.75rem;">';
+  html += '<span style="font-size:1.5rem;">' + icon + '</span>';
+  html += '<strong style="color:' + color + ';font-size:1.1rem;">AI Scam Analysis: ' + label + '</strong>';
+  if (result.mlPowered) {
+    html += '<span style="background:#dbeafe;color:#1d4ed8;font-size:0.65rem;padding:2px 8px;border-radius:999px;font-weight:700;">ML-POWERED</span>';
+  }
+  html += '</div>';
+
+  // Risk score bar
+  if (result.level !== 'insufficient') {
+    html += '<div style="margin-bottom:0.75rem;">';
+    html += '<div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#6b7280;margin-bottom:4px;">';
+    html += '<span>Risk Score</span><span>' + result.score + '/100</span></div>';
+    html += '<div style="background:#e5e7eb;border-radius:999px;height:8px;overflow:hidden;">';
+    html += '<div style="background:' + color + ';height:100%;width:' + result.score + '%;border-radius:999px;transition:width 0.5s;"></div>';
+    html += '</div></div>';
+  }
+
+  html += '<p style="color:#374151;font-size:0.9rem;margin-bottom:0.5rem;">' + escapeHtml(result.summary) + '</p>';
+
+  // Flags
+  if (result.flags && result.flags.length > 0) {
+    html += '<div style="margin-top:0.75rem;">';
+    html += '<p style="font-weight:700;font-size:0.85rem;color:#374151;margin-bottom:0.5rem;">Detected Indicators:</p>';
+    for (var i = 0; i < result.flags.length; i++) {
+      var flag = result.flags[i];
+      var flagColor = flag.confidence > 50 ? '#ef4444' : flag.confidence > 25 ? '#f59e0b' : '#6b7280';
+      html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.85rem;">';
+      html += '<span style="color:' + flagColor + ';">\u25CF</span>';
+      html += '<span style="color:#374151;">' + escapeHtml(flag.indicator) + '</span>';
+      html += '<span style="color:#9ca3af;font-size:0.75rem;">(' + flag.confidence + '% confidence)</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  if (result.safeScore !== undefined && result.safeScore > 0) {
+    html += '<p style="color:#6b7280;font-size:0.8rem;margin-top:0.5rem;">Legitimacy confidence: ' + result.safeScore + '%</p>';
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
+  container.style.display = 'block';
+}
+
+// ── ML Status Badge (for Portfolio Import UI) ────────────────────────────
+function renderMLStatusBadge(containerId, status, message) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+
+  var colors = {
+    'loading-lib': { bg: '#dbeafe', text: '#1d4ed8', icon: '\u23F3' },
+    'loading-model': { bg: '#dbeafe', text: '#1d4ed8', icon: '\u{1F9E0}' },
+    'downloading': { bg: '#dbeafe', text: '#1d4ed8', icon: '\u2B07\uFE0F' },
+    'classifying': { bg: '#fef3c7', text: '#92400e', icon: '\u{1F50D}' },
+    'analyzing': { bg: '#fef3c7', text: '#92400e', icon: '\u{1F50D}' },
+    'ready': { bg: '#d1fae5', text: '#065f46', icon: '\u2705' },
+    'done': { bg: '#d1fae5', text: '#065f46', icon: '\u2705' },
+    'fallback': { bg: '#fef3c7', text: '#92400e', icon: '\u26A0\uFE0F' },
+    'error': { bg: '#fee2e2', text: '#991b1b', icon: '\u274C' },
+  };
+
+  var c = colors[status] || { bg: '#f3f4f6', text: '#374151', icon: '\u2139\uFE0F' };
+  container.innerHTML = '<div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:' + c.bg +
+    ';color:' + c.text + ';border-radius:999px;font-size:0.78rem;font-weight:600;">' +
+    '<span>' + c.icon + '</span><span>' + escapeHtml(message || status) + '</span></div>';
+  container.style.display = 'block';
+}
+
+// Check if ML is available (lightweight check)
+function isMLAvailable() {
+  return RV_ML.ready;
+}
+
+function getMLStatus() {
+  if (RV_ML.ready) return 'ready';
+  if (RV_ML.loading) return 'loading';
+  if (RV_ML.error) return 'error';
+  return 'idle';
 }
 
 // Seed ledger data on load

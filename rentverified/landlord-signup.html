@@ -1295,7 +1295,8 @@
       <!-- PORTFOLIO IMPORT TAB -->
       <div id="dtab-import" class="tab-content">
         <div class="page-header">
-          <div><h1>📥 Portfolio Import</h1><p>Bulk import properties from CSV or XLSX files. The AI will auto-map your columns.</p></div>
+          <div><h1>📥 Portfolio Import</h1><p>Bulk import properties from CSV or XLSX files. ML-powered column detection maps your data automatically.</p></div>
+          <div id="ml-import-status" style="display:none;"></div>
         </div>
         <div class="card" style="margin-bottom:1.5rem;">
           <div class="card-body">
@@ -1316,8 +1317,12 @@
         <div id="import-mapping-panel" style="display:none;">
           <div class="card" style="margin-bottom:1.5rem;">
             <div class="card-body">
-              <h3 style="font-weight:700;margin-bottom:1rem;">🤖 AI Column Mapping</h3>
-              <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1rem;">Review the auto-detected column mapping below. Adjust if needed.</p>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+                <h3 style="font-weight:700;margin:0;">🤖 AI Column Mapping</h3>
+                <span id="ml-mapping-badge" style="background:#dbeafe;color:#1d4ed8;font-size:0.65rem;padding:2px 8px;border-radius:999px;font-weight:700;">HUGGING FACE ML</span>
+              </div>
+              <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1rem;">Review the ML-detected column mapping below. Powered by open-source Hugging Face models running in your browser. Adjust if needed.</p>
+              <div id="ml-column-status" style="display:none;margin-bottom:0.75rem;"></div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                 <div class="form-group"><label>Property Address Column</label><select id="map-property" class="form-control"></select></div>
                 <div class="form-group"><label>Tenant Name Column</label><select id="map-tenant" class="form-control"></select></div>
@@ -2327,7 +2332,17 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       alert('Could not parse file. Please check the format.');
       return;
     }
-    var mapping = autoMapColumns(parsed.headers);
+    // Try ML-enhanced mapping first, fall back to regex
+    var statusCb = function(status, msg) { renderMLStatusBadge('ml-column-status', status, msg); };
+    mlAutoMapColumns(parsed.headers, statusCb).then(function(mapping) {
+      _applyMapping(parsed, mapping);
+    }).catch(function() {
+      var mapping = autoMapColumns(parsed.headers);
+      _applyMapping(parsed, mapping);
+    });
+  }
+
+  function _applyMapping(parsed, mapping) {
     var fields = ['property','tenant','rent','pmfee','beds','baths'];
     var mapKeys = ['property','tenant','rent','pmFee','beds','baths'];
     fields.forEach(function(f, fi) {
