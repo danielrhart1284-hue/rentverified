@@ -3009,8 +3009,19 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
         var data = e.target.result;
         var rows;
         if (file.name.endsWith('.csv')) {
-          var parsed = parseCSV(data);
-          rows = [parsed.headers].concat(parsed.rows.map(function(r) { return parsed.headers.map(function(h) { return r[h]; }); }));
+          // Parse CSV into raw 2D array (same format as XLSX path) — don't use parseCSV which treats first row as headers
+          var lines = data.split(/\r?\n/).filter(function(l) { return l.trim(); });
+          rows = lines.map(function(line) {
+            var cells = []; var current = ''; var inQuotes = false;
+            for (var ci = 0; ci < line.length; ci++) {
+              var ch = line[ci];
+              if (ch === '"') { inQuotes = !inQuotes; }
+              else if (ch === ',' && !inQuotes) { cells.push(current.trim()); current = ''; }
+              else { current += ch; }
+            }
+            cells.push(current.trim());
+            return cells.map(function(v) { var n = parseFloat(v); return (!isNaN(n) && v === String(n)) ? n : v; });
+          });
         } else {
           // XLSX parsing using SheetJS
           if (typeof XLSX === 'undefined') {
