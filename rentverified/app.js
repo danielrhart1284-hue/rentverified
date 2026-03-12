@@ -1503,6 +1503,7 @@ function initMLClassifier(statusCallback) {
   }
 
   RV_ML.loading = true;
+  RV_ML.error = null;
   if (statusCallback) statusCallback('loading-lib', 'Loading Transformers.js library...');
 
   return loadTransformersJS().then(function() {
