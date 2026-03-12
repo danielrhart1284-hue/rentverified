@@ -1626,14 +1626,21 @@ function importSPMToClientHub(xlsxRows) {
         });
       }
       if (p.tenant && p.rent > 0) {
-        addLedgerEntry({
-          tenant: p.tenant, property: p.fullAddress,
-          month: new Date().toISOString().slice(0, 7),
-          rentDue: p.rent, rentPaid: 0, pmFee: p.pmFeeDollar,
-          pmFeePercent: p.pmFeePercent, status: 'due',
-          method: p.paymentMethod, ownerName: owner.name,
-          securityDeposit: p.securityDeposit
+        var currentMonth = new Date().toISOString().slice(0, 7);
+        var ledger = getRentLedger();
+        var alreadyExists = ledger.some(function(entry) {
+          return entry.tenant === p.tenant && entry.property === p.fullAddress && entry.month === currentMonth;
         });
+        if (!alreadyExists) {
+          addLedgerEntry({
+            tenant: p.tenant, property: p.fullAddress,
+            month: currentMonth,
+            rentDue: p.rent, rentPaid: 0, pmFee: p.pmFeeDollar,
+            pmFeePercent: p.pmFeePercent, status: 'due',
+            method: p.paymentMethod, ownerName: owner.name,
+            securityDeposit: p.securityDeposit
+          });
+        }
       }
     });
   });
