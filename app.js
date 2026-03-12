@@ -1473,7 +1473,7 @@ function parseSPMRentCollections(rows) {
     var colJ = row[9];
 
     // Skip header row and total/summary rows
-    if (colA === 'Property' || colA === 'Rent Collections' || /^Total/i.test(colA)) {
+    if (colA === 'Property' || /^Rent Collections/i.test(colA) || /^Total/i.test(colA)) {
       if (pendingProperty && currentOwner) {
         currentOwner.properties.push(pendingProperty);
         pendingProperty = null;
@@ -1496,10 +1496,28 @@ function parseSPMRentCollections(rows) {
 
     // Detect rent amount — numeric in col C indicates property row
     var rentNum = typeof colC === 'number' ? colC : parseFloat(colC);
-    var isPropertyRow = !isNaN(rentNum) && rentNum > 0;
+    var feeNum = typeof colD === 'number' ? colD : parseFloat(colD);
+    // A property row has rent > 0 OR has a fee percent (covers $0 rent vacant properties)
+    var isPropertyRow = (!isNaN(rentNum) && rentNum > 0) || (!isNaN(feeNum) && feeNum > 0 && colB);
 
     // Detect owner header: col A has text, no valid rent in col C, not a city line
     if (!isPropertyRow && colA && !_looksLikeCityLine(colA)) {
+      // Check if this looks like a notes/continuation row rather than a new owner header.
+      // Notes rows: start with lowercase, contain sentences/phrases, have words like "waiting", "owes", "might"
+      // Owner rows: proper-cased names like "Calvin Blohm", "Garth Properties", "TWC Properties"
+      var looksLikeNotes = /^[^A-Z]/.test(colA) || /\b(waiting|owes|might|they|move in|paid|until|collects|picks)\b/i.test(colA);
+      if (looksLikeNotes && currentOwner) {
+        // Treat as notes on the pending or last property
+        if (pendingProperty) {
+          pendingProperty.notes = ((pendingProperty.notes || '') + ' ' + colA).trim();
+          if (colB) pendingProperty.notes = (pendingProperty.notes + ' ' + colB).trim();
+        } else if (currentOwner.properties.length > 0) {
+          var lastProp = currentOwner.properties[currentOwner.properties.length - 1];
+          lastProp.notes = ((lastProp.notes || '') + ' ' + colA).trim();
+          if (colB) lastProp.notes = (lastProp.notes + ' ' + colB).trim();
+        }
+        continue;
+      }
       if (pendingProperty && currentOwner) {
         currentOwner.properties.push(pendingProperty);
         pendingProperty = null;
@@ -1593,7 +1611,14 @@ function parseSPMRentCollections(rows) {
 
 function _looksLikeCityLine(text) {
   if (!text) return false;
-  return /\b[A-Z]{2}\s*\d{5}\b/.test(text) || /,\s*[A-Z]{2}\s+\d{5}/.test(text);
+  // Match: "City, ST 84109" or "ST 84109" or "City, ST" (no zip)
+  // Also match: "SLC, UT 84106", "Orem, UT 84059", "Salt Lake City, UT"
+  if (/\b[A-Z]{2}\s+\d{5}\b/.test(text)) return true;           // ST 84109
+  if (/,\s*[A-Z]{2}\s*\d{5}/.test(text)) return true;            // , ST84109
+  if (/,\s*[A-Z]{2}\s*$/.test(text.trim())) return true;          // City, ST (no zip)
+  // Known Utah city names followed by comma
+  if (/^(Salt Lake City|West Valley City|West Jordan|Orem|Tooele|Murray|Riverton|Payson|Sandy|Provo|Ogden|SLC|Bluffdale|Draper|Lehi|Herriman|Cottonwood Heights|Midvale|Taylorsville|South Jordan|Magna|Kearns|Clinton),?\s/i.test(text.trim())) return true;
+  return false;
 }
 
 // ── Import SPM data into Client Hub ───────────────────────────────────────
