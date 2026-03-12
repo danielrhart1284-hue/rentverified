@@ -1665,12 +1665,26 @@ function analyzeListingForFraud(listingText, statusCallback) {
       riskScore = Math.min(100, Math.round(riskScore));
 
       // Also run keyword checks and combine
+      // Explicit mapping from keyword indicators to their corresponding ML labels for accurate dedup
+      var keywordToMLLabel = {
+        'Mentions wire transfer or money order services': 'requests wire transfer or Western Union payment',
+        'Requests gift card payment': 'requests gift cards as payment',
+        'Asks for payment before viewing': 'asks for payment before viewing the property',
+        'Uses urgency pressure tactics': 'uses urgency pressure tactics like act now or limited time',
+        'Requests sensitive financial information': 'asks for personal financial information upfront',
+        'Claims inability to meet or show property': 'refuses to meet in person or show the property',
+        'Language suggesting unrealistic deal': 'price is suspiciously below market rate',
+        'Promises no screening (unusual for legitimate rentals)': null,
+        'Price appears significantly below market rate': 'price is suspiciously below market rate',
+        'Pressures for immediate deposit': 'asks for payment before viewing the property',
+      };
       var keywordResult = keywordScamDetection(listingText);
       for (var k = 0; k < keywordResult.flags.length; k++) {
         var kFlag = keywordResult.flags[k];
-        var isDuplicate = flags.some(function(f) {
-          return f.indicator.toLowerCase().indexOf(kFlag.indicator.toLowerCase().split(' ')[0]) !== -1;
-        });
+        var mlLabel = keywordToMLLabel[kFlag.indicator];
+        var isDuplicate = mlLabel ? flags.some(function(f) {
+          return f.indicator === mlLabel;
+        }) : false;
         if (!isDuplicate) {
           flags.push(kFlag);
           riskScore = Math.min(100, riskScore + kFlag.confidence * 0.3);
