@@ -289,8 +289,12 @@ function sendChat() {
   messages.scrollTop = messages.scrollHeight;
 
   if (window.RV_CHAT_API) {
+    var replied = false;
     var apiTimeout = setTimeout(function() {
-      respondWithKeywords(text);
+      if (!replied) {
+        replied = true;
+        respondWithKeywords(text);
+      }
     }, CHAT_FALLBACK_TIMEOUT);
 
     fetch(window.RV_CHAT_API, {
@@ -301,11 +305,17 @@ function sendChat() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       clearTimeout(apiTimeout);
-      autoReply(data.response || getAIResponse(text) || getFallbackResponse(text));
+      if (!replied) {
+        replied = true;
+        autoReply(data.response || getAIResponse(text) || getFallbackResponse(text));
+      }
     })
     .catch(function() {
       clearTimeout(apiTimeout);
-      respondWithKeywords(text);
+      if (!replied) {
+        replied = true;
+        respondWithKeywords(text);
+      }
     });
   } else {
     var delay = TYPING_MIN + Math.random() * (TYPING_MAX - TYPING_MIN);
