@@ -2017,12 +2017,12 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     return getSuspendedAccounts().indexOf(clientId) >= 0;
   }
   function getListingsForClient(clientId) {
+    const key = 'rv_listings_' + clientId;
     if (clientId === 'sanders-pm') {
-      const raw = localStorage.getItem('rv_sanders_listings');
+      const raw = localStorage.getItem(key);
       if (raw) try { return JSON.parse(raw); } catch(e) {}
       return SAMPLE_LISTINGS.slice();
     }
-    const key = 'rv_listings_' + clientId;
     const raw = localStorage.getItem(key);
     if (raw) try { return JSON.parse(raw); } catch(e) {}
     if (clientId === 'demo-pm') return DEMO_LISTINGS_PM.slice();
@@ -2030,11 +2030,10 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     return [];
   }
   function saveListingsForClient(clientId, arr) {
+    const key = 'rv_listings_' + clientId;
+    localStorage.setItem(key, JSON.stringify(arr));
     if (clientId === 'sanders-pm') {
-      localStorage.setItem('rv_sanders_listings', JSON.stringify(arr));
       renderPropertiesList();
-    } else {
-      localStorage.setItem('rv_listings_' + clientId, JSON.stringify(arr));
     }
     if (window._selectedClientId === clientId) renderClientDetailListings(clientId);
   }

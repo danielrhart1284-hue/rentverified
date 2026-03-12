@@ -867,7 +867,7 @@ function generateListingId(existingListings) {
   }
   // Unique ID when called without args (e.g. during bulk import)
   var year = new Date().getFullYear();
-  var rand = Math.random().toString(36).substr(2, 4).toUpperCase();
+  var rand = Math.random().toString(36).substr(2, 6).toUpperCase();
   return 'RV-' + year + '-' + rand;
 }
 
