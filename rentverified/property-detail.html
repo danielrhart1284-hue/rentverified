@@ -360,12 +360,74 @@
 
 <script src="app.js"></script>
 <script>
+  // Load property data from URL param ?id=RV-2026-XXXX
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var listingId = params.get('id');
+    if (listingId) {
+      var result = verifyListing(listingId);
+      if (result && result.verified && result.listing) {
+        var l = result.listing;
+        window.PROPERTY_DATA = {
+          address: l.address,
+          rent: l.rent,
+          deposit: l.rent,
+          beds: l.beds,
+          baths: l.baths,
+          sqft: l.sqft,
+          listingId: l.listingId,
+          description: l.description,
+          status: l.status,
+          type: l.type,
+          managedBy: (result.client && result.client.name) || RV_CONFIG.companyName,
+          available: l.status === 'available' ? 'Now' : 'Occupied',
+        };
+
+        // Update page title and header
+        document.title = l.address + ' - RentVerified';
+
+        var h1 = document.querySelector('.detail-main h1');
+        if (h1) h1.textContent = l.address;
+
+        var priceEl = document.querySelector('.detail-main .property-price, .detail-header div[style*="text-align:right"] div[style*="font-size:2rem"]');
+        if (priceEl) priceEl.innerHTML = '$' + Number(l.rent).toLocaleString() + '<span style="font-size:1rem;font-weight:500;color:var(--gray-600);">/mo</span>';
+
+        var idSpan = document.querySelector('[style*="font-family:monospace"]');
+        if (idSpan) idSpan.textContent = 'ID: ' + l.listingId;
+
+        // Update chat widget greeting
+        var chatGreeting = document.querySelector('#chat-messages .chat-msg.ai');
+        if (chatGreeting) chatGreeting.textContent = 'Hi! I can answer any questions about ' + l.address + ' \u2014 lease terms, utilities, the application process, or anything else. What would you like to know?';
+
+        var chatStatus = document.querySelector('.chat-status');
+        if (chatStatus) chatStatus.innerHTML = '\ud83d\udfe2 ' + l.address + ' \u00b7 Always available';
+      }
+    }
+  })();
+
   function openApp() {
     document.getElementById('app-form').style.display = 'block';
     document.getElementById('app-form').scrollIntoView({ behavior: 'smooth' });
   }
 
   function submitApp() {
+    var nameInput = document.querySelector('#app-form input[type="text"]');
+    var emailInput = document.querySelector('#app-form input[type="email"]');
+    var phoneInput = document.querySelector('#app-form input[type="tel"]');
+    var dateInput = document.querySelector('#app-form input[type="date"]');
+
+    if (nameInput && emailInput) {
+      var propData = window.PROPERTY_DATA || {};
+      createApplication({
+        firstName: (nameInput.value || '').split(' ')[0],
+        lastName: (nameInput.value || '').split(' ').slice(1).join(' '),
+        email: emailInput.value || '',
+        phone: phoneInput ? phoneInput.value : '',
+        listingId: propData.listingId || '',
+        propertyAddress: propData.address || '',
+      });
+    }
+
     document.getElementById('app-form').style.display = 'none';
     document.getElementById('app-success').style.display = 'block';
   }
@@ -373,12 +435,13 @@
   function openChat(property) {
     toggleChat();
     if (property) {
-      setTimeout(() => {
-        const msg = document.createElement('div');
+      setTimeout(function() {
+        var msg = document.createElement('div');
         msg.className = 'chat-msg user';
         msg.textContent = 'I have a question about ' + property;
         document.getElementById('chat-messages').appendChild(msg);
-        setTimeout(autoReply, 800);
+        var delay = 700 + Math.random() * 600;
+        setTimeout(function() { respondWithKeywords('I have a question about ' + property); }, delay);
       }, 300);
     }
   }

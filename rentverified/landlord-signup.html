@@ -1221,7 +1221,11 @@
       <div id="dtab-docs" class="tab-content">
         <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div><h1>Documents</h1><p>Manage rental applications, leases, and tenant files.</p></div>
-          <button class="btn btn-primary">+ Upload Document</button>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-outline" onclick="generateLeaseUI()">Generate Lease</button>
+            <button class="btn btn-outline" onclick="generateEvictionUI()">Generate Eviction Notice</button>
+            <button class="btn btn-primary">+ Upload Document</button>
+          </div>
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;">
@@ -1301,8 +1305,8 @@
 
   // ── AUTH ──────────────────────────────────────────
   const ACCOUNTS = [
-    { email: 'danielrhart1284@gmail.com', password: 'SPMis#1!',   name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' },
-    { email: 'danielhart1284',            password: 'Mayais#1dog!', name: 'Daniel', company: 'Sanders Property Management', role: 'admin',    username: 'danielhart1284' },
+    { email: 'danielrhart1284@gmail.com', password: 'SPMdemo2026',   name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' },
+    { email: 'danielhart1284',            password: 'RVadmin2026', name: 'Daniel', company: 'Sanders Property Management', role: 'admin',    username: 'danielhart1284' },
   ];
 
   let currentLoginRole = 'landlord';
@@ -1423,7 +1427,7 @@
     const password = document.getElementById('login-password').value || '';
     const errEl    = document.getElementById('login-error');
 
-    const DANIEL = { email: 'danielrhart1284@gmail.com', password: 'Sandersis#1PM!', company: 'Sanders Property Management' };
+    const DANIEL = { email: 'danielrhart1284@gmail.com', password: 'SPMdemo2026', company: 'Sanders Property Management' };
     const DEMO   = { email: 'daniel@sanderspm.com', password: 'Sanders2026' };
     const stored = JSON.parse(localStorage.getItem('rv_account') || 'null');
     const matchStored = stored && stored.email === email && stored.password === password;
@@ -2035,6 +2039,82 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   });
   document.addEventListener('DOMContentLoaded', loadAssistanceNotifications);
   document.addEventListener('DOMContentLoaded', loadFeePolicy);
+  document.addEventListener('DOMContentLoaded', loadChatInbox);
+
+  // ── Chat inbox loader (from app.js rv_chat_inbox) ──────────
+  function loadChatInbox() {
+    try {
+      var inbox = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
+      if (inbox.length === 0) return;
+      var tbody = document.querySelector('#dtab-inquiries tbody');
+      if (!tbody) return;
+      inbox.forEach(function(item) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td><strong>' + (item.question || '').slice(0,20) + '</strong></td>' +
+          '<td style="max-width:200px;font-size:0.875rem;">"' + (item.question || '') + '"</td>' +
+          '<td style="font-size:0.875rem;">' + (item.property || 'General') + '</td>' +
+          '<td><span class="badge badge-pending">Website</span></td>' +
+          '<td style="font-size:0.8rem;color:var(--gray-500);">' + (item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown') + '</td>' +
+          '<td><span class="badge" style="background:#fef3c7;color:#92400e;">Needs Review</span></td>';
+        tbody.appendChild(tr);
+      });
+    } catch(e) {}
+  }
+
+  // ── Generate Lease UI ──────────
+  function generateLeaseUI() {
+    var tenant = prompt('Enter tenant full name:');
+    if (!tenant) return;
+    var address = prompt('Enter property address:');
+    if (!address) return;
+    var rent = prompt('Enter monthly rent amount:');
+    if (!rent) return;
+    var startDate = prompt('Lease start date (YYYY-MM-DD):');
+    var endDate = prompt('Lease end date (YYYY-MM-DD):');
+    var lease = generateLease({
+      tenantName: tenant,
+      propertyAddress: address,
+      monthlyRent: parseFloat(rent) || 1200,
+      startDate: startDate || new Date().toISOString().split('T')[0],
+      endDate: endDate || '',
+      securityDeposit: parseFloat(rent) || 1200,
+    });
+    if (lease) {
+      alert('Lease generated successfully!\n\nLease ID: ' + lease.leaseId + '\nTenant: ' + tenant + '\nProperty: ' + address + '\n\nThe lease has been saved and is ready for e-signature.');
+    }
+  }
+
+  // ── Generate Eviction Notice UI ──────────
+  function generateEvictionUI() {
+    var tenant = prompt('Enter tenant full name:');
+    if (!tenant) return;
+    var address = prompt('Enter property address:');
+    if (!address) return;
+    var type = prompt('Notice type:\n1 = 3-Day Pay or Quit\n2 = 3-Day Cure or Quit\n3 = 15-Day Month-to-Month\n\nEnter 1, 2, or 3:');
+    var noticeTypes = {'1': 'pay_or_quit', '2': 'cure_or_quit', '3': 'month_to_month'};
+    var noticeType = noticeTypes[type] || 'pay_or_quit';
+    var amountOwed = '';
+    if (noticeType === 'pay_or_quit') {
+      amountOwed = prompt('Amount owed ($):') || '0';
+    }
+    var doc = generateEvictionNotice({
+      tenantName: tenant,
+      propertyAddress: address,
+      noticeType: noticeType,
+      amountOwed: parseFloat(amountOwed) || 0,
+      landlordName: 'Sanders Property Management',
+    });
+    if (doc) {
+      alert('Eviction notice generated!\n\nType: ' + doc.title + '\nTenant: ' + tenant + '\nProperty: ' + address + '\n\nThe document has been saved. You can generate an attorney packet from the Documents tab.');
+      var genPacket = confirm('Would you like to generate an attorney packet as well?');
+      if (genPacket) {
+        var packet = generateAttorneyPacket(tenant, address);
+        if (packet) {
+          alert('Attorney packet generated with ' + packet.documents.length + ' documents.\n\nPacket includes: ' + packet.documents.map(function(d) { return d.type; }).join(', '));
+        }
+      }
+    }
+  }
 
   // Referral CTA — show after 4s on dashboard, once per session
   document.addEventListener('DOMContentLoaded', function() {

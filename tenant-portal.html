@@ -1179,12 +1179,27 @@
     const pri  = document.getElementById('tMPri').value;
     const el   = document.getElementById('tenantMaintList');
     const icons = {Plumbing:'🚿',Electrical:'⚡','HVAC / Heating':'❄️',Appliance:'🍳','Pest Control':'🐛',Structural:'🏗️','Locks / Security':'🔑',Cleaning:'🧹',Other:'🔧'};
+    // Save to localStorage for persistence
+    try {
+      var requests = JSON.parse(localStorage.getItem('rv_maintenance_requests') || '[]');
+      requests.unshift({
+        id: 'MR-' + Date.now(),
+        category: cat,
+        description: desc,
+        priority: pri,
+        status: 'open',
+        tenant: 'Current Tenant',
+        property: '119 E 600 S #119, Orem UT',
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem('rv_maintenance_requests', JSON.stringify(requests));
+    } catch(e) {}
     const div = document.createElement('div');
     div.style.cssText='display:flex;align-items:center;gap:1rem;padding:.75rem;background:#fffbeb;border-radius:8px;border:1.5px solid #f59e0b;margin-bottom:.5rem;';
     div.innerHTML=`<div style="font-size:1.25rem;">${icons[cat]||'🔧'}</div><div style="flex:1;"><div style="font-weight:600;font-size:.9rem;">${cat} — ${desc.slice(0,60)}</div><div style="font-size:.78rem;color:#64748b;">Submitted today · Priority: ${pri}</div></div><span style="background:#fef9c3;color:#854d0e;border-radius:99px;padding:.2rem .65rem;font-size:.75rem;font-weight:600;">Open</span>`;
     el.prepend(div);
     document.getElementById('tMDesc').value='';
-    alert('✅ Maintenance request submitted! Your landlord will be notified.');
+    alert('Maintenance request submitted! Your landlord will be notified.');
   }
 
   function openThread(name) {
