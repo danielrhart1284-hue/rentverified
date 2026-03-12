@@ -368,7 +368,7 @@
               <button class="btn btn-outline" onclick="showTab('pay')" style="justify-content:center;padding:0.85rem;">💳 Pay Rent</button>
               <button class="btn btn-outline" onclick="showTab('docs')" style="justify-content:center;padding:0.85rem;">📄 View Lease</button>
               <button class="btn btn-outline" onclick="toggleChat()" style="justify-content:center;padding:0.85rem;">🤖 Ask AI</button>
-              <button class="btn btn-outline" style="justify-content:center;padding:0.85rem;">🔧 Maintenance</button>
+              <button class="btn btn-outline" onclick="showTab('maintenance')" style="justify-content:center;padding:0.85rem;">🔧 Maintenance</button>
             </div>
           </div>
         </div>
@@ -761,7 +761,7 @@
           <div class="card-body" style="padding:0;">
             <div style="padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-200);">
               <h3 style="font-weight:700;">Payment Records</h3>
-              <button class="btn btn-outline btn-sm">Download PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="showWIP('Payment history PDF export is coming soon.')">Download PDF</button>
             </div>
             <table>
               <thead>
@@ -831,7 +831,7 @@
               </div>
               <h4 style="font-weight:700;margin-bottom:0.25rem;">Lease Agreement</h4>
               <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:1rem;">April 1, 2025 – March 31, 2026 · 123 Maple St, Unit 2A</p>
-              <button class="btn btn-outline btn-sm">📥 Download</button>
+              <button class="btn btn-outline btn-sm" onclick="showWIP('Lease download will be available when document storage is connected.')">📥 Download</button>
             </div>
           </div>
 
@@ -843,7 +843,7 @@
               </div>
               <h4 style="font-weight:700;margin-bottom:0.25rem;">Rental Application</h4>
               <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:1rem;">Submitted March 15, 2025</p>
-              <button class="btn btn-outline btn-sm">📥 Download</button>
+              <button class="btn btn-outline btn-sm" onclick="showWIP('Application download will be available when document storage is connected.')">📥 Download</button>
             </div>
           </div>
 
@@ -855,7 +855,7 @@
               </div>
               <h4 style="font-weight:700;margin-bottom:0.25rem;">Move-In Inspection Report</h4>
               <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:1rem;">Completed April 1, 2025</p>
-              <button class="btn btn-outline btn-sm">📥 Download</button>
+              <button class="btn btn-outline btn-sm" onclick="showWIP('Inspection report download will be available when document storage is connected.')">📥 Download</button>
             </div>
           </div>
 
@@ -1179,12 +1179,27 @@
     const pri  = document.getElementById('tMPri').value;
     const el   = document.getElementById('tenantMaintList');
     const icons = {Plumbing:'🚿',Electrical:'⚡','HVAC / Heating':'❄️',Appliance:'🍳','Pest Control':'🐛',Structural:'🏗️','Locks / Security':'🔑',Cleaning:'🧹',Other:'🔧'};
+    // Save to localStorage for persistence
+    try {
+      var requests = JSON.parse(localStorage.getItem('rv_maintenance_requests') || '[]');
+      requests.unshift({
+        id: 'MR-' + Date.now(),
+        category: cat,
+        description: desc,
+        priority: pri,
+        status: 'open',
+        tenant: 'Current Tenant',
+        property: '119 E 600 S #119, Orem UT',
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem('rv_maintenance_requests', JSON.stringify(requests));
+    } catch(e) {}
     const div = document.createElement('div');
     div.style.cssText='display:flex;align-items:center;gap:1rem;padding:.75rem;background:#fffbeb;border-radius:8px;border:1.5px solid #f59e0b;margin-bottom:.5rem;';
     div.innerHTML=`<div style="font-size:1.25rem;">${icons[cat]||'🔧'}</div><div style="flex:1;"><div style="font-weight:600;font-size:.9rem;">${cat} — ${desc.slice(0,60)}</div><div style="font-size:.78rem;color:#64748b;">Submitted today · Priority: ${pri}</div></div><span style="background:#fef9c3;color:#854d0e;border-radius:99px;padding:.2rem .65rem;font-size:.75rem;font-weight:600;">Open</span>`;
     el.prepend(div);
     document.getElementById('tMDesc').value='';
-    alert('✅ Maintenance request submitted! Your landlord will be notified.');
+    alert('Maintenance request submitted! Your landlord will be notified.');
   }
 
   function openThread(name) {

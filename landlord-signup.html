@@ -112,8 +112,12 @@
       font-weight: 700;
     }
   </style>
-  <!-- JSZip for photo ZIP download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Google Maps Places API (replace YOUR_API_KEY with actual key to enable autocomplete) -->
+  <script>
+    // Graceful fallback: if Google Maps API key is not configured, autocomplete won't load but manual entry still works
+    window.RV_GOOGLE_MAPS_KEY = '';
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=Function.prototype" onerror="console.log('Google Maps API not loaded - using manual address entry')"></script>
 </head>
 <body>
 
@@ -527,10 +531,14 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
           📣 Ad Builder
         </a>
-        <a href="accounting.html" class="dash-link" style="color:var(--gray-400);">
+        <div class="dash-link" onclick="dashTab('import')" style="color:#f59e0b;background:rgba(245,158,11,0.08);border-left:2px solid #f59e0b;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          📥 Portfolio Import
+        </div>
+        <div class="dash-link" onclick="dashTab('accounting')" style="color:#10b981;background:rgba(16,185,129,0.08);border-left:2px solid #10b981;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V5a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2h-2M9 7h6"/></svg>
           📊 Accounting
-        </a>
+        </div>
         <a href="maintenance.html" class="dash-link" style="color:var(--gray-400);">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
           🔧 Maintenance
@@ -731,7 +739,7 @@
                 </div>
                 <div>
                   <div style="font-weight:800;font-size:1rem;">$1,200</div>
-                  <button class="btn btn-success btn-sm" style="margin-top:6px;">Confirm</button>
+                  <button class="btn btn-success btn-sm" style="margin-top:6px;" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">Confirm</button>
                 </div>
               </div>
               <div class="inquiry-item">
@@ -743,7 +751,7 @@
                 </div>
                 <div>
                   <div style="font-weight:800;font-size:1rem;">$950</div>
-                  <button class="btn btn-success btn-sm" style="margin-top:6px;">Confirm</button>
+                  <button class="btn btn-success btn-sm" style="margin-top:6px;" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">Confirm</button>
                 </div>
               </div>
             </div>
@@ -888,18 +896,30 @@
               <textarea id="edit-description" rows="3" placeholder="Beautiful updated unit with hardwood floors, modern kitchen..." style="resize:vertical;"></textarea>
             </div>
             <div class="form-group">
+              <label>Client (Owner)</label>
+              <div style="display:flex;gap:.5rem;">
+                <select id="edit-client-owner" style="flex:1;">
+                  <option value="">Select existing client...</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" onclick="addNewClientInline()" style="white-space:nowrap;">+ New Client</button>
+              </div>
+              <div id="new-client-inline" style="display:none;margin-top:.5rem;padding:.75rem;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+                  <input type="text" id="new-client-name" placeholder="Client name" style="font-size:.85rem;" />
+                  <input type="email" id="new-client-email" placeholder="Email" style="font-size:.85rem;" />
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveNewClientInline()" style="margin-top:.5rem;">Save Client</button>
+              </div>
+            </div>
+            <div class="form-group">
               <label>Property Photos</label>
               <div id="photo-preview-strip" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;min-height:0;"></div>
-              <label for="photo-upload-input" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1rem;border:2px dashed #d1d5db;border-radius:8px;cursor:pointer;font-size:.875rem;color:#6B7280;transition:border-color .2s;" onmouseover="this.style.borderColor='#1a56db'" onmouseout="this.style.borderColor='#d1d5db'">
-                <span style="font-size:1.1rem;">📷</span> Click to upload photos (JPG, PNG · saved to cloud)
-              </label>
-              <input type="file" id="photo-upload-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(this)" />
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;">
-                <span id="photo-count-label" style="font-size:0.78rem;color:#6b7280;"></span>
-                <button id="download-photos-btn" onclick="downloadPhotosZip()" style="font-size:0.78rem;padding:0.3rem 0.7rem;border:1px solid #d1d5db;background:white;border-radius:6px;cursor:pointer;color:#374151;display:flex;align-items:center;gap:4px;" title="Download all listing photos as a ZIP file for use in ads">
-                  📥 Download Photos ZIP
-                </button>
+              <div id="photo-drop-zone" style="border:2px dashed #d1d5db;border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:.5rem;" onclick="document.getElementById('photo-upload-input').click()">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">📷</div>
+                <div style="font-weight:600;font-size:.875rem;">Drag & drop photos or folders here</div>
+                <div style="color:#9ca3af;font-size:.8rem;">or click to browse — JPG, PNG (select/deselect after upload)</div>
               </div>
+              <input type="file" id="photo-upload-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(this)" />
             </div>
             <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
               <button class="btn btn-primary" onclick="saveEditListing()">Save changes</button>
@@ -956,43 +976,56 @@
 
       <!-- AI CONVERSATIONS TAB -->
       <div id="dtab-inquiries" class="tab-content">
-        <div class="page-header">
-          <h1>AI Conversations</h1>
-          <p>Questions from your property listing chat widget. The AI answers most automatically — questions it couldn't answer are flagged below for your follow-up.</p>
-        </div>
-        <!-- Unanswered questions from chat widget -->
-        <div class="card" style="margin-bottom:1.5rem;">
-          <div class="card-body" style="padding:0;">
-            <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;">
-              <div>
-                <strong>Unanswered Questions — Need Your Reply</strong>
-                <span id="inbox-badge" style="margin-left:0.5rem;background:var(--danger);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;display:none;"></span>
-              </div>
-              <button onclick="clearChatInbox()" style="font-size:0.78rem;padding:0.3rem 0.75rem;border:1px solid #d1d5db;background:white;border-radius:6px;cursor:pointer;color:#6b7280;">Clear All</button>
-            </div>
-            <div id="chat-inbox-list" style="padding:1rem 1.5rem;">
-              <div style="color:var(--gray-500);font-size:0.875rem;text-align:center;padding:1.5rem 0;">
-                No unanswered questions yet. When prospective tenants ask the chat AI a question it can't answer, it will appear here.
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- AI auto-answered activity (informational) -->
+        <div class="page-header"><h1>AI Conversations</h1><p>Messages handled by your AI across all channels.</p></div>
         <div class="card">
           <div class="card-body" style="padding:0;">
             <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--gray-200);">
-              <strong>About the Chat AI</strong>
-            </div>
-            <div style="padding:1rem 1.5rem;color:var(--gray-700);font-size:0.9rem;line-height:1.7;">
-              <p>Your property pages have a live chat widget that automatically answers tenant questions 24/7 — rent, availability, pets, how to apply, lease terms, payment methods, and more.</p>
-              <p style="margin-top:0.75rem;">When a tenant asks something the AI doesn't recognize, it flags it here so you can follow up personally. The more you customize your listing descriptions, the better the AI answers.</p>
-              <p style="margin-top:0.75rem;"><strong>For Facebook Messenger / Zillow messages:</strong> You can paste any message a tenant sends you into this chat box to get a suggested reply to copy back to them:</p>
-              <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
-                <input id="ai-draft-input" type="text" placeholder="Paste tenant's message here..." style="flex:1;padding:.6rem .9rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;" onkeypress="if(event.key==='Enter')draftReply()" />
-                <button onclick="draftReply()" class="btn btn-primary btn-sm">Get Reply</button>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <span class="badge" style="background:#e0f2fe;color:#0369a1;cursor:pointer;">All Channels</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Website Chat</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">SMS</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Facebook</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">Email</span>
+                <span class="badge" style="background:var(--gray-200);color:var(--gray-700);cursor:pointer;">WhatsApp</span>
               </div>
-              <div id="ai-draft-output" style="display:none;margin-top:0.75rem;padding:0.75rem;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:0.875rem;line-height:1.6;"></div>
             </div>
+            <table>
+              <thead><tr><th>Contact</th><th>Message</th><th>Property</th><th>Channel</th><th>Time</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Maria R.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">maria@email.com</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"Is 123 Maple still available?"</td>
+                  <td style="font-size:0.875rem;">123 Maple St</td>
+                  <td><span class="badge badge-available">💬 Chat</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">2m ago</td>
+                  <td><span class="badge badge-verified">AI Replied</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Tyler J.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">(555) 201-9876</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"Can I get an application?"</td>
+                  <td style="font-size:0.875rem;">789 Pine Rd</td>
+                  <td><span class="badge badge-pending">📱 SMS</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">1h ago</td>
+                  <td><span class="badge badge-available">App Sent</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Karen P.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">Facebook DM</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"Is the Oak Ave unit pet friendly?"</td>
+                  <td style="font-size:0.875rem;">456 Oak Ave</td>
+                  <td><span class="badge" style="background:#ede9fe;color:#5b21b6;">📘 Facebook</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">3h ago</td>
+                  <td><span class="badge badge-pending">Needs Review</span></td>
+                </tr>
+                <tr>
+                  <td><strong>James W.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">james@email.com</span></td>
+                  <td style="max-width:200px;font-size:0.875rem;">"What utilities are included?"</td>
+                  <td style="font-size:0.875rem;">123 Maple St</td>
+                  <td><span class="badge" style="background:#fef3c7;color:#92400e;">📧 Email</span></td>
+                  <td style="font-size:0.8rem;color:var(--gray-500);">5h ago</td>
+                  <td><span class="badge badge-verified">AI Replied</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1019,8 +1052,8 @@
                   <td><span class="badge badge-pending">Pending</span></td>
                   <td>
                     <div style="display:flex;gap:6px;">
-                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;">View Screenshot</button>
-                      <button class="btn btn-success btn-sm">✓ Confirm</button>
+                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;" onclick="showWIP('Screenshot viewer is coming soon.')">View Screenshot</button>
+                      <button class="btn btn-success btn-sm" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">✓ Confirm</button>
                     </div>
                   </td>
                 </tr>
@@ -1034,8 +1067,8 @@
                   <td><span class="badge badge-pending">Pending</span></td>
                   <td>
                     <div style="display:flex;gap:6px;">
-                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;">View Screenshot</button>
-                      <button class="btn btn-success btn-sm">✓ Confirm</button>
+                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;" onclick="showWIP('Screenshot viewer is coming soon.')">View Screenshot</button>
+                      <button class="btn btn-success btn-sm" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">✓ Confirm</button>
                     </div>
                   </td>
                 </tr>
@@ -1056,7 +1089,7 @@
       </div>
 
       <!-- PAYMENT SETTINGS -->
-      <div style="margin-top:1.5rem;">
+      <div id="payment-settings-widget" style="margin-top:1.5rem;">
         <h2 style="font-size:1.15rem;font-weight:700;color:var(--gray-800);margin-bottom:1rem;">💳 Payment Settings</h2>
         <div class="grid-2" style="align-items:start;gap:1.25rem;">
 
@@ -1153,8 +1186,6 @@
       </div>
       <!-- /dtab-payments end of extra content -->
 
-      </div><!-- /dtab-payments outer -->
-
       <!-- AI SETTINGS TAB -->
       <div id="dtab-ai" class="tab-content">
         <div class="page-header"><h1>AI Settings</h1><p>Configure how your AI assistant responds to tenants.</p></div>
@@ -1206,7 +1237,7 @@
                 <label>Zelle Phone/Email</label>
                 <input type="text" placeholder="payments@sanderspm.com or phone" />
               </div>
-              <button class="btn btn-primary">Save Settings</button>
+              <button class="btn btn-primary" onclick="showWIP('AI behavior settings will sync to the server when the backend is connected.')">Save Settings</button>
             </div>
           </div>
         </div>
@@ -1216,7 +1247,11 @@
       <div id="dtab-docs" class="tab-content">
         <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div><h1>Documents</h1><p>Manage rental applications, leases, and tenant files.</p></div>
-          <button class="btn btn-primary">+ Upload Document</button>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-outline" onclick="generateLeaseUI()">Generate Lease</button>
+            <button class="btn btn-outline" onclick="generateEvictionUI()">Generate Eviction Notice</button>
+            <button class="btn btn-primary" onclick="showWIP('Document upload will be available when cloud storage is connected.')">+ Upload Document</button>
+          </div>
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;">
@@ -1228,31 +1263,152 @@
                   <td>Tyler Johnson</td>
                   <td>789 Pine Rd</td>
                   <td>Mar 4, 2026</td>
-                  <td><button class="btn btn-outline btn-sm">Send to Tenant</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Send to Tenant will be available when email integration is connected.')">Send to Tenant</button></td>
                 </tr>
                 <tr>
                   <td>📄 <strong>Lease Agreement</strong></td>
                   <td>Jane Doe</td>
                   <td>123 Maple St 2A</td>
                   <td>Apr 1, 2025</td>
-                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Document viewer is coming soon.')">View</button></td>
                 </tr>
                 <tr>
                   <td>📄 <strong>Lease Agreement</strong></td>
                   <td>Robert Lee</td>
                   <td>456 Oak Ave 1B</td>
                   <td>Jun 1, 2025</td>
-                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Document viewer is coming soon.')">View</button></td>
                 </tr>
                 <tr>
                   <td>🏠 <strong>Move-In Inspection</strong></td>
                   <td>Jane Doe</td>
                   <td>123 Maple St 2A</td>
                   <td>Apr 1, 2025</td>
-                  <td><button class="btn btn-outline btn-sm">View</button></td>
+                  <td><button class="btn btn-outline btn-sm" onclick="showWIP('Document viewer is coming soon.')">View</button></td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORTFOLIO IMPORT TAB -->
+      <div id="dtab-import" class="tab-content">
+        <div class="page-header">
+          <div><h1>📥 Portfolio Import</h1><p>Bulk import properties from CSV or XLSX files. The AI will auto-map your columns.</p></div>
+        </div>
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:1rem;">Upload Your Portfolio File</h3>
+            <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1rem;">Supports CSV and XLSX files. The system will identify columns for Property Address, Tenant, Rent, and PM Fee automatically.</p>
+            <div id="import-drop-zone" style="border:2px dashed #d1d5db;border-radius:12px;padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;" onclick="document.getElementById('import-file-input').click()">
+              <div style="font-size:2.5rem;margin-bottom:.5rem;">📂</div>
+              <div style="font-weight:700;font-size:1rem;margin-bottom:.25rem;">Drop your CSV/XLSX file here</div>
+              <div style="color:var(--gray-500);font-size:.85rem;">or click to browse</div>
+            </div>
+            <input type="file" id="import-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleImportFile(this)" />
+            <div id="import-status" style="display:none;margin-top:1rem;padding:1rem;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;">
+              <div id="import-status-text" style="font-weight:600;color:#15803d;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Column Mapping Preview -->
+        <div id="import-mapping-panel" style="display:none;">
+          <div class="card" style="margin-bottom:1.5rem;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">🤖 AI Column Mapping</h3>
+              <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1rem;">Review the auto-detected column mapping below. Adjust if needed.</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Property Address Column</label><select id="map-property" class="form-control"></select></div>
+                <div class="form-group"><label>Tenant Name Column</label><select id="map-tenant" class="form-control"></select></div>
+                <div class="form-group"><label>Rent Amount Column</label><select id="map-rent" class="form-control"></select></div>
+                <div class="form-group"><label>PM Fee Column</label><select id="map-pmfee" class="form-control"></select></div>
+                <div class="form-group"><label>Beds Column</label><select id="map-beds" class="form-control"></select></div>
+                <div class="form-group"><label>Baths Column</label><select id="map-baths" class="form-control"></select></div>
+              </div>
+              <div style="display:flex;gap:.75rem;margin-top:1rem;">
+                <button class="btn btn-primary" onclick="executeImport()">🚀 Import Properties</button>
+                <button class="btn btn-outline" onclick="document.getElementById('import-mapping-panel').style.display='none'">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <!-- Data Preview -->
+          <div class="card">
+            <div class="card-body" style="padding:0;overflow-x:auto;">
+              <h3 style="font-weight:700;padding:1rem 1.25rem .5rem;">📋 Data Preview (first 5 rows)</h3>
+              <table id="import-preview-table" style="font-size:.85rem;"><thead></thead><tbody></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTING TAB -->
+      <div id="dtab-accounting" class="tab-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div><h1>📊 Accounting & Statements</h1><p>View rent ledgers, generate owner statements, and create tax summaries.</p></div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="showStatementGenerator()">📄 Generate Statement</button>
+            <button class="btn btn-outline" onclick="showTaxGenerator()">📊 Tax Summary</button>
+          </div>
+        </div>
+
+        <!-- Rent Ledger -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+              <h3 style="font-weight:700;">💰 Rent Ledger</h3>
+              <div style="display:flex;gap:.5rem;">
+                <select id="ledger-tenant-filter" onchange="renderLedger()" style="padding:.4rem .75rem;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;">
+                  <option value="">All Tenants</option>
+                </select>
+                <select id="ledger-month-filter" onchange="renderLedger()" style="padding:.4rem .75rem;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;">
+                  <option value="">All Months</option>
+                </select>
+              </div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="font-size:.85rem;">
+                <thead><tr><th>Tenant</th><th>Property</th><th>Month</th><th>Rent Due</th><th>Rent Paid</th><th>PM Fee</th><th>Status</th><th>Method</th></tr></thead>
+                <tbody id="ledger-tbody"></tbody>
+              </table>
+            </div>
+            <div id="ledger-summary" style="margin-top:1rem;padding:1rem;background:#f8fafc;border-radius:10px;display:flex;gap:2rem;flex-wrap:wrap;font-size:.9rem;"></div>
+          </div>
+        </div>
+
+        <!-- Statement Generator Modal -->
+        <div id="statement-generator" style="display:none;">
+          <div class="card" style="margin-bottom:1.5rem;border:2px solid #1a56db;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">📄 Generate Monthly Owner Statement</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Owner Name</label><input type="text" id="stmt-owner" placeholder="Property Owner Name" /></div>
+                <div class="form-group"><label>Property</label><select id="stmt-property"></select></div>
+                <div class="form-group"><label>Month</label><input type="month" id="stmt-month" /></div>
+              </div>
+              <div style="display:flex;gap:.75rem;margin-top:1rem;">
+                <button class="btn btn-primary" onclick="doGenerateStatement()">📥 Download PDF</button>
+                <button class="btn btn-outline" onclick="document.getElementById('statement-generator').style.display='none'">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tax Summary Generator -->
+        <div id="tax-generator" style="display:none;">
+          <div class="card" style="margin-bottom:1.5rem;border:2px solid #10b981;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">📊 Generate Year-End Tax Summary</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Owner Name</label><input type="text" id="tax-owner" placeholder="Property Owner Name" /></div>
+                <div class="form-group"><label>Property</label><select id="tax-property"></select></div>
+                <div class="form-group"><label>Tax Year</label><select id="tax-year"><option value="2025">2025</option><option value="2026">2026</option></select></div>
+              </div>
+              <div style="display:flex;gap:.75rem;margin-top:1rem;">
+                <button class="btn btn-primary" onclick="doGenerateTax()">📥 Download PDF</button>
+                <button class="btn btn-outline" onclick="document.getElementById('tax-generator').style.display='none'">Cancel</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1294,12 +1450,7 @@
     }
   }
 
-  // ── AUTH ──────────────────────────────────────────
-  const ACCOUNTS = [
-    { email: 'danielrhart1284@gmail.com', password: 'SPMis#1!',   name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' },
-    { email: 'danielhart1284',            password: 'Mayais#1dog!', name: 'Daniel', company: 'Sanders Property Management', role: 'admin',    username: 'danielhart1284' },
-  ];
-
+  // ── AUTH HELPERS ──────────────────────────────────
   let currentLoginRole = 'landlord';
 
   function setLoginRole(role, btn) {
@@ -1316,54 +1467,24 @@
     });
   }
 
-  function doLogin() {
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const pw    = document.getElementById('loginPw').value;
-    const errEl = document.getElementById('loginErr');
-    const acct  = ACCOUNTS.find(a => (a.email.toLowerCase() === email || (a.username && a.username.toLowerCase() === email)) && a.password === pw);
-    if (!acct) {
-      errEl.textContent = '⚠️ Incorrect email or password. Please try again.';
-      errEl.style.display = 'block';
-      document.getElementById('loginPw').style.borderColor = '#ef4444';
-      return;
-    }
-    errEl.style.display = 'none';
-    // Route by role
-    if (currentLoginRole === 'agent') {
-      window.location.href = 'agent-portal.html';
-      return;
-    }
-    if (currentLoginRole === 'vendor') {
-      window.location.href = 'vendor-portal.html';
-      return;
-    }
-    // Landlord / PM → dashboard
-    document.getElementById('signup-screen').style.display = 'none';
-    document.getElementById('dashboard-screen').style.display = 'block';
-  }
-
   function togglePw() {
     const el = document.getElementById('loginPw');
-    el.type = el.type === 'password' ? 'text' : 'password';
+    if (el) el.type = el.type === 'password' ? 'text' : 'password';
   }
 
   function showSignupForm() {
-    document.getElementById('login-panel').style.display = 'none';
-    document.getElementById('signup-panel').style.display = 'block';
+    const lp = document.getElementById('login-panel');
+    const sp = document.getElementById('signup-panel');
+    if (lp) lp.style.display = 'none';
+    if (sp) sp.style.display = 'block';
   }
 
   function showLoginForm() {
-    document.getElementById('signup-panel').style.display = 'none';
-    document.getElementById('login-panel').style.display = 'block';
+    const sp = document.getElementById('signup-panel');
+    const lp = document.getElementById('login-panel');
+    if (sp) sp.style.display = 'none';
+    if (lp) lp.style.display = 'block';
   }
-
-  // Allow Enter key to submit login
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && document.getElementById('login-panel') &&
-        document.getElementById('login-panel').style.display !== 'none') {
-      doLogin();
-    }
-  });
 
   function submitSignup() {
     // Save credentials from step-1 inputs to localStorage
@@ -1414,11 +1535,22 @@
   ];
 
   function doLogin() {
-    const email    = (document.getElementById('login-email').value || '').toLowerCase().trim();
-    const password = document.getElementById('login-password').value || '';
-    const errEl    = document.getElementById('login-error');
+    // Support both login forms: login-panel (loginEmail/loginPw) and login-screen (login-email/login-password)
+    const emailEl1 = document.getElementById('loginEmail');
+    const emailEl2 = document.getElementById('login-email');
+    const pwEl1    = document.getElementById('loginPw');
+    const pwEl2    = document.getElementById('login-password');
+    const errEl1   = document.getElementById('loginErr');
+    const errEl2   = document.getElementById('login-error');
 
-    const DANIEL = { email: 'danielrhart1284@gmail.com', password: 'Sandersis#1PM!', company: 'Sanders Property Management' };
+    // Determine which form is active (visible)
+    const usePanel = emailEl1 && emailEl1.value && emailEl1.offsetParent !== null;
+    const email    = usePanel ? (emailEl1.value || '').toLowerCase().trim() : (emailEl2 ? emailEl2.value || '' : '').toLowerCase().trim();
+    const password = usePanel ? (pwEl1 ? pwEl1.value : '') : (pwEl2 ? pwEl2.value : '');
+    const errEl    = usePanel ? errEl1 : errEl2;
+    const pwField  = usePanel ? pwEl1 : pwEl2;
+
+    const DANIEL = { email: 'danielrhart1284@gmail.com', password: 'SPMdemo2026', company: 'Sanders Property Management' };
     const DEMO   = { email: 'daniel@sanderspm.com', password: 'Sanders2026' };
     const stored = JSON.parse(localStorage.getItem('rv_account') || 'null');
     const matchStored = stored && stored.email === email && stored.password === password;
@@ -1427,7 +1559,7 @@
     const testAcct    = TEST_ACCOUNTS.find(a => a.email === email && a.password === password);
 
     if (testAcct && testAcct.redirect) {
-      errEl.style.display = 'none';
+      if (errEl) errEl.style.display = 'none';
       if (testAcct.redirect.indexOf('insurance-agents') !== -1) {
         localStorage.setItem('rv_ins_agent', JSON.stringify({ name: 'Test Ins Agent', company: 'Test Insurance Co', license: '12345678', tier: 'featured' }));
       }
@@ -1436,14 +1568,18 @@
     }
 
     if (matchStored || matchDaniel || matchDemo || (testAcct && !testAcct.redirect)) {
-      errEl.style.display = 'none';
+      if (errEl) errEl.style.display = 'none';
       const acct = matchDaniel ? { firstName: 'Daniel', lastName: 'Sanders', email: DANIEL.email, password: DANIEL.password, company: DANIEL.company } :
         matchDemo ? { firstName: 'Daniel', lastName: 'Sanders', email: DEMO.email, password: DEMO.password, company: 'Sanders Property Management' } :
         testAcct ? { firstName: (testAcct.name || '').split(' ')[0], lastName: '', email: testAcct.email, password: testAcct.password, company: testAcct.company || '', plan: testAcct.plan } :
         stored;
       if (!stored || testAcct) localStorage.setItem('rv_account', JSON.stringify(acct));
       if (testAcct && testAcct.plan) localStorage.setItem('rv_plan', testAcct.plan);
-      document.getElementById('login-screen').style.display   = 'none';
+      // Hide both login forms and show dashboard
+      const signupScreen = document.getElementById('signup-screen');
+      const loginScreen  = document.getElementById('login-screen');
+      if (signupScreen) signupScreen.style.display = 'none';
+      if (loginScreen)  loginScreen.style.display  = 'none';
       document.getElementById('dashboard-screen').style.display = 'block';
       if (document.querySelector('.plan-chip')) document.querySelector('.plan-chip').textContent = (testAcct && testAcct.plan) ? testAcct.plan : 'Pro Plan';
       renderPropertiesList();
@@ -1451,10 +1587,11 @@
       renderLeaseExpiry();
       loadFeePolicy();
     } else {
-      errEl.textContent = 'Incorrect email or password. Please try again.';
-      errEl.style.display = 'block';
-      document.getElementById('login-password').value = '';
-      document.getElementById('login-password').focus();
+      if (errEl) {
+        errEl.textContent = 'Incorrect email or password. Please try again.';
+        errEl.style.display = 'block';
+      }
+      if (pwField) { pwField.value = ''; pwField.focus(); }
     }
   }
 
@@ -1600,119 +1737,39 @@
   document.addEventListener('DOMContentLoaded', renderLeaseExpiry);
 
   /* ── PHOTO UPLOAD ── */
-  // ── CLOUDINARY CONFIG ─────────────────────────────────────────────────────
-  // 1. Sign up FREE at cloudinary.com (25 GB free storage)
-  // 2. Go to Settings → Upload → Add upload preset → set Signing mode: Unsigned
-  //    Name the preset exactly: rentverified_photos
-  // 3. Find your Cloud Name in the top-left of your Cloudinary dashboard
-  // 4. Paste your Cloud Name below (replace YOUR_CLOUD_NAME)
-  const CLOUDINARY_CONFIG = {
-    cloudName:    'YOUR_CLOUD_NAME',      // ← Paste your Cloudinary cloud name here
-    uploadPreset: 'rentverified_photos'   // ← Must match your unsigned preset name
-  };
+  let editPhotos = []; // base64 array for current edit session
 
-  let editPhotos = []; // Cloudinary URL array for current edit session
-
-  function refreshPhotoStrip() {
+  function handlePhotoUpload(input) {
+    const files = Array.from(input.files).slice(0, 5);
+    editPhotos = [];
     const strip = document.getElementById('photo-preview-strip');
-    if (!strip) return;
     strip.innerHTML = '';
-    editPhotos.forEach((src, i) => {
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #d1fae5;flex-shrink:0;';
-      wrap.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />' +
-        '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
-      strip.appendChild(wrap);
+    files.forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        editPhotos[i] = e.target.result;
+        const img = document.createElement('div');
+        img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
+        img.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" />' +
+          '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
+        strip.appendChild(img);
+      };
+      reader.readAsDataURL(file);
     });
-    const countEl = document.getElementById('photo-count-label');
-    if (countEl) countEl.textContent = editPhotos.length ? editPhotos.length + ' photo' + (editPhotos.length > 1 ? 's' : '') + ' uploaded' : '';
-  }
-
-  async function handlePhotoUpload(input) {
-    const files = Array.from(input.files).slice(0, 10);
-    input.value = ''; // reset so same file can be re-added
-    if (!CLOUDINARY_CONFIG.cloudName || CLOUDINARY_CONFIG.cloudName === 'YOUR_CLOUD_NAME') {
-      alert('📸 Cloud photo storage not configured yet.\n\n' +
-        'Quick setup (free):\n' +
-        '1. Go to cloudinary.com → sign up free\n' +
-        '2. Settings → Upload → Add upload preset → set Unsigned → name it "rentverified_photos"\n' +
-        '3. Copy your Cloud Name from the dashboard (top-left)\n' +
-        '4. Open landlord-signup.html and replace YOUR_CLOUD_NAME with your cloud name\n\n' +
-        'Until then, photos are stored locally in your browser.');
-      // Fall back to base64 local storage
-      files.forEach((file, i) => {
-        const reader = new FileReader();
-        reader.onload = e => { editPhotos.push(e.target.result); refreshPhotoStrip(); };
-        reader.readAsDataURL(file);
-      });
-      return;
-    }
-    const strip = document.getElementById('photo-preview-strip');
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      // Show uploading placeholder
-      const ph = document.createElement('div');
-      ph.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;border:2px dashed #93c5fd;flex-shrink:0;background:#eff6ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;';
-      ph.innerHTML = '<div style="font-size:20px;">📤</div><div style="font-size:9px;color:#3b82f6;font-weight:600;">Uploading...</div>';
-      strip.appendChild(ph);
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-        const res = await fetch(
-          'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CONFIG.cloudName + '/image/upload',
-          { method: 'POST', body: formData }
-        );
-        const data = await res.json();
-        if (data.secure_url) {
-          editPhotos.push(data.secure_url);
-          ph.remove();
-          refreshPhotoStrip();
-        } else {
-          ph.remove();
-          alert('Photo upload failed: ' + (data.error ? data.error.message : 'Check Cloudinary config.'));
-        }
-      } catch (err) {
-        ph.remove();
-        alert('Upload failed — check your internet connection.');
-      }
-    }
   }
 
   function removePhoto(idx) {
     editPhotos.splice(idx, 1);
-    refreshPhotoStrip();
-  }
-
-  async function downloadPhotosZip() {
-    const listId = (document.getElementById('edit-listing-id') || {}).value || 'listing';
-    if (!editPhotos.length) {
-      alert('No photos uploaded for this listing yet. Upload photos first, then save the listing.');
-      return;
-    }
-    const btn = document.getElementById('download-photos-btn');
-    if (btn) { btn.textContent = '⏳ Building ZIP...'; btn.disabled = true; }
-    try {
-      const zip = new JSZip();
-      const folder = zip.folder('photos-' + listId);
-      for (let i = 0; i < editPhotos.length; i++) {
-        const url = editPhotos[i];
-        const resp = await fetch(url);
-        const blob = await resp.blob();
-        const ext  = blob.type.includes('png') ? 'png' : blob.type.includes('gif') ? 'gif' : 'jpg';
-        folder.file('photo-' + (i + 1) + '.' + ext, blob);
-      }
-      const content = await zip.generateAsync({ type: 'blob' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(content);
-      a.download = 'rentverified-photos-' + listId + '.zip';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
-    } catch (err) {
-      alert('Could not build ZIP. Check your internet connection and try again.');
-    } finally {
-      if (btn) { btn.textContent = '📥 Download Photos ZIP'; btn.disabled = false; }
-    }
+    // Re-render strip
+    const strip = document.getElementById('photo-preview-strip');
+    strip.innerHTML = '';
+    editPhotos.forEach((src, i) => {
+      const img = document.createElement('div');
+      img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
+      img.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />' +
+        '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
+      strip.appendChild(img);
+    });
   }
 
   /* ── BROADCAST ── */
@@ -1795,81 +1852,28 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   function dashTab(name) {
     document.querySelectorAll('#dashboard-screen .tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dash-link').forEach(l => l.classList.remove('active'));
-    document.getElementById('dtab-' + name).classList.add('active');
-    if (event && event.currentTarget) event.currentTarget.classList.add('active');
+    var target = document.getElementById('dtab-' + name);
+    if (target) target.classList.add('active');
+    try { if (event && event.currentTarget) event.currentTarget.classList.add('active'); } catch(e) {}
+    // Hide standalone widgets (outside tab-content divs) when switching away from overview
+    var standaloneIds = ['comp-widget', 'payment-settings-widget'];
+    standaloneIds.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = (name === 'overview') ? '' : 'none';
+    });
+    // Scroll main content area so active tab content is visible at top
+    if (target) {
+      var main = document.querySelector('.dash-main');
+      if (main) {
+        // Calculate the target's position relative to dash-main and scroll there
+        var mainRect = main.getBoundingClientRect();
+        var targetRect = target.getBoundingClientRect();
+        main.scrollTop = main.scrollTop + (targetRect.top - mainRect.top);
+      }
+    }
+    window.scrollTo(0, 0);
     if (name === 'properties') renderPropertiesList();
     if (name === 'clients') { renderAllClientsList(); clearClientSelection(); }
-    if (name === 'inquiries') loadChatInbox();
-  }
-
-  // ── Chat Inbox (unanswered tenant questions from website AI) ─────────────
-  function loadChatInbox() {
-    const msgs = (() => { try { return JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]'); } catch(e) { return []; } })();
-    const list = document.getElementById('chat-inbox-list');
-    const badge = document.getElementById('inbox-badge');
-    const navBadge = document.querySelector('.dash-link[onclick*="inquiries"] span');
-    const unread = msgs.filter(m => !m.read).length;
-    if (badge) { badge.textContent = unread; badge.style.display = unread ? 'inline' : 'none'; }
-    if (navBadge) { navBadge.textContent = unread; navBadge.style.display = unread ? 'inline' : 'none'; }
-    if (!list) return;
-    if (!msgs.length) {
-      list.innerHTML = '<div style="color:var(--gray-500);font-size:0.875rem;text-align:center;padding:1.5rem 0;">No unanswered questions yet. When prospective tenants ask the chat AI a question it can\'t answer, it will appear here.</div>';
-      return;
-    }
-    list.innerHTML = msgs.map((m, i) => {
-      const dt = new Date(m.timestamp);
-      const age = Math.round((Date.now() - dt) / 60000);
-      const timeStr = age < 60 ? age + 'm ago' : age < 1440 ? Math.round(age / 60) + 'h ago' : Math.round(age / 1440) + 'd ago';
-      return '<div style="padding:0.75rem 0;border-bottom:1px solid var(--gray-100);' + (!m.read ? 'background:#fffbeb;border-left:3px solid #f59e0b;padding-left:0.75rem;' : '') + '">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">' +
-          '<div style="flex:1;">' +
-            '<div style="font-size:0.875rem;font-weight:600;margin-bottom:2px;">' + escHtml(m.property) + '</div>' +
-            '<div style="font-size:0.875rem;color:var(--gray-800);">"' + escHtml(m.text) + '"</div>' +
-            '<div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px;">💬 Website chat · ' + timeStr + (m.listingId ? ' · ' + escHtml(m.listingId) : '') + '</div>' +
-          '</div>' +
-          '<div style="display:flex;gap:0.4rem;flex-shrink:0;">' +
-            '<button onclick="markChatRead(' + i + ')" style="font-size:0.75rem;padding:0.25rem 0.6rem;border:1px solid #d1d5db;background:white;border-radius:6px;cursor:pointer;color:#374151;">Mark read</button>' +
-            '<button onclick="deleteChatMsg(' + i + ')" style="font-size:0.75rem;padding:0.25rem 0.6rem;border:1px solid #fca5a5;background:white;border-radius:6px;cursor:pointer;color:var(--danger);">Remove</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-  function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function markChatRead(idx) {
-    try {
-      const msgs = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
-      if (msgs[idx]) { msgs[idx].read = true; localStorage.setItem('rv_chat_inbox', JSON.stringify(msgs)); }
-    } catch(e) {}
-    loadChatInbox();
-  }
-  function deleteChatMsg(idx) {
-    try {
-      const msgs = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
-      msgs.splice(idx, 1);
-      localStorage.setItem('rv_chat_inbox', JSON.stringify(msgs));
-    } catch(e) {}
-    loadChatInbox();
-  }
-  function clearChatInbox() {
-    if (!confirm('Clear all chat messages?')) return;
-    localStorage.removeItem('rv_chat_inbox');
-    loadChatInbox();
-  }
-  // AI draft reply generator (for copy-pasting to Zillow/Facebook messages)
-  function draftReply() {
-    const input = document.getElementById('ai-draft-input');
-    const output = document.getElementById('ai-draft-output');
-    if (!input || !output) return;
-    const text = input.value.trim();
-    if (!text) return;
-    const response = typeof getAIResponse === 'function' ? getAIResponse(text) :
-      'Thanks for reaching out! Please contact Sanders Property Management directly for more information.';
-    output.style.display = 'block';
-    output.innerHTML = '<strong style="font-size:0.75rem;color:#6b7280;display:block;margin-bottom:0.4rem;">Suggested reply (copy & paste):</strong>' +
-      '<div id="draft-reply-text" style="white-space:pre-wrap;">' + escHtml(response) + '</div>' +
-      '<button onclick="navigator.clipboard.writeText(document.getElementById(\'draft-reply-text\').textContent).then(()=>this.textContent=\'✓ Copied!\').catch(()=>{})" ' +
-      'style="margin-top:0.5rem;font-size:0.75rem;padding:0.25rem 0.75rem;border:1px solid #86efac;background:white;border-radius:6px;cursor:pointer;color:#15803d;">📋 Copy Reply</button>';
   }
 
   // ── All clients (admin: each person's data/listings) ──────────────────
@@ -2018,7 +2022,16 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     document.getElementById('edit-description').value = p.description || '';
     // Load existing photos
     editPhotos = p.photos || [];
-    refreshPhotoStrip();
+    const strip = document.getElementById('photo-preview-strip');
+    if (strip) {
+      strip.innerHTML = '';
+      editPhotos.forEach((src, i) => {
+        const img = document.createElement('div');
+        img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
+        img.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />';
+        strip.appendChild(img);
+      });
+    }
     } else {
       document.getElementById('edit-address').value = '';
       document.getElementById('edit-beds').value = '';
@@ -2172,15 +2185,84 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   });
   document.addEventListener('DOMContentLoaded', loadAssistanceNotifications);
   document.addEventListener('DOMContentLoaded', loadFeePolicy);
-  document.addEventListener('DOMContentLoaded', function() {
-    // Update chat inbox badge count in nav sidebar
+  document.addEventListener('DOMContentLoaded', loadChatInbox);
+
+  // ── Chat inbox loader (from app.js rv_chat_inbox) ──────────
+  function loadChatInbox() {
     try {
-      const msgs = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
-      const unread = msgs.filter(m => !m.read).length;
-      const navBadge = document.querySelector('.dash-link[onclick*="inquiries"] span');
-      if (navBadge) { navBadge.textContent = unread; navBadge.style.display = unread ? 'inline' : 'none'; }
+      var inbox = JSON.parse(localStorage.getItem('rv_chat_inbox') || '[]');
+      if (inbox.length === 0) return;
+      var tbody = document.querySelector('#dtab-inquiries tbody');
+      if (!tbody) return;
+      inbox.forEach(function(item) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td><strong>' + escapeHtml((item.question || '').slice(0,20)) + '</strong></td>' +
+          '<td style="max-width:200px;font-size:0.875rem;">"' + escapeHtml(item.question || '') + '"</td>' +
+          '<td style="font-size:0.875rem;">' + escapeHtml(item.property || 'General') + '</td>' +
+          '<td><span class="badge badge-pending">Website</span></td>' +
+          '<td style="font-size:0.8rem;color:var(--gray-500);">' + (item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown') + '</td>' +
+          '<td><span class="badge" style="background:#fef3c7;color:#92400e;">Needs Review</span></td>';
+        tbody.appendChild(tr);
+      });
     } catch(e) {}
-  });
+  }
+
+  // ── Generate Lease UI ──────────
+  function generateLeaseUI() {
+    var tenant = prompt('Enter tenant full name:');
+    if (!tenant) return;
+    var address = prompt('Enter property address:');
+    if (!address) return;
+    var rent = prompt('Enter monthly rent amount:');
+    if (!rent) return;
+    var startDate = prompt('Lease start date (YYYY-MM-DD):');
+    var endDate = prompt('Lease end date (YYYY-MM-DD):');
+    var lease = generateLease(
+      {
+        primaryApplicant: { firstName: tenant.split(' ')[0], lastName: tenant.split(' ').slice(1).join(' ') },
+        propertyAddress: address,
+      },
+      {
+        monthlyRent: parseFloat(rent) || 1200,
+        commencementDate: startDate || new Date().toISOString().split('T')[0],
+        endDate: endDate || '',
+        securityDeposit: parseFloat(rent) || 1200,
+      }
+    );
+    if (lease) {
+      alert('Lease generated successfully!\n\nLease ID: ' + lease.id + '\nTenant: ' + tenant + '\nProperty: ' + address + '\n\nThe lease has been saved and is ready for e-signature.');
+    }
+  }
+
+  // ── Generate Eviction Notice UI ──────────
+  function generateEvictionUI() {
+    var tenant = prompt('Enter tenant full name:');
+    if (!tenant) return;
+    var address = prompt('Enter property address:');
+    if (!address) return;
+    var type = prompt('Notice type:\n1 = 3-Day Pay or Quit\n2 = 3-Day Cure or Quit\n3 = 15-Day Month-to-Month\n\nEnter 1, 2, or 3:');
+    var noticeTypes = {'1': '3-day-pay', '2': '3-day-cure', '3': '15-day'};
+    var noticeType = noticeTypes[type] || '3-day-pay';
+    var amountOwed = '';
+    if (noticeType === '3-day-pay') {
+      amountOwed = prompt('Amount owed ($):') || '0';
+    }
+    var doc = generateEvictionNotice(
+      noticeType,
+      { name: tenant },
+      { address: address, amountOwed: parseFloat(amountOwed) || 0 }
+    );
+    if (doc) {
+      alert('Eviction notice generated!\n\nType: ' + doc.title + '\nTenant: ' + tenant + '\nProperty: ' + address + '\n\nThe document has been saved. You can generate an attorney packet from the Documents tab.');
+      var genPacket = confirm('Would you like to generate an attorney packet as well?');
+      if (genPacket) {
+        var packet = generateAttorneyPacket(tenant, address);
+        if (packet) {
+          alert('Attorney packet generated with ' + (packet.evictionNotices || []).length + ' eviction notice(s).\n\nIncludes: application, lease, eviction notices, payment history, and communication log.');
+        }
+      }
+    }
+  }
 
   // Referral CTA — show after 4s on dashboard, once per session
   document.addEventListener('DOMContentLoaded', function() {
@@ -2193,6 +2275,419 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       }, 4000);
     }
   });
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: PORTFOLIO IMPORT UI
+  // ══════════════════════════════════════════════════════════════════════
+  var _importParsedData = null;
+
+  function handleImportFile(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'csv') {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        _importParsedData = parseCSV(e.target.result);
+        showImportMapping(_importParsedData);
+      };
+      reader.readAsText(file);
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      // Load SheetJS for XLSX parsing
+      if (typeof XLSX === 'undefined') {
+        var s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        s.onload = function() { parseXLSX(file); };
+        s.onerror = function() { alert('Failed to load XLSX parser. Please try CSV format.'); };
+        document.head.appendChild(s);
+      } else {
+        parseXLSX(file);
+      }
+    } else {
+      alert('Unsupported file format. Please use CSV or XLSX.');
+    }
+  }
+
+  function parseXLSX(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var firstSheet = workbook.SheetNames[0];
+      var csv = XLSX.utils.sheet_to_csv(workbook.Sheets[firstSheet]);
+      _importParsedData = parseCSV(csv);
+      showImportMapping(_importParsedData);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function showImportMapping(parsed) {
+    if (!parsed || !parsed.headers || parsed.headers.length === 0) {
+      alert('Could not parse file. Please check the format.');
+      return;
+    }
+    var mapping = autoMapColumns(parsed.headers);
+    var fields = ['property','tenant','rent','pmfee','beds','baths'];
+    var mapKeys = ['property','tenant','rent','pmFee','beds','baths'];
+    fields.forEach(function(f, fi) {
+      var sel = document.getElementById('map-' + f);
+      if (!sel) return;
+      sel.innerHTML = '<option value="">(none)</option>';
+      parsed.headers.forEach(function(h) {
+        var opt = document.createElement('option');
+        opt.value = h; opt.textContent = h;
+        if (mapping[mapKeys[fi]] === h) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    });
+    // Preview table
+    var thead = document.querySelector('#import-preview-table thead');
+    var tbody = document.querySelector('#import-preview-table tbody');
+    thead.innerHTML = '<tr>' + parsed.headers.map(function(h) { return '<th>' + escapeHtml(h) + '</th>'; }).join('') + '</tr>';
+    tbody.innerHTML = '';
+    parsed.rows.slice(0, 5).forEach(function(row) {
+      var tr = '<tr>' + parsed.headers.map(function(h) { return '<td>' + escapeHtml(row[h] || '') + '</td>'; }).join('') + '</tr>';
+      tbody.innerHTML += tr;
+    });
+    document.getElementById('import-mapping-panel').style.display = 'block';
+    var status = document.getElementById('import-status');
+    status.style.display = 'block';
+    document.getElementById('import-status-text').textContent = 'File loaded: ' + parsed.rows.length + ' rows detected. ' + parsed.headers.length + ' columns found.';
+  }
+
+  function executeImport() {
+    if (!_importParsedData) { alert('No file loaded.'); return; }
+    var mapping = {
+      property: document.getElementById('map-property').value,
+      tenant: document.getElementById('map-tenant').value,
+      rent: document.getElementById('map-rent').value,
+      pmFee: document.getElementById('map-pmfee').value,
+      beds: document.getElementById('map-beds').value,
+      baths: document.getElementById('map-baths').value,
+    };
+    if (!mapping.property) { alert('Please select the Property Address column.'); return; }
+    var result = importPortfolio(_importParsedData, mapping, 'sanders-pm');
+    document.getElementById('import-status-text').innerHTML = '✅ Successfully imported <strong>' + result.imported + '</strong> properties! Total listings: ' + result.total;
+    document.getElementById('import-status').style.background = '#dcfce7';
+    document.getElementById('import-mapping-panel').style.display = 'none';
+    _importParsedData = null;
+    renderPropertiesList();
+  }
+
+  // Import drop zone drag-and-drop
+  document.addEventListener('DOMContentLoaded', function() {
+    var zone = document.getElementById('import-drop-zone');
+    if (!zone) return;
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='#1a56db'; zone.style.background='#eff6ff'; });
+    zone.addEventListener('dragleave', function(e) { e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background=''; });
+    zone.addEventListener('drop', function(e) {
+      e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background='';
+      if (e.dataTransfer.files.length > 0) {
+        document.getElementById('import-file-input').files = e.dataTransfer.files;
+        handleImportFile(document.getElementById('import-file-input'));
+      }
+    });
+  });
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: ACCOUNTING & STATEMENTS UI
+  // ══════════════════════════════════════════════════════════════════════
+  function renderLedger() {
+    seedLedgerData();
+    var all = getRentLedger(null, null);
+    var tenantFilter = document.getElementById('ledger-tenant-filter').value;
+    var monthFilter = document.getElementById('ledger-month-filter').value;
+    if (tenantFilter) all = all.filter(function(e) { return e.tenant === tenantFilter; });
+    if (monthFilter) all = all.filter(function(e) { return e.month === monthFilter; });
+    all.sort(function(a, b) { return b.month.localeCompare(a.month) || a.tenant.localeCompare(b.tenant); });
+
+    var tbody = document.getElementById('ledger-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = all.map(function(e) {
+      var statusBadge = e.status === 'paid'
+        ? '<span class="badge badge-available">Paid</span>'
+        : '<span class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">Due</span>';
+      return '<tr>' +
+        '<td style="font-weight:600;">' + escapeHtml(e.tenant) + '</td>' +
+        '<td style="font-size:.82rem;">' + escapeHtml(e.property) + '</td>' +
+        '<td>' + escapeHtml(e.month) + '</td>' +
+        '<td>$' + (e.rentDue || 0).toFixed(2) + '</td>' +
+        '<td style="color:' + (e.rentPaid >= e.rentDue ? '#15803d' : '#b91c1c') + ';font-weight:600;">$' + (e.rentPaid || 0).toFixed(2) + '</td>' +
+        '<td>$' + (e.pmFee || 0).toFixed(2) + '</td>' +
+        '<td>' + statusBadge + '</td>' +
+        '<td>' + escapeHtml(e.method || '—') + '</td>' +
+        '</tr>';
+    }).join('');
+
+    // Summary
+    var totalDue = 0, totalPaid = 0, totalFees = 0;
+    all.forEach(function(e) { totalDue += e.rentDue || 0; totalPaid += e.rentPaid || 0; totalFees += e.pmFee || 0; });
+    var summary = document.getElementById('ledger-summary');
+    if (summary) {
+      summary.innerHTML = '<div><strong>Total Due:</strong> $' + totalDue.toFixed(2) + '</div>' +
+        '<div><strong>Total Collected:</strong> <span style="color:#15803d;">$' + totalPaid.toFixed(2) + '</span></div>' +
+        '<div><strong>PM Fees:</strong> $' + totalFees.toFixed(2) + '</div>' +
+        '<div><strong>Collection Rate:</strong> ' + (totalDue > 0 ? Math.round(totalPaid / totalDue * 100) : 0) + '%</div>';
+    }
+  }
+
+  function populateLedgerFilters() {
+    seedLedgerData();
+    var all = getRentLedger(null, null);
+    var tenants = [], months = [];
+    all.forEach(function(e) {
+      if (tenants.indexOf(e.tenant) === -1) tenants.push(e.tenant);
+      if (months.indexOf(e.month) === -1) months.push(e.month);
+    });
+    var tSel = document.getElementById('ledger-tenant-filter');
+    var mSel = document.getElementById('ledger-month-filter');
+    if (tSel) {
+      tSel.innerHTML = '<option value="">All Tenants</option>';
+      tenants.sort().forEach(function(t) { tSel.innerHTML += '<option value="' + escapeHtml(t) + '">' + escapeHtml(t) + '</option>'; });
+    }
+    if (mSel) {
+      mSel.innerHTML = '<option value="">All Months</option>';
+      months.sort().reverse().forEach(function(m) { mSel.innerHTML += '<option value="' + m + '">' + m + '</option>'; });
+    }
+  }
+
+  function populatePropertySelects() {
+    var listings = getListings();
+    var properties = [];
+    listings.forEach(function(l) { if (l.address && properties.indexOf(l.address) === -1) properties.push(l.address); });
+    // Also add properties from ledger
+    var ledger = getRentLedger(null, null);
+    ledger.forEach(function(e) { if (e.property && properties.indexOf(e.property) === -1) properties.push(e.property); });
+    ['stmt-property','tax-property'].forEach(function(id) {
+      var sel = document.getElementById(id);
+      if (!sel) return;
+      sel.innerHTML = '<option value="">Select property</option>';
+      properties.forEach(function(p) { sel.innerHTML += '<option value="' + escapeHtml(p) + '">' + escapeHtml(p) + '</option>'; });
+    });
+  }
+
+  function showStatementGenerator() {
+    populatePropertySelects();
+    document.getElementById('statement-generator').style.display = 'block';
+    document.getElementById('tax-generator').style.display = 'none';
+    var monthInput = document.getElementById('stmt-month');
+    if (monthInput && !monthInput.value) {
+      var now = new Date();
+      monthInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    }
+  }
+
+  function showTaxGenerator() {
+    populatePropertySelects();
+    document.getElementById('tax-generator').style.display = 'block';
+    document.getElementById('statement-generator').style.display = 'none';
+  }
+
+  function doGenerateStatement() {
+    var owner = document.getElementById('stmt-owner').value.trim() || 'Property Owner';
+    var property = document.getElementById('stmt-property').value;
+    var month = document.getElementById('stmt-month').value;
+    if (!property) { alert('Please select a property.'); return; }
+    if (!month) { alert('Please select a month.'); return; }
+    var statement = generateOwnerStatement(owner, property, month);
+    generateStatementPDF(statement);
+  }
+
+  function doGenerateTax() {
+    var owner = document.getElementById('tax-owner').value.trim() || 'Property Owner';
+    var property = document.getElementById('tax-property').value;
+    var year = document.getElementById('tax-year').value;
+    if (!property) { alert('Please select a property.'); return; }
+    var summary = generateTaxSummary(owner, property, year);
+    generateTaxPDF(summary);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: ENHANCED ADD PROPERTY (Google Maps + Drag-Drop + Client)
+  // ══════════════════════════════════════════════════════════════════════
+  var _dragDropPhotos = [];
+
+  // Initialize Google Maps autocomplete on edit-address field
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() { initGooglePlaces('edit-address'); }, 500);
+  });
+
+  // Initialize drag-drop on the photo upload area
+  document.addEventListener('DOMContentLoaded', function() {
+    initDragDropZone('photo-drop-zone', function(files) {
+      files.forEach(function(file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          _dragDropPhotos.push({ src: e.target.result, selected: true, name: file.name });
+          renderDragDropPhotos();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  });
+
+  function renderDragDropPhotos() {
+    var strip = document.getElementById('photo-preview-strip');
+    if (!strip) return;
+    strip.innerHTML = '';
+    _dragDropPhotos.forEach(function(photo, i) {
+      var div = document.createElement('div');
+      div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:2px solid ' + (photo.selected ? '#1a56db' : '#e5e7eb') + ';flex-shrink:0;cursor:pointer;opacity:' + (photo.selected ? '1' : '0.5') + ';';
+      div.innerHTML = '<img src="' + photo.src + '" style="width:100%;height:100%;object-fit:cover;" />' +
+        '<div onclick="event.stopPropagation();togglePhotoSelect(' + i + ')" style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:4px;background:' + (photo.selected ? '#1a56db' : 'rgba(0,0,0,.4)') + ';color:white;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;">' + (photo.selected ? '✓' : '') + '</div>' +
+        '<button onclick="event.stopPropagation();removeDragPhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
+      strip.appendChild(div);
+    });
+    // Update editPhotos to selected ones
+    editPhotos = _dragDropPhotos.filter(function(p) { return p.selected; }).map(function(p) { return p.src; });
+  }
+
+  function togglePhotoSelect(idx) {
+    _dragDropPhotos[idx].selected = !_dragDropPhotos[idx].selected;
+    renderDragDropPhotos();
+  }
+
+  function removeDragPhoto(idx) {
+    _dragDropPhotos.splice(idx, 1);
+    renderDragDropPhotos();
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: CLIENT ASSOCIATION (Add Property modal)
+  // ══════════════════════════════════════════════════════════════════════
+  function populateClientDropdown() {
+    var sel = document.getElementById('edit-client-owner');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Select existing client...</option>';
+    var clients = JSON.parse(localStorage.getItem('rv_clients') || '[]');
+    clients.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.id || c.email || c.name;
+      opt.textContent = c.name + (c.email ? ' (' + c.email + ')' : '');
+      sel.appendChild(opt);
+    });
+    // Also add default Sanders PM
+    var opt2 = document.createElement('option');
+    opt2.value = 'sanders-pm';
+    opt2.textContent = 'Sanders Property Management (Self)';
+    sel.appendChild(opt2);
+  }
+
+  function addNewClientInline() {
+    var panel = document.getElementById('new-client-inline');
+    if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function saveNewClientInline() {
+    var name = document.getElementById('new-client-name').value.trim();
+    var email = document.getElementById('new-client-email').value.trim();
+    if (!name) { alert('Please enter a client name.'); return; }
+    var clients = JSON.parse(localStorage.getItem('rv_clients') || '[]');
+    var newClient = {
+      id: 'client-' + Date.now(),
+      name: name,
+      email: email,
+      createdAt: new Date().toISOString()
+    };
+    clients.push(newClient);
+    localStorage.setItem('rv_clients', JSON.stringify(clients));
+    populateClientDropdown();
+    // Select the new client
+    var sel = document.getElementById('edit-client-owner');
+    if (sel) sel.value = newClient.id;
+    document.getElementById('new-client-inline').style.display = 'none';
+    document.getElementById('new-client-name').value = '';
+    document.getElementById('new-client-email').value = '';
+    alert('Client "' + name + '" added successfully!');
+  }
+
+  // Populate client dropdown when edit modal opens
+  var _origOpenEditListing = typeof openEditListing === 'function' ? openEditListing : null;
+  if (_origOpenEditListing) {
+    var _origOpen = openEditListing;
+    openEditListing = function(idx, cid) {
+      _origOpen(idx, cid);
+      populateClientDropdown();
+      _dragDropPhotos = [];
+      renderDragDropPhotos();
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: FACEBOOK GRAPH API INTEGRATION
+  // ══════════════════════════════════════════════════════════════════════
+  window.RV_FACEBOOK_API = null; // Set to { pageId: '...', accessToken: '...' } to enable
+  function publishToFacebook(listing) {
+    if (!window.RV_FACEBOOK_API || !window.RV_FACEBOOK_API.accessToken) {
+      return false; // Fallback to clipboard method
+    }
+    var api = window.RV_FACEBOOK_API;
+    var message = listing.address + '\n' +
+      (listing.beds || '?') + ' bed / ' + (listing.baths || '?') + ' bath' +
+      (listing.sqft ? ' · ' + listing.sqft + ' sq ft' : '') + '\n' +
+      '$' + (listing.rent || '?') + '/mo\n\n' +
+      (listing.description || '') + '\n\n' +
+      'Listing ID: ' + (listing.listingId || 'N/A') + '\n' +
+      'Verify at: https://rentverified.com\n' +
+      'Managed by Sanders Property Management';
+    // Post to Facebook Page via Graph API
+    fetch('https://graph.facebook.com/v18.0/' + api.pageId + '/feed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, access_token: api.accessToken })
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.id) {
+          var fbStatus = document.getElementById('fb-status');
+          if (fbStatus) { fbStatus.textContent = 'Published!'; fbStatus.style.color = '#15803d'; }
+          alert('Successfully published to Facebook Page!');
+        } else {
+          alert('Facebook publish error: ' + (data.error ? data.error.message : 'Unknown error'));
+        }
+      })
+      .catch(function(err) { alert('Facebook API error: ' + err.message); });
+    return true;
+  }
+
+  // Publish to Facebook from broadcast modal using Graph API
+  function publishToFacebookFromBroadcast() {
+    if (!window._broadcastListing) { alert('No listing selected.'); return; }
+    var listing = window._broadcastListing;
+    var published = publishToFacebook(listing);
+    if (!published) {
+      alert('Facebook Graph API is not configured. Use the "Open →" button to post manually via clipboard.');
+    }
+  }
+
+  // Show Facebook Graph API button if configured
+  function updateFbGraphBtn() {
+    var btn = document.getElementById('fb-graph-btn');
+    if (btn && window.RV_FACEBOOK_API && window.RV_FACEBOOK_API.accessToken) {
+      btn.style.display = '';
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 2: DASHBOARD TAB ROUTING UPDATE
+  // ══════════════════════════════════════════════════════════════════════
+  var _origDashTab = dashTab;
+  dashTab = function(name) {
+    _origDashTab(name);
+    if (name === 'accounting') {
+      populateLedgerFilters();
+      renderLedger();
+      populatePropertySelects();
+    }
+    if (name === 'import') {
+      // Reset import state
+      var mp = document.getElementById('import-mapping-panel');
+      var is = document.getElementById('import-status');
+      if (mp) mp.style.display = 'none';
+      if (is) is.style.display = 'none';
+    }
+  };
+
 </script>
 
   <!-- BROADCAST MODAL -->
@@ -2230,6 +2725,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
             </div>
             <span id="fb-status" style="font-size:.75rem;color:#6B7280;"></span>
             <button onclick="broadcastTo('fb')" class="btn btn-sm" style="background:#1877f2;color:white;border:none;white-space:nowrap;">Open →</button>
+            <button onclick="publishToFacebookFromBroadcast()" class="btn btn-sm" style="background:#42b72a;color:white;border:none;white-space:nowrap;display:none;" id="fb-graph-btn">Publish to Page</button>
           </div>
 
           <!-- Craigslist -->
