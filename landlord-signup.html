@@ -1452,12 +1452,7 @@
     }
   }
 
-  // ── AUTH ──────────────────────────────────────────
-  const ACCOUNTS = [
-    { email: 'danielrhart1284@gmail.com', password: 'SPMdemo2026',   name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' },
-    { email: 'danielhart1284',            password: 'RVadmin2026', name: 'Daniel', company: 'Sanders Property Management', role: 'admin',    username: 'danielhart1284' },
-  ];
-
+  // ── AUTH HELPERS ──────────────────────────────────
   let currentLoginRole = 'landlord';
 
   function setLoginRole(role, btn) {
@@ -1474,54 +1469,24 @@
     });
   }
 
-  function doLogin() {
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const pw    = document.getElementById('loginPw').value;
-    const errEl = document.getElementById('loginErr');
-    const acct  = ACCOUNTS.find(a => (a.email.toLowerCase() === email || (a.username && a.username.toLowerCase() === email)) && a.password === pw);
-    if (!acct) {
-      errEl.textContent = '⚠️ Incorrect email or password. Please try again.';
-      errEl.style.display = 'block';
-      document.getElementById('loginPw').style.borderColor = '#ef4444';
-      return;
-    }
-    errEl.style.display = 'none';
-    // Route by role
-    if (currentLoginRole === 'agent') {
-      window.location.href = 'agent-portal.html';
-      return;
-    }
-    if (currentLoginRole === 'vendor') {
-      window.location.href = 'vendor-portal.html';
-      return;
-    }
-    // Landlord / PM → dashboard
-    document.getElementById('signup-screen').style.display = 'none';
-    document.getElementById('dashboard-screen').style.display = 'block';
-  }
-
   function togglePw() {
     const el = document.getElementById('loginPw');
-    el.type = el.type === 'password' ? 'text' : 'password';
+    if (el) el.type = el.type === 'password' ? 'text' : 'password';
   }
 
   function showSignupForm() {
-    document.getElementById('login-panel').style.display = 'none';
-    document.getElementById('signup-panel').style.display = 'block';
+    const lp = document.getElementById('login-panel');
+    const sp = document.getElementById('signup-panel');
+    if (lp) lp.style.display = 'none';
+    if (sp) sp.style.display = 'block';
   }
 
   function showLoginForm() {
-    document.getElementById('signup-panel').style.display = 'none';
-    document.getElementById('login-panel').style.display = 'block';
+    const sp = document.getElementById('signup-panel');
+    const lp = document.getElementById('login-panel');
+    if (sp) sp.style.display = 'none';
+    if (lp) lp.style.display = 'block';
   }
-
-  // Allow Enter key to submit login
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && document.getElementById('login-panel') &&
-        document.getElementById('login-panel').style.display !== 'none') {
-      doLogin();
-    }
-  });
 
   function submitSignup() {
     // Save credentials from step-1 inputs to localStorage
@@ -1572,9 +1537,20 @@
   ];
 
   function doLogin() {
-    const email    = (document.getElementById('login-email').value || '').toLowerCase().trim();
-    const password = document.getElementById('login-password').value || '';
-    const errEl    = document.getElementById('login-error');
+    // Support both login forms: login-panel (loginEmail/loginPw) and login-screen (login-email/login-password)
+    const emailEl1 = document.getElementById('loginEmail');
+    const emailEl2 = document.getElementById('login-email');
+    const pwEl1    = document.getElementById('loginPw');
+    const pwEl2    = document.getElementById('login-password');
+    const errEl1   = document.getElementById('loginErr');
+    const errEl2   = document.getElementById('login-error');
+
+    // Determine which form is active (visible)
+    const usePanel = emailEl1 && emailEl1.value && emailEl1.offsetParent !== null;
+    const email    = usePanel ? (emailEl1.value || '').toLowerCase().trim() : (emailEl2 ? emailEl2.value || '' : '').toLowerCase().trim();
+    const password = usePanel ? (pwEl1 ? pwEl1.value : '') : (pwEl2 ? pwEl2.value : '');
+    const errEl    = usePanel ? errEl1 : errEl2;
+    const pwField  = usePanel ? pwEl1 : pwEl2;
 
     const DANIEL = { email: 'danielrhart1284@gmail.com', password: 'SPMdemo2026', company: 'Sanders Property Management' };
     const DEMO   = { email: 'daniel@sanderspm.com', password: 'Sanders2026' };
@@ -1585,7 +1561,7 @@
     const testAcct    = TEST_ACCOUNTS.find(a => a.email === email && a.password === password);
 
     if (testAcct && testAcct.redirect) {
-      errEl.style.display = 'none';
+      if (errEl) errEl.style.display = 'none';
       if (testAcct.redirect.indexOf('insurance-agents') !== -1) {
         localStorage.setItem('rv_ins_agent', JSON.stringify({ name: 'Test Ins Agent', company: 'Test Insurance Co', license: '12345678', tier: 'featured' }));
       }
@@ -1594,14 +1570,18 @@
     }
 
     if (matchStored || matchDaniel || matchDemo || (testAcct && !testAcct.redirect)) {
-      errEl.style.display = 'none';
+      if (errEl) errEl.style.display = 'none';
       const acct = matchDaniel ? { firstName: 'Daniel', lastName: 'Sanders', email: DANIEL.email, password: DANIEL.password, company: DANIEL.company } :
         matchDemo ? { firstName: 'Daniel', lastName: 'Sanders', email: DEMO.email, password: DEMO.password, company: 'Sanders Property Management' } :
         testAcct ? { firstName: (testAcct.name || '').split(' ')[0], lastName: '', email: testAcct.email, password: testAcct.password, company: testAcct.company || '', plan: testAcct.plan } :
         stored;
       if (!stored || testAcct) localStorage.setItem('rv_account', JSON.stringify(acct));
       if (testAcct && testAcct.plan) localStorage.setItem('rv_plan', testAcct.plan);
-      document.getElementById('login-screen').style.display   = 'none';
+      // Hide both login forms and show dashboard
+      const signupScreen = document.getElementById('signup-screen');
+      const loginScreen  = document.getElementById('login-screen');
+      if (signupScreen) signupScreen.style.display = 'none';
+      if (loginScreen)  loginScreen.style.display  = 'none';
       document.getElementById('dashboard-screen').style.display = 'block';
       if (document.querySelector('.plan-chip')) document.querySelector('.plan-chip').textContent = (testAcct && testAcct.plan) ? testAcct.plan : 'Pro Plan';
       renderPropertiesList();
@@ -1609,10 +1589,11 @@
       renderLeaseExpiry();
       loadFeePolicy();
     } else {
-      errEl.textContent = 'Incorrect email or password. Please try again.';
-      errEl.style.display = 'block';
-      document.getElementById('login-password').value = '';
-      document.getElementById('login-password').focus();
+      if (errEl) {
+        errEl.textContent = 'Incorrect email or password. Please try again.';
+        errEl.style.display = 'block';
+      }
+      if (pwField) { pwField.value = ''; pwField.focus(); }
     }
   }
 
