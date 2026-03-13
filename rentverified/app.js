@@ -3149,8 +3149,8 @@ function validateStatementMath(statementData) {
   statementData.entries.forEach(function(e, i) {
     var rent = e.rentPaid || 0;
     var feePercent = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
-    var expectedFee = rent * (feePercent / 100);
-    var expectedNet = rent - expectedFee;
+    var expectedFee = Math.round(rent * (feePercent / 100) * 100) / 100;
+    var expectedNet = Math.round((rent - expectedFee) * 100) / 100;
 
     if (Math.abs((e.pmFeeAmount || 0) - expectedFee) > 0.01) {
       errors.push('Entry ' + (i+1) + ': Fee mismatch. Expected $' + expectedFee.toFixed(2) + ', got $' + (e.pmFeeAmount || 0).toFixed(2));
@@ -3185,10 +3185,12 @@ function generateMathReport(statementData) {
   if (statementData && statementData.entries) {
     var totalRent = 0, totalFees = 0, totalNet = 0;
     statementData.entries.forEach(function(e) {
-      totalRent += (e.rentPaid || 0);
+      var rp = e.rentPaid || 0;
+      totalRent += rp;
       var fp = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
-      totalFees += (e.rentPaid || 0) * (fp / 100);
-      totalNet += (e.rentPaid || 0) - ((e.rentPaid || 0) * (fp / 100));
+      var fee = Math.round(rp * (fp / 100) * 100) / 100;
+      totalFees += fee;
+      totalNet += Math.round((rp - fee) * 100) / 100;
     });
     report.summary = { totalRent: totalRent, totalFees: totalFees, totalNet: totalNet, entryCount: statementData.entries.length };
   }
