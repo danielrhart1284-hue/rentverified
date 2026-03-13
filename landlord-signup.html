@@ -3768,11 +3768,11 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   }
 
   // --- Update dashTab to support new tabs ---
-  const _origDashTab = typeof dashTab === 'function' ? dashTab : null;
+  var _origDashTabPhase3 = typeof dashTab === 'function' ? dashTab : null;
   window.dashTab = function(tabName) {
     // Hide all new tabs
     ['propcommand','rentstatus','inbox','attydocs'].forEach(function(t) {
-      const el = document.getElementById('tab-' + t);
+      var el = document.getElementById('tab-' + t);
       if (el) el.style.display = 'none';
     });
 
@@ -3781,7 +3781,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       // Hide all existing tab-content panels (dtab-* elements use .tab-content.active pattern)
       document.querySelectorAll('#dashboard-screen .tab-content').forEach(function(t) { t.classList.remove('active'); });
 
-      const targetEl = document.getElementById('tab-' + tabName);
+      var targetEl = document.getElementById('tab-' + tabName);
       if (targetEl) targetEl.style.display = 'block';
 
       if (tabName === 'rentstatus') renderRentStatusBoard();
@@ -3794,12 +3794,12 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     }
 
     // For existing tabs, call original function
-    if (_origDashTab) _origDashTab(tabName);
+    if (_origDashTabPhase3) _origDashTabPhase3(tabName);
 
     // Render rent status and inbox counts on overview
     if (tabName === 'overview') {
-      const unread = getUnreadMessages('pm');
-      const badge = document.getElementById('inbox-badge');
+      var unread = getUnreadMessages('pm');
+      var badge = document.getElementById('inbox-badge');
       if (badge) badge.textContent = unread.length;
     }
   };
