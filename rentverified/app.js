@@ -2240,3 +2240,315 @@ function getMLStatus() {
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', seedLedgerData);
 }
+
+
+// ============================================================================
+// PHASE 3: COMMAND CENTER & PERMISSION LOGIC
+// ============================================================================
+
+// --- Permission Roles ---
+var RV_ROLES = {
+  PM: 'pm',
+  ADMIN: 'admin',
+  OWNER: 'owner',
+  TENANT: 'tenant',
+  VENDOR: 'vendor',
+  ATTORNEY: 'attorney',
+  AGENT: 'agent'
+};
+
+var RV_PERMISSIONS = {
+  pm:       { canMessage: ['owner','tenant','vendor','attorney','agent'], canView: ['lease','accounting','maintenance','docs','communications','history'] },
+  admin:    { canMessage: ['owner','tenant','vendor','attorney','agent'], canView: ['lease','accounting','maintenance','docs','communications','history'] },
+  owner:    { canMessage: ['pm'], canView: ['maintenance','accounting'] },
+  tenant:   { canMessage: ['pm'], canView: ['lease','maintenance'] },
+  vendor:   { canMessage: ['pm'], canView: ['maintenance'] },
+  attorney: { canMessage: ['pm'], canView: ['docs','lease'] },
+  agent:    { canMessage: ['pm','tenant'], canView: ['lease','docs'] }
+};
+
+function canUserMessage(fromRole, toRole) {
+  var perms = RV_PERMISSIONS[fromRole];
+  return perms && perms.canMessage.indexOf(toRole) >= 0;
+}
+
+function canUserViewTile(role, tileName) {
+  var perms = RV_PERMISSIONS[role];
+  return perms && perms.canView.indexOf(tileName) >= 0;
+}
+
+function getCurrentUserRole() {
+  var acct = rvGet('rv_account');
+  if (!acct) return 'pm';
+  return acct.role || 'pm';
+}
+
+// --- Messaging System ---
+RV_KEYS.MESSAGES = 'rv_messages';
+RV_KEYS.ATTORNEY_DOCS = 'rv_attorney_docs';
+RV_KEYS.SIDEBAR_ORDER = 'rv_sidebar_order';
+RV_KEYS.PROPERTY_DOCS = 'rv_property_docs';
+RV_KEYS.TENANT_HISTORY = 'rv_tenant_history';
+
+function getMessages() { return rvGet(RV_KEYS.MESSAGES) || []; }
+function saveMessages(arr) { rvSet(RV_KEYS.MESSAGES, arr); }
+
+function sendMessage(opts) {
+  var fromRole = opts.fromRole || getCurrentUserRole();
+  var toRole = opts.toRole || 'pm';
+  if (!canUserMessage(fromRole, toRole)) {
+    return { success: false, error: 'Permission denied: ' + fromRole + ' cannot message ' + toRole };
+  }
+  var msgs = getMessages();
+  var msg = {
+    id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    from: opts.from || 'Unknown',
+    fromRole: fromRole,
+    to: opts.to || 'PM',
+    toRole: toRole,
+    property: opts.property || '',
+    subject: opts.subject || '',
+    body: opts.body || '',
+    timestamp: new Date().toISOString(),
+    read: false,
+    replied: false
+  };
+  msgs.unshift(msg);
+  saveMessages(msgs);
+  return { success: true, message: msg };
+}
+
+function getUnreadMessages(role) {
+  var msgs = getMessages();
+  return msgs.filter(function(m) {
+    return !m.read && (m.toRole === role || role === 'pm' || role === 'admin');
+  });
+}
+
+function markMessageRead(msgId) {
+  var msgs = getMessages();
+  msgs.forEach(function(m) { if (m.id === msgId) m.read = true; });
+  saveMessages(msgs);
+}
+
+function getMessagesForProperty(propertyAddress) {
+  return getMessages().filter(function(m) { return m.property === propertyAddress; });
+}
+
+// --- Property Command Tiles ---
+function getPropertyCommandData(listing) {
+  var addr = listing.address || '';
+  var leases = getLeases().filter(function(l) { return l.property === addr; });
+  var currentLease = leases.length > 0 ? leases[leases.length - 1] : null;
+  var ledger = getRentLedger().filter(function(e) { return e.property === addr; });
+  var maintenance = getMaintenanceRequests().filter(function(r) { return r.property === addr; });
+  var docs = getPropertyDocs(addr);
+  var messages = getMessagesForProperty(addr);
+  var history = getTenantHistory(addr);
+
+  var totalOwed = 0, totalPaid = 0;
+  ledger.forEach(function(e) {
+    totalOwed += (e.rentDue || 0);
+    totalPaid += (e.rentPaid || 0);
+  });
+
+  var openMaint = maintenance.filter(function(r) { return r.status !== 'completed' && r.status !== 'closed'; });
+
+  return {
+    lease: {
+      current: currentLease,
+      expiryStatus: currentLease ? getLeaseExpiryStatus(currentLease) : null,
+      count: leases.length
+    },
+    accounting: {
+      totalOwed: totalOwed,
+      totalPaid: totalPaid,
+      balance: totalOwed - totalPaid,
+      entries: ledger,
+      pmFee: listing.pmFee || 0,
+      pmFeePercent: listing.pmFeePercent || 0
+    },
+    maintenance: {
+      open: openMaint.length,
+      total: maintenance.length,
+      requests: maintenance
+    },
+    docs: {
+      count: docs.length,
+      files: docs
+    },
+    communications: {
+      unread: messages.filter(function(m) { return !m.read; }).length,
+      total: messages.length,
+      messages: messages
+    },
+    history: {
+      tenants: history,
+      count: history.length
+    }
+  };
+}
+
+// --- Property Documents ---
+function getPropertyDocs(addr) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS) || {};
+  return all[addr] || [];
+}
+
+function addPropertyDoc(addr, doc) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS) || {};
+  if (!all[addr]) all[addr] = [];
+  all[addr].push({
+    id: 'doc-' + Date.now(),
+    name: doc.name || 'Untitled',
+    type: doc.type || 'other',
+    size: doc.size || 0,
+    uploadedAt: new Date().toISOString(),
+    uploadedBy: doc.uploadedBy || 'PM',
+    category: doc.category || 'general'
+  });
+  rvSet(RV_KEYS.PROPERTY_DOCS, all);
+}
+
+// --- Tenant History ---
+function getTenantHistory(addr) {
+  var all = rvGet(RV_KEYS.TENANT_HISTORY) || {};
+  return all[addr] || [];
+}
+
+function addTenantHistory(addr, record) {
+  var all = rvGet(RV_KEYS.TENANT_HISTORY) || {};
+  if (!all[addr]) all[addr] = [];
+  all[addr].push({
+    tenant: record.tenant || 'Unknown',
+    moveIn: record.moveIn || '',
+    moveOut: record.moveOut || '',
+    reason: record.reason || '',
+    notes: record.notes || '',
+    addedAt: new Date().toISOString()
+  });
+  rvSet(RV_KEYS.TENANT_HISTORY, all);
+}
+
+// --- Rent Status Board ---
+function getRentStatusBoard(clientId) {
+  var listings = getListingsForClient(clientId);
+  var ledger = getRentLedger();
+  var currentMonth = new Date().toISOString().slice(0, 7);
+
+  return listings.map(function(l) {
+    var monthEntries = ledger.filter(function(e) {
+      return e.property === l.address && e.month === currentMonth;
+    });
+    var owed = l.rent || 0;
+    var paid = 0;
+    var notes = '';
+    monthEntries.forEach(function(e) {
+      paid += (e.rentPaid || 0);
+      if (e.notes) notes += (notes ? '; ' : '') + e.notes;
+    });
+    var status = paid >= owed ? 'paid' : paid > 0 ? 'partial' : 'unpaid';
+    return {
+      address: l.address,
+      tenant: l.tenant || 'Vacant',
+      owed: owed,
+      paid: paid,
+      balance: owed - paid,
+      status: status,
+      notes: notes,
+      listingId: l.listingId
+    };
+  });
+}
+
+// --- Attorney Documents ---
+function getAttorneyDocs() { return rvGet(RV_KEYS.ATTORNEY_DOCS) || []; }
+function saveAttorneyDocs(arr) { rvSet(RV_KEYS.ATTORNEY_DOCS, arr); }
+
+function addAttorneyDoc(doc) {
+  var docs = getAttorneyDocs();
+  docs.push({
+    id: 'atty-doc-' + Date.now(),
+    name: doc.name || 'Untitled',
+    type: doc.type || 'legal',
+    category: doc.category || 'form',
+    size: doc.size || 0,
+    uploadedAt: new Date().toISOString(),
+    uploadedBy: doc.uploadedBy || 'Attorney'
+  });
+  saveAttorneyDocs(docs);
+  return docs;
+}
+
+// --- Sidebar Customization ---
+function getSidebarOrder() {
+  return rvGet(RV_KEYS.SIDEBAR_ORDER) || null;
+}
+function saveSidebarOrder(order) {
+  rvSet(RV_KEYS.SIDEBAR_ORDER, order);
+}
+
+// --- TransUnion SmartMove ---
+function triggerSmartMove(applicantEmail, applicantName, propertyAddress) {
+  var url = RV_CONFIG.smartMoveUrl;
+  var record = {
+    id: 'sm-' + Date.now(),
+    email: applicantEmail,
+    name: applicantName,
+    property: propertyAddress,
+    status: 'invited',
+    invitedAt: new Date().toISOString()
+  };
+  var existing = rvGet('rv_smartmove_invites') || [];
+  existing.push(record);
+  rvSet('rv_smartmove_invites', existing);
+  return { url: url, record: record };
+}
+
+function getSmartMoveInvites() {
+  return rvGet('rv_smartmove_invites') || [];
+}
+
+// --- Owner Statement (SPM Mirror Format) ---
+function generateOwnerStatementSPM(ownerId) {
+  var hub = getClientHub();
+  var owner = null;
+  hub.forEach(function(o) { if (o.id === ownerId) owner = o; });
+  if (!owner) return null;
+  var currentMonth = new Date().toISOString().slice(0, 7);
+  var monthName = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  var properties = owner.properties || [];
+  var totalRent = 0, totalFees = 0, totalDeposits = 0;
+  var lines = [];
+  properties.forEach(function(p) {
+    var rent = p.rent || 0;
+    var feePercent = p.feePercent || p.pmFeePercent || 0;
+    var fee = rent * feePercent / 100;
+    var net = rent - fee;
+    var deposit = p.deposit || 0;
+    totalRent += rent;
+    totalFees += fee;
+    totalDeposits += deposit;
+    lines.push({
+      address: p.fullAddress || p.address || '',
+      tenant: p.tenant || 'Vacant',
+      rent: rent,
+      feePercent: feePercent,
+      fee: fee,
+      net: net,
+      deposit: deposit,
+      payment: p.paymentMethod || '',
+      notes: p.notes || ''
+    });
+  });
+  return {
+    owner: owner.name,
+    month: monthName,
+    monthKey: currentMonth,
+    properties: lines,
+    totalRent: totalRent,
+    totalFees: totalFees,
+    totalNet: totalRent - totalFees,
+    totalDeposits: totalDeposits
+  };
+}
