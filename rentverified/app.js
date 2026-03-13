@@ -2757,7 +2757,7 @@ function addLedgerEntryAdvanced(entry) {
     paymentMethod: entry.paymentMethod || '',
     paymentDate: entry.paymentDate || '',
     status: entry.status || 'unpaid',
-    pmFeePercent: entry.pmFeePercent || 7,
+    pmFeePercent: (entry.pmFeePercent !== undefined && entry.pmFeePercent !== null) ? entry.pmFeePercent : 7,
     pmFeeAmount: 0,
     netToOwner: 0,
     notes: entry.notes || '',
@@ -3044,7 +3044,7 @@ function seedAdvancedLedger() {
           paymentMethod: paid > 0 ? methods[mi % methods.length] : '',
           paymentDate: paid > 0 ? '2026-0' + (mi + 1) + '-05' : '',
           status: status,
-          pmFeePercent: prop.pmFeePercent || 7,
+          pmFeePercent: (prop.pmFeePercent !== undefined && prop.pmFeePercent !== null) ? prop.pmFeePercent : 7,
           notes: ''
         });
       });
