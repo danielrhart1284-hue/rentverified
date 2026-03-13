@@ -135,6 +135,12 @@
   <div class="nav-links">
     <a href="index.html">← Back to Home</a>
   </div>
+    <!-- Global Search -->
+    <div style="position:relative;flex:1;max-width:400px;margin:0 1rem;">
+      <input type="text" id="global-search-input" placeholder="Search properties, tenants, clients, docs..." style="width:100%;padding:0.5rem 0.75rem 0.5rem 2.2rem;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;background:#f8fafc;" oninput="handleGlobalSearch(this.value)" autocomplete="off" />
+      <svg style="position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#94a3b8;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <div id="global-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,0.15);max-height:320px;overflow-y:auto;z-index:1000;margin-top:4px;"></div>
+    </div>
   <div class="nav-cta">
     <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
     <button class="btn btn-primary btn-sm" onclick="showLogin()" style="margin-left:.5rem;">Business Log In</button>
@@ -501,6 +507,11 @@
 
       <div style="padding:0 0.75rem;">
         <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-600);padding:0.5rem 0.25rem;margin-bottom:0.25rem;">Manage</div>
+        
+        <div class="dash-link" onclick="window.history.back()" data-sidebar-id="back" style="color:#94a3b8;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:0.5rem;padding-bottom:0.75rem;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          ← Back
+        </div>
         <div class="dash-link active" onclick="dashTab('overview')" data-sidebar-id="overview">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Overview
@@ -587,6 +598,23 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           🛡️ Insurance Agents
         </a>
+
+        <div class="dash-link" onclick="dashTab('advaccounting')" data-sidebar-id="advaccounting" style="color:#059669;background:rgba(5,150,105,0.08);border-left:2px solid #059669;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V5a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2h-2M9 7h6"/></svg>
+          💰 Adv. Accounting
+        </div>
+        <div class="dash-link" onclick="dashTab('profile')" data-sidebar-id="profile" style="color:#7c3aed;background:rgba(124,58,237,0.08);border-left:2px solid #7c3aed;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          👤 Profile
+        </div>
+        <div class="dash-link" onclick="dashTab('bulkmsg')" data-sidebar-id="bulkmsg" style="color:#ea580c;background:rgba(234,88,12,0.08);border-left:2px solid #ea580c;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+          📣 Bulk Messages
+        </div>
+        <div class="dash-link" onclick="dashTab('permissions')" data-sidebar-id="permissions" style="color:#be185d;background:rgba(190,24,93,0.08);border-left:2px solid #be185d;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          🔐 Permissions
+        </div>
         <a href="referral.html" class="dash-link" style="color:#a78bfa;background:rgba(167,139,250,0.1);border-left:3px solid #a78bfa;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
           🎁 Refer &amp; Earn
@@ -1737,6 +1765,153 @@
               <div id="atty-upload-result" style="margin-top:.75rem;"></div>
             </div>
           </div>
+
+
+
+    <!-- ========== TAB: Advanced Accounting (Grouped by Owner) ========== -->
+    <div id="tab-advaccounting" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📊 Advanced Accounting</h2>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-outline btn-sm" onclick="exportAdvancedLedgerCSV()">📥 Export CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddLedgerEntryModal()">+ Add Entry</button>
+        </div>
+      </div>
+      <div id="advanced-ledger-container"></div>
+    </div>
+
+    <!-- ========== TAB: Professional Profile ========== -->
+    <div id="tab-profile" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">👤 Professional Profile</h2>
+        <button class="btn btn-primary btn-sm" onclick="savePublicProfileUI()">💾 Save Profile</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Company Information</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Company Name</label>
+            <input type="text" id="profile-company-name" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Tagline</label>
+            <input type="text" id="profile-tagline" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Bio / Description</label>
+            <textarea id="profile-bio" class="form-input" rows="4" style="width:100%;resize:vertical;"></textarea>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">License Number</label>
+            <input type="text" id="profile-license" class="form-input" style="width:100%;" />
+          </div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Contact & Branding</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Phone</label>
+            <input type="tel" id="profile-phone" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Email</label>
+            <input type="email" id="profile-email" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Website</label>
+            <input type="url" id="profile-website" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.5rem;">Corporate Logo</label>
+            <div id="logo-upload-zone" style="border:2px dashed #cbd5e1;border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;background:#f8fafc;" onclick="document.getElementById('logo-file-input').click()">
+              <div id="logo-preview" style="margin-bottom:0.5rem;"></div>
+              <div style="color:#64748b;font-size:0.85rem;">Click or drag to upload logo</div>
+              <input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Team Members Section -->
+      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 style="font-weight:700;">👥 Team Members</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddTeamMemberModal()">+ Add Member</button>
+        </div>
+        <div id="team-members-list"></div>
+      </div>
+      <!-- Approved Vendors Section -->
+      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 style="font-weight:700;">🔧 Approved Vendors</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddVendorModal()">+ Add Vendor</button>
+        </div>
+        <div id="approved-vendors-list"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: Bulk Messaging ========== -->
+    <div id="tab-bulkmsg" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📣 Bulk Messaging</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Compose Broadcast</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Target Audience</label>
+            <select id="bulk-target" class="form-input" style="width:100%;">
+              <option value="everyone">Everyone</option>
+              <option value="delinquent">Delinquent Tenants (Unpaid Rent)</option>
+              <option value="owners">All Owners</option>
+              <option value="tenants">All Tenants</option>
+              <option value="vendors">All Vendors</option>
+              <option value="hoa">HOA Group</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Method</label>
+            <select id="bulk-method" class="form-input" style="width:100%;">
+              <option value="email">Email</option>
+              <option value="sms">SMS (Twilio)</option>
+              <option value="both">Email + SMS</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Subject</label>
+            <input type="text" id="bulk-subject" class="form-input" style="width:100%;" placeholder="Message subject..." />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Message</label>
+            <textarea id="bulk-body" class="form-input" rows="6" style="width:100%;resize:vertical;" placeholder="Type your broadcast message..."></textarea>
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="sendBulkMessageUI()">🚀 Send Broadcast</button>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Recent Broadcasts</h3>
+          <div id="bulk-history-list" style="max-height:400px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: Permission Manager ========== -->
+    <div id="tab-permissions" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">🔐 Permission Manager</h2>
+      </div>
+      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;margin-bottom:1.5rem;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Messaging Guardrails</h3>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.75rem;background:#f8fafc;border-radius:8px;margin-bottom:0.5rem;">
+          <input type="checkbox" id="perm-restrict-external" onchange="updateGuardrails()" />
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Restrict External Messaging</div>
+            <div style="font-size:0.8rem;color:#64748b;">Only the Account Owner can message external contacts (vendors, tenants) unless explicitly granted.</div>
+          </div>
+        </label>
+      </div>
+      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Team Permission Matrix</h3>
+        <div id="permission-matrix-container"></div>
+      </div>
+    </div>
 
     </div><!-- end dash-main -->
   </div><!-- end dashboard-layout -->
@@ -3886,6 +4061,585 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     }
   };
 
+
+  // ============================================================================
+  // PHASE 3 EXPANDED: UI Functions
+  // ============================================================================
+
+  // --- Global Search ---
+  function handleGlobalSearch(query) {
+    var container = document.getElementById('global-search-results');
+    if (!container) return;
+    if (!query || query.length < 2) { container.style.display = 'none'; return; }
+    var results = globalSearch(query);
+    if (results.length === 0) {
+      container.innerHTML = '<div style="padding:1rem;color:#94a3b8;text-align:center;font-size:0.85rem;">No results found</div>';
+      container.style.display = 'block';
+      return;
+    }
+    var typeIcons = { property: '🏠', client: '👤', message: '✉️', document: '📄' };
+    var typeColors = { property: '#2563eb', client: '#7c3aed', message: '#0891b2', document: '#059669' };
+    container.innerHTML = results.map(function(r) {
+      return '<div style="padding:0.6rem 1rem;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;align-items:center;gap:0.75rem;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'white\'" onclick="handleSearchResultClick(\'' + r.type + '\',\'' + (r.index !== undefined ? r.index : r.id || '').toString().replace(/'/g, "\\'") + '\')">' +
+        '<span style="font-size:1.1rem;">' + (typeIcons[r.type] || '📋') + '</span>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (r.label || '').replace(/</g, '&lt;') + '</div>' +
+          '<div style="font-size:0.75rem;color:#94a3b8;">' + (r.detail || '').replace(/</g, '&lt;') + '</div>' +
+        '</div>' +
+        '<span style="font-size:0.7rem;padding:2px 8px;border-radius:999px;background:' + (typeColors[r.type] || '#64748b') + '15;color:' + (typeColors[r.type] || '#64748b') + ';font-weight:600;text-transform:uppercase;">' + r.type + '</span>' +
+      '</div>';
+    }).join('');
+    container.style.display = 'block';
+  }
+
+  function handleSearchResultClick(type, id) {
+    document.getElementById('global-search-results').style.display = 'none';
+    document.getElementById('global-search-input').value = '';
+    if (type === 'property') { dashTab('properties'); }
+    else if (type === 'client') { dashTab('clienthub'); }
+    else if (type === 'message') { dashTab('inbox'); }
+    else if (type === 'document') { dashTab('docs'); }
+  }
+
+  // Close search on click outside
+  document.addEventListener('click', function(e) {
+    var sr = document.getElementById('global-search-results');
+    var si = document.getElementById('global-search-input');
+    if (sr && si && !sr.contains(e.target) && e.target !== si) { sr.style.display = 'none'; }
+  });
+
+  // --- Modal helpers ---
+  function openModal(id) {
+    var el = document.getElementById(id);
+    if (el) { el.style.display = 'flex'; }
+  }
+  function closeModal(id) {
+    var el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; }
+  }
+
+  // --- Logo Upload ---
+  function handleLogoUpload(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var branding = getBranding();
+      branding.logoUrl = e.target.result;
+      saveBranding(branding);
+      var preview = document.getElementById('logo-preview');
+      if (preview) preview.innerHTML = '<img src="' + e.target.result + '" style="max-width:120px;max-height:80px;border-radius:8px;" />';
+      // Update sidebar logo
+      var sidebarLogo = document.querySelector('.dash-sidebar div:first-child div div:first-child');
+      if (sidebarLogo && sidebarLogo.style) {
+        sidebarLogo.style.background = 'url(' + e.target.result + ') center/cover';
+        sidebarLogo.textContent = '';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- Advanced Accounting UI ---
+  function renderAdvancedLedger() {
+    seedAdvancedLedger();
+    var container = document.getElementById('advanced-ledger-container');
+    if (!container) return;
+    var entries = getAdvancedLedger();
+    if (entries.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:#94a3b8;">No ledger entries yet. Import data from Client Hub or add entries manually.</div>';
+      return;
+    }
+    // Group by owner
+    var grouped = {};
+    entries.forEach(function(e) {
+      var key = e.ownerName || 'Unknown Owner';
+      if (!grouped[key]) grouped[key] = {};
+      var addr = e.propertyAddress || 'Unknown Property';
+      if (!grouped[key][addr]) grouped[key][addr] = [];
+      grouped[key][addr].push(e);
+    });
+    var html = '';
+    Object.keys(grouped).forEach(function(owner) {
+      var ownerTotal = 0, ownerPaid = 0, ownerFees = 0;
+      Object.keys(grouped[owner]).forEach(function(addr) {
+        grouped[owner][addr].forEach(function(e) { ownerTotal += e.rentOwed || 0; ownerPaid += e.rentPaid || 0; ownerFees += e.pmFeeAmount || 0; });
+      });
+      html += '<div style="background:white;border-radius:12px;padding:1.25rem;border:1px solid #e2e8f0;margin-bottom:1rem;">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">';
+      html += '<div><h3 style="font-weight:700;font-size:1.1rem;">' + owner.replace(/</g, '&lt;') + '</h3>';
+      html += '<div style="font-size:0.8rem;color:#64748b;">Owed: $' + ownerTotal.toLocaleString() + ' | Paid: $' + ownerPaid.toLocaleString() + ' | Fees: $' + ownerFees.toLocaleString() + ' | Net: $' + (ownerPaid - ownerFees).toLocaleString() + '</div></div>';
+      html += '<div style="display:flex;gap:0.5rem;">';
+      html += '<button class="btn btn-outline btn-sm" onclick="generateMonthlyStatementUI(\'' + owner.replace(/'/g, "\\'") + '\')">📄 Monthly</button>';
+      html += '<button class="btn btn-outline btn-sm" onclick="generateEOYStatementUI(\'' + owner.replace(/'/g, "\\'") + '\')">📊 Year-End</button>';
+      html += '</div></div>';
+
+      Object.keys(grouped[owner]).forEach(function(addr) {
+        html += '<div style="margin-left:1rem;margin-bottom:1rem;">';
+        html += '<div style="font-weight:600;font-size:0.9rem;color:#374151;margin-bottom:0.5rem;">📍 ' + addr.replace(/</g, '&lt;') + '</div>';
+        html += '<table style="width:100%;font-size:0.8rem;border-collapse:collapse;">';
+        html += '<thead><tr style="background:#f8fafc;"><th style="padding:0.4rem;text-align:left;">Month</th><th style="text-align:right;padding:0.4rem;">Owed</th><th style="text-align:right;padding:0.4rem;">Paid</th><th style="padding:0.4rem;">Method</th><th style="padding:0.4rem;">Status</th><th style="text-align:right;padding:0.4rem;">Fee</th><th style="text-align:right;padding:0.4rem;">Net</th><th style="padding:0.4rem;">Modified</th><th style="padding:0.4rem;">Notes</th></tr></thead>';
+        html += '<tbody>';
+        grouped[owner][addr].forEach(function(e) {
+          var statusColors = { paid: '#16a34a', partial: '#f59e0b', unpaid: '#dc2626', late: '#dc2626' };
+          var sc = statusColors[e.status] || '#64748b';
+          var modTime = e.modifiedAt ? new Date(e.modifiedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+          html += '<tr style="border-bottom:1px solid #f1f5f9;">';
+          html += '<td style="padding:0.4rem;">' + (e.month || '') + '</td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.rentOwed || 0).toLocaleString() + '</td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.rentPaid || 0).toLocaleString() + '</td>';
+          html += '<td style="padding:0.4rem;">' + (e.paymentMethod || '-') + '</td>';
+          html += '<td style="padding:0.4rem;"><span style="color:' + sc + ';font-weight:600;text-transform:uppercase;font-size:0.7rem;">' + (e.status || 'unpaid') + '</span></td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.pmFeeAmount || 0).toFixed(2) + '</td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.netToOwner || 0).toFixed(2) + '</td>';
+          html += '<td style="padding:0.4rem;font-size:0.7rem;color:#94a3b8;" title="' + (e.modifiedAt || '') + '">' + (e.modifiedBy || '') + ' ' + modTime + '</td>';
+          html += '<td style="padding:0.4rem;font-size:0.75rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (e.notes || '').replace(/"/g, '&quot;') + '">' + (e.notes || '-') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function openAddLedgerEntryModal() {
+    // Populate payment methods dropdown
+    var sel = document.getElementById('le-method');
+    if (sel) {
+      var methods = getPaymentMethods();
+      sel.innerHTML = methods.map(function(m) { return '<option value="' + m + '">' + m + '</option>'; }).join('') + '<option value="__add_new__">+ Add New Method</option>';
+      sel.onchange = function() {
+        if (this.value === '__add_new__') {
+          var nm = prompt('Enter new payment method name:');
+          if (nm) { addPaymentMethod(nm); this.innerHTML += '<option value="' + nm + '">' + nm + '</option>'; this.value = nm; }
+          else { this.value = methods[0]; }
+        }
+      };
+    }
+    openModal('modal-add-ledger');
+  }
+
+  function submitLedgerEntry() {
+    addLedgerEntryAdvanced({
+      ownerName: document.getElementById('le-owner').value,
+      propertyAddress: document.getElementById('le-address').value,
+      tenantName: document.getElementById('le-tenant').value,
+      rentOwed: parseFloat(document.getElementById('le-owed').value) || 0,
+      rentPaid: parseFloat(document.getElementById('le-paid').value) || 0,
+      paymentMethod: document.getElementById('le-method').value,
+      pmFeePercent: (document.getElementById('le-fee').value !== '' && !isNaN(parseFloat(document.getElementById('le-fee').value))) ? parseFloat(document.getElementById('le-fee').value) : 7,
+      status: document.getElementById('le-status').value,
+      notes: document.getElementById('le-notes').value
+    });
+    closeModal('modal-add-ledger');
+    renderAdvancedLedger();
+  }
+
+  function exportAdvancedLedgerCSV() {
+    var entries = getAdvancedLedger();
+    var csv = 'Owner,Property,Tenant,Month,Owed,Paid,Method,Status,Fee%,Fee$,Net,Modified By,Modified At,Notes\n';
+    entries.forEach(function(e) {
+      csv += [e.ownerName, e.propertyAddress, e.tenantName, e.month, e.rentOwed, e.rentPaid, e.paymentMethod, e.status, e.pmFeePercent, e.pmFeeAmount, e.netToOwner, e.modifiedBy, e.modifiedAt, '"' + (e.notes || '').replace(/"/g, '""') + '"'].join(',') + '\n';
+    });
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'advanced_ledger_' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+  }
+
+  function generateMonthlyStatementUI(ownerName) {
+    var month = prompt('Enter month (e.g., "Feb 2026"):', 'Feb 2026');
+    if (!month) return;
+    var stmt = generateAdvancedMonthlyStatement(ownerName, month);
+    alert('Monthly Statement for ' + ownerName + ' (' + month + '):\n\nTotal Owed: $' + stmt.totalRent.toLocaleString() + '\nTotal Paid: $' + stmt.totalPaid.toLocaleString() + '\nPM Fees: $' + stmt.totalFees.toFixed(2) + '\nNet to Owner: $' + stmt.totalNet.toFixed(2) + '\n\nEntries: ' + stmt.entries.length + '\nInvoices attached: ' + stmt.invoices.length);
+  }
+
+  function generateEOYStatementUI(ownerName) {
+    var year = prompt('Enter year:', '2026');
+    if (!year) return;
+    var stmt = generateEndOfYearStatement(ownerName, parseInt(year));
+    alert('End of Year Statement for ' + ownerName + ' (' + year + '):\n\nTotal Owed: $' + stmt.totalRent.toLocaleString() + '\nTotal Paid: $' + stmt.totalPaid.toLocaleString() + '\nPM Fees: $' + stmt.totalFees.toFixed(2) + '\nNet to Owner: $' + stmt.totalNet.toFixed(2) + '\n\nTotal Entries: ' + stmt.entries.length);
+  }
+
+  // --- Professional Profile UI ---
+  function loadProfileUI() {
+    var profile = getPublicProfile();
+    var fields = { 'profile-company-name': 'companyName', 'profile-tagline': 'tagline', 'profile-bio': 'bio', 'profile-phone': 'phone', 'profile-email': 'email', 'profile-website': 'website', 'profile-license': 'license' };
+    Object.keys(fields).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = profile[fields[id]] || '';
+    });
+    // Show logo preview
+    var branding = getBranding();
+    if (branding.logoUrl) {
+      var preview = document.getElementById('logo-preview');
+      if (preview) preview.innerHTML = '<img src="' + branding.logoUrl + '" style="max-width:120px;max-height:80px;border-radius:8px;" />';
+    }
+    renderTeamMembers();
+    renderApprovedVendors();
+  }
+
+  function savePublicProfileUI() {
+    var profile = getPublicProfile();
+    var fields = { 'profile-company-name': 'companyName', 'profile-tagline': 'tagline', 'profile-bio': 'bio', 'profile-phone': 'phone', 'profile-email': 'email', 'profile-website': 'website', 'profile-license': 'license' };
+    Object.keys(fields).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) profile[fields[id]] = el.value;
+    });
+    savePublicProfile(profile);
+    alert('Profile saved successfully!');
+  }
+
+  // --- Team Members UI ---
+  function renderTeamMembers() {
+    var container = document.getElementById('team-members-list');
+    if (!container) return;
+    var members = getTeamMembers();
+    if (members.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#94a3b8;font-size:0.85rem;">No team members yet. Click "+ Add Member" to invite someone.</div>';
+      return;
+    }
+    container.innerHTML = members.map(function(m) {
+      var perms = Object.keys(m.permissions || {}).filter(function(k) { return m.permissions[k]; }).join(', ') || 'None';
+      return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;border-bottom:1px solid #f1f5f9;">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;">' + (m.name || '?').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase() + '</div>' +
+        '<div style="flex:1;"><div style="font-weight:600;font-size:0.9rem;">' + (m.name || '').replace(/</g, '&lt;') + ' <span style="font-size:0.75rem;color:#7c3aed;background:#f5f3ff;padding:1px 6px;border-radius:999px;">' + (m.role || '') + '</span></div>' +
+        '<div style="font-size:0.8rem;color:#64748b;">' + (m.responsibilities || m.email || '') + '</div>' +
+        '<div style="font-size:0.75rem;color:#94a3b8;">Permissions: ' + perms + '</div></div>' +
+        '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fecaca;" onclick="removeTeamMember(\'' + m.id + '\');renderTeamMembers();">Remove</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openAddTeamMemberModal() { openModal('modal-add-team'); }
+
+  function submitTeamMember() {
+    addTeamMember({
+      name: document.getElementById('tm-name').value,
+      email: document.getElementById('tm-email').value,
+      role: document.getElementById('tm-role').value,
+      responsibilities: document.getElementById('tm-responsibilities').value,
+      permissions: {
+        accounting: document.getElementById('tm-perm-accounting').checked,
+        docs: document.getElementById('tm-perm-docs').checked,
+        messaging: document.getElementById('tm-perm-messaging').checked,
+        maintenance: document.getElementById('tm-perm-maintenance').checked,
+        leasing: document.getElementById('tm-perm-leasing').checked
+      }
+    });
+    closeModal('modal-add-team');
+    renderTeamMembers();
+    // Clear form
+    ['tm-name','tm-email','tm-responsibilities'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    ['tm-perm-accounting','tm-perm-docs','tm-perm-messaging','tm-perm-maintenance','tm-perm-leasing'].forEach(function(id) { var el = document.getElementById(id); if (el) el.checked = false; });
+  }
+
+  // --- Approved Vendors UI ---
+  function renderApprovedVendors() {
+    var container = document.getElementById('approved-vendors-list');
+    if (!container) return;
+    var vendors = getApprovedVendors();
+    if (vendors.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#94a3b8;font-size:0.85rem;">No approved vendors yet. Click "+ Add Vendor" to add one.</div>';
+      return;
+    }
+    container.innerHTML = vendors.map(function(v) {
+      return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;border-bottom:1px solid #f1f5f9;">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:#059669;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;">🔧</div>' +
+        '<div style="flex:1;"><div style="font-weight:600;font-size:0.9rem;">' + (v.name || '').replace(/</g, '&lt;') + ' <span style="font-size:0.75rem;color:#059669;background:#ecfdf5;padding:1px 6px;border-radius:999px;">' + (v.specialty || '') + '</span></div>' +
+        '<div style="font-size:0.8rem;color:#64748b;">' + (v.phone || '') + ' | ' + (v.email || '') + '</div>' +
+        '<div style="font-size:0.75rem;color:#94a3b8;">Repair limit: $' + (v.repairLimit || 500) + ' before approval</div></div>' +
+        '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fecaca;" onclick="removeApprovedVendor(\'' + v.id + '\');renderApprovedVendors();">Remove</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openAddVendorModal() { openModal('modal-add-vendor'); }
+
+  function submitVendor() {
+    addApprovedVendor({
+      name: document.getElementById('av-name').value,
+      specialty: document.getElementById('av-specialty').value,
+      phone: document.getElementById('av-phone').value,
+      email: document.getElementById('av-email').value,
+      repairLimit: parseFloat(document.getElementById('av-limit').value) || 500
+    });
+    closeModal('modal-add-vendor');
+    renderApprovedVendors();
+    ['av-name','av-specialty','av-phone','av-email'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  }
+
+  // --- Bulk Messaging UI ---
+  function renderBulkMessages() {
+    var container = document.getElementById('bulk-history-list');
+    if (!container) return;
+    var history = getBulkMessages();
+    if (history.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:0.85rem;">No broadcasts sent yet.</div>';
+      return;
+    }
+    container.innerHTML = history.map(function(m) {
+      var date = new Date(m.sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return '<div style="padding:0.75rem;border-bottom:1px solid #f1f5f9;">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">' +
+          '<div style="font-weight:600;font-size:0.85rem;">' + (m.subject || 'No subject').replace(/</g, '&lt;') + '</div>' +
+          '<div style="font-size:0.75rem;color:#94a3b8;">' + date + '</div>' +
+        '</div>' +
+        '<div style="font-size:0.8rem;color:#64748b;">To: ' + m.target + ' via ' + m.method + ' (' + m.recipientCount + ' recipients)</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sendBulkMessageUI() {
+    var target = document.getElementById('bulk-target').value;
+    var method = document.getElementById('bulk-method').value;
+    var subject = document.getElementById('bulk-subject').value;
+    var body = document.getElementById('bulk-body').value;
+    if (!subject || !body) { alert('Please fill in subject and message.'); return; }
+    var recipientCount = target === 'everyone' ? 25 : target === 'delinquent' ? 5 : target === 'owners' ? 15 : target === 'tenants' ? 20 : 10;
+    var result = sendBulkMessage({ subject: subject, body: body, target: target, method: method, recipientCount: recipientCount, checkGuardrails: true });
+    if (!result.success) { alert(result.error); return; }
+    alert('Broadcast sent to ' + recipientCount + ' ' + target + ' recipients via ' + method + '!');
+    document.getElementById('bulk-subject').value = '';
+    document.getElementById('bulk-body').value = '';
+    renderBulkMessages();
+  }
+
+  // --- Permissions UI ---
+  function renderPermissionManager() {
+    var container = document.getElementById('permission-matrix-container');
+    if (!container) return;
+    var members = getTeamMembers();
+    var overrides = getPermissionOverrides();
+    // Update checkbox state
+    var restrictEl = document.getElementById('perm-restrict-external');
+    if (restrictEl) restrictEl.checked = !!overrides.externalMessagingRestricted;
+    if (members.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:0.85rem;">No team members to manage. Add members in the Profile tab first.</div>';
+      return;
+    }
+    var permTypes = ['accounting', 'docs', 'messaging', 'maintenance', 'leasing'];
+    var html = '<table style="width:100%;font-size:0.85rem;border-collapse:collapse;">';
+    html += '<thead><tr style="background:#f8fafc;"><th style="padding:0.5rem;text-align:left;">Member</th><th style="padding:0.5rem;text-align:left;">Role</th>';
+    permTypes.forEach(function(p) { html += '<th style="padding:0.5rem;text-align:center;text-transform:capitalize;">' + p + '</th>'; });
+    html += '</tr></thead><tbody>';
+    members.forEach(function(m) {
+      html += '<tr style="border-bottom:1px solid #f1f5f9;">';
+      html += '<td style="padding:0.5rem;font-weight:600;">' + (m.name || '').replace(/</g, '&lt;') + '</td>';
+      html += '<td style="padding:0.5rem;"><span style="font-size:0.75rem;color:#7c3aed;background:#f5f3ff;padding:1px 6px;border-radius:999px;">' + (m.role || '') + '</span></td>';
+      permTypes.forEach(function(p) {
+        var checked = m.permissions && m.permissions[p] ? 'checked' : '';
+        html += '<td style="padding:0.5rem;text-align:center;"><input type="checkbox" ' + checked + ' onchange="toggleTeamPermission(\'' + m.id + '\',\'' + p + '\',this.checked)" /></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function toggleTeamPermission(memberId, perm, value) {
+    var members = getTeamMembers();
+    var m = members.find(function(t) { return t.id === memberId; });
+    if (m) {
+      if (!m.permissions) m.permissions = {};
+      m.permissions[perm] = value;
+      saveTeamMembers(members);
+      addAuditEntry((value ? 'Granted' : 'Revoked') + ' ' + perm + ' permission for ' + m.name, '');
+    }
+  }
+
+  function updateGuardrails() {
+    var overrides = getPermissionOverrides();
+    overrides.externalMessagingRestricted = document.getElementById('perm-restrict-external').checked;
+    savePermissionOverrides(overrides);
+    addAuditEntry('Messaging guardrails ' + (overrides.externalMessagingRestricted ? 'enabled' : 'disabled'), '');
+  }
+
+  // --- Document Upload UI ---
+  function openDocUploadModal(listingId) {
+    document.getElementById('du-listing-id').value = listingId || '';
+    document.getElementById('du-name').value = '';
+    document.getElementById('du-file-name').textContent = '';
+    document.getElementById('du-share-owner').checked = false;
+    window._pendingDocFile = null;
+    openModal('modal-doc-upload');
+  }
+
+  function handleDocFileSelect(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    window._pendingDocFile = file;
+    document.getElementById('du-file-name').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    if (!document.getElementById('du-name').value) {
+      document.getElementById('du-name').value = file.name.replace(/\.[^.]+$/, '');
+    }
+  }
+
+  function submitDocUpload() {
+    var name = document.getElementById('du-name').value;
+    if (!name) { alert('Please enter a document name.'); return; }
+    var listingId = document.getElementById('du-listing-id').value;
+    var category = document.getElementById('du-category').value;
+    var shared = document.getElementById('du-share-owner').checked;
+    var file = window._pendingDocFile;
+    var fileName = file ? file.name : 'manual-entry';
+    var fileSize = file ? file.size : 0;
+
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        addPropertyDocEnhanced({
+          listingId: listingId,
+          name: name,
+          category: category,
+          fileName: fileName,
+          fileSize: fileSize,
+          sharedWithOwner: shared,
+          dataUrl: e.target.result
+        });
+        closeModal('modal-doc-upload');
+        alert('Document "' + name + '" uploaded successfully!');
+        // Refresh property command if open
+        if (window._currentCommandListingId) openPropertyCommand(window._currentCommandListingId);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      addPropertyDocEnhanced({
+        listingId: listingId,
+        name: name,
+        category: category,
+        fileName: fileName,
+        fileSize: fileSize,
+        sharedWithOwner: shared
+      });
+      closeModal('modal-doc-upload');
+      alert('Document "' + name + '" added successfully!');
+    }
+  }
+
+  // Setup drag-drop on doc upload zone
+  setTimeout(function() {
+    var dropZone = document.getElementById('doc-drop-zone');
+    if (dropZone) {
+      dropZone.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#2563eb'; this.style.background = '#eff6ff'; });
+      dropZone.addEventListener('dragleave', function(e) { e.preventDefault(); this.style.borderColor = '#cbd5e1'; this.style.background = '#f8fafc'; });
+      dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#cbd5e1'; this.style.background = '#f8fafc';
+        if (e.dataTransfer.files.length > 0) {
+          var input = document.getElementById('du-file-input');
+          input.files = e.dataTransfer.files;
+          handleDocFileSelect(input);
+        }
+      });
+    }
+  }, 1000);
+
+  // --- Welcome Letter UI ---
+  function openWelcomeLetterModal(listingId) {
+    var letter = generateWelcomeLetter(listingId);
+    if (!letter) { alert('Property not found.'); return; }
+    var content = document.getElementById('welcome-letter-content');
+    if (content) {
+      content.innerHTML = '<div style="font-family:Georgia,serif;padding:1rem;">' +
+        '<div style="text-align:center;margin-bottom:2rem;">' +
+          '<h2 style="margin:0;font-size:1.3rem;">' + letter.companyName + '</h2>' +
+          '<div style="color:#64748b;font-size:0.85rem;">' + letter.date + '</div>' +
+        '</div>' +
+        '<p>Dear <strong>' + letter.tenant + '</strong>,</p>' +
+        '<p>Welcome to your new home at <strong>' + letter.address + '</strong>! We are excited to have you as our tenant.</p>' +
+        '<h4 style="margin-top:1.5rem;">Monthly Rent</h4><p>Your monthly rent is <strong>$' + Number(letter.rent).toLocaleString() + '</strong>.</p>' +
+        '<h4>Utility Setup</h4><p>' + letter.utilities + '</p>' +
+        '<h4>Move-In Instructions</h4><p>' + letter.moveInInstructions + '</p>' +
+        '<h4>Emergency Contact</h4><p>' + letter.emergencyContact + '</p>' +
+        (letter.customNotes ? '<h4>Additional Notes</h4><p>' + letter.customNotes + '</p>' : '') +
+        '<p style="margin-top:2rem;">Best regards,<br/><strong>' + letter.companyName + '</strong></p>' +
+      '</div>';
+    }
+    openModal('modal-welcome-letter');
+  }
+
+  function printWelcomeLetter() {
+    var content = document.getElementById('welcome-letter-content');
+    if (!content) return;
+    var win = window.open('', '', 'width=800,height=600');
+    win.document.write('<html><head><title>Welcome Letter</title></head><body>' + content.innerHTML + '</body></html>');
+    win.document.close();
+    win.print();
+  }
+
+  // --- Update Property Command to remove Lease tile, add enhanced docs ---
+  var _origOpenPropertyCommand = typeof openPropertyCommand === 'function' ? openPropertyCommand : null;
+  window.openPropertyCommand = function(listingId) {
+    window._currentCommandListingId = listingId;
+    if (_origOpenPropertyCommand) _origOpenPropertyCommand(listingId);
+    // After original renders, modify: remove Lease tile, add Welcome Letter button, update Docs tile
+    setTimeout(function() {
+      var container = document.getElementById('tab-propcommand');
+      if (!container) return;
+      // Add property metadata row
+      var metaRow = document.getElementById('prop-meta-row');
+      if (!metaRow) {
+        var cmdHeader = container.querySelector('div[style*="display:flex"]');
+        if (cmdHeader) {
+          var ptype = getPropertyType(listingId);
+          var hoa = getHOAInfo(listingId);
+          var metaHtml = '<div id="prop-meta-row" style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">';
+          metaHtml += '<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;"><span style="font-weight:600;">Type:</span> <select onchange="setPropertyType(\'' + listingId + '\',this.value)" style="padding:2px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8rem;"><option value="long-term"' + (ptype === 'long-term' ? ' selected' : '') + '>Long-term</option><option value="short-term"' + (ptype === 'short-term' ? ' selected' : '') + '>Short-term/Airbnb/VRBO</option></select></div>';
+          metaHtml += '<button class="btn btn-sm" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;font-size:0.75rem;" onclick="openWelcomeLetterModal(\'' + listingId + '\')">📬 Welcome Letter</button>';
+          if (hoa.contact) { metaHtml += '<div style="font-size:0.8rem;color:#64748b;">HOA: ' + hoa.contact + '</div>'; }
+          metaHtml += '</div>';
+          cmdHeader.insertAdjacentHTML('afterend', metaHtml);
+        }
+      }
+    }, 200);
+  };
+
+  // --- Extend dashTab for new expanded tabs ---
+  var _origDashTabExpanded = window.dashTab;
+  window.dashTab = function(tabName) {
+    // Hide expanded tabs
+    ['advaccounting','profile','bulkmsg','permissions'].forEach(function(t) {
+      var el = document.getElementById('tab-' + t);
+      if (el) el.style.display = 'none';
+    });
+    if (tabName === 'advaccounting' || tabName === 'profile' || tabName === 'bulkmsg' || tabName === 'permissions') {
+      document.querySelectorAll('#dashboard-screen .tab-content').forEach(function(t) { t.classList.remove('active'); });
+      // Also hide Phase 3 tabs
+      ['propcommand','rentstatus','inbox','attydocs'].forEach(function(t) {
+        var el = document.getElementById('tab-' + t);
+        if (el) el.style.display = 'none';
+      });
+      var targetEl = document.getElementById('tab-' + tabName);
+      if (targetEl) targetEl.style.display = 'block';
+      if (tabName === 'advaccounting') renderAdvancedLedger();
+      if (tabName === 'profile') loadProfileUI();
+      if (tabName === 'bulkmsg') renderBulkMessages();
+      if (tabName === 'permissions') renderPermissionManager();
+      document.querySelectorAll('.dash-link').forEach(function(l) { l.classList.remove('active'); });
+      var activeLink = document.querySelector('.dash-link[data-sidebar-id="' + tabName + '"]');
+      if (activeLink) activeLink.classList.add('active');
+      return;
+    }
+    if (_origDashTabExpanded) _origDashTabExpanded(tabName);
+  };
+
+  // --- Init expanded features on load ---
+  setTimeout(function() {
+    // Load branding
+    var branding = getBranding();
+    if (branding.logoUrl) {
+      var sidebarAvatar = document.querySelector('.dash-sidebar div:first-child div div:first-child');
+      if (sidebarAvatar) {
+        sidebarAvatar.style.backgroundImage = 'url(' + branding.logoUrl + ')';
+        sidebarAvatar.style.backgroundSize = 'cover';
+        sidebarAvatar.style.backgroundPosition = 'center';
+        sidebarAvatar.textContent = '';
+      }
+    }
+  }, 600);
+
 </script>
 
   <!-- BROADCAST MODAL -->
@@ -3980,6 +4734,117 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       </div>
     </div>
   </div>
+
+
+
+    <!-- ========== MODAL: Add Ledger Entry ========== -->
+    <div id="modal-add-ledger" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:none;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Add Ledger Entry</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Owner Name</label><input type="text" id="le-owner" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Property Address</label><input type="text" id="le-address" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Tenant Name</label><input type="text" id="le-tenant" class="form-input" style="width:100%;" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+          <div><label style="font-size:0.85rem;font-weight:600;">Rent Owed ($)</label><input type="number" id="le-owed" class="form-input" style="width:100%;" /></div>
+          <div><label style="font-size:0.85rem;font-weight:600;">Rent Paid ($)</label><input type="number" id="le-paid" class="form-input" style="width:100%;" /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+          <div><label style="font-size:0.85rem;font-weight:600;">Payment Method</label>
+            <select id="le-method" class="form-input" style="width:100%;"></select>
+          </div>
+          <div><label style="font-size:0.85rem;font-weight:600;">PM Fee %</label><input type="number" id="le-fee" class="form-input" style="width:100%;" value="7" /></div>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Status</label>
+          <select id="le-status" class="form-input" style="width:100%;"><option value="paid">Paid</option><option value="partial">Partial</option><option value="unpaid">Unpaid</option><option value="late">Late</option></select>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Notes</label><textarea id="le-notes" class="form-input" rows="2" style="width:100%;resize:vertical;"></textarea></div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-ledger')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitLedgerEntry()">Add Entry</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Add Team Member ========== -->
+    <div id="modal-add-team" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Add Team Member</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Name</label><input type="text" id="tm-name" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Email</label><input type="email" id="tm-email" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Role</label>
+          <select id="tm-role" class="form-input" style="width:100%;"><option value="agent">Leasing Agent</option><option value="pm">Property Manager</option><option value="accountant">Accountant</option><option value="attorney">Attorney</option><option value="maintenance">Maintenance</option></select>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Responsibilities</label><input type="text" id="tm-responsibilities" class="form-input" style="width:100%;" placeholder="e.g., Leasing, showings, tenant communication" /></div>
+        <h4 style="font-weight:600;margin:1rem 0 0.5rem;">Permissions</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-accounting" /> Accounting</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-docs" /> Documents</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-messaging" /> Messaging</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-maintenance" /> Maintenance</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-leasing" /> Leasing</label>
+        </div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-team')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitTeamMember()">Add Member</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Add Vendor ========== -->
+    <div id="modal-add-vendor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Add Approved Vendor</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Vendor Name</label><input type="text" id="av-name" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Specialty</label><input type="text" id="av-specialty" class="form-input" style="width:100%;" placeholder="e.g., Plumbing, Electrical, HVAC" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+          <div><label style="font-size:0.85rem;font-weight:600;">Phone</label><input type="tel" id="av-phone" class="form-input" style="width:100%;" /></div>
+          <div><label style="font-size:0.85rem;font-weight:600;">Email</label><input type="email" id="av-email" class="form-input" style="width:100%;" /></div>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Repair Dollar Limit (before approval needed)</label><input type="number" id="av-limit" class="form-input" style="width:100%;" value="500" /></div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-vendor')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitVendor()">Add Vendor</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Welcome Letter ========== -->
+    <div id="modal-welcome-letter" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">📬 Welcome Letter</h3>
+        <div id="welcome-letter-content"></div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-welcome-letter')">Close</button>
+          <button class="btn btn-primary btn-sm" onclick="printWelcomeLetter()">🖨 Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Document Upload ========== -->
+    <div id="modal-doc-upload" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">📄 Upload Document</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Document Name</label><input type="text" id="du-name" class="form-input" style="width:100%;" placeholder="e.g., Signed Lease Agreement" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Category</label>
+          <select id="du-category" class="form-input" style="width:100%;"><option value="lease">Lease</option><option value="contract">Management Contract</option><option value="application">Application</option><option value="inspection">Inspection Report</option><option value="invoice">Invoice/Receipt</option><option value="legal">Legal Document</option><option value="general">General</option></select>
+        </div>
+        <div id="doc-drop-zone" style="border:2px dashed #cbd5e1;border-radius:8px;padding:2rem;text-align:center;cursor:pointer;background:#f8fafc;margin-bottom:0.75rem;" onclick="document.getElementById('du-file-input').click()">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📁</div>
+          <div style="color:#64748b;font-size:0.85rem;">Drag & drop files here or click to browse</div>
+          <div id="du-file-name" style="font-size:0.8rem;color:#2563eb;margin-top:0.5rem;"></div>
+          <input type="file" id="du-file-input" style="display:none;" onchange="handleDocFileSelect(this)" />
+        </div>
+        <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+          <input type="checkbox" id="du-share-owner" />
+          <span style="font-size:0.85rem;">Share with Owner (visible in Owner Portal)</span>
+        </label>
+        <input type="hidden" id="du-listing-id" />
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-doc-upload')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitDocUpload()">Upload</button>
+        </div>
+      </div>
+    </div>
 
 </body>
 </html>

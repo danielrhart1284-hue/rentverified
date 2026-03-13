@@ -2552,3 +2552,502 @@ function generateOwnerStatementSPM(ownerId) {
     totalDeposits: totalDeposits
   };
 }
+
+
+// ============================================================================
+// PHASE 3 EXPANDED: PROFESSIONAL ERP DASHBOARD
+// ============================================================================
+
+// --- Corporate Branding ---
+RV_KEYS.BRANDING = 'rv_branding';
+RV_KEYS.TEAM_MEMBERS = 'rv_team_members';
+RV_KEYS.PUBLIC_PROFILE = 'rv_public_profile';
+RV_KEYS.APPROVED_VENDORS = 'rv_approved_vendors';
+RV_KEYS.PERMISSION_OVERRIDES = 'rv_permission_overrides';
+RV_KEYS.PAYMENT_METHODS = 'rv_payment_methods';
+RV_KEYS.WELCOME_TEMPLATES = 'rv_welcome_templates';
+RV_KEYS.HOA_INFO = 'rv_hoa_info';
+RV_KEYS.BULK_MESSAGES = 'rv_bulk_messages';
+RV_KEYS.AUDIT_LOG = 'rv_audit_log';
+RV_KEYS.PROPERTY_DOCS_ENHANCED = 'rv_property_docs_enhanced';
+
+function getBranding() { return rvGet(RV_KEYS.BRANDING) || { logoUrl: '', companyPhotos: [] }; }
+function saveBranding(data) { rvSet(RV_KEYS.BRANDING, data); }
+
+// --- Global Search ---
+function globalSearch(query) {
+  if (!query || query.length < 2) return [];
+  var q = query.toLowerCase();
+  var results = [];
+  // Search properties
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  listings.forEach(function(p, i) {
+    var addr = (p.address || '').toLowerCase();
+    var tenant = (p.tenant || '').toLowerCase();
+    var lid = (p.listingId || '').toLowerCase();
+    if (addr.indexOf(q) >= 0 || tenant.indexOf(q) >= 0 || lid.indexOf(q) >= 0) {
+      results.push({ type: 'property', label: p.address || 'Property ' + i, detail: p.listingId || '', index: i });
+    }
+  });
+  // Search clients
+  var hub = getClientHub();
+  if (hub && hub.length) {
+    hub.forEach(function(owner) {
+      if ((owner.name || '').toLowerCase().indexOf(q) >= 0 || (owner.email || '').toLowerCase().indexOf(q) >= 0) {
+        results.push({ type: 'client', label: owner.name, detail: owner.email || '', id: owner.id });
+      }
+    });
+  }
+  // Search messages
+  var msgs = getMessages();
+  msgs.forEach(function(m) {
+    if ((m.subject || '').toLowerCase().indexOf(q) >= 0 || (m.from || '').toLowerCase().indexOf(q) >= 0) {
+      results.push({ type: 'message', label: m.subject, detail: 'From: ' + m.from, id: m.id });
+    }
+  });
+  // Search documents (enhanced format uses separate key)
+  var docs = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  docs.forEach(function(d) {
+    if ((d.name || '').toLowerCase().indexOf(q) >= 0 || (d.listingId || '').toLowerCase().indexOf(q) >= 0) {
+      results.push({ type: 'document', label: d.name, detail: d.listingId || '', id: d.id });
+    }
+  });
+  return results.slice(0, 15);
+}
+
+// --- Document Management (Enhanced) ---
+function getPropertyDocsEnhanced(listingId) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  return all.filter(function(d) { return d.listingId === listingId; });
+}
+
+function addPropertyDocEnhanced(doc) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  var newDoc = {
+    id: 'doc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    listingId: doc.listingId || '',
+    name: doc.name || 'Untitled',
+    type: doc.type || 'general',
+    fileName: doc.fileName || '',
+    fileSize: doc.fileSize || 0,
+    uploadedBy: doc.uploadedBy || 'PM',
+    uploadedAt: new Date().toISOString(),
+    sharedWithOwner: doc.sharedWithOwner || false,
+    category: doc.category || 'general',
+    dataUrl: doc.dataUrl || ''
+  };
+  all.unshift(newDoc);
+  rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
+  addAuditEntry('Document uploaded: ' + newDoc.name, newDoc.listingId);
+  return newDoc;
+}
+
+function toggleDocSharing(docId, shared) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  var doc = all.find(function(d) { return d.id === docId; });
+  if (doc) {
+    doc.sharedWithOwner = shared;
+    rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
+    addAuditEntry((shared ? 'Shared' : 'Unshared') + ' document: ' + doc.name, doc.listingId);
+  }
+}
+
+function deletePropertyDoc(docId) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  var idx = all.findIndex(function(d) { return d.id === docId; });
+  if (idx >= 0) {
+    var removed = all.splice(idx, 1)[0];
+    rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
+    addAuditEntry('Document deleted: ' + removed.name, removed.listingId);
+  }
+}
+
+// --- HOA Info ---
+function getHOAInfo(listingId) {
+  var all = rvGet(RV_KEYS.HOA_INFO) || {};
+  return all[listingId] || { contact: '', phone: '', email: '', notes: '' };
+}
+
+function saveHOAInfo(listingId, info) {
+  var all = rvGet(RV_KEYS.HOA_INFO) || {};
+  all[listingId] = info;
+  rvSet(RV_KEYS.HOA_INFO, all);
+  addAuditEntry('HOA info updated', listingId);
+}
+
+// --- Property Type ---
+function getPropertyType(listingId) {
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  var p = listings.find(function(l) { return l.listingId === listingId; });
+  return p ? (p.propertyType || 'long-term') : 'long-term';
+}
+
+function setPropertyType(listingId, ptype) {
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  var p = listings.find(function(l) { return l.listingId === listingId; });
+  if (p) {
+    p.propertyType = ptype;
+    saveListingsForClient(clientId, listings);
+    addAuditEntry('Property type changed to ' + ptype, listingId);
+  }
+}
+
+// --- Welcome Letter ---
+function getWelcomeTemplate(listingId) {
+  var all = rvGet(RV_KEYS.WELCOME_TEMPLATES) || {};
+  return all[listingId] || { utilities: '', moveInInstructions: '', emergencyContact: '', customNotes: '' };
+}
+
+function saveWelcomeTemplate(listingId, template) {
+  var all = rvGet(RV_KEYS.WELCOME_TEMPLATES) || {};
+  all[listingId] = template;
+  rvSet(RV_KEYS.WELCOME_TEMPLATES, all);
+}
+
+function generateWelcomeLetter(listingId) {
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  var p = listings.find(function(l) { return l.listingId === listingId; });
+  if (!p) return null;
+  var tmpl = getWelcomeTemplate(listingId);
+  var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  var letter = {
+    date: today,
+    tenant: p.tenant || 'New Tenant',
+    address: p.address || '',
+    rent: p.rent || 0,
+    utilities: tmpl.utilities || 'Contact local providers for electric, gas, water, and internet setup.',
+    moveInInstructions: tmpl.moveInInstructions || 'Keys will be available at the management office on your move-in date.',
+    emergencyContact: tmpl.emergencyContact || 'For emergencies, call Sanders PM at (801) 555-0100.',
+    customNotes: tmpl.customNotes || '',
+    companyName: 'Sanders Property Management'
+  };
+  addAuditEntry('Welcome letter generated for ' + letter.tenant, listingId);
+  return letter;
+}
+
+// --- Advanced Accounting ---
+function getAdvancedLedger() {
+  return rvGet('rv_advanced_ledger') || [];
+}
+
+function saveAdvancedLedger(entries) {
+  rvSet('rv_advanced_ledger', entries);
+}
+
+function addLedgerEntryAdvanced(entry) {
+  var acct = rvGet('rv_account');
+  var initials = acct ? (acct.company || acct.email || 'PM').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substr(0, 2) : 'PM';
+  var all = getAdvancedLedger();
+  var newEntry = {
+    id: 'ledger-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    ownerName: entry.ownerName || '',
+    propertyAddress: entry.propertyAddress || '',
+    tenantName: entry.tenantName || '',
+    month: entry.month || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    rentOwed: entry.rentOwed || 0,
+    rentPaid: entry.rentPaid || 0,
+    paymentMethod: entry.paymentMethod || '',
+    paymentDate: entry.paymentDate || '',
+    status: entry.status || 'unpaid',
+    pmFeePercent: (entry.pmFeePercent !== undefined && entry.pmFeePercent !== null) ? entry.pmFeePercent : 7,
+    pmFeeAmount: 0,
+    netToOwner: 0,
+    notes: entry.notes || '',
+    modifiedBy: initials,
+    modifiedAt: new Date().toISOString(),
+    invoiceAttachments: entry.invoiceAttachments || []
+  };
+  newEntry.pmFeeAmount = Math.round(newEntry.rentPaid * (newEntry.pmFeePercent / 100) * 100) / 100;
+  newEntry.netToOwner = Math.round((newEntry.rentPaid - newEntry.pmFeeAmount) * 100) / 100;
+  all.unshift(newEntry);
+  saveAdvancedLedger(all);
+  addAuditEntry(initials + ' added ledger entry: $' + newEntry.rentPaid + ' for ' + newEntry.propertyAddress, '');
+  return newEntry;
+}
+
+function updateLedgerEntry(entryId, updates) {
+  var acct = rvGet('rv_account');
+  var initials = acct ? (acct.company || acct.email || 'PM').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substr(0, 2) : 'PM';
+  var all = getAdvancedLedger();
+  var entry = all.find(function(e) { return e.id === entryId; });
+  if (!entry) return;
+  Object.keys(updates).forEach(function(k) { entry[k] = updates[k]; });
+  if (updates.rentPaid !== undefined || updates.pmFeePercent !== undefined) {
+    entry.pmFeeAmount = Math.round(entry.rentPaid * (entry.pmFeePercent / 100) * 100) / 100;
+    entry.netToOwner = Math.round((entry.rentPaid - entry.pmFeeAmount) * 100) / 100;
+  }
+  entry.modifiedBy = initials;
+  entry.modifiedAt = new Date().toISOString();
+  saveAdvancedLedger(all);
+  addAuditEntry(initials + ' updated ledger entry for ' + entry.propertyAddress, '');
+}
+
+// --- Payment Methods ---
+function getPaymentMethods() {
+  return rvGet(RV_KEYS.PAYMENT_METHODS) || ['Zelle', 'Cash App', 'Venmo', 'Check', 'Money Order', 'Bank Transfer', 'Credit Card'];
+}
+
+function addPaymentMethod(method) {
+  var methods = getPaymentMethods();
+  if (methods.indexOf(method) < 0) {
+    methods.push(method);
+    rvSet(RV_KEYS.PAYMENT_METHODS, methods);
+  }
+}
+
+// --- Audit Trail ---
+function addAuditEntry(action, listingId) {
+  var acct = rvGet('rv_account');
+  var initials = 'SYS';
+  if (acct) {
+    initials = (acct.company || acct.email || 'PM').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substr(0, 2);
+  }
+  var log = rvGet(RV_KEYS.AUDIT_LOG) || [];
+  log.unshift({
+    id: 'audit-' + Date.now(),
+    action: action,
+    listingId: listingId || '',
+    by: initials,
+    at: new Date().toISOString()
+  });
+  if (log.length > 500) log = log.slice(0, 500);
+  rvSet(RV_KEYS.AUDIT_LOG, log);
+}
+
+function getAuditLog(listingId) {
+  var log = rvGet(RV_KEYS.AUDIT_LOG) || [];
+  if (listingId) return log.filter(function(e) { return e.listingId === listingId; });
+  return log;
+}
+
+// --- Professional Profiles ---
+function getPublicProfile() {
+  return rvGet(RV_KEYS.PUBLIC_PROFILE) || {
+    companyName: 'Sanders Property Management',
+    tagline: 'Professional Property Management in Utah',
+    bio: '',
+    phone: '',
+    email: '',
+    website: '',
+    license: '',
+    serviceAreas: [],
+    specialties: [],
+    logoUrl: '',
+    coverPhotoUrl: ''
+  };
+}
+
+function savePublicProfile(profile) {
+  rvSet(RV_KEYS.PUBLIC_PROFILE, profile);
+  addAuditEntry('Public profile updated', '');
+}
+
+// --- Team Members ---
+function getTeamMembers() { return rvGet(RV_KEYS.TEAM_MEMBERS) || []; }
+function saveTeamMembers(members) { rvSet(RV_KEYS.TEAM_MEMBERS, members); }
+
+function addTeamMember(member) {
+  var members = getTeamMembers();
+  var newMember = {
+    id: 'team-' + Date.now(),
+    name: member.name || '',
+    role: member.role || 'agent',
+    email: member.email || '',
+    phone: member.phone || '',
+    responsibilities: member.responsibilities || '',
+    permissions: member.permissions || {
+      accounting: false,
+      docs: false,
+      messaging: false,
+      maintenance: false,
+      leasing: false
+    },
+    addedAt: new Date().toISOString()
+  };
+  members.push(newMember);
+  saveTeamMembers(members);
+  addAuditEntry('Team member added: ' + newMember.name, '');
+  return newMember;
+}
+
+function updateTeamMemberPermissions(memberId, permissions) {
+  var members = getTeamMembers();
+  var m = members.find(function(t) { return t.id === memberId; });
+  if (m) {
+    m.permissions = permissions;
+    saveTeamMembers(members);
+    addAuditEntry('Permissions updated for ' + m.name, '');
+  }
+}
+
+function removeTeamMember(memberId) {
+  var members = getTeamMembers();
+  var idx = members.findIndex(function(t) { return t.id === memberId; });
+  if (idx >= 0) {
+    var removed = members.splice(idx, 1)[0];
+    saveTeamMembers(members);
+    addAuditEntry('Team member removed: ' + removed.name, '');
+  }
+}
+
+// --- Approved Vendors ---
+function getApprovedVendors() { return rvGet(RV_KEYS.APPROVED_VENDORS) || []; }
+function saveApprovedVendors(vendors) { rvSet(RV_KEYS.APPROVED_VENDORS, vendors); }
+
+function addApprovedVendor(vendor) {
+  var vendors = getApprovedVendors();
+  var newVendor = {
+    id: 'vendor-' + Date.now(),
+    name: vendor.name || '',
+    specialty: vendor.specialty || '',
+    phone: vendor.phone || '',
+    email: vendor.email || '',
+    repairLimit: vendor.repairLimit || 500,
+    addedBy: vendor.addedBy || 'PM',
+    addedAt: new Date().toISOString()
+  };
+  vendors.push(newVendor);
+  saveApprovedVendors(vendors);
+  addAuditEntry('Approved vendor added: ' + newVendor.name, '');
+  return newVendor;
+}
+
+function removeApprovedVendor(vendorId) {
+  var vendors = getApprovedVendors();
+  var idx = vendors.findIndex(function(v) { return v.id === vendorId; });
+  if (idx >= 0) {
+    var removed = vendors.splice(idx, 1)[0];
+    saveApprovedVendors(vendors);
+    addAuditEntry('Approved vendor removed: ' + removed.name, '');
+  }
+}
+
+// --- Bulk Messaging ---
+function getBulkMessages() { return rvGet(RV_KEYS.BULK_MESSAGES) || []; }
+
+function sendBulkMessage(opts) {
+  var acct = rvGet('rv_account');
+  var canSendExternal = true;
+  if (opts.checkGuardrails) {
+    var overrides = rvGet(RV_KEYS.PERMISSION_OVERRIDES) || {};
+    if (overrides.externalMessagingRestricted && (!acct || acct.role !== 'admin')) {
+      return { success: false, error: 'Only the Account Owner can send external messages.' };
+    }
+  }
+  var bulk = getBulkMessages();
+  var msg = {
+    id: 'bulk-' + Date.now(),
+    subject: opts.subject || '',
+    body: opts.body || '',
+    target: opts.target || 'everyone',
+    sentBy: acct ? (acct.company || acct.email) : 'PM',
+    sentAt: new Date().toISOString(),
+    recipientCount: opts.recipientCount || 0,
+    method: opts.method || 'email'
+  };
+  bulk.unshift(msg);
+  rvSet(RV_KEYS.BULK_MESSAGES, bulk);
+  addAuditEntry('Bulk message sent to ' + msg.target + ' (' + msg.recipientCount + ' recipients)', '');
+  return { success: true, message: msg };
+}
+
+// --- Permission Overrides ---
+function getPermissionOverrides() { return rvGet(RV_KEYS.PERMISSION_OVERRIDES) || {}; }
+function savePermissionOverrides(overrides) { rvSet(RV_KEYS.PERMISSION_OVERRIDES, overrides); }
+
+// --- Advanced Statement Generation with Invoice Attachments ---
+function generateAdvancedMonthlyStatement(ownerName, month) {
+  var ledger = getAdvancedLedger();
+  var ownerEntries = ledger.filter(function(e) {
+    return e.ownerName === ownerName && (!month || e.month === month);
+  });
+  var totalRent = 0, totalPaid = 0, totalFees = 0, totalNet = 0;
+  var invoices = [];
+  ownerEntries.forEach(function(e) {
+    totalRent += e.rentOwed || 0;
+    totalPaid += e.rentPaid || 0;
+    totalFees += e.pmFeeAmount || 0;
+    totalNet += e.netToOwner || 0;
+    if (e.invoiceAttachments && e.invoiceAttachments.length > 0) {
+      invoices = invoices.concat(e.invoiceAttachments);
+    }
+  });
+  addAuditEntry('Monthly statement generated for ' + ownerName + (month ? ' (' + month + ')' : ''), '');
+  return {
+    ownerName: ownerName,
+    month: month || 'All',
+    entries: ownerEntries,
+    totalRent: totalRent,
+    totalPaid: totalPaid,
+    totalFees: totalFees,
+    totalNet: totalNet,
+    invoices: invoices,
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateEndOfYearStatement(ownerName, year) {
+  var ledger = getAdvancedLedger();
+  var yearStr = String(year || new Date().getFullYear());
+  var yearEntries = ledger.filter(function(e) {
+    return e.ownerName === ownerName && (e.month || '').indexOf(yearStr) >= 0;
+  });
+  var totalRent = 0, totalPaid = 0, totalFees = 0, totalNet = 0;
+  yearEntries.forEach(function(e) {
+    totalRent += e.rentOwed || 0;
+    totalPaid += e.rentPaid || 0;
+    totalFees += e.pmFeeAmount || 0;
+    totalNet += e.netToOwner || 0;
+  });
+  addAuditEntry('End of year statement generated for ' + ownerName + ' (' + yearStr + ')', '');
+  return {
+    ownerName: ownerName,
+    year: yearStr,
+    entries: yearEntries,
+    totalRent: totalRent,
+    totalPaid: totalPaid,
+    totalFees: totalFees,
+    totalNet: totalNet,
+    generatedAt: new Date().toISOString()
+  };
+}
+
+// --- Seed Advanced Ledger from existing data ---
+function seedAdvancedLedger() {
+  var existing = getAdvancedLedger();
+  if (existing.length > 0) return;
+  var hub = getClientHub();
+  if (!hub || !hub.length) return;
+  var months = ['Jan 2026', 'Feb 2026', 'Mar 2026'];
+  var methods = ['Zelle', 'Cash App', 'Venmo', 'Check'];
+  hub.slice(0, 5).forEach(function(owner) {
+    var props = (owner.properties || []).slice(0, 3);
+    props.forEach(function(prop) {
+      months.forEach(function(month, mi) {
+        var paid = mi < 2 ? (prop.rent || 0) : 0;
+        var status = mi < 2 ? 'paid' : 'unpaid';
+        addLedgerEntryAdvanced({
+          ownerName: owner.name,
+          propertyAddress: prop.address || '',
+          tenantName: prop.tenant || 'Vacant',
+          month: month,
+          rentOwed: prop.rent || 0,
+          rentPaid: paid,
+          paymentMethod: paid > 0 ? methods[mi % methods.length] : '',
+          paymentDate: paid > 0 ? '2026-0' + (mi + 1) + '-05' : '',
+          status: status,
+          pmFeePercent: (prop.pmFeePercent !== undefined && prop.pmFeePercent !== null) ? prop.pmFeePercent : 7,
+          notes: ''
+        });
+      });
+    });
+  });
+}
