@@ -539,6 +539,10 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V5a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2h-2M9 7h6"/></svg>
           📊 Accounting
         </div>
+        <div class="dash-link" onclick="dashTab('clienthub')" style="color:#8b5cf6;background:rgba(139,92,246,0.08);border-left:2px solid #8b5cf6;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          🏢 Client Hub
+        </div>
         <a href="maintenance.html" class="dash-link" style="color:var(--gray-400);">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
           🔧 Maintenance
@@ -1418,6 +1422,102 @@
         </div>
       </div>
 
+      <!-- CLIENT HUB TAB -->
+      <div id="dtab-clienthub" class="tab-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <h1>🏢 Client Hub</h1>
+            <p>Manage property owners, view portfolios, and track aggregate accounting per client.</p>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="showSPMImportModal()">📥 Import SPM Data</button>
+            <button class="btn btn-outline" onclick="addNewClientManual()">+ Add Client</button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div style="margin-bottom:1.25rem;">
+          <input type="text" id="client-hub-search" class="form-control" placeholder="Search owners, properties, or tenants..." oninput="renderClientHub()" style="max-width:400px;" />
+        </div>
+
+        <!-- Client List -->
+        <div id="client-hub-list" class="card">
+          <div class="card-body" style="padding:0;">
+            <div class="property-row" style="background:var(--gray-100);font-weight:700;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray-600);">
+              <div style="flex:2;">Owner</div>
+              <div style="flex:1;text-align:center;">Properties</div>
+              <div style="flex:1;text-align:right;">Total Rent</div>
+              <div style="flex:1;text-align:right;">Total Fees</div>
+              <div style="flex:1;text-align:right;">Net to Owner</div>
+              <div style="width:100px;text-align:center;">Actions</div>
+            </div>
+            <div id="client-hub-list-body"></div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="client-hub-empty" style="display:none;text-align:center;padding:3rem 1rem;">
+          <div style="font-size:3rem;margin-bottom:1rem;">🏢</div>
+          <h3 style="font-weight:700;margin-bottom:.5rem;">No Clients Yet</h3>
+          <p style="color:var(--gray-500);margin-bottom:1.5rem;">Import your SPM Rent Collections file to automatically create client profiles with all their properties.</p>
+          <button class="btn btn-primary" onclick="showSPMImportModal()">📥 Import SPM Data</button>
+        </div>
+
+        <!-- Client Detail Panel (hidden by default) -->
+        <div id="client-detail-hub" style="display:none;margin-top:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+            <h2 style="font-size:1.2rem;font-weight:800;" id="client-hub-detail-title"></h2>
+            <button class="btn btn-outline btn-sm" onclick="closeClientDetail()">&#8592; Back to all clients</button>
+          </div>
+
+          <!-- Contact Info (Editable) -->
+          <div class="card" style="margin-bottom:1.25rem;">
+            <div class="card-body">
+              <h3 style="font-weight:700;margin-bottom:1rem;">📇 Contact Information</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Phone</label><input type="tel" id="client-hub-phone" class="form-control" placeholder="(801) 555-0000" onchange="saveClientContact()" /></div>
+                <div class="form-group"><label>Email</label><input type="email" id="client-hub-email" class="form-control" placeholder="owner@email.com" onchange="saveClientContact()" /></div>
+                <div class="form-group"><label>Mailing Address</label><input type="text" id="client-hub-mailing" class="form-control" placeholder="123 Main St, City, UT" onchange="saveClientContact()" /></div>
+              </div>
+              <div style="margin-top:.5rem;font-size:.8rem;color:var(--gray-500);">
+                <span id="client-hub-payable" style="font-style:italic;"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aggregate Accounting -->
+          <div class="grid-4" style="margin-bottom:1.25rem;">
+            <div class="stat-card"><div class="stat-value" id="ch-stat-props">0</div><div class="stat-label">Properties</div></div>
+            <div class="stat-card"><div class="stat-value" id="ch-stat-rent">$0</div><div class="stat-label">Monthly Rent</div></div>
+            <div class="stat-card"><div class="stat-value" id="ch-stat-fees">$0</div><div class="stat-label">Monthly PM Fees</div></div>
+            <div class="stat-card"><div class="stat-value" id="ch-stat-net">$0</div><div class="stat-label">Net to Owner</div></div>
+          </div>
+
+          <!-- Properties Table with Editable PM Fee -->
+          <div class="card">
+            <div class="card-body" style="padding:0;overflow-x:auto;">
+              <h3 style="font-weight:700;padding:1rem 1.25rem .5rem;">🏠 Portfolio</h3>
+              <table style="font-size:.85rem;width:100%;">
+                <thead>
+                  <tr style="background:var(--gray-100);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;">
+                    <th style="padding:.6rem .75rem;">Address</th>
+                    <th>Tenant</th>
+                    <th style="text-align:right;">Rent</th>
+                    <th style="text-align:right;min-width:100px;">PM Fee %</th>
+                    <th style="text-align:right;">PM Fee $</th>
+                    <th style="text-align:right;">Net to Owner</th>
+                    <th style="text-align:right;">Deposit</th>
+                    <th>Payment</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="client-hub-props-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- end dash-main -->
   </div><!-- end dashboard-layout -->
 </div><!-- end dashboard-screen -->
@@ -1917,12 +2017,12 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     return getSuspendedAccounts().indexOf(clientId) >= 0;
   }
   function getListingsForClient(clientId) {
+    const key = 'rv_listings_' + clientId;
     if (clientId === 'sanders-pm') {
-      const raw = localStorage.getItem('rv_sanders_listings');
+      const raw = localStorage.getItem(key);
       if (raw) try { return JSON.parse(raw); } catch(e) {}
       return SAMPLE_LISTINGS.slice();
     }
-    const key = 'rv_listings_' + clientId;
     const raw = localStorage.getItem(key);
     if (raw) try { return JSON.parse(raw); } catch(e) {}
     if (clientId === 'demo-pm') return DEMO_LISTINGS_PM.slice();
@@ -1930,11 +2030,10 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     return [];
   }
   function saveListingsForClient(clientId, arr) {
+    const key = 'rv_listings_' + clientId;
+    localStorage.setItem(key, JSON.stringify(arr));
     if (clientId === 'sanders-pm') {
-      localStorage.setItem('rv_sanders_listings', JSON.stringify(arr));
       renderPropertiesList();
-    } else {
-      localStorage.setItem('rv_listings_' + clientId, JSON.stringify(arr));
     }
     if (window._selectedClientId === clientId) renderClientDetailListings(clientId);
   }
@@ -2706,7 +2805,287 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       if (mp) mp.style.display = 'none';
       if (is) is.style.display = 'none';
     }
+    if (name === 'clienthub') {
+      renderClientHub();
+    }
   };
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PHASE 3: CLIENT HUB UI (CRM)
+  // ══════════════════════════════════════════════════════════════════════
+  var _activeClientId = null;
+
+  function renderClientHub() {
+    var query = '';
+    var searchEl = document.getElementById('client-hub-search');
+    if (searchEl) query = searchEl.value;
+    var clients = searchClientHub(query);
+    var body = document.getElementById('client-hub-list-body');
+    var emptyEl = document.getElementById('client-hub-empty');
+    var listEl = document.getElementById('client-hub-list');
+
+    if (!clients || clients.length === 0) {
+      if (emptyEl) emptyEl.style.display = 'block';
+      if (listEl) listEl.style.display = 'none';
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (listEl) listEl.style.display = 'block';
+
+    body.innerHTML = clients.map(function(owner) {
+      var agg = getOwnerAggregate(owner);
+      return '<div class="property-row" style="cursor:pointer;" onclick="showClientDetail(\'' + owner.id + '\')">' +
+        '<div style="flex:2;font-weight:700;">' + escapeHtml(owner.rawName || owner.name) + '</div>' +
+        '<div style="flex:1;text-align:center;">' + agg.propertyCount + '</div>' +
+        '<div style="flex:1;text-align:right;color:#15803d;font-weight:600;">$' + agg.totalRent.toLocaleString() + '</div>' +
+        '<div style="flex:1;text-align:right;color:#b91c1c;">$' + agg.totalFees.toLocaleString() + '</div>' +
+        '<div style="flex:1;text-align:right;font-weight:600;">$' + agg.netToOwner.toLocaleString() + '</div>' +
+        '<div style="width:100px;text-align:center;"><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();showClientDetail(\'' + owner.id + '\')">View</button></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function showClientDetail(ownerId) {
+    _activeClientId = ownerId;
+    var owner = getClientHubOwner(ownerId);
+    if (!owner) { alert('Client not found'); return; }
+
+    // Hide list, show detail
+    document.getElementById('client-hub-list').style.display = 'none';
+    document.getElementById('client-hub-empty').style.display = 'none';
+    document.getElementById('client-detail-hub').style.display = 'block';
+    document.querySelector('#dtab-clienthub .page-header').style.display = 'none';
+    document.querySelector('#dtab-clienthub > div:nth-child(2)').style.display = 'none'; // search bar
+
+    // Title
+    document.getElementById('client-hub-detail-title').textContent = owner.rawName || owner.name;
+
+    // Contact info
+    document.getElementById('client-hub-phone').value = owner.phone || '';
+    document.getElementById('client-hub-email').value = owner.email || '';
+    document.getElementById('client-hub-mailing').value = owner.mailingAddress || '';
+    document.getElementById('client-hub-payable').textContent = owner.payableTo ? 'Payable to: ' + owner.payableTo : '';
+
+    // Aggregate stats
+    var agg = getOwnerAggregate(owner);
+    document.getElementById('ch-stat-props').textContent = agg.propertyCount;
+    document.getElementById('ch-stat-rent').textContent = '$' + agg.totalRent.toLocaleString();
+    document.getElementById('ch-stat-fees').textContent = '$' + agg.totalFees.toLocaleString();
+    document.getElementById('ch-stat-net').textContent = '$' + agg.netToOwner.toLocaleString();
+
+    // Properties table
+    renderClientPortfolio(owner);
+  }
+
+  function renderClientPortfolio(owner) {
+    var tbody = document.getElementById('client-hub-props-body');
+    tbody.innerHTML = owner.properties.map(function(p, idx) {
+      var net = p.rent - (p.pmFeeDollar || 0);
+      return '<tr>' +
+        '<td style="padding:.6rem .75rem;font-weight:600;">' + escapeHtml(p.fullAddress || p.address) + '</td>' +
+        '<td>' + escapeHtml(p.tenant || '—') + '</td>' +
+        '<td style="text-align:right;font-weight:600;">$' + (p.rent || 0).toLocaleString() + '</td>' +
+        '<td style="text-align:right;"><input type="number" step="0.1" min="0" max="100" value="' + (p.pmFeePercent || 0) + '" ' +
+          'onchange="updateFeeFromInput(\'' + owner.id + '\',' + idx + ',this.value)" ' +
+          'style="width:70px;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;text-align:right;font-size:.82rem;" />%</td>' +
+        '<td style="text-align:right;color:#b91c1c;">$' + (p.pmFeeDollar || 0).toFixed(2) + '</td>' +
+        '<td style="text-align:right;font-weight:600;color:#15803d;">$' + net.toFixed(2) + '</td>' +
+        '<td style="text-align:right;">$' + (p.securityDeposit || 0).toLocaleString() + '</td>' +
+        '<td style="font-size:.78rem;">' + escapeHtml(p.paymentMethod || '—') + '</td>' +
+        '<td style="font-size:.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + escapeHtml(p.notes || '') + '">' + escapeHtml(p.notes || '—') + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function updateFeeFromInput(ownerId, propIndex, newVal) {
+    var pct = parseFloat(newVal);
+    if (isNaN(pct) || pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+    var result = updatePropertyFee(ownerId, propIndex, pct);
+    if (result) {
+      // Re-render to show updated fee $ and net
+      var owner = getClientHubOwner(ownerId);
+      if (owner) {
+        renderClientPortfolio(owner);
+        // Update aggregate stats
+        var agg = getOwnerAggregate(owner);
+        document.getElementById('ch-stat-fees').textContent = '$' + agg.totalFees.toLocaleString();
+        document.getElementById('ch-stat-net').textContent = '$' + agg.netToOwner.toLocaleString();
+      }
+    }
+  }
+
+  function closeClientDetail() {
+    _activeClientId = null;
+    document.getElementById('client-detail-hub').style.display = 'none';
+    document.getElementById('client-hub-list').style.display = 'block';
+    document.querySelector('#dtab-clienthub .page-header').style.display = '';
+    document.querySelector('#dtab-clienthub > div:nth-child(2)').style.display = ''; // search bar
+    renderClientHub();
+  }
+
+  function saveClientContact() {
+    if (!_activeClientId) return;
+    updateClientHubOwner(_activeClientId, {
+      phone: document.getElementById('client-hub-phone').value.trim(),
+      email: document.getElementById('client-hub-email').value.trim(),
+      mailingAddress: document.getElementById('client-hub-mailing').value.trim()
+    });
+  }
+
+  function addNewClientManual() {
+    var name = prompt('Enter client/owner name:');
+    if (!name || !name.trim()) return;
+    var hub = getClientHub();
+    var newOwner = {
+      id: 'owner-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+      name: name.trim(),
+      rawName: name.trim(),
+      payableTo: '',
+      properties: [],
+      phone: '',
+      email: '',
+      mailingAddress: '',
+      createdAt: new Date().toISOString()
+    };
+    hub.push(newOwner);
+    saveClientHub(hub);
+    renderClientHub();
+    showClientDetail(newOwner.id);
+  }
+
+  // ── SPM Import Modal ─────────────────────────────────────────────────
+  function showSPMImportModal() {
+    var modal = document.getElementById('spm-import-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'spm-import-modal';
+      modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:2rem;';
+      document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+    modal.innerHTML = '<div style="background:white;border-radius:16px;max-width:520px;width:90%;padding:2rem;box-shadow:0 25px 50px rgba(0,0,0,.25);">' +
+      '<h2 style="font-weight:800;margin-bottom:.5rem;">📥 Import SPM Rent Collections</h2>' +
+      '<p style="color:#6b7280;margin-bottom:1.5rem;font-size:.9rem;">Upload your SPM Rent Collections .xlsx or .csv file. The system will automatically detect owners, properties, rent amounts, and PM fees.</p>' +
+      '<div style="border:2px dashed #d1d5db;border-radius:12px;padding:2rem;text-align:center;margin-bottom:1rem;cursor:pointer;" onclick="document.getElementById(\'spm-file-input\').click()" id="spm-drop-zone">' +
+        '<div style="font-size:2rem;margin-bottom:.5rem;">📁</div>' +
+        '<div style="font-weight:600;margin-bottom:.25rem;">Drop file here or click to browse</div>' +
+        '<div style="font-size:.8rem;color:#9ca3af;">Supports .xlsx and .csv files</div>' +
+      '</div>' +
+      '<input type="file" id="spm-file-input" accept=".xlsx,.csv" style="display:none;" onchange="handleSPMFile(this)" />' +
+      '<div id="spm-import-status" style="display:none;padding:.75rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem;"></div>' +
+      '<div style="display:flex;gap:.5rem;justify-content:flex-end;">' +
+        '<button class="btn btn-outline" onclick="document.getElementById(\'spm-import-modal\').style.display=\'none\'">Cancel</button>' +
+      '</div>' +
+    '</div>';
+
+    // Add drag-drop listeners
+    var zone = document.getElementById('spm-drop-zone');
+    if (zone) {
+      zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='#1a56db'; zone.style.background='#eff6ff'; });
+      zone.addEventListener('dragleave', function(e) { e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background=''; });
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background='';
+        if (e.dataTransfer.files.length > 0) {
+          document.getElementById('spm-file-input').files = e.dataTransfer.files;
+          handleSPMFile(document.getElementById('spm-file-input'));
+        }
+      });
+    }
+  }
+
+  function handleSPMFile(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var statusEl = document.getElementById('spm-import-status');
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#eff6ff';
+    statusEl.innerHTML = '⏳ Reading file: <strong>' + escapeHtml(file.name) + '</strong>...';
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = e.target.result;
+        var rows;
+        if (file.name.endsWith('.csv')) {
+          // Parse CSV into raw 2D array (same format as XLSX path) — don't use parseCSV which treats first row as headers
+          var lines = data.split(/\r?\n/).filter(function(l) { return l.trim(); });
+          rows = lines.map(function(line) {
+            var cells = []; var current = ''; var inQuotes = false;
+            for (var ci = 0; ci < line.length; ci++) {
+              var ch = line[ci];
+              if (ch === '"') { inQuotes = !inQuotes; }
+              else if (ch === ',' && !inQuotes) { cells.push(current.trim()); current = ''; }
+              else { current += ch; }
+            }
+            cells.push(current.trim());
+            return cells.map(function(v) { var n = parseFloat(v); return (!isNaN(n) && v === String(n)) ? n : v; });
+          });
+        } else {
+          // XLSX parsing using SheetJS
+          if (typeof XLSX === 'undefined') {
+            statusEl.style.background = '#fef2f2';
+            statusEl.innerHTML = '⚠️ Loading XLSX parser...';
+            var script = document.createElement('script');
+            script.src = 'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';
+            script.onload = function() {
+              processXLSX(data, statusEl);
+            };
+            script.onerror = function() {
+              statusEl.style.background = '#fef2f2';
+              statusEl.innerHTML = '❌ Failed to load XLSX parser. Try converting to CSV first.';
+            };
+            document.head.appendChild(script);
+            return;
+          }
+          processXLSX(data, statusEl);
+        }
+        if (rows) {
+          doSPMImport(rows, statusEl);
+        }
+      } catch(err) {
+        statusEl.style.background = '#fef2f2';
+        statusEl.innerHTML = '❌ Error reading file: ' + escapeHtml(err.message);
+      }
+    };
+    if (file.name.endsWith('.csv')) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsArrayBuffer(file);
+    }
+  }
+
+  function processXLSX(data, statusEl) {
+    try {
+      var workbook = XLSX.read(data, { type: 'array' });
+      var sheetName = workbook.SheetNames[0];
+      var sheet = workbook.Sheets[sheetName];
+      var rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      doSPMImport(rows, statusEl);
+    } catch(err) {
+      statusEl.style.background = '#fef2f2';
+      statusEl.innerHTML = '❌ Error parsing XLSX: ' + escapeHtml(err.message);
+    }
+  }
+
+  function doSPMImport(rows, statusEl) {
+    statusEl.innerHTML = '⏳ Parsing SPM data (' + rows.length + ' rows)...';
+    try {
+      var result = importSPMToClientHub(rows);
+      statusEl.style.background = '#dcfce7';
+      statusEl.innerHTML = '✅ Import complete! <strong>' + result.ownersImported + '</strong> new owners imported. ' +
+        'Total: <strong>' + result.totalOwners + '</strong> owners, <strong>' + result.totalProperties + '</strong> properties.';
+
+      // Auto-close after 3 seconds and switch to client hub
+      setTimeout(function() {
+        document.getElementById('spm-import-modal').style.display = 'none';
+        renderClientHub();
+      }, 3000);
+    } catch(err) {
+      statusEl.style.background = '#fef2f2';
+      statusEl.innerHTML = '❌ Import error: ' + escapeHtml(err.message);
+    }
+  }
 
 </script>
 
