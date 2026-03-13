@@ -1766,6 +1766,153 @@
             </div>
           </div>
 
+
+
+    <!-- ========== TAB: Advanced Accounting (Grouped by Owner) ========== -->
+    <div id="tab-advaccounting" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📊 Advanced Accounting</h2>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-outline btn-sm" onclick="exportAdvancedLedgerCSV()">📥 Export CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddLedgerEntryModal()">+ Add Entry</button>
+        </div>
+      </div>
+      <div id="advanced-ledger-container"></div>
+    </div>
+
+    <!-- ========== TAB: Professional Profile ========== -->
+    <div id="tab-profile" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">👤 Professional Profile</h2>
+        <button class="btn btn-primary btn-sm" onclick="savePublicProfileUI()">💾 Save Profile</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Company Information</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Company Name</label>
+            <input type="text" id="profile-company-name" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Tagline</label>
+            <input type="text" id="profile-tagline" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Bio / Description</label>
+            <textarea id="profile-bio" class="form-input" rows="4" style="width:100%;resize:vertical;"></textarea>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">License Number</label>
+            <input type="text" id="profile-license" class="form-input" style="width:100%;" />
+          </div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Contact & Branding</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Phone</label>
+            <input type="tel" id="profile-phone" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Email</label>
+            <input type="email" id="profile-email" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Website</label>
+            <input type="url" id="profile-website" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.5rem;">Corporate Logo</label>
+            <div id="logo-upload-zone" style="border:2px dashed #cbd5e1;border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;background:#f8fafc;" onclick="document.getElementById('logo-file-input').click()">
+              <div id="logo-preview" style="margin-bottom:0.5rem;"></div>
+              <div style="color:#64748b;font-size:0.85rem;">Click or drag to upload logo</div>
+              <input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Team Members Section -->
+      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 style="font-weight:700;">👥 Team Members</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddTeamMemberModal()">+ Add Member</button>
+        </div>
+        <div id="team-members-list"></div>
+      </div>
+      <!-- Approved Vendors Section -->
+      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 style="font-weight:700;">🔧 Approved Vendors</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddVendorModal()">+ Add Vendor</button>
+        </div>
+        <div id="approved-vendors-list"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: Bulk Messaging ========== -->
+    <div id="tab-bulkmsg" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📣 Bulk Messaging</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Compose Broadcast</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Target Audience</label>
+            <select id="bulk-target" class="form-input" style="width:100%;">
+              <option value="everyone">Everyone</option>
+              <option value="delinquent">Delinquent Tenants (Unpaid Rent)</option>
+              <option value="owners">All Owners</option>
+              <option value="tenants">All Tenants</option>
+              <option value="vendors">All Vendors</option>
+              <option value="hoa">HOA Group</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Method</label>
+            <select id="bulk-method" class="form-input" style="width:100%;">
+              <option value="email">Email</option>
+              <option value="sms">SMS (Twilio)</option>
+              <option value="both">Email + SMS</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Subject</label>
+            <input type="text" id="bulk-subject" class="form-input" style="width:100%;" placeholder="Message subject..." />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Message</label>
+            <textarea id="bulk-body" class="form-input" rows="6" style="width:100%;resize:vertical;" placeholder="Type your broadcast message..."></textarea>
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="sendBulkMessageUI()">🚀 Send Broadcast</button>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Recent Broadcasts</h3>
+          <div id="bulk-history-list" style="max-height:400px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: Permission Manager ========== -->
+    <div id="tab-permissions" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">🔐 Permission Manager</h2>
+      </div>
+      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;margin-bottom:1.5rem;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Messaging Guardrails</h3>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.75rem;background:#f8fafc;border-radius:8px;margin-bottom:0.5rem;">
+          <input type="checkbox" id="perm-restrict-external" onchange="updateGuardrails()" />
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Restrict External Messaging</div>
+            <div style="font-size:0.8rem;color:#64748b;">Only the Account Owner can message external contacts (vendors, tenants) unless explicitly granted.</div>
+          </div>
+        </label>
+      </div>
+      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Team Permission Matrix</h3>
+        <div id="permission-matrix-container"></div>
+      </div>
+    </div>
+
     </div><!-- end dash-main -->
   </div><!-- end dashboard-layout -->
 </div><!-- end dashboard-screen -->
@@ -4589,150 +4736,6 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   </div>
 
 
-    <!-- ========== TAB: Advanced Accounting (Grouped by Owner) ========== -->
-    <div id="tab-advaccounting" style="display:none;padding:1.5rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-        <h2 style="font-size:1.4rem;font-weight:800;">📊 Advanced Accounting</h2>
-        <div style="display:flex;gap:0.5rem;">
-          <button class="btn btn-outline btn-sm" onclick="exportAdvancedLedgerCSV()">📥 Export CSV</button>
-          <button class="btn btn-primary btn-sm" onclick="openAddLedgerEntryModal()">+ Add Entry</button>
-        </div>
-      </div>
-      <div id="advanced-ledger-container"></div>
-    </div>
-
-    <!-- ========== TAB: Professional Profile ========== -->
-    <div id="tab-profile" style="display:none;padding:1.5rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-        <h2 style="font-size:1.4rem;font-weight:800;">👤 Professional Profile</h2>
-        <button class="btn btn-primary btn-sm" onclick="savePublicProfileUI()">💾 Save Profile</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
-          <h3 style="font-weight:700;margin-bottom:1rem;">Company Information</h3>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Company Name</label>
-            <input type="text" id="profile-company-name" class="form-input" style="width:100%;" />
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Tagline</label>
-            <input type="text" id="profile-tagline" class="form-input" style="width:100%;" />
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Bio / Description</label>
-            <textarea id="profile-bio" class="form-input" rows="4" style="width:100%;resize:vertical;"></textarea>
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">License Number</label>
-            <input type="text" id="profile-license" class="form-input" style="width:100%;" />
-          </div>
-        </div>
-        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
-          <h3 style="font-weight:700;margin-bottom:1rem;">Contact & Branding</h3>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Phone</label>
-            <input type="tel" id="profile-phone" class="form-input" style="width:100%;" />
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Email</label>
-            <input type="email" id="profile-email" class="form-input" style="width:100%;" />
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Website</label>
-            <input type="url" id="profile-website" class="form-input" style="width:100%;" />
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.5rem;">Corporate Logo</label>
-            <div id="logo-upload-zone" style="border:2px dashed #cbd5e1;border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;background:#f8fafc;" onclick="document.getElementById('logo-file-input').click()">
-              <div id="logo-preview" style="margin-bottom:0.5rem;"></div>
-              <div style="color:#64748b;font-size:0.85rem;">Click or drag to upload logo</div>
-              <input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Team Members Section -->
-      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-          <h3 style="font-weight:700;">👥 Team Members</h3>
-          <button class="btn btn-primary btn-sm" onclick="openAddTeamMemberModal()">+ Add Member</button>
-        </div>
-        <div id="team-members-list"></div>
-      </div>
-      <!-- Approved Vendors Section -->
-      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-          <h3 style="font-weight:700;">🔧 Approved Vendors</h3>
-          <button class="btn btn-primary btn-sm" onclick="openAddVendorModal()">+ Add Vendor</button>
-        </div>
-        <div id="approved-vendors-list"></div>
-      </div>
-    </div>
-
-    <!-- ========== TAB: Bulk Messaging ========== -->
-    <div id="tab-bulkmsg" style="display:none;padding:1.5rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-        <h2 style="font-size:1.4rem;font-weight:800;">📣 Bulk Messaging</h2>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
-          <h3 style="font-weight:700;margin-bottom:1rem;">Compose Broadcast</h3>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Target Audience</label>
-            <select id="bulk-target" class="form-input" style="width:100%;">
-              <option value="everyone">Everyone</option>
-              <option value="delinquent">Delinquent Tenants (Unpaid Rent)</option>
-              <option value="owners">All Owners</option>
-              <option value="tenants">All Tenants</option>
-              <option value="vendors">All Vendors</option>
-              <option value="hoa">HOA Group</option>
-            </select>
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Method</label>
-            <select id="bulk-method" class="form-input" style="width:100%;">
-              <option value="email">Email</option>
-              <option value="sms">SMS (Twilio)</option>
-              <option value="both">Email + SMS</option>
-            </select>
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Subject</label>
-            <input type="text" id="bulk-subject" class="form-input" style="width:100%;" placeholder="Message subject..." />
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Message</label>
-            <textarea id="bulk-body" class="form-input" rows="6" style="width:100%;resize:vertical;" placeholder="Type your broadcast message..."></textarea>
-          </div>
-          <button class="btn btn-primary" style="width:100%;" onclick="sendBulkMessageUI()">🚀 Send Broadcast</button>
-        </div>
-        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
-          <h3 style="font-weight:700;margin-bottom:1rem;">Recent Broadcasts</h3>
-          <div id="bulk-history-list" style="max-height:400px;overflow-y:auto;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========== TAB: Permission Manager ========== -->
-    <div id="tab-permissions" style="display:none;padding:1.5rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-        <h2 style="font-size:1.4rem;font-weight:800;">🔐 Permission Manager</h2>
-      </div>
-      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;margin-bottom:1.5rem;">
-        <h3 style="font-weight:700;margin-bottom:1rem;">Messaging Guardrails</h3>
-        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.75rem;background:#f8fafc;border-radius:8px;margin-bottom:0.5rem;">
-          <input type="checkbox" id="perm-restrict-external" onchange="updateGuardrails()" />
-          <div>
-            <div style="font-weight:600;font-size:0.9rem;">Restrict External Messaging</div>
-            <div style="font-size:0.8rem;color:#64748b;">Only the Account Owner can message external contacts (vendors, tenants) unless explicitly granted.</div>
-          </div>
-        </label>
-      </div>
-      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
-        <h3 style="font-weight:700;margin-bottom:1rem;">Team Permission Matrix</h3>
-        <div id="permission-matrix-container"></div>
-      </div>
-    </div>
 
     <!-- ========== MODAL: Add Ledger Entry ========== -->
     <div id="modal-add-ledger" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:none;align-items:center;justify-content:center;">
