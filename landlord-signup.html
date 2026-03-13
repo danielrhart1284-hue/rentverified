@@ -3345,8 +3345,8 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       if (data.lease.current) {
         const exp = data.lease.expiryStatus;
         leaseEl.innerHTML = '<div style="font-weight:600;">Active Lease</div>' +
-          '<div style="font-size:.8rem;color:' + (exp && exp.daysLeft < 30 ? '#dc2626' : '#16a34a') + ';">' +
-          (exp ? exp.daysLeft + ' days remaining' : 'No expiry set') + '</div>';
+          '<div style="font-size:.8rem;color:' + (exp && exp.days < 30 ? '#dc2626' : '#16a34a') + ';">' +
+          (exp ? exp.days + ' days remaining' : 'No expiry set') + '</div>';
       } else {
         leaseEl.innerHTML = '<div style="color:#94a3b8;">No active lease</div>';
       }
@@ -3410,7 +3410,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
           '<tr><td style="padding:.4rem 0;font-weight:600;">End Date:</td><td>' + (l.endDate || l.moveOut || 'N/A') + '</td></tr>' +
           '<tr><td style="padding:.4rem 0;font-weight:600;">Rent:</td><td>' + formatCurrency(l.rent || _selectedPropertyForCommand.rent || 0) + '/mo</td></tr>' +
           '<tr><td style="padding:.4rem 0;font-weight:600;">Deposit:</td><td>' + formatCurrency(l.deposit || _selectedPropertyForCommand.deposit || 0) + '</td></tr>' +
-          '<tr><td style="padding:.4rem 0;font-weight:600;">Status:</td><td>' + (data.lease.expiryStatus ? '<span style="color:' + (data.lease.expiryStatus.daysLeft < 30 ? '#dc2626' : '#16a34a') + ';">' + data.lease.expiryStatus.daysLeft + ' days remaining</span>' : 'Active') + '</td></tr></table>';
+          '<tr><td style="padding:.4rem 0;font-weight:600;">Status:</td><td>' + (data.lease.expiryStatus ? '<span style="color:' + (data.lease.expiryStatus.days < 30 ? '#dc2626' : '#16a34a') + ';">' + data.lease.expiryStatus.days + ' days remaining</span>' : 'Active') + '</td></tr></table>';
       } else {
         html = '<div style="text-align:center;padding:1.5rem;color:#94a3b8;"><div style="font-size:1.5rem;margin-bottom:.5rem;">📄</div><p>No active lease for this property.</p><button onclick="showWIP()" class="btn btn-sm btn-primary" style="margin-top:.5rem;">+ Create Lease</button></div>';
       }
@@ -3777,16 +3777,8 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
 
     // Handle new tabs
     if (tabName === 'propcommand' || tabName === 'rentstatus' || tabName === 'inbox' || tabName === 'attydocs') {
-      // Hide all existing tabs
-      document.querySelectorAll('.dash-main > div[id^="tab-"]').forEach(function(el) { el.style.display = 'none'; });
-      // Also hide overview and other content
-      const overviewEl = document.getElementById('tab-overview');
-      const propertiesEl = document.getElementById('tab-properties');
-      const clientsEl = document.getElementById('tab-clients');
-      const importEl = document.getElementById('tab-import');
-      const accountingEl = document.getElementById('tab-accounting');
-      const clienthubEl = document.getElementById('tab-clienthub');
-      [overviewEl, propertiesEl, clientsEl, importEl, accountingEl, clienthubEl].forEach(function(el) { if (el) el.style.display = 'none'; });
+      // Hide all existing tab-content panels (dtab-* elements use .tab-content.active pattern)
+      document.querySelectorAll('#dashboard-screen .tab-content').forEach(function(t) { t.classList.remove('active'); });
 
       const targetEl = document.getElementById('tab-' + tabName);
       if (targetEl) targetEl.style.display = 'block';

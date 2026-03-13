@@ -2357,7 +2357,7 @@ function getPropertyCommandData(listing) {
   return {
     lease: {
       current: currentLease,
-      expiryStatus: currentLease ? getLeaseExpiryStatus(currentLease) : null,
+      expiryStatus: currentLease ? getLeaseExpiryStatus(currentLease.endDate || currentLease.end || currentLease.moveOut) : null,
       count: leases.length
     },
     accounting: {
