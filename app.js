@@ -2321,7 +2321,7 @@ function sendMessage(opts) {
 function getUnreadMessages(role) {
   var msgs = getMessages();
   return msgs.filter(function(m) {
-    return !m.read && (m.toRole === role || m.toRole === 'pm' || m.toRole === 'admin');
+    return !m.read && m.fromRole !== role && (m.toRole === role || role === 'pm' || role === 'admin');
   });
 }
 
