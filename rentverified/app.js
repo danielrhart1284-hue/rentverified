@@ -2569,6 +2569,7 @@ RV_KEYS.WELCOME_TEMPLATES = 'rv_welcome_templates';
 RV_KEYS.HOA_INFO = 'rv_hoa_info';
 RV_KEYS.BULK_MESSAGES = 'rv_bulk_messages';
 RV_KEYS.AUDIT_LOG = 'rv_audit_log';
+RV_KEYS.PROPERTY_DOCS_ENHANCED = 'rv_property_docs_enhanced';
 
 function getBranding() { return rvGet(RV_KEYS.BRANDING) || { logoUrl: '', companyPhotos: [] }; }
 function saveBranding(data) { rvSet(RV_KEYS.BRANDING, data); }
@@ -2592,8 +2593,8 @@ function globalSearch(query) {
   });
   // Search clients
   var hub = getClientHub();
-  if (hub && hub.owners) {
-    hub.owners.forEach(function(owner) {
+  if (hub && hub.length) {
+    hub.forEach(function(owner) {
       if ((owner.name || '').toLowerCase().indexOf(q) >= 0 || (owner.email || '').toLowerCase().indexOf(q) >= 0) {
         results.push({ type: 'client', label: owner.name, detail: owner.email || '', id: owner.id });
       }
@@ -2606,8 +2607,8 @@ function globalSearch(query) {
       results.push({ type: 'message', label: m.subject, detail: 'From: ' + m.from, id: m.id });
     }
   });
-  // Search documents
-  var docs = rvGet(RV_KEYS.PROPERTY_DOCS) || [];
+  // Search documents (enhanced format uses separate key)
+  var docs = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
   docs.forEach(function(d) {
     if ((d.name || '').toLowerCase().indexOf(q) >= 0 || (d.property || '').toLowerCase().indexOf(q) >= 0) {
       results.push({ type: 'document', label: d.name, detail: d.property || '', id: d.id });
@@ -2618,12 +2619,12 @@ function globalSearch(query) {
 
 // --- Document Management (Enhanced) ---
 function getPropertyDocsEnhanced(listingId) {
-  var all = rvGet(RV_KEYS.PROPERTY_DOCS) || [];
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
   return all.filter(function(d) { return d.listingId === listingId; });
 }
 
 function addPropertyDocEnhanced(doc) {
-  var all = rvGet(RV_KEYS.PROPERTY_DOCS) || [];
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
   var newDoc = {
     id: 'doc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
     listingId: doc.listingId || '',
@@ -2638,27 +2639,27 @@ function addPropertyDocEnhanced(doc) {
     dataUrl: doc.dataUrl || ''
   };
   all.unshift(newDoc);
-  rvSet(RV_KEYS.PROPERTY_DOCS, all);
+  rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
   addAuditEntry('Document uploaded: ' + newDoc.name, newDoc.listingId);
   return newDoc;
 }
 
 function toggleDocSharing(docId, shared) {
-  var all = rvGet(RV_KEYS.PROPERTY_DOCS) || [];
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
   var doc = all.find(function(d) { return d.id === docId; });
   if (doc) {
     doc.sharedWithOwner = shared;
-    rvSet(RV_KEYS.PROPERTY_DOCS, all);
+    rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
     addAuditEntry((shared ? 'Shared' : 'Unshared') + ' document: ' + doc.name, doc.listingId);
   }
 }
 
 function deletePropertyDoc(docId) {
-  var all = rvGet(RV_KEYS.PROPERTY_DOCS) || [];
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
   var idx = all.findIndex(function(d) { return d.id === docId; });
   if (idx >= 0) {
     var removed = all.splice(idx, 1)[0];
-    rvSet(RV_KEYS.PROPERTY_DOCS, all);
+    rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
     addAuditEntry('Document deleted: ' + removed.name, removed.listingId);
   }
 }
@@ -3024,10 +3025,10 @@ function seedAdvancedLedger() {
   var existing = getAdvancedLedger();
   if (existing.length > 0) return;
   var hub = getClientHub();
-  if (!hub || !hub.owners) return;
+  if (!hub || !hub.length) return;
   var months = ['Jan 2026', 'Feb 2026', 'Mar 2026'];
   var methods = ['Zelle', 'Cash App', 'Venmo', 'Check'];
-  hub.owners.slice(0, 5).forEach(function(owner) {
+  hub.slice(0, 5).forEach(function(owner) {
     var props = (owner.properties || []).slice(0, 3);
     props.forEach(function(prop) {
       months.forEach(function(month, mi) {
