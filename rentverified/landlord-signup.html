@@ -111,6 +111,59 @@
       font-size: 0.8rem;
       font-weight: 700;
     }
+
+    /* Phase 4: Breadcrumbs */
+    .rv-breadcrumbs {
+      display: flex; align-items: center; gap: 0.25rem;
+      padding: 0.5rem 1rem; background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.8rem; color: #64748b; flex-wrap: wrap;
+    }
+    .rv-breadcrumbs a { color: #2563eb; text-decoration: none; font-weight: 500; cursor: pointer; }
+    .rv-breadcrumbs a:hover { text-decoration: underline; }
+    .rv-breadcrumbs .sep { color: #cbd5e1; margin: 0 2px; }
+    .rv-breadcrumbs .current { color: #1e293b; font-weight: 600; }
+
+    /* Phase 4: Audit Tooltip */
+    .audit-tooltip-trigger { position: relative; cursor: help; }
+    .audit-tooltip {
+      display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: white; padding: 0.5rem 0.75rem; border-radius: 6px;
+      font-size: 0.75rem; white-space: nowrap; z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); pointer-events: none;
+    }
+    .audit-tooltip::after {
+      content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: #1e293b;
+    }
+    .audit-tooltip-trigger:hover .audit-tooltip { display: block; }
+
+    /* Phase 4: Contextual Sidebar */
+    .ctx-sidebar-section { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem; margin-top: 0.75rem; }
+    .ctx-sidebar-header { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; padding: 0.25rem; margin-bottom: 0.25rem; }
+    .ctx-link { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; border-radius: 6px; color: #94a3b8; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; }
+    .ctx-link:hover { background: rgba(255,255,255,0.08); color: white; }
+    .ctx-link.active { background: rgba(37,99,235,0.15); color: #60a5fa; }
+
+    /* Phase 4: Verified Badge */
+    .verified-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+    }
+    .verified-badge svg { width: 12px; height: 12px; }
+
+    /* Phase 4: Invoice Alert */
+    .invoice-flagged { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; }
+    .invoice-flagged .flag-icon { color: #dc2626; font-weight: 700; }
+
+    /* Phase 4: Lead Capture */
+    .lead-capture-overlay {
+      position: fixed; bottom: 0; left: 0; right: 0; background: white;
+      border-top: 2px solid #2563eb; box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+      padding: 1.25rem; z-index: 999; transform: translateY(100%); transition: transform 0.3s ease;
+    }
+    .lead-capture-overlay.visible { transform: translateY(0); }
   </style>
   <!-- Google Maps Places API (replace YOUR_API_KEY with actual key to enable autocomplete) -->
   <script>
@@ -146,6 +199,9 @@
     <button class="btn btn-primary btn-sm" onclick="showLogin()" style="margin-left:.5rem;">Business Log In</button>
   </div>
 </nav>
+
+<!-- Phase 4: Breadcrumb Bar -->
+<div id="breadcrumb-bar" class="rv-breadcrumbs" style="display:none;"></div>
 
 <!-- SIGN UP FORM (shown by default) -->
 <div id="signup-screen">
@@ -615,6 +671,16 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
           🔐 Permissions
         </div>
+        <div class="dash-link" onclick="dashTab('vendorinvoices')" data-sidebar-id="vendorinvoices" style="color:#dc2626;background:rgba(220,38,38,0.06);border-left:2px solid #dc2626;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+          📋 Vendor Invoices
+        </div>
+        <div class="dash-link" onclick="dashTab('leadcaptures')" data-sidebar-id="leadcaptures" style="color:#059669;background:rgba(5,150,105,0.06);border-left:2px solid #059669;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          📱 QR Leads
+        </div>
+        <!-- Phase 4: Contextual Sidebar (property-specific links) -->
+        <div id="ctx-sidebar-section" class="ctx-sidebar-section" style="display:none;"></div>
         <a href="referral.html" class="dash-link" style="color:#a78bfa;background:rgba(167,139,250,0.1);border-left:3px solid #a78bfa;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
           🎁 Refer &amp; Earn
@@ -1911,6 +1977,23 @@
         <h3 style="font-weight:700;margin-bottom:1rem;">Team Permission Matrix</h3>
         <div id="permission-matrix-container"></div>
       </div>
+    </div>
+
+    <!-- ========== Phase 4 TAB: Vendor Invoices ========== -->
+    <div id="tab-vendorinvoices" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📋 Vendor Invoices</h2>
+        <button class="btn btn-primary btn-sm" onclick="openSubmitInvoiceModal()">+ Submit Invoice</button>
+      </div>
+      <div id="vendor-invoices-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;"></div>
+    </div>
+
+    <!-- ========== Phase 4 TAB: Lead Captures ========== -->
+    <div id="tab-leadcaptures" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📱 QR Lead Captures</h2>
+      </div>
+      <div id="lead-captures-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;"></div>
     </div>
 
     </div><!-- end dash-main -->
@@ -4640,6 +4723,366 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     }
   }, 600);
 
+  // ============================================================================
+  // PHASE 4: UI FUNCTIONS
+  // ============================================================================
+
+  // --- Breadcrumb Rendering ---
+  function renderBreadcrumbs() {
+    var bar = document.getElementById('breadcrumb-bar');
+    if (!bar) return;
+    var crumbs = getBreadcrumbs();
+    if (crumbs.length === 0) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    var html = '';
+    crumbs.forEach(function(c, i) {
+      if (i > 0) html += ' <span style="color:#94a3b8;margin:0 6px;">›</span> ';
+      if (i < crumbs.length - 1) {
+        html += '<a href="#" onclick="navigateBreadcrumb(' + i + ');renderBreadcrumbs();return false;" style="color:#2563eb;text-decoration:none;font-weight:500;">' + c.label + '</a>';
+      } else {
+        html += '<span style="color:#1e293b;font-weight:700;">' + c.label + '</span>';
+      }
+    });
+    bar.innerHTML = html;
+  }
+
+  // --- Contextual Sidebar ---
+  function renderContextualSidebar(listingId) {
+    var sec = document.getElementById('ctx-sidebar-section');
+    if (!sec) return;
+    if (!listingId) { sec.style.display = 'none'; return; }
+    sec.style.display = 'block';
+    var listings = getListingsForClient(rvGet('rv_account') ? rvGet('rv_account').clientId : '');
+    var prop = null;
+    listings.forEach(function(l) { if (l.listingId === listingId) prop = l; });
+    var addr = prop ? (prop.address || listingId) : listingId;
+    sec.innerHTML = '<div class="ctx-sidebar-header">Command Hub: ' + addr.substring(0, 25) + '</div>' +
+      '<a class="ctx-link" href="#" onclick="openAdBuilder(\'' + listingId + '\');return false;">📣 Create Ad</a>' +
+      '<a class="ctx-link" href="#" onclick="openAttorneyPacket(\'' + listingId + '\');return false;">⚖️ Attorney Packet</a>' +
+      '<a class="ctx-link" href="#" onclick="showPropertyLedger(\'' + listingId + '\');return false;">💰 View Ledger</a>' +
+      '<a class="ctx-link" href="#" onclick="exitPropertyContextUI();return false;">← Back to Dashboard</a>';
+  }
+
+  function exitPropertyContextUI() {
+    exitPropertyContext();
+    renderBreadcrumbs();
+    var sec = document.getElementById('ctx-sidebar-section');
+    if (sec) sec.style.display = 'none';
+    if (typeof dashTab === 'function') dashTab('overview');
+  }
+
+  // --- Audit Trail Tooltips ---
+  function addAuditTooltips() {
+    document.querySelectorAll('.audit-tooltip-trigger').forEach(function(el) {
+      var entryId = el.getAttribute('data-entry-id');
+      if (!entryId) return;
+      var details = getAuditDetailsForEntry(entryId);
+      if (!details) return;
+      var tooltip = el.querySelector('.audit-tooltip');
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'audit-tooltip';
+        el.appendChild(tooltip);
+      }
+      tooltip.innerHTML = '<strong>Audit Trail</strong><br>' +
+        'By: ' + (details.initials || 'N/A') + '<br>' +
+        'Date: ' + (details.timestamp ? new Date(details.timestamp).toLocaleString() : 'N/A') + '<br>' +
+        'Method: ' + (details.method || 'manual');
+    });
+  }
+
+  // --- Math Validation UI ---
+  function runMathValidation(ownerId) {
+    // Build statement data from the owner's ledger entries
+    var ledger = getAdvancedLedger();
+    // ownerId may be a client hub ID or owner name — resolve to name first
+    var owner = (typeof getClientHubOwner === 'function') ? getClientHubOwner(ownerId) : null;
+    var ownerName = owner ? owner.name : ownerId;
+    var ownerEntries = ledger.filter(function(e) { return e.ownerName === ownerName; });
+    if (ownerEntries.length === 0) { alert('No ledger data found for this owner.'); return; }
+    var totalRent = 0, totalFees = 0;
+    ownerEntries.forEach(function(e) { totalRent += (e.rentPaid || 0); totalFees += (e.pmFeeAmount || 0); });
+    var statementData = { entries: ownerEntries, totalRent: totalRent, totalFees: totalFees, totalNet: totalRent - totalFees };
+    var report = generateMathReport(statementData);
+    if (!report) { alert('Error generating math report.'); return; }
+    var s = report.summary || {};
+    if (report.valid) {
+      alert('Math Validation PASSED\n\nTotal Rent: $' + (s.totalRent || 0).toFixed(2) +
+        '\nTotal Fees: $' + (s.totalFees || 0).toFixed(2) +
+        '\nTotal Net: $' + (s.totalNet || 0).toFixed(2) +
+        '\nEntries checked: ' + (s.entryCount || 0));
+    } else {
+      var msg = 'Math Validation FAILED\n\nDiscrepancies found:\n';
+      (report.errors || []).forEach(function(e) {
+        msg += '- ' + e + '\n';
+      });
+      alert(msg);
+    }
+  }
+
+  // --- AI Ad Builder UI ---
+  function openAdBuilder(listingId) {
+    var listings = getListingsForClient(rvGet('rv_account') ? rvGet('rv_account').clientId : '');
+    var prop = null;
+    listings.forEach(function(l) { if (l.listingId === listingId) prop = l; });
+    if (!prop) { alert('Property not found.'); return; }
+    var ad = generateAIAd(prop);
+    document.getElementById('ad-property-label').textContent = prop.address || listingId;
+    document.getElementById('ad-title-output').value = ad.title;
+    document.getElementById('ad-body-output').value = ad.body;
+    document.getElementById('ad-hashtags-output').value = ad.hashtags;
+    var modal = document.getElementById('modal-ad-builder');
+    modal.style.display = 'flex';
+  }
+
+  function copyAdToClipboard(fieldId) {
+    var el = document.getElementById(fieldId);
+    var text = el.value || el.textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() {
+        var btn = el.parentElement.querySelector('.copy-ad-btn');
+        if (btn) { var orig = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(function() { btn.textContent = orig; }, 1500); }
+      });
+    } else {
+      el.select(); document.execCommand('copy');
+    }
+  }
+
+  // --- Attorney Packet UI ---
+  var _attyPacketListingId = null;
+  function openAttorneyPacket(listingId) {
+    _attyPacketListingId = listingId;
+    var listings = getListingsForClient(rvGet('rv_account') ? rvGet('rv_account').clientId : '');
+    var prop = null;
+    listings.forEach(function(l) { if (l.listingId === listingId) prop = l; });
+    document.getElementById('atty-packet-property').textContent = prop ? (prop.address || listingId) : listingId;
+    document.getElementById('atty-packet-tenant').textContent = prop ? (prop.tenant || 'No tenant') : 'N/A';
+    var modal = document.getElementById('modal-attorney-packet');
+    modal.style.display = 'flex';
+  }
+
+  function exportAttorneyPacket() {
+    if (!_attyPacketListingId) return;
+    var result = generateAttorneyPacketZip(_attyPacketListingId);
+    // Generate a text summary since we can't create actual ZIP in browser without library
+    var content = '=== ATTORNEY PACKET ===\n';
+    content += 'Generated: ' + new Date().toISOString() + '\n';
+    content += 'Property: ' + _attyPacketListingId + '\n\n';
+    content += '--- LEASE ---\n' + JSON.stringify(result.lease, null, 2) + '\n\n';
+    content += '--- LEDGER ENTRIES (' + result.ledger.length + ') ---\n';
+    result.ledger.forEach(function(e) {
+      content += (e.paymentDate || e.month || 'N/A') + ' | $' + (e.rentPaid || 0) + ' | ' + (e.paymentMethod || 'N/A') + '\n';
+    });
+    content += '\n--- COMMUNICATIONS (' + result.communications.length + ') ---\n';
+    result.communications.forEach(function(m) {
+      content += (m.timestamp || 'N/A') + ' | ' + m.from + ': ' + (m.body || m.subject || '') + '\n';
+    });
+    content += '\n--- DOCUMENTS (' + result.documents.length + ') ---\n';
+    result.documents.forEach(function(d) {
+      content += d.name + ' (' + d.category + ')\n';
+    });
+    // Download as .txt file
+    var blob = new Blob([content], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'AttorneyPacket_' + _attyPacketListingId + '.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    closeModal('modal-attorney-packet');
+    alert('Attorney Packet downloaded successfully.');
+  }
+
+  // --- Vendor Invoice UI ---
+  function openSubmitInvoiceModal() {
+    document.getElementById('inv-vendor').value = '';
+    document.getElementById('inv-property').value = '';
+    document.getElementById('inv-desc').value = '';
+    document.getElementById('inv-amount').value = '';
+    var modal = document.getElementById('modal-vendor-invoice');
+    modal.style.display = 'flex';
+  }
+
+  function submitVendorInvoiceUI() {
+    var vendor = document.getElementById('inv-vendor').value.trim();
+    var property = document.getElementById('inv-property').value.trim();
+    var desc = document.getElementById('inv-desc').value.trim();
+    var amount = parseFloat(document.getElementById('inv-amount').value);
+    if (!vendor || !property || !desc || isNaN(amount) || amount <= 0) {
+      alert('Please fill in all fields with valid values.');
+      return;
+    }
+    var result = submitVendorInvoice({
+      vendorName: vendor,
+      listingId: property,
+      description: desc,
+      amount: amount
+    });
+    closeModal('modal-vendor-invoice');
+    if (result.flagged) {
+      alert('FLAGGED: Invoice for $' + amount.toFixed(2) + ' exceeds vendor limit.\n' + (result.flagReason || '') + '\nStatus: Pending Owner Approval');
+    } else {
+      alert('✅ Invoice submitted successfully for $' + amount.toFixed(2));
+    }
+    renderVendorInvoices();
+  }
+
+  function renderVendorInvoices() {
+    var container = document.getElementById('vendor-invoices-list');
+    if (!container) return;
+    var invoices = getVendorInvoices();
+    if (invoices.length === 0) {
+      container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;">No vendor invoices yet. Click "+ Submit Invoice" to add one.</div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">';
+    html += '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">' +
+      '<th style="padding:0.75rem;text-align:left;">Vendor</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Property</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Description</th>' +
+      '<th style="padding:0.75rem;text-align:right;">Amount</th>' +
+      '<th style="padding:0.75rem;text-align:center;">Status</th>' +
+      '<th style="padding:0.75rem;text-align:center;">Actions</th></tr></thead><tbody>';
+    invoices.forEach(function(inv) {
+      var statusColor = inv.status === 'approved' ? '#059669' : inv.status === 'pending_approval' ? '#d97706' : inv.status === 'denied' ? '#dc2626' : '#6366f1';
+      var flagClass = inv.flagged ? ' invoice-flagged' : '';
+      html += '<tr class="' + flagClass + '" style="border-bottom:1px solid #f1f5f9;">';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(inv.vendorName) + '</td>';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(inv.listingId) + '</td>';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(inv.description) + '</td>';
+      html += '<td style="padding:0.75rem;text-align:right;font-weight:600;">$' + inv.amount.toFixed(2) + '</td>';
+      html += '<td style="padding:0.75rem;text-align:center;"><span style="background:' + statusColor + ';color:white;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;">' + inv.status.replace('_', ' ') + '</span></td>';
+      html += '<td style="padding:0.75rem;text-align:center;">';
+      if (inv.status === 'pending_approval') {
+        html += '<button onclick="approveInvoiceUI(\'' + inv.id + '\')" class="btn btn-sm" style="background:#059669;color:white;margin-right:4px;padding:2px 8px;font-size:0.7rem;">Approve</button>';
+        html += '<button onclick="denyInvoiceUI(\'' + inv.id + '\')" class="btn btn-sm" style="background:#dc2626;color:white;padding:2px 8px;font-size:0.7rem;">Deny</button>';
+      } else {
+        html += '<span style="color:#94a3b8;font-size:0.75rem;">—</span>';
+      }
+      html += '</td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function approveInvoiceUI(invoiceId) {
+    approveVendorInvoice(invoiceId);
+    renderVendorInvoices();
+  }
+
+  function denyInvoiceUI(invoiceId) {
+    denyVendorInvoice(invoiceId);
+    renderVendorInvoices();
+  }
+
+  // --- Lead Captures UI ---
+  function renderLeadCaptures() {
+    var container = document.getElementById('lead-captures-list');
+    if (!container) return;
+    var leads = getLeadCaptures();
+    if (leads.length === 0) {
+      container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;">No QR leads captured yet. Leads appear when visitors scan property QR codes and save listings.</div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">';
+    html += '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">' +
+      '<th style="padding:0.75rem;text-align:left;">Email</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Property</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Date</th>' +
+      '<th style="padding:0.75rem;text-align:center;">Source</th></tr></thead><tbody>';
+    leads.forEach(function(lead) {
+      html += '<tr style="border-bottom:1px solid #f1f5f9;">';
+      html += '<td style="padding:0.75rem;font-weight:500;">' + escapeHtml(lead.email) + '</td>';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(lead.listingId) + '</td>';
+      html += '<td style="padding:0.75rem;">' + new Date(lead.capturedAt).toLocaleDateString() + '</td>';
+      html += '<td style="padding:0.75rem;text-align:center;"><span style="background:#6366f1;color:white;padding:2px 10px;border-radius:12px;font-size:0.75rem;">QR Scan</span></td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  // --- Verified Badge Injection ---
+  function injectVerifiedBadge() {
+    var profileTab = document.getElementById('tab-profile');
+    if (!profileTab) return;
+    var header = profileTab.querySelector('h2');
+    if (!header || header.querySelector('.verified-badge')) return;
+    var acct = rvGet('rv_account');
+    if (!acct) return;
+    var badge = document.createElement('span');
+    badge.className = 'verified-badge';
+    badge.title = 'Verified RentVerified Professional';
+    badge.innerHTML = '✓ Verified';
+    header.appendChild(badge);
+  }
+
+  // --- Show Property Ledger (from contextual sidebar) ---
+  function showPropertyLedger(listingId) {
+    if (typeof dashTab === 'function') dashTab('advaccounting');
+    // Scroll to or filter the ledger for this property
+    setTimeout(function() {
+      var filterInput = document.querySelector('#tab-advaccounting input[type="text"]');
+      if (filterInput) { filterInput.value = listingId; filterInput.dispatchEvent(new Event('input')); }
+    }, 300);
+  }
+
+  // --- Wire Phase 4 tabs into dashTab ---
+  var _origDashTabPhase4 = window.dashTab;
+  window.dashTab = function(tabName) {
+    // Hide Phase 4 tabs
+    ['vendorinvoices','leadcaptures'].forEach(function(t) {
+      var el = document.getElementById('tab-' + t);
+      if (el) el.style.display = 'none';
+    });
+    if (tabName === 'vendorinvoices' || tabName === 'leadcaptures') {
+      document.querySelectorAll('#dashboard-screen .tab-content').forEach(function(t) { t.classList.remove('active'); });
+      ['advaccounting','profile','bulkmsg','permissions','propcommand','rentstatus','inbox','attydocs'].forEach(function(t) {
+        var el = document.getElementById('tab-' + t);
+        if (el) el.style.display = 'none';
+      });
+      var targetEl = document.getElementById('tab-' + tabName);
+      if (targetEl) targetEl.style.display = 'block';
+      if (tabName === 'vendorinvoices') renderVendorInvoices();
+      if (tabName === 'leadcaptures') renderLeadCaptures();
+      document.querySelectorAll('.dash-link').forEach(function(l) { l.classList.remove('active'); });
+      var activeLink = document.querySelector('.dash-link[data-sidebar-id="' + tabName + '"]');
+      if (activeLink) activeLink.classList.add('active');
+      // Update breadcrumbs
+      clearBreadcrumbs();
+      pushBreadcrumb('Dashboard', 'overview');
+      pushBreadcrumb(tabName === 'vendorinvoices' ? 'Vendor Invoices' : 'QR Leads', tabName);
+      renderBreadcrumbs();
+      return;
+    }
+    // For other tabs, also update breadcrumbs
+    if (tabName === 'overview') {
+      clearBreadcrumbs();
+      renderBreadcrumbs();
+      exitPropertyContext();
+      var sec = document.getElementById('ctx-sidebar-section');
+      if (sec) sec.style.display = 'none';
+    } else if (tabName !== 'vendorinvoices' && tabName !== 'leadcaptures') {
+      clearBreadcrumbs();
+      pushBreadcrumb('Dashboard', 'overview');
+      var tabLabels = {
+        'clients': 'Clients', 'advaccounting': 'Accounting', 'profile': 'Profile',
+        'bulkmsg': 'Bulk Messages', 'permissions': 'Permissions', 'propcommand': 'Property Command',
+        'rentstatus': 'Rent Status', 'inbox': 'Inbox', 'attydocs': 'Legal Docs',
+        'portfolioimport': 'Import', 'accounting': 'Accounting'
+      };
+      pushBreadcrumb(tabLabels[tabName] || tabName, tabName);
+      renderBreadcrumbs();
+    }
+    if (_origDashTabPhase4) _origDashTabPhase4(tabName);
+  };
+
+  // --- Init Phase 4 on load ---
+  setTimeout(function() {
+    injectVerifiedBadge();
+    renderBreadcrumbs();
+    addAuditTooltips();
+  }, 800);
+
 </script>
 
   <!-- BROADCAST MODAL -->
@@ -4845,6 +5288,99 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
         </div>
       </div>
     </div>
+
+<!-- Phase 4: AI Ad Builder Modal -->
+<div id="modal-ad-builder" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div class="card" style="width:700px;max-width:95vw;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h3 style="font-weight:700;">📣 AI Ad Builder</h3>
+      <button onclick="closeModal('modal-ad-builder')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8;">&times;</button>
+    </div>
+    <div style="margin-bottom:0.5rem;font-size:0.85rem;color:#64748b;">Property: <strong id="ad-property-label"></strong></div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Ad Title</label>
+      <div style="position:relative;">
+        <input type="text" id="ad-title-output" class="form-input" style="width:100%;padding-right:70px;box-sizing:border-box;" />
+        <button class="btn btn-sm copy-ad-btn" onclick="copyAdToClipboard('ad-title-output')" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:0.7rem;">📋 Copy</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Ad Body (Facebook / Craigslist)</label>
+      <div style="position:relative;">
+        <textarea id="ad-body-output" rows="12" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:0.75rem;font-size:0.85rem;line-height:1.6;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+        <button class="btn btn-sm copy-ad-btn" onclick="copyAdToClipboard('ad-body-output')" style="position:absolute;right:8px;top:8px;font-size:0.7rem;">📋 Copy</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Hashtags</label>
+      <div style="position:relative;">
+        <input type="text" id="ad-hashtags-output" class="form-input" style="width:100%;padding-right:70px;box-sizing:border-box;" />
+        <button class="btn btn-sm copy-ad-btn" onclick="copyAdToClipboard('ad-hashtags-output')" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:0.7rem;">📋 Copy</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button onclick="closeModal('modal-ad-builder')" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 4: Attorney Packet Modal -->
+<div id="modal-attorney-packet" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div class="card" style="width:500px;max-width:90vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h3 style="font-weight:700;">⚖️ One-Click Attorney Packet</h3>
+      <button onclick="closeModal('modal-attorney-packet')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8;">&times;</button>
+    </div>
+    <div style="background:#f8fafc;border-radius:8px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:0.85rem;color:#64748b;">Property: <strong id="atty-packet-property"></strong></div>
+      <div style="font-size:0.85rem;color:#64748b;">Tenant: <strong id="atty-packet-tenant"></strong></div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">This packet will include:</div>
+      <ul style="font-size:0.82rem;color:#475569;line-height:1.8;padding-left:1.25rem;">
+        <li>📝 Lease Agreement(s)</li>
+        <li>💰 Complete Rent Ledger</li>
+        <li>💬 Communication Log (all messages)</li>
+        <li>📄 Uploaded Documents</li>
+        <li>⚠️ Eviction Notices (if any)</li>
+      </ul>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button onclick="closeModal('modal-attorney-packet')" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Cancel</button>
+      <button onclick="exportAttorneyPacket()" class="btn btn-sm btn-primary">📦 Export Packet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 4: Vendor Invoice Modal -->
+<div id="modal-vendor-invoice" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div class="card" style="width:500px;max-width:90vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h3 style="font-weight:700;">📋 Submit Vendor Invoice</h3>
+      <button onclick="closeModal('modal-vendor-invoice')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8;">&times;</button>
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Vendor Name</label>
+      <input type="text" id="inv-vendor" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="e.g., Mike's Plumbing" />
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Property</label>
+      <input type="text" id="inv-property" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="Property address..." />
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Description</label>
+      <input type="text" id="inv-desc" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="Water heater replacement..." />
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Amount ($)</label>
+      <input type="number" id="inv-amount" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="0.00" step="0.01" />
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button onclick="closeModal('modal-vendor-invoice')" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Cancel</button>
+      <button onclick="submitVendorInvoiceUI()" class="btn btn-sm btn-primary">Submit Invoice</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
