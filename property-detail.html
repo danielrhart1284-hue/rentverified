@@ -113,6 +113,83 @@
       border: 1px solid var(--gray-200);
     }
 
+    /* Phase 4: Scam-Check Verified Header */
+    .rv-scam-check-header {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(5,150,105,0.3);
+    }
+    .rv-scam-check-header .rv-shield { font-size: 1.5rem; }
+    .rv-scam-check-header .rv-check-text { line-height: 1.4; }
+    .rv-scam-check-header .rv-check-text small { display: block; font-weight: 400; opacity: 0.85; font-size: 0.78rem; }
+
+    /* Phase 4: Lead Capture Overlay */
+    .rv-lead-overlay {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 3px solid #6366f1;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+      padding: 1.5rem;
+      z-index: 999;
+      animation: rv-slide-up 0.4s ease;
+    }
+    @keyframes rv-slide-up {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .rv-lead-overlay .rv-lead-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .rv-lead-overlay h4 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .rv-lead-overlay p { font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; }
+    .rv-lead-overlay .rv-lead-form {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .rv-lead-overlay .rv-lead-form input {
+      padding: 0.6rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      width: 260px;
+    }
+    .rv-lead-overlay .rv-lead-form button {
+      padding: 0.6rem 1.25rem;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .rv-lead-overlay .rv-lead-form button:hover { background: #4f46e5; }
+    .rv-lead-overlay .rv-lead-dismiss {
+      position: absolute;
+      top: 0.75rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
     @media (max-width: 900px) {
       .detail-layout { grid-template-columns: 1fr; }
       .sticky-card { position: static; }
@@ -120,6 +197,15 @@
   </style>
 </head>
 <body>
+
+<!-- Phase 4: Scam-Check Verified Header -->
+<div class="rv-scam-check-header" id="rv-scam-header">
+  <span class="rv-shield">🛡️</span>
+  <div class="rv-check-text">
+    You are viewing a <strong>Verified Listing</strong> by RentVerified.
+    <small>Payments made through this portal are secured. If you found this listing on Facebook, Craigslist, or Zillow — this confirms it is real.</small>
+  </div>
+</div>
 
 <!-- Sanders PM live banner -->
 <div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
@@ -458,6 +544,57 @@ window.PROPERTY_DATA = {
       }, 300);
     }
   }
+  // Phase 4: Lead Capture — show after 15 seconds if user hasn't applied
+  var _leadCaptured = false;
+  setTimeout(function() {
+    if (_leadCaptured) return;
+    var overlay = document.getElementById('rv-lead-overlay');
+    if (overlay) overlay.style.display = 'block';
+  }, 15000);
+
+  function dismissLeadCapture() {
+    var overlay = document.getElementById('rv-lead-overlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+
+  function submitLeadCapture() {
+    var emailInput = document.getElementById('rv-lead-email');
+    if (!emailInput || !emailInput.value.trim()) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    var email = emailInput.value.trim();
+    var propData = window.PROPERTY_DATA || {};
+    // Use app.js capturePropertyLead if available
+    if (typeof capturePropertyLead === 'function') {
+      capturePropertyLead(propData.listingId || 'unknown', email);
+    } else {
+      // Fallback: store in localStorage directly
+      var leads = JSON.parse(localStorage.getItem('rv_lead_captures') || '[]');
+      leads.push({ email: email, listingId: propData.listingId || 'unknown', capturedAt: new Date().toISOString(), source: 'qr_scan' });
+      localStorage.setItem('rv_lead_captures', JSON.stringify(leads));
+    }
+    _leadCaptured = true;
+    var overlay = document.getElementById('rv-lead-overlay');
+    if (overlay) {
+      overlay.querySelector('.rv-lead-inner').innerHTML = '<div style="font-size:2rem;margin-bottom:0.5rem;">✅</div><h4>Property Saved!</h4><p>We\'ll send you updates about this and similar properties at <strong>' + email + '</strong></p>';
+      setTimeout(function() { overlay.style.display = 'none'; }, 4000);
+    }
+  }
 </script>
+
+<!-- Phase 4: Lead Capture Overlay -->
+<div class="rv-lead-overlay" id="rv-lead-overlay">
+  <button class="rv-lead-dismiss" onclick="dismissLeadCapture()">&times;</button>
+  <div class="rv-lead-inner">
+    <h4>💾 Save This Property</h4>
+    <p>Not ready to apply? Save this listing and we'll notify you if anything changes.</p>
+    <div class="rv-lead-form">
+      <input type="email" id="rv-lead-email" placeholder="Enter your email..." />
+      <button onclick="submitLeadCapture()">Save Property</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
