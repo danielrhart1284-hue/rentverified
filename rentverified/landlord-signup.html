@@ -4871,11 +4871,11 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     content += '--- LEASE ---\n' + JSON.stringify(result.lease, null, 2) + '\n\n';
     content += '--- LEDGER ENTRIES (' + result.ledger.length + ') ---\n';
     result.ledger.forEach(function(e) {
-      content += e.date + ' | $' + (e.amount || 0) + ' | ' + (e.paymentMethod || 'N/A') + '\n';
+      content += (e.paymentDate || e.month || 'N/A') + ' | $' + (e.rentPaid || 0) + ' | ' + (e.paymentMethod || 'N/A') + '\n';
     });
     content += '\n--- COMMUNICATIONS (' + result.communications.length + ') ---\n';
     result.communications.forEach(function(m) {
-      content += m.date + ' | ' + m.from + ': ' + m.text + '\n';
+      content += (m.timestamp || 'N/A') + ' | ' + m.from + ': ' + (m.body || m.subject || '') + '\n';
     });
     content += '\n--- DOCUMENTS (' + result.documents.length + ') ---\n';
     result.documents.forEach(function(d) {
