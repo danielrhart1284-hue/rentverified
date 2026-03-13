@@ -2310,7 +2310,7 @@ function sendMessage(opts) {
     subject: opts.subject || '',
     body: opts.body || '',
     timestamp: new Date().toISOString(),
-    read: false,
+    read: opts.read !== undefined ? opts.read : false,
     replied: false
   };
   msgs.unshift(msg);
