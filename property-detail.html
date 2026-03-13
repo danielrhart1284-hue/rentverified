@@ -564,6 +564,10 @@ window.PROPERTY_DATA = {
       return;
     }
     var email = emailInput.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
     var propData = window.PROPERTY_DATA || {};
     // Use app.js capturePropertyLead if available
     if (typeof capturePropertyLead === 'function') {
@@ -577,7 +581,8 @@ window.PROPERTY_DATA = {
     _leadCaptured = true;
     var overlay = document.getElementById('rv-lead-overlay');
     if (overlay) {
-      overlay.querySelector('.rv-lead-inner').innerHTML = '<div style="font-size:2rem;margin-bottom:0.5rem;">✅</div><h4>Property Saved!</h4><p>We\'ll send you updates about this and similar properties at <strong>' + email + '</strong></p>';
+      var safeEmail = email.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      overlay.querySelector('.rv-lead-inner').innerHTML = '<div style="font-size:2rem;margin-bottom:0.5rem;">✅</div><h4>Property Saved!</h4><p>We\'ll send you updates about this and similar properties at <strong>' + safeEmail + '</strong></p>';
       setTimeout(function() { overlay.style.display = 'none'; }, 4000);
     }
   }
