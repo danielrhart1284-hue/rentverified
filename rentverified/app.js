@@ -2610,8 +2610,8 @@ function globalSearch(query) {
   // Search documents (enhanced format uses separate key)
   var docs = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
   docs.forEach(function(d) {
-    if ((d.name || '').toLowerCase().indexOf(q) >= 0 || (d.property || '').toLowerCase().indexOf(q) >= 0) {
-      results.push({ type: 'document', label: d.name, detail: d.property || '', id: d.id });
+    if ((d.name || '').toLowerCase().indexOf(q) >= 0 || (d.listingId || '').toLowerCase().indexOf(q) >= 0) {
+      results.push({ type: 'document', label: d.name, detail: d.listingId || '', id: d.id });
     }
   });
   return results.slice(0, 15);
