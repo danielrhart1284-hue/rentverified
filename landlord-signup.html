@@ -4795,7 +4795,10 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   function runMathValidation(ownerId) {
     // Build statement data from the owner's ledger entries
     var ledger = getAdvancedLedger();
-    var ownerEntries = ledger.filter(function(e) { return e.ownerId === ownerId; });
+    // ownerId may be a client hub ID or owner name — resolve to name first
+    var owner = (typeof getClientHubOwner === 'function') ? getClientHubOwner(ownerId) : null;
+    var ownerName = owner ? owner.name : ownerId;
+    var ownerEntries = ledger.filter(function(e) { return e.ownerName === ownerName; });
     if (ownerEntries.length === 0) { alert('No ledger data found for this owner.'); return; }
     var totalRent = 0, totalFees = 0;
     ownerEntries.forEach(function(e) { totalRent += (e.rentOwed || 0); totalFees += (e.pmFeeAmount || 0); });

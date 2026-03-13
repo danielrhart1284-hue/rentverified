@@ -3147,7 +3147,7 @@ function validateStatementMath(statementData) {
 
   var calcTotalRent = 0, calcTotalFees = 0, calcTotalNet = 0;
   statementData.entries.forEach(function(e, i) {
-    var rent = e.rentOwed || 0;
+    var rent = e.rentPaid || 0;
     var feePercent = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
     var expectedFee = rent * (feePercent / 100);
     var expectedNet = rent - expectedFee;
@@ -3185,10 +3185,10 @@ function generateMathReport(statementData) {
   if (statementData && statementData.entries) {
     var totalRent = 0, totalFees = 0, totalNet = 0;
     statementData.entries.forEach(function(e) {
-      totalRent += (e.rentOwed || 0);
+      totalRent += (e.rentPaid || 0);
       var fp = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
-      totalFees += (e.rentOwed || 0) * (fp / 100);
-      totalNet += (e.rentOwed || 0) - ((e.rentOwed || 0) * (fp / 100));
+      totalFees += (e.rentPaid || 0) * (fp / 100);
+      totalNet += (e.rentPaid || 0) - ((e.rentPaid || 0) * (fp / 100));
     });
     report.summary = { totalRent: totalRent, totalFees: totalFees, totalNet: totalNet, entryCount: statementData.entries.length };
   }
@@ -3266,7 +3266,7 @@ function generateAttorneyPacketZip(listingIdOrAddress, tenantName) {
   packet.lease = leases.filter(function(l) {
     return (l.property || '').toLowerCase().indexOf(q) >= 0 ||
            (l.listingId || '').toLowerCase() === q ||
-           (l.tenant || '').toLowerCase().indexOf((tenantName || '').toLowerCase()) >= 0;
+           (tenantName && (l.tenant || '').toLowerCase().indexOf(tenantName.toLowerCase()) >= 0);
   });
 
   var ledger = getAdvancedLedger();
