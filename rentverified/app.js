@@ -3114,9 +3114,10 @@ function getContextualPropertyId() {
 // --- Audit Trail with Hover Details ---
 function getAuditDetailsForEntry(entryId) {
   var log = getAuditLog();
-  return log.filter(function(a) {
+  var matches = log.filter(function(a) {
     return a.context && a.context === entryId;
   });
+  return matches.length > 0 ? matches[0] : null;
 }
 
 function addAuditEntryWithContext(action, context, entryId) {
@@ -3248,41 +3249,50 @@ function generateAIAd(property) {
 }
 
 // --- One-Click Attorney Packet ---
-function generateAttorneyPacketZip(propertyAddress, tenantName) {
+function generateAttorneyPacketZip(listingIdOrAddress, tenantName) {
+  var q = (listingIdOrAddress || '').toLowerCase();
   var packet = {
     generatedAt: new Date().toISOString(),
-    property: propertyAddress,
-    tenant: tenantName,
-    sections: {}
+    property: listingIdOrAddress,
+    tenant: tenantName || '',
+    lease: null,
+    ledger: [],
+    communications: [],
+    documents: [],
+    evictions: []
   };
 
   var leases = rvGet(RV_KEYS.LEASES) || [];
-  packet.sections.leases = leases.filter(function(l) {
-    return (l.property || '').toLowerCase().indexOf((propertyAddress || '').toLowerCase()) >= 0 ||
+  packet.lease = leases.filter(function(l) {
+    return (l.property || '').toLowerCase().indexOf(q) >= 0 ||
+           (l.listingId || '').toLowerCase() === q ||
            (l.tenant || '').toLowerCase().indexOf((tenantName || '').toLowerCase()) >= 0;
   });
 
   var ledger = getAdvancedLedger();
-  packet.sections.ledger = ledger.filter(function(e) {
-    return (e.propertyAddress || '').toLowerCase().indexOf((propertyAddress || '').toLowerCase()) >= 0;
+  packet.ledger = ledger.filter(function(e) {
+    return (e.propertyAddress || '').toLowerCase().indexOf(q) >= 0 ||
+           (e.listingId || '').toLowerCase() === q;
   });
 
   var msgs = getMessages();
-  packet.sections.communications = msgs.filter(function(m) {
-    return (m.property || '').toLowerCase().indexOf((propertyAddress || '').toLowerCase()) >= 0;
+  packet.communications = msgs.filter(function(m) {
+    return (m.property || '').toLowerCase().indexOf(q) >= 0 ||
+           (m.listingId || '').toLowerCase() === q;
   });
 
   var evictions = rvGet(RV_KEYS.EVICTION_DOCS) || [];
-  packet.sections.evictions = evictions.filter(function(e) {
-    return (e.property || '').toLowerCase().indexOf((propertyAddress || '').toLowerCase()) >= 0;
+  packet.evictions = evictions.filter(function(e) {
+    return (e.property || '').toLowerCase().indexOf(q) >= 0;
   });
 
   var docs = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
-  packet.sections.documents = docs.filter(function(d) {
-    return (d.listingId || '').toLowerCase().indexOf((propertyAddress || '').toLowerCase()) >= 0;
+  packet.documents = docs.filter(function(d) {
+    return (d.listingId || '').toLowerCase() === q ||
+           (d.listingId || '').toLowerCase().indexOf(q) >= 0;
   });
 
-  addAuditEntry('Attorney packet generated for ' + propertyAddress + ' / ' + tenantName, '');
+  addAuditEntry('Attorney packet generated for ' + listingIdOrAddress + ' / ' + (tenantName || 'N/A'), '');
 
   return packet;
 }
@@ -3298,7 +3308,7 @@ function submitVendorInvoice(invoice) {
     id: 'inv-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
     vendorName: invoice.vendorName || '',
     vendorId: invoice.vendorId || '',
-    propertyAddress: invoice.propertyAddress || '',
+    listingId: invoice.listingId || invoice.propertyAddress || '',
     description: invoice.description || '',
     amount: parseFloat(invoice.amount) || 0,
     submittedAt: new Date().toISOString(),
@@ -3350,19 +3360,32 @@ function denyVendorInvoice(invoiceId) {
 // --- Lead Capture (QR Viral) ---
 function getLeadCaptures() { return rvGet(RV_KEYS.LEAD_CAPTURES) || []; }
 
-function capturePropertyLead(data) {
+function capturePropertyLead(listingIdOrData, emailParam) {
   var leads = getLeadCaptures();
-  var lead = {
-    id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-    email: data.email || '',
-    name: data.name || '',
-    phone: data.phone || '',
-    propertyAddress: data.propertyAddress || '',
-    listingId: data.listingId || '',
-    source: data.source || 'qr_scan',
-    capturedAt: new Date().toISOString(),
-    followedUp: false
-  };
+  var lead;
+  // Support both (listingId, email) and ({...data}) signatures
+  if (typeof listingIdOrData === 'object' && listingIdOrData !== null) {
+    lead = {
+      id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      email: listingIdOrData.email || '',
+      name: listingIdOrData.name || '',
+      phone: listingIdOrData.phone || '',
+      propertyAddress: listingIdOrData.propertyAddress || '',
+      listingId: listingIdOrData.listingId || '',
+      source: listingIdOrData.source || 'qr_scan',
+      capturedAt: new Date().toISOString(),
+      followedUp: false
+    };
+  } else {
+    lead = {
+      id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      email: emailParam || '',
+      listingId: listingIdOrData || '',
+      source: 'qr_scan',
+      capturedAt: new Date().toISOString(),
+      followedUp: false
+    };
+  }
   leads.unshift(lead);
   rvSet(RV_KEYS.LEAD_CAPTURES, leads);
   return lead;

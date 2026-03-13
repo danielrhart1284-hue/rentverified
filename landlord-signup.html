@@ -4793,17 +4793,25 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
 
   // --- Math Validation UI ---
   function runMathValidation(ownerId) {
-    var report = generateMathReport(ownerId);
-    if (!report) { alert('No ledger data found for this owner.'); return; }
+    // Build statement data from the owner's ledger entries
+    var ledger = getAdvancedLedger();
+    var ownerEntries = ledger.filter(function(e) { return e.ownerId === ownerId; });
+    if (ownerEntries.length === 0) { alert('No ledger data found for this owner.'); return; }
+    var totalRent = 0, totalFees = 0;
+    ownerEntries.forEach(function(e) { totalRent += (e.rentOwed || 0); totalFees += (e.pmFeeAmount || 0); });
+    var statementData = { entries: ownerEntries, totalRent: totalRent, totalFees: totalFees };
+    var report = generateMathReport(statementData);
+    if (!report) { alert('Error generating math report.'); return; }
+    var s = report.summary || {};
     if (report.valid) {
-      alert('✅ Math Validation PASSED\n\nTotal Rent: $' + report.totalRent.toFixed(2) +
-        '\nTotal Fees: $' + report.totalFees.toFixed(2) +
-        '\nTotal Net: $' + report.totalNet.toFixed(2) +
-        '\nEntries checked: ' + report.entryCount);
+      alert('Math Validation PASSED\n\nTotal Rent: $' + (s.totalRent || 0).toFixed(2) +
+        '\nTotal Fees: $' + (s.totalFees || 0).toFixed(2) +
+        '\nTotal Net: $' + (s.totalNet || 0).toFixed(2) +
+        '\nEntries checked: ' + (s.entryCount || 0));
     } else {
-      var msg = '❌ Math Validation FAILED\n\nDiscrepancies found:\n';
-      report.discrepancies.forEach(function(d) {
-        msg += '• Entry ' + d.entryId + ': expected net $' + d.expectedNet.toFixed(2) + ', found $' + d.actualNet.toFixed(2) + '\n';
+      var msg = 'Math Validation FAILED\n\nDiscrepancies found:\n';
+      (report.errors || []).forEach(function(e) {
+        msg += '- ' + e + '\n';
       });
       alert(msg);
     }
@@ -4908,7 +4916,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     });
     closeModal('modal-vendor-invoice');
     if (result.flagged) {
-      alert('⚠️ FLAGGED: Invoice for $' + amount.toFixed(2) + ' exceeds the vendor limit of $' + result.vendorLimit.toFixed(2) + '.\nStatus: Pending Owner Approval');
+      alert('FLAGGED: Invoice for $' + amount.toFixed(2) + ' exceeds vendor limit.\n' + (result.flagReason || '') + '\nStatus: Pending Owner Approval');
     } else {
       alert('✅ Invoice submitted successfully for $' + amount.toFixed(2));
     }
