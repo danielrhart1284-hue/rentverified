@@ -3136,6 +3136,7 @@ function addAuditEntryWithContext(action, context, entryId) {
   };
   var log = getAuditLog();
   log.unshift(entry);
+  if (log.length > 500) log = log.slice(0, 500);
   rvSet(RV_KEYS.AUDIT_LOG, log);
   return entry;
 }
@@ -3169,6 +3170,9 @@ function validateStatementMath(statementData) {
   }
   if (Math.abs((statementData.totalFees || 0) - calcTotalFees) > 0.01) {
     errors.push('Total fees mismatch: Expected $' + calcTotalFees.toFixed(2) + ', got $' + (statementData.totalFees || 0).toFixed(2));
+  }
+  if (Math.abs((statementData.totalNet || 0) - calcTotalNet) > 0.01) {
+    errors.push('Total net mismatch: Expected $' + calcTotalNet.toFixed(2) + ', got $' + (statementData.totalNet || 0).toFixed(2));
   }
 
   return { valid: errors.length === 0, errors: errors };
