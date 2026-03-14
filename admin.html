@@ -443,7 +443,7 @@ function renderApprovalQueue() {
       actions = '<button class="btn-approve" onclick="handleApprove(\'' + a.id + '\')">Approve</button> ' +
         '<button class="btn-reject" onclick="handleReject(\'' + a.id + '\')">Reject</button>';
     } else {
-      actions = '<span style="font-size:0.8rem;color:#94a3b8;">' + (a.reviewedBy || '-') + '</span>';
+      actions = '<span style="font-size:0.8rem;color:#94a3b8;">' + escapeHtml(a.reviewedBy || '-') + '</span>';
     }
 
     html += '<tr>' +
@@ -695,11 +695,20 @@ function render1099Report() {
 
 // Auto-login check on load
 (function() {
-  var session = sessionStorage.getItem('rv_admin_session');
-  if (session) {
-    document.getElementById('admin-login-screen').style.display = 'none';
-    document.getElementById('admin-dashboard').style.display = 'block';
-    renderAdminDashboard();
+  var sessionStr = sessionStorage.getItem('rv_admin_session');
+  if (sessionStr) {
+    try {
+      var session = JSON.parse(sessionStr);
+      if (session && session.role === 'admin') {
+        document.getElementById('admin-login-screen').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+        renderAdminDashboard();
+      } else {
+        sessionStorage.removeItem('rv_admin_session');
+      }
+    } catch(e) {
+      sessionStorage.removeItem('rv_admin_session');
+    }
   }
 })();
 </script>

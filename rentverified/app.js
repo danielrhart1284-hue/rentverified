@@ -3819,9 +3819,9 @@ function _build3DayNoticeText(tenant, address, amount, issued, deadline) {
 
 function getOverdueTenants() {
   var ledger = getRentLedger();
-  var currentMonth = new Date().toISOString().slice(0, 7);
-  var today = new Date();
-  var dayOfMonth = today.getDate();
+  var mdt = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Denver' }));
+  var currentMonth = mdt.getFullYear() + '-' + String(mdt.getMonth() + 1).padStart(2, '0');
+  var dayOfMonth = mdt.getDate();
   if (dayOfMonth < 5) return [];
   return ledger.filter(function(e) {
     return e.month === currentMonth && e.status === 'due' && (!e.rentPaid || e.rentPaid === 0);
