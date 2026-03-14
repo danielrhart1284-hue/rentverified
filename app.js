@@ -37,6 +37,11 @@ var RV_KEYS = {
   EVICTION_DOCS: 'rv_eviction_docs',
   MAINTENANCE_REQUESTS: 'rv_maintenance_requests',
   TENANT_ACCOUNTS: 'rv_tenant_accounts',
+  LANDLORD_APPROVALS: 'rv_landlord_approvals',
+  INSPECTIONS: 'rv_inspections',
+  WORK_ORDERS: 'rv_work_orders',
+  TENANT_SCORES: 'rv_tenant_scores',
+  COMPLIANCE_NOTICES: 'rv_compliance_notices',
 };
 
 function rvGet(key) {
@@ -2551,4 +2556,1598 @@ function generateOwnerStatementSPM(ownerId) {
     totalNet: totalRent - totalFees,
     totalDeposits: totalDeposits
   };
+}
+
+
+// ============================================================================
+// PHASE 3 EXPANDED: PROFESSIONAL ERP DASHBOARD
+// ============================================================================
+
+// --- Corporate Branding ---
+RV_KEYS.BRANDING = 'rv_branding';
+RV_KEYS.TEAM_MEMBERS = 'rv_team_members';
+RV_KEYS.PUBLIC_PROFILE = 'rv_public_profile';
+RV_KEYS.APPROVED_VENDORS = 'rv_approved_vendors';
+RV_KEYS.PERMISSION_OVERRIDES = 'rv_permission_overrides';
+RV_KEYS.PAYMENT_METHODS = 'rv_payment_methods';
+RV_KEYS.WELCOME_TEMPLATES = 'rv_welcome_templates';
+RV_KEYS.HOA_INFO = 'rv_hoa_info';
+RV_KEYS.BULK_MESSAGES = 'rv_bulk_messages';
+RV_KEYS.AUDIT_LOG = 'rv_audit_log';
+RV_KEYS.PROPERTY_DOCS_ENHANCED = 'rv_property_docs_enhanced';
+
+function getBranding() { return rvGet(RV_KEYS.BRANDING) || { logoUrl: '', companyPhotos: [] }; }
+function saveBranding(data) { rvSet(RV_KEYS.BRANDING, data); }
+
+// --- Global Search ---
+function globalSearch(query) {
+  if (!query || query.length < 2) return [];
+  var q = query.toLowerCase();
+  var results = [];
+  // Search properties
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  listings.forEach(function(p, i) {
+    var addr = (p.address || '').toLowerCase();
+    var tenant = (p.tenant || '').toLowerCase();
+    var lid = (p.listingId || '').toLowerCase();
+    if (addr.indexOf(q) >= 0 || tenant.indexOf(q) >= 0 || lid.indexOf(q) >= 0) {
+      results.push({ type: 'property', label: p.address || 'Property ' + i, detail: p.listingId || '', index: i });
+    }
+  });
+  // Search clients
+  var hub = getClientHub();
+  if (hub && hub.length) {
+    hub.forEach(function(owner) {
+      if ((owner.name || '').toLowerCase().indexOf(q) >= 0 || (owner.email || '').toLowerCase().indexOf(q) >= 0) {
+        results.push({ type: 'client', label: owner.name, detail: owner.email || '', id: owner.id });
+      }
+    });
+  }
+  // Search messages
+  var msgs = getMessages();
+  msgs.forEach(function(m) {
+    if ((m.subject || '').toLowerCase().indexOf(q) >= 0 || (m.from || '').toLowerCase().indexOf(q) >= 0) {
+      results.push({ type: 'message', label: m.subject, detail: 'From: ' + m.from, id: m.id });
+    }
+  });
+  // Search documents (enhanced format uses separate key)
+  var docs = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  docs.forEach(function(d) {
+    if ((d.name || '').toLowerCase().indexOf(q) >= 0 || (d.listingId || '').toLowerCase().indexOf(q) >= 0) {
+      results.push({ type: 'document', label: d.name, detail: d.listingId || '', id: d.id });
+    }
+  });
+  return results.slice(0, 15);
+}
+
+// --- Document Management (Enhanced) ---
+function getPropertyDocsEnhanced(listingId) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  return all.filter(function(d) { return d.listingId === listingId; });
+}
+
+function addPropertyDocEnhanced(doc) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  var newDoc = {
+    id: 'doc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    listingId: doc.listingId || '',
+    name: doc.name || 'Untitled',
+    type: doc.type || 'general',
+    fileName: doc.fileName || '',
+    fileSize: doc.fileSize || 0,
+    uploadedBy: doc.uploadedBy || 'PM',
+    uploadedAt: new Date().toISOString(),
+    sharedWithOwner: doc.sharedWithOwner || false,
+    category: doc.category || 'general',
+    dataUrl: doc.dataUrl || ''
+  };
+  all.unshift(newDoc);
+  rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
+  addAuditEntry('Document uploaded: ' + newDoc.name, newDoc.listingId);
+  return newDoc;
+}
+
+function toggleDocSharing(docId, shared) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  var doc = all.find(function(d) { return d.id === docId; });
+  if (doc) {
+    doc.sharedWithOwner = shared;
+    rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
+    addAuditEntry((shared ? 'Shared' : 'Unshared') + ' document: ' + doc.name, doc.listingId);
+  }
+}
+
+function deletePropertyDoc(docId) {
+  var all = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  var idx = all.findIndex(function(d) { return d.id === docId; });
+  if (idx >= 0) {
+    var removed = all.splice(idx, 1)[0];
+    rvSet(RV_KEYS.PROPERTY_DOCS_ENHANCED, all);
+    addAuditEntry('Document deleted: ' + removed.name, removed.listingId);
+  }
+}
+
+// --- HOA Info ---
+function getHOAInfo(listingId) {
+  var all = rvGet(RV_KEYS.HOA_INFO) || {};
+  return all[listingId] || { contact: '', phone: '', email: '', notes: '' };
+}
+
+function saveHOAInfo(listingId, info) {
+  var all = rvGet(RV_KEYS.HOA_INFO) || {};
+  all[listingId] = info;
+  rvSet(RV_KEYS.HOA_INFO, all);
+  addAuditEntry('HOA info updated', listingId);
+}
+
+// --- Property Type ---
+function getPropertyType(listingId) {
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  var p = listings.find(function(l) { return l.listingId === listingId; });
+  return p ? (p.propertyType || 'long-term') : 'long-term';
+}
+
+function setPropertyType(listingId, ptype) {
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  var p = listings.find(function(l) { return l.listingId === listingId; });
+  if (p) {
+    p.propertyType = ptype;
+    saveListingsForClient(clientId, listings);
+    addAuditEntry('Property type changed to ' + ptype, listingId);
+  }
+}
+
+// --- Welcome Letter ---
+function getWelcomeTemplate(listingId) {
+  var all = rvGet(RV_KEYS.WELCOME_TEMPLATES) || {};
+  return all[listingId] || { utilities: '', moveInInstructions: '', emergencyContact: '', customNotes: '' };
+}
+
+function saveWelcomeTemplate(listingId, template) {
+  var all = rvGet(RV_KEYS.WELCOME_TEMPLATES) || {};
+  all[listingId] = template;
+  rvSet(RV_KEYS.WELCOME_TEMPLATES, all);
+}
+
+function generateWelcomeLetter(listingId) {
+  var acct = rvGet('rv_account');
+  var clientId = acct ? acct.clientId : '';
+  var listings = getListingsForClient(clientId);
+  var p = listings.find(function(l) { return l.listingId === listingId; });
+  if (!p) return null;
+  var tmpl = getWelcomeTemplate(listingId);
+  var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  var letter = {
+    date: today,
+    tenant: p.tenant || 'New Tenant',
+    address: p.address || '',
+    rent: p.rent || 0,
+    utilities: tmpl.utilities || 'Contact local providers for electric, gas, water, and internet setup.',
+    moveInInstructions: tmpl.moveInInstructions || 'Keys will be available at the management office on your move-in date.',
+    emergencyContact: tmpl.emergencyContact || 'For emergencies, call Sanders PM at (801) 555-0100.',
+    customNotes: tmpl.customNotes || '',
+    companyName: 'Sanders Property Management'
+  };
+  addAuditEntry('Welcome letter generated for ' + letter.tenant, listingId);
+  return letter;
+}
+
+// --- Advanced Accounting ---
+function getAdvancedLedger() {
+  return rvGet('rv_advanced_ledger') || [];
+}
+
+function saveAdvancedLedger(entries) {
+  rvSet('rv_advanced_ledger', entries);
+}
+
+function addLedgerEntryAdvanced(entry) {
+  var acct = rvGet('rv_account');
+  var initials = acct ? (acct.company || acct.email || 'PM').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substr(0, 2) : 'PM';
+  var all = getAdvancedLedger();
+  var newEntry = {
+    id: 'ledger-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    ownerName: entry.ownerName || '',
+    propertyAddress: entry.propertyAddress || '',
+    tenantName: entry.tenantName || '',
+    month: entry.month || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    rentOwed: entry.rentOwed || 0,
+    rentPaid: entry.rentPaid || 0,
+    paymentMethod: entry.paymentMethod || '',
+    paymentDate: entry.paymentDate || '',
+    status: entry.status || 'unpaid',
+    pmFeePercent: (entry.pmFeePercent !== undefined && entry.pmFeePercent !== null) ? entry.pmFeePercent : 7,
+    pmFeeAmount: 0,
+    netToOwner: 0,
+    notes: entry.notes || '',
+    modifiedBy: initials,
+    modifiedAt: new Date().toISOString(),
+    invoiceAttachments: entry.invoiceAttachments || []
+  };
+  newEntry.pmFeeAmount = Math.round(newEntry.rentPaid * (newEntry.pmFeePercent / 100) * 100) / 100;
+  newEntry.netToOwner = Math.round((newEntry.rentPaid - newEntry.pmFeeAmount) * 100) / 100;
+  all.unshift(newEntry);
+  saveAdvancedLedger(all);
+  addAuditEntry(initials + ' added ledger entry: $' + newEntry.rentPaid + ' for ' + newEntry.propertyAddress, '');
+  return newEntry;
+}
+
+function updateLedgerEntry(entryId, updates) {
+  var acct = rvGet('rv_account');
+  var initials = acct ? (acct.company || acct.email || 'PM').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substr(0, 2) : 'PM';
+  var all = getAdvancedLedger();
+  var entry = all.find(function(e) { return e.id === entryId; });
+  if (!entry) return;
+  Object.keys(updates).forEach(function(k) { entry[k] = updates[k]; });
+  if (updates.rentPaid !== undefined || updates.pmFeePercent !== undefined) {
+    entry.pmFeeAmount = Math.round(entry.rentPaid * (entry.pmFeePercent / 100) * 100) / 100;
+    entry.netToOwner = Math.round((entry.rentPaid - entry.pmFeeAmount) * 100) / 100;
+  }
+  entry.modifiedBy = initials;
+  entry.modifiedAt = new Date().toISOString();
+  saveAdvancedLedger(all);
+  addAuditEntry(initials + ' updated ledger entry for ' + entry.propertyAddress, '');
+}
+
+// --- Payment Methods ---
+function getPaymentMethods() {
+  return rvGet(RV_KEYS.PAYMENT_METHODS) || ['Zelle', 'Cash App', 'Venmo', 'Check', 'Money Order', 'Bank Transfer', 'Credit Card'];
+}
+
+function addPaymentMethod(method) {
+  var methods = getPaymentMethods();
+  if (methods.indexOf(method) < 0) {
+    methods.push(method);
+    rvSet(RV_KEYS.PAYMENT_METHODS, methods);
+  }
+}
+
+// --- Audit Trail ---
+function addAuditEntry(action, listingId) {
+  var acct = rvGet('rv_account');
+  var initials = 'SYS';
+  if (acct) {
+    initials = (acct.company || acct.email || 'PM').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substr(0, 2);
+  }
+  var log = rvGet(RV_KEYS.AUDIT_LOG) || [];
+  log.unshift({
+    id: 'audit-' + Date.now(),
+    action: action,
+    listingId: listingId || '',
+    by: initials,
+    at: new Date().toISOString()
+  });
+  if (log.length > 500) log = log.slice(0, 500);
+  rvSet(RV_KEYS.AUDIT_LOG, log);
+}
+
+function getAuditLog(listingId) {
+  var log = rvGet(RV_KEYS.AUDIT_LOG) || [];
+  if (listingId) return log.filter(function(e) { return e.listingId === listingId; });
+  return log;
+}
+
+// --- Professional Profiles ---
+function getPublicProfile() {
+  return rvGet(RV_KEYS.PUBLIC_PROFILE) || {
+    companyName: 'Sanders Property Management',
+    tagline: 'Professional Property Management in Utah',
+    bio: '',
+    phone: '',
+    email: '',
+    website: '',
+    license: '',
+    serviceAreas: [],
+    specialties: [],
+    logoUrl: '',
+    coverPhotoUrl: ''
+  };
+}
+
+function savePublicProfile(profile) {
+  rvSet(RV_KEYS.PUBLIC_PROFILE, profile);
+  addAuditEntry('Public profile updated', '');
+}
+
+// --- Team Members ---
+function getTeamMembers() { return rvGet(RV_KEYS.TEAM_MEMBERS) || []; }
+function saveTeamMembers(members) { rvSet(RV_KEYS.TEAM_MEMBERS, members); }
+
+function addTeamMember(member) {
+  var members = getTeamMembers();
+  var newMember = {
+    id: 'team-' + Date.now(),
+    name: member.name || '',
+    role: member.role || 'agent',
+    email: member.email || '',
+    phone: member.phone || '',
+    responsibilities: member.responsibilities || '',
+    permissions: member.permissions || {
+      accounting: false,
+      docs: false,
+      messaging: false,
+      maintenance: false,
+      leasing: false
+    },
+    addedAt: new Date().toISOString()
+  };
+  members.push(newMember);
+  saveTeamMembers(members);
+  addAuditEntry('Team member added: ' + newMember.name, '');
+  return newMember;
+}
+
+function updateTeamMemberPermissions(memberId, permissions) {
+  var members = getTeamMembers();
+  var m = members.find(function(t) { return t.id === memberId; });
+  if (m) {
+    m.permissions = permissions;
+    saveTeamMembers(members);
+    addAuditEntry('Permissions updated for ' + m.name, '');
+  }
+}
+
+function removeTeamMember(memberId) {
+  var members = getTeamMembers();
+  var idx = members.findIndex(function(t) { return t.id === memberId; });
+  if (idx >= 0) {
+    var removed = members.splice(idx, 1)[0];
+    saveTeamMembers(members);
+    addAuditEntry('Team member removed: ' + removed.name, '');
+  }
+}
+
+// --- Approved Vendors ---
+function getApprovedVendors() { return rvGet(RV_KEYS.APPROVED_VENDORS) || []; }
+function saveApprovedVendors(vendors) { rvSet(RV_KEYS.APPROVED_VENDORS, vendors); }
+
+function addApprovedVendor(vendor) {
+  var vendors = getApprovedVendors();
+  var newVendor = {
+    id: 'vendor-' + Date.now(),
+    name: vendor.name || '',
+    specialty: vendor.specialty || '',
+    phone: vendor.phone || '',
+    email: vendor.email || '',
+    repairLimit: vendor.repairLimit || 500,
+    addedBy: vendor.addedBy || 'PM',
+    addedAt: new Date().toISOString()
+  };
+  vendors.push(newVendor);
+  saveApprovedVendors(vendors);
+  addAuditEntry('Approved vendor added: ' + newVendor.name, '');
+  return newVendor;
+}
+
+function removeApprovedVendor(vendorId) {
+  var vendors = getApprovedVendors();
+  var idx = vendors.findIndex(function(v) { return v.id === vendorId; });
+  if (idx >= 0) {
+    var removed = vendors.splice(idx, 1)[0];
+    saveApprovedVendors(vendors);
+    addAuditEntry('Approved vendor removed: ' + removed.name, '');
+  }
+}
+
+// --- Bulk Messaging ---
+function getBulkMessages() { return rvGet(RV_KEYS.BULK_MESSAGES) || []; }
+
+function sendBulkMessage(opts) {
+  var acct = rvGet('rv_account');
+  var canSendExternal = true;
+  if (opts.checkGuardrails) {
+    var overrides = rvGet(RV_KEYS.PERMISSION_OVERRIDES) || {};
+    if (overrides.externalMessagingRestricted && (!acct || acct.role !== 'admin')) {
+      return { success: false, error: 'Only the Account Owner can send external messages.' };
+    }
+  }
+  var bulk = getBulkMessages();
+  var msg = {
+    id: 'bulk-' + Date.now(),
+    subject: opts.subject || '',
+    body: opts.body || '',
+    target: opts.target || 'everyone',
+    sentBy: acct ? (acct.company || acct.email) : 'PM',
+    sentAt: new Date().toISOString(),
+    recipientCount: opts.recipientCount || 0,
+    method: opts.method || 'email'
+  };
+  bulk.unshift(msg);
+  rvSet(RV_KEYS.BULK_MESSAGES, bulk);
+  addAuditEntry('Bulk message sent to ' + msg.target + ' (' + msg.recipientCount + ' recipients)', '');
+  return { success: true, message: msg };
+}
+
+// --- Permission Overrides ---
+function getPermissionOverrides() { return rvGet(RV_KEYS.PERMISSION_OVERRIDES) || {}; }
+function savePermissionOverrides(overrides) { rvSet(RV_KEYS.PERMISSION_OVERRIDES, overrides); }
+
+// --- Advanced Statement Generation with Invoice Attachments ---
+function generateAdvancedMonthlyStatement(ownerName, month) {
+  var ledger = getAdvancedLedger();
+  var ownerEntries = ledger.filter(function(e) {
+    return e.ownerName === ownerName && (!month || e.month === month);
+  });
+  var totalRent = 0, totalPaid = 0, totalFees = 0, totalNet = 0;
+  var invoices = [];
+  ownerEntries.forEach(function(e) {
+    totalRent += e.rentOwed || 0;
+    totalPaid += e.rentPaid || 0;
+    totalFees += e.pmFeeAmount || 0;
+    totalNet += e.netToOwner || 0;
+    if (e.invoiceAttachments && e.invoiceAttachments.length > 0) {
+      invoices = invoices.concat(e.invoiceAttachments);
+    }
+  });
+  addAuditEntry('Monthly statement generated for ' + ownerName + (month ? ' (' + month + ')' : ''), '');
+  return {
+    ownerName: ownerName,
+    month: month || 'All',
+    entries: ownerEntries,
+    totalRent: totalRent,
+    totalPaid: totalPaid,
+    totalFees: totalFees,
+    totalNet: totalNet,
+    invoices: invoices,
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateEndOfYearStatement(ownerName, year) {
+  var ledger = getAdvancedLedger();
+  var yearStr = String(year || new Date().getFullYear());
+  var yearEntries = ledger.filter(function(e) {
+    return e.ownerName === ownerName && (e.month || '').indexOf(yearStr) >= 0;
+  });
+  var totalRent = 0, totalPaid = 0, totalFees = 0, totalNet = 0;
+  yearEntries.forEach(function(e) {
+    totalRent += e.rentOwed || 0;
+    totalPaid += e.rentPaid || 0;
+    totalFees += e.pmFeeAmount || 0;
+    totalNet += e.netToOwner || 0;
+  });
+  addAuditEntry('End of year statement generated for ' + ownerName + ' (' + yearStr + ')', '');
+  return {
+    ownerName: ownerName,
+    year: yearStr,
+    entries: yearEntries,
+    totalRent: totalRent,
+    totalPaid: totalPaid,
+    totalFees: totalFees,
+    totalNet: totalNet,
+    generatedAt: new Date().toISOString()
+  };
+}
+
+// --- Seed Advanced Ledger from existing data ---
+function seedAdvancedLedger() {
+  var existing = getAdvancedLedger();
+  if (existing.length > 0) return;
+  var hub = getClientHub();
+  if (!hub || !hub.length) return;
+  var months = ['Jan 2026', 'Feb 2026', 'Mar 2026'];
+  var methods = ['Zelle', 'Cash App', 'Venmo', 'Check'];
+  hub.slice(0, 5).forEach(function(owner) {
+    var props = (owner.properties || []).slice(0, 3);
+    props.forEach(function(prop) {
+      months.forEach(function(month, mi) {
+        var paid = mi < 2 ? (prop.rent || 0) : 0;
+        var status = mi < 2 ? 'paid' : 'unpaid';
+        addLedgerEntryAdvanced({
+          ownerName: owner.name,
+          propertyAddress: prop.address || '',
+          tenantName: prop.tenant || 'Vacant',
+          month: month,
+          rentOwed: prop.rent || 0,
+          rentPaid: paid,
+          paymentMethod: paid > 0 ? methods[mi % methods.length] : '',
+          paymentDate: paid > 0 ? '2026-0' + (mi + 1) + '-05' : '',
+          status: status,
+          pmFeePercent: (prop.pmFeePercent !== undefined && prop.pmFeePercent !== null) ? prop.pmFeePercent : 7,
+          notes: ''
+        });
+      });
+    });
+  });
+}
+
+// ============================================================================
+// PHASE 4: NAVIGATION, ACCOUNTING TRUST, PROFESSIONAL ECOSYSTEM, SECURITY, QR
+// ============================================================================
+
+// --- Breadcrumb Navigation ---
+RV_KEYS.BREADCRUMBS = 'rv_breadcrumbs';
+RV_KEYS.LEAD_CAPTURES = 'rv_lead_captures';
+RV_KEYS.VENDOR_INVOICES = 'rv_vendor_invoices';
+
+var _breadcrumbStack = [];
+
+function pushBreadcrumb(label, action) {
+  _breadcrumbStack.push({ label: label, action: action });
+}
+
+function popBreadcrumb() {
+  if (_breadcrumbStack.length > 0) _breadcrumbStack.pop();
+}
+
+function getBreadcrumbs() {
+  return _breadcrumbStack.slice();
+}
+
+function clearBreadcrumbs() {
+  _breadcrumbStack = [];
+}
+
+function navigateBreadcrumb(index) {
+  if (index < 0 || index >= _breadcrumbStack.length) return;
+  var crumb = _breadcrumbStack[index];
+  _breadcrumbStack = _breadcrumbStack.slice(0, index + 1);
+  if (crumb.action && typeof crumb.action === 'string') {
+    if (typeof window.dashTab === 'function') window.dashTab(crumb.action);
+  }
+}
+
+// --- Contextual Sidebar State ---
+var _contextualSidebarActive = false;
+var _contextualPropertyId = null;
+
+function enterPropertyContext(listingId) {
+  _contextualSidebarActive = true;
+  _contextualPropertyId = listingId;
+}
+
+function exitPropertyContext() {
+  _contextualSidebarActive = false;
+  _contextualPropertyId = null;
+  clearBreadcrumbs();
+}
+
+function isInPropertyContext() {
+  return _contextualSidebarActive;
+}
+
+function getContextualPropertyId() {
+  return _contextualPropertyId;
+}
+
+// --- Audit Trail with Hover Details ---
+function getAuditDetailsForEntry(entryId) {
+  var log = getAuditLog();
+  var matches = log.filter(function(a) {
+    return a.context && a.context === entryId;
+  });
+  return matches.length > 0 ? matches[0] : null;
+}
+
+function addAuditEntryWithContext(action, context, entryId) {
+  var acct = rvGet('rv_account');
+  var initials = 'PM';
+  if (acct && acct.company) {
+    initials = acct.company.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase();
+  }
+  var entry = {
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    action: action,
+    context: entryId || context,
+    initials: initials,
+    timestamp: new Date().toISOString(),
+    details: context
+  };
+  var log = getAuditLog();
+  log.unshift(entry);
+  if (log.length > 500) log = log.slice(0, 500);
+  rvSet(RV_KEYS.AUDIT_LOG, log);
+  return entry;
+}
+
+// --- Statement Math Validation ---
+function validateStatementMath(statementData) {
+  var errors = [];
+  if (!statementData || !statementData.entries) return { valid: true, errors: [] };
+
+  var calcTotalRent = 0, calcTotalFees = 0, calcTotalNet = 0;
+  statementData.entries.forEach(function(e, i) {
+    var rent = e.rentPaid || 0;
+    var feePercent = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
+    var expectedFee = Math.round(rent * (feePercent / 100) * 100) / 100;
+    var expectedNet = Math.round((rent - expectedFee) * 100) / 100;
+
+    if (Math.abs((e.pmFeeAmount || 0) - expectedFee) > 0.01) {
+      errors.push('Entry ' + (i+1) + ': Fee mismatch. Expected $' + expectedFee.toFixed(2) + ', got $' + (e.pmFeeAmount || 0).toFixed(2));
+    }
+    if (Math.abs((e.netToOwner || 0) - expectedNet) > 0.01) {
+      errors.push('Entry ' + (i+1) + ': Net mismatch. Expected $' + expectedNet.toFixed(2) + ', got $' + (e.netToOwner || 0).toFixed(2));
+    }
+
+    calcTotalRent += rent;
+    calcTotalFees += expectedFee;
+    calcTotalNet += expectedNet;
+  });
+
+  if (Math.abs((statementData.totalPaid || 0) - calcTotalRent) > 0.01) {
+    errors.push('Total paid mismatch: Expected $' + calcTotalRent.toFixed(2) + ', got $' + (statementData.totalPaid || 0).toFixed(2));
+  }
+  if (Math.abs((statementData.totalFees || 0) - calcTotalFees) > 0.01) {
+    errors.push('Total fees mismatch: Expected $' + calcTotalFees.toFixed(2) + ', got $' + (statementData.totalFees || 0).toFixed(2));
+  }
+  if (Math.abs((statementData.totalNet || 0) - calcTotalNet) > 0.01) {
+    errors.push('Total net mismatch: Expected $' + calcTotalNet.toFixed(2) + ', got $' + (statementData.totalNet || 0).toFixed(2));
+  }
+
+  return { valid: errors.length === 0, errors: errors };
+}
+
+function generateMathReport(statementData) {
+  var validation = validateStatementMath(statementData);
+  var report = {
+    generatedAt: new Date().toISOString(),
+    valid: validation.valid,
+    errors: validation.errors,
+    summary: {}
+  };
+  if (statementData && statementData.entries) {
+    var totalRent = 0, totalFees = 0, totalNet = 0;
+    statementData.entries.forEach(function(e) {
+      var rp = e.rentPaid || 0;
+      totalRent += rp;
+      var fp = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
+      var fee = Math.round(rp * (fp / 100) * 100) / 100;
+      totalFees += fee;
+      totalNet += Math.round((rp - fee) * 100) / 100;
+    });
+    report.summary = { totalRent: totalRent, totalFees: totalFees, totalNet: totalNet, entryCount: statementData.entries.length };
+  }
+  addAuditEntry('Math validation report generated: ' + (validation.valid ? 'PASSED' : 'FAILED with ' + validation.errors.length + ' errors'), '');
+  return report;
+}
+
+// --- AI Ad Builder ---
+function generateAIAd(property) {
+  if (!property) return { title: '', body: '', hashtags: '' };
+
+  var addr = property.address || 'Beautiful Rental Property';
+  var rent = property.rent || 0;
+  var beds = property.beds || '';
+  var baths = property.baths || '';
+  var sqft = property.sqft || '';
+  var desc = property.description || '';
+  var type = property.propertyType || 'Long-term';
+
+  var title = addr + ' | $' + rent + '/mo';
+  if (beds) title += ' | ' + beds + 'BD';
+  if (baths) title += '/' + baths + 'BA';
+
+  var body = 'VERIFIED RENTAL LISTING\n\n';
+  body += 'Address: ' + addr + '\n';
+  body += 'Rent: $' + rent + '/month\n';
+  if (beds) body += 'Bedrooms: ' + beds + '\n';
+  if (baths) body += 'Bathrooms: ' + baths + '\n';
+  if (sqft) body += 'Sq Ft: ' + sqft + '\n';
+  body += '\n';
+
+  if (desc) {
+    body += desc + '\n\n';
+  }
+
+  if (type === 'Short-term') {
+    body += 'Short-term / Vacation rental available!\n';
+    body += 'Flexible dates - Fully furnished\n\n';
+  } else {
+    body += 'Application process:\n';
+    body += '1. Visit our verified listing page\n';
+    body += '2. Complete online application\n';
+    body += '3. Background & credit check via TransUnion\n';
+    body += '4. Move in!\n\n';
+  }
+
+  body += 'RentVerified Listing - Scam-Free Guarantee\n';
+  body += 'Apply now: ' + (RV_CONFIG.websiteUrl || 'https://rentverified.vercel.app') + '\n';
+  body += '\n' + RV_CONFIG.companyName + ' | Licensed Property Management';
+
+  var hashtags = '#ForRent #' + (addr.split(',')[1] || 'Utah').trim().replace(/\s+/g, '') + ' #RentVerified #PropertyManagement';
+  if (type === 'Short-term') hashtags += ' #Airbnb #VRBO #VacationRental';
+  else hashtags += ' #Apartment #Rental #NowLeasing';
+
+  addAuditEntry('AI ad generated for ' + addr, '');
+
+  return { title: title, body: body, hashtags: hashtags };
+}
+
+// --- One-Click Attorney Packet ---
+function generateAttorneyPacketZip(listingIdOrAddress, tenantName) {
+  var q = (listingIdOrAddress || '').toLowerCase();
+  var packet = {
+    generatedAt: new Date().toISOString(),
+    property: listingIdOrAddress,
+    tenant: tenantName || '',
+    lease: null,
+    ledger: [],
+    communications: [],
+    documents: [],
+    evictions: []
+  };
+
+  var leases = rvGet(RV_KEYS.LEASES) || [];
+  packet.lease = leases.filter(function(l) {
+    return (l.property || '').toLowerCase().indexOf(q) >= 0 ||
+           (l.listingId || '').toLowerCase() === q ||
+           (tenantName && (l.tenant || '').toLowerCase().indexOf(tenantName.toLowerCase()) >= 0);
+  });
+
+  var ledger = getAdvancedLedger();
+  packet.ledger = ledger.filter(function(e) {
+    return (e.propertyAddress || '').toLowerCase().indexOf(q) >= 0 ||
+           (e.listingId || '').toLowerCase() === q;
+  });
+
+  var msgs = getMessages();
+  packet.communications = msgs.filter(function(m) {
+    return (m.property || '').toLowerCase().indexOf(q) >= 0 ||
+           (m.listingId || '').toLowerCase() === q;
+  });
+
+  var evictions = rvGet(RV_KEYS.EVICTION_DOCS) || [];
+  packet.evictions = evictions.filter(function(e) {
+    return (e.property || '').toLowerCase().indexOf(q) >= 0;
+  });
+
+  var docs = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  packet.documents = docs.filter(function(d) {
+    return (d.listingId || '').toLowerCase() === q ||
+           (d.listingId || '').toLowerCase().indexOf(q) >= 0;
+  });
+
+  addAuditEntry('Attorney packet generated for ' + listingIdOrAddress + ' / ' + (tenantName || 'N/A'), '');
+
+  return packet;
+}
+
+// --- Vendor Invoice & Dollar Limit ---
+function getVendorInvoices() { return rvGet(RV_KEYS.VENDOR_INVOICES) || []; }
+
+function submitVendorInvoice(invoice) {
+  var invoices = getVendorInvoices();
+  var vendors = rvGet(RV_KEYS.APPROVED_VENDORS) || [];
+
+  var newInvoice = {
+    id: 'inv-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    vendorName: invoice.vendorName || '',
+    vendorId: invoice.vendorId || '',
+    listingId: invoice.listingId || invoice.propertyAddress || '',
+    description: invoice.description || '',
+    amount: parseFloat(invoice.amount) || 0,
+    submittedAt: new Date().toISOString(),
+    status: 'pending',
+    flagged: false,
+    flagReason: ''
+  };
+
+  var vendor = vendors.find(function(v) { return v.name === invoice.vendorName || v.id === invoice.vendorId; });
+  if (vendor && vendor.repairLimit && newInvoice.amount > vendor.repairLimit) {
+    newInvoice.flagged = true;
+    newInvoice.flagReason = 'Amount $' + newInvoice.amount.toFixed(2) + ' exceeds vendor limit of $' + vendor.repairLimit.toFixed(2) + '. Requires Owner Approval.';
+    newInvoice.status = 'pending_approval';
+    addAuditEntry('Vendor invoice FLAGGED: ' + newInvoice.vendorName + ' $' + newInvoice.amount.toFixed(2) + ' exceeds limit', '');
+  } else {
+    addAuditEntry('Vendor invoice submitted: ' + newInvoice.vendorName + ' $' + newInvoice.amount.toFixed(2), '');
+  }
+
+  invoices.unshift(newInvoice);
+  rvSet(RV_KEYS.VENDOR_INVOICES, invoices);
+  return newInvoice;
+}
+
+function approveVendorInvoice(invoiceId) {
+  var invoices = getVendorInvoices();
+  var inv = invoices.find(function(i) { return i.id === invoiceId; });
+  if (inv) {
+    inv.status = 'approved';
+    inv.flagged = false;
+    inv.approvedAt = new Date().toISOString();
+    rvSet(RV_KEYS.VENDOR_INVOICES, invoices);
+    addAuditEntry('Vendor invoice approved: ' + inv.vendorName + ' $' + inv.amount.toFixed(2), '');
+  }
+  return inv;
+}
+
+function denyVendorInvoice(invoiceId) {
+  var invoices = getVendorInvoices();
+  var inv = invoices.find(function(i) { return i.id === invoiceId; });
+  if (inv) {
+    inv.status = 'denied';
+    inv.deniedAt = new Date().toISOString();
+    rvSet(RV_KEYS.VENDOR_INVOICES, invoices);
+    addAuditEntry('Vendor invoice denied: ' + inv.vendorName + ' $' + inv.amount.toFixed(2), '');
+  }
+  return inv;
+}
+
+// --- Lead Capture (QR Viral) ---
+function getLeadCaptures() { return rvGet(RV_KEYS.LEAD_CAPTURES) || []; }
+
+function capturePropertyLead(listingIdOrData, emailParam) {
+  var leads = getLeadCaptures();
+  var lead;
+  // Support both (listingId, email) and ({...data}) signatures
+  if (typeof listingIdOrData === 'object' && listingIdOrData !== null) {
+    lead = {
+      id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      email: listingIdOrData.email || '',
+      name: listingIdOrData.name || '',
+      phone: listingIdOrData.phone || '',
+      propertyAddress: listingIdOrData.propertyAddress || '',
+      listingId: listingIdOrData.listingId || '',
+      source: listingIdOrData.source || 'qr_scan',
+      capturedAt: new Date().toISOString(),
+      followedUp: false
+    };
+  } else {
+    lead = {
+      id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      email: emailParam || '',
+      listingId: listingIdOrData || '',
+      source: 'qr_scan',
+      capturedAt: new Date().toISOString(),
+      followedUp: false
+    };
+  }
+  leads.unshift(lead);
+  rvSet(RV_KEYS.LEAD_CAPTURES, leads);
+  return lead;
+}
+
+// --- Verified Professional Badge ---
+function getVerifiedProfessionals() {
+  return rvGet('rv_verified_professionals') || [];
+}
+
+function verifyProfessional(profileId) {
+  var verified = getVerifiedProfessionals();
+  if (verified.indexOf(profileId) < 0) {
+    verified.push(profileId);
+    rvSet('rv_verified_professionals', verified);
+  }
+}
+
+function isVerifiedProfessional(profileId) {
+  var verified = getVerifiedProfessionals();
+  return verified.indexOf(profileId) >= 0;
+}
+
+// ============================================================================
+// PHASE 5: PRE-LAUNCH POLISH & PROFESSIONAL HARDENING
+// Production Data Reset, Admin Approval, Stripe, Inspections, Work Orders,
+// Tenant Scoring, Compliance Notices, Data Export, 1099 Tax Reporting
+// ============================================================================
+
+// ── Utility: MDT Timestamp ────────────────────────────────────────────────
+function toMDT(date) {
+  if (!date) date = new Date();
+  if (typeof date === 'string') date = new Date(date);
+  return date.toLocaleString('en-US', { timeZone: 'America/Denver', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+}
+
+function toMDTDate(date) {
+  if (!date) date = new Date();
+  if (typeof date === 'string') date = new Date(date);
+  return date.toLocaleDateString('en-US', { timeZone: 'America/Denver', year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+// ── Utility: Currency formatting (always 2 decimals) ──────────────────────
+function fmtCurrency(val) {
+  var n = parseFloat(val);
+  if (isNaN(n)) return '$0.00';
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ── 1. Production Data Reset: Hardcoded SPM Rent Collections ──────────────
+// This function clears all test data and re-imports the exact SPM spreadsheet
+// using the multi-row parser logic. Ensures 2142 S. King St = $1,850 / Garth.
+function productionDataReset() {
+  // Clear existing test data
+  var keysToRemove = ['rv_client_hub', 'rv_listings_sanders-pm', 'rv_rent_ledger', 'rv_tenant_scores'];
+  keysToRemove.forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
+
+  // Hardcoded SPM Rent Collections rows (exact copy from spreadsheet)
+  var spmRows = [
+    ['Rent Collections \u2013 February 2026','','','','','','','','','',''],
+    ['Property','Tenant','Rent','PM Fee %','PM Fee $','Notes','Payment Method','','','Security Deposit',''],
+    ['Garth Properties','','','','','','','','','',''],
+    ['2142 S. King St','Russell Schofield',1850,0.07,129.50,'Check to Garth','Zelle','','',1200,''],
+    ['Salt Lake City, UT 84109','Garth wants us to do a rent increase','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['1285 W. Greasewood','Rich Wheeler',2050,0.07,143.50,'Check to Garth','Zelle','','',1500,''],
+    ['Riverton, UT 84065','*Brian collects','','','','plus $33/month Sewer, I keep and pay the sewer bill','','','','',''],
+    ['','','','','','','','','','',''],
+    ['3262 W. Sanborn Ln','Scott & Lisa Sanders',2550,0.07,178.50,'Check to Garth','Venmo','night of 5th','',0,''],
+    ['Riverton, UT 84065','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['6779 S. Florentine Way','Linda',1700,0.07,119,'Check to Garth','Zelle','night of 5th or late','',0,''],
+    ['West Jordan, UT 84084','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['4660 S. Quail Park Unit F','Samuel',1250,0.08,100,'Check to Garth','Zelle','pays on 1st','',1150,''],
+    ['Salt Lake City, UT','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['847 E. Zenith Ave','William Ross,',2500,0.07,175,'Check to Garth','Venmo','','',2000,''],
+    ['SLC, UT 84106','Shane Fox, TJ, Terrence','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['1187 W. 1460 N. Clinton','Phillip Wassom',2800,0.07,196,'Check to Garth','','','',2000,''],
+    ['','move in 12/1/25','','','','','','','','',''],
+    ['2374 S. Derby St.','Julian Erazo Chavarro',1400,0.07,98,'Check to Garth','','','',1000,''],
+    ['','*Danny picks up cash','owes $140 late fee','','','','','','','',''],
+    ['2376 S. Derby St.','Jeremiah',1300,0.08,104,'Check to Garth','Venmo','','',1200,''],
+    ['','','','','','','','','','',''],
+    ['3471 W. Westlake Rd 2A','Bee Boriboun',1200,0.08,96,'Check to Garth','Venmo','','',300,''],
+    ['','','','','','','','','','',''],
+    ['3471 W. Westlake Rd 2B','Esther',1300,0.08,104,'Check to Garth','Zelle','','',1200,''],
+    ['','','','','','','','','','',''],
+    ['3541 W. Westlake Rd 1A','Mario Vigil',1200,0.08,96,'Check to Garth','Venmo','','',0,''],
+    ['','','','','','','','','','',''],
+    ['3541 W. Westlake Rd 1B','Sherilyn & Stephanie',1200,0.08,96,'Check to Garth','mails check','','',595,''],
+    ['','','','','','','','','','',''],
+    ['3473 W. Westlake Cir 1A','Chase',1300,0.08,104,'Check to Garth','Venmo','','',1200,''],
+    ['','','','','','Owes $50 Rent +$283 Utilities','','','','',''],
+    ['3473 W. Westlake Cir 1B','Mario Mendez',1300,0.08,104,'Check to Garth','cash','Danny picks it up','',1200,''],
+    ['','*Danny picks up cash','','','','','','','','',''],
+    ['3493 W. Westlake Cir 2A','Juan Gurrola',1400,0.08,112,'Check to Garth','Zelle','','',1200,''],
+    ['','','','','','','','','','',''],
+    ['3493 W. Westlake Cir 2B','Yohana',1300,0.07,91,'Check to Garth','cash','Danny picks it up','',1250,''],
+    ['','*Danny picks up cash','','','','','','','','',''],
+    ['3513 W. Westlake Cir','Maria Palomares',1350,0.07,94.50,'Check to Garth','Venmo','','',1100,''],
+    ['','','','','','Owes $200 late fee','','','','',''],
+    ['3515 W. Westlake Cir','Petra Vigil',1500,0.07,105,'Check to Garth','Venmo','','',500,''],
+    ['','','','','','','','','','',''],
+    ['3531 W. Westlake Dr Unit A','Valerie Montez',1300,0.08,104,'Check to Garth','Venmo','','',1250,''],
+    ['','','','','','','','','','',''],
+    ['3531 W. Westlake Dr.B','Vanessa Vigil',1200,0.08,96,'Check to Garth','Venmo','','',1100,''],
+    ['','Juan Vigil','','','','','','','','',''],
+    ['3529 W. Westgene','Darren & Charmel',1200,0.08,96,'Check to Garth','cash','Danny picks it up','',0,''],
+    ['','Bolding. *Danny picks up cash','','','','','','','','',''],
+    ['3531 W. Westgene','Janeen Guyton',1250,0.08,100,'Check to Garth','cash','Danny picks it up','',1250,''],
+    ['','*Danny picks up cash','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Garth IRA Properties','','','','','','','','','',''],
+    ['1593 W. 980 S.','Cami & Koben(upstairs)',2000,0.07,140,'Check to Garth IRA','Cami - Venmo','$3300 rent/$300 utilities','',2700,''],
+    ['Orem, UT 84059','Downstairs - Jessica Perez Granados',1400,'','','','Koben - Venmo','','','',''],
+    ['','','','','','','','','','',''],
+    ['211 W. 1160 N. #4','Josh Johnson',1425,0.07,99.75,'Check to Garth IRA','Venmo','Josh owes $1000 deposit','',200,''],
+    ['Tooele, UT 84074','Owes $137 late fee','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['211 W. 1160 N. #5','Vanessa & Austun Bird',1400,0.07,98,'Check to Garth IRA','','','',1200,''],
+    ['Tooele, UT 84074','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['211 W. 1160 N. #11','Stella',1375,0.07,96.25,'Check to Garth IRA','Sends rent to Danny','','',1000,''],
+    ['Tooele, UT 84074','','','','','Pd thru July 2025','','','','',''],
+    ['','','','','','','','','','',''],
+    ['32 W. 6830 S.','Salma',2650,0.07,185.50,'Check to Garth IRA','State pays $2617','','',1500,''],
+    ['Murray, UT 84107','','','','','Salma should pay $33','Cash app','','','',''],
+    ['','','','','','','','','','',''],
+    ['268 Highland Dr','Angel Duran, Tyler Berg',1600,0.07,112,'Check to Garth IRA','','','',1600,''],
+    ['Tooele, UT 84074','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Calvin Blohm','','','','','','','','','',''],
+    ['3834 S. Bannock St','Kristin',2100,0.09,189,'Check to Calvin','Section 8 pays $500, renter $1600','','',1500,''],
+    ['West Valley City, UT 84120','','','','','','','','','',''],
+    ['','*Danny picks up cash','','','','','','','','',''],
+    ['149 N. 100 E.','Lavina',1500,0.09,135,'Check to Calvin','Zelle','','',1200,''],
+    ['Payson, UT','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['4908 W. 3850 S.','Aseteria, Omen, Pupu, Sousa Moeai',2050,0.09,184.50,'Check to Calvin','Venmo','KJ Moeia','',1900,''],
+    ['West Valley City, UT 84120','*Danny collects','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['460 S. 700 E.','Stephanie',1500,0.09,135,'Check to Calvin','Venmo','','',1250,''],
+    ['Payson, UT','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Randy Meldrum','','','','','','','','','',''],
+    ['9174 S. 220 E.','Michelle Fischer',1500,0.09,135,'Check Randy online bill pay','Venmo','','',1200,''],
+    ['Sandy, UT 84070','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['TWC Properties','','','','','','','','','',''],
+    ['14413 S. Ferndale','Damian Lucero',1900,0.09,171,'Zelle to Crichton\'s','Venmo','Current Sec Dep','',1500,''],
+    ['Riverton, UT 84096','*Danny collects','','','','','','Prior Sec Dep','',1032.85,''],
+    ['','','','','','','','','','',''],
+    ['14417 S. Ferndale','Jonathan',1800,0.09,162,'Zelle to Crichton\'s','Venmo','','',1300,''],
+    ['Riverton, UT 84096','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['14419 S. Ferndale','Braeden Sonnenburg',1825,0.09,164.25,'Zelle to Crichton\'s','','','',1500,''],
+    ['Riverton, UT 84096','Move in 9/8/25','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['14421 S. Ferndale','Dallas/ Coden Young',1925,0.09,173.25,'Zelle to Crichton\'s','','','',1500,''],
+    ['Riverton, UT 84096','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Victoria Comes Out Bird','','','','','','','','','',''],
+    ['3510 S. 300 E. Unit O','Carlos and Jessica',1450,0.07,101.50,'Zelle to Victoria','Venmo','','',1300,''],
+    ['Salt Lake City, UT 84115','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['881 S. 830 E.','Ryan Erickson',2600,0.07,182,'Zelle to Victoria','Venmo','','',1200,''],
+    ['Orem, UT 84097','*Brian collects','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Carolina Paz','','','','','','','','','',''],
+    ['1446 N. 400 E.','Matthew Beaudry',2000,0.09,180,'Venmo to Carolina','','','',1500,''],
+    ['Centerville, UT 84014','move in 9/14','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Rhonda Rindlisbach','','','','','','','','','',''],
+    ['1597 W. 12100 S.','Noemi',1600,0.09,144,'Venmo to Rhonda','','','',1400,''],
+    ['Riverton, UT 84065','Move in April 25, 2025','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['James Mutscheller','','','','','','','','','',''],
+    ['556 S. 1100 E.','Tyler, Freddie',4000,0.09,360,'Zelle to James','Zelle','','',4200,''],
+    ['Salt Lake City, UT 84102','Brady, Jake','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Tim Linford','Check to Rey Holdings','','','','','','','','',''],
+    ['1364 W. Sunset Drive','Chantelle Murakimi',1900,0.10,190,'Check to Rey Holdings LLC','Tim has Sec Dep','','',0,''],
+    ['Salt Lake City, UT 84116','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Tim Linford','Check to: Lifestyles Homes of UT 2 LLC','','','','','','','','',''],
+    ['2986 W. 5685 S.','Keri Robinson',1450,0.10,145,'Check to Lifestyles Homes of UT 2 LLC','Tim has Sec Dep','','','',''],
+    ['SLC, UT 84118','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['7202 S. Milky Hollow Lane','Christy Allen',1750,0.10,175,'Check to Lifestyles Homes of UT 2 LLC','Tim has Sec Dep','','','',''],
+    ['West Jordan, UT 84084','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['David Hargreaves','','','','','','','','','',''],
+    ['6181 S. Jeremy Cir','Danyal Lawrence',1900,0.09,171,'Check to David Hargreaves','','','',1500,''],
+    ['Salt Lake City, 84121','','','','','online bill pay','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Dave Robinson','Tenor Property Management','','','','','','','','',''],
+    ['306 W. Shadow Ridge Dr','Brandon Merchant',36938,0.09,0,'$ to Tenor Prop Mgt','','','',2500,''],
+    ['Saratoga Springs, UT 84045','move in 11/21','paid through 11/2026','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Mike Payne','','','','','','','','','',''],
+    ['5041 Doren Dr.','Bryan & Aaron Angell',1900,0.09,171,'$ to Mike Payne','','','','',''],
+    ['South Ogden, UT 84403','','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Denise Rucker','','','','','','','','','',''],
+    ['2147 W. Rainy Brook Ct.','Larry & Annie Staten',1500,0.09,135,'','','','',1350,''],
+    ['Riverton, UT 84065','6 mo lease, move in 10/13','','','','','','','','',''],
+    ['','','','','','','','','','',''],
+    ['Klark & Trina Kennington','','','','','','','','','',''],
+    ['1656 W. 14600 S. Bluffdale','unknown',0,0.09,0,'','','','','',''],
+  ];
+
+  var result = importSPMToClientHub(spmRows);
+  return result;
+}
+
+// ── 2. Admin Approval Queue (Landlord Verification) ───────────────────────
+function getLandlordApprovals() {
+  return rvGet(RV_KEYS.LANDLORD_APPROVALS) || [];
+}
+
+function submitLandlordApproval(data) {
+  var approvals = getLandlordApprovals();
+  var approval = {
+    id: 'appr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    landlordName: data.landlordName || '',
+    email: data.email || '',
+    companyName: data.companyName || '',
+    proofType: data.proofType || 'management_agreement',
+    proofFileName: data.proofFileName || '',
+    proofUploadedAt: new Date().toISOString(),
+    status: 'pending',
+    submittedAt: new Date().toISOString(),
+    reviewedAt: null,
+    reviewedBy: null,
+    notes: data.notes || ''
+  };
+  approvals.unshift(approval);
+  rvSet(RV_KEYS.LANDLORD_APPROVALS, approvals);
+  return approval;
+}
+
+function approveLandlord(approvalId, reviewerName) {
+  var approvals = getLandlordApprovals();
+  var appr = approvals.find(function(a) { return a.id === approvalId; });
+  if (appr) {
+    appr.status = 'approved';
+    appr.reviewedAt = new Date().toISOString();
+    appr.reviewedBy = reviewerName || 'Admin';
+    rvSet(RV_KEYS.LANDLORD_APPROVALS, approvals);
+    // Also mark as verified professional
+    verifyProfessional(appr.email);
+  }
+  return appr;
+}
+
+function rejectLandlord(approvalId, reviewerName, reason) {
+  var approvals = getLandlordApprovals();
+  var appr = approvals.find(function(a) { return a.id === approvalId; });
+  if (appr) {
+    appr.status = 'rejected';
+    appr.reviewedAt = new Date().toISOString();
+    appr.reviewedBy = reviewerName || 'Admin';
+    appr.rejectionReason = reason || '';
+    rvSet(RV_KEYS.LANDLORD_APPROVALS, approvals);
+  }
+  return appr;
+}
+
+// ── 3. Stripe Split-Pay Integration ───────────────────────────────────────
+var STRIPE_CONFIG = {
+  publishableKey: '', // Set via admin dashboard or env
+  applicationFee: 50, // Total application fee ($50)
+  transUnionCost: 35, // TransUnion screening cost ($35)
+  rvMarkup: 15, // RentVerified revenue ($15)
+  currency: 'usd'
+};
+
+function initStripeCheckout(applicantEmail, listingId, propertyAddress) {
+  if (!STRIPE_CONFIG.publishableKey) {
+    console.warn('Stripe not configured. Using fallback payment flow.');
+    return { success: false, message: 'Stripe not configured. Contact admin to set up payment processing.', fallback: true };
+  }
+  var session = {
+    id: 'sess-' + Date.now(),
+    applicantEmail: applicantEmail,
+    listingId: listingId,
+    propertyAddress: propertyAddress,
+    amount: STRIPE_CONFIG.applicationFee,
+    breakdown: {
+      transUnion: STRIPE_CONFIG.transUnionCost,
+      rvFee: STRIPE_CONFIG.rvMarkup
+    },
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+  // Store session for tracking
+  var sessions = rvGet('rv_stripe_sessions') || [];
+  sessions.unshift(session);
+  rvSet('rv_stripe_sessions', sessions);
+  return session;
+}
+
+function getStripePaymentHistory() {
+  return rvGet('rv_stripe_sessions') || [];
+}
+
+// ── 4. Property Inspections (Liability Shield) ────────────────────────────
+function getInspections() {
+  return rvGet(RV_KEYS.INSPECTIONS) || [];
+}
+
+function createInspection(data) {
+  var inspections = getInspections();
+  var inspection = {
+    id: 'insp-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    propertyAddress: data.propertyAddress || '',
+    listingId: data.listingId || '',
+    type: data.type || 'move_in',
+    inspectorName: data.inspectorName || '',
+    inspectorRole: data.inspectorRole || 'pm',
+    rooms: [],
+    status: 'in_progress',
+    createdAt: new Date().toISOString(),
+    completedAt: null,
+    notes: data.notes || ''
+  };
+  inspections.unshift(inspection);
+  rvSet(RV_KEYS.INSPECTIONS, inspections);
+  return inspection;
+}
+
+function addInspectionPhoto(inspectionId, roomData) {
+  var inspections = getInspections();
+  var insp = inspections.find(function(i) { return i.id === inspectionId; });
+  if (insp) {
+    var photo = {
+      id: 'photo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      room: roomData.room || 'General',
+      description: roomData.description || '',
+      photoUrl: roomData.photoUrl || '',
+      timestamp: new Date().toISOString(),
+      timestampMDT: toMDT(),
+      geolocation: roomData.geolocation || null,
+      condition: roomData.condition || 'good'
+    };
+    insp.rooms.push(photo);
+    rvSet(RV_KEYS.INSPECTIONS, inspections);
+    return photo;
+  }
+  return null;
+}
+
+function completeInspection(inspectionId) {
+  var inspections = getInspections();
+  var insp = inspections.find(function(i) { return i.id === inspectionId; });
+  if (insp) {
+    insp.status = 'completed';
+    insp.completedAt = new Date().toISOString();
+    rvSet(RV_KEYS.INSPECTIONS, inspections);
+  }
+  return insp;
+}
+
+function getInspectionsForProperty(listingId) {
+  return getInspections().filter(function(i) { return i.listingId === listingId; });
+}
+
+// ── 5. Compliance Countdown (3-Day Notice) ────────────────────────────────
+function getComplianceNotices() {
+  return rvGet(RV_KEYS.COMPLIANCE_NOTICES) || [];
+}
+
+function generate3DayNotice(tenantName, propertyAddress, amountOwed, listingId) {
+  var notices = getComplianceNotices();
+  var today = new Date();
+  var deadline = new Date(today);
+  deadline.setDate(deadline.getDate() + 3);
+  var notice = {
+    id: 'notice-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    type: '3_day_pay_or_vacate',
+    tenantName: tenantName,
+    propertyAddress: propertyAddress,
+    listingId: listingId || '',
+    amountOwed: amountOwed,
+    issuedDate: toMDTDate(today),
+    deadlineDate: toMDTDate(deadline),
+    issuedTimestamp: today.toISOString(),
+    deadlineTimestamp: deadline.toISOString(),
+    status: 'issued',
+    deliveryMethod: 'email_and_portal',
+    generatedText: _build3DayNoticeText(tenantName, propertyAddress, amountOwed, toMDTDate(today), toMDTDate(deadline)),
+    createdAt: new Date().toISOString()
+  };
+  notices.unshift(notice);
+  rvSet(RV_KEYS.COMPLIANCE_NOTICES, notices);
+  return notice;
+}
+
+function _build3DayNoticeText(tenant, address, amount, issued, deadline) {
+  return '3-DAY NOTICE TO PAY RENT OR VACATE\n' +
+    '(Utah Code Ann. \u00A7 78B-6-802)\n\n' +
+    'TO: ' + tenant + '\n' +
+    'PROPERTY: ' + address + '\n' +
+    'DATE ISSUED: ' + issued + '\n\n' +
+    'You are hereby notified that you owe ' + fmtCurrency(amount) + ' in unpaid rent.\n\n' +
+    'You are required, within THREE (3) calendar days from the date of service of this notice, ' +
+    'to either pay the full amount of rent due or vacate the premises.\n\n' +
+    'DEADLINE: ' + deadline + '\n\n' +
+    'If you fail to pay or vacate within 3 days, legal proceedings may be initiated ' +
+    'to recover possession of the premises, unpaid rent, court costs, and attorney fees ' +
+    'as allowed by Utah law.\n\n' +
+    'This notice is served in compliance with the Utah Fit Premises Act.\n\n' +
+    'Property Manager: Sanders Property Management\n' +
+    'Contact: danielrhart1284@gmail.com\n' +
+    'Date: ' + issued;
+}
+
+function getOverdueTenants() {
+  var ledger = getRentLedger();
+  var mdt = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Denver' }));
+  var currentMonth = mdt.getFullYear() + '-' + String(mdt.getMonth() + 1).padStart(2, '0');
+  var dayOfMonth = mdt.getDate();
+  if (dayOfMonth < 5) return [];
+  return ledger.filter(function(e) {
+    return e.month === currentMonth && e.status === 'due' && (!e.rentPaid || e.rentPaid === 0);
+  });
+}
+
+// ── 6. Work Order Tracking ────────────────────────────────────────────────
+function getWorkOrders() {
+  return rvGet(RV_KEYS.WORK_ORDERS) || [];
+}
+
+function createWorkOrder(data) {
+  var orders = getWorkOrders();
+  var order = {
+    id: 'wo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    maintenanceRequestId: data.maintenanceRequestId || '',
+    propertyAddress: data.propertyAddress || '',
+    listingId: data.listingId || '',
+    description: data.description || '',
+    assignedVendor: data.assignedVendor || '',
+    vendorEmail: data.vendorEmail || '',
+    priority: data.priority || 'normal',
+    estimatedCost: data.estimatedCost || 0,
+    actualCost: 0,
+    ownerRepairLimit: data.ownerRepairLimit || 500,
+    autoApproved: data.estimatedCost <= (data.ownerRepairLimit || 500),
+    status: 'assigned',
+    invoiceUploaded: false,
+    invoiceUrl: '',
+    createdAt: new Date().toISOString(),
+    completedAt: null,
+    notes: data.notes || ''
+  };
+  orders.unshift(order);
+  rvSet(RV_KEYS.WORK_ORDERS, orders);
+  return order;
+}
+
+function uploadWorkOrderInvoice(workOrderId, invoiceData) {
+  var orders = getWorkOrders();
+  var order = orders.find(function(o) { return o.id === workOrderId; });
+  if (order) {
+    order.invoiceUploaded = true;
+    order.invoiceUrl = invoiceData.url || '';
+    order.actualCost = invoiceData.amount || 0;
+    if (order.actualCost > order.ownerRepairLimit) {
+      order.status = 'pending_owner_approval';
+    } else {
+      order.status = 'invoice_received';
+    }
+    rvSet(RV_KEYS.WORK_ORDERS, orders);
+  }
+  return order;
+}
+
+function completeWorkOrder(workOrderId) {
+  var orders = getWorkOrders();
+  var order = orders.find(function(o) { return o.id === workOrderId; });
+  if (order) {
+    order.status = 'completed';
+    order.completedAt = new Date().toISOString();
+    rvSet(RV_KEYS.WORK_ORDERS, orders);
+  }
+  return order;
+}
+
+function getWorkOrdersForProperty(listingId) {
+  return getWorkOrders().filter(function(o) { return o.listingId === listingId; });
+}
+
+// ── 7. Tenant Scoring (RentVerified Score) ────────────────────────────────
+function getTenantScores() {
+  return rvGet(RV_KEYS.TENANT_SCORES) || {};
+}
+
+function calculateTenantScore(tenantName, forceRecalculate) {
+  var scores = getTenantScores();
+  if (!forceRecalculate && scores[tenantName]) return scores[tenantName];
+
+  var ledger = getRentLedger();
+  var tenantEntries = ledger.filter(function(e) { return e.tenant === tenantName; });
+  if (tenantEntries.length === 0) return { score: 0, grade: 'N/A', factors: {} };
+
+  var totalMonths = tenantEntries.length;
+  var onTimePaid = tenantEntries.filter(function(e) { return e.status === 'paid'; }).length;
+  var paymentRate = totalMonths > 0 ? (onTimePaid / totalMonths) : 0;
+
+  // Inspection score — filter by tenant's property addresses
+  var tenantProperties = tenantEntries.map(function(e) { return (e.property || '').toLowerCase(); }).filter(function(p) { return p.length > 0; });
+  var inspections = getInspections();
+  var tenantInspections = inspections.filter(function(i) {
+    var inspAddr = (i.propertyAddress || i.listingId || '').toLowerCase();
+    return tenantProperties.some(function(tp) { return tp === inspAddr || inspAddr.indexOf(tp) >= 0 || tp.indexOf(inspAddr) >= 0; }) &&
+      i.rooms && i.rooms.some(function(r) { return r.condition === 'good' || r.condition === 'excellent'; });
+  });
+  var inspectionBonus = tenantInspections.length > 0 ? 10 : 0;
+
+  // Maintenance responsiveness (reported issues promptly)
+  var requests = getMaintenanceRequests();
+  var tenantRequests = requests.filter(function(r) { return r.tenantName === tenantName; });
+  var maintenanceBonus = tenantRequests.length > 0 ? 5 : 0;
+
+  var baseScore = Math.round(paymentRate * 85);
+  var totalScore = Math.min(100, baseScore + inspectionBonus + maintenanceBonus);
+
+  var grade;
+  if (totalScore >= 90) grade = 'A+';
+  else if (totalScore >= 80) grade = 'A';
+  else if (totalScore >= 70) grade = 'B';
+  else if (totalScore >= 60) grade = 'C';
+  else if (totalScore >= 50) grade = 'D';
+  else grade = 'F';
+
+  var result = {
+    score: totalScore,
+    grade: grade,
+    factors: {
+      paymentRate: Math.round(paymentRate * 100),
+      monthsTracked: totalMonths,
+      onTimePaid: onTimePaid,
+      inspectionBonus: inspectionBonus,
+      maintenanceBonus: maintenanceBonus
+    },
+    isVerifiedRenter: totalScore >= 80,
+    calculatedAt: new Date().toISOString()
+  };
+
+  scores[tenantName] = result;
+  rvSet(RV_KEYS.TENANT_SCORES, scores);
+  return result;
+}
+
+// ── 8. Data Backup / Portability (Download All Records) ───────────────────
+function exportAllRecords() {
+  var data = {
+    exportDate: toMDT(),
+    exportVersion: '1.0',
+    clientHub: getClientHub(),
+    listings: rvGet('rv_listings_sanders-pm') || [],
+    rentLedger: getRentLedger(),
+    leases: getLeases(),
+    messages: rvGet('rv_messages') || [],
+    maintenanceRequests: getMaintenanceRequests(),
+    inspections: getInspections(),
+    workOrders: getWorkOrders(),
+    vendorInvoices: rvGet('rv_vendor_invoices') || [],
+    leadCaptures: rvGet('rv_lead_captures') || [],
+    complianceNotices: getComplianceNotices(),
+    tenantScores: getTenantScores(),
+    approvals: getLandlordApprovals()
+  };
+  return data;
+}
+
+function downloadAllRecordsZip() {
+  var data = exportAllRecords();
+  var jsonStr = JSON.stringify(data, null, 2);
+
+  // Try ZIP with JSZip if available, otherwise download as JSON
+  if (typeof JSZip !== 'undefined') {
+    var zip = new JSZip();
+    zip.file('rentverified-export-' + new Date().toISOString().slice(0, 10) + '.json', jsonStr);
+    zip.file('client-hub.json', JSON.stringify(data.clientHub, null, 2));
+    zip.file('rent-ledger.json', JSON.stringify(data.rentLedger, null, 2));
+    zip.file('leases.json', JSON.stringify(data.leases, null, 2));
+    zip.file('inspections.json', JSON.stringify(data.inspections, null, 2));
+    zip.file('work-orders.json', JSON.stringify(data.workOrders, null, 2));
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(content);
+      a.download = 'rentverified-backup-' + new Date().toISOString().slice(0, 10) + '.zip';
+      a.click();
+    });
+  } else {
+    var blob = new Blob([jsonStr], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rentverified-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+  }
+}
+
+// ── 9. Tax Reporting (1099-MISC Generation) ───────────────────────────────
+function generate1099Data(year) {
+  year = year || new Date().getFullYear();
+  var ledger = getRentLedger();
+  var hub = getClientHub();
+
+  // Group payouts by owner
+  var ownerPayouts = {};
+  ledger.forEach(function(entry) {
+    if (!entry.ownerName) return;
+    var entryYear = (entry.month || '').substring(0, 4);
+    if (parseInt(entryYear) !== year) return;
+    if (!ownerPayouts[entry.ownerName]) {
+      ownerPayouts[entry.ownerName] = { totalRent: 0, totalFees: 0, netPaid: 0, properties: [] };
+    }
+    var paid = parseFloat(entry.rentPaid) || 0;
+    var fee = paid > 0 ? (parseFloat(entry.pmFee) || 0) : 0;
+    ownerPayouts[entry.ownerName].totalRent += paid;
+    ownerPayouts[entry.ownerName].totalFees += fee;
+    ownerPayouts[entry.ownerName].netPaid += (paid - fee);
+    if (ownerPayouts[entry.ownerName].properties.indexOf(entry.property) === -1) {
+      ownerPayouts[entry.ownerName].properties.push(entry.property);
+    }
+  });
+
+  // Build 1099 records
+  var records = [];
+  Object.keys(ownerPayouts).forEach(function(ownerName) {
+    var payout = ownerPayouts[ownerName];
+    var owner = hub.find(function(h) { return h.name === ownerName; });
+    if (payout.netPaid >= 600) { // IRS threshold
+      records.push({
+        recipientName: ownerName,
+        recipientAddress: owner ? (owner.mailingAddress || '') : '',
+        recipientEmail: owner ? (owner.email || '') : '',
+        recipientTIN: '', // Must be provided by owner
+        payerName: 'Sanders Property Management',
+        payerTIN: '', // Company TIN
+        taxYear: year,
+        box1_rents: Math.round(payout.netPaid * 100) / 100,
+        totalRentCollected: Math.round(payout.totalRent * 100) / 100,
+        managementFees: Math.round(payout.totalFees * 100) / 100,
+        properties: payout.properties,
+        generatedAt: new Date().toISOString()
+      });
+    }
+  });
+
+  return records;
+}
+
+function download1099Report(year) {
+  var records = generate1099Data(year);
+  if (records.length === 0) {
+    alert('No 1099 records to generate for ' + (year || new Date().getFullYear()) + '. Owners must receive $600+ to require a 1099.');
+    return;
+  }
+  var text = '1099-MISC REPORTING DATA\n';
+  text += 'Tax Year: ' + (year || new Date().getFullYear()) + '\n';
+  text += 'Payer: Sanders Property Management\n';
+  text += 'Generated: ' + toMDT() + '\n';
+  text += '=' .repeat(60) + '\n\n';
+
+  records.forEach(function(r, idx) {
+    text += '--- RECIPIENT #' + (idx + 1) + ' ---\n';
+    text += 'Name: ' + r.recipientName + '\n';
+    text += 'Address: ' + (r.recipientAddress || 'ON FILE') + '\n';
+    text += 'Email: ' + (r.recipientEmail || 'ON FILE') + '\n';
+    text += 'TIN/SSN: ' + (r.recipientTIN || 'REQUIRED - COLLECT FROM OWNER') + '\n';
+    text += 'Box 1 - Rents: ' + fmtCurrency(r.box1_rents) + '\n';
+    text += 'Total Rent Collected: ' + fmtCurrency(r.totalRentCollected) + '\n';
+    text += 'Management Fees Withheld: ' + fmtCurrency(r.managementFees) + '\n';
+    text += 'Properties: ' + r.properties.join('; ') + '\n\n';
+  });
+
+  text += '\nNOTE: This is a summary for your records. Actual 1099-MISC forms must be filed with the IRS.\n';
+  text += 'Consult your tax professional for filing requirements.\n';
+
+  var blob = new Blob([text], { type: 'text/plain' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '1099-MISC-' + (year || new Date().getFullYear()) + '-SPM.txt';
+  a.click();
+}
+
+// ── 10. Empty State Messages ──────────────────────────────────────────────
+var EMPTY_STATES = {
+  maintenance: { icon: '\u{1F6E0}\uFE0F', title: 'No Active Requests', message: 'No active maintenance requests. Your properties are in good shape!' },
+  inspections: { icon: '\u{1F4F7}', title: 'No Inspections', message: 'No inspections on file. Schedule a move-in inspection to protect your investment.' },
+  workOrders: { icon: '\u{1F4CB}', title: 'No Work Orders', message: 'No open work orders. All maintenance is up to date!' },
+  messages: { icon: '\u{1F4EC}', title: 'No Messages', message: 'Your inbox is empty. All caught up!' },
+  leases: { icon: '\u{1F4C4}', title: 'No Leases', message: 'No leases on file. Create your first lease from a property tile.' },
+  vendorInvoices: { icon: '\u{1F4B3}', title: 'No Invoices', message: 'No vendor invoices submitted yet.' },
+  leadCaptures: { icon: '\u{1F4F1}', title: 'No Leads', message: 'No QR leads captured yet. Share your property QR codes to start collecting leads!' },
+  compliance: { icon: '\u2705', title: 'All Clear', message: 'No compliance notices issued. All tenants are current.' },
+  approvals: { icon: '\u{1F4E5}', title: 'No Pending Approvals', message: 'No landlord verification requests pending.' }
+};
+
+function renderEmptyState(containerId, type) {
+  var state = EMPTY_STATES[type] || { icon: '\u{1F4AD}', title: 'No Data', message: 'Nothing to show here yet.' };
+  var el = document.getElementById(containerId);
+  if (el) {
+    el.innerHTML = '<div style="text-align:center;padding:3rem 1rem;color:#6B7280;">' +
+      '<div style="font-size:3rem;margin-bottom:0.75rem;">' + state.icon + '</div>' +
+      '<h4 style="font-size:1.1rem;font-weight:700;color:#374151;margin-bottom:0.5rem;">' + escapeHtml(state.title) + '</h4>' +
+      '<p style="font-size:0.9rem;">' + escapeHtml(state.message) + '</p></div>';
+  }
+}
+
+// ── 11. Permission Logic Audit ────────────────────────────────────────────
+function getVisibleTilesForRole(role) {
+  var allTiles = ['overview', 'properties', 'accounting', 'clienthub', 'rentstatus', 'inbox', 'maintenance', 'leases', 'documents', 'screening', 'profile', 'bulkmsg', 'permissions', 'vendorinvoices', 'leadcaptures', 'compliance', 'inspections', 'workorders'];
+  var roleTiles = {
+    admin: allTiles,
+    pm: allTiles,
+    owner: ['overview', 'properties', 'accounting', 'maintenance', 'documents', 'inspections'],
+    tenant: ['overview', 'maintenance', 'leases', 'documents'],
+    vendor: ['overview', 'workorders', 'vendorinvoices'],
+    attorney: ['overview', 'documents', 'leases', 'compliance']
+  };
+  return roleTiles[role] || roleTiles.tenant;
+}
+
+function canRoleAccessTile(role, tileName) {
+  var allowed = getVisibleTilesForRole(role);
+  return allowed.indexOf(tileName) !== -1;
+}
+
+// ── 12. Affiliate Tile Links ──────────────────────────────────────────────
+var AFFILIATE_LINKS = {
+  xfinity: { name: 'Xfinity', url: '', description: 'Internet & Cable', placeholder: true },
+  obligo: { name: 'Obligo', url: '', description: 'Security Deposit Alternative', placeholder: true },
+  lemonade: { name: 'Lemonade', url: '', description: 'Renters Insurance', placeholder: true },
+  transunion: { name: 'TransUnion SmartMove', url: 'https://www.mysmartmove.com/', description: 'Tenant Screening', placeholder: false },
+  assurant: { name: 'Assurant', url: '', description: 'Landlord Insurance', placeholder: true }
+};
+
+function getAffiliateLink(service) {
+  return AFFILIATE_LINKS[service] || null;
+}
+
+function setAffiliateLink(service, url) {
+  if (AFFILIATE_LINKS[service]) {
+    AFFILIATE_LINKS[service].url = url;
+    AFFILIATE_LINKS[service].placeholder = !url;
+  }
 }

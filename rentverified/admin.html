@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .admin-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    .admin-login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    }
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    .admin-sidebar {
+      background: #0f172a;
+      padding: 1.5rem 0;
+      color: white;
+    }
+    .admin-sidebar .logo {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 1rem;
+    }
+    .admin-sidebar .logo h2 { font-size: 1.1rem; font-weight: 800; color: white; }
+    .admin-sidebar .logo p { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.7rem 1.5rem;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .admin-nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+    .admin-nav-item.active { background: #1e40af; color: white; border-left: 3px solid #60a5fa; }
+    .admin-main {
+      background: #f1f5f9;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    .admin-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+    .admin-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .admin-stat {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .admin-stat .label { font-size: 0.8rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .admin-stat .value { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-top: 4px; }
+    .admin-stat .change { font-size: 0.78rem; color: #059669; font-weight: 600; margin-top: 2px; }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .admin-table th {
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .admin-table td {
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+    }
+    .admin-table tr:hover td { background: #f8fafc; }
+    .badge-pending { background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+    .badge-approved { background: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+    .badge-rejected { background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+    .btn-approve {
+      background: #059669; color: white; border: none; padding: 6px 14px;
+      border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-approve:hover { background: #047857; }
+    .btn-reject {
+      background: #dc2626; color: white; border: none; padding: 6px 14px;
+      border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-reject:hover { background: #b91c1c; }
+    .admin-tab { display: none; }
+    .admin-tab.active { display: block; }
+
+    .data-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+    }
+    .data-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: #0f172a; }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .admin-layout { grid-template-columns: 1fr; }
+      .admin-sidebar { display: none; }
+      .admin-main { padding: 1rem; }
+      .admin-header { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+      .admin-stat-grid { grid-template-columns: 1fr 1fr; }
+      .admin-table { font-size: 0.8rem; }
+      .admin-table th, .admin-table td { padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN -->
+<div class="admin-login" id="admin-login-screen">
+  <div class="admin-login-card">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-size:2.5rem;">🔒</div>
+      <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin-top:0.5rem;">Admin Dashboard</h2>
+      <p style="color:#64748b;font-size:0.85rem;">RentVerified Platform Administration</p>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="adminEmail" placeholder="admin@rentverified.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="adminPw" placeholder="Enter admin password" />
+    </div>
+    <div id="adminLoginErr" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:.75rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.8rem;" onclick="doAdminLogin()">Sign In</button>
+    <p style="text-align:center;margin-top:1rem;font-size:0.8rem;color:#94a3b8;">This page is restricted to platform administrators.</p>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin-dashboard" style="display:none;">
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <div class="admin-sidebar">
+      <div class="logo">
+        <h2>RentVerified Admin</h2>
+        <p>Platform Control Panel</p>
+      </div>
+      <div class="admin-nav-item active" onclick="showAdminTab('approvals', event)">📋 Approval Queue</div>
+      <div class="admin-nav-item" onclick="showAdminTab('data', event)">📊 Data Management</div>
+      <div class="admin-nav-item" onclick="showAdminTab('stripe', event)">💳 Stripe Payments</div>
+      <div class="admin-nav-item" onclick="showAdminTab('compliance', event)">⚖️ Compliance</div>
+      <div class="admin-nav-item" onclick="showAdminTab('scoring', event)">⭐ Tenant Scoring</div>
+      <div class="admin-nav-item" onclick="showAdminTab('export', event)">📦 Data Export</div>
+      <div class="admin-nav-item" onclick="showAdminTab('tax', event)">🧾 1099 Reporting</div>
+      <div style="padding:1.5rem;margin-top:auto;border-top:1px solid rgba(255,255,255,0.08);">
+        <button class="btn btn-outline" style="width:100%;justify-content:center;color:#94a3b8;border-color:#334155;font-size:0.85rem;" onclick="adminLogout()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="admin-main">
+
+      <!-- STATS -->
+      <div class="admin-header">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p style="color:#64748b;font-size:0.9rem;" id="admin-timestamp"></p>
+        </div>
+        <button class="btn btn-primary" onclick="productionDataReset();renderAdminDashboard();">🔄 Reset Production Data</button>
+      </div>
+
+      <div class="admin-stat-grid" id="admin-stats"></div>
+
+      <!-- TAB: Approval Queue -->
+      <div class="admin-tab active" id="tab-approvals">
+        <div class="data-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <h3 style="margin-bottom:0;">Landlord Approval Queue</h3>
+            <span style="font-size:0.8rem;color:#64748b;">Kill Switch: Manually verify landlords before QR codes go live</span>
+          </div>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1.25rem;">When a landlord uploads their "Proof of Authority" (Management Agreement or Deed), it appears here for your manual approval. Approved landlords get their QR codes activated.</p>
+
+          <!-- Test submission form -->
+          <div style="background:#f8fafc;border-radius:8px;padding:1rem;margin-bottom:1.5rem;border:1px dashed #cbd5e1;">
+            <h4 style="font-size:0.9rem;font-weight:700;margin-bottom:0.75rem;">📤 Submit Test Verification Request</h4>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+              <input type="text" id="test-landlord-name" placeholder="Landlord Name" style="padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.85rem;" />
+              <input type="email" id="test-landlord-email" placeholder="Email" style="padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.85rem;" />
+              <input type="text" id="test-landlord-company" placeholder="Company Name" style="padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.85rem;" />
+              <select id="test-proof-type" style="padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.85rem;">
+                <option value="management_agreement">Management Agreement</option>
+                <option value="deed">Property Deed</option>
+                <option value="llc_docs">LLC Documentation</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="margin-top:0.75rem;font-size:0.85rem;padding:0.5rem 1.25rem;" onclick="submitTestApproval()">Submit Test Request</button>
+          </div>
+
+          <div id="approval-queue-table"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Data Management -->
+      <div class="admin-tab" id="tab-data">
+        <div class="data-card">
+          <h3>Production Data Management</h3>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1rem;">Reset and re-import SPM Rent Collections data. This clears all test data and loads the production dataset.</p>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="productionDataReset();renderDataTab();">🔄 Run Production Data Reset</button>
+            <button class="btn btn-outline" onclick="verifyCheckpoint()">✓ Verify Checkpoint (2142 S. King St)</button>
+          </div>
+          <div id="data-status" style="margin-top:1rem;"></div>
+          <div id="data-owners-list" style="margin-top:1.5rem;"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Stripe Payments -->
+      <div class="admin-tab" id="tab-stripe">
+        <div class="data-card">
+          <h3>💳 Stripe Split-Pay Configuration</h3>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1rem;">Application fee: $50 total. Split: $35 to TransUnion (screening) + $15 to RentVerified treasury.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+            <div class="admin-stat">
+              <div class="label">Application Fee</div>
+              <div class="value">$50.00</div>
+            </div>
+            <div class="admin-stat">
+              <div class="label">TransUnion Cost</div>
+              <div class="value">$35.00</div>
+            </div>
+            <div class="admin-stat">
+              <div class="label">RV Revenue Per App</div>
+              <div class="value" style="color:#059669;">$15.00</div>
+            </div>
+            <div class="admin-stat">
+              <div class="label">Total Sessions</div>
+              <div class="value" id="stripe-sessions-count">0</div>
+            </div>
+          </div>
+          <div style="background:#f8fafc;border-radius:8px;padding:1rem;border:1px solid #e2e8f0;">
+            <h4 style="font-size:0.9rem;font-weight:700;margin-bottom:0.75rem;">Stripe API Configuration</h4>
+            <div class="form-group">
+              <label style="font-size:0.8rem;">Publishable Key</label>
+              <input type="text" id="stripe-pk" placeholder="pk_test_..." style="font-family:monospace;font-size:0.85rem;" />
+            </div>
+            <div class="form-group">
+              <label style="font-size:0.8rem;">Mode</label>
+              <select id="stripe-mode" style="padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;">
+                <option value="test">Test Mode</option>
+                <option value="live">Live Mode</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="font-size:0.85rem;" onclick="saveStripeConfig()">Save Stripe Config</button>
+            <p style="font-size:0.78rem;color:#94a3b8;margin-top:0.5rem;">Stripe Connect keys are required for live split-pay. Contact support for setup.</p>
+          </div>
+          <div id="stripe-history" style="margin-top:1.5rem;"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Compliance -->
+      <div class="admin-tab" id="tab-compliance">
+        <div class="data-card">
+          <h3>⚖️ Compliance Countdown</h3>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1rem;">Generate 3-Day Notice to Pay or Vacate (Utah Code Ann. 78B-6-802). Auto-detect overdue tenants after the 5th of each month.</p>
+          <button class="btn btn-primary" style="margin-bottom:1rem;" onclick="renderOverdueTenants()">🔍 Check Overdue Tenants</button>
+          <div id="overdue-list"></div>
+          <div id="notices-list" style="margin-top:1.5rem;"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Tenant Scoring -->
+      <div class="admin-tab" id="tab-scoring">
+        <div class="data-card">
+          <h3>⭐ RentVerified Tenant Scores</h3>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1rem;">Internal reputation scores based on platform behavior: payment history, inspection results, and maintenance responsiveness.</p>
+          <button class="btn btn-primary" style="margin-bottom:1rem;" onclick="renderTenantScores()">Calculate All Scores</button>
+          <div id="tenant-scores-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Data Export -->
+      <div class="admin-tab" id="tab-export">
+        <div class="data-card">
+          <h3>📦 Data Backup & Portability</h3>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1rem;">Download all records as a ZIP/JSON file. Includes client hub, listings, ledger, leases, inspections, work orders, and more.</p>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="downloadAllRecordsZip()">📥 Download All Records (ZIP/JSON)</button>
+          </div>
+          <div style="margin-top:1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:1rem;">
+            <p style="font-size:0.85rem;color:#166534;font-weight:600;">Data portability guarantee:</p>
+            <p style="font-size:0.8rem;color:#15803d;">If an owner decides to leave, they can download all their ledgers, leases, and documents. No data is ever trapped.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: 1099 Reporting -->
+      <div class="admin-tab" id="tab-tax">
+        <div class="data-card">
+          <h3>🧾 1099-MISC Tax Reporting</h3>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1rem;">Generate 1099-MISC data for owners who received $600+ in payouts during the tax year. Required by the IRS.</p>
+          <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;">
+            <select id="tax-year" style="padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.9rem;">
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+            <button class="btn btn-primary" onclick="render1099Report()">Generate 1099 Report</button>
+            <button class="btn btn-outline" onclick="download1099Report(parseInt(document.getElementById('tax-year').value))">📥 Download 1099 Data</button>
+          </div>
+          <div id="tax-report"></div>
+        </div>
+      </div>
+
+    </div><!-- end admin-main -->
+  </div><!-- end admin-layout -->
+</div>
+
+<script src="app.js"></script>
+<script>
+// ── Admin Dashboard Logic ──────────────────────────────────────────────
+
+function doAdminLogin() {
+  var email = document.getElementById('adminEmail').value.trim();
+  var pw = document.getElementById('adminPw').value;
+  var errEl = document.getElementById('adminLoginErr');
+  var user = authenticateUser(email, pw);
+  if (user && user.role === 'admin') {
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.getElementById('admin-dashboard').style.display = 'block';
+    sessionStorage.setItem('rv_admin_session', JSON.stringify({email: user.email, name: user.name, role: user.role, clientId: user.clientId}));
+    renderAdminDashboard();
+  } else {
+    errEl.textContent = user ? 'Access denied. Admin privileges required.' : 'Invalid email or password.';
+    errEl.style.display = 'block';
+  }
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('rv_admin_session');
+  document.getElementById('admin-dashboard').style.display = 'none';
+  document.getElementById('admin-login-screen').style.display = 'flex';
+}
+
+function showAdminTab(tabName, evt) {
+  var tabs = document.querySelectorAll('.admin-tab');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  var target = document.getElementById('tab-' + tabName);
+  if (target) target.classList.add('active');
+
+  var navItems = document.querySelectorAll('.admin-nav-item');
+  navItems.forEach(function(n) { n.classList.remove('active'); });
+  if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+
+  // Render tab-specific data
+  if (tabName === 'data') renderDataTab();
+  if (tabName === 'stripe') renderStripeTab();
+  if (tabName === 'compliance') renderComplianceTab();
+  if (tabName === 'scoring') renderTenantScores();
+  if (tabName === 'tax') render1099Report();
+}
+
+function renderAdminDashboard() {
+  // Timestamp
+  var tsEl = document.getElementById('admin-timestamp');
+  if (tsEl) tsEl.textContent = 'Last updated: ' + toMDT();
+
+  // Stats
+  var hub = getClientHub();
+  var listings = JSON.parse(localStorage.getItem('rv_listings_sanders-pm') || '[]');
+  var approvals = getLandlordApprovals();
+  var pending = approvals.filter(function(a) { return a.status === 'pending'; }).length;
+  var ledger = getRentLedger();
+  var sessions = getStripePaymentHistory();
+
+  var totalProperties = 0;
+  hub.forEach(function(owner) { totalProperties += (owner.properties ? owner.properties.length : 0); });
+
+  var statsHtml = '';
+  statsHtml += '<div class="admin-stat"><div class="label">Total Owners</div><div class="value">' + hub.length + '</div></div>';
+  statsHtml += '<div class="admin-stat"><div class="label">Total Properties</div><div class="value">' + totalProperties + '</div></div>';
+  statsHtml += '<div class="admin-stat"><div class="label">Pending Approvals</div><div class="value" style="color:' + (pending > 0 ? '#dc2626' : '#059669') + ';">' + pending + '</div></div>';
+  statsHtml += '<div class="admin-stat"><div class="label">Ledger Entries</div><div class="value">' + ledger.length + '</div></div>';
+  statsHtml += '<div class="admin-stat"><div class="label">Stripe Sessions</div><div class="value">' + sessions.length + '</div></div>';
+  document.getElementById('admin-stats').innerHTML = statsHtml;
+
+  renderApprovalQueue();
+}
+
+function renderApprovalQueue() {
+  var approvals = getLandlordApprovals();
+  var container = document.getElementById('approval-queue-table');
+
+  if (approvals.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;">' +
+      '<div style="font-size:2.5rem;margin-bottom:0.5rem;">📭</div>' +
+      '<h4 style="font-weight:700;color:#374151;">No Pending Approvals</h4>' +
+      '<p style="font-size:0.85rem;">No landlord verification requests pending. All clear!</p></div>';
+    return;
+  }
+
+  var html = '<table class="admin-table"><thead><tr>' +
+    '<th>Landlord</th><th>Email</th><th>Company</th><th>Proof Type</th><th>Submitted</th><th>Status</th><th>Actions</th>' +
+    '</tr></thead><tbody>';
+
+  approvals.forEach(function(a) {
+    var statusBadge = '';
+    if (a.status === 'pending') statusBadge = '<span class="badge-pending">Pending</span>';
+    else if (a.status === 'approved') statusBadge = '<span class="badge-approved">Approved</span>';
+    else statusBadge = '<span class="badge-rejected">Rejected</span>';
+
+    var proofLabel = a.proofType === 'management_agreement' ? 'Mgmt Agreement' : a.proofType === 'deed' ? 'Property Deed' : 'LLC Docs';
+    var actions = '';
+    if (a.status === 'pending') {
+      actions = '<button class="btn-approve" onclick="handleApprove(\'' + a.id + '\')">Approve</button> ' +
+        '<button class="btn-reject" onclick="handleReject(\'' + a.id + '\')">Reject</button>';
+    } else {
+      actions = '<span style="font-size:0.8rem;color:#94a3b8;">' + escapeHtml(a.reviewedBy || '-') + '</span>';
+    }
+
+    html += '<tr>' +
+      '<td><strong>' + escapeHtml(a.landlordName) + '</strong></td>' +
+      '<td>' + escapeHtml(a.email) + '</td>' +
+      '<td>' + escapeHtml(a.companyName) + '</td>' +
+      '<td>' + proofLabel + '</td>' +
+      '<td>' + toMDT(a.submittedAt) + '</td>' +
+      '<td>' + statusBadge + '</td>' +
+      '<td>' + actions + '</td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function submitTestApproval() {
+  var name = document.getElementById('test-landlord-name').value.trim();
+  var email = document.getElementById('test-landlord-email').value.trim();
+  var company = document.getElementById('test-landlord-company').value.trim();
+  var proofType = document.getElementById('test-proof-type').value;
+  if (!name || !email) { alert('Name and email are required.'); return; }
+  submitLandlordApproval({
+    landlordName: name,
+    email: email,
+    companyName: company,
+    proofType: proofType,
+    proofFileName: 'test-proof-' + Date.now() + '.pdf'
+  });
+  document.getElementById('test-landlord-name').value = '';
+  document.getElementById('test-landlord-email').value = '';
+  document.getElementById('test-landlord-company').value = '';
+  renderApprovalQueue();
+  renderAdminDashboard();
+}
+
+function handleApprove(approvalId) {
+  var session = JSON.parse(sessionStorage.getItem('rv_admin_session') || '{}');
+  approveLandlord(approvalId, session.name || 'Admin');
+  renderApprovalQueue();
+  renderAdminDashboard();
+}
+
+function handleReject(approvalId) {
+  var reason = prompt('Rejection reason (optional):');
+  var session = JSON.parse(sessionStorage.getItem('rv_admin_session') || '{}');
+  rejectLandlord(approvalId, session.name || 'Admin', reason || '');
+  renderApprovalQueue();
+  renderAdminDashboard();
+}
+
+function renderDataTab() {
+  var hub = getClientHub();
+  var container = document.getElementById('data-owners-list');
+  if (hub.length === 0) {
+    container.innerHTML = '<p style="color:#94a3b8;">No data loaded. Click "Run Production Data Reset" to import SPM data.</p>';
+    return;
+  }
+  var html = '<table class="admin-table"><thead><tr><th>Owner</th><th>Properties</th><th>Total Rent</th><th>Total Fees</th><th>Net to Owner</th></tr></thead><tbody>';
+  hub.forEach(function(owner) {
+    var agg = getOwnerAggregate(owner);
+    html += '<tr><td><strong>' + escapeHtml(owner.name) + '</strong></td>' +
+      '<td>' + agg.propertyCount + '</td>' +
+      '<td>' + fmtCurrency(agg.totalRent) + '</td>' +
+      '<td>' + fmtCurrency(agg.totalFees) + '</td>' +
+      '<td>' + fmtCurrency(agg.netToOwner) + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function verifyCheckpoint() {
+  var hub = getClientHub();
+  var statusEl = document.getElementById('data-status');
+  var found = false;
+  hub.forEach(function(owner) {
+    if (owner.name && owner.name.indexOf('Garth') !== -1) {
+      owner.properties.forEach(function(p) {
+        if (p.address && p.address.indexOf('2142 S. King St') !== -1) {
+          found = true;
+          var pass = p.rent === 1850;
+          statusEl.innerHTML = '<div style="padding:1rem;border-radius:8px;background:' + (pass ? '#f0fdf4;border:1px solid #bbf7d0' : '#fef2f2;border:1px solid #fecaca') + ';">' +
+            '<strong>' + (pass ? '✅ CHECKPOINT PASSED' : '❌ CHECKPOINT FAILED') + '</strong><br/>' +
+            'Property: 2142 S. King St<br/>' +
+            'Owner: ' + escapeHtml(owner.name) + '<br/>' +
+            'Rent: ' + fmtCurrency(p.rent) + (pass ? ' (matches $1,850.00)' : ' (expected $1,850.00)') + '<br/>' +
+            'Tenant: ' + escapeHtml(p.tenant) + '<br/>' +
+            'Deposit: ' + fmtCurrency(p.securityDeposit) + '</div>';
+        }
+      });
+    }
+  });
+  if (!found) {
+    statusEl.innerHTML = '<div style="padding:1rem;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;"><strong>❌ Property not found.</strong> Run "Production Data Reset" first.</div>';
+  }
+}
+
+function renderStripeTab() {
+  var sessions = getStripePaymentHistory();
+  document.getElementById('stripe-sessions-count').textContent = sessions.length;
+  var container = document.getElementById('stripe-history');
+  if (sessions.length === 0) {
+    container.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:1rem;">No payment sessions yet.</p>';
+    return;
+  }
+  var html = '<h4 style="font-weight:700;margin-bottom:0.75rem;">Payment History</h4>';
+  html += '<table class="admin-table"><thead><tr><th>Session ID</th><th>Email</th><th>Property</th><th>Amount</th><th>TU Split</th><th>RV Split</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+  sessions.forEach(function(s) {
+    html += '<tr><td style="font-family:monospace;font-size:0.8rem;">' + escapeHtml(s.id) + '</td>' +
+      '<td>' + escapeHtml(s.applicantEmail) + '</td>' +
+      '<td>' + escapeHtml(s.propertyAddress) + '</td>' +
+      '<td>' + fmtCurrency(s.amount) + '</td>' +
+      '<td>' + fmtCurrency(s.breakdown.transUnion) + '</td>' +
+      '<td style="color:#059669;font-weight:700;">' + fmtCurrency(s.breakdown.rvFee) + '</td>' +
+      '<td>' + escapeHtml(s.status) + '</td>' +
+      '<td>' + toMDT(s.createdAt) + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function saveStripeConfig() {
+  var pk = document.getElementById('stripe-pk').value.trim();
+  var mode = document.getElementById('stripe-mode').value;
+  if (pk) STRIPE_CONFIG.publishableKey = pk;
+  localStorage.setItem('rv_stripe_config', JSON.stringify({ publishableKey: pk, mode: mode }));
+  alert('Stripe configuration saved. Mode: ' + mode);
+}
+
+function renderComplianceTab() {
+  renderOverdueTenants();
+  renderComplianceNotices();
+}
+
+function renderOverdueTenants() {
+  var overdue = getOverdueTenants();
+  var container = document.getElementById('overdue-list');
+  if (overdue.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#64748b;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">' +
+      '<strong style="color:#166534;">✅ All Clear</strong><br/>No overdue tenants detected. All rents current or not yet past the 5th.</div>';
+    return;
+  }
+  var html = '<table class="admin-table"><thead><tr><th>Tenant</th><th>Property</th><th>Rent Due</th><th>Rent Paid</th><th>Action</th></tr></thead><tbody>';
+  overdue.forEach(function(e) {
+    html += '<tr><td>' + escapeHtml(e.tenant) + '</td>' +
+      '<td>' + escapeHtml(e.property) + '</td>' +
+      '<td>' + fmtCurrency(e.rentDue) + '</td>' +
+      '<td>' + fmtCurrency(e.rentPaid) + '</td>' +
+      '<td><button class="btn-reject" style="font-size:0.78rem;" onclick="issueNotice(\'' + escapeHtml(e.tenant).replace(/'/g, "\\'") + '\',\'' + escapeHtml(e.property).replace(/'/g, "\\'") + '\',' + e.rentDue + ')">Generate 3-Day Notice</button></td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function issueNotice(tenant, property, amount) {
+  var notice = generate3DayNotice(tenant, property, amount);
+  alert('3-Day Notice generated for ' + tenant + '.\nDeadline: ' + notice.deadlineDate);
+  renderComplianceNotices();
+}
+
+function renderComplianceNotices() {
+  var notices = getComplianceNotices();
+  var container = document.getElementById('notices-list');
+  if (notices.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  var html = '<h4 style="font-weight:700;margin-bottom:0.75rem;">Issued Notices</h4>';
+  html += '<table class="admin-table"><thead><tr><th>Tenant</th><th>Property</th><th>Amount</th><th>Issued</th><th>Deadline</th><th>View</th></tr></thead><tbody>';
+  notices.forEach(function(n) {
+    html += '<tr><td>' + escapeHtml(n.tenantName) + '</td>' +
+      '<td>' + escapeHtml(n.propertyAddress) + '</td>' +
+      '<td>' + fmtCurrency(n.amountOwed) + '</td>' +
+      '<td>' + n.issuedDate + '</td>' +
+      '<td style="font-weight:700;color:#dc2626;">' + n.deadlineDate + '</td>' +
+      '<td><button class="btn btn-outline" style="font-size:0.75rem;padding:4px 10px;" onclick="viewNotice(\'' + n.id + '\')">View</button></td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function viewNotice(noticeId) {
+  var notices = getComplianceNotices();
+  var notice = notices.find(function(n) { return n.id === noticeId; });
+  if (notice) {
+    var w = window.open('', '_blank');
+    if (!w) { alert('Please allow popups to view the notice.'); return; }
+    w.document.write('<pre style="font-family:Georgia,serif;white-space:pre-wrap;max-width:800px;margin:2rem auto;padding:2rem;line-height:1.8;">' + escapeHtml(notice.generatedText) + '</pre>');
+    w.document.close();
+  }
+}
+
+function renderTenantScores() {
+  var hub = getClientHub();
+  var container = document.getElementById('tenant-scores-list');
+  var allTenants = [];
+  hub.forEach(function(owner) {
+    if (owner.properties) {
+      owner.properties.forEach(function(p) {
+        if (p.tenant) allTenants.push({ name: p.tenant, property: p.fullAddress || p.address, ownerName: owner.name });
+      });
+    }
+  });
+
+  if (allTenants.length === 0) {
+    container.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:1rem;">No tenants found. Import data first.</p>';
+    return;
+  }
+
+  var html = '<table class="admin-table"><thead><tr><th>Tenant</th><th>Property</th><th>Owner</th><th>Score</th><th>Grade</th><th>Verified Renter</th></tr></thead><tbody>';
+  allTenants.forEach(function(t) {
+    var score = calculateTenantScore(t.name, true);
+    var gradeColor = score.grade === 'A+' || score.grade === 'A' ? '#059669' : score.grade === 'B' ? '#d97706' : score.grade === 'C' ? '#ea580c' : '#dc2626';
+    html += '<tr><td><strong>' + escapeHtml(t.name) + '</strong></td>' +
+      '<td style="font-size:0.82rem;">' + escapeHtml(t.property) + '</td>' +
+      '<td>' + escapeHtml(t.ownerName) + '</td>' +
+      '<td style="font-weight:700;">' + score.score + '/100</td>' +
+      '<td style="font-weight:800;color:' + gradeColor + ';">' + score.grade + '</td>' +
+      '<td>' + (score.isVerifiedRenter ? '<span style="color:#059669;font-weight:700;">✓ Verified</span>' : '<span style="color:#94a3b8;">-</span>') + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function render1099Report() {
+  var year = parseInt(document.getElementById('tax-year').value) || new Date().getFullYear();
+  var records = generate1099Data(year);
+  var container = document.getElementById('tax-report');
+
+  if (records.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#64748b;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;">' +
+      '<strong>No 1099 records for ' + year + '</strong><br/>Owners must receive $600+ to require a 1099-MISC.</div>';
+    return;
+  }
+
+  var html = '<table class="admin-table"><thead><tr><th>Recipient</th><th>Box 1 (Rents)</th><th>Total Collected</th><th>Mgmt Fees</th><th>Properties</th><th>TIN Status</th></tr></thead><tbody>';
+  records.forEach(function(r) {
+    html += '<tr><td><strong>' + escapeHtml(r.recipientName) + '</strong></td>' +
+      '<td style="font-weight:700;">' + fmtCurrency(r.box1_rents) + '</td>' +
+      '<td>' + fmtCurrency(r.totalRentCollected) + '</td>' +
+      '<td>' + fmtCurrency(r.managementFees) + '</td>' +
+      '<td style="font-size:0.8rem;">' + r.properties.length + ' properties</td>' +
+      '<td>' + (r.recipientTIN ? '✓ On file' : '<span style="color:#dc2626;font-weight:600;">⚠ Needed</span>') + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// Auto-login check on load
+(function() {
+  var sessionStr = sessionStorage.getItem('rv_admin_session');
+  if (sessionStr) {
+    try {
+      var session = JSON.parse(sessionStr);
+      if (session && session.role === 'admin') {
+        document.getElementById('admin-login-screen').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+        renderAdminDashboard();
+      } else {
+        sessionStorage.removeItem('rv_admin_session');
+      }
+    } catch(e) {
+      sessionStorage.removeItem('rv_admin_session');
+    }
+  }
+})();
+</script>
+
+</body>
+</html>
