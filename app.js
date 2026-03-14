@@ -3170,8 +3170,8 @@ function validateStatementMath(statementData) {
     calcTotalNet += expectedNet;
   });
 
-  if (Math.abs((statementData.totalRent || 0) - calcTotalRent) > 0.01) {
-    errors.push('Total rent mismatch: Expected $' + calcTotalRent.toFixed(2) + ', got $' + (statementData.totalRent || 0).toFixed(2));
+  if (Math.abs((statementData.totalPaid || 0) - calcTotalRent) > 0.01) {
+    errors.push('Total paid mismatch: Expected $' + calcTotalRent.toFixed(2) + ', got $' + (statementData.totalPaid || 0).toFixed(2));
   }
   if (Math.abs((statementData.totalFees || 0) - calcTotalFees) > 0.01) {
     errors.push('Total fees mismatch: Expected $' + calcTotalFees.toFixed(2) + ', got $' + (statementData.totalFees || 0).toFixed(2));
@@ -3909,10 +3909,13 @@ function calculateTenantScore(tenantName) {
   var onTimePaid = tenantEntries.filter(function(e) { return e.status === 'paid'; }).length;
   var paymentRate = totalMonths > 0 ? (onTimePaid / totalMonths) : 0;
 
-  // Inspection score
+  // Inspection score — filter by tenant's property addresses
+  var tenantProperties = tenantEntries.map(function(e) { return (e.property || '').toLowerCase(); }).filter(function(p) { return p.length > 0; });
   var inspections = getInspections();
   var tenantInspections = inspections.filter(function(i) {
-    return i.rooms && i.rooms.some(function(r) { return r.condition === 'good' || r.condition === 'excellent'; });
+    var inspAddr = (i.propertyAddress || i.listingId || '').toLowerCase();
+    return tenantProperties.some(function(tp) { return tp === inspAddr || inspAddr.indexOf(tp) >= 0 || tp.indexOf(inspAddr) >= 0; }) &&
+      i.rooms && i.rooms.some(function(r) { return r.condition === 'good' || r.condition === 'excellent'; });
   });
   var inspectionBonus = tenantInspections.length > 0 ? 10 : 0;
 
