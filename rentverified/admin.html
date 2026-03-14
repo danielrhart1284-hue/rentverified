@@ -631,6 +631,7 @@ function viewNotice(noticeId) {
   var notice = notices.find(function(n) { return n.id === noticeId; });
   if (notice) {
     var w = window.open('', '_blank');
+    if (!w) { alert('Please allow popups to view the notice.'); return; }
     w.document.write('<pre style="font-family:Georgia,serif;white-space:pre-wrap;max-width:800px;margin:2rem auto;padding:2rem;line-height:1.8;">' + escapeHtml(notice.generatedText) + '</pre>');
     w.document.close();
   }
@@ -655,7 +656,7 @@ function renderTenantScores() {
 
   var html = '<table class="admin-table"><thead><tr><th>Tenant</th><th>Property</th><th>Owner</th><th>Score</th><th>Grade</th><th>Verified Renter</th></tr></thead><tbody>';
   allTenants.forEach(function(t) {
-    var score = calculateTenantScore(t.name);
+    var score = calculateTenantScore(t.name, true);
     var gradeColor = score.grade === 'A+' || score.grade === 'A' ? '#059669' : score.grade === 'B' ? '#d97706' : score.grade === 'C' ? '#ea580c' : '#dc2626';
     html += '<tr><td><strong>' + escapeHtml(t.name) + '</strong></td>' +
       '<td style="font-size:0.82rem;">' + escapeHtml(t.property) + '</td>' +

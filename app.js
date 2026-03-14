@@ -3451,7 +3451,7 @@ function fmtCurrency(val) {
 // using the multi-row parser logic. Ensures 2142 S. King St = $1,850 / Garth.
 function productionDataReset() {
   // Clear existing test data
-  var keysToRemove = ['rv_client_hub', 'rv_listings_sanders-pm', 'rv_rent_ledger'];
+  var keysToRemove = ['rv_client_hub', 'rv_listings_sanders-pm', 'rv_rent_ledger', 'rv_tenant_scores'];
   keysToRemove.forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
 
   // Hardcoded SPM Rent Collections rows (exact copy from spreadsheet)
@@ -3897,9 +3897,9 @@ function getTenantScores() {
   return rvGet(RV_KEYS.TENANT_SCORES) || {};
 }
 
-function calculateTenantScore(tenantName) {
+function calculateTenantScore(tenantName, forceRecalculate) {
   var scores = getTenantScores();
-  if (scores[tenantName]) return scores[tenantName];
+  if (!forceRecalculate && scores[tenantName]) return scores[tenantName];
 
   var ledger = getRentLedger();
   var tenantEntries = ledger.filter(function(e) { return e.tenant === tenantName; });
@@ -4020,7 +4020,7 @@ function generate1099Data(year) {
       ownerPayouts[entry.ownerName] = { totalRent: 0, totalFees: 0, netPaid: 0, properties: [] };
     }
     var paid = parseFloat(entry.rentPaid) || 0;
-    var fee = parseFloat(entry.pmFee) || 0;
+    var fee = paid > 0 ? (parseFloat(entry.pmFee) || 0) : 0;
     ownerPayouts[entry.ownerName].totalRent += paid;
     ownerPayouts[entry.ownerName].totalFees += fee;
     ownerPayouts[entry.ownerName].netPaid += (paid - fee);
