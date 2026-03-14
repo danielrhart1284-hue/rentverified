@@ -175,13 +175,13 @@
         <h2>RentVerified Admin</h2>
         <p>Platform Control Panel</p>
       </div>
-      <div class="admin-nav-item active" onclick="showAdminTab('approvals')">📋 Approval Queue</div>
-      <div class="admin-nav-item" onclick="showAdminTab('data')">📊 Data Management</div>
-      <div class="admin-nav-item" onclick="showAdminTab('stripe')">💳 Stripe Payments</div>
-      <div class="admin-nav-item" onclick="showAdminTab('compliance')">⚖️ Compliance</div>
-      <div class="admin-nav-item" onclick="showAdminTab('scoring')">⭐ Tenant Scoring</div>
-      <div class="admin-nav-item" onclick="showAdminTab('export')">📦 Data Export</div>
-      <div class="admin-nav-item" onclick="showAdminTab('tax')">🧾 1099 Reporting</div>
+      <div class="admin-nav-item active" onclick="showAdminTab('approvals', event)">📋 Approval Queue</div>
+      <div class="admin-nav-item" onclick="showAdminTab('data', event)">📊 Data Management</div>
+      <div class="admin-nav-item" onclick="showAdminTab('stripe', event)">💳 Stripe Payments</div>
+      <div class="admin-nav-item" onclick="showAdminTab('compliance', event)">⚖️ Compliance</div>
+      <div class="admin-nav-item" onclick="showAdminTab('scoring', event)">⭐ Tenant Scoring</div>
+      <div class="admin-nav-item" onclick="showAdminTab('export', event)">📦 Data Export</div>
+      <div class="admin-nav-item" onclick="showAdminTab('tax', event)">🧾 1099 Reporting</div>
       <div style="padding:1.5rem;margin-top:auto;border-top:1px solid rgba(255,255,255,0.08);">
         <button class="btn btn-outline" style="width:100%;justify-content:center;color:#94a3b8;border-color:#334155;font-size:0.85rem;" onclick="adminLogout()">Sign Out</button>
       </div>
@@ -370,7 +370,7 @@ function adminLogout() {
   document.getElementById('admin-login-screen').style.display = 'flex';
 }
 
-function showAdminTab(tabName) {
+function showAdminTab(tabName, evt) {
   var tabs = document.querySelectorAll('.admin-tab');
   tabs.forEach(function(t) { t.classList.remove('active'); });
   var target = document.getElementById('tab-' + tabName);
@@ -378,7 +378,7 @@ function showAdminTab(tabName) {
 
   var navItems = document.querySelectorAll('.admin-nav-item');
   navItems.forEach(function(n) { n.classList.remove('active'); });
-  event.currentTarget.classList.add('active');
+  if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
   // Render tab-specific data
   if (tabName === 'data') renderDataTab();
