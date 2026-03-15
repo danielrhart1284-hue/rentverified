@@ -390,9 +390,13 @@
               🤖 Ask AI a Question
             </button>
             <button class="btn btn-success" style="justify-content:center;" onclick="openApp()">
-              📋 Request Rental Application
+              &#128203; Request Rental Application
+            </button>
+            <button class="btn btn-outline" style="justify-content:center;border-color:#059669;color:#059669;" onclick="openCalendly()">
+              &#128197; Schedule a Tour
             </button>
             <a href="listings.html" class="btn btn-outline" style="justify-content:center;">View Other Listings</a>
+            <a id="apply-now-link" href="apply.html" class="btn btn-success" style="justify-content:center;margin-top:0.5rem;">&#128203; Apply Now</a>
           </div>
           <div style="font-size:0.8rem;color:var(--gray-600);text-align:center;">
             📞 AI available 24/7 · Application sent instantly by email
@@ -532,6 +536,34 @@ window.PROPERTY_DATA = {
         var idSpan = document.querySelector('[style*="font-family:monospace"]');
         if (idSpan) idSpan.textContent = 'ID: ' + l.listingId;
 
+        // Update description
+        var descP = document.querySelector('.detail-main .detail-section p[style*="line-height:1.8"]');
+        if (descP && l.description) descP.textContent = l.description;
+
+        // Update key facts
+        var factChips = document.querySelectorAll('.amenity-chip');
+        if (factChips.length >= 3) {
+          factChips[0].innerHTML = '&#128717; ' + l.beds + ' Bedroom' + (l.beds !== 1 ? 's' : '');
+          factChips[1].innerHTML = '&#128707; ' + l.baths + ' Bathroom' + (l.baths !== 1 ? 's' : '');
+          if (l.type) factChips[2].innerHTML = '&#127970; ' + l.type;
+        }
+
+        // Update badge
+        var statusBadge = document.querySelector('.badge-available, .badge-rented');
+        if (statusBadge) {
+          if (l.status === 'available') {
+            statusBadge.className = 'badge badge-available';
+            statusBadge.textContent = 'Available Now';
+          } else {
+            statusBadge.className = 'badge badge-rented';
+            statusBadge.textContent = 'Rented';
+          }
+        }
+
+        // Update deposit
+        var depositEl = document.querySelector('.detail-section .grid-2 div:nth-child(2) div[style*="font-size:1.1rem"]');
+        if (depositEl) depositEl.innerHTML = '$' + Number(l.rent).toLocaleString();
+
         // Update chat widget greeting
         var chatGreeting = document.querySelector('#chat-messages .chat-msg.ai');
         if (chatGreeting) chatGreeting.textContent = 'Hi! I can answer any questions about ' + l.address + ' \u2014 lease terms, utilities, the application process, or anything else. What would you like to know?';
@@ -582,6 +614,36 @@ window.PROPERTY_DATA = {
       }, 300);
     }
   }
+
+  // Calendly Tour Scheduling
+  function openCalendly() {
+    var propData = window.PROPERTY_DATA || {};
+    var calendlyUrl = 'https://calendly.com/sanders-pm/tour';
+    // Add property context to Calendly URL
+    var params = '?name=' + encodeURIComponent(propData.address || '') + '&a1=' + encodeURIComponent(propData.listingId || '');
+    // Show embedded modal
+    var modal = document.getElementById('calendly-modal');
+    if (modal) {
+      document.getElementById('calendly-frame').src = calendlyUrl + params;
+      modal.style.display = 'flex';
+    } else {
+      window.open(calendlyUrl + params, '_blank');
+    }
+  }
+  function closeCalendly() {
+    var modal = document.getElementById('calendly-modal');
+    if (modal) { modal.style.display = 'none'; document.getElementById('calendly-frame').src = ''; }
+  }
+
+  // Update Apply Now link with listing ID
+  (function() {
+    var propData = window.PROPERTY_DATA || {};
+    var applyLink = document.getElementById('apply-now-link');
+    if (applyLink && propData.listingId) {
+      applyLink.href = 'apply.html?id=' + encodeURIComponent(propData.listingId);
+    }
+  })();
+
   // Phase 4: Lead Capture — show after 15 seconds if user hasn't applied
   var _leadCaptured = false;
   setTimeout(function() {
@@ -625,6 +687,18 @@ window.PROPERTY_DATA = {
     }
   }
 </script>
+
+
+<!-- Calendly Tour Modal -->
+<div id="calendly-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:white;border-radius:16px;width:100%;max-width:700px;height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-weight:800;">&#128197; Schedule a Tour</div>
+      <button onclick="closeCalendly()" style="background:none;border:none;cursor:pointer;font-size:1.5rem;color:#9ca3af;">&times;</button>
+    </div>
+    <iframe id="calendly-frame" src="" style="flex:1;border:none;width:100%;"></iframe>
+  </div>
+</div>
 
 <!-- Phase 4: Lead Capture Overlay -->
 <div class="rv-lead-overlay" id="rv-lead-overlay">

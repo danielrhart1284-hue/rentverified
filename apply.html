@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rental Application - RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    .app-container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .app-header { text-align: center; margin-bottom: 2rem; }
+    .app-header h1 { font-size: 1.8rem; font-weight: 900; }
+    .app-header p { color: var(--gray-600); margin-top: 0.5rem; }
+    .app-progress { display: flex; gap: 4px; margin-bottom: 2rem; }
+    .app-progress .step { flex: 1; height: 6px; border-radius: 3px; background: var(--gray-200); transition: background 0.3s; }
+    .app-progress .step.active { background: var(--primary); }
+    .app-progress .step.done { background: var(--success); }
+    .app-section { display: none; }
+    .app-section.active { display: block; }
+    .app-section h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--gray-900); }
+    .app-section .section-desc { font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-600); margin-bottom: 0.4rem; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+    .form-check { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 0.75rem; }
+    .form-check input[type="checkbox"] { margin-top: 3px; width: auto; }
+    .form-check label { font-size: 0.875rem; color: var(--gray-700); text-transform: none; letter-spacing: 0; font-weight: 400; }
+    .app-nav { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200); }
+    .app-nav .btn { min-width: 140px; justify-content: center; }
+    .property-banner { background: linear-gradient(135deg, #1e40af, #1a56db); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .property-banner .prop-icon { font-size: 2rem; }
+    .property-banner .prop-info h3 { font-weight: 700; margin-bottom: 2px; }
+    .property-banner .prop-info p { font-size: 0.85rem; opacity: 0.85; }
+    .sig-pad { border: 2px solid var(--gray-200); border-radius: 8px; background: #fafafa; cursor: crosshair; display: block; width: 100%; max-width: 500px; height: 150px; }
+    .sig-pad:hover { border-color: var(--primary); }
+    .payment-card { background: white; border: 2px solid var(--gray-200); border-radius: 16px; padding: 2rem; text-align: center; max-width: 500px; margin: 2rem auto; }
+    .payment-card h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .payment-card .price { font-size: 2.5rem; font-weight: 900; color: var(--primary); margin: 1rem 0; }
+    .payment-card .price span { font-size: 1rem; font-weight: 500; color: var(--gray-600); }
+    .payment-card p { font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1.5rem; }
+    .payment-card .pay-btn { width: 100%; padding: 0.9rem; font-size: 1rem; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; }
+    .payment-card .pay-btn:hover { background: #1e40af; }
+    .payment-card .pay-btn:disabled { background: var(--gray-400); cursor: not-allowed; }
+    .success-card { text-align: center; padding: 3rem 2rem; }
+    .success-card .icon { font-size: 4rem; margin-bottom: 1rem; }
+    .success-card h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .success-card p { color: var(--gray-600); margin-bottom: 1.5rem; }
+    .smartmove-box { background: #f0f9ff; border: 2px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; }
+    .smartmove-box h3 { font-weight: 700; margin-bottom: 0.5rem; }
+    .smartmove-box p { font-size: 0.875rem; color: var(--gray-600); }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .app-container { padding: 1rem; }
+      .payment-card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sanders PM banner -->
+<div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
+  Sanders Property Management &middot; <a href="listings.html" style="color:#93c5fd;">Our Rentals</a> &middot; <a href="tenant-portal.html" style="color:#93c5fd;">Tenant Portal</a>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    Sanders PM <span style="opacity:0.85;">&middot; RentVerified</span>
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">&larr; Our Rentals</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+  </div>
+</nav>
+
+<div class="app-container">
+  <!-- Property Banner -->
+  <div class="property-banner" id="prop-banner">
+    <div class="prop-icon">&#127968;</div>
+    <div class="prop-info">
+      <h3 id="app-prop-address">Loading property...</h3>
+      <p id="app-prop-details">Loading...</p>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="app-progress" id="app-progress">
+    <div class="step active" data-step="1"></div>
+    <div class="step" data-step="2"></div>
+    <div class="step" data-step="3"></div>
+    <div class="step" data-step="4"></div>
+    <div class="step" data-step="5"></div>
+    <div class="step" data-step="6"></div>
+    <div class="step" data-step="7"></div>
+    <div class="step" data-step="8"></div>
+    <div class="step" data-step="9"></div>
+  </div>
+
+  <!-- SECTION 1: Primary Applicant -->
+  <div class="app-section active" id="section-1">
+    <h2>1. Primary Applicant</h2>
+    <div class="section-desc">Your personal information</div>
+    <div class="form-row">
+      <div class="form-group"><label>First Name *</label><input type="text" id="pa-first" required /></div>
+      <div class="form-group"><label>Last Name *</label><input type="text" id="pa-last" required /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Email *</label><input type="email" id="pa-email" required /></div>
+      <div class="form-group"><label>Phone *</label><input type="tel" id="pa-phone" required /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date of Birth *</label><input type="date" id="pa-dob" required /></div>
+      <div class="form-group"><label>Driver&#39;s License #</label><input type="text" id="pa-dl" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>SSN (last 4 digits)</label><input type="text" id="pa-ssn4" maxlength="4" placeholder="XXXX" /></div>
+      <div class="form-group"><label>Current Address *</label><input type="text" id="pa-address" required /></div>
+    </div>
+    <div class="app-nav">
+      <div></div>
+      <button class="btn btn-primary" onclick="nextSection(2)">Next: Co-Applicant &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Co-Applicant -->
+  <div class="app-section" id="section-2">
+    <h2>2. Co-Applicant</h2>
+    <div class="section-desc">If applying with another person (roommate, partner, etc.)</div>
+    <div class="form-check">
+      <input type="checkbox" id="has-coapplicant" onchange="toggleCoApp()" />
+      <label for="has-coapplicant">I have a co-applicant</label>
+    </div>
+    <div id="coapp-fields" style="display:none;">
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" id="ca-first" /></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="ca-last" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="ca-email" /></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="ca-phone" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date of Birth</label><input type="date" id="ca-dob" /></div>
+        <div class="form-group"><label>Relationship</label><input type="text" id="ca-relationship" placeholder="Spouse, roommate, etc." /></div>
+      </div>
+    </div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(1)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="nextSection(3)">Next: Residential History &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Residential History -->
+  <div class="app-section" id="section-3">
+    <h2>3. Residential History</h2>
+    <div class="section-desc">Your last 3 years of rental/housing history</div>
+    <div style="background:var(--gray-100);border-radius:12px;padding:1.25rem;margin-bottom:1rem;">
+      <div style="font-weight:700;margin-bottom:0.75rem;">Current Residence</div>
+      <div class="form-row full"><div class="form-group"><label>Address</label><input type="text" id="rh1-address" /></div></div>
+      <div class="form-row">
+        <div class="form-group"><label>Landlord Name</label><input type="text" id="rh1-landlord" /></div>
+        <div class="form-group"><label>Landlord Phone</label><input type="tel" id="rh1-phone" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Monthly Rent</label><input type="number" id="rh1-rent" placeholder="$" /></div>
+        <div class="form-group"><label>Dates (From - To)</label><input type="text" id="rh1-dates" placeholder="Jan 2024 - Present" /></div>
+      </div>
+      <div class="form-group"><label>Reason for Leaving</label><input type="text" id="rh1-reason" /></div>
+    </div>
+    <div style="background:var(--gray-100);border-radius:12px;padding:1.25rem;margin-bottom:1rem;">
+      <div style="font-weight:700;margin-bottom:0.75rem;">Previous Residence</div>
+      <div class="form-row full"><div class="form-group"><label>Address</label><input type="text" id="rh2-address" /></div></div>
+      <div class="form-row">
+        <div class="form-group"><label>Landlord Name</label><input type="text" id="rh2-landlord" /></div>
+        <div class="form-group"><label>Landlord Phone</label><input type="tel" id="rh2-phone" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Monthly Rent</label><input type="number" id="rh2-rent" placeholder="$" /></div>
+        <div class="form-group"><label>Dates (From - To)</label><input type="text" id="rh2-dates" /></div>
+      </div>
+      <div class="form-group"><label>Reason for Leaving</label><input type="text" id="rh2-reason" /></div>
+    </div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(2)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="nextSection(4)">Next: Employment &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Employment -->
+  <div class="app-section" id="section-4">
+    <h2>4. Employment &amp; Income</h2>
+    <div class="section-desc">Your current employment and income information</div>
+    <div class="form-row">
+      <div class="form-group"><label>Employer Name *</label><input type="text" id="emp-name" required /></div>
+      <div class="form-group"><label>Job Title</label><input type="text" id="emp-title" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Employer Phone</label><input type="tel" id="emp-phone" /></div>
+      <div class="form-group"><label>Employer Address</label><input type="text" id="emp-address" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Monthly Gross Income *</label><input type="number" id="emp-income" placeholder="$" required /></div>
+      <div class="form-group"><label>Length of Employment</label><input type="text" id="emp-length" placeholder="e.g. 2 years" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Additional Income (monthly)</label><input type="number" id="emp-other" placeholder="$0" /></div>
+      <div class="form-group"><label>Source of Additional Income</label><input type="text" id="emp-other-source" placeholder="e.g. freelance, alimony" /></div>
+    </div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(3)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="nextSection(5)">Next: Occupants &amp; Pets &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Occupants & Pets -->
+  <div class="app-section" id="section-5">
+    <h2>5. Occupants &amp; Pets</h2>
+    <div class="section-desc">Everyone who will live in the unit and any pets</div>
+    <div style="font-weight:700;margin-bottom:0.75rem;">Additional Occupants</div>
+    <div id="occupants-list">
+      <div class="form-row" style="margin-bottom:0.5rem;">
+        <div class="form-group"><label>Full Name</label><input type="text" id="occ1-name" /></div>
+        <div class="form-group"><label>Relationship / Age</label><input type="text" id="occ1-rel" placeholder="e.g. Child, 8 years old" /></div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="addOccupant()" style="margin-bottom:1.5rem;">+ Add Another Occupant</button>
+
+    <div style="font-weight:700;margin-bottom:0.75rem;">Pets</div>
+    <div class="form-check">
+      <input type="checkbox" id="has-pets" onchange="togglePets()" />
+      <label for="has-pets">I have pets</label>
+    </div>
+    <div id="pets-fields" style="display:none;">
+      <div class="form-row">
+        <div class="form-group"><label>Pet Type</label><input type="text" id="pet1-type" placeholder="Dog, Cat, etc." /></div>
+        <div class="form-group"><label>Breed</label><input type="text" id="pet1-breed" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Weight (lbs)</label><input type="number" id="pet1-weight" /></div>
+        <div class="form-group"><label>Age</label><input type="text" id="pet1-age" /></div>
+      </div>
+    </div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(4)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="nextSection(6)">Next: Financial &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Financial -->
+  <div class="app-section" id="section-6">
+    <h2>6. Financial Information</h2>
+    <div class="section-desc">Financial history relevant to your application</div>
+    <div class="form-row">
+      <div class="form-group"><label>Monthly Take-Home Pay</label><input type="number" id="fin-takehome" placeholder="$" /></div>
+      <div class="form-group"><label>Savings / Checking Balance</label><input type="number" id="fin-savings" placeholder="$" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Monthly Debt Payments</label><input type="number" id="fin-debt" placeholder="$0" /></div>
+      <div class="form-group"><label>Credit Score (approximate)</label><input type="number" id="fin-credit" placeholder="e.g. 720" /></div>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="fin-bankruptcy" />
+      <label for="fin-bankruptcy">I have filed for bankruptcy in the past 7 years</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="fin-eviction" />
+      <label for="fin-eviction">I have been evicted or had an eviction filed against me</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="fin-felony" />
+      <label for="fin-felony">I have a felony conviction</label>
+    </div>
+    <div class="form-group"><label>If you checked any boxes above, please explain</label><textarea id="fin-explain" placeholder="Provide context..."></textarea></div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(5)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="nextSection(7)">Next: Background Check &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Background Check Consent -->
+  <div class="app-section" id="section-7">
+    <h2>7. Background Check Consent</h2>
+    <div class="section-desc">Authorization for credit and background verification</div>
+    <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="font-weight:700;margin-bottom:0.5rem;">&#9888;&#65039; Important Notice</div>
+      <p style="font-size:0.875rem;color:var(--gray-700);line-height:1.6;">By checking the box below, you authorize Sanders Property Management and RentVerified to obtain a consumer credit report and/or investigative consumer report from TransUnion SmartMove or any other consumer reporting agency. This report may include credit history, criminal background, eviction history, and identity verification.</p>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="bg-consent" required />
+      <label for="bg-consent"><strong>I authorize a background and credit check</strong> as described above. I understand that a $45 screening fee will be charged after submitting this application.</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="bg-accurate" />
+      <label for="bg-accurate">I certify that all information provided in this application is true and accurate to the best of my knowledge.</label>
+    </div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(6)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="nextSection(8)">Next: Emergency Contact &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Emergency Contact -->
+  <div class="app-section" id="section-8">
+    <h2>8. Emergency Contact</h2>
+    <div class="section-desc">Someone we can contact in case of emergency</div>
+    <div class="form-row">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="ec-name" required /></div>
+      <div class="form-group"><label>Relationship</label><input type="text" id="ec-relationship" placeholder="e.g. Parent, Sibling" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone *</label><input type="tel" id="ec-phone" required /></div>
+      <div class="form-group"><label>Email</label><input type="email" id="ec-email" /></div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group"><label>Address</label><input type="text" id="ec-address" /></div>
+    </div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(7)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="nextSection(9)">Next: Authorization &amp; Signature &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Authorization & E-Signature -->
+  <div class="app-section" id="section-9">
+    <h2>9. Authorization &amp; E-Signature</h2>
+    <div class="section-desc">Review and sign your application</div>
+    <div style="background:var(--gray-100);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--gray-700);line-height:1.7;">
+      <p><strong>By signing below, I certify that:</strong></p>
+      <ul style="margin:0.5rem 0;padding-left:1.5rem;">
+        <li>All information in this application is true and complete.</li>
+        <li>I authorize verification of all references, employment, and financial information.</li>
+        <li>I authorize a credit and background check through TransUnion SmartMove.</li>
+        <li>I understand that providing false information is grounds for denial or lease termination.</li>
+        <li>I agree to pay a non-refundable $45 application/screening fee.</li>
+        <li>I have read and agree to the RentVerified Terms of Service and Privacy Policy.</li>
+      </ul>
+    </div>
+    <div class="form-group">
+      <label>E-Signature (draw your signature below)</label>
+      <canvas id="sig-canvas" class="sig-pad" width="500" height="150"></canvas>
+      <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+        <button class="btn btn-outline btn-sm" onclick="clearSignature()">Clear Signature</button>
+        <span id="sig-status" style="font-size:0.8rem;color:var(--gray-500);line-height:32px;"></span>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Typed Full Name *</label><input type="text" id="sig-name" required placeholder="Type your full legal name" /></div>
+      <div class="form-group"><label>Date</label><input type="text" id="sig-date" readonly /></div>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="sig-agree" required />
+      <label for="sig-agree"><strong>I agree to all terms above and submit this application.</strong></label>
+    </div>
+    <div class="app-nav">
+      <button class="btn btn-outline" onclick="prevSection(8)">&larr; Back</button>
+      <button class="btn btn-primary" id="submit-app-btn" onclick="submitApplication()">Submit Application &rarr;</button>
+    </div>
+  </div>
+
+  <!-- PAYMENT STEP (shown after submission) -->
+  <div id="payment-step" style="display:none;">
+    <div class="payment-card">
+      <div style="font-size:3rem;margin-bottom:0.5rem;">&#128179;</div>
+      <h2>Background Check Fee</h2>
+      <p>Complete your application by paying the screening fee. This covers your TransUnion SmartMove background and credit check.</p>
+      <div class="price">$45 <span>one-time fee</span></div>
+      <div style="background:var(--gray-100);border-radius:10px;padding:1rem;margin-bottom:1.5rem;text-align:left;">
+        <div style="font-size:0.8rem;color:var(--gray-600);margin-bottom:0.5rem;">Includes:</div>
+        <div style="font-size:0.85rem;display:flex;flex-direction:column;gap:4px;">
+          <div>&#10003; Credit report</div>
+          <div>&#10003; Criminal background check</div>
+          <div>&#10003; Eviction history</div>
+          <div>&#10003; Identity verification</div>
+        </div>
+      </div>
+      <button class="pay-btn" id="pay-btn" onclick="processPayment()">&#128274; Pay $45 with Stripe</button>
+      <div style="font-size:0.75rem;color:var(--gray-500);margin-top:0.75rem;">Secure payment powered by Stripe. Your card details are never stored on our servers.</div>
+    </div>
+  </div>
+
+  <!-- SUCCESS (shown after payment) -->
+  <div id="success-step" style="display:none;">
+    <div class="success-card">
+      <div class="icon">&#127881;</div>
+      <h2>Application Submitted &amp; Paid!</h2>
+      <p>Your application for <strong id="success-address"></strong> has been submitted successfully. The landlord will review your application and background check results.</p>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#166534;padding:6px 16px;border-radius:999px;font-size:0.85rem;font-weight:700;">&#128179; Payment Confirmed &mdash; $45.00</div>
+      <div class="smartmove-box">
+        <h3>&#128736;&#65039; TransUnion SmartMove</h3>
+        <p>Your background check is being processed. You may receive an email from TransUnion to verify your identity. Results are typically available within 1-2 business days.</p>
+        <a href="https://www.mysmartmove.com/?utm_source=rentverified&utm_medium=partner&utm_campaign=screening" target="_blank" class="btn btn-primary btn-sm" style="margin-top:0.75rem;">View SmartMove Status &rarr;</a>
+      </div>
+      <div style="margin-top:1.5rem;">
+        <a href="listings.html" class="btn btn-outline">Browse More Listings</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end app-container -->
+
+<script src="app.js"></script>
+<script>
+var _currentSection = 1;
+var _totalSections = 9;
+var _appListingId = '';
+var _appPropertyAddress = '';
+var _sigDrawing = false;
+var _sigCanvas, _sigCtx;
+
+// Load property from URL param
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var listingId = params.get('id') || params.get('listing');
+  if (listingId) {
+    _appListingId = listingId;
+    var result = typeof verifyListing === 'function' ? verifyListing(listingId) : null;
+    if (result && result.verified && result.listing) {
+      var l = result.listing;
+      _appPropertyAddress = l.address;
+      document.getElementById('app-prop-address').textContent = l.address;
+      document.getElementById('app-prop-details').textContent = '$' + Number(l.rent).toLocaleString() + '/mo \u00b7 ' + l.beds + ' bed \u00b7 ' + l.baths + ' bath';
+      document.title = 'Apply: ' + l.address + ' - RentVerified';
+    } else {
+      document.getElementById('app-prop-address').textContent = 'Property Application';
+      document.getElementById('app-prop-details').textContent = 'Listing ID: ' + listingId;
+    }
+  } else {
+    document.getElementById('app-prop-address').textContent = 'General Application';
+    document.getElementById('app-prop-details').textContent = 'Sanders Property Management';
+  }
+
+  // Set today's date
+  document.getElementById('sig-date').value = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+})();
+
+// Signature canvas
+document.addEventListener('DOMContentLoaded', function() {
+  _sigCanvas = document.getElementById('sig-canvas');
+  _sigCtx = _sigCanvas.getContext('2d');
+  _sigCtx.strokeStyle = '#1e293b';
+  _sigCtx.lineWidth = 2;
+  _sigCtx.lineCap = 'round';
+
+  function getPos(e) {
+    var rect = _sigCanvas.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    var y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    // Scale for canvas resolution
+    x = x * (_sigCanvas.width / rect.width);
+    y = y * (_sigCanvas.height / rect.height);
+    return { x: x, y: y };
+  }
+
+  _sigCanvas.addEventListener('mousedown', function(e) { _sigDrawing = true; _sigCtx.beginPath(); var p = getPos(e); _sigCtx.moveTo(p.x, p.y); });
+  _sigCanvas.addEventListener('mousemove', function(e) { if (!_sigDrawing) return; var p = getPos(e); _sigCtx.lineTo(p.x, p.y); _sigCtx.stroke(); });
+  _sigCanvas.addEventListener('mouseup', function() { _sigDrawing = false; document.getElementById('sig-status').textContent = 'Signature captured'; });
+  _sigCanvas.addEventListener('mouseleave', function() { _sigDrawing = false; });
+
+  // Touch support
+  _sigCanvas.addEventListener('touchstart', function(e) { e.preventDefault(); _sigDrawing = true; _sigCtx.beginPath(); var p = getPos(e); _sigCtx.moveTo(p.x, p.y); });
+  _sigCanvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!_sigDrawing) return; var p = getPos(e); _sigCtx.lineTo(p.x, p.y); _sigCtx.stroke(); });
+  _sigCanvas.addEventListener('touchend', function() { _sigDrawing = false; document.getElementById('sig-status').textContent = 'Signature captured'; });
+});
+
+function clearSignature() {
+  _sigCtx.clearRect(0, 0, _sigCanvas.width, _sigCanvas.height);
+  document.getElementById('sig-status').textContent = '';
+}
+
+function toggleCoApp() {
+  document.getElementById('coapp-fields').style.display = document.getElementById('has-coapplicant').checked ? 'block' : 'none';
+}
+function togglePets() {
+  document.getElementById('pets-fields').style.display = document.getElementById('has-pets').checked ? 'block' : 'none';
+}
+
+var _occCount = 1;
+function addOccupant() {
+  _occCount++;
+  var div = document.createElement('div');
+  div.className = 'form-row';
+  div.style.marginBottom = '0.5rem';
+  div.innerHTML = '<div class="form-group"><label>Full Name</label><input type="text" id="occ' + _occCount + '-name" /></div><div class="form-group"><label>Relationship / Age</label><input type="text" id="occ' + _occCount + '-rel" /></div>';
+  document.getElementById('occupants-list').appendChild(div);
+}
+
+function nextSection(n) {
+  // Basic validation on required fields for current section
+  var currentEl = document.getElementById('section-' + _currentSection);
+  var required = currentEl.querySelectorAll('input[required]');
+  for (var i = 0; i < required.length; i++) {
+    if (!required[i].value.trim()) {
+      required[i].style.borderColor = '#ef4444';
+      required[i].focus();
+      return;
+    }
+    required[i].style.borderColor = '';
+  }
+  showSection(n);
+}
+
+function prevSection(n) { showSection(n); }
+
+function showSection(n) {
+  document.getElementById('section-' + _currentSection).classList.remove('active');
+  document.getElementById('section-' + n).classList.add('active');
+  _currentSection = n;
+  // Update progress
+  var steps = document.querySelectorAll('.app-progress .step');
+  for (var i = 0; i < steps.length; i++) {
+    var s = parseInt(steps[i].dataset.step);
+    steps[i].classList.remove('active', 'done');
+    if (s < n) steps[i].classList.add('done');
+    else if (s === n) steps[i].classList.add('active');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function checked(id) { var el = document.getElementById(id); return el ? el.checked : false; }
+
+function submitApplication() {
+  if (!checked('sig-agree')) { alert('Please agree to the terms to submit your application.'); return; }
+  if (!val('sig-name')) { alert('Please type your full legal name.'); return; }
+
+  // Collect all 9 sections
+  var formData = {
+    listingId: _appListingId,
+    propertyAddress: _appPropertyAddress,
+    firstName: val('pa-first'),
+    lastName: val('pa-last'),
+    email: val('pa-email'),
+    phone: val('pa-phone'),
+    dob: val('pa-dob'),
+    driversLicense: val('pa-dl'),
+    ssn4: val('pa-ssn4'),
+    currentAddress: val('pa-address'),
+    coApplicant: checked('has-coapplicant') ? {
+      firstName: val('ca-first'), lastName: val('ca-last'),
+      email: val('ca-email'), phone: val('ca-phone'),
+      dob: val('ca-dob'), relationship: val('ca-relationship')
+    } : null,
+    residentialHistory: [
+      { address: val('rh1-address'), landlord: val('rh1-landlord'), phone: val('rh1-phone'), rent: val('rh1-rent'), dates: val('rh1-dates'), reason: val('rh1-reason') },
+      { address: val('rh2-address'), landlord: val('rh2-landlord'), phone: val('rh2-phone'), rent: val('rh2-rent'), dates: val('rh2-dates'), reason: val('rh2-reason') }
+    ],
+    employment: {
+      employer: val('emp-name'), title: val('emp-title'), phone: val('emp-phone'),
+      address: val('emp-address'), length: val('emp-length')
+    },
+    monthlyIncome: parseFloat(val('emp-income')) || 0,
+    otherIncome: parseFloat(val('emp-other')) || 0,
+    otherIncomeSource: val('emp-other-source'),
+    occupants: [],
+    pets: checked('has-pets') ? [{ type: val('pet1-type'), breed: val('pet1-breed'), weight: val('pet1-weight'), age: val('pet1-age') }] : [],
+    financial: {
+      takeHome: val('fin-takehome'), savings: val('fin-savings'),
+      debt: val('fin-debt'), creditScore: val('fin-credit'),
+      explain: val('fin-explain')
+    },
+    bankruptcy: checked('fin-bankruptcy'),
+    evictionHistory: checked('fin-eviction'),
+    felony: checked('fin-felony'),
+    backgroundDisclosure: { consent: checked('bg-consent'), accurate: checked('bg-accurate') },
+    emergencyContact: {
+      name: val('ec-name'), relationship: val('ec-relationship'),
+      phone: val('ec-phone'), email: val('ec-email'), address: val('ec-address')
+    },
+    authorized: checked('sig-agree'),
+    signature: _sigCanvas.toDataURL(),
+    signedName: val('sig-name'),
+    signedDate: val('sig-date')
+  };
+
+  // Collect occupants
+  for (var i = 1; i <= _occCount; i++) {
+    var n = val('occ' + i + '-name');
+    if (n) formData.occupants.push({ name: n, relationship: val('occ' + i + '-rel') });
+  }
+
+  // Save using app.js createApplication
+  if (typeof createApplication === 'function') {
+    var app = createApplication(formData);
+    // Also save to listing-specific key
+    var lsKey = 'rv_applications_' + (_appListingId || 'general');
+    var existing = JSON.parse(localStorage.getItem(lsKey) || '[]');
+    existing.push(app);
+    localStorage.setItem(lsKey, JSON.stringify(existing));
+  }
+
+  // Hide form, show payment
+  document.getElementById('section-' + _currentSection).classList.remove('active');
+  document.getElementById('app-progress').style.display = 'none';
+  document.getElementById('payment-step').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function processPayment() {
+  var btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  // Check if Stripe is configured (placeholder check)
+  var stripeKey = 'YOUR_STRIPE_PUBLISHABLE_KEY';
+  if (stripeKey.indexOf('YOUR_') === 0) {
+    // Demo mode: simulate payment
+    setTimeout(function() {
+      // Mark application as paid
+      var apps = typeof getApplications === 'function' ? getApplications() : [];
+      if (apps.length > 0) {
+        apps[apps.length - 1].paymentStatus = 'paid';
+        apps[apps.length - 1].paymentAmount = 45;
+        apps[apps.length - 1].paymentDate = new Date().toISOString();
+        if (typeof saveApplications === 'function') saveApplications(apps);
+        // Also update listing-specific key
+        var lsKey = 'rv_applications_' + (_appListingId || 'general');
+        var existing = JSON.parse(localStorage.getItem(lsKey) || '[]');
+        if (existing.length > 0) {
+          existing[existing.length - 1].paymentStatus = 'paid';
+          existing[existing.length - 1].paymentAmount = 45;
+          existing[existing.length - 1].paymentDate = new Date().toISOString();
+          localStorage.setItem(lsKey, JSON.stringify(existing));
+        }
+      }
+      showSuccess();
+    }, 1500);
+  } else {
+    // Real Stripe Checkout
+    var stripe = Stripe(stripeKey);
+    stripe.redirectToCheckout({
+      lineItems: [{ price: 'STRIPE_SCREENING_PRICE_ID', quantity: 1 }],
+      mode: 'payment',
+      successUrl: window.location.href + '?payment=success',
+      cancelUrl: window.location.href + '?payment=cancel',
+    }).then(function(result) {
+      if (result.error) {
+        btn.disabled = false;
+        btn.textContent = 'Pay $45 with Stripe';
+        alert('Payment error: ' + result.error.message);
+      }
+    });
+  }
+}
+
+function showSuccess() {
+  document.getElementById('payment-step').style.display = 'none';
+  document.getElementById('success-step').style.display = 'block';
+  document.getElementById('success-address').textContent = _appPropertyAddress || 'this property';
+}
+
+// Handle return from Stripe
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    document.getElementById('app-progress').style.display = 'none';
+    for (var i = 1; i <= 9; i++) {
+      var s = document.getElementById('section-' + i);
+      if (s) s.classList.remove('active');
+    }
+    showSuccess();
+  }
+})();
+</script>
+</body>
+</html>

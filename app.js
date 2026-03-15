@@ -220,6 +220,8 @@ function buildResponses() {
     { keys: ['rent', 'price'], response: 'Rent is ' + rent + '/month. Zero processing fees via Cash App or Zelle.' },
     { keys: ['deposit'], response: "Security deposit is " + deposit + ", equal to one month's rent." },
     { keys: ['tour', 'view', 'see'], response: tourMsg },
+        { keys: ['tour', 'showing', 'visit', 'see the place', 'schedule', 'come by', 'walk through', 'walkthrough', 'open house'],
+      response: 'I\'d love to help you schedule a tour! You can book a 30-minute showing directly here:\n\nhttps://calendly.com/sanders-pm/tour\n\nOr click the "Schedule a Tour" button on the property page. If you\'re ready to apply, use the "Apply Now" button!' },
     { keys: ['pet', 'dog', 'cat', 'animal'], response: 'Pets are ' + petPolicy + '. Mention any pets in your application.' },
     { keys: ['parking', 'car'], response: 'Yes, ' + parking + '.' },
   ];
