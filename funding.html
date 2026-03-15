@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Funding Hub – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .funding-hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      color: white; padding: 3.5rem 2rem; text-align: center;
+    }
+    .funding-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .funding-hero p { font-size: 1.05rem; opacity: 0.85; max-width: 600px; margin: 0 auto; }
+    .pathway-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 900px; margin: -2rem auto 2rem; padding: 0 1.5rem; position: relative; z-index: 1; }
+    .pathway-card {
+      background: white; border-radius: 16px; padding: 2rem; text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      border: 2px solid transparent;
+    }
+    .pathway-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+    .pathway-card.active { border-color: #1a56db; }
+    .pathway-card .pathway-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .pathway-card h3 { font-weight: 800; font-size: 1.15rem; margin-bottom: 0.35rem; }
+    .pathway-card p { font-size: 0.88rem; color: #64748b; }
+    .funding-section { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+    .funding-section h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .funding-section .subtitle { color: #64748b; font-size: 0.92rem; margin-bottom: 1.5rem; }
+    .partner-card {
+      background: white; border-radius: 12px; padding: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #f1f5f9;
+      display: flex; gap: 1.25rem; align-items: flex-start; margin-bottom: 1rem;
+      transition: box-shadow 0.2s;
+    }
+    .partner-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .partner-logo {
+      width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.9rem; color: white;
+    }
+    .partner-info h4 { font-weight: 700; font-size: 1rem; margin-bottom: 0.2rem; }
+    .partner-info .partner-type { font-size: 0.78rem; color: #6366f1; font-weight: 600; }
+    .partner-info p { font-size: 0.85rem; color: #64748b; margin: 0.5rem 0; line-height: 1.55; }
+    .partner-stats { display: flex; gap: 1rem; margin: 0.5rem 0; }
+    .partner-stat { font-size: 0.78rem; color: #475569; font-weight: 600; }
+    .partner-stat span { color: #059669; }
+    .assist-card {
+      background: white; border-radius: 12px; padding: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #f1f5f9;
+    }
+    .assist-card h4 { font-weight: 700; margin-bottom: 0.25rem; }
+    .assist-card p { font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem; line-height: 1.55; }
+    .form-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 2rem; }
+    .form-card h3 { font-weight: 800; font-size: 1.15rem; margin-bottom: 0.25rem; }
+    .form-card .form-subtitle { font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; color: #374151; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-size: 0.92rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #3b82f6; }
+    .confirmation-screen {
+      text-align: center; padding: 2rem; display: none;
+    }
+    .confirmation-screen .check { font-size: 3rem; margin-bottom: 0.75rem; }
+    @media (max-width: 640px) {
+      .pathway-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .partner-card { flex-direction: column; }
+      .funding-hero h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Banner -->
+<div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
+  🏢 <strong style="color:#e2e8f0;">Sanders Property Management</strong> · <a href="index.html" style="color:#93c5fd;">Home</a> · <a href="landlord-signup.html" style="color:#93c5fd;">Dashboard</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    <span style="font-weight:800;">Sanders PM</span> <span style="font-weight:500;opacity:0.9;">· Funding Hub</span>
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">Browse Rentals</a>
+    <a href="index.html#pricing">Pricing</a>
+    <a href="funding.html" style="font-weight:700;color:var(--primary);">Funding</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Tenant Login</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="funding-hero">
+  <div style="font-size:2.5rem;margin-bottom:0.5rem;">💰</div>
+  <h1>RentVerified Funding Hub</h1>
+  <p>Whether you're a business owner looking for capital or a tenant needing financial help, we connect you with the right resources.</p>
+</div>
+
+<!-- PATHWAY SELECTOR -->
+<div class="pathway-grid">
+  <div class="pathway-card active" onclick="showPathway('business')" id="pathway-business">
+    <div class="pathway-icon">🏢</div>
+    <h3>Business Funding</h3>
+    <p>Working capital, equipment financing, SBA loans, and merchant cash advances for businesses.</p>
+  </div>
+  <div class="pathway-card" onclick="showPathway('personal')" id="pathway-personal">
+    <div class="pathway-icon">🏠</div>
+    <h3>Tenant Financial Assistance</h3>
+    <p>Deposit alternatives, rent help, emergency assistance, and credit-building tools for tenants.</p>
+  </div>
+</div>
+
+<!-- BUSINESS FUNDING SECTION -->
+<div id="section-business" class="funding-section" style="margin-bottom:3rem;">
+  <h2>Business Funding</h2>
+  <p class="subtitle">Apply once. Get matched with multiple lenders. Funding from $5,000 to $5,000,000.</p>
+
+  <!-- C2: Application Form -->
+  <div class="form-card" id="biz-form-card">
+    <h3>📋 Business Funding Application</h3>
+    <p class="form-subtitle">Fill out this form and we'll match you with the best lending partners. No obligation, no impact on your credit score.</p>
+    <form id="biz-funding-form" onsubmit="submitBizFunding(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Business Name *</label>
+          <input type="text" id="bf-business-name" required placeholder="Your business name" />
+        </div>
+        <div class="form-group">
+          <label>Contact Name *</label>
+          <input type="text" id="bf-contact-name" required placeholder="Full name" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="bf-email" required placeholder="you@business.com" />
+        </div>
+        <div class="form-group">
+          <label>Phone *</label>
+          <input type="tel" id="bf-phone" required placeholder="(555) 000-0000" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Funding Amount Needed *</label>
+          <select id="bf-amount" required>
+            <option value="">Select range...</option>
+            <option value="5k-25k">$5,000 - $25,000</option>
+            <option value="25k-100k">$25,000 - $100,000</option>
+            <option value="100k-500k">$100,000 - $500,000</option>
+            <option value="500k-1m">$500,000 - $1,000,000</option>
+            <option value="1m-5m">$1,000,000 - $5,000,000</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Funding Type *</label>
+          <select id="bf-type" required>
+            <option value="">Select type...</option>
+            <option value="working-capital">Working Capital</option>
+            <option value="equipment">Equipment Financing</option>
+            <option value="sba">SBA Loan</option>
+            <option value="mca">Merchant Cash Advance</option>
+            <option value="line-of-credit">Business Line of Credit</option>
+            <option value="real-estate">Commercial Real Estate</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Years in Business</label>
+          <select id="bf-years">
+            <option value="">Select...</option>
+            <option value="startup">Startup (less than 1 year)</option>
+            <option value="1-2">1-2 years</option>
+            <option value="3-5">3-5 years</option>
+            <option value="5+">5+ years</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Monthly Revenue</label>
+          <select id="bf-revenue">
+            <option value="">Select range...</option>
+            <option value="under-10k">Under $10,000</option>
+            <option value="10k-50k">$10,000 - $50,000</option>
+            <option value="50k-100k">$50,000 - $100,000</option>
+            <option value="100k+">$100,000+</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>What will the funding be used for?</label>
+        <textarea id="bf-purpose" rows="3" placeholder="e.g., Buildout of new retail space, equipment purchase, working capital..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;">Submit Application</button>
+      <p style="font-size:0.78rem;color:#94a3b8;text-align:center;margin-top:0.75rem;">Your information is secure. We share it only with our vetted lending partners.</p>
+    </form>
+  </div>
+
+  <!-- C2: Confirmation screen -->
+  <div class="form-card confirmation-screen" id="biz-confirmation">
+    <div class="check">✅</div>
+    <h3 style="margin-bottom:0.5rem;">Application Submitted!</h3>
+    <p style="color:#64748b;margin-bottom:1rem;">Your business funding application has been received. Our lending partners will review your information and reach out within 1-2 business days.</p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-weight:700;color:#166534;font-size:0.92rem;">What Happens Next</div>
+      <ol style="font-size:0.85rem;color:#374151;padding-left:1.25rem;margin-top:0.5rem;line-height:1.8;">
+        <li>Our partners review your application (1-2 business days)</li>
+        <li>You receive personalized offers via email/phone</li>
+        <li>Compare offers and choose the best fit</li>
+        <li>Funding can be deposited as quickly as same day</li>
+      </ol>
+    </div>
+    <div id="biz-app-reference" style="font-size:0.82rem;color:#64748b;"></div>
+    <button class="btn btn-outline" style="margin-top:1rem;" onclick="resetBizForm()">Submit Another Application</button>
+  </div>
+
+  <!-- C4: Partner Cards -->
+  <h3 style="font-weight:700;margin-bottom:1rem;">Our Lending Partners</h3>
+
+  <div class="partner-card">
+    <div class="partner-logo" style="background:#1a56db;">GK</div>
+    <div class="partner-info">
+      <h4>GoKapital</h4>
+      <div class="partner-type">Business Loans &amp; Equipment Financing</div>
+      <p>Small business loans from $5,000 to $800,000. Equipment financing, working capital, and merchant cash advances. Fast approval with flexible terms.</p>
+      <div class="partner-stats">
+        <div class="partner-stat">Amounts: <span>$5K-$800K</span></div>
+        <div class="partner-stat">Approval: <span>24-48hrs</span></div>
+        <div class="partner-stat">Terms: <span>6mo-5yr</span></div>
+      </div>
+      <!-- AFFILIATE_LINK: GoKapital -->
+      <button class="btn btn-primary btn-sm" onclick="trackAffiliateClick('gokapital','https://www.gokapital.com')">Apply Now ↗</button>
+    </div>
+  </div>
+
+  <div class="partner-card">
+    <div class="partner-logo" style="background:#059669;">CC</div>
+    <div class="partner-info">
+      <h4>Clarify Capital</h4>
+      <div class="partner-type">Working Capital &amp; Business Loans</div>
+      <p>Business loans from $10,000 to $5,000,000. Get multiple offers from one application. Specializes in fast-funding for established businesses.</p>
+      <div class="partner-stats">
+        <div class="partner-stat">Amounts: <span>$10K-$5M</span></div>
+        <div class="partner-stat">Approval: <span>Same day</span></div>
+        <div class="partner-stat">Terms: <span>3mo-10yr</span></div>
+      </div>
+      <!-- AFFILIATE_LINK: Clarify Capital -->
+      <button class="btn btn-primary btn-sm" onclick="trackAffiliateClick('clarify_capital','https://www.clarifycapital.com')">Apply Now ↗</button>
+    </div>
+  </div>
+
+  <div class="partner-card">
+    <div class="partner-logo" style="background:#1e40af;">SBA</div>
+    <div class="partner-info">
+      <h4>SBA Loan Referral Network</h4>
+      <div class="partner-type">Government-Backed Small Business Loans</div>
+      <p>SBA 7(a) and 504 loans with the lowest interest rates available. Government-backed, long terms (7-25 years), and lower monthly payments. Best for established businesses.</p>
+      <div class="partner-stats">
+        <div class="partner-stat">Amounts: <span>$50K-$5M</span></div>
+        <div class="partner-stat">Rates: <span>Prime+2.25%</span></div>
+        <div class="partner-stat">Terms: <span>7-25yr</span></div>
+      </div>
+      <!-- AFFILIATE_LINK: SBA -->
+      <button class="btn btn-primary btn-sm" onclick="trackAffiliateClick('sba','https://www.sba.gov/funding-programs/loans')">Learn More ↗</button>
+    </div>
+  </div>
+
+  <div class="partner-card">
+    <div class="partner-logo" style="background:#dc2626;">NF</div>
+    <div class="partner-info">
+      <h4>National Funding</h4>
+      <div class="partner-type">Small Business Loans &amp; Working Capital</div>
+      <p>Business loans up to $500,000 with early payoff discounts. Specializes in working capital for small to mid-size businesses. Simple application process.</p>
+      <div class="partner-stats">
+        <div class="partner-stat">Amounts: <span>$5K-$500K</span></div>
+        <div class="partner-stat">Approval: <span>24hrs</span></div>
+        <div class="partner-stat">Terms: <span>4mo-2yr</span></div>
+      </div>
+      <!-- AFFILIATE_LINK: National Funding -->
+      <button class="btn btn-primary btn-sm" onclick="trackAffiliateClick('national_funding','https://www.nationalfunding.com')">Apply Now ↗</button>
+    </div>
+  </div>
+
+  <div class="partner-card">
+    <div class="partner-logo" style="background:#7c3aed;">MCA</div>
+    <div class="partner-info">
+      <h4>Merchant Cash Advance Network</h4>
+      <div class="partner-type">Revenue-Based Financing</div>
+      <p>Get capital based on your future sales. No fixed monthly payments — repayment adjusts with your revenue. Best for retail, restaurants, and service businesses with steady card sales.</p>
+      <div class="partner-stats">
+        <div class="partner-stat">Amounts: <span>$5K-$2M</span></div>
+        <div class="partner-stat">Approval: <span>Same day</span></div>
+        <div class="partner-stat">Repayment: <span>Daily % of sales</span></div>
+      </div>
+      <!-- AFFILIATE_LINK: MCA Network -->
+      <button class="btn btn-primary btn-sm" onclick="trackAffiliateClick('mca_network','#')">Apply Now ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- TENANT FINANCIAL ASSISTANCE SECTION (C3) -->
+<div id="section-personal" class="funding-section" style="display:none;margin-bottom:3rem;">
+  <h2>Tenant Financial Assistance</h2>
+  <p class="subtitle">Resources to help you move in, build credit, and manage your finances. All available through your landlord's RentVerified portal.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">🛡️</div>
+      <h4>Deposit Bonds</h4>
+      <p>Pay ~$17/month instead of a full security deposit. Same protection for your landlord, much lower move-in cost for you. Get approved in minutes.</p>
+      <button class="btn btn-sm btn-primary" onclick="showWIP('Deposit bond enrollment is available through your tenant portal.')">Check Eligibility</button>
+    </div>
+
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">🏠</div>
+      <h4>Deposit-Free Move-In</h4>
+      <p>Move in with $0 deposit. Your bank account is verified instead of paying a lump sum. Available at participating properties.</p>
+      <button class="btn btn-sm btn-primary" onclick="showWIP('Deposit-free enrollment is available through your tenant portal.')">Learn More</button>
+    </div>
+
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">📈</div>
+      <h4>Credit Builder</h4>
+      <p>Your on-time rent payments reported to all 3 credit bureaus. Most tenants see a 20-50 point increase within 3-6 months. $6.99/month.</p>
+      <button class="btn btn-sm btn-primary" onclick="showWIP('Credit builder is available through your tenant portal.')">Start Building</button>
+    </div>
+
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">📅</div>
+      <h4>Rent Flexibility (Flex Pay)</h4>
+      <p>Split your rent into 2 payments per month, aligned with your paychecks. Your landlord still gets paid in full on the 1st. $14.99/month.</p>
+      <button class="btn btn-sm btn-primary" onclick="showWIP('Flex Pay is available through your tenant portal.')">Learn More</button>
+    </div>
+
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">🔒</div>
+      <h4>Renters Insurance</h4>
+      <p>Protect your belongings from theft, fire, and water damage starting at ~$10/month. May be required by your lease.</p>
+      <!-- AFFILIATE_LINK: Lemonade Renters Insurance -->
+      <button class="btn btn-sm btn-primary" onclick="trackAffiliateClick('lemonade','https://www.lemonade.com/renters')">Get a Quote ↗</button>
+    </div>
+
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">🆘</div>
+      <h4>Emergency Rent Assistance</h4>
+      <p>Utah has $40M+ in emergency rental assistance programs. Most tenants never know they exist. We'll help you find programs in your area.</p>
+      <a href="tenant-assistance.html" class="btn btn-sm" style="background:#ef4444;color:white;border:none;">Find Help</a>
+    </div>
+
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">⚡</div>
+      <h4>Utility Setup Concierge</h4>
+      <p>Moving in? We'll handle power, gas, water, and internet transfers for you. One form, everything handled.</p>
+      <button class="btn btn-sm btn-primary" onclick="showWIP('Utility setup is available through your tenant portal.')">Get Started</button>
+    </div>
+
+    <div class="assist-card">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">💰</div>
+      <h4>Personal Loans</h4>
+      <p>Need help covering first month's rent or moving costs? Personal loans from $1,000 to $50,000 with fixed monthly payments.</p>
+      <!-- AFFILIATE_LINK: Personal Loans -->
+      <button class="btn btn-sm btn-primary" onclick="trackAffiliateClick('personal_loans','#')">Check Rates ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <span style="font-size:1.2rem;font-weight:800;color:white;">🏠 RentVerified</span>
+      <p style="font-size:0.875rem;line-height:1.7;max-width:280px;margin-top:0.75rem;">The only rental platform where every listing is verified and every landlord is screened.</p>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <a href="index.html">Home</a>
+      <a href="listings.html">Browse Rentals</a>
+      <a href="tenant-portal.html">Tenant Portal</a>
+      <a href="landlord-signup.html">Landlord Dashboard</a>
+    </div>
+    <div>
+      <h4>Funding</h4>
+      <a href="#" onclick="showPathway('business');window.scrollTo(0,0);">Business Loans</a>
+      <a href="#" onclick="showPathway('personal');window.scrollTo(0,0);">Tenant Assistance</a>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <a href="#">About Us</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 Sanders Property Management. All rights reserved.</span>
+    <span>Powered by RentVerified</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+/* ── Funding Hub JS ── */
+function showPathway(type) {
+  document.getElementById('section-business').style.display = type === 'business' ? 'block' : 'none';
+  document.getElementById('section-personal').style.display = type === 'personal' ? 'block' : 'none';
+  document.getElementById('pathway-business').classList.toggle('active', type === 'business');
+  document.getElementById('pathway-personal').classList.toggle('active', type === 'personal');
+}
+
+function submitBizFunding(e) {
+  e.preventDefault();
+  var app = {
+    businessName: document.getElementById('bf-business-name').value,
+    contactName: document.getElementById('bf-contact-name').value,
+    email: document.getElementById('bf-email').value,
+    phone: document.getElementById('bf-phone').value,
+    amount: document.getElementById('bf-amount').value,
+    type: document.getElementById('bf-type').value,
+    years: document.getElementById('bf-years').value,
+    revenue: document.getElementById('bf-revenue').value,
+    purpose: document.getElementById('bf-purpose').value,
+    submittedAt: new Date().toISOString(),
+    status: 'submitted',
+    id: 'BF-' + Date.now()
+  };
+  var apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  apps.push(app);
+  localStorage.setItem('rv_funding_applications', JSON.stringify(apps));
+  document.getElementById('biz-form-card').style.display = 'none';
+  var conf = document.getElementById('biz-confirmation');
+  conf.style.display = 'block';
+  document.getElementById('biz-app-reference').textContent = 'Reference: ' + app.id;
+}
+
+function resetBizForm() {
+  document.getElementById('biz-funding-form').reset();
+  document.getElementById('biz-form-card').style.display = 'block';
+  document.getElementById('biz-confirmation').style.display = 'none';
+}
+
+function trackAffiliateClick(partner, url) {
+  var clicks = JSON.parse(localStorage.getItem('rv_affiliate_clicks') || '[]');
+  clicks.push({ partner: partner, timestamp: new Date().toISOString(), page: 'funding' });
+  localStorage.setItem('rv_affiliate_clicks', JSON.stringify(clicks));
+  if (url && url !== '#') window.open(url, '_blank');
+  else showWIP('Partner application page coming soon. We will notify you when it is live.');
+}
+
+function showWIP(msg) { alert(msg); }
+
+// Handle #personal hash
+if (window.location.hash === '#personal') showPathway('personal');
+</script>
+</body>
+</html>

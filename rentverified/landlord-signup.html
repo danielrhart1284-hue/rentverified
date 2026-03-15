@@ -877,6 +877,10 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           AI Settings
         </div>
+        <div class="dash-link" onclick="dashTab('mgmt-profile')" data-sidebar-id="mgmt-profile" style="color:#6366f1;background:rgba(99,102,241,0.06);border-left:2px solid #6366f1;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Management Profile
+        </div>
         <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="document.getElementById('dashboard-screen').style.display='none';document.getElementById('signup-screen').style.display='block';">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           Sign Out
@@ -1503,6 +1507,198 @@
               <button class="btn btn-primary" onclick="showWIP('AI behavior settings will sync to the server when the backend is connected.')">Save Settings</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- MANAGEMENT PROFILE TAB -->
+      <div id="dtab-mgmt-profile" class="tab-content">
+        <style>
+          .mp-toggle-row { display:flex;justify-content:space-between;align-items:center;padding:0.85rem 1rem;background:#f8fafc;border-radius:10px;margin-bottom:0.5rem;transition:background 0.15s; }
+          .mp-toggle-row:hover { background:#f1f5f9; }
+          .mp-toggle-info { flex:1;min-width:0; }
+          .mp-toggle-name { font-weight:600;font-size:0.92rem;color:#1e293b; }
+          .mp-toggle-desc { font-size:0.8rem;color:#64748b;margin-top:2px; }
+          .mp-toggle-commission { font-size:0.78rem;color:#059669;font-weight:600;margin-top:3px; }
+          .mp-toggle-switch { position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;flex-shrink:0;margin-left:1rem; }
+          .mp-toggle-switch input { opacity:0;width:0;height:0;position:absolute; }
+          .mp-toggle-track { position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:background 0.2s; }
+          .mp-toggle-switch input:checked + .mp-toggle-track { background:#22c55e; }
+          .mp-toggle-thumb { position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:transform 0.2s; }
+          .mp-toggle-switch input:checked ~ .mp-toggle-thumb { transform:translateX(22px); }
+          .mp-edu-toggle { font-size:0.78rem;color:#3b82f6;cursor:pointer;margin-top:4px;display:inline-block; }
+          .mp-edu-toggle:hover { text-decoration:underline; }
+          .mp-edu-card { display:none;background:#eff6ff;border-left:3px solid #3b82f6;border-radius:0 8px 8px 0;padding:1.1rem 1.25rem;margin:0.5rem 0 0.75rem 0;font-size:0.84rem;line-height:1.65;color:#1e40af; }
+          .mp-edu-card h4 { font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#1e3a8a;margin:0.75rem 0 0.35rem; }
+          .mp-edu-card h4:first-child { margin-top:0; }
+          .mp-edu-card .mp-edu-qa { margin-top:0.5rem;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.6);border-radius:6px; }
+          .mp-edu-card .mp-edu-qa strong { color:#1e3a8a; }
+          .mp-section-header { font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;padding:0.75rem 0 0.35rem;margin-top:1rem;border-top:1px solid #e2e8f0; }
+          .mp-section-header:first-child { border-top:none;margin-top:0; }
+          .mp-radio-group { display:flex;gap:1rem;margin-top:0.5rem; }
+          .mp-radio-group label { font-size:0.88rem;color:#374151;cursor:pointer;display:flex;align-items:center;gap:0.35rem; }
+        </style>
+        <div class="page-header"><h1>Management Profile</h1><p>Control what financial products and payment methods you offer to tenants. This is your single source of truth.</p></div>
+
+        <!-- Payment Methods Section -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:0.25rem;">💳 Payment Methods You Accept</h3>
+            <p style="font-size:0.84rem;color:#64748b;margin-bottom:1.25rem;">ON = you accept it. OFF = tenants won't see it as an option.</p>
+            <div id="mp-payment-methods">
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💚 Cash App</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="cashApp" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💜 Zelle</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="zelle" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💙 Venmo</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="venmo" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">🏦 Bank Transfer (ACH)</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="ach" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💳 Credit / Debit Card</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="card" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">📝 Check / Money Order</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="check" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">🅿 PayPal</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="paypal" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            </div>
+            <div style="margin-top:1.25rem;padding:1rem;background:#f8fafc;border-radius:10px;">
+              <div style="font-weight:700;font-size:0.92rem;margin-bottom:0.5rem;">Card Fee Policy</div>
+              <div class="mp-radio-group">
+                <label><input type="radio" name="mp-card-fee" value="tenant_pays" checked /> Tenant pays fee</label>
+                <label><input type="radio" name="mp-card-fee" value="landlord_absorbs" /> I absorb fees</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Products Section -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:0.25rem;">🛡️ Financial Products &amp; Services</h3>
+            <p style="font-size:0.84rem;color:#64748b;margin-bottom:1rem;">Toggle products ON to offer them to your tenants. Expand "How does this work?" to learn more.</p>
+
+            <!-- DEPOSIT ALTERNATIVES -->
+            <div class="mp-section-header">Deposit Alternatives</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Deposit Bonds (Jetty / Obligo)</div><div class="mp-toggle-desc">Tenants pay ~$17/mo instead of full deposit. You're still covered for the full deposit amount.</div><div class="mp-toggle-commission">You earn: ~15% commission on every premium</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-deposit-bonds')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="depositBonds" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-deposit-bonds">
+              <h4>What It Is</h4>A deposit bond is a small monthly payment that replaces the traditional upfront security deposit. Instead of your tenant paying $1,500-$2,500 upfront, they pay roughly $17-30/month. A surety company (like Jetty) guarantees the full deposit amount to you.
+              <h4>How It Works for Your Tenant</h4>The tenant applies through RentVerified at lease signing. They're approved in minutes based on a soft credit check. Instead of writing a $2,000 check, they pay ~$17/month. If they cause damage or break the lease, the bond company pays you - then collects from the tenant.
+              <h4>How It Protects You</h4>You are covered for the SAME amount as a traditional deposit. If the tenant causes $1,500 in damage, the surety company pays you up to the bonded amount. You file a claim just like you'd keep a regular deposit - except now you get paid by a company with actual funds, not a tenant who might dispute or be broke. Many landlords find they actually collect MORE with bonds because the surety company pays without argument.
+              <h4>What You Earn</h4>~15% commission on every premium. On a $17/month bond, that's ~$2.55/month per tenant, recurring for the entire lease. 10 tenants = $25.50/month passive income just from deposit bonds.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "What if the tenant causes $3,000 in damage but the bond is only $2,000?"</strong><br/>A: The bond covers up to the bonded amount (same as a traditional deposit). For damages beyond the bond amount, you pursue the tenant directly - same as you would with a regular deposit.</div>
+              <div class="mp-edu-qa"><strong>Q: "Does this mean I can't also collect a deposit?"</strong><br/>A: Correct - the bond replaces the deposit. But you can still charge non-refundable move-in fees (pet deposit, admin fee, etc.) separately.</div>
+              <div class="mp-edu-qa"><strong>Q: "What if the tenant stops paying the bond premium?"</strong><br/>A: The surety company handles collections. Your coverage remains in effect for the lease term regardless.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Deposit-Free (Obligo Bank Verification)</div><div class="mp-toggle-desc">Tenants move in with $0 deposit. Obligo holds a bank authorization instead.</div><div class="mp-toggle-commission">You earn: flat fee per enrollment</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-deposit-free')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="depositFree" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-deposit-free">
+              <h4>What It Is</h4>Instead of a cash deposit or bond, Obligo verifies the tenant's bank account and places a hold authorization. The tenant moves in with zero upfront deposit cost. If they cause damage, Obligo charges their bank account directly.
+              <h4>How It Protects You</h4>You have a verified bank authorization for the full deposit amount. If the tenant causes damage, Obligo charges their account. No need to chase anyone.
+              <h4>What You Earn</h4>A flat enrollment fee per tenant. The primary benefit is faster lease conversions - tenants are far more likely to sign when they don't need $2,000 upfront.
+            </div>
+
+            <!-- INSURANCE PRODUCTS -->
+            <div class="mp-section-header">Insurance Products</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Renters Insurance (Jetty / Sure)</div><div class="mp-toggle-desc">Required or optional - tenants get coverage starting at ~$10/mo.</div><div class="mp-toggle-commission">You earn: $2-5/mo recurring per policy</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-renters-insurance')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="rentersInsurance" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-renters-insurance">
+              <h4>What It Is</h4>Renters insurance covers your tenant's personal belongings and provides liability protection. Many landlords require it as a lease condition. Through RentVerified, tenants can purchase policies starting at ~$10/month.
+              <h4>How It Works for Your Tenant</h4>Tenant purchases a policy through RentVerified during lease signing or move-in. Coverage typically includes personal property (theft, fire, water damage), personal liability ($100K+), and additional living expenses if the unit becomes uninhabitable.
+              <h4>How It Protects You</h4>If a tenant causes accidental damage (kitchen fire, overflowing bathtub), their renters insurance liability coverage can pay for repairs to YOUR property - not just the tenant's belongings. Without renters insurance, you'd be chasing the tenant for repair costs. With it, their insurance handles it. This is why most professional landlords require it.
+              <h4>What You Earn</h4>$2-5/month recurring commission per active policy. Alternatively, ~$20 one-time referral fee per enrollment depending on the provider. With Jetty's combo product, you can bundle this with a deposit bond in a single enrollment.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "Can I require tenants to have renters insurance?"</strong><br/>A: Yes. In most states (including Utah), landlords can require renters insurance as a lease condition.</div>
+              <div class="mp-edu-qa"><strong>Q: "What if they already have renters insurance?"</strong><br/>A: They can keep their existing policy. You can still require proof of coverage. You only earn a commission if they purchase through RentVerified.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Rent Guarantee Insurance</div><div class="mp-toggle-desc">If your tenant stops paying, the insurer covers missed rent (up to 6-12 months).</div><div class="mp-toggle-commission">You earn: $150-200 per policy (15% of annual premium)</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-rent-guarantee')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="rentGuarantee" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-rent-guarantee">
+              <h4>What It Is</h4>Rent guarantee insurance is a policy that pays YOU (the landlord) if your tenant stops paying rent. It typically covers 6-12 months of lost rent plus legal fees for eviction. Think of it as landlord insurance against non-payment.
+              <h4>How It Works for Your Tenant</h4>The tenant doesn't pay anything extra. The cost is either built into the lease terms or paid by the landlord (and offset by the premium savings vs. the cost of an actual eviction). Some landlords pass the cost to tenants as a required lease add-on.
+              <h4>How It Protects You</h4>If your tenant stops paying, the insurance company reimburses your lost rent - usually within 30 days of filing a claim. Most policies also cover legal fees for the eviction process. The average eviction costs landlords $3,500-$10,000 in lost rent + legal fees. One policy at ~$300-500/year can save you from that entire loss.
+              <h4>What You Earn</h4>$150-200 commission per policy sold (approximately 15% of the annual premium). This is a one-time commission at lease signing, with renewal commissions each year.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "What's the waiting period before I can claim?"</strong><br/>A: Most policies have a 30-60 day waiting period after the first missed payment. After that, they reimburse retroactively.</div>
+              <div class="mp-edu-qa"><strong>Q: "Does this replace screening tenants?"</strong><br/>A: No. You should still screen thoroughly. The insurance is a safety net, not a replacement for due diligence.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Lease Guarantee (LeaseLock)</div><div class="mp-toggle-desc">Whole-property insurance that replaces security deposits entirely.</div><div class="mp-toggle-commission">You earn: higher commission structure per unit</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-lease-guarantee')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="leaseGuarantee" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-lease-guarantee">
+              <h4>What It Is</h4>LeaseLock is a lease insurance product that replaces the traditional security deposit for your entire property. Instead of collecting deposits from individual tenants, the property is insured against damages and unpaid rent.
+              <h4>How It Protects You</h4>You're covered for damages, unpaid rent, and lease breaks across your portfolio. Claims are handled by LeaseLock directly. Higher coverage limits than traditional deposits.
+              <h4>What You Earn</h4>Higher commission structure per unit enrolled. Best for landlords with 10+ units looking to streamline operations and attract more tenants.
+            </div>
+
+            <!-- TENANT FINANCIAL TOOLS -->
+            <div class="mp-section-header">Tenant Financial Tools</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Credit Builder (Boom)</div><div class="mp-toggle-desc">Tenant's on-time rent payments reported to all 3 bureaus. Builds their credit score.</div><div class="mp-toggle-commission">You earn: $1-2/mo recurring per tenant</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-credit-builder')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="creditBuilder" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-credit-builder">
+              <h4>What It Is</h4>Credit building through rent reporting means your tenant's on-time rent payments are reported to all 3 major credit bureaus (Experian, TransUnion, Equifax). This helps tenants build credit history using a payment they're already making.
+              <h4>How It Works for Your Tenant</h4>The tenant enrolls through RentVerified. Boom verifies their rent payments each month and reports them as positive tradelines to the credit bureaus. Most tenants see a credit score increase of 20-50 points within 3-6 months of consistent reporting.
+              <h4>How It Protects You</h4>Tenants actively building their credit are significantly less likely to default on rent - their payment directly affects their credit score. It's a built-in incentive for on-time payment. Plus, tenants who value this benefit tend to renew leases more often, reducing your turnover costs.
+              <h4>What You Earn</h4>$1-2/month recurring commission per tenant enrolled. This continues for the entire lease term. It's small per tenant but 100% passive - and with high enrollment rates (tenants want better credit), it adds up across your portfolio.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "Does this report late payments too?"</strong><br/>A: It depends on the provider. Most only report positive (on-time) payments. Late or missed payments are typically not reported to avoid harming the tenant.</div>
+              <div class="mp-edu-qa"><strong>Q: "Do I have to do anything?"</strong><br/>A: No. Once the tenant enrolls, everything is automatic. Boom verifies payments through your payment records in RentVerified.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Rent Flexibility (Flex)</div><div class="mp-toggle-desc">Tenants split rent into 2 payments/month. You still get paid in full on the 1st.</div><div class="mp-toggle-commission">Tenant pays $14.99/mo for the service</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-rent-flex')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="rentFlexibility" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-rent-flex">
+              <h4>What It Is</h4>Flex lets tenants split their monthly rent into 2 payments (e.g., pay half on the 1st and half on the 15th). Flex pays YOU the full rent on the 1st - the tenant's second payment goes to Flex, not to you.
+              <h4>How It Works for Your Tenant</h4>The tenant signs up for Flex ($14.99/month). On the 1st, Flex pays you the full rent. The tenant pays Flex back in two installments aligned with their paychecks.
+              <h4>How It Protects You</h4>You get paid in full, on time, on the 1st. Period. Flex takes on the risk of the second half-payment. If the tenant doesn't pay Flex back, that's between Flex and the tenant - you already have your money.
+              <h4>What You Earn</h4>The tenant pays Flex $14.99/month directly. The primary benefit to you is fewer late payments and higher tenant satisfaction (which means fewer vacancies and longer leases).
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "What if the tenant misses their second payment to Flex?"</strong><br/>A: That's Flex's problem, not yours. You already received full rent on the 1st.</div>
+              <div class="mp-edu-qa"><strong>Q: "Does this change my lease terms?"</strong><br/>A: No. Your lease still says rent is due on the 1st, and you receive it on the 1st.</div>
+            </div>
+
+            <!-- MOVE-IN SERVICES -->
+            <div class="mp-section-header">Move-In Services</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Utility Setup Concierge</div><div class="mp-toggle-desc">We handle power, gas, internet transfers for your new tenant.</div><div class="mp-toggle-commission">You earn: $75 per tenant</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-utility')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="utilitySetup" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-utility">
+              <h4>What It Is</h4>A concierge service that handles all utility transfers and setups for your new tenant - power, gas, water, internet, and cable. The tenant fills out one form and everything is handled.
+              <h4>How It Protects You</h4>Ensures utilities are transferred into the tenant's name on move-in day. No gaps in service, no bills landing on you.
+              <h4>What You Earn</h4>$75 per tenant who uses the concierge service. Completely passive - the concierge company handles everything.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Internet / Cable Setup (AT&amp;T, Xfinity)</div><div class="mp-toggle-desc">New install referral at move-in.</div><div class="mp-toggle-commission">You earn: $50-150 per installation</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-internet')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="internetSetup" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-internet">
+              <h4>What It Is</h4>When a new tenant moves in, they need internet and cable set up. Through RentVerified, you can refer them directly to AT&amp;T, Xfinity, or other providers and earn a referral commission for each installation.
+              <h4>What You Earn</h4>$50-150 per installation depending on the provider and plan selected. This is a one-time commission at move-in.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Moving Services Referral</div><div class="mp-toggle-desc">Connect tenants with vetted movers.</div><div class="mp-toggle-commission">You earn: $50 per booked move</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-moving')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="movingServices" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-moving">
+              <h4>What It Is</h4>Refer new tenants to vetted local moving companies. The tenant gets a discount, you earn a referral fee.
+              <h4>What You Earn</h4>$50 per booked move. Additional volume bonuses available with some partners.
+            </div>
+
+            <!-- BUSINESS FUNDING -->
+            <div class="mp-section-header">Business Funding (for commercial tenants)</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Business Loans &amp; Working Capital</div><div class="mp-toggle-desc">Connect your commercial tenants with funding for buildout, equipment, and operations.</div><div class="mp-toggle-commission">You earn: $200-5,000 per funded deal</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-biz-loans')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="businessLoans" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-biz-loans">
+              <h4>What It Is</h4>Connect your commercial tenants with working capital, equipment financing, and term loans from our lending partners (GoKapital, Clarify Capital, National Funding). Loan amounts range from $5,000 to $5,000,000.
+              <h4>How It Protects You</h4>A funded tenant is a tenant who can afford their buildout and operations. This means they sign the lease, stay longer, and pay on time. Commercial tenants who can't get funding often walk away from deals.
+              <h4>What You Earn</h4>$200-5,000 per funded deal depending on loan size and type. SBA loans can earn $2,500-5,000 per close.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">SBA Loan Referrals</div><div class="mp-toggle-desc">Government-backed small business loans for qualified tenants.</div><div class="mp-toggle-commission">You earn: $2,500-5,000 per closed SBA loan</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-sba')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="sbaLoans" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-sba">
+              <h4>What It Is</h4>SBA (Small Business Administration) loans are government-backed loans with the lowest interest rates available. Terms range from 7-25 years with rates at Prime + 2.25%-4.75%.
+              <h4>What You Earn</h4>$2,500-5,000 per closed SBA loan. These are larger deals that take longer to close but have the highest commissions.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Merchant Cash Advance Referral</div><div class="mp-toggle-desc">Quick capital based on future revenue. Good for retail/restaurant tenants.</div><div class="mp-toggle-commission">You earn: $2,000-4,500 per funded MCA</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-mca')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="merchantCashAdvance" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-mca">
+              <h4>What It Is</h4>A merchant cash advance provides quick capital to businesses based on their future sales revenue. Repayment is a daily percentage of sales, so it flexes with the business's income. Best for retail, restaurants, and service businesses with steady revenue.
+              <h4>What You Earn</h4>$2,000-4,500 per funded MCA. These close faster than traditional loans (often same-day) but have higher costs for the borrower.
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="mp-save-status" style="font-size:0.85rem;color:#059669;opacity:0;transition:opacity 0.4s;">Profile saved successfully</span>
+          <button class="btn btn-primary" onclick="saveMgmtProfile()">Save Management Profile</button>
         </div>
       </div>
 
@@ -6055,6 +6251,72 @@ async function generateListingDescription() {
     </div>
   </div>
 </div>
+
+<!-- Management Profile JS -->
+<script>
+/* ── Management Profile: Save / Load / Toggle ── */
+function getMgmtProfileKey() {
+  var co = localStorage.getItem('rv_company_id') || 'sanders_pm';
+  return 'rv_mgmt_profile_' + co;
+}
+
+function loadMgmtProfile() {
+  var key = getMgmtProfileKey();
+  var saved = localStorage.getItem(key);
+  if (!saved) return; // defaults: all checked items stay checked
+  try {
+    var profile = JSON.parse(saved);
+    // Payment methods
+    if (profile.paymentMethods) {
+      document.querySelectorAll('[data-mp-pay]').forEach(function(cb) {
+        var k = cb.getAttribute('data-mp-pay');
+        if (typeof profile.paymentMethods[k] !== 'undefined') cb.checked = profile.paymentMethods[k];
+      });
+    }
+    // Card fee policy
+    if (profile.cardFeePolicy) {
+      var radio = document.querySelector('input[name="mp-card-fee"][value="' + profile.cardFeePolicy + '"]');
+      if (radio) radio.checked = true;
+    }
+    // Financial products
+    if (profile.products) {
+      document.querySelectorAll('[data-mp-prod]').forEach(function(cb) {
+        var k = cb.getAttribute('data-mp-prod');
+        if (typeof profile.products[k] !== 'undefined') cb.checked = profile.products[k];
+      });
+    }
+  } catch(e) { /* ignore parse errors */ }
+}
+
+function saveMgmtProfile() {
+  var profile = { paymentMethods: {}, products: {}, cardFeePolicy: 'tenant_pays' };
+  document.querySelectorAll('[data-mp-pay]').forEach(function(cb) {
+    profile.paymentMethods[cb.getAttribute('data-mp-pay')] = cb.checked;
+  });
+  document.querySelectorAll('[data-mp-prod]').forEach(function(cb) {
+    profile.products[cb.getAttribute('data-mp-prod')] = cb.checked;
+  });
+  var feeRadio = document.querySelector('input[name="mp-card-fee"]:checked');
+  if (feeRadio) profile.cardFeePolicy = feeRadio.value;
+  profile.updatedAt = new Date().toISOString();
+  localStorage.setItem(getMgmtProfileKey(), JSON.stringify(profile));
+  var st = document.getElementById('mp-save-status');
+  if (st) { st.style.opacity = '1'; setTimeout(function(){ st.style.opacity = '0'; }, 2500); }
+}
+
+function toggleEdu(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// Load profile on page ready (runs after DOMContentLoaded if tab already exists)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadMgmtProfile);
+} else {
+  loadMgmtProfile();
+}
+</script>
 
 </body>
 </html>

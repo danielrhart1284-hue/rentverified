@@ -305,6 +305,18 @@
       </div>
 
       <div class="sidebar-section" style="margin-top:.25rem;">
+        <div class="sidebar-label">Financial Resources</div>
+        <div class="sidebar-link" onclick="showTab('financial-resources')" style="background:rgba(16,185,129,0.12);border-left:3px solid #10b981;color:#6ee7b7;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          🛡️ Financial Products
+        </div>
+        <a href="funding.html" class="sidebar-link" style="background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;color:#fde68a;text-decoration:none;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          💰 Funding Hub
+        </a>
+      </div>
+
+      <div class="sidebar-section" style="margin-top:.25rem;">
         <div class="sidebar-label">Need Help?</div>
         <a href="tenant-assistance.html" class="sidebar-link" style="background:rgba(239,68,68,0.15);border-left:3px solid #ef4444;color:#fca5a5;text-decoration:none;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -1086,6 +1098,19 @@
         </div>
       </div>
 
+      <!-- FINANCIAL RESOURCES TAB (C6) -->
+      <div id="tab-financial-resources" class="tab-content" style="display:none;">
+        <div class="page-header"><h1>Financial Resources</h1><p>Products and services available through your landlord's RentVerified portal.</p></div>
+        <div id="fin-resources-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;">
+          <!-- Products populated by JS based on landlord prefs -->
+        </div>
+        <div id="fin-resources-empty" style="display:none;text-align:center;padding:3rem;color:#64748b;">
+          <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">No Financial Products Available</h3>
+          <p>Your landlord hasn't enabled any financial products yet. Check back later!</p>
+        </div>
+      </div>
+
     </div><!-- end portal-main -->
   </div><!-- end portal-layout -->
 </div><!-- end portal-screen -->
@@ -1488,8 +1513,59 @@ async function explainClauseTP(clauseText, resultElId) {
   }
 }
 
+/* -- FINANCIAL RESOURCES TAB: Filter by landlord prefs (A4 + C6) -- */
+function getLandlordMgmtProfile() {
+  var co = localStorage.getItem('rv_company_id') || 'sanders_pm';
+  var saved = localStorage.getItem('rv_mgmt_profile_' + co);
+  if (!saved) return null; // No profile = all products ON (opt-out model)
+  try { return JSON.parse(saved); } catch(e) { return null; }
+}
+
+function isProductEnabled(profile, productKey) {
+  if (!profile || !profile.products) return true; // Default ON if no profile
+  return profile.products[productKey] !== false;
+}
+
+var TENANT_PRODUCT_CATALOG = [
+  { key: 'depositBonds', icon: '🛡️', name: 'Deposit Bond', desc: 'Pay ~$17/mo instead of a full security deposit. Same protection for your landlord, lower move-in cost for you.', cta: 'Learn More', color: '#3b82f6' },
+  { key: 'depositFree', icon: '🏠', name: 'Deposit-Free Move-In', desc: 'Move in with $0 deposit. Your bank account is verified instead.', cta: 'Check Eligibility', color: '#6366f1' },
+  { key: 'rentersInsurance', icon: '🔒', name: 'Renters Insurance', desc: 'Protect your belongings starting at ~$10/mo. May be required by your lease.', cta: 'Get a Quote', color: '#f59e0b' },
+  { key: 'creditBuilder', icon: '📈', name: 'Credit Builder', desc: 'Your on-time rent payments reported to all 3 credit bureaus. Build credit with payments you already make.', cta: 'Start Building', color: '#8b5cf6' },
+  { key: 'rentFlexibility', icon: '📅', name: 'Rent Flexibility', desc: 'Split your rent into 2 payments per month, aligned with your paychecks. $14.99/mo.', cta: 'Learn More', color: '#10b981' },
+  { key: 'utilitySetup', icon: '⚡', name: 'Utility Setup Concierge', desc: 'We handle your power, gas, water, and internet transfers when you move in.', cta: 'Get Started', color: '#ef4444' },
+  { key: 'internetSetup', icon: '📡', name: 'Internet & Cable Setup', desc: 'Get internet set up at your new place. Fast, easy installation.', cta: 'Check Plans', color: '#0ea5e9' },
+  { key: 'movingServices', icon: '🚚', name: 'Moving Services', desc: 'Get connected with vetted local movers at a discount.', cta: 'Get Quotes', color: '#78716c' }
+];
+
+function renderFinancialResources() {
+  var grid = document.getElementById('fin-resources-grid');
+  var empty = document.getElementById('fin-resources-empty');
+  if (!grid) return;
+  var profile = getLandlordMgmtProfile();
+  var cards = [];
+  TENANT_PRODUCT_CATALOG.forEach(function(p) {
+    if (isProductEnabled(profile, p.key)) {
+      cards.push('<div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #f1f5f9;">' +
+        '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">' +
+        '<div style="width:44px;height:44px;border-radius:10px;background:' + p.color + '15;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">' + p.icon + '</div>' +
+        '<div style="font-weight:700;font-size:1rem;color:#1e293b;">' + p.name + '</div></div>' +
+        '<p style="font-size:0.88rem;color:#64748b;line-height:1.6;margin-bottom:1rem;">' + p.desc + '</p>' +
+        '<button class="btn btn-sm" style="background:' + p.color + ';color:white;border:none;border-radius:8px;padding:0.5rem 1.25rem;font-weight:600;cursor:pointer;" onclick="showWIP(\'' + p.name + ' enrollment coming soon.\')">' + p.cta + '</button></div>');
+    }
+  });
+  if (cards.length === 0) {
+    grid.style.display = 'none';
+    if (empty) empty.style.display = 'block';
+  } else {
+    grid.innerHTML = cards.join('');
+    grid.style.display = 'grid';
+    if (empty) empty.style.display = 'none';
+  }
+}
+
 /* -- INIT CREDIT BUILDER + LEMONADE -- */
 document.addEventListener('DOMContentLoaded', function() {
+  renderFinancialResources();
   var cbTab = document.querySelector('[data-tab="credit-builder"], a[href*="credit"]');
   if (cbTab) {
     cbTab.addEventListener('click', function(e) {

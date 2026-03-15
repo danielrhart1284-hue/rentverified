@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commercial Portal – Sanders Property Management | RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .comm-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 68px); }
+    .comm-sidebar { background: #0f172a; padding: 1.5rem 0; }
+    .comm-sidebar-section { padding: 0 1rem; margin-bottom: 0.5rem; }
+    .comm-sidebar-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; padding: 0.5rem 0.75rem; }
+    .comm-sidebar-link {
+      display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.75rem;
+      border-radius: 8px; color: #94a3b8; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; text-decoration: none;
+    }
+    .comm-sidebar-link:hover { background: rgba(255,255,255,0.07); color: white; }
+    .comm-sidebar-link.active { background: #1a56db; color: white; }
+    .comm-sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .comm-main { background: #f8fafc; padding: 2rem; }
+    .comm-header { margin-bottom: 2rem; }
+    .comm-header h1 { font-size: 1.6rem; font-weight: 800; }
+    .comm-header p { color: #64748b; margin-top: 4px; }
+    .comm-tab { display: none; }
+    .comm-tab.active { display: block; }
+    /* Management Profile toggles - same as landlord */
+    .cmp-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0; border-bottom: 1px solid #f1f5f9; }
+    .cmp-toggle-label { font-weight: 600; font-size: 0.92rem; color: #1e293b; }
+    .cmp-toggle-desc { font-size: 0.78rem; color: #64748b; margin-top: 2px; }
+    .cmp-toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+    .cmp-toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .cmp-toggle-switch .slider {
+      position: absolute; inset: 0; background: #cbd5e1; border-radius: 26px;
+      cursor: pointer; transition: 0.3s;
+    }
+    .cmp-toggle-switch .slider::before {
+      content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%;
+      background: white; left: 3px; top: 3px; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .cmp-toggle-switch input:checked + .slider { background: #22c55e; }
+    .cmp-toggle-switch input:checked + .slider::before { transform: translateX(22px); }
+    .cmp-section-header { font-weight: 700; font-size: 1rem; color: #1e293b; padding: 1rem 0 0.5rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 0.25rem; }
+    /* Partner card in funding tab */
+    .cmp-partner { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; margin-bottom: 0.75rem; }
+    .cmp-partner h4 { font-weight: 700; font-size: 0.95rem; }
+    .cmp-partner p { font-size: 0.85rem; color: #64748b; margin: 0.35rem 0; }
+    .cmp-app-tracker { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    @media (max-width: 768px) {
+      .comm-layout { grid-template-columns: 1fr; }
+      .comm-sidebar {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+        padding: 0; display: flex; overflow-x: auto; background: #0f172a;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+      .comm-sidebar-section { display: flex; gap: 0; padding: 0; margin: 0; }
+      .comm-sidebar-section:not(:first-of-type) { display: none; }
+      .comm-sidebar-label { display: none; }
+      .comm-sidebar-link { flex-direction: column; font-size: 0.65rem; padding: 0.5rem 0.75rem; gap: 2px; white-space: nowrap; min-width: 60px; text-align: center; justify-content: center; }
+      .comm-sidebar-link svg { width: 16px; height: 16px; }
+      .comm-main { padding-bottom: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Banner -->
+<div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
+  🏢 <strong style="color:#e2e8f0;">Sanders Property Management</strong> · Commercial Portal
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">Sanders PM</span> <span style="font-weight:500;opacity:0.9;">· Commercial</span>
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">Browse Rentals</a>
+    <a href="funding.html">Funding</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Landlord Dashboard</a>
+  </div>
+</nav>
+
+<!-- LOGIN SCREEN -->
+<div id="comm-login" style="min-height:calc(100vh - 68px);display:flex;align-items:center;justify-content:center;background:#f8fafc;">
+  <div style="background:white;border-radius:16px;padding:2.5rem;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.1);">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-size:2.5rem;">🏢</div>
+      <h2 style="font-size:1.5rem;font-weight:800;color:#1a56db;margin-top:0.5rem;">Commercial Portal</h2>
+      <p style="color:#64748b;font-size:0.9rem;">Sanders Property Management</p>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.35rem;">Email</label>
+      <input type="email" id="comm-email" style="width:100%;padding:0.65rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.92rem;box-sizing:border-box;" placeholder="you@business.com" />
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.35rem;">Password</label>
+      <input type="password" id="comm-pass" style="width:100%;padding:0.65rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.92rem;box-sizing:border-box;" placeholder="••••••••" />
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.75rem;" onclick="commLogin()">Sign In</button>
+    <p id="comm-login-error" style="color:#ef4444;font-size:0.82rem;text-align:center;margin-top:0.75rem;display:none;">Invalid credentials. Try again.</p>
+  </div>
+</div>
+
+<!-- PORTAL SCREEN -->
+<div id="comm-portal" style="display:none;">
+  <div class="comm-layout">
+    <!-- SIDEBAR -->
+    <div class="comm-sidebar">
+      <div style="padding:0 1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:#1a56db;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">SP</div>
+          <div>
+            <div style="color:white;font-weight:600;font-size:0.9rem;">Sanders PM</div>
+            <div style="color:#64748b;font-size:0.75rem;">Commercial Division</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comm-sidebar-section">
+        <div class="comm-sidebar-label">Management</div>
+        <div class="comm-sidebar-link active" onclick="commTab('dashboard')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </div>
+        <div class="comm-sidebar-link" onclick="commTab('properties')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Properties
+        </div>
+        <div class="comm-sidebar-link" onclick="commTab('mgmt-profile')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Management Profile
+        </div>
+      </div>
+
+      <div class="comm-sidebar-section" style="margin-top:0.5rem;">
+        <div class="comm-sidebar-label">Funding</div>
+        <div class="comm-sidebar-link" onclick="commTab('funding')" style="background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;color:#fde68a;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          💰 Business Funding
+        </div>
+      </div>
+
+      <div class="comm-sidebar-section" style="margin-top:0.5rem;">
+        <div class="comm-sidebar-label">Account</div>
+        <div class="comm-sidebar-link" onclick="commLogout()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Sign Out
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="comm-main">
+
+      <!-- DASHBOARD TAB -->
+      <div id="comm-tab-dashboard" class="comm-tab active">
+        <div class="comm-header"><h1>Commercial Dashboard</h1><p>Manage your commercial properties and tenants.</p></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;">
+          <div class="card" style="padding:1.5rem;text-align:center;">
+            <div style="font-size:2rem;">🏢</div>
+            <div style="font-size:1.5rem;font-weight:900;margin:0.5rem 0;">3</div>
+            <div style="color:#64748b;font-size:0.85rem;">Commercial Properties</div>
+          </div>
+          <div class="card" style="padding:1.5rem;text-align:center;">
+            <div style="font-size:2rem;">👥</div>
+            <div style="font-size:1.5rem;font-weight:900;margin:0.5rem 0;">8</div>
+            <div style="color:#64748b;font-size:0.85rem;">Business Tenants</div>
+          </div>
+          <div class="card" style="padding:1.5rem;text-align:center;">
+            <div style="font-size:2rem;">💰</div>
+            <div style="font-size:1.5rem;font-weight:900;margin:0.5rem 0;">$24,500</div>
+            <div style="color:#64748b;font-size:0.85rem;">Monthly Revenue</div>
+          </div>
+          <div class="card" style="padding:1.5rem;text-align:center;">
+            <div style="font-size:2rem;">📊</div>
+            <div style="font-size:1.5rem;font-weight:900;margin:0.5rem 0;">96%</div>
+            <div style="color:#64748b;font-size:0.85rem;">Occupancy Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROPERTIES TAB -->
+      <div id="comm-tab-properties" class="comm-tab">
+        <div class="comm-header"><h1>Commercial Properties</h1><p>Your managed commercial spaces.</p></div>
+        <div class="card" style="padding:1.25rem;margin-bottom:0.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:700;">1200 Main St - Suite 100</div>
+              <div style="font-size:0.82rem;color:#64748b;">Office Space · 2,400 sq ft · $3,200/mo</div>
+            </div>
+            <span style="background:#dcfce7;color:#166534;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.78rem;font-weight:600;">Occupied</span>
+          </div>
+        </div>
+        <div class="card" style="padding:1.25rem;margin-bottom:0.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:700;">4500 State St - Unit B</div>
+              <div style="font-size:0.82rem;color:#64748b;">Retail Space · 1,800 sq ft · $2,800/mo</div>
+            </div>
+            <span style="background:#dcfce7;color:#166534;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.78rem;font-weight:600;">Occupied</span>
+          </div>
+        </div>
+        <div class="card" style="padding:1.25rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:700;">780 Industrial Dr</div>
+              <div style="font-size:0.82rem;color:#64748b;">Warehouse · 5,000 sq ft · $4,500/mo</div>
+            </div>
+            <span style="background:#fef9c3;color:#854d0e;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.78rem;font-weight:600;">Available</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGEMENT PROFILE TAB (A6) -->
+      <div id="comm-tab-mgmt-profile" class="comm-tab">
+        <div class="comm-header"><h1>Commercial Management Profile</h1><p>Control which payment methods and financial products are available to your commercial tenants.</p></div>
+        <div class="card" style="padding:1.5rem;">
+          <div class="cmp-section-header">Payment Methods</div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">ACH / Bank Transfer</div><div class="cmp-toggle-desc">Direct bank-to-bank payments</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-pay="ach" checked /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Wire Transfer</div><div class="cmp-toggle-desc">For large commercial transactions</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-pay="wire" checked /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Credit/Debit Card</div><div class="cmp-toggle-desc">Card payments with processing fee</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-pay="card" checked /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Check / Money Order</div><div class="cmp-toggle-desc">Traditional paper payments</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-pay="check" checked /><span class="slider"></span></label>
+          </div>
+
+          <div class="cmp-section-header" style="margin-top:1.5rem;">Financial Products (Commercial)</div>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Commercial defaults: Business funding ON, deposit alternatives OFF, personal products OFF.</p>
+
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Business Loans</div><div class="cmp-toggle-desc">Working capital loans for your tenants ($5K-$5M)</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-prod="businessLoans" checked /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">SBA Loans</div><div class="cmp-toggle-desc">Government-backed small business loans</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-prod="sbaLoans" checked /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Merchant Cash Advance</div><div class="cmp-toggle-desc">Revenue-based financing for retail/service businesses</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-prod="mca" checked /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Lease Guarantee (LeaseLock)</div><div class="cmp-toggle-desc">Guarantees commercial lease payments</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-prod="leaseGuarantee" checked /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Deposit Bonds</div><div class="cmp-toggle-desc">Bond replaces cash deposit (rare for commercial)</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-prod="depositBonds" /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Renters Insurance</div><div class="cmp-toggle-desc">Not typically applicable to commercial</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-prod="rentersInsurance" /><span class="slider"></span></label>
+          </div>
+          <div class="cmp-toggle-row">
+            <div><div class="cmp-toggle-label">Credit Builder</div><div class="cmp-toggle-desc">Not relevant for business tenants</div></div>
+            <label class="cmp-toggle-switch"><input type="checkbox" data-cmp-prod="creditBuilder" /><span class="slider"></span></label>
+          </div>
+
+          <div style="margin-top:1.5rem;display:flex;gap:0.75rem;align-items:center;">
+            <button class="btn btn-primary" onclick="saveCommProfile()">Save Profile</button>
+            <span id="cmp-save-status" style="color:#059669;font-weight:600;font-size:0.88rem;opacity:0;transition:opacity 0.3s;">Saved!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FUNDING TAB (C5) -->
+      <div id="comm-tab-funding" class="comm-tab">
+        <div class="comm-header"><h1>Business Funding</h1><p>Access capital for your business or connect your tenants with funding resources.</p></div>
+
+        <!-- Application Tracker -->
+        <div class="cmp-app-tracker" style="margin-bottom:1.5rem;">
+          <h3 style="font-weight:700;margin-bottom:0.75rem;">Your Applications</h3>
+          <div id="comm-app-list">
+            <p style="color:#94a3b8;font-size:0.88rem;">No funding applications submitted yet. <a href="funding.html" style="color:#1a56db;font-weight:600;">Apply for funding ↗</a></p>
+          </div>
+        </div>
+
+        <!-- Partner Cards -->
+        <h3 style="font-weight:700;margin-bottom:0.75rem;">Funding Partners</h3>
+        <div class="cmp-partner">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#1a56db;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;">GK</div>
+            <h4>GoKapital</h4>
+          </div>
+          <p>Business loans $5K-$800K. Equipment financing, working capital, fast approval.</p>
+          <!-- AFFILIATE_LINK: GoKapital -->
+          <button class="btn btn-primary btn-sm" onclick="trackCommAffiliate('gokapital')">Apply Now ↗</button>
+        </div>
+        <div class="cmp-partner">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#059669;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;">CC</div>
+            <h4>Clarify Capital</h4>
+          </div>
+          <p>Business loans $10K-$5M. Multiple offers from one application. Same-day approval.</p>
+          <!-- AFFILIATE_LINK: Clarify Capital -->
+          <button class="btn btn-primary btn-sm" onclick="trackCommAffiliate('clarify_capital')">Apply Now ↗</button>
+        </div>
+        <div class="cmp-partner">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#1e40af;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;">SBA</div>
+            <h4>SBA Loans</h4>
+          </div>
+          <p>Government-backed loans with lowest rates. 7(a) and 504 programs, 7-25 year terms.</p>
+          <!-- AFFILIATE_LINK: SBA -->
+          <button class="btn btn-primary btn-sm" onclick="trackCommAffiliate('sba')">Learn More ↗</button>
+        </div>
+        <div class="cmp-partner">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;">MCA</div>
+            <h4>Merchant Cash Advance</h4>
+          </div>
+          <p>Revenue-based financing. No fixed payments — repayment adjusts with your sales.</p>
+          <!-- AFFILIATE_LINK: MCA Network -->
+          <button class="btn btn-primary btn-sm" onclick="trackCommAffiliate('mca_network')">Apply Now ↗</button>
+        </div>
+      </div>
+
+    </div><!-- end comm-main -->
+  </div><!-- end comm-layout -->
+</div><!-- end comm-portal -->
+
+<script src="app.js"></script>
+<script>
+/* ── Commercial Portal JS ── */
+function commTab(name) {
+  document.querySelectorAll('.comm-tab').forEach(function(t) { t.classList.remove('active'); });
+  var el = document.getElementById('comm-tab-' + name);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.comm-sidebar-link').forEach(function(l) { l.classList.remove('active'); });
+  if (event && event.target) {
+    var link = event.target.closest('.comm-sidebar-link');
+    if (link) link.classList.add('active');
+  }
+  if (name === 'funding') renderCommApps();
+}
+
+function commLogin() {
+  var email = document.getElementById('comm-email').value;
+  var pass = document.getElementById('comm-pass').value;
+  // Demo credentials
+  if ((email === 'danielrhart1284@gmail.com' && pass === 'SPMdemo2026') ||
+      (email === 'admin@sanderspm.com' && pass === 'SPMdemo2026')) {
+    document.getElementById('comm-login').style.display = 'none';
+    document.getElementById('comm-portal').style.display = 'block';
+    loadCommProfile();
+  } else {
+    document.getElementById('comm-login-error').style.display = 'block';
+  }
+}
+
+function commLogout() {
+  document.getElementById('comm-portal').style.display = 'none';
+  document.getElementById('comm-login').style.display = 'flex';
+}
+
+function getCommProfileKey() {
+  return 'rv_comm_mgmt_profile_sanders_pm';
+}
+
+function loadCommProfile() {
+  var saved = localStorage.getItem(getCommProfileKey());
+  if (!saved) return;
+  try {
+    var profile = JSON.parse(saved);
+    if (profile.paymentMethods) {
+      document.querySelectorAll('[data-cmp-pay]').forEach(function(cb) {
+        var k = cb.getAttribute('data-cmp-pay');
+        if (typeof profile.paymentMethods[k] !== 'undefined') cb.checked = profile.paymentMethods[k];
+      });
+    }
+    if (profile.products) {
+      document.querySelectorAll('[data-cmp-prod]').forEach(function(cb) {
+        var k = cb.getAttribute('data-cmp-prod');
+        if (typeof profile.products[k] !== 'undefined') cb.checked = profile.products[k];
+      });
+    }
+  } catch(e) {}
+}
+
+function saveCommProfile() {
+  var profile = { paymentMethods: {}, products: {}, updatedAt: new Date().toISOString() };
+  document.querySelectorAll('[data-cmp-pay]').forEach(function(cb) {
+    profile.paymentMethods[cb.getAttribute('data-cmp-pay')] = cb.checked;
+  });
+  document.querySelectorAll('[data-cmp-prod]').forEach(function(cb) {
+    profile.products[cb.getAttribute('data-cmp-prod')] = cb.checked;
+  });
+  localStorage.setItem(getCommProfileKey(), JSON.stringify(profile));
+  var st = document.getElementById('cmp-save-status');
+  if (st) { st.style.opacity = '1'; setTimeout(function(){ st.style.opacity = '0'; }, 2500); }
+}
+
+function renderCommApps() {
+  var el = document.getElementById('comm-app-list');
+  if (!el) return;
+  var apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  if (apps.length === 0) {
+    el.innerHTML = '<p style="color:#94a3b8;font-size:0.88rem;">No funding applications submitted yet. <a href="funding.html" style="color:#1a56db;font-weight:600;">Apply for funding ↗</a></p>';
+    return;
+  }
+  var html = '<div style="overflow-x:auto;"><table style="width:100%;font-size:0.85rem;border-collapse:collapse;">' +
+    '<tr style="border-bottom:2px solid #e2e8f0;"><th style="text-align:left;padding:0.5rem;">ID</th><th style="text-align:left;padding:0.5rem;">Business</th><th style="text-align:left;padding:0.5rem;">Amount</th><th style="text-align:left;padding:0.5rem;">Type</th><th style="text-align:left;padding:0.5rem;">Status</th><th style="text-align:left;padding:0.5rem;">Date</th></tr>';
+  apps.forEach(function(a) {
+    html += '<tr style="border-bottom:1px solid #f1f5f9;">' +
+      '<td style="padding:0.5rem;font-weight:600;">' + (a.id || '-') + '</td>' +
+      '<td style="padding:0.5rem;">' + (a.businessName || '-') + '</td>' +
+      '<td style="padding:0.5rem;">' + (a.amount || '-') + '</td>' +
+      '<td style="padding:0.5rem;">' + (a.type || '-') + '</td>' +
+      '<td style="padding:0.5rem;"><span style="background:#fef9c3;color:#854d0e;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">' + (a.status || 'submitted') + '</span></td>' +
+      '<td style="padding:0.5rem;">' + (a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : '-') + '</td></tr>';
+  });
+  html += '</table></div>';
+  el.innerHTML = html;
+}
+
+function trackCommAffiliate(partner) {
+  var clicks = JSON.parse(localStorage.getItem('rv_affiliate_clicks') || '[]');
+  clicks.push({ partner: partner, timestamp: new Date().toISOString(), page: 'commercial' });
+  localStorage.setItem('rv_affiliate_clicks', JSON.stringify(clicks));
+  window.open('funding.html', '_blank');
+}
+</script>
+</body>
+</html>
