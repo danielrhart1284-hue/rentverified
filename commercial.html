@@ -122,15 +122,15 @@
 
       <div class="comm-sidebar-section">
         <div class="comm-sidebar-label">Management</div>
-        <div class="comm-sidebar-link active" onclick="commTab('dashboard')">
+        <div class="comm-sidebar-link active" onclick="commTab('dashboard', event)">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
           Dashboard
         </div>
-        <div class="comm-sidebar-link" onclick="commTab('properties')">
+        <div class="comm-sidebar-link" onclick="commTab('properties', event)">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
           Properties
         </div>
-        <div class="comm-sidebar-link" onclick="commTab('mgmt-profile')">
+        <div class="comm-sidebar-link" onclick="commTab('mgmt-profile', event)">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           Management Profile
         </div>
@@ -138,7 +138,7 @@
 
       <div class="comm-sidebar-section" style="margin-top:0.5rem;">
         <div class="comm-sidebar-label">Funding</div>
-        <div class="comm-sidebar-link" onclick="commTab('funding')" style="background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;color:#fde68a;">
+        <div class="comm-sidebar-link" onclick="commTab('funding', event)" style="background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;color:#fde68a;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           💰 Business Funding
         </div>
@@ -335,13 +335,14 @@
 <script src="app.js"></script>
 <script>
 /* ── Commercial Portal JS ── */
-function commTab(name) {
+function commTab(name, evt) {
   document.querySelectorAll('.comm-tab').forEach(function(t) { t.classList.remove('active'); });
   var el = document.getElementById('comm-tab-' + name);
   if (el) el.classList.add('active');
   document.querySelectorAll('.comm-sidebar-link').forEach(function(l) { l.classList.remove('active'); });
-  if (event && event.target) {
-    var link = event.target.closest('.comm-sidebar-link');
+  var e = evt || window.event;
+  if (e && e.target) {
+    var link = e.target.closest('.comm-sidebar-link');
     if (link) link.classList.add('active');
   }
   if (name === 'funding') renderCommApps();
@@ -350,9 +351,9 @@ function commTab(name) {
 function commLogin() {
   var email = document.getElementById('comm-email').value;
   var pass = document.getElementById('comm-pass').value;
-  // Demo credentials
-  if ((email === 'danielrhart1284@gmail.com' && pass === 'SPMdemo2026') ||
-      (email === 'admin@sanderspm.com' && pass === 'SPMdemo2026')) {
+  // Use centralized auth from app.js
+  var user = (typeof authenticateUser === 'function') ? authenticateUser(email, pass) : null;
+  if (user && (user.role === 'admin' || user.role === 'pm')) {
     document.getElementById('comm-login').style.display = 'none';
     document.getElementById('comm-portal').style.display = 'block';
     loadCommProfile();
