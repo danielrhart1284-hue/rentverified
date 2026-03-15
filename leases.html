@@ -102,7 +102,15 @@
     .lease-doc h3 { color:#1e293b; margin:1.25rem 0 .5rem; border-bottom:1px solid #e2e8f0; padding-bottom:.25rem; }
     .lease-doc .field { background:#fef9c3; border-radius:3px; padding:0 .25rem; font-weight:600; }
     @media(max-width:768px){ .lm-wrapper{grid-template-columns:1fr;} .lm-sidebar{display:none;} .esign-steps{flex-direction:column;} }
-  </style>
+  
+/* == AI CLAUSE EXPLAINER == */
+.ai-explain-btn { background:none; border:1.5px solid #93c5fd; color:#2563eb; padding:.3rem .7rem; border-radius:6px; font-size:.78rem; font-weight:600; cursor:pointer; margin-left:.5rem; transition:all .15s; }
+.ai-explain-btn:hover { background:#eff6ff; }
+.ai-explain-btn:disabled { opacity:.5; cursor:not-allowed; }
+.ai-explain-result { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:.75rem; margin-top:.5rem; font-size:.85rem; color:#374151; line-height:1.6; display:none; }
+.ai-explain-note { font-size:.72rem; color:#94a3b8; font-style:italic; margin-top:.4rem; }
+
+</style>
 </head>
 <body>
 
@@ -655,6 +663,60 @@ function toast(msg) {
   const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),3500);
 }
+
+
+/* ================================================================
+   PHASE 6: AI LEASE CLAUSE EXPLAINER
+   ================================================================ */
+
+async function explainClause(clauseText, btnEl) {
+  var resultEl = btnEl.parentElement.querySelector('.ai-explain-result');
+  if (!resultEl) {
+    resultEl = document.createElement('div');
+    resultEl.className = 'ai-explain-result';
+    btnEl.parentElement.appendChild(resultEl);
+  }
+  if (resultEl.style.display === 'block' && resultEl.textContent && resultEl.textContent.indexOf('Explaining') === -1) {
+    resultEl.style.display = 'none'; return;
+  }
+  resultEl.style.display = 'block';
+  resultEl.textContent = 'Explaining in simple terms...';
+  btnEl.disabled = true;
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'explain', input: clauseText }) });
+    var data = await resp.json();
+    var explanation = typeof data.result === 'string' ? data.result : 'This clause establishes standard terms between you and your landlord. Please consult with a legal professional for specific questions.';
+    resultEl.innerHTML = explanation.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '<div class="ai-explain-note">AI-generated explanation at 6th-grade reading level. Not legal advice.</div>';
+  } catch (err) {
+    resultEl.innerHTML = 'This clause establishes standard terms between you and your landlord. Please consult with a legal professional for specific questions.<div class="ai-explain-note">AI unavailable - showing default explanation.</div>';
+  } finally { btnEl.disabled = false; }
+}
+
+function injectExplainButtons() {
+  var clauseHeaders = document.querySelectorAll('.clause-hdr, .clause h3, .clause-body, .lease-clause');
+  clauseHeaders.forEach(function(hdr) {
+    if (hdr.querySelector('.ai-explain-btn')) return;
+    var clauseText = '';
+    if (hdr.classList.contains('clause-hdr')) {
+      var body = hdr.nextElementSibling;
+      if (body) clauseText = body.textContent || body.innerText || '';
+    } else { clauseText = hdr.textContent || hdr.innerText || ''; }
+    if (!clauseText.trim()) return;
+    var btn = document.createElement('button');
+    btn.className = 'ai-explain-btn';
+    btn.textContent = 'What Does This Mean?';
+    btn.onclick = function(e) { e.stopPropagation(); explainClause(clauseText.substring(0, 500), btn); };
+    hdr.appendChild(btn);
+  });
+}
+
+if (typeof renderClauses === 'function') {
+  var origRC = renderClauses;
+  renderClauses = function() { origRC.apply(this, arguments); setTimeout(injectExplainButtons, 100); };
+}
+
+document.addEventListener('DOMContentLoaded', function() { setTimeout(injectExplainButtons, 500); });
+
 </script>
 </body>
 </html>

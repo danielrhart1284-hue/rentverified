@@ -113,13 +113,137 @@
       border: 1px solid var(--gray-200);
     }
 
+    /* Phase 4: Scam-Check Verified Header */
+    .rv-scam-check-header {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(5,150,105,0.3);
+    }
+    .rv-scam-check-header .rv-shield { font-size: 1.5rem; }
+    .rv-scam-check-header .rv-check-text { line-height: 1.4; }
+    .rv-scam-check-header .rv-check-text small { display: block; font-weight: 400; opacity: 0.85; font-size: 0.78rem; }
+
+    /* Phase 4: Lead Capture Overlay */
+    .rv-lead-overlay {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 3px solid #6366f1;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+      padding: 1.5rem;
+      z-index: 999;
+      animation: rv-slide-up 0.4s ease;
+    }
+    @keyframes rv-slide-up {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .rv-lead-overlay .rv-lead-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .rv-lead-overlay h4 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .rv-lead-overlay p { font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; }
+    .rv-lead-overlay .rv-lead-form {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .rv-lead-overlay .rv-lead-form input {
+      padding: 0.6rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      width: 260px;
+    }
+    .rv-lead-overlay .rv-lead-form button {
+      padding: 0.6rem 1.25rem;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .rv-lead-overlay .rv-lead-form button:hover { background: #4f46e5; }
+    .rv-lead-overlay .rv-lead-dismiss {
+      position: absolute;
+      top: 0.75rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
     @media (max-width: 900px) {
       .detail-layout { grid-template-columns: 1fr; }
       .sticky-card { position: static; }
     }
+
+    /* ── Mobile Audit: Responsive CSS for QR scan entry ── */
+    @media (max-width: 768px) {
+      .detail-hero { height: 220px; font-size: 4rem; }
+      .detail-layout { padding: 1rem; gap: 1rem; }
+      .detail-header { flex-direction: column; }
+      .detail-header > div:last-child { text-align: left; }
+      .detail-header h1 { font-size: 1.3rem; }
+      .amenity-chip { font-size: 0.8rem; padding: 5px 10px; }
+      .detail-section h3 { font-size: 1rem; }
+      .grid-2 { grid-template-columns: 1fr !important; }
+      nav { padding: 0.5rem 1rem; }
+      .nav-links { display: none; }
+      .nav-cta { gap: 4px; }
+      .nav-cta .btn { font-size: 0.75rem; padding: 0.4rem 0.6rem; }
+      .rv-scam-check-header { padding: 0.75rem 1rem; font-size: 0.82rem; flex-wrap: wrap; }
+      .rv-scam-check-header .rv-shield { font-size: 1.2rem; }
+      .rv-scam-check-header .rv-check-text small { font-size: 0.72rem; }
+      .landlord-profile { flex-direction: column; text-align: center; }
+      .qr-box { padding: 1rem; }
+      .qr-placeholder { width: 100px; height: 100px; font-size: 2.5rem; }
+      .rv-lead-overlay { padding: 1rem; }
+      .rv-lead-overlay h4 { font-size: 1rem; }
+      .rv-lead-overlay .rv-lead-form { flex-direction: column; align-items: stretch; }
+      .rv-lead-overlay .rv-lead-form input { width: 100%; box-sizing: border-box; }
+      .rv-lead-overlay .rv-lead-form button { width: 100%; }
+      .card-body { padding: 1rem; }
+      #chat-window { width: calc(100vw - 1rem) !important; right: 0.5rem !important; bottom: 70px !important; max-height: 70vh !important; }
+      #chat-bubble { width: 50px; height: 50px; bottom: 12px; right: 12px; }
+    }
+    @media (max-width: 480px) {
+      .detail-hero { height: 160px; font-size: 3rem; }
+      .detail-header h1 { font-size: 1.15rem; }
+      .detail-layout { padding: 0.75rem; }
+      nav .nav-logo { font-size: 0.85rem; }
+      .nav-cta { flex-direction: column; gap: 2px; }
+      .amenity-chip { font-size: 0.75rem; padding: 4px 8px; }
+    }
   </style>
 </head>
 <body>
+
+<!-- Phase 4: Scam-Check Verified Header -->
+<div class="rv-scam-check-header" id="rv-scam-header">
+  <span class="rv-shield">🛡️</span>
+  <div class="rv-check-text">
+    You are viewing a <strong>Verified Listing</strong> by RentVerified.
+    <small>Payments made through this portal are secured. If you found this listing on Facebook, Craigslist, or Zillow — this confirms it is real.</small>
+  </div>
+</div>
 
 <!-- Sanders PM live banner -->
 <div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
@@ -236,6 +360,27 @@
       </div>
     </div>
 
+    <!-- This Property Accepts (A5) -->
+    <div class="detail-section" id="property-accepts">
+      <h3>This Property Accepts</h3>
+      <div id="property-accepts-badges" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;"></div>
+    </div>
+
+    <!-- Financial Services CTAs (C7) -->
+    <div class="detail-section" id="property-funding-ctas">
+      <h3>Financial Resources</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.75rem;">
+        <a href="funding.html" style="display:flex;align-items:center;gap:0.75rem;padding:1rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;text-decoration:none;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+          <div style="font-size:1.5rem;">💰</div>
+          <div><div style="font-weight:700;font-size:0.9rem;color:#1e40af;">Need Business Funding?</div><div style="font-size:0.78rem;color:#3b82f6;">Loans from $5K-$5M</div></div>
+        </a>
+        <a href="funding.html#personal" style="display:flex;align-items:center;gap:0.75rem;padding:1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;text-decoration:none;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+          <div style="font-size:1.5rem;">🛡️</div>
+          <div><div style="font-weight:700;font-size:0.9rem;color:#166534;">Deposit Alternatives</div><div style="font-size:0.78rem;color:#16a34a;">Move in for less</div></div>
+        </a>
+      </div>
+    </div>
+
     <!-- Map placeholder -->
     <div class="detail-section" id="map">
       <h3>Location</h3>
@@ -266,9 +411,13 @@
               🤖 Ask AI a Question
             </button>
             <button class="btn btn-success" style="justify-content:center;" onclick="openApp()">
-              📋 Request Rental Application
+              &#128203; Request Rental Application
+            </button>
+            <button class="btn btn-outline" style="justify-content:center;border-color:#059669;color:#059669;" onclick="openCalendly()">
+              &#128197; Schedule a Tour
             </button>
             <a href="listings.html" class="btn btn-outline" style="justify-content:center;">View Other Listings</a>
+            <a id="apply-now-link" href="apply.html" class="btn btn-success" style="justify-content:center;margin-top:0.5rem;">&#128203; Apply Now</a>
           </div>
           <div style="font-size:0.8rem;color:var(--gray-600);text-align:center;">
             📞 AI available 24/7 · Application sent instantly by email
@@ -408,6 +557,34 @@ window.PROPERTY_DATA = {
         var idSpan = document.querySelector('[style*="font-family:monospace"]');
         if (idSpan) idSpan.textContent = 'ID: ' + l.listingId;
 
+        // Update description
+        var descP = document.querySelector('.detail-main .detail-section p[style*="line-height:1.8"]');
+        if (descP && l.description) descP.textContent = l.description;
+
+        // Update key facts
+        var factChips = document.querySelectorAll('.amenity-chip');
+        if (factChips.length >= 3) {
+          factChips[0].innerHTML = '&#128717; ' + l.beds + ' Bedroom' + (l.beds !== 1 ? 's' : '');
+          factChips[1].innerHTML = '&#128707; ' + l.baths + ' Bathroom' + (l.baths !== 1 ? 's' : '');
+          if (l.type) factChips[2].innerHTML = '&#127970; ' + l.type;
+        }
+
+        // Update badge
+        var statusBadge = document.querySelector('.badge-available, .badge-rented');
+        if (statusBadge) {
+          if (l.status === 'available') {
+            statusBadge.className = 'badge badge-available';
+            statusBadge.textContent = 'Available Now';
+          } else {
+            statusBadge.className = 'badge badge-rented';
+            statusBadge.textContent = 'Rented';
+          }
+        }
+
+        // Update deposit
+        var depositEl = document.querySelector('.detail-section .grid-2 div:nth-child(2) div[style*="font-size:1.1rem"]');
+        if (depositEl) depositEl.innerHTML = '$' + Number(l.rent).toLocaleString();
+
         // Update chat widget greeting
         var chatGreeting = document.querySelector('#chat-messages .chat-msg.ai');
         if (chatGreeting) chatGreeting.textContent = 'Hi! I can answer any questions about ' + l.address + ' \u2014 lease terms, utilities, the application process, or anything else. What would you like to know?';
@@ -458,6 +635,149 @@ window.PROPERTY_DATA = {
       }, 300);
     }
   }
+
+  // Calendly Tour Scheduling
+  function openCalendly() {
+    var propData = window.PROPERTY_DATA || {};
+    var calendlyUrl = 'https://calendly.com/sanders-pm/tour';
+    // Add property context to Calendly URL
+    var params = '?name=' + encodeURIComponent(propData.address || '') + '&a1=' + encodeURIComponent(propData.listingId || '');
+    // Show embedded modal
+    var modal = document.getElementById('calendly-modal');
+    if (modal) {
+      document.getElementById('calendly-frame').src = calendlyUrl + params;
+      modal.style.display = 'flex';
+    } else {
+      window.open(calendlyUrl + params, '_blank');
+    }
+  }
+  function closeCalendly() {
+    var modal = document.getElementById('calendly-modal');
+    if (modal) { modal.style.display = 'none'; document.getElementById('calendly-frame').src = ''; }
+  }
+
+  // Update Apply Now link with listing ID
+  (function() {
+    var propData = window.PROPERTY_DATA || {};
+    var applyLink = document.getElementById('apply-now-link');
+    if (applyLink && propData.listingId) {
+      applyLink.href = 'apply.html?id=' + encodeURIComponent(propData.listingId);
+    }
+  })();
+
+  // Phase 4: Lead Capture — show after 15 seconds if user hasn't applied
+  var _leadCaptured = false;
+  setTimeout(function() {
+    if (_leadCaptured) return;
+    var overlay = document.getElementById('rv-lead-overlay');
+    if (overlay) overlay.style.display = 'block';
+  }, 15000);
+
+  function dismissLeadCapture() {
+    var overlay = document.getElementById('rv-lead-overlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+
+  function submitLeadCapture() {
+    var emailInput = document.getElementById('rv-lead-email');
+    if (!emailInput || !emailInput.value.trim()) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    var email = emailInput.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    var propData = window.PROPERTY_DATA || {};
+    // Use app.js capturePropertyLead if available
+    if (typeof capturePropertyLead === 'function') {
+      capturePropertyLead(propData.listingId || 'unknown', email);
+    } else {
+      // Fallback: store in localStorage directly
+      var leads = JSON.parse(localStorage.getItem('rv_lead_captures') || '[]');
+      leads.push({ email: email, listingId: propData.listingId || 'unknown', capturedAt: new Date().toISOString(), source: 'qr_scan' });
+      localStorage.setItem('rv_lead_captures', JSON.stringify(leads));
+    }
+    _leadCaptured = true;
+    var overlay = document.getElementById('rv-lead-overlay');
+    if (overlay) {
+      var safeEmail = email.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      overlay.querySelector('.rv-lead-inner').innerHTML = '<div style="font-size:2rem;margin-bottom:0.5rem;">✅</div><h4>Property Saved!</h4><p>We\'ll send you updates about this and similar properties at <strong>' + safeEmail + '</strong></p>';
+      setTimeout(function() { overlay.style.display = 'none'; }, 4000);
+    }
+  }
 </script>
+
+
+<!-- Calendly Tour Modal -->
+<div id="calendly-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:white;border-radius:16px;width:100%;max-width:700px;height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-weight:800;">&#128197; Schedule a Tour</div>
+      <button onclick="closeCalendly()" style="background:none;border:none;cursor:pointer;font-size:1.5rem;color:#9ca3af;">&times;</button>
+    </div>
+    <iframe id="calendly-frame" src="" style="flex:1;border:none;width:100%;"></iframe>
+  </div>
+</div>
+
+<!-- Property Accepts Badges JS (A5) -->
+<script>
+(function() {
+  var BADGE_PRODUCTS = [
+    { key: 'depositBonds', label: 'Deposit Bonds', icon: '🛡️', bg: '#eff6ff', color: '#1e40af' },
+    { key: 'depositFree', label: 'Deposit-Free', icon: '🏠', bg: '#eef2ff', color: '#4338ca' },
+    { key: 'rentersInsurance', label: 'Renters Insurance', icon: '🔒', bg: '#fffbeb', color: '#b45309' },
+    { key: 'creditBuilder', label: 'Credit Builder', icon: '📈', bg: '#f5f3ff', color: '#6d28d9' },
+    { key: 'rentFlexibility', label: 'Flex Pay', icon: '📅', bg: '#ecfdf5', color: '#047857' },
+    { key: 'utilitySetup', label: 'Utility Setup', icon: '⚡', bg: '#fef2f2', color: '#b91c1c' },
+    { key: 'internetSetup', label: 'Internet Setup', icon: '📡', bg: '#f0f9ff', color: '#0369a1' }
+  ];
+  var BADGE_PAYMENTS = [
+    { key: 'cashApp', label: 'Cash App', icon: '💚' },
+    { key: 'zelle', label: 'Zelle', icon: '💜' },
+    { key: 'venmo', label: 'Venmo', icon: '💙' },
+    { key: 'ach', label: 'Bank Transfer', icon: '🏦' },
+    { key: 'card', label: 'Card', icon: '💳' }
+  ];
+  function loadProfile() {
+    var co = localStorage.getItem('rv_company_id') || 'sanders_pm';
+    var s = localStorage.getItem('rv_mgmt_profile_' + co);
+    if (!s) return null;
+    try { return JSON.parse(s); } catch(e) { return null; }
+  }
+  function render() {
+    var el = document.getElementById('property-accepts-badges');
+    if (!el) return;
+    var profile = loadProfile();
+    var html = '';
+    BADGE_PRODUCTS.forEach(function(b) {
+      var on = !profile || !profile.products || profile.products[b.key] !== false;
+      if (on) html += '<span style="display:inline-flex;align-items:center;gap:4px;padding:0.35rem 0.75rem;background:' + b.bg + ';color:' + b.color + ';border-radius:999px;font-size:0.78rem;font-weight:600;">' + b.icon + ' ' + b.label + '</span>';
+    });
+    BADGE_PAYMENTS.forEach(function(b) {
+      var on = !profile || !profile.paymentMethods || profile.paymentMethods[b.key] !== false;
+      if (on) html += '<span style="display:inline-flex;align-items:center;gap:4px;padding:0.35rem 0.75rem;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;border-radius:999px;font-size:0.78rem;font-weight:600;">' + b.icon + ' ' + b.label + '</span>';
+    });
+    el.innerHTML = html || '<span style="color:#94a3b8;font-size:0.85rem;">No specific products listed for this property.</span>';
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
+  else render();
+})();
+</script>
+
+<!-- Phase 4: Lead Capture Overlay -->
+<div class="rv-lead-overlay" id="rv-lead-overlay">
+  <button class="rv-lead-dismiss" onclick="dismissLeadCapture()">&times;</button>
+  <div class="rv-lead-inner">
+    <h4>💾 Save This Property</h4>
+    <p>Not ready to apply? Save this listing and we'll notify you if anything changes.</p>
+    <div class="rv-lead-form">
+      <input type="email" id="rv-lead-email" placeholder="Enter your email..." />
+      <button onclick="submitLeadCapture()">Save Property</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

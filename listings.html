@@ -109,7 +109,7 @@
       <option>2 Beds</option>
       <option>3+ Beds</option>
     </select>
-    <button class="btn btn-primary">Search</button>
+    <button class="btn btn-primary" onclick="filterListings()">Search</button>
   </div>
 </div>
 
@@ -244,13 +244,104 @@
 <script src="app.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Load all listings from all clients in localStorage
+  var allListings = [];
+  var keys = Object.keys(localStorage);
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i].indexOf('rv_listings_') === 0) {
+      try {
+        var data = JSON.parse(localStorage.getItem(keys[i]));
+        if (Array.isArray(data)) {
+          var clientId = keys[i].replace('rv_listings_', '');
+          data.forEach(function(l) { l._clientId = clientId; });
+          allListings = allListings.concat(data);
+        }
+      } catch(e) {}
+    }
+  }
+
+  // If no listings in localStorage, seed from default
+  if (allListings.length === 0) {
+    allListings = getListingsForClient('sanders-pm');
+  }
+
+  // Render all listings
   renderListingCards('dynamic-listings', 'sanders-pm');
-  var listings = getListingsForClient('sanders-pm');
+
   var countEl = document.getElementById('listing-count');
   if (countEl) {
+    var listings = getListingsForClient('sanders-pm');
     countEl.innerHTML = '<p style="font-size:0.8rem;color:var(--gray-500);margin-top:0.75rem;">Showing ' + listings.length + ' verified listing' + (listings.length !== 1 ? 's' : '') + '</p>';
   }
 });
+
+function filterListings() {
+  var query = document.querySelector('.listings-main input[type="text"], div[style*="border-bottom"] input[type="text"]');
+  var priceSelect = document.querySelectorAll('select');
+  var searchText = query ? query.value.toLowerCase() : '';
+
+  var listings = getListingsForClient('sanders-pm');
+  var filtered = listings;
+
+  if (searchText) {
+    filtered = listings.filter(function(l) {
+      return (l.address || '').toLowerCase().indexOf(searchText) !== -1 ||
+             (l.description || '').toLowerCase().indexOf(searchText) !== -1 ||
+             (l.listingId || '').toLowerCase().indexOf(searchText) !== -1;
+    });
+  }
+
+  // Render filtered results
+  var container = document.getElementById('dynamic-listings');
+  if (!container) return;
+
+  var gradients = [
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #0ea5e9, #0284c7)',
+    'linear-gradient(135deg, #10b981, #059669)',
+    'linear-gradient(135deg, #f59e0b, #d97706)',
+    'linear-gradient(135deg, #ec4899, #db2777)',
+    'linear-gradient(135deg, #6366f1, #4f46e5)',
+  ];
+
+  container.innerHTML = filtered.map(function(l, i) {
+    var isRented = l.status === 'rented' || (l.tenant && l.status !== 'available');
+    var statusBadge = isRented ? '<span class="badge badge-rented">Rented</span>' :
+      l.status === 'coming_soon' ? '<span class="badge badge-pending">Coming Soon</span>' :
+      '<span class="badge badge-available">Available</span>';
+    var gradient = gradients[i % gradients.length];
+    var photoHtml = (l.photos && l.photos.length > 0)
+      ? '<img src="' + escapeHtml(l.photos[0]) + '" alt="' + escapeHtml(l.address) + '" style="width:100%;height:200px;object-fit:cover;border-radius:12px 12px 0 0;">'
+      : '<div class="property-img" style="background:' + gradient + ';">&#127968;</div>';
+
+    return '<div class="property-card"' + (isRented ? ' style="opacity:0.75;"' : '') + '>' +
+      photoHtml +
+      '<div class="property-info">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">' +
+          '<div class="property-price"' + (isRented ? ' style="color:var(--gray-500);"' : '') + '>$' + (l.rent || 0).toLocaleString() + '/mo</div>' +
+          '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">' + statusBadge +
+            (!isRented ? '<span class="badge badge-verified" style="font-size:0.7rem;">&#10003; Verified</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="property-address">&#128205; ' + escapeHtml(l.address) + '</div>' +
+        '<div class="property-meta">' +
+          '<span>&#128716; ' + (l.beds || '?') + ' Bed' + ((l.beds || 0) !== 1 ? 's' : '') + '</span>' +
+          '<span>&#128703; ' + (l.baths || '?') + ' Bath' + ((l.baths || 0) !== 1 ? 's' : '') + '</span>' +
+          (l.sqft ? '<span>' + l.sqft + ' sqft</span>' : '') +
+        '</div>' +
+        '<div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.5rem;">&#128154; Cash App / Zelle &middot; $0 fee</div>' +
+        '<div style="margin-top:0.75rem;display:flex;gap:0.5rem;">' +
+          '<a href="property-detail.html?id=' + encodeURIComponent(l.listingId || '') + '" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">View Details</a>' +
+          '<button class="btn btn-outline btn-sm" onclick="toggleChat()">Ask AI</button>' +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+
+  var countEl = document.getElementById('listing-count');
+  if (countEl) {
+    countEl.innerHTML = '<p style="font-size:0.8rem;color:var(--gray-500);margin-top:0.75rem;">Showing ' + filtered.length + ' verified listing' + (filtered.length !== 1 ? 's' : '') + (searchText ? ' matching "' + escapeHtml(searchText) + '"' : '') + '</p>';
+  }
+}
 </script>
 </body>
 </html>

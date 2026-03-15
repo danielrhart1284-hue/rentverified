@@ -134,7 +134,65 @@
     .rent-card .label { opacity: 0.8; font-size: 0.9rem; }
     .rent-card .due { font-size: 0.85rem; opacity: 0.75; margin-top: 4px; }
     .rent-card-grid { display: grid; grid-template-columns: 1fr auto; align-items: center; }
-  </style>
+
+    /* ── Mobile Audit: Responsive CSS for tenant portal ── */
+    @media (max-width: 768px) {
+      .portal-layout { grid-template-columns: 1fr; }
+      .sidebar { 
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+        padding: 0; display: flex; overflow-x: auto; gap: 0;
+        background: var(--dark); border-top: 1px solid rgba(255,255,255,0.1);
+      }
+      .sidebar-section { display: flex; gap: 0; padding: 0; margin: 0; }
+      .sidebar-section:not(:first-of-type) { display: none; }
+      .sidebar-label { display: none; }
+      .sidebar-link {
+        flex-direction: column; font-size: 0.65rem; padding: 0.5rem 0.75rem;
+        gap: 2px; white-space: nowrap; min-width: 60px; text-align: center;
+        justify-content: center;
+      }
+      .sidebar-link svg { width: 16px; height: 16px; }
+      .sidebar > div:first-child { display: none; }
+      .portal-main { padding: 1rem; padding-bottom: 5rem; }
+      .page-header h1 { font-size: 1.2rem; }
+      .rent-card { padding: 1.25rem; }
+      .rent-card .amount { font-size: 2rem; }
+      .rent-card-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+      nav { padding: 0.5rem 1rem; }
+      .nav-links { display: none; }
+      .nav-cta { display: none; }
+      .login-card { padding: 1.5rem; margin: 1rem; }
+      .login-card h2 { font-size: 1.2rem; }
+      .steps-indicator { gap: 4px; }
+      .step-dot { width: 28px; height: 28px; font-size: 0.75rem; }
+      .pay-method { padding: 1rem; }
+      .pay-method-icon { font-size: 2rem; }
+      table { font-size: 0.8rem; }
+      table th, table td { padding: 0.5rem; }
+    }
+    @media (max-width: 480px) {
+      .sidebar-link { font-size: 0.6rem; padding: 0.4rem 0.5rem; min-width: 50px; }
+      .rent-card .amount { font-size: 1.75rem; }
+      .portal-main { padding: 0.75rem; padding-bottom: 5rem; }
+      .login-card { padding: 1.25rem; }
+    }
+  
+/* == CREDIT BUILDER SUBSCRIPTION == */
+.credit-sub-gate { background:linear-gradient(135deg,#7c3aed,#6d28d9); color:white; border-radius:12px; padding:1.5rem; text-align:center; margin:1rem 0; }
+.credit-sub-gate h3 { font-size:1.1rem; margin-bottom:.5rem; }
+.credit-sub-gate .credit-price { font-size:2rem; font-weight:800; }
+.credit-sub-gate .credit-price span { font-size:.85rem; font-weight:400; opacity:.8; }
+.credit-sub-btn { background:white; color:#7c3aed; border:none; padding:.7rem 2rem; border-radius:10px; font-weight:700; font-size:1rem; cursor:pointer; margin-top:.75rem; transition:all .2s; }
+.credit-sub-btn:hover { background:#f5f3ff; transform:translateY(-1px); }
+.credit-active-badge { background:#dcfce7; color:#15803d; padding:.4rem 1rem; border-radius:20px; font-weight:700; font-size:.85rem; display:inline-block; }
+.lemonade-btn { background:linear-gradient(135deg,#ff6b9d,#c850c0); color:white; border:none; padding:.6rem 1.2rem; border-radius:8px; font-weight:600; cursor:pointer; font-size:.88rem; display:inline-flex; align-items:center; gap:.4rem; transition:all .2s; }
+.lemonade-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(200,80,192,.3); }
+.ai-classify-badge { display:inline-block; padding:.25rem .65rem; border-radius:20px; font-size:.75rem; font-weight:700; background:#dbeafe; color:#1d4ed8; margin-left:.5rem; }
+.ai-explain-btn-tp { background:none; border:1.5px solid #93c5fd; color:#2563eb; padding:.3rem .7rem; border-radius:6px; font-size:.78rem; font-weight:600; cursor:pointer; margin-left:.5rem; }
+.ai-explain-btn-tp:hover { background:#eff6ff; }
+.ai-explain-result-tp { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:.75rem; margin-top:.5rem; font-size:.85rem; color:#374151; line-height:1.5; display:none; }
+
+</style>
 </head>
 <body>
 
@@ -243,6 +301,18 @@
         <a href="financial-hub.html" class="sidebar-link" style="background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;color:#fde68a;text-decoration:none;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           💼 Renters Insurance
+        </a>
+      </div>
+
+      <div class="sidebar-section" style="margin-top:.25rem;">
+        <div class="sidebar-label">Financial Resources</div>
+        <div class="sidebar-link" onclick="showTab('financial-resources')" style="background:rgba(16,185,129,0.12);border-left:3px solid #10b981;color:#6ee7b7;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          🛡️ Financial Products
+        </div>
+        <a href="funding.html" class="sidebar-link" style="background:rgba(251,191,36,0.1);border-left:3px solid #fbbf24;color:#fde68a;text-decoration:none;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          💰 Funding Hub
         </a>
       </div>
 
@@ -1028,6 +1098,19 @@
         </div>
       </div>
 
+      <!-- FINANCIAL RESOURCES TAB (C6) -->
+      <div id="tab-financial-resources" class="tab-content" style="display:none;">
+        <div class="page-header"><h1>Financial Resources</h1><p>Products and services available through your landlord's RentVerified portal.</p></div>
+        <div id="fin-resources-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;">
+          <!-- Products populated by JS based on landlord prefs -->
+        </div>
+        <div id="fin-resources-empty" style="display:none;text-align:center;padding:3rem;color:#64748b;">
+          <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">No Financial Products Available</h3>
+          <p>Your landlord hasn't enabled any financial products yet. Check back later!</p>
+        </div>
+      </div>
+
     </div><!-- end portal-main -->
   </div><!-- end portal-layout -->
 </div><!-- end portal-screen -->
@@ -1355,6 +1438,162 @@
   function submitPayment() { nextPayStep(4); }
 
   document.addEventListener('DOMContentLoaded', () => { updateFeeDisplay('ach'); });
+
+
+/* ================================================================
+   PHASE 6: TENANT PORTAL REVENUE + AI
+   ================================================================ */
+
+/* -- TASK 2: CREDIT BUILDER SUBSCRIPTION -- */
+function checkCreditSub() {
+  var sub = JSON.parse(localStorage.getItem('rv_credit_sub') || 'null');
+  return sub && sub.status === 'active' && new Date(sub.expiresAt) > new Date();
+}
+
+function renderCreditBuilder() {
+  var container = document.getElementById('credit-builder-panel');
+  if (!container) return;
+  if (checkCreditSub()) {
+    container.innerHTML = '<div style="text-align:center;padding:1rem;"><span class="credit-active-badge">Credit Builder Active</span><p style="margin-top:.75rem;font-size:.88rem;color:#374151;">Your rent payments are being reported to all 3 credit bureaus. Next report date: ' + new Date(Date.now() + 15*86400000).toLocaleDateString() + '</p></div>';
+  } else {
+    container.innerHTML = '<div class="credit-sub-gate"><h3>Build Your Credit Score</h3><p style="opacity:.9;margin-bottom:.5rem;">Report your on-time rent payments to all 3 credit bureaus</p><div class="credit-price">$6.99<span>/month</span></div><button class="credit-sub-btn" onclick="subscribeCreditBuilder()">Subscribe Now</button><p style="font-size:.78rem;opacity:.7;margin-top:.5rem;">Cancel anytime. Powered by RentVerified.</p></div>';
+  }
+}
+
+function subscribeCreditBuilder() {
+  var link = 'STRIPE_CREDIT_BUILDER_LINK';
+  localStorage.setItem('rv_credit_sub', JSON.stringify({ status: 'active', expiresAt: new Date(Date.now() + 30*24*60*60*1000).toISOString(), startedAt: new Date().toISOString() }));
+  if (link.indexOf('STRIPE_') === 0) { renderCreditBuilder(); alert('Credit Builder activated! (demo mode - connect Stripe for production billing)'); return; }
+  window.open(link, '_blank');
+}
+
+/* -- TASK 4: LEMONADE RENTERS INSURANCE AFFILIATE -- */
+function openLemonadeAffiliateTenant() {
+  var clicks = JSON.parse(localStorage.getItem('rv_affiliate_clicks') || '[]');
+  clicks.push({ partner: 'lemonade', timestamp: new Date().toISOString() });
+  localStorage.setItem('rv_affiliate_clicks', JSON.stringify(clicks));
+  window.open('https://www.lemonade.com/renters?utm_source=rentverified&utm_medium=referral&utm_campaign=renters_insurance', '_blank');
+}
+
+/* -- TASK 9c: MAINTENANCE CLASSIFICATION -- */
+async function classifyMaintenanceRequestTP(description) {
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'classify', input: description }) });
+    var data = await resp.json();
+    if (data.result && data.result.label) return data.result.label;
+    return classifyLocalTP(description);
+  } catch (err) { return classifyLocalTP(description); }
+}
+
+function classifyLocalTP(desc) {
+  var d = desc.toLowerCase();
+  if (/pipe|leak|faucet|drain|toilet|water|plumb/i.test(d)) return 'Plumbing';
+  if (/electric|outlet|wire|light|switch|breaker|power/i.test(d)) return 'Electrical';
+  if (/heat|cool|hvac|ac |a\/c|furnace|thermostat|air condition/i.test(d)) return 'HVAC';
+  if (/appliance|fridge|refrigerator|oven|stove|dishwasher|washer|dryer|microwave/i.test(d)) return 'Appliance';
+  if (/roof|wall|crack|foundation|struct|floor|ceiling|window|door/i.test(d)) return 'Structural';
+  if (/pest|bug|roach|ant|mouse|rat|termite|bee|wasp/i.test(d)) return 'Pest Control';
+  if (/clean|mold|mildew|stain|carpet|odor|smell/i.test(d)) return 'Cleaning';
+  if (/yard|lawn|tree|bush|garden|landscap|fence|gate/i.test(d)) return 'Landscaping';
+  return 'Other';
+}
+
+/* -- TASK 9d: LEASE CLAUSE EXPLAINER -- */
+async function explainClauseTP(clauseText, resultElId) {
+  var resultEl = document.getElementById(resultElId);
+  if (!resultEl) return;
+  resultEl.style.display = 'block';
+  resultEl.textContent = 'Explaining...';
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'explain', input: clauseText }) });
+    var data = await resp.json();
+    resultEl.textContent = typeof data.result === 'string' ? data.result : 'This clause sets standard terms between you and your landlord. Contact a legal professional for specific questions.';
+  } catch (err) {
+    resultEl.textContent = 'This clause sets standard terms between you and your landlord. Contact a legal professional for specific questions.';
+  }
+}
+
+/* -- FINANCIAL RESOURCES TAB: Filter by landlord prefs (A4 + C6) -- */
+function getLandlordMgmtProfile() {
+  var co = localStorage.getItem('rv_company_id') || 'sanders_pm';
+  var saved = localStorage.getItem('rv_mgmt_profile_' + co);
+  if (!saved) return null; // No profile = all products ON (opt-out model)
+  try { return JSON.parse(saved); } catch(e) { return null; }
+}
+
+function isProductEnabled(profile, productKey) {
+  if (!profile || !profile.products) return true; // Default ON if no profile
+  return profile.products[productKey] !== false;
+}
+
+var TENANT_PRODUCT_CATALOG = [
+  { key: 'depositBonds', icon: '🛡️', name: 'Deposit Bond', desc: 'Pay ~$17/mo instead of a full security deposit. Same protection for your landlord, lower move-in cost for you.', cta: 'Learn More', color: '#3b82f6' },
+  { key: 'depositFree', icon: '🏠', name: 'Deposit-Free Move-In', desc: 'Move in with $0 deposit. Your bank account is verified instead.', cta: 'Check Eligibility', color: '#6366f1' },
+  { key: 'rentersInsurance', icon: '🔒', name: 'Renters Insurance', desc: 'Protect your belongings starting at ~$10/mo. May be required by your lease.', cta: 'Get a Quote', color: '#f59e0b' },
+  { key: 'creditBuilder', icon: '📈', name: 'Credit Builder', desc: 'Your on-time rent payments reported to all 3 credit bureaus. Build credit with payments you already make.', cta: 'Start Building', color: '#8b5cf6' },
+  { key: 'rentFlexibility', icon: '📅', name: 'Rent Flexibility', desc: 'Split your rent into 2 payments per month, aligned with your paychecks. $14.99/mo.', cta: 'Learn More', color: '#10b981' },
+  { key: 'utilitySetup', icon: '⚡', name: 'Utility Setup Concierge', desc: 'We handle your power, gas, water, and internet transfers when you move in.', cta: 'Get Started', color: '#ef4444' },
+  { key: 'internetSetup', icon: '📡', name: 'Internet & Cable Setup', desc: 'Get internet set up at your new place. Fast, easy installation.', cta: 'Check Plans', color: '#0ea5e9' },
+  { key: 'movingServices', icon: '🚚', name: 'Moving Services', desc: 'Get connected with vetted local movers at a discount.', cta: 'Get Quotes', color: '#78716c' }
+];
+
+function renderFinancialResources() {
+  var grid = document.getElementById('fin-resources-grid');
+  var empty = document.getElementById('fin-resources-empty');
+  if (!grid) return;
+  var profile = getLandlordMgmtProfile();
+  var cards = [];
+  TENANT_PRODUCT_CATALOG.forEach(function(p) {
+    if (isProductEnabled(profile, p.key)) {
+      cards.push('<div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #f1f5f9;">' +
+        '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">' +
+        '<div style="width:44px;height:44px;border-radius:10px;background:' + p.color + '15;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">' + p.icon + '</div>' +
+        '<div style="font-weight:700;font-size:1rem;color:#1e293b;">' + p.name + '</div></div>' +
+        '<p style="font-size:0.88rem;color:#64748b;line-height:1.6;margin-bottom:1rem;">' + p.desc + '</p>' +
+        '<button class="btn btn-sm" style="background:' + p.color + ';color:white;border:none;border-radius:8px;padding:0.5rem 1.25rem;font-weight:600;cursor:pointer;" onclick="showWIP(\'' + p.name + ' enrollment coming soon.\')">' + p.cta + '</button></div>');
+    }
+  });
+  if (cards.length === 0) {
+    grid.style.display = 'none';
+    if (empty) empty.style.display = 'block';
+  } else {
+    grid.innerHTML = cards.join('');
+    grid.style.display = 'grid';
+    if (empty) empty.style.display = 'none';
+  }
+}
+
+/* -- INIT CREDIT BUILDER + LEMONADE -- */
+document.addEventListener('DOMContentLoaded', function() {
+  renderFinancialResources();
+  var cbTab = document.querySelector('[data-tab="credit-builder"], a[href*="credit"]');
+  if (cbTab) {
+    cbTab.addEventListener('click', function(e) {
+      e.preventDefault();
+      var panel = document.getElementById('credit-builder-panel');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'credit-builder-panel';
+        panel.style.cssText = 'margin:1rem;';
+        var mainContent = document.querySelector('.portal-main') || document.querySelector('main') || document.body;
+        mainContent.appendChild(panel);
+      }
+      renderCreditBuilder();
+      panel.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+  // Auto-create credit builder panel
+  if (!document.getElementById('credit-builder-panel')) {
+    var tp = document.querySelector('.portal-main') || document.querySelector('main');
+    if (tp) {
+      var cbPanel = document.createElement('div');
+      cbPanel.id = 'credit-builder-panel';
+      cbPanel.style.cssText = 'margin:1rem;display:none;';
+      tp.appendChild(cbPanel);
+    }
+  }
+});
+
 </script>
 </body>
 </html>

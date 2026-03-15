@@ -301,6 +301,18 @@
     .two-col { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
   }
+
+/* == VENDOR LEAD PAYWALL == */
+.lead-blurred { filter:blur(5px); user-select:none; pointer-events:none; }
+.lead-unlock-btn { background:linear-gradient(135deg,#f59e0b,#d97706); color:white; border:none; padding:.6rem 1.5rem; border-radius:8px; font-weight:700; cursor:pointer; font-size:.9rem; transition:all .2s; }
+.lead-unlock-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(245,158,11,.3); }
+.lead-pack-modal { background:white; border-radius:16px; padding:2rem; max-width:440px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+.lead-pack { border:2px solid #e5e7eb; border-radius:12px; padding:1.25rem; margin-bottom:1rem; cursor:pointer; transition:all .2s; }
+.lead-pack:hover { border-color:#f59e0b; background:#fffbeb; }
+.lead-pack h4 { font-size:1rem; font-weight:700; color:#1e1b4b; }
+.lead-pack .pack-price { font-size:1.5rem; font-weight:800; color:#d97706; }
+.vendor-credits-badge { background:#fef3c7; color:#92400e; padding:.3rem .75rem; border-radius:20px; font-weight:700; font-size:.82rem; display:inline-flex; align-items:center; gap:.3rem; }
+
 </style>
 </head>
 <body>
@@ -1510,6 +1522,81 @@ function saveSettings() {
   refreshStats();
   alert('✅ Settings saved!');
 }
+
+
+/* ================================================================
+   PHASE 6: VENDOR LEAD PAYWALL
+   ================================================================ */
+var STRIPE_VENDOR_LINKS = { pack5: 'STRIPE_VENDOR_5_LEADS', pack20: 'STRIPE_VENDOR_20_LEADS' };
+
+function getVendorCredits() { return parseInt(localStorage.getItem('rv_vendor_credits') || '0', 10); }
+function getUnlockedLeads() { return JSON.parse(localStorage.getItem('rv_vendor_unlocked_leads') || '[]'); }
+function isLeadUnlocked(leadId) { return getUnlockedLeads().indexOf(leadId) !== -1; }
+
+function unlockLead(leadId) {
+  var credits = getVendorCredits();
+  if (credits <= 0) { showLeadPackModal(); return; }
+  credits--;
+  localStorage.setItem('rv_vendor_credits', credits.toString());
+  var unlocked = getUnlockedLeads();
+  if (unlocked.indexOf(leadId) === -1) unlocked.push(leadId);
+  localStorage.setItem('rv_vendor_unlocked_leads', JSON.stringify(unlocked));
+  if (typeof renderLeads === 'function') renderLeads();
+  updateCreditsDisplay();
+}
+
+function showLeadPackModal() {
+  var overlay = document.getElementById('lead-pack-overlay');
+  if (overlay) { overlay.style.display = 'flex'; return; }
+  overlay = document.createElement('div');
+  overlay.id = 'lead-pack-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+  overlay.innerHTML = '<div class="lead-pack-modal"><h3 style="font-size:1.2rem;font-weight:800;margin-bottom:.25rem;">Buy Lead Credits</h3><p style="color:#6b7280;margin-bottom:1.25rem;font-size:.88rem;">Unlock contact details for qualified property management leads</p><div class="lead-pack" onclick="buyLeadPack(5)"><div style="display:flex;justify-content:space-between;align-items:center;"><div><h4>5 Lead Pack</h4><p style="color:#6b7280;font-size:.82rem;">Perfect for getting started</p></div><div class="pack-price">$25</div></div></div><div class="lead-pack" onclick="buyLeadPack(20)"><div style="display:flex;justify-content:space-between;align-items:center;"><div><h4>20 Lead Pack <span style="background:#10b981;color:white;font-size:.7rem;padding:2px 8px;border-radius:10px;margin-left:.5rem;">Best Value</span></h4><p style="color:#6b7280;font-size:.82rem;">Save 20% per lead</p></div><div class="pack-price">$80</div></div></div><button onclick="closeLeadPackModal()" style="width:100%;padding:.6rem;background:#f1f5f9;border:none;border-radius:8px;color:#64748b;cursor:pointer;font-weight:600;">Cancel</button></div>';
+  document.body.appendChild(overlay);
+}
+
+function closeLeadPackModal() {
+  var overlay = document.getElementById('lead-pack-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function buyLeadPack(size) {
+  var link = size === 5 ? STRIPE_VENDOR_LINKS.pack5 : STRIPE_VENDOR_LINKS.pack20;
+  var credits = getVendorCredits() + size;
+  localStorage.setItem('rv_vendor_credits', credits.toString());
+  closeLeadPackModal();
+  if (link.indexOf('STRIPE_') === 0) {
+    alert('Lead pack purchased: ' + size + ' credits added! (demo mode - connect Stripe for billing)');
+    updateCreditsDisplay();
+    if (typeof renderLeads === 'function') renderLeads();
+    return;
+  }
+  window.open(link, '_blank');
+}
+
+function updateCreditsDisplay() {
+  var badge = document.getElementById('vendor-credits-badge');
+  if (badge) badge.textContent = getVendorCredits() + ' credits';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var sidebar = document.querySelector('.vp-sidebar, .sidebar, nav');
+  if (sidebar) {
+    var badge = document.createElement('div');
+    badge.id = 'vendor-credits-badge';
+    badge.className = 'vendor-credits-badge';
+    badge.style.margin = '0.75rem 1rem';
+    badge.textContent = getVendorCredits() + ' credits';
+    sidebar.appendChild(badge);
+    var buyBtn = document.createElement('button');
+    buyBtn.className = 'lead-unlock-btn';
+    buyBtn.textContent = '+ Buy Lead Credits';
+    buyBtn.style.cssText = 'margin:0.5rem 1rem;font-size:.8rem;padding:.4rem 1rem;';
+    buyBtn.onclick = showLeadPackModal;
+    sidebar.appendChild(buyBtn);
+  }
+});
+
 </script>
 </body>
 </html>

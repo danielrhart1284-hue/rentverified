@@ -202,6 +202,12 @@
   /* confetti dot */
   .confetti-dot { position: fixed; pointer-events: none; border-radius: 50%; animation: confettiFall linear forwards; z-index: 9999; }
   @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(600px) rotate(720deg);opacity:0} }
+
+/* == REFERRAL CAPTURE == */
+.ref-capture-banner { background:linear-gradient(135deg,#10b981,#059669); color:white; padding:1rem 1.5rem; border-radius:12px; margin-bottom:1.5rem; text-align:center; }
+.ref-capture-banner h3 { font-size:1rem; margin-bottom:.25rem; }
+.ref-capture-banner .ref-code { font-size:1.3rem; font-weight:800; background:rgba(255,255,255,.2); padding:.25rem .75rem; border-radius:8px; display:inline-block; margin-top:.25rem; }
+
 </style>
 </head>
 <body>
@@ -1017,6 +1023,27 @@ function renderGrowthChart(baseRefs) {
     }
   }, 600);
 })();
+
+
+/* ================================================================
+   PHASE 6: REFERRAL PROGRAM ACTIVATION
+   ================================================================ */
+
+(function captureReferralCode() {
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  if (ref) {
+    localStorage.setItem('rv_referral_source', ref);
+    var main = document.querySelector('.ref-main, .referral-main') || document.querySelector('main') || document.querySelector('.container');
+    if (main) {
+      var banner = document.createElement('div');
+      banner.className = 'ref-capture-banner';
+      banner.innerHTML = '<h3>Referral Code Applied!</h3><p>You were referred by:</p><div class="ref-code">' + ref.replace(/</g,'&lt;') + '</div><p style="font-size:.85rem;margin-top:.5rem;opacity:.9;">You will receive a $20 credit on your first subscription month.</p>';
+      main.insertBefore(banner, main.firstChild);
+    }
+  }
+})();
+
 </script>
 </body>
 </html>

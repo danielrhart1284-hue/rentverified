@@ -269,6 +269,13 @@
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp .35s ease forwards; }
+
+/* == FEATURED AGENT == */
+.featured-badge { display:inline-flex; align-items:center; gap:.3rem; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; padding:.25rem .65rem; border-radius:20px; font-size:.72rem; font-weight:700; }
+.featured-agent { border:2px solid #f59e0b !important; position:relative; }
+.become-featured-btn { background:linear-gradient(135deg,#f59e0b,#d97706); color:white; border:none; padding:.55rem 1.2rem; border-radius:8px; font-weight:700; cursor:pointer; font-size:.85rem; transition:all .2s; display:inline-flex; align-items:center; gap:.4rem; }
+.become-featured-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(245,158,11,.3); }
+
 </style>
 </head>
 <body>
@@ -1440,6 +1447,68 @@ function toggleSwitch(el) {
     document.querySelectorAll('.toggle-switch:not(.off)').forEach(t => {});
   }, 100);
 })();
+
+
+/* ================================================================
+   PHASE 6: INSURANCE AGENT FEATURED LISTING
+   ================================================================ */
+
+function isAgentFeatured() {
+  var agent = JSON.parse(localStorage.getItem('rv_ins_agent') || '{}');
+  return agent.featured && agent.featuredUntil && new Date(agent.featuredUntil) > new Date();
+}
+
+function becomeFeatured() {
+  var link = 'STRIPE_AGENT_FEATURED';
+  var agent = JSON.parse(localStorage.getItem('rv_ins_agent') || '{}');
+  agent.featured = true;
+  agent.featuredUntil = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+  localStorage.setItem('rv_ins_agent', JSON.stringify(agent));
+  if (link.indexOf('STRIPE_') === 0) { alert('Featured status activated for 30 days! (demo mode - connect Stripe for $29/mo billing)'); renderFeaturedUI(); return; }
+  window.open(link, '_blank');
+}
+
+function renderFeaturedUI() {
+  var existingBtn = document.getElementById('become-featured-btn');
+  if (isAgentFeatured() && existingBtn) {
+    existingBtn.innerHTML = '<span class="featured-badge">Featured Agent</span>';
+    existingBtn.onclick = null;
+    existingBtn.style.cursor = 'default';
+    existingBtn.style.background = 'transparent';
+  }
+  var directory = document.getElementById('agent-directory') || document.getElementById('agentGrid');
+  if (directory) {
+    var cards = Array.from(directory.children);
+    cards.sort(function(a, b) {
+      var aF = a.classList.contains('featured-agent') ? 0 : 1;
+      var bF = b.classList.contains('featured-agent') ? 0 : 1;
+      return aF - bF;
+    });
+    cards.forEach(function(c) { directory.appendChild(c); });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var profileArea = document.querySelector('.agent-profile, .profile-section, [id*="profile"], .sidebar-profile, .sb-profile, [id*="sb-"]');
+    if (profileArea && !document.getElementById('become-featured-btn')) {
+      var btn = document.createElement('button');
+      btn.id = 'become-featured-btn';
+      if (isAgentFeatured()) {
+        btn.innerHTML = '<span class="featured-badge">Featured Agent</span>';
+        btn.style.cssText = 'background:transparent;border:none;margin:0.75rem 0;cursor:default;';
+      } else {
+        btn.className = 'become-featured-btn';
+        btn.textContent = 'Become Featured - $29/mo';
+        btn.onclick = becomeFeatured;
+        btn.style.margin = '0.75rem 0';
+      }
+      profileArea.appendChild(btn);
+    }
+    renderFeaturedUI();
+  }, 200);
+});
+
 </script>
 </body>
 </html>

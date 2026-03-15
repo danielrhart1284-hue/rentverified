@@ -111,7 +111,97 @@
       font-size: 0.8rem;
       font-weight: 700;
     }
-  </style>
+
+    /* Phase 4: Breadcrumbs */
+    .rv-breadcrumbs {
+      display: flex; align-items: center; gap: 0.25rem;
+      padding: 0.5rem 1rem; background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.8rem; color: #64748b; flex-wrap: wrap;
+    }
+    .rv-breadcrumbs a { color: #2563eb; text-decoration: none; font-weight: 500; cursor: pointer; }
+    .rv-breadcrumbs a:hover { text-decoration: underline; }
+    .rv-breadcrumbs .sep { color: #cbd5e1; margin: 0 2px; }
+    .rv-breadcrumbs .current { color: #1e293b; font-weight: 600; }
+
+    /* Phase 4: Audit Tooltip */
+    .audit-tooltip-trigger { position: relative; cursor: help; }
+    .audit-tooltip {
+      display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: white; padding: 0.5rem 0.75rem; border-radius: 6px;
+      font-size: 0.75rem; white-space: nowrap; z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); pointer-events: none;
+    }
+    .audit-tooltip::after {
+      content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: #1e293b;
+    }
+    .audit-tooltip-trigger:hover .audit-tooltip { display: block; }
+
+    /* Phase 4: Contextual Sidebar */
+    .ctx-sidebar-section { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem; margin-top: 0.75rem; }
+    .ctx-sidebar-header { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; padding: 0.25rem; margin-bottom: 0.25rem; }
+    .ctx-link { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; border-radius: 6px; color: #94a3b8; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; }
+    .ctx-link:hover { background: rgba(255,255,255,0.08); color: white; }
+    .ctx-link.active { background: rgba(37,99,235,0.15); color: #60a5fa; }
+
+    /* Phase 4: Verified Badge */
+    .verified-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+    }
+    .verified-badge svg { width: 12px; height: 12px; }
+
+    /* Phase 4: Invoice Alert */
+    .invoice-flagged { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; }
+    .invoice-flagged .flag-icon { color: #dc2626; font-weight: 700; }
+
+    /* Phase 4: Lead Capture */
+    .lead-capture-overlay {
+      position: fixed; bottom: 0; left: 0; right: 0; background: white;
+      border-top: 2px solid #2563eb; box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+      padding: 1.25rem; z-index: 999; transform: translateY(100%); transition: transform 0.3s ease;
+    }
+    .lead-capture-overlay.visible { transform: translateY(0); }
+  
+/* == SUBSCRIPTION GATE == */
+#subscription-gate { display:none; min-height:100vh; background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#1e40af 100%); padding:2rem; }
+.sub-gate-wrap { max-width:1100px; margin:0 auto; }
+.sub-gate-header { text-align:center; color:white; margin-bottom:2.5rem; }
+.sub-gate-header h1 { font-size:2rem; font-weight:800; margin-bottom:.5rem; }
+.sub-gate-header p { color:#94a3b8; font-size:1rem; }
+.sub-tiers { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+@media(max-width:800px){ .sub-tiers { grid-template-columns:1fr; } }
+.sub-tier { background:white; border-radius:16px; padding:2rem; position:relative; transition:transform .2s,box-shadow .2s; }
+.sub-tier:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,.2); }
+.sub-tier.popular { border:3px solid #2563eb; }
+.sub-tier .pop-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#2563eb; color:white; font-size:.75rem; font-weight:700; padding:4px 16px; border-radius:20px; }
+.sub-tier h3 { font-size:1.3rem; font-weight:700; color:#1e293b; margin-bottom:.25rem; }
+.sub-tier .price { font-size:2.2rem; font-weight:800; color:#1e293b; }
+.sub-tier .price span { font-size:.9rem; font-weight:400; color:#64748b; }
+.sub-tier .desc { color:#64748b; font-size:.88rem; margin:.75rem 0 1.25rem; }
+.sub-tier ul { list-style:none; padding:0; margin:0 0 1.5rem; }
+.sub-tier ul li { padding:.4rem 0; font-size:.88rem; color:#374151; }
+.sub-tier ul li::before { content:"\2713 "; color:#10b981; font-weight:700; }
+.sub-tier .sub-btn { display:block; width:100%; padding:.75rem; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.sub-tier .sub-btn.primary { background:#2563eb; color:white; }
+.sub-tier .sub-btn.primary:hover { background:#1d4ed8; }
+.sub-tier .sub-btn.outline { background:transparent; color:#2563eb; border:2px solid #2563eb; }
+.sub-tier .sub-btn.outline:hover { background:#eff6ff; }
+.referral-banner { background:linear-gradient(135deg,#10b981,#059669); color:white; padding:1rem 1.5rem; border-radius:12px; margin-bottom:1.5rem; text-align:center; font-weight:600; display:none; }
+.referral-banner .ref-amount { font-size:1.5rem; font-weight:800; }
+.ai-panel { background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:12px; padding:1.25rem; margin-top:1rem; }
+.ai-panel h4 { font-size:.9rem; font-weight:700; color:#0369a1; margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; }
+.ai-panel .ai-note { font-size:.75rem; color:#64748b; font-style:italic; margin-top:.75rem; }
+.ai-panel .ai-result { background:white; border-radius:8px; padding:1rem; font-size:.88rem; color:#374151; line-height:1.6; }
+.ai-btn { background:linear-gradient(135deg,#7c3aed,#6d28d9); color:white; border:none; padding:.5rem 1rem; border-radius:8px; font-weight:600; cursor:pointer; font-size:.85rem; display:inline-flex; align-items:center; gap:.4rem; transition:all .15s; }
+.ai-btn:hover { background:linear-gradient(135deg,#6d28d9,#5b21b6); }
+.ai-btn:disabled { opacity:.6; cursor:not-allowed; }
+.screening-btn { background:#059669; color:white; border:none; padding:.5rem 1rem; border-radius:8px; font-weight:600; cursor:pointer; font-size:.85rem; margin-top:.75rem; display:inline-flex; align-items:center; gap:.4rem; }
+.screening-tooltip { display:none; background:#065f46; color:white; padding:.5rem .75rem; border-radius:6px; font-size:.8rem; margin-top:.5rem; }
+
+</style>
   <!-- Google Maps Places API (replace YOUR_API_KEY with actual key to enable autocomplete) -->
   <script>
     // Graceful fallback: if Google Maps API key is not configured, autocomplete won't load but manual entry still works
@@ -135,11 +225,20 @@
   <div class="nav-links">
     <a href="index.html">← Back to Home</a>
   </div>
+    <!-- Global Search -->
+    <div style="position:relative;flex:1;max-width:400px;margin:0 1rem;">
+      <input type="text" id="global-search-input" placeholder="Search properties, tenants, clients, docs..." style="width:100%;padding:0.5rem 0.75rem 0.5rem 2.2rem;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;background:#f8fafc;" oninput="handleGlobalSearch(this.value)" autocomplete="off" />
+      <svg style="position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#94a3b8;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <div id="global-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,0.15);max-height:320px;overflow-y:auto;z-index:1000;margin-top:4px;"></div>
+    </div>
   <div class="nav-cta">
     <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
     <button class="btn btn-primary btn-sm" onclick="showLogin()" style="margin-left:.5rem;">Business Log In</button>
   </div>
 </nav>
+
+<!-- Phase 4: Breadcrumb Bar -->
+<div id="breadcrumb-bar" class="rv-breadcrumbs" style="display:none;"></div>
 
 <!-- SIGN UP FORM (shown by default) -->
 <div id="signup-screen">
@@ -484,6 +583,93 @@
 </div>
 
 <!-- DASHBOARD (shown after signup) -->
+
+<!-- == SUBSCRIPTION GATE == -->
+<div id="subscription-gate">
+  <div class="sub-gate-wrap">
+    <div class="sub-gate-header">
+      <h1>Choose Your Plan</h1>
+      <p>Professional property management tools for every portfolio size</p>
+    </div>
+    <div id="referral-banner" class="referral-banner" style="display:none;">
+      You have a <span class="ref-amount">$20</span> referral credit! Your first month is discounted.
+    </div>
+    <div class="sub-tiers" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;max-width:1100px;margin:0 auto;">
+      <div class="sub-tier">
+        <h3>Starter</h3>
+        <div class="price" id="starter-price">$29<span>/month</span></div>
+        <div class="desc">Up to 2 listings &mdash; perfect for getting started</div>
+        <ul>
+          <li>Up to 2 listings</li>
+          <li>Tenant screening</li>
+          <li>Lease management</li>
+          <li>Maintenance tracking</li>
+          <li>Basic accounting</li>
+        </ul>
+        <button class="sub-btn primary" onclick="selectPlan('starter')">Get Started</button>
+      </div>
+      <div class="sub-tier popular">
+        <div class="pop-badge">Most Popular</div>
+        <h3>Pro Monthly</h3>
+        <div class="price" id="pro-price">$79<span>/month</span></div>
+        <div class="desc">Unlimited listings + full platform access</div>
+        <ul>
+          <li>Unlimited listings</li>
+          <li>Everything in Starter</li>
+          <li>AI application screening</li>
+          <li>Advanced accounting</li>
+          <li>Owner statements &amp; 1099s</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="sub-btn primary" onclick="selectPlan('pro_monthly')">Get Started</button>
+      </div>
+      <div class="sub-tier">
+        <div class="pop-badge" style="background:#059669;">Best Value</div>
+        <h3>Pro Annual</h3>
+        <div class="price" id="pro-annual-price">$59<span>/month</span></div>
+        <div class="desc">Billed annually at $708/yr &mdash; save 25%</div>
+        <ul>
+          <li>Everything in Pro Monthly</li>
+          <li>Save $240/year</li>
+          <li>Annual billing ($708/yr)</li>
+          <li>Priority onboarding</li>
+        </ul>
+        <button class="sub-btn primary" onclick="selectPlan('pro_annual')">Get Started</button>
+      </div>
+      <div class="sub-tier">
+        <h3>Rent to Own</h3>
+        <div class="price">$99<span>/month</span></div>
+        <div class="desc">Lease-option management + credit tracker</div>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>RTO lease templates</li>
+          <li>Credit tracking (Boom)</li>
+          <li>Mortgage referral pipeline</li>
+          <li>Option agreement e-sign</li>
+        </ul>
+        <button class="sub-btn primary" onclick="selectPlan('rent_to_own')">Get Started</button>
+      </div>
+      <div class="sub-tier">
+        <h3>Commercial</h3>
+        <div class="price">$149<span>/month</span></div>
+        <div class="desc">NNN/CAM tools + business screening</div>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>NNN lease calculator</li>
+          <li>CAM reconciliation</li>
+          <li>Business entity screening</li>
+          <li>NOI dashboard</li>
+          <li>Commercial ad builder</li>
+        </ul>
+        <button class="sub-btn outline" onclick="selectPlan('commercial')">Get Started</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <button onclick="skipSubscription()" style="background:none;border:none;color:#94a3b8;font-size:.85rem;cursor:pointer;text-decoration:underline;">Skip for now &mdash; start free trial</button>
+    </div>
+  </div>
+</div>
+
 <div id="dashboard-screen" style="display:none;">
   <div class="dashboard-layout">
 
@@ -501,9 +687,18 @@
 
       <div style="padding:0 0.75rem;">
         <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-600);padding:0.5rem 0.25rem;margin-bottom:0.25rem;">Manage</div>
+        
+        <div class="dash-link" onclick="window.history.back()" data-sidebar-id="back" style="color:#94a3b8;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:0.5rem;padding-bottom:0.75rem;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          ← Back
+        </div>
         <div class="dash-link active" onclick="dashTab('overview')" data-sidebar-id="overview">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Overview
+        </div>
+        <div class="dash-link" onclick="dashTab('applications')" data-sidebar-id="applications">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Applications
         </div>
         <div class="dash-link" onclick="dashTab('properties')" data-sidebar-id="properties">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -587,6 +782,58 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           🛡️ Insurance Agents
         </a>
+
+        <div class="dash-link" onclick="dashTab('advaccounting')" data-sidebar-id="advaccounting" style="color:#059669;background:rgba(5,150,105,0.08);border-left:2px solid #059669;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V5a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2h-2M9 7h6"/></svg>
+          💰 Adv. Accounting
+        </div>
+        <div class="dash-link" onclick="dashTab('profile')" data-sidebar-id="profile" style="color:#7c3aed;background:rgba(124,58,237,0.08);border-left:2px solid #7c3aed;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          👤 Profile
+        </div>
+        <div class="dash-link" onclick="dashTab('bulkmsg')" data-sidebar-id="bulkmsg" style="color:#ea580c;background:rgba(234,88,12,0.08);border-left:2px solid #ea580c;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+          📣 Bulk Messages
+        </div>
+        <div class="dash-link" onclick="dashTab('permissions')" data-sidebar-id="permissions" style="color:#be185d;background:rgba(190,24,93,0.08);border-left:2px solid #be185d;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          🔐 Permissions
+        </div>
+        <div class="dash-link" onclick="dashTab('vendorinvoices')" data-sidebar-id="vendorinvoices" style="color:#dc2626;background:rgba(220,38,38,0.06);border-left:2px solid #dc2626;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+          📋 Vendor Invoices
+        </div>
+        <div class="dash-link" onclick="dashTab('leadcaptures')" data-sidebar-id="leadcaptures" style="color:#059669;background:rgba(5,150,105,0.06);border-left:2px solid #059669;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          📱 QR Leads
+        </div>
+        <!-- Phase 5: Pre-Launch Polish sidebar items -->
+        <div class="dash-link" onclick="dashTab('inspections')" data-sidebar-id="inspections" style="color:#0284c7;background:rgba(2,132,199,0.06);border-left:2px solid #0284c7;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
+          📷 Inspections
+        </div>
+        <div class="dash-link" onclick="dashTab('workorders')" data-sidebar-id="workorders" style="color:#ca8a04;background:rgba(202,138,4,0.06);border-left:2px solid #ca8a04;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+          📋 Work Orders
+        </div>
+        <div class="dash-link" onclick="dashTab('compliancemgr')" data-sidebar-id="compliancemgr" style="color:#7c2d12;background:rgba(124,45,18,0.06);border-left:2px solid #7c2d12;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          ⏰ Compliance
+        </div>
+        <div class="dash-link" onclick="dashTab('tenantscoring')" data-sidebar-id="tenantscoring" style="color:#7c3aed;background:rgba(124,58,237,0.06);border-left:2px solid #7c3aed;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          ⭐ Tenant Scoring
+        </div>
+        <div class="dash-link" onclick="dashTab('affiliates')" data-sidebar-id="affiliates" style="color:#059669;background:rgba(5,150,105,0.06);border-left:2px solid #059669;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          🔗 Financial Services
+        </div>
+        <div class="dash-link" onclick="dashTab('dataexport')" data-sidebar-id="dataexport" style="color:#475569;background:rgba(71,85,105,0.06);border-left:2px solid #475569;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          📦 Data Export
+        </div>
+        <!-- Phase 4: Contextual Sidebar (property-specific links) -->
+        <div id="ctx-sidebar-section" class="ctx-sidebar-section" style="display:none;"></div>
         <a href="referral.html" class="dash-link" style="color:#a78bfa;background:rgba(167,139,250,0.1);border-left:3px solid #a78bfa;">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
           🎁 Refer &amp; Earn
@@ -629,6 +876,10 @@
         <div class="dash-link" onclick="dashTab('ai')">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           AI Settings
+        </div>
+        <div class="dash-link" onclick="dashTab('mgmt-profile')" data-sidebar-id="mgmt-profile" style="color:#6366f1;background:rgba(99,102,241,0.06);border-left:2px solid #6366f1;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Management Profile
         </div>
         <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="document.getElementById('dashboard-screen').style.display='none';document.getElementById('signup-screen').style.display='block';">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -1259,6 +1510,198 @@
         </div>
       </div>
 
+      <!-- MANAGEMENT PROFILE TAB -->
+      <div id="dtab-mgmt-profile" class="tab-content">
+        <style>
+          .mp-toggle-row { display:flex;justify-content:space-between;align-items:center;padding:0.85rem 1rem;background:#f8fafc;border-radius:10px;margin-bottom:0.5rem;transition:background 0.15s; }
+          .mp-toggle-row:hover { background:#f1f5f9; }
+          .mp-toggle-info { flex:1;min-width:0; }
+          .mp-toggle-name { font-weight:600;font-size:0.92rem;color:#1e293b; }
+          .mp-toggle-desc { font-size:0.8rem;color:#64748b;margin-top:2px; }
+          .mp-toggle-commission { font-size:0.78rem;color:#059669;font-weight:600;margin-top:3px; }
+          .mp-toggle-switch { position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;flex-shrink:0;margin-left:1rem; }
+          .mp-toggle-switch input { opacity:0;width:0;height:0;position:absolute; }
+          .mp-toggle-track { position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:background 0.2s; }
+          .mp-toggle-switch input:checked + .mp-toggle-track { background:#22c55e; }
+          .mp-toggle-thumb { position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:transform 0.2s; }
+          .mp-toggle-switch input:checked ~ .mp-toggle-thumb { transform:translateX(22px); }
+          .mp-edu-toggle { font-size:0.78rem;color:#3b82f6;cursor:pointer;margin-top:4px;display:inline-block; }
+          .mp-edu-toggle:hover { text-decoration:underline; }
+          .mp-edu-card { display:none;background:#eff6ff;border-left:3px solid #3b82f6;border-radius:0 8px 8px 0;padding:1.1rem 1.25rem;margin:0.5rem 0 0.75rem 0;font-size:0.84rem;line-height:1.65;color:#1e40af; }
+          .mp-edu-card h4 { font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#1e3a8a;margin:0.75rem 0 0.35rem; }
+          .mp-edu-card h4:first-child { margin-top:0; }
+          .mp-edu-card .mp-edu-qa { margin-top:0.5rem;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.6);border-radius:6px; }
+          .mp-edu-card .mp-edu-qa strong { color:#1e3a8a; }
+          .mp-section-header { font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;padding:0.75rem 0 0.35rem;margin-top:1rem;border-top:1px solid #e2e8f0; }
+          .mp-section-header:first-child { border-top:none;margin-top:0; }
+          .mp-radio-group { display:flex;gap:1rem;margin-top:0.5rem; }
+          .mp-radio-group label { font-size:0.88rem;color:#374151;cursor:pointer;display:flex;align-items:center;gap:0.35rem; }
+        </style>
+        <div class="page-header"><h1>Management Profile</h1><p>Control what financial products and payment methods you offer to tenants. This is your single source of truth.</p></div>
+
+        <!-- Payment Methods Section -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:0.25rem;">💳 Payment Methods You Accept</h3>
+            <p style="font-size:0.84rem;color:#64748b;margin-bottom:1.25rem;">ON = you accept it. OFF = tenants won't see it as an option.</p>
+            <div id="mp-payment-methods">
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💚 Cash App</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="cashApp" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💜 Zelle</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="zelle" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💙 Venmo</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="venmo" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">🏦 Bank Transfer (ACH)</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="ach" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">💳 Credit / Debit Card</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="card" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">📝 Check / Money Order</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="check" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+              <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">🅿 PayPal</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-pay="paypal" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            </div>
+            <div style="margin-top:1.25rem;padding:1rem;background:#f8fafc;border-radius:10px;">
+              <div style="font-weight:700;font-size:0.92rem;margin-bottom:0.5rem;">Card Fee Policy</div>
+              <div class="mp-radio-group">
+                <label><input type="radio" name="mp-card-fee" value="tenant_pays" checked /> Tenant pays fee</label>
+                <label><input type="radio" name="mp-card-fee" value="landlord_absorbs" /> I absorb fees</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Products Section -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-body">
+            <h3 style="font-weight:700;margin-bottom:0.25rem;">🛡️ Financial Products &amp; Services</h3>
+            <p style="font-size:0.84rem;color:#64748b;margin-bottom:1rem;">Toggle products ON to offer them to your tenants. Expand "How does this work?" to learn more.</p>
+
+            <!-- DEPOSIT ALTERNATIVES -->
+            <div class="mp-section-header">Deposit Alternatives</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Deposit Bonds (Jetty / Obligo)</div><div class="mp-toggle-desc">Tenants pay ~$17/mo instead of full deposit. You're still covered for the full deposit amount.</div><div class="mp-toggle-commission">You earn: ~15% commission on every premium</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-deposit-bonds')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="depositBonds" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-deposit-bonds">
+              <h4>What It Is</h4>A deposit bond is a small monthly payment that replaces the traditional upfront security deposit. Instead of your tenant paying $1,500-$2,500 upfront, they pay roughly $17-30/month. A surety company (like Jetty) guarantees the full deposit amount to you.
+              <h4>How It Works for Your Tenant</h4>The tenant applies through RentVerified at lease signing. They're approved in minutes based on a soft credit check. Instead of writing a $2,000 check, they pay ~$17/month. If they cause damage or break the lease, the bond company pays you - then collects from the tenant.
+              <h4>How It Protects You</h4>You are covered for the SAME amount as a traditional deposit. If the tenant causes $1,500 in damage, the surety company pays you up to the bonded amount. You file a claim just like you'd keep a regular deposit - except now you get paid by a company with actual funds, not a tenant who might dispute or be broke. Many landlords find they actually collect MORE with bonds because the surety company pays without argument.
+              <h4>What You Earn</h4>~15% commission on every premium. On a $17/month bond, that's ~$2.55/month per tenant, recurring for the entire lease. 10 tenants = $25.50/month passive income just from deposit bonds.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "What if the tenant causes $3,000 in damage but the bond is only $2,000?"</strong><br/>A: The bond covers up to the bonded amount (same as a traditional deposit). For damages beyond the bond amount, you pursue the tenant directly - same as you would with a regular deposit.</div>
+              <div class="mp-edu-qa"><strong>Q: "Does this mean I can't also collect a deposit?"</strong><br/>A: Correct - the bond replaces the deposit. But you can still charge non-refundable move-in fees (pet deposit, admin fee, etc.) separately.</div>
+              <div class="mp-edu-qa"><strong>Q: "What if the tenant stops paying the bond premium?"</strong><br/>A: The surety company handles collections. Your coverage remains in effect for the lease term regardless.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Deposit-Free (Obligo Bank Verification)</div><div class="mp-toggle-desc">Tenants move in with $0 deposit. Obligo holds a bank authorization instead.</div><div class="mp-toggle-commission">You earn: flat fee per enrollment</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-deposit-free')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="depositFree" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-deposit-free">
+              <h4>What It Is</h4>Instead of a cash deposit or bond, Obligo verifies the tenant's bank account and places a hold authorization. The tenant moves in with zero upfront deposit cost. If they cause damage, Obligo charges their bank account directly.
+              <h4>How It Protects You</h4>You have a verified bank authorization for the full deposit amount. If the tenant causes damage, Obligo charges their account. No need to chase anyone.
+              <h4>What You Earn</h4>A flat enrollment fee per tenant. The primary benefit is faster lease conversions - tenants are far more likely to sign when they don't need $2,000 upfront.
+            </div>
+
+            <!-- INSURANCE PRODUCTS -->
+            <div class="mp-section-header">Insurance Products</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Renters Insurance (Jetty / Sure)</div><div class="mp-toggle-desc">Required or optional - tenants get coverage starting at ~$10/mo.</div><div class="mp-toggle-commission">You earn: $2-5/mo recurring per policy</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-renters-insurance')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="rentersInsurance" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-renters-insurance">
+              <h4>What It Is</h4>Renters insurance covers your tenant's personal belongings and provides liability protection. Many landlords require it as a lease condition. Through RentVerified, tenants can purchase policies starting at ~$10/month.
+              <h4>How It Works for Your Tenant</h4>Tenant purchases a policy through RentVerified during lease signing or move-in. Coverage typically includes personal property (theft, fire, water damage), personal liability ($100K+), and additional living expenses if the unit becomes uninhabitable.
+              <h4>How It Protects You</h4>If a tenant causes accidental damage (kitchen fire, overflowing bathtub), their renters insurance liability coverage can pay for repairs to YOUR property - not just the tenant's belongings. Without renters insurance, you'd be chasing the tenant for repair costs. With it, their insurance handles it. This is why most professional landlords require it.
+              <h4>What You Earn</h4>$2-5/month recurring commission per active policy. Alternatively, ~$20 one-time referral fee per enrollment depending on the provider. With Jetty's combo product, you can bundle this with a deposit bond in a single enrollment.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "Can I require tenants to have renters insurance?"</strong><br/>A: Yes. In most states (including Utah), landlords can require renters insurance as a lease condition.</div>
+              <div class="mp-edu-qa"><strong>Q: "What if they already have renters insurance?"</strong><br/>A: They can keep their existing policy. You can still require proof of coverage. You only earn a commission if they purchase through RentVerified.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Rent Guarantee Insurance</div><div class="mp-toggle-desc">If your tenant stops paying, the insurer covers missed rent (up to 6-12 months).</div><div class="mp-toggle-commission">You earn: $150-200 per policy (15% of annual premium)</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-rent-guarantee')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="rentGuarantee" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-rent-guarantee">
+              <h4>What It Is</h4>Rent guarantee insurance is a policy that pays YOU (the landlord) if your tenant stops paying rent. It typically covers 6-12 months of lost rent plus legal fees for eviction. Think of it as landlord insurance against non-payment.
+              <h4>How It Works for Your Tenant</h4>The tenant doesn't pay anything extra. The cost is either built into the lease terms or paid by the landlord (and offset by the premium savings vs. the cost of an actual eviction). Some landlords pass the cost to tenants as a required lease add-on.
+              <h4>How It Protects You</h4>If your tenant stops paying, the insurance company reimburses your lost rent - usually within 30 days of filing a claim. Most policies also cover legal fees for the eviction process. The average eviction costs landlords $3,500-$10,000 in lost rent + legal fees. One policy at ~$300-500/year can save you from that entire loss.
+              <h4>What You Earn</h4>$150-200 commission per policy sold (approximately 15% of the annual premium). This is a one-time commission at lease signing, with renewal commissions each year.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "What's the waiting period before I can claim?"</strong><br/>A: Most policies have a 30-60 day waiting period after the first missed payment. After that, they reimburse retroactively.</div>
+              <div class="mp-edu-qa"><strong>Q: "Does this replace screening tenants?"</strong><br/>A: No. You should still screen thoroughly. The insurance is a safety net, not a replacement for due diligence.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Lease Guarantee (LeaseLock)</div><div class="mp-toggle-desc">Whole-property insurance that replaces security deposits entirely.</div><div class="mp-toggle-commission">You earn: higher commission structure per unit</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-lease-guarantee')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="leaseGuarantee" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-lease-guarantee">
+              <h4>What It Is</h4>LeaseLock is a lease insurance product that replaces the traditional security deposit for your entire property. Instead of collecting deposits from individual tenants, the property is insured against damages and unpaid rent.
+              <h4>How It Protects You</h4>You're covered for damages, unpaid rent, and lease breaks across your portfolio. Claims are handled by LeaseLock directly. Higher coverage limits than traditional deposits.
+              <h4>What You Earn</h4>Higher commission structure per unit enrolled. Best for landlords with 10+ units looking to streamline operations and attract more tenants.
+            </div>
+
+            <!-- TENANT FINANCIAL TOOLS -->
+            <div class="mp-section-header">Tenant Financial Tools</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Credit Builder (Boom)</div><div class="mp-toggle-desc">Tenant's on-time rent payments reported to all 3 bureaus. Builds their credit score.</div><div class="mp-toggle-commission">You earn: $1-2/mo recurring per tenant</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-credit-builder')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="creditBuilder" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-credit-builder">
+              <h4>What It Is</h4>Credit building through rent reporting means your tenant's on-time rent payments are reported to all 3 major credit bureaus (Experian, TransUnion, Equifax). This helps tenants build credit history using a payment they're already making.
+              <h4>How It Works for Your Tenant</h4>The tenant enrolls through RentVerified. Boom verifies their rent payments each month and reports them as positive tradelines to the credit bureaus. Most tenants see a credit score increase of 20-50 points within 3-6 months of consistent reporting.
+              <h4>How It Protects You</h4>Tenants actively building their credit are significantly less likely to default on rent - their payment directly affects their credit score. It's a built-in incentive for on-time payment. Plus, tenants who value this benefit tend to renew leases more often, reducing your turnover costs.
+              <h4>What You Earn</h4>$1-2/month recurring commission per tenant enrolled. This continues for the entire lease term. It's small per tenant but 100% passive - and with high enrollment rates (tenants want better credit), it adds up across your portfolio.
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "Does this report late payments too?"</strong><br/>A: It depends on the provider. Most only report positive (on-time) payments. Late or missed payments are typically not reported to avoid harming the tenant.</div>
+              <div class="mp-edu-qa"><strong>Q: "Do I have to do anything?"</strong><br/>A: No. Once the tenant enrolls, everything is automatic. Boom verifies payments through your payment records in RentVerified.</div>
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Rent Flexibility (Flex)</div><div class="mp-toggle-desc">Tenants split rent into 2 payments/month. You still get paid in full on the 1st.</div><div class="mp-toggle-commission">Tenant pays $14.99/mo for the service</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-rent-flex')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="rentFlexibility" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-rent-flex">
+              <h4>What It Is</h4>Flex lets tenants split their monthly rent into 2 payments (e.g., pay half on the 1st and half on the 15th). Flex pays YOU the full rent on the 1st - the tenant's second payment goes to Flex, not to you.
+              <h4>How It Works for Your Tenant</h4>The tenant signs up for Flex ($14.99/month). On the 1st, Flex pays you the full rent. The tenant pays Flex back in two installments aligned with their paychecks.
+              <h4>How It Protects You</h4>You get paid in full, on time, on the 1st. Period. Flex takes on the risk of the second half-payment. If the tenant doesn't pay Flex back, that's between Flex and the tenant - you already have your money.
+              <h4>What You Earn</h4>The tenant pays Flex $14.99/month directly. The primary benefit to you is fewer late payments and higher tenant satisfaction (which means fewer vacancies and longer leases).
+              <h4>Common Concerns</h4>
+              <div class="mp-edu-qa"><strong>Q: "What if the tenant misses their second payment to Flex?"</strong><br/>A: That's Flex's problem, not yours. You already received full rent on the 1st.</div>
+              <div class="mp-edu-qa"><strong>Q: "Does this change my lease terms?"</strong><br/>A: No. Your lease still says rent is due on the 1st, and you receive it on the 1st.</div>
+            </div>
+
+            <!-- MOVE-IN SERVICES -->
+            <div class="mp-section-header">Move-In Services</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Utility Setup Concierge</div><div class="mp-toggle-desc">We handle power, gas, internet transfers for your new tenant.</div><div class="mp-toggle-commission">You earn: $75 per tenant</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-utility')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="utilitySetup" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-utility">
+              <h4>What It Is</h4>A concierge service that handles all utility transfers and setups for your new tenant - power, gas, water, internet, and cable. The tenant fills out one form and everything is handled.
+              <h4>How It Protects You</h4>Ensures utilities are transferred into the tenant's name on move-in day. No gaps in service, no bills landing on you.
+              <h4>What You Earn</h4>$75 per tenant who uses the concierge service. Completely passive - the concierge company handles everything.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Internet / Cable Setup (AT&amp;T, Xfinity)</div><div class="mp-toggle-desc">New install referral at move-in.</div><div class="mp-toggle-commission">You earn: $50-150 per installation</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-internet')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="internetSetup" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-internet">
+              <h4>What It Is</h4>When a new tenant moves in, they need internet and cable set up. Through RentVerified, you can refer them directly to AT&amp;T, Xfinity, or other providers and earn a referral commission for each installation.
+              <h4>What You Earn</h4>$50-150 per installation depending on the provider and plan selected. This is a one-time commission at move-in.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Moving Services Referral</div><div class="mp-toggle-desc">Connect tenants with vetted movers.</div><div class="mp-toggle-commission">You earn: $50 per booked move</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-moving')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="movingServices" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-moving">
+              <h4>What It Is</h4>Refer new tenants to vetted local moving companies. The tenant gets a discount, you earn a referral fee.
+              <h4>What You Earn</h4>$50 per booked move. Additional volume bonuses available with some partners.
+            </div>
+
+            <!-- BUSINESS FUNDING -->
+            <div class="mp-section-header">Business Funding (for commercial tenants)</div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Business Loans &amp; Working Capital</div><div class="mp-toggle-desc">Connect your commercial tenants with funding for buildout, equipment, and operations.</div><div class="mp-toggle-commission">You earn: $200-5,000 per funded deal</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-biz-loans')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="businessLoans" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-biz-loans">
+              <h4>What It Is</h4>Connect your commercial tenants with working capital, equipment financing, and term loans from our lending partners (GoKapital, Clarify Capital, National Funding). Loan amounts range from $5,000 to $5,000,000.
+              <h4>How It Protects You</h4>A funded tenant is a tenant who can afford their buildout and operations. This means they sign the lease, stay longer, and pay on time. Commercial tenants who can't get funding often walk away from deals.
+              <h4>What You Earn</h4>$200-5,000 per funded deal depending on loan size and type. SBA loans can earn $2,500-5,000 per close.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">SBA Loan Referrals</div><div class="mp-toggle-desc">Government-backed small business loans for qualified tenants.</div><div class="mp-toggle-commission">You earn: $2,500-5,000 per closed SBA loan</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-sba')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="sbaLoans" checked /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-sba">
+              <h4>What It Is</h4>SBA (Small Business Administration) loans are government-backed loans with the lowest interest rates available. Terms range from 7-25 years with rates at Prime + 2.25%-4.75%.
+              <h4>What You Earn</h4>$2,500-5,000 per closed SBA loan. These are larger deals that take longer to close but have the highest commissions.
+            </div>
+
+            <div class="mp-toggle-row"><div class="mp-toggle-info"><div class="mp-toggle-name">Merchant Cash Advance Referral</div><div class="mp-toggle-desc">Quick capital based on future revenue. Good for retail/restaurant tenants.</div><div class="mp-toggle-commission">You earn: $2,000-4,500 per funded MCA</div><div class="mp-edu-toggle" onclick="toggleEdu('edu-mca')">How does this work? &#9662;</div></div><label class="mp-toggle-switch"><input type="checkbox" data-mp-prod="merchantCashAdvance" /><span class="mp-toggle-track"></span><span class="mp-toggle-thumb"></span></label></div>
+            <div class="mp-edu-card" id="edu-mca">
+              <h4>What It Is</h4>A merchant cash advance provides quick capital to businesses based on their future sales revenue. Repayment is a daily percentage of sales, so it flexes with the business's income. Best for retail, restaurants, and service businesses with steady revenue.
+              <h4>What You Earn</h4>$2,000-4,500 per funded MCA. These close faster than traditional loans (often same-day) but have higher costs for the borrower.
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="mp-save-status" style="font-size:0.85rem;color:#059669;opacity:0;transition:opacity 0.4s;">Profile saved successfully</span>
+          <button class="btn btn-primary" onclick="saveMgmtProfile()">Save Management Profile</button>
+        </div>
+      </div>
+
       <!-- DOCS TAB -->
       <div id="dtab-docs" class="tab-content">
         <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -1738,6 +2181,333 @@
             </div>
           </div>
 
+
+
+    <!-- ========== TAB: Advanced Accounting (Grouped by Owner) ========== -->
+    <div id="tab-advaccounting" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📊 Advanced Accounting</h2>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-outline btn-sm" onclick="exportAdvancedLedgerCSV()">📥 Export CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddLedgerEntryModal()">+ Add Entry</button>
+        </div>
+      </div>
+      <div id="advanced-ledger-container"></div>
+    </div>
+
+    <!-- ========== TAB: Professional Profile ========== -->
+    <div id="tab-profile" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">👤 Professional Profile</h2>
+        <button class="btn btn-primary btn-sm" onclick="savePublicProfileUI()">💾 Save Profile</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Company Information</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Company Name</label>
+            <input type="text" id="profile-company-name" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Tagline</label>
+            <input type="text" id="profile-tagline" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Bio / Description</label>
+            <textarea id="profile-bio" class="form-input" rows="4" style="width:100%;resize:vertical;"></textarea>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">License Number</label>
+            <input type="text" id="profile-license" class="form-input" style="width:100%;" />
+          </div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Contact & Branding</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Phone</label>
+            <input type="tel" id="profile-phone" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Email</label>
+            <input type="email" id="profile-email" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Website</label>
+            <input type="url" id="profile-website" class="form-input" style="width:100%;" />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.5rem;">Corporate Logo</label>
+            <div id="logo-upload-zone" style="border:2px dashed #cbd5e1;border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;background:#f8fafc;" onclick="document.getElementById('logo-file-input').click()">
+              <div id="logo-preview" style="margin-bottom:0.5rem;"></div>
+              <div style="color:#64748b;font-size:0.85rem;">Click or drag to upload logo</div>
+              <input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Team Members Section -->
+      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 style="font-weight:700;">👥 Team Members</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddTeamMemberModal()">+ Add Member</button>
+        </div>
+        <div id="team-members-list"></div>
+      </div>
+      <!-- Approved Vendors Section -->
+      <div style="margin-top:1.5rem;background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 style="font-weight:700;">🔧 Approved Vendors</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddVendorModal()">+ Add Vendor</button>
+        </div>
+        <div id="approved-vendors-list"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: Bulk Messaging ========== -->
+    <div id="tab-bulkmsg" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📣 Bulk Messaging</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Compose Broadcast</h3>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Target Audience</label>
+            <select id="bulk-target" class="form-input" style="width:100%;">
+              <option value="everyone">Everyone</option>
+              <option value="delinquent">Delinquent Tenants (Unpaid Rent)</option>
+              <option value="owners">All Owners</option>
+              <option value="tenants">All Tenants</option>
+              <option value="vendors">All Vendors</option>
+              <option value="hoa">HOA Group</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Method</label>
+            <select id="bulk-method" class="form-input" style="width:100%;">
+              <option value="email">Email</option>
+              <option value="sms">SMS (Twilio)</option>
+              <option value="both">Email + SMS</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Subject</label>
+            <input type="text" id="bulk-subject" class="form-input" style="width:100%;" placeholder="Message subject..." />
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Message</label>
+            <textarea id="bulk-body" class="form-input" rows="6" style="width:100%;resize:vertical;" placeholder="Type your broadcast message..."></textarea>
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="sendBulkMessageUI()">🚀 Send Broadcast</button>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+          <h3 style="font-weight:700;margin-bottom:1rem;">Recent Broadcasts</h3>
+          <div id="bulk-history-list" style="max-height:400px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: Permission Manager ========== -->
+    <div id="tab-permissions" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">🔐 Permission Manager</h2>
+      </div>
+      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;margin-bottom:1.5rem;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Messaging Guardrails</h3>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.75rem;background:#f8fafc;border-radius:8px;margin-bottom:0.5rem;">
+          <input type="checkbox" id="perm-restrict-external" onchange="updateGuardrails()" />
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Restrict External Messaging</div>
+            <div style="font-size:0.8rem;color:#64748b;">Only the Account Owner can message external contacts (vendors, tenants) unless explicitly granted.</div>
+          </div>
+        </label>
+      </div>
+      <div style="background:white;border-radius:12px;padding:1.5rem;border:1px solid #e2e8f0;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Team Permission Matrix</h3>
+        <div id="permission-matrix-container"></div>
+      </div>
+    </div>
+
+    <!-- ========== Phase 4 TAB: Vendor Invoices ========== -->
+    <div id="tab-vendorinvoices" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📋 Vendor Invoices</h2>
+        <button class="btn btn-primary btn-sm" onclick="openSubmitInvoiceModal()">+ Submit Invoice</button>
+      </div>
+      <div id="vendor-invoices-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;"></div>
+    </div>
+
+    <!-- ========== Phase 4 TAB: Lead Captures ========== -->
+    <div id="tab-leadcaptures" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📱 QR Lead Captures</h2>
+      </div>
+      <div id="lead-captures-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;"></div>
+    </div>
+
+    <!-- ========== Phase 5 TAB: Inspections ========== -->
+    <div id="tab-inspections" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📷 Property Inspections</h2>
+        <button class="btn btn-primary btn-sm" onclick="openNewInspectionModal()">+ New Inspection</button>
+      </div>
+      <p style="color:#64748b;margin-bottom:1rem;">Time-stamped, geo-tagged photos for move-in/move-out. Each inspection costs <strong>$99</strong> ($75 cost + $24 RentVerified profit).</p>
+      <div id="inspections-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;">
+        <div style="padding:2rem;text-align:center;color:#94a3b8;">
+          <div style="font-size:3rem;margin-bottom:0.5rem;">📷</div>
+          <div style="font-weight:600;color:#475569;">No Inspections Yet</div>
+          <div style="font-size:0.85rem;">Create your first move-in or move-out inspection to build your liability shield.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Phase 5 TAB: Work Orders ========== -->
+    <div id="tab-workorders" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📋 Work Orders</h2>
+        <button class="btn btn-primary btn-sm" onclick="openNewWorkOrderModal()">+ New Work Order</button>
+      </div>
+      <p style="color:#64748b;margin-bottom:1rem;">Assign maintenance to vendors, upload invoices, auto-approve under owner's repair dollar limit (default $500).</p>
+      <div id="work-orders-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;">
+        <div style="padding:2rem;text-align:center;color:#94a3b8;">
+          <div style="font-size:3rem;margin-bottom:0.5rem;">🔧</div>
+          <div style="font-weight:600;color:#475569;">No Work Orders</div>
+          <div style="font-size:0.85rem;">Your properties are in good shape! Create a work order when maintenance is needed.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Phase 5 TAB: Compliance Manager ========== -->
+    <div id="tab-compliancemgr" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">⏰ Compliance Countdown</h2>
+      </div>
+      <p style="color:#64748b;margin-bottom:1rem;">Auto-generate Utah 3-Day Notice to Pay or Vacate on day 5 of the month for unpaid rent. All notices timestamped in MDT.</p>
+      <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;margin-bottom:0.75rem;">Generate 3-Day Notice</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+          <div>
+            <label style="font-size:0.8rem;font-weight:600;color:#475569;">Property</label>
+            <select id="compliance-property-select" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:8px;margin-top:0.25rem;"></select>
+          </div>
+          <div>
+            <label style="font-size:0.8rem;font-weight:600;color:#475569;">Month/Year</label>
+            <input type="month" id="compliance-month" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:8px;margin-top:0.25rem;" />
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="generateComplianceNotice()">Generate Notice</button>
+      </div>
+      <div id="compliance-notices-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;">
+        <div style="padding:2rem;text-align:center;color:#94a3b8;">
+          <div style="font-size:3rem;margin-bottom:0.5rem;">✅</div>
+          <div style="font-weight:600;color:#475569;">All Tenants Current</div>
+          <div style="font-size:0.85rem;">No overdue notices needed. Compliance notices will appear here when generated.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Phase 5 TAB: Tenant Scoring ========== -->
+    <div id="tab-tenantscoring" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">⭐ Tenant Scoring</h2>
+      </div>
+      <p style="color:#64748b;margin-bottom:1rem;">RentVerified Score based on platform behavior: payment history (85%), inspection cleanliness (10 bonus), maintenance responsiveness (5 bonus). Grades: A+ to F.</p>
+      <div id="tenant-scores-list" style="background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;">
+        <div style="padding:2rem;text-align:center;color:#94a3b8;">
+          <div style="font-size:3rem;margin-bottom:0.5rem;">⭐</div>
+          <div style="font-weight:600;color:#475569;">No Tenant Scores Yet</div>
+          <div style="font-size:0.85rem;">Tenant scores are calculated from payment history and platform behavior over time.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Phase 5 TAB: Affiliate / Financial Services ========== -->
+    <div id="tab-affiliates" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">🔗 Financial Services</h2>
+      </div>
+      <p style="color:#64748b;margin-bottom:1.5rem;">Recommended partner services for landlords and tenants. Affiliate links generate revenue for RentVerified.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+        <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.25rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">🏠</div>
+          <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">TransUnion SmartMove</h3>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Background checks &amp; credit reports for tenant screening. Industry standard.</p>
+          <a href="https://www.mysmartmove.com/" target="_blank" style="color:#1a56db;font-weight:600;font-size:0.85rem;text-decoration:none;">Visit SmartMove &rarr;</a>
+        </div>
+        <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.25rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📡</div>
+          <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">Xfinity Internet</h3>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Set up internet for new tenants. Affiliate commission on each signup.</p>
+          <span style="color:#94a3b8;font-size:0.85rem;font-style:italic;">Affiliate link coming soon</span>
+        </div>
+        <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.25rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">🔒</div>
+          <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">Obligo Deposit-Free</h3>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Deposit-free renting solution. Tenants pay no security deposit upfront.</p>
+          <span style="color:#94a3b8;font-size:0.85rem;font-style:italic;">Affiliate link coming soon</span>
+        </div>
+        <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.25rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">🛡️</div>
+          <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">Lemonade Renters Insurance</h3>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">AI-powered renters insurance starting at $5/month. Required by most leases.</p>
+          <span style="color:#94a3b8;font-size:0.85rem;font-style:italic;">Affiliate link coming soon</span>
+        </div>
+        <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.25rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📋</div>
+          <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">Assurant PMI</h3>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Property management insurance for landlords. Liability and property coverage.</p>
+          <span style="color:#94a3b8;font-size:0.85rem;font-style:italic;">Affiliate link coming soon</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Phase 5 TAB: Data Export ========== -->
+    <div id="tab-dataexport" style="display:none;padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.4rem;font-weight:800;">📦 Data Export &amp; Backup</h2>
+      </div>
+      <p style="color:#64748b;margin-bottom:1.5rem;">Download all your records as a ZIP file. Your data is never trapped — full portability guaranteed.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+        <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.5rem;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:0.5rem;">📦</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Download All Records</h3>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:1rem;">Client hub, listings, ledger, leases, messages, inspections, work orders — all in one ZIP.</p>
+          <button class="btn btn-primary" onclick="if(typeof downloadAllRecordsZip==='function'){downloadAllRecordsZip();}else{alert('Export function loading...');}">Download ZIP</button>
+        </div>
+        <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;padding:1.5rem;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:0.5rem;">📊</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">1099-MISC Tax Report</h3>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:1rem;">Generate year-end 1099 report for owners receiving $600+ in payouts. IRS compliant.</p>
+          <div style="display:flex;gap:0.5rem;justify-content:center;align-items:center;">
+            <select id="tax-year-select" style="padding:0.5rem;border:1px solid #e2e8f0;border-radius:8px;">
+              <option value="2025">2025</option>
+              <option value="2026" selected>2026</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="if(typeof download1099Report==='function'){download1099Report(document.getElementById('tax-year-select').value);}else{alert('Tax report function loading...');}">Generate 1099</button>
+          </div>
+        </div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:1rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;font-weight:600;color:#166534;margin-bottom:0.25rem;">
+          <span>🔒</span> Data Portability Promise
+        </div>
+        <p style="font-size:0.82rem;color:#15803d;">Your data belongs to you. Export everything at any time — no lock-in, no hidden fees, no restrictions. RentVerified believes in full data transparency.</p>
+      </div>
+    </div>
+
+    <!-- APPLICATIONS TAB -->
+    <div id="dtab-applications" class="tab-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h2 style="font-weight:800;font-size:1.25rem;">Tenant Applications</h2>
+          <p style="color:var(--gray-500);font-size:0.85rem;">Review and manage rental applications</p>
+        </div>
+      </div>
+      <div id="applications-list">
+        <div style="text-align:center;padding:3rem;color:var(--gray-500);">Loading applications...</div>
+      </div>
+    </div>
+
     </div><!-- end dash-main -->
   </div><!-- end dashboard-layout -->
 </div><!-- end dashboard-screen -->
@@ -2199,6 +2969,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     window.scrollTo(0, 0);
     if (name === 'properties') renderPropertiesList();
     if (name === 'clients') { renderAllClientsList(); clearClientSelection(); }
+    if (name === 'applications' && typeof renderApplicationsTab === 'function') renderApplicationsTab();
   }
 
   // ── All clients (admin: each person's data/listings) ──────────────────
@@ -3886,9 +4657,1305 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     }
   };
 
+
+  // ============================================================================
+  // PHASE 3 EXPANDED: UI Functions
+  // ============================================================================
+
+  // --- Global Search ---
+  function handleGlobalSearch(query) {
+    var container = document.getElementById('global-search-results');
+    if (!container) return;
+    if (!query || query.length < 2) { container.style.display = 'none'; return; }
+    var results = globalSearch(query);
+    if (results.length === 0) {
+      container.innerHTML = '<div style="padding:1rem;color:#94a3b8;text-align:center;font-size:0.85rem;">No results found</div>';
+      container.style.display = 'block';
+      return;
+    }
+    var typeIcons = { property: '🏠', client: '👤', message: '✉️', document: '📄' };
+    var typeColors = { property: '#2563eb', client: '#7c3aed', message: '#0891b2', document: '#059669' };
+    container.innerHTML = results.map(function(r) {
+      return '<div style="padding:0.6rem 1rem;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;align-items:center;gap:0.75rem;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'white\'" onclick="handleSearchResultClick(\'' + r.type + '\',\'' + (r.index !== undefined ? r.index : r.id || '').toString().replace(/'/g, "\\'") + '\')">' +
+        '<span style="font-size:1.1rem;">' + (typeIcons[r.type] || '📋') + '</span>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (r.label || '').replace(/</g, '&lt;') + '</div>' +
+          '<div style="font-size:0.75rem;color:#94a3b8;">' + (r.detail || '').replace(/</g, '&lt;') + '</div>' +
+        '</div>' +
+        '<span style="font-size:0.7rem;padding:2px 8px;border-radius:999px;background:' + (typeColors[r.type] || '#64748b') + '15;color:' + (typeColors[r.type] || '#64748b') + ';font-weight:600;text-transform:uppercase;">' + r.type + '</span>' +
+      '</div>';
+    }).join('');
+    container.style.display = 'block';
+  }
+
+  function handleSearchResultClick(type, id) {
+    document.getElementById('global-search-results').style.display = 'none';
+    document.getElementById('global-search-input').value = '';
+    if (type === 'property') { dashTab('properties'); }
+    else if (type === 'client') { dashTab('clienthub'); }
+    else if (type === 'message') { dashTab('inbox'); }
+    else if (type === 'document') { dashTab('docs'); }
+  }
+
+  // Close search on click outside
+  document.addEventListener('click', function(e) {
+    var sr = document.getElementById('global-search-results');
+    var si = document.getElementById('global-search-input');
+    if (sr && si && !sr.contains(e.target) && e.target !== si) { sr.style.display = 'none'; }
+  });
+
+  // --- Modal helpers ---
+  function openModal(id) {
+    var el = document.getElementById(id);
+    if (el) { el.style.display = 'flex'; }
+  }
+  function closeModal(id) {
+    var el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; }
+  }
+
+  // --- Logo Upload ---
+  function handleLogoUpload(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var branding = getBranding();
+      branding.logoUrl = e.target.result;
+      saveBranding(branding);
+      var preview = document.getElementById('logo-preview');
+      if (preview) preview.innerHTML = '<img src="' + e.target.result + '" style="max-width:120px;max-height:80px;border-radius:8px;" />';
+      // Update sidebar logo
+      var sidebarLogo = document.querySelector('.dash-sidebar div:first-child div div:first-child');
+      if (sidebarLogo && sidebarLogo.style) {
+        sidebarLogo.style.background = 'url(' + e.target.result + ') center/cover';
+        sidebarLogo.textContent = '';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- Advanced Accounting UI ---
+  function renderAdvancedLedger() {
+    seedAdvancedLedger();
+    var container = document.getElementById('advanced-ledger-container');
+    if (!container) return;
+    var entries = getAdvancedLedger();
+    if (entries.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:#94a3b8;">No ledger entries yet. Import data from Client Hub or add entries manually.</div>';
+      return;
+    }
+    // Group by owner
+    var grouped = {};
+    entries.forEach(function(e) {
+      var key = e.ownerName || 'Unknown Owner';
+      if (!grouped[key]) grouped[key] = {};
+      var addr = e.propertyAddress || 'Unknown Property';
+      if (!grouped[key][addr]) grouped[key][addr] = [];
+      grouped[key][addr].push(e);
+    });
+    var html = '';
+    Object.keys(grouped).forEach(function(owner) {
+      var ownerTotal = 0, ownerPaid = 0, ownerFees = 0;
+      Object.keys(grouped[owner]).forEach(function(addr) {
+        grouped[owner][addr].forEach(function(e) { ownerTotal += e.rentOwed || 0; ownerPaid += e.rentPaid || 0; ownerFees += e.pmFeeAmount || 0; });
+      });
+      html += '<div style="background:white;border-radius:12px;padding:1.25rem;border:1px solid #e2e8f0;margin-bottom:1rem;">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">';
+      html += '<div><h3 style="font-weight:700;font-size:1.1rem;">' + owner.replace(/</g, '&lt;') + '</h3>';
+      html += '<div style="font-size:0.8rem;color:#64748b;">Owed: $' + ownerTotal.toLocaleString() + ' | Paid: $' + ownerPaid.toLocaleString() + ' | Fees: $' + ownerFees.toLocaleString() + ' | Net: $' + (ownerPaid - ownerFees).toLocaleString() + '</div></div>';
+      html += '<div style="display:flex;gap:0.5rem;">';
+      html += '<button class="btn btn-outline btn-sm" onclick="generateMonthlyStatementUI(\'' + owner.replace(/'/g, "\\'") + '\')">📄 Monthly</button>';
+      html += '<button class="btn btn-outline btn-sm" onclick="generateEOYStatementUI(\'' + owner.replace(/'/g, "\\'") + '\')">📊 Year-End</button>';
+      html += '</div></div>';
+
+      Object.keys(grouped[owner]).forEach(function(addr) {
+        html += '<div style="margin-left:1rem;margin-bottom:1rem;">';
+        html += '<div style="font-weight:600;font-size:0.9rem;color:#374151;margin-bottom:0.5rem;">📍 ' + addr.replace(/</g, '&lt;') + '</div>';
+        html += '<table style="width:100%;font-size:0.8rem;border-collapse:collapse;">';
+        html += '<thead><tr style="background:#f8fafc;"><th style="padding:0.4rem;text-align:left;">Month</th><th style="text-align:right;padding:0.4rem;">Owed</th><th style="text-align:right;padding:0.4rem;">Paid</th><th style="padding:0.4rem;">Method</th><th style="padding:0.4rem;">Status</th><th style="text-align:right;padding:0.4rem;">Fee</th><th style="text-align:right;padding:0.4rem;">Net</th><th style="padding:0.4rem;">Modified</th><th style="padding:0.4rem;">Notes</th></tr></thead>';
+        html += '<tbody>';
+        grouped[owner][addr].forEach(function(e) {
+          var statusColors = { paid: '#16a34a', partial: '#f59e0b', unpaid: '#dc2626', late: '#dc2626' };
+          var sc = statusColors[e.status] || '#64748b';
+          var modTime = e.modifiedAt ? new Date(e.modifiedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+          html += '<tr style="border-bottom:1px solid #f1f5f9;">';
+          html += '<td style="padding:0.4rem;">' + (e.month || '') + '</td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.rentOwed || 0).toLocaleString() + '</td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.rentPaid || 0).toLocaleString() + '</td>';
+          html += '<td style="padding:0.4rem;">' + (e.paymentMethod || '-') + '</td>';
+          html += '<td style="padding:0.4rem;"><span style="color:' + sc + ';font-weight:600;text-transform:uppercase;font-size:0.7rem;">' + (e.status || 'unpaid') + '</span></td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.pmFeeAmount || 0).toFixed(2) + '</td>';
+          html += '<td style="text-align:right;padding:0.4rem;">$' + (e.netToOwner || 0).toFixed(2) + '</td>';
+          html += '<td style="padding:0.4rem;font-size:0.7rem;color:#94a3b8;" title="' + (e.modifiedAt || '') + '">' + (e.modifiedBy || '') + ' ' + modTime + '</td>';
+          html += '<td style="padding:0.4rem;font-size:0.75rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (e.notes || '').replace(/"/g, '&quot;') + '">' + (e.notes || '-') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function openAddLedgerEntryModal() {
+    // Populate payment methods dropdown
+    var sel = document.getElementById('le-method');
+    if (sel) {
+      var methods = getPaymentMethods();
+      sel.innerHTML = methods.map(function(m) { return '<option value="' + m + '">' + m + '</option>'; }).join('') + '<option value="__add_new__">+ Add New Method</option>';
+      sel.onchange = function() {
+        if (this.value === '__add_new__') {
+          var nm = prompt('Enter new payment method name:');
+          if (nm) { addPaymentMethod(nm); this.innerHTML += '<option value="' + nm + '">' + nm + '</option>'; this.value = nm; }
+          else { this.value = methods[0]; }
+        }
+      };
+    }
+    openModal('modal-add-ledger');
+  }
+
+  function submitLedgerEntry() {
+    addLedgerEntryAdvanced({
+      ownerName: document.getElementById('le-owner').value,
+      propertyAddress: document.getElementById('le-address').value,
+      tenantName: document.getElementById('le-tenant').value,
+      rentOwed: parseFloat(document.getElementById('le-owed').value) || 0,
+      rentPaid: parseFloat(document.getElementById('le-paid').value) || 0,
+      paymentMethod: document.getElementById('le-method').value,
+      pmFeePercent: (document.getElementById('le-fee').value !== '' && !isNaN(parseFloat(document.getElementById('le-fee').value))) ? parseFloat(document.getElementById('le-fee').value) : 7,
+      status: document.getElementById('le-status').value,
+      notes: document.getElementById('le-notes').value
+    });
+    closeModal('modal-add-ledger');
+    renderAdvancedLedger();
+  }
+
+  function exportAdvancedLedgerCSV() {
+    var entries = getAdvancedLedger();
+    var csv = 'Owner,Property,Tenant,Month,Owed,Paid,Method,Status,Fee%,Fee$,Net,Modified By,Modified At,Notes\n';
+    entries.forEach(function(e) {
+      csv += [e.ownerName, e.propertyAddress, e.tenantName, e.month, e.rentOwed, e.rentPaid, e.paymentMethod, e.status, e.pmFeePercent, e.pmFeeAmount, e.netToOwner, e.modifiedBy, e.modifiedAt, '"' + (e.notes || '').replace(/"/g, '""') + '"'].join(',') + '\n';
+    });
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'advanced_ledger_' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+  }
+
+  function generateMonthlyStatementUI(ownerName) {
+    var month = prompt('Enter month (e.g., "Feb 2026"):', 'Feb 2026');
+    if (!month) return;
+    var stmt = generateAdvancedMonthlyStatement(ownerName, month);
+    alert('Monthly Statement for ' + ownerName + ' (' + month + '):\n\nTotal Owed: $' + stmt.totalRent.toLocaleString() + '\nTotal Paid: $' + stmt.totalPaid.toLocaleString() + '\nPM Fees: $' + stmt.totalFees.toFixed(2) + '\nNet to Owner: $' + stmt.totalNet.toFixed(2) + '\n\nEntries: ' + stmt.entries.length + '\nInvoices attached: ' + stmt.invoices.length);
+  }
+
+  function generateEOYStatementUI(ownerName) {
+    var year = prompt('Enter year:', '2026');
+    if (!year) return;
+    var stmt = generateEndOfYearStatement(ownerName, parseInt(year));
+    alert('End of Year Statement for ' + ownerName + ' (' + year + '):\n\nTotal Owed: $' + stmt.totalRent.toLocaleString() + '\nTotal Paid: $' + stmt.totalPaid.toLocaleString() + '\nPM Fees: $' + stmt.totalFees.toFixed(2) + '\nNet to Owner: $' + stmt.totalNet.toFixed(2) + '\n\nTotal Entries: ' + stmt.entries.length);
+  }
+
+  // --- Professional Profile UI ---
+  function loadProfileUI() {
+    var profile = getPublicProfile();
+    var fields = { 'profile-company-name': 'companyName', 'profile-tagline': 'tagline', 'profile-bio': 'bio', 'profile-phone': 'phone', 'profile-email': 'email', 'profile-website': 'website', 'profile-license': 'license' };
+    Object.keys(fields).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = profile[fields[id]] || '';
+    });
+    // Show logo preview
+    var branding = getBranding();
+    if (branding.logoUrl) {
+      var preview = document.getElementById('logo-preview');
+      if (preview) preview.innerHTML = '<img src="' + branding.logoUrl + '" style="max-width:120px;max-height:80px;border-radius:8px;" />';
+    }
+    renderTeamMembers();
+    renderApprovedVendors();
+  }
+
+  function savePublicProfileUI() {
+    var profile = getPublicProfile();
+    var fields = { 'profile-company-name': 'companyName', 'profile-tagline': 'tagline', 'profile-bio': 'bio', 'profile-phone': 'phone', 'profile-email': 'email', 'profile-website': 'website', 'profile-license': 'license' };
+    Object.keys(fields).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) profile[fields[id]] = el.value;
+    });
+    savePublicProfile(profile);
+    alert('Profile saved successfully!');
+  }
+
+  // --- Team Members UI ---
+  function renderTeamMembers() {
+    var container = document.getElementById('team-members-list');
+    if (!container) return;
+    var members = getTeamMembers();
+    if (members.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#94a3b8;font-size:0.85rem;">No team members yet. Click "+ Add Member" to invite someone.</div>';
+      return;
+    }
+    container.innerHTML = members.map(function(m) {
+      var perms = Object.keys(m.permissions || {}).filter(function(k) { return m.permissions[k]; }).join(', ') || 'None';
+      return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;border-bottom:1px solid #f1f5f9;">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;">' + (m.name || '?').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase() + '</div>' +
+        '<div style="flex:1;"><div style="font-weight:600;font-size:0.9rem;">' + (m.name || '').replace(/</g, '&lt;') + ' <span style="font-size:0.75rem;color:#7c3aed;background:#f5f3ff;padding:1px 6px;border-radius:999px;">' + (m.role || '') + '</span></div>' +
+        '<div style="font-size:0.8rem;color:#64748b;">' + (m.responsibilities || m.email || '') + '</div>' +
+        '<div style="font-size:0.75rem;color:#94a3b8;">Permissions: ' + perms + '</div></div>' +
+        '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fecaca;" onclick="removeTeamMember(\'' + m.id + '\');renderTeamMembers();">Remove</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openAddTeamMemberModal() { openModal('modal-add-team'); }
+
+  function submitTeamMember() {
+    addTeamMember({
+      name: document.getElementById('tm-name').value,
+      email: document.getElementById('tm-email').value,
+      role: document.getElementById('tm-role').value,
+      responsibilities: document.getElementById('tm-responsibilities').value,
+      permissions: {
+        accounting: document.getElementById('tm-perm-accounting').checked,
+        docs: document.getElementById('tm-perm-docs').checked,
+        messaging: document.getElementById('tm-perm-messaging').checked,
+        maintenance: document.getElementById('tm-perm-maintenance').checked,
+        leasing: document.getElementById('tm-perm-leasing').checked
+      }
+    });
+    closeModal('modal-add-team');
+    renderTeamMembers();
+    // Clear form
+    ['tm-name','tm-email','tm-responsibilities'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    ['tm-perm-accounting','tm-perm-docs','tm-perm-messaging','tm-perm-maintenance','tm-perm-leasing'].forEach(function(id) { var el = document.getElementById(id); if (el) el.checked = false; });
+  }
+
+  // --- Approved Vendors UI ---
+  function renderApprovedVendors() {
+    var container = document.getElementById('approved-vendors-list');
+    if (!container) return;
+    var vendors = getApprovedVendors();
+    if (vendors.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#94a3b8;font-size:0.85rem;">No approved vendors yet. Click "+ Add Vendor" to add one.</div>';
+      return;
+    }
+    container.innerHTML = vendors.map(function(v) {
+      return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;border-bottom:1px solid #f1f5f9;">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:#059669;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;">🔧</div>' +
+        '<div style="flex:1;"><div style="font-weight:600;font-size:0.9rem;">' + (v.name || '').replace(/</g, '&lt;') + ' <span style="font-size:0.75rem;color:#059669;background:#ecfdf5;padding:1px 6px;border-radius:999px;">' + (v.specialty || '') + '</span></div>' +
+        '<div style="font-size:0.8rem;color:#64748b;">' + (v.phone || '') + ' | ' + (v.email || '') + '</div>' +
+        '<div style="font-size:0.75rem;color:#94a3b8;">Repair limit: $' + (v.repairLimit || 500) + ' before approval</div></div>' +
+        '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fecaca;" onclick="removeApprovedVendor(\'' + v.id + '\');renderApprovedVendors();">Remove</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openAddVendorModal() { openModal('modal-add-vendor'); }
+
+  function submitVendor() {
+    addApprovedVendor({
+      name: document.getElementById('av-name').value,
+      specialty: document.getElementById('av-specialty').value,
+      phone: document.getElementById('av-phone').value,
+      email: document.getElementById('av-email').value,
+      repairLimit: parseFloat(document.getElementById('av-limit').value) || 500
+    });
+    closeModal('modal-add-vendor');
+    renderApprovedVendors();
+    ['av-name','av-specialty','av-phone','av-email'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  }
+
+  // --- Bulk Messaging UI ---
+  function renderBulkMessages() {
+    var container = document.getElementById('bulk-history-list');
+    if (!container) return;
+    var history = getBulkMessages();
+    if (history.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:0.85rem;">No broadcasts sent yet.</div>';
+      return;
+    }
+    container.innerHTML = history.map(function(m) {
+      var date = new Date(m.sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return '<div style="padding:0.75rem;border-bottom:1px solid #f1f5f9;">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">' +
+          '<div style="font-weight:600;font-size:0.85rem;">' + (m.subject || 'No subject').replace(/</g, '&lt;') + '</div>' +
+          '<div style="font-size:0.75rem;color:#94a3b8;">' + date + '</div>' +
+        '</div>' +
+        '<div style="font-size:0.8rem;color:#64748b;">To: ' + m.target + ' via ' + m.method + ' (' + m.recipientCount + ' recipients)</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sendBulkMessageUI() {
+    var target = document.getElementById('bulk-target').value;
+    var method = document.getElementById('bulk-method').value;
+    var subject = document.getElementById('bulk-subject').value;
+    var body = document.getElementById('bulk-body').value;
+    if (!subject || !body) { alert('Please fill in subject and message.'); return; }
+    var recipientCount = target === 'everyone' ? 25 : target === 'delinquent' ? 5 : target === 'owners' ? 15 : target === 'tenants' ? 20 : 10;
+    var result = sendBulkMessage({ subject: subject, body: body, target: target, method: method, recipientCount: recipientCount, checkGuardrails: true });
+    if (!result.success) { alert(result.error); return; }
+    alert('Broadcast sent to ' + recipientCount + ' ' + target + ' recipients via ' + method + '!');
+    document.getElementById('bulk-subject').value = '';
+    document.getElementById('bulk-body').value = '';
+    renderBulkMessages();
+  }
+
+  // --- Permissions UI ---
+  function renderPermissionManager() {
+    var container = document.getElementById('permission-matrix-container');
+    if (!container) return;
+    var members = getTeamMembers();
+    var overrides = getPermissionOverrides();
+    // Update checkbox state
+    var restrictEl = document.getElementById('perm-restrict-external');
+    if (restrictEl) restrictEl.checked = !!overrides.externalMessagingRestricted;
+    if (members.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:0.85rem;">No team members to manage. Add members in the Profile tab first.</div>';
+      return;
+    }
+    var permTypes = ['accounting', 'docs', 'messaging', 'maintenance', 'leasing'];
+    var html = '<table style="width:100%;font-size:0.85rem;border-collapse:collapse;">';
+    html += '<thead><tr style="background:#f8fafc;"><th style="padding:0.5rem;text-align:left;">Member</th><th style="padding:0.5rem;text-align:left;">Role</th>';
+    permTypes.forEach(function(p) { html += '<th style="padding:0.5rem;text-align:center;text-transform:capitalize;">' + p + '</th>'; });
+    html += '</tr></thead><tbody>';
+    members.forEach(function(m) {
+      html += '<tr style="border-bottom:1px solid #f1f5f9;">';
+      html += '<td style="padding:0.5rem;font-weight:600;">' + (m.name || '').replace(/</g, '&lt;') + '</td>';
+      html += '<td style="padding:0.5rem;"><span style="font-size:0.75rem;color:#7c3aed;background:#f5f3ff;padding:1px 6px;border-radius:999px;">' + (m.role || '') + '</span></td>';
+      permTypes.forEach(function(p) {
+        var checked = m.permissions && m.permissions[p] ? 'checked' : '';
+        html += '<td style="padding:0.5rem;text-align:center;"><input type="checkbox" ' + checked + ' onchange="toggleTeamPermission(\'' + m.id + '\',\'' + p + '\',this.checked)" /></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function toggleTeamPermission(memberId, perm, value) {
+    var members = getTeamMembers();
+    var m = members.find(function(t) { return t.id === memberId; });
+    if (m) {
+      if (!m.permissions) m.permissions = {};
+      m.permissions[perm] = value;
+      saveTeamMembers(members);
+      addAuditEntry((value ? 'Granted' : 'Revoked') + ' ' + perm + ' permission for ' + m.name, '');
+    }
+  }
+
+  function updateGuardrails() {
+    var overrides = getPermissionOverrides();
+    overrides.externalMessagingRestricted = document.getElementById('perm-restrict-external').checked;
+    savePermissionOverrides(overrides);
+    addAuditEntry('Messaging guardrails ' + (overrides.externalMessagingRestricted ? 'enabled' : 'disabled'), '');
+  }
+
+  // --- Document Upload UI ---
+  function openDocUploadModal(listingId) {
+    document.getElementById('du-listing-id').value = listingId || '';
+    document.getElementById('du-name').value = '';
+    document.getElementById('du-file-name').textContent = '';
+    document.getElementById('du-share-owner').checked = false;
+    window._pendingDocFile = null;
+    openModal('modal-doc-upload');
+  }
+
+  function handleDocFileSelect(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    window._pendingDocFile = file;
+    document.getElementById('du-file-name').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    if (!document.getElementById('du-name').value) {
+      document.getElementById('du-name').value = file.name.replace(/\.[^.]+$/, '');
+    }
+  }
+
+  function submitDocUpload() {
+    var name = document.getElementById('du-name').value;
+    if (!name) { alert('Please enter a document name.'); return; }
+    var listingId = document.getElementById('du-listing-id').value;
+    var category = document.getElementById('du-category').value;
+    var shared = document.getElementById('du-share-owner').checked;
+    var file = window._pendingDocFile;
+    var fileName = file ? file.name : 'manual-entry';
+    var fileSize = file ? file.size : 0;
+
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        addPropertyDocEnhanced({
+          listingId: listingId,
+          name: name,
+          category: category,
+          fileName: fileName,
+          fileSize: fileSize,
+          sharedWithOwner: shared,
+          dataUrl: e.target.result
+        });
+        closeModal('modal-doc-upload');
+        alert('Document "' + name + '" uploaded successfully!');
+        // Refresh property command if open
+        if (window._currentCommandListingId) openPropertyCommand(window._currentCommandListingId);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      addPropertyDocEnhanced({
+        listingId: listingId,
+        name: name,
+        category: category,
+        fileName: fileName,
+        fileSize: fileSize,
+        sharedWithOwner: shared
+      });
+      closeModal('modal-doc-upload');
+      alert('Document "' + name + '" added successfully!');
+    }
+  }
+
+  // Setup drag-drop on doc upload zone
+  setTimeout(function() {
+    var dropZone = document.getElementById('doc-drop-zone');
+    if (dropZone) {
+      dropZone.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#2563eb'; this.style.background = '#eff6ff'; });
+      dropZone.addEventListener('dragleave', function(e) { e.preventDefault(); this.style.borderColor = '#cbd5e1'; this.style.background = '#f8fafc'; });
+      dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#cbd5e1'; this.style.background = '#f8fafc';
+        if (e.dataTransfer.files.length > 0) {
+          var input = document.getElementById('du-file-input');
+          input.files = e.dataTransfer.files;
+          handleDocFileSelect(input);
+        }
+      });
+    }
+  }, 1000);
+
+  // --- Welcome Letter UI ---
+  function openWelcomeLetterModal(listingId) {
+    var letter = generateWelcomeLetter(listingId);
+    if (!letter) { alert('Property not found.'); return; }
+    var content = document.getElementById('welcome-letter-content');
+    if (content) {
+      content.innerHTML = '<div style="font-family:Georgia,serif;padding:1rem;">' +
+        '<div style="text-align:center;margin-bottom:2rem;">' +
+          '<h2 style="margin:0;font-size:1.3rem;">' + letter.companyName + '</h2>' +
+          '<div style="color:#64748b;font-size:0.85rem;">' + letter.date + '</div>' +
+        '</div>' +
+        '<p>Dear <strong>' + letter.tenant + '</strong>,</p>' +
+        '<p>Welcome to your new home at <strong>' + letter.address + '</strong>! We are excited to have you as our tenant.</p>' +
+        '<h4 style="margin-top:1.5rem;">Monthly Rent</h4><p>Your monthly rent is <strong>$' + Number(letter.rent).toLocaleString() + '</strong>.</p>' +
+        '<h4>Utility Setup</h4><p>' + letter.utilities + '</p>' +
+        '<h4>Move-In Instructions</h4><p>' + letter.moveInInstructions + '</p>' +
+        '<h4>Emergency Contact</h4><p>' + letter.emergencyContact + '</p>' +
+        (letter.customNotes ? '<h4>Additional Notes</h4><p>' + letter.customNotes + '</p>' : '') +
+        '<p style="margin-top:2rem;">Best regards,<br/><strong>' + letter.companyName + '</strong></p>' +
+      '</div>';
+    }
+    openModal('modal-welcome-letter');
+  }
+
+  function printWelcomeLetter() {
+    var content = document.getElementById('welcome-letter-content');
+    if (!content) return;
+    var win = window.open('', '', 'width=800,height=600');
+    win.document.write('<html><head><title>Welcome Letter</title></head><body>' + content.innerHTML + '</body></html>');
+    win.document.close();
+    win.print();
+  }
+
+  // --- Update Property Command to remove Lease tile, add enhanced docs ---
+  var _origOpenPropertyCommand = typeof openPropertyCommand === 'function' ? openPropertyCommand : null;
+  window.openPropertyCommand = function(listingId) {
+    window._currentCommandListingId = listingId;
+    if (_origOpenPropertyCommand) _origOpenPropertyCommand(listingId);
+    // After original renders, modify: remove Lease tile, add Welcome Letter button, update Docs tile
+    setTimeout(function() {
+      var container = document.getElementById('tab-propcommand');
+      if (!container) return;
+      // Add property metadata row
+      var metaRow = document.getElementById('prop-meta-row');
+      if (!metaRow) {
+        var cmdHeader = container.querySelector('div[style*="display:flex"]');
+        if (cmdHeader) {
+          var ptype = getPropertyType(listingId);
+          var hoa = getHOAInfo(listingId);
+          var metaHtml = '<div id="prop-meta-row" style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">';
+          metaHtml += '<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;"><span style="font-weight:600;">Type:</span> <select onchange="setPropertyType(\'' + listingId + '\',this.value)" style="padding:2px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8rem;"><option value="long-term"' + (ptype === 'long-term' ? ' selected' : '') + '>Long-term</option><option value="short-term"' + (ptype === 'short-term' ? ' selected' : '') + '>Short-term/Airbnb/VRBO</option></select></div>';
+          metaHtml += '<button class="btn btn-sm" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;font-size:0.75rem;" onclick="openWelcomeLetterModal(\'' + listingId + '\')">📬 Welcome Letter</button>';
+          if (hoa.contact) { metaHtml += '<div style="font-size:0.8rem;color:#64748b;">HOA: ' + hoa.contact + '</div>'; }
+          metaHtml += '</div>';
+          cmdHeader.insertAdjacentHTML('afterend', metaHtml);
+        }
+      }
+    }, 200);
+  };
+
+  // --- Extend dashTab for new expanded tabs ---
+  var _origDashTabExpanded = window.dashTab;
+  window.dashTab = function(tabName) {
+    // Hide expanded tabs
+    ['advaccounting','profile','bulkmsg','permissions'].forEach(function(t) {
+      var el = document.getElementById('tab-' + t);
+      if (el) el.style.display = 'none';
+    });
+    if (tabName === 'advaccounting' || tabName === 'profile' || tabName === 'bulkmsg' || tabName === 'permissions') {
+      document.querySelectorAll('#dashboard-screen .tab-content').forEach(function(t) { t.classList.remove('active'); });
+      // Also hide Phase 3 tabs
+      ['propcommand','rentstatus','inbox','attydocs'].forEach(function(t) {
+        var el = document.getElementById('tab-' + t);
+        if (el) el.style.display = 'none';
+      });
+      var targetEl = document.getElementById('tab-' + tabName);
+      if (targetEl) targetEl.style.display = 'block';
+      if (tabName === 'advaccounting') renderAdvancedLedger();
+      if (tabName === 'profile') loadProfileUI();
+      if (tabName === 'bulkmsg') renderBulkMessages();
+      if (tabName === 'permissions') renderPermissionManager();
+      document.querySelectorAll('.dash-link').forEach(function(l) { l.classList.remove('active'); });
+      var activeLink = document.querySelector('.dash-link[data-sidebar-id="' + tabName + '"]');
+      if (activeLink) activeLink.classList.add('active');
+      return;
+    }
+    if (_origDashTabExpanded) _origDashTabExpanded(tabName);
+  };
+
+  // --- Init expanded features on load ---
+  setTimeout(function() {
+    // Load branding
+    var branding = getBranding();
+    if (branding.logoUrl) {
+      var sidebarAvatar = document.querySelector('.dash-sidebar div:first-child div div:first-child');
+      if (sidebarAvatar) {
+        sidebarAvatar.style.backgroundImage = 'url(' + branding.logoUrl + ')';
+        sidebarAvatar.style.backgroundSize = 'cover';
+        sidebarAvatar.style.backgroundPosition = 'center';
+        sidebarAvatar.textContent = '';
+      }
+    }
+  }, 600);
+
+  // ============================================================================
+  // PHASE 4: UI FUNCTIONS
+  // ============================================================================
+
+  // --- Breadcrumb Rendering ---
+  function renderBreadcrumbs() {
+    var bar = document.getElementById('breadcrumb-bar');
+    if (!bar) return;
+    var crumbs = getBreadcrumbs();
+    if (crumbs.length === 0) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    var html = '';
+    crumbs.forEach(function(c, i) {
+      if (i > 0) html += ' <span style="color:#94a3b8;margin:0 6px;">›</span> ';
+      if (i < crumbs.length - 1) {
+        html += '<a href="#" onclick="navigateBreadcrumb(' + i + ');renderBreadcrumbs();return false;" style="color:#2563eb;text-decoration:none;font-weight:500;">' + c.label + '</a>';
+      } else {
+        html += '<span style="color:#1e293b;font-weight:700;">' + c.label + '</span>';
+      }
+    });
+    bar.innerHTML = html;
+  }
+
+  // --- Contextual Sidebar ---
+  function renderContextualSidebar(listingId) {
+    var sec = document.getElementById('ctx-sidebar-section');
+    if (!sec) return;
+    if (!listingId) { sec.style.display = 'none'; return; }
+    sec.style.display = 'block';
+    var listings = getListingsForClient(rvGet('rv_account') ? rvGet('rv_account').clientId : '');
+    var prop = null;
+    listings.forEach(function(l) { if (l.listingId === listingId) prop = l; });
+    var addr = prop ? (prop.address || listingId) : listingId;
+    sec.innerHTML = '<div class="ctx-sidebar-header">Command Hub: ' + addr.substring(0, 25) + '</div>' +
+      '<a class="ctx-link" href="#" onclick="openAdBuilder(\'' + listingId + '\');return false;">📣 Create Ad</a>' +
+      '<a class="ctx-link" href="#" onclick="openAttorneyPacket(\'' + listingId + '\');return false;">⚖️ Attorney Packet</a>' +
+      '<a class="ctx-link" href="#" onclick="showPropertyLedger(\'' + listingId + '\');return false;">💰 View Ledger</a>' +
+      '<a class="ctx-link" href="#" onclick="exitPropertyContextUI();return false;">← Back to Dashboard</a>';
+  }
+
+  function exitPropertyContextUI() {
+    exitPropertyContext();
+    renderBreadcrumbs();
+    var sec = document.getElementById('ctx-sidebar-section');
+    if (sec) sec.style.display = 'none';
+    if (typeof dashTab === 'function') dashTab('overview');
+  }
+
+  // --- Audit Trail Tooltips ---
+  function addAuditTooltips() {
+    document.querySelectorAll('.audit-tooltip-trigger').forEach(function(el) {
+      var entryId = el.getAttribute('data-entry-id');
+      if (!entryId) return;
+      var details = getAuditDetailsForEntry(entryId);
+      if (!details) return;
+      var tooltip = el.querySelector('.audit-tooltip');
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'audit-tooltip';
+        el.appendChild(tooltip);
+      }
+      tooltip.innerHTML = '<strong>Audit Trail</strong><br>' +
+        'By: ' + (details.initials || 'N/A') + '<br>' +
+        'Date: ' + (details.timestamp ? new Date(details.timestamp).toLocaleString() : 'N/A') + '<br>' +
+        'Method: ' + (details.method || 'manual');
+    });
+  }
+
+  // --- Math Validation UI ---
+  function runMathValidation(ownerId) {
+    // Build statement data from the owner's ledger entries
+    var ledger = getAdvancedLedger();
+    // ownerId may be a client hub ID or owner name — resolve to name first
+    var owner = (typeof getClientHubOwner === 'function') ? getClientHubOwner(ownerId) : null;
+    var ownerName = owner ? owner.name : ownerId;
+    var ownerEntries = ledger.filter(function(e) { return e.ownerName === ownerName; });
+    if (ownerEntries.length === 0) { alert('No ledger data found for this owner.'); return; }
+    var totalRent = 0, totalFees = 0;
+    ownerEntries.forEach(function(e) { totalRent += (e.rentPaid || 0); totalFees += (e.pmFeeAmount || 0); });
+    var statementData = { entries: ownerEntries, totalRent: totalRent, totalFees: totalFees, totalNet: totalRent - totalFees };
+    var report = generateMathReport(statementData);
+    if (!report) { alert('Error generating math report.'); return; }
+    var s = report.summary || {};
+    if (report.valid) {
+      alert('Math Validation PASSED\n\nTotal Rent: $' + (s.totalRent || 0).toFixed(2) +
+        '\nTotal Fees: $' + (s.totalFees || 0).toFixed(2) +
+        '\nTotal Net: $' + (s.totalNet || 0).toFixed(2) +
+        '\nEntries checked: ' + (s.entryCount || 0));
+    } else {
+      var msg = 'Math Validation FAILED\n\nDiscrepancies found:\n';
+      (report.errors || []).forEach(function(e) {
+        msg += '- ' + e + '\n';
+      });
+      alert(msg);
+    }
+  }
+
+  // --- AI Ad Builder UI ---
+  function openAdBuilder(listingId) {
+    var listings = getListingsForClient(rvGet('rv_account') ? rvGet('rv_account').clientId : '');
+    var prop = null;
+    listings.forEach(function(l) { if (l.listingId === listingId) prop = l; });
+    if (!prop) { alert('Property not found.'); return; }
+    var ad = generateAIAd(prop);
+    document.getElementById('ad-property-label').textContent = prop.address || listingId;
+    document.getElementById('ad-title-output').value = ad.title;
+    document.getElementById('ad-body-output').value = ad.body;
+    document.getElementById('ad-hashtags-output').value = ad.hashtags;
+    var modal = document.getElementById('modal-ad-builder');
+    modal.style.display = 'flex';
+  }
+
+  function copyAdToClipboard(fieldId) {
+    var el = document.getElementById(fieldId);
+    var text = el.value || el.textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() {
+        var btn = el.parentElement.querySelector('.copy-ad-btn');
+        if (btn) { var orig = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(function() { btn.textContent = orig; }, 1500); }
+      });
+    } else {
+      el.select(); document.execCommand('copy');
+    }
+  }
+
+  // --- Attorney Packet UI ---
+  var _attyPacketListingId = null;
+  function openAttorneyPacket(listingId) {
+    _attyPacketListingId = listingId;
+    var listings = getListingsForClient(rvGet('rv_account') ? rvGet('rv_account').clientId : '');
+    var prop = null;
+    listings.forEach(function(l) { if (l.listingId === listingId) prop = l; });
+    document.getElementById('atty-packet-property').textContent = prop ? (prop.address || listingId) : listingId;
+    document.getElementById('atty-packet-tenant').textContent = prop ? (prop.tenant || 'No tenant') : 'N/A';
+    var modal = document.getElementById('modal-attorney-packet');
+    modal.style.display = 'flex';
+  }
+
+  function exportAttorneyPacket() {
+    if (!_attyPacketListingId) return;
+    var result = generateAttorneyPacketZip(_attyPacketListingId);
+    // Generate a text summary since we can't create actual ZIP in browser without library
+    var content = '=== ATTORNEY PACKET ===\n';
+    content += 'Generated: ' + new Date().toISOString() + '\n';
+    content += 'Property: ' + _attyPacketListingId + '\n\n';
+    content += '--- LEASE ---\n' + JSON.stringify(result.lease, null, 2) + '\n\n';
+    content += '--- LEDGER ENTRIES (' + result.ledger.length + ') ---\n';
+    result.ledger.forEach(function(e) {
+      content += (e.paymentDate || e.month || 'N/A') + ' | $' + (e.rentPaid || 0) + ' | ' + (e.paymentMethod || 'N/A') + '\n';
+    });
+    content += '\n--- COMMUNICATIONS (' + result.communications.length + ') ---\n';
+    result.communications.forEach(function(m) {
+      content += (m.timestamp || 'N/A') + ' | ' + m.from + ': ' + (m.body || m.subject || '') + '\n';
+    });
+    content += '\n--- DOCUMENTS (' + result.documents.length + ') ---\n';
+    result.documents.forEach(function(d) {
+      content += d.name + ' (' + d.category + ')\n';
+    });
+    // Download as .txt file
+    var blob = new Blob([content], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'AttorneyPacket_' + _attyPacketListingId + '.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    closeModal('modal-attorney-packet');
+    alert('Attorney Packet downloaded successfully.');
+  }
+
+  // --- Vendor Invoice UI ---
+  function openSubmitInvoiceModal() {
+    document.getElementById('inv-vendor').value = '';
+    document.getElementById('inv-property').value = '';
+    document.getElementById('inv-desc').value = '';
+    document.getElementById('inv-amount').value = '';
+    var modal = document.getElementById('modal-vendor-invoice');
+    modal.style.display = 'flex';
+  }
+
+  function submitVendorInvoiceUI() {
+    var vendor = document.getElementById('inv-vendor').value.trim();
+    var property = document.getElementById('inv-property').value.trim();
+    var desc = document.getElementById('inv-desc').value.trim();
+    var amount = parseFloat(document.getElementById('inv-amount').value);
+    if (!vendor || !property || !desc || isNaN(amount) || amount <= 0) {
+      alert('Please fill in all fields with valid values.');
+      return;
+    }
+    var result = submitVendorInvoice({
+      vendorName: vendor,
+      listingId: property,
+      description: desc,
+      amount: amount
+    });
+    closeModal('modal-vendor-invoice');
+    if (result.flagged) {
+      alert('FLAGGED: Invoice for $' + amount.toFixed(2) + ' exceeds vendor limit.\n' + (result.flagReason || '') + '\nStatus: Pending Owner Approval');
+    } else {
+      alert('✅ Invoice submitted successfully for $' + amount.toFixed(2));
+    }
+    renderVendorInvoices();
+  }
+
+  function renderVendorInvoices() {
+    var container = document.getElementById('vendor-invoices-list');
+    if (!container) return;
+    var invoices = getVendorInvoices();
+    if (invoices.length === 0) {
+      container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;">No vendor invoices yet. Click "+ Submit Invoice" to add one.</div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">';
+    html += '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">' +
+      '<th style="padding:0.75rem;text-align:left;">Vendor</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Property</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Description</th>' +
+      '<th style="padding:0.75rem;text-align:right;">Amount</th>' +
+      '<th style="padding:0.75rem;text-align:center;">Status</th>' +
+      '<th style="padding:0.75rem;text-align:center;">Actions</th></tr></thead><tbody>';
+    invoices.forEach(function(inv) {
+      var statusColor = inv.status === 'approved' ? '#059669' : inv.status === 'pending_approval' ? '#d97706' : inv.status === 'denied' ? '#dc2626' : '#6366f1';
+      var flagClass = inv.flagged ? ' invoice-flagged' : '';
+      html += '<tr class="' + flagClass + '" style="border-bottom:1px solid #f1f5f9;">';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(inv.vendorName) + '</td>';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(inv.listingId) + '</td>';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(inv.description) + '</td>';
+      html += '<td style="padding:0.75rem;text-align:right;font-weight:600;">$' + inv.amount.toFixed(2) + '</td>';
+      html += '<td style="padding:0.75rem;text-align:center;"><span style="background:' + statusColor + ';color:white;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;">' + inv.status.replace('_', ' ') + '</span></td>';
+      html += '<td style="padding:0.75rem;text-align:center;">';
+      if (inv.status === 'pending_approval') {
+        html += '<button onclick="approveInvoiceUI(\'' + inv.id + '\')" class="btn btn-sm" style="background:#059669;color:white;margin-right:4px;padding:2px 8px;font-size:0.7rem;">Approve</button>';
+        html += '<button onclick="denyInvoiceUI(\'' + inv.id + '\')" class="btn btn-sm" style="background:#dc2626;color:white;padding:2px 8px;font-size:0.7rem;">Deny</button>';
+      } else {
+        html += '<span style="color:#94a3b8;font-size:0.75rem;">—</span>';
+      }
+      html += '</td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function approveInvoiceUI(invoiceId) {
+    approveVendorInvoice(invoiceId);
+    renderVendorInvoices();
+  }
+
+  function denyInvoiceUI(invoiceId) {
+    denyVendorInvoice(invoiceId);
+    renderVendorInvoices();
+  }
+
+  // --- Lead Captures UI ---
+  function renderLeadCaptures() {
+    var container = document.getElementById('lead-captures-list');
+    if (!container) return;
+    var leads = getLeadCaptures();
+    if (leads.length === 0) {
+      container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;">No QR leads captured yet. Leads appear when visitors scan property QR codes and save listings.</div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">';
+    html += '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">' +
+      '<th style="padding:0.75rem;text-align:left;">Email</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Property</th>' +
+      '<th style="padding:0.75rem;text-align:left;">Date</th>' +
+      '<th style="padding:0.75rem;text-align:center;">Source</th></tr></thead><tbody>';
+    leads.forEach(function(lead) {
+      html += '<tr style="border-bottom:1px solid #f1f5f9;">';
+      html += '<td style="padding:0.75rem;font-weight:500;">' + escapeHtml(lead.email) + '</td>';
+      html += '<td style="padding:0.75rem;">' + escapeHtml(lead.listingId) + '</td>';
+      html += '<td style="padding:0.75rem;">' + new Date(lead.capturedAt).toLocaleDateString() + '</td>';
+      html += '<td style="padding:0.75rem;text-align:center;"><span style="background:#6366f1;color:white;padding:2px 10px;border-radius:12px;font-size:0.75rem;">QR Scan</span></td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  // --- Verified Badge Injection ---
+  function injectVerifiedBadge() {
+    var profileTab = document.getElementById('tab-profile');
+    if (!profileTab) return;
+    var header = profileTab.querySelector('h2');
+    if (!header || header.querySelector('.verified-badge')) return;
+    var acct = rvGet('rv_account');
+    if (!acct) return;
+    var badge = document.createElement('span');
+    badge.className = 'verified-badge';
+    badge.title = 'Verified RentVerified Professional';
+    badge.innerHTML = '✓ Verified';
+    header.appendChild(badge);
+  }
+
+  // --- Show Property Ledger (from contextual sidebar) ---
+  function showPropertyLedger(listingId) {
+    if (typeof dashTab === 'function') dashTab('advaccounting');
+    // Scroll to or filter the ledger for this property
+    setTimeout(function() {
+      var filterInput = document.querySelector('#tab-advaccounting input[type="text"]');
+      if (filterInput) { filterInput.value = listingId; filterInput.dispatchEvent(new Event('input')); }
+    }, 300);
+  }
+
+  // --- Wire Phase 4 tabs into dashTab ---
+  var _origDashTabPhase4 = window.dashTab;
+  window.dashTab = function(tabName) {
+    // Hide Phase 4 tabs
+    var _phase4StandaloneTabs = ['vendorinvoices','leadcaptures','inspections','workorders','compliancemgr','tenantscoring','affiliates','dataexport'];
+    _phase4StandaloneTabs.forEach(function(t) {
+      var el = document.getElementById('tab-' + t);
+      if (el) el.style.display = 'none';
+    });
+    if (_phase4StandaloneTabs.indexOf(tabName) >= 0) {
+      document.querySelectorAll('#dashboard-screen .tab-content').forEach(function(t) { t.classList.remove('active'); });
+      ['advaccounting','profile','bulkmsg','permissions','propcommand','rentstatus','inbox','attydocs'].forEach(function(t) {
+        var el = document.getElementById('tab-' + t);
+        if (el) el.style.display = 'none';
+      });
+      var targetEl = document.getElementById('tab-' + tabName);
+      if (targetEl) targetEl.style.display = 'block';
+      if (tabName === 'vendorinvoices') renderVendorInvoices();
+      if (tabName === 'leadcaptures') renderLeadCaptures();
+      if (tabName === 'inspections') renderInspectionsTab();
+      if (tabName === 'workorders') renderWorkOrdersTab();
+      if (tabName === 'compliancemgr') renderComplianceTab();
+      if (tabName === 'tenantscoring') renderTenantScoringTab();
+      document.querySelectorAll('.dash-link').forEach(function(l) { l.classList.remove('active'); });
+      var activeLink = document.querySelector('.dash-link[data-sidebar-id="' + tabName + '"]');
+      if (activeLink) activeLink.classList.add('active');
+      // Update breadcrumbs
+      clearBreadcrumbs();
+      pushBreadcrumb('Dashboard', 'overview');
+      var _standaloneLabels = { vendorinvoices:'Vendor Invoices', leadcaptures:'QR Leads', inspections:'Inspections', workorders:'Work Orders', compliancemgr:'Compliance', tenantscoring:'Tenant Scoring', affiliates:'Financial Services', dataexport:'Data Export' };
+      pushBreadcrumb(_standaloneLabels[tabName] || tabName, tabName);
+      renderBreadcrumbs();
+      return;
+    }
+    // For other tabs, also update breadcrumbs
+    if (tabName === 'overview') {
+      clearBreadcrumbs();
+      renderBreadcrumbs();
+      exitPropertyContext();
+      var sec = document.getElementById('ctx-sidebar-section');
+      if (sec) sec.style.display = 'none';
+    } else if (_phase4StandaloneTabs.indexOf(tabName) < 0) {
+      clearBreadcrumbs();
+      pushBreadcrumb('Dashboard', 'overview');
+      var tabLabels = {
+        'clients': 'Clients', 'advaccounting': 'Accounting', 'profile': 'Profile',
+        'bulkmsg': 'Bulk Messages', 'permissions': 'Permissions', 'propcommand': 'Property Command',
+        'rentstatus': 'Rent Status', 'inbox': 'Inbox', 'attydocs': 'Legal Docs',
+        'portfolioimport': 'Import', 'accounting': 'Accounting'
+      };
+      pushBreadcrumb(tabLabels[tabName] || tabName, tabName);
+      renderBreadcrumbs();
+    }
+    if (_origDashTabPhase4) _origDashTabPhase4(tabName);
+  };
+
+  // --- Phase 5: Tab render helpers ---
+  function renderInspectionsTab() {
+    var container = document.getElementById('inspections-list');
+    if (!container || typeof getInspections !== 'function') return;
+    var inspections = getInspections();
+    if (!inspections || inspections.length === 0) {
+      container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;"><div style="font-size:3rem;margin-bottom:0.5rem;">📷</div><div style="font-weight:600;color:#475569;">No Inspections Yet</div><div style="font-size:0.85rem;">Create your first move-in or move-out inspection to build your liability shield.</div></div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f8fafc;"><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Property</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Type</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Date</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Photos</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Status</th></tr></thead><tbody>';
+    inspections.forEach(function(insp) {
+      html += '<tr style="border-top:1px solid #e2e8f0;"><td style="padding:0.75rem;">' + escapeHtml(insp.propertyAddress || insp.listingId || '-') + '</td><td style="padding:0.75rem;">' + escapeHtml(insp.type || '-') + '</td><td style="padding:0.75rem;font-size:0.85rem;">' + escapeHtml((insp.createdAt || '').slice(0,10)) + '</td><td style="padding:0.75rem;">' + (insp.photos ? insp.photos.length : 0) + '</td><td style="padding:0.75rem;"><span style="padding:2px 8px;border-radius:12px;font-size:0.78rem;background:' + (insp.status === 'completed' ? '#dcfce7;color:#166534' : '#fef3c7;color:#92400e') + ';">' + escapeHtml(insp.status || 'pending') + '</span></td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function renderWorkOrdersTab() {
+    var container = document.getElementById('work-orders-list');
+    if (!container || typeof getWorkOrders !== 'function') return;
+    var orders = getWorkOrders();
+    if (!orders || orders.length === 0) {
+      container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;"><div style="font-size:3rem;margin-bottom:0.5rem;">🔧</div><div style="font-weight:600;color:#475569;">No Work Orders</div><div style="font-size:0.85rem;">Your properties are in good shape! Create a work order when maintenance is needed.</div></div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f8fafc;"><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Property</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Issue</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Vendor</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Amount</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Status</th></tr></thead><tbody>';
+    orders.forEach(function(wo) {
+      var statusColor = wo.status === 'completed' ? '#dcfce7;color:#166534' : wo.status === 'approved' ? '#dbeafe;color:#1e40af' : '#fef3c7;color:#92400e';
+      html += '<tr style="border-top:1px solid #e2e8f0;"><td style="padding:0.75rem;">' + escapeHtml(wo.propertyAddress || wo.listingId || '-') + '</td><td style="padding:0.75rem;">' + escapeHtml(wo.description || '-') + '</td><td style="padding:0.75rem;">' + escapeHtml(wo.vendorName || '-') + '</td><td style="padding:0.75rem;">' + (typeof fmtCurrency === 'function' ? fmtCurrency(wo.amount || 0) : '$' + (wo.amount || 0).toFixed(2)) + '</td><td style="padding:0.75rem;"><span style="padding:2px 8px;border-radius:12px;font-size:0.78rem;background:' + statusColor + ';">' + escapeHtml(wo.status || 'pending') + '</span></td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function renderComplianceTab() {
+    // Populate property selector
+    var select = document.getElementById('compliance-property-select');
+    if (select && select.options.length <= 1) {
+      var hub = typeof getClientHub === 'function' ? getClientHub() : [];
+      hub.forEach(function(owner) {
+        if (owner.properties) {
+          owner.properties.forEach(function(p) {
+            var opt = document.createElement('option');
+            opt.value = p.address || '';
+            opt.textContent = p.address || 'Unknown';
+            select.appendChild(opt);
+          });
+        }
+      });
+    }
+    var container = document.getElementById('compliance-notices-list');
+    if (!container || typeof getComplianceNotices !== 'function') return;
+    var notices = getComplianceNotices();
+    if (!notices || notices.length === 0) return;
+    var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f8fafc;"><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Tenant</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Property</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Amount Due</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Deadline</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Status</th></tr></thead><tbody>';
+    notices.forEach(function(n) {
+      html += '<tr style="border-top:1px solid #e2e8f0;"><td style="padding:0.75rem;">' + escapeHtml(n.tenantName || '-') + '</td><td style="padding:0.75rem;">' + escapeHtml(n.propertyAddress || '-') + '</td><td style="padding:0.75rem;">' + (typeof fmtCurrency === 'function' ? fmtCurrency(n.amountDue || 0) : '$' + (n.amountDue || 0).toFixed(2)) + '</td><td style="padding:0.75rem;font-size:0.85rem;">' + escapeHtml(n.deadline || '-') + '</td><td style="padding:0.75rem;"><span style="padding:2px 8px;border-radius:12px;font-size:0.78rem;background:#fef2f2;color:#991b1b;">Issued</span></td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function renderTenantScoringTab() {
+    var container = document.getElementById('tenant-scores-list');
+    if (!container) return;
+    var hub = typeof getClientHub === 'function' ? getClientHub() : [];
+    var tenants = [];
+    hub.forEach(function(owner) {
+      if (owner.properties) {
+        owner.properties.forEach(function(p) {
+          if (p.tenant && p.tenant.trim()) {
+            var score = typeof calculateTenantScore === 'function' ? calculateTenantScore(p.tenant) : null;
+            tenants.push({ name: p.tenant, property: p.address || '-', score: score });
+          }
+        });
+      }
+    });
+    if (tenants.length === 0) {
+      container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;"><div style="font-size:3rem;margin-bottom:0.5rem;">⭐</div><div style="font-weight:600;color:#475569;">No Tenant Scores Yet</div><div style="font-size:0.85rem;">Tenant scores are calculated from payment history and platform behavior over time.</div></div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f8fafc;"><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Tenant</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Property</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Score</th><th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:#64748b;">Grade</th></tr></thead><tbody>';
+    tenants.forEach(function(t) {
+      var gradeColor = !t.score ? '#94a3b8' : t.score.grade.startsWith('A') ? '#166534' : t.score.grade.startsWith('B') ? '#1e40af' : t.score.grade.startsWith('C') ? '#92400e' : '#991b1b';
+      html += '<tr style="border-top:1px solid #e2e8f0;"><td style="padding:0.75rem;">' + escapeHtml(t.name) + '</td><td style="padding:0.75rem;">' + escapeHtml(t.property) + '</td><td style="padding:0.75rem;">' + (t.score ? t.score.totalScore : 'N/A') + '</td><td style="padding:0.75rem;"><span style="font-weight:700;color:' + gradeColor + ';">' + (t.score ? t.score.grade : '-') + '</span></td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function generateComplianceNotice() {
+    var property = document.getElementById('compliance-property-select').value;
+    var month = document.getElementById('compliance-month').value;
+    if (!property) { alert('Please select a property.'); return; }
+    if (!month) { alert('Please select a month/year.'); return; }
+    if (typeof generate3DayNotice === 'function') {
+      var result = generate3DayNotice(property, month);
+      if (result && result.success) {
+        alert('3-Day Notice generated for ' + property + '. Deadline: ' + (result.notice ? result.notice.deadline : 'N/A'));
+        renderComplianceTab();
+      } else {
+        alert(result && result.message ? result.message : 'Could not generate notice.');
+      }
+    } else {
+      alert('Compliance function not available.');
+    }
+  }
+
+  function openNewInspectionModal() {
+    var property = prompt('Enter property address for inspection:');
+    if (!property) return;
+    var type = prompt('Inspection type (move-in / move-out):') || 'move-in';
+    if (typeof createInspection === 'function') {
+      var result = createInspection(property, type);
+      if (result) {
+        alert('Inspection created for ' + property + ' (' + type + '). Add photos from the inspection detail view.');
+        renderInspectionsTab();
+      }
+    } else {
+      alert('Inspection function not available.');
+    }
+  }
+
+  function openNewWorkOrderModal() {
+    var property = prompt('Enter property address:');
+    if (!property) return;
+    var description = prompt('Describe the maintenance issue:');
+    if (!description) return;
+    var vendor = prompt('Assign to vendor (name):') || 'Unassigned';
+    var amount = parseFloat(prompt('Estimated cost ($):') || '0');
+    if (typeof createWorkOrder === 'function') {
+      var result = createWorkOrder({ propertyAddress: property, description: description, vendorName: vendor, amount: amount });
+      if (result) {
+        var autoMsg = amount <= 500 ? ' Auto-approved (under $500 limit).' : ' Pending owner approval (over $500).';
+        alert('Work order created.' + autoMsg);
+        renderWorkOrdersTab();
+      }
+    } else {
+      alert('Work order function not available.');
+    }
+  }
+
+  // --- Init Phase 4 on load ---
+  setTimeout(function() {
+    injectVerifiedBadge();
+    renderBreadcrumbs();
+    addAuditTooltips();
+  }, 800);
+
+
+
+/* ================================================================
+   PHASE 6: REVENUE INTEGRATION + AI
+   ================================================================ */
+
+/* -- TASK 1: SUBSCRIPTION GATE -- */
+var STRIPE_LINKS = {
+  starter: 'STRIPE_STARTER_LINK',
+  pro_monthly: 'STRIPE_PRO_MONTHLY_LINK',
+  pro_annual: 'STRIPE_PRO_ANNUAL_LINK',
+  rent_to_own: 'STRIPE_RENT_TO_OWN_LINK',
+  commercial: 'STRIPE_COMMERCIAL_LINK'
+};
+
+function checkSubscriptionGate() {
+  var sub = JSON.parse(localStorage.getItem('rv_subscription') || 'null');
+  if (sub && sub.status === 'active' && new Date(sub.expiresAt) > new Date()) {
+    return true;
+  }
+  return false;
+}
+
+function showSubscriptionGate() {
+  var gate = document.getElementById('subscription-gate');
+  if (!gate) return;
+  var ref = localStorage.getItem('rv_referral_source');
+  if (ref) {
+    var banner = document.getElementById('referral-banner');
+    if (banner) {
+      banner.style.display = 'block';
+      var sp = document.getElementById('starter-price');
+      var pp = document.getElementById('pro-price');
+      if (sp) sp.innerHTML = '<del style="color:#94a3b8;font-size:1.2rem;">$29</del> $9<span>/first month</span>';
+      if (pp) pp.innerHTML = '<del style="color:#94a3b8;font-size:1.2rem;">$79</del> $59<span>/first month</span>';
+      var pap = document.getElementById('pro-annual-price');
+      if (pap) pap.innerHTML = '<del style="color:#94a3b8;font-size:1.2rem;">$59</del> $39<span>/first month</span>';
+    }
+  }
+  gate.style.display = 'block';
+}
+
+function selectPlan(tier) {
+  var link = STRIPE_LINKS[tier];
+  var ref = localStorage.getItem('rv_referral_source');
+  var url = link + (ref ? '?client_reference_id=' + encodeURIComponent(ref) : '');
+  localStorage.setItem('rv_subscription', JSON.stringify({
+    tier: tier, status: 'active',
+    stripeCustomerId: 'YOUR_STRIPE_PUBLISHABLE_KEY',
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    startedAt: new Date().toISOString()
+  }));
+  if (link.indexOf('STRIPE_') === 0) {
+    document.getElementById('subscription-gate').style.display = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+    if (typeof renderPropertiesList === 'function') renderPropertiesList();
+    if (typeof renderAllClientsList === 'function') renderAllClientsList();
+    if (typeof renderLeaseExpiry === 'function') renderLeaseExpiry();
+    if (typeof loadFeePolicy === 'function') loadFeePolicy();
+    alert('Plan activated: ' + tier.charAt(0).toUpperCase() + tier.slice(1) + ' (demo mode - connect Stripe for production billing)');
+    return;
+  }
+  window.open(url, '_blank');
+}
+
+function skipSubscription() {
+  localStorage.setItem('rv_subscription', JSON.stringify({
+    tier: 'trial', status: 'active', stripeCustomerId: null,
+    expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    startedAt: new Date().toISOString()
+  }));
+  document.getElementById('subscription-gate').style.display = 'none';
+  document.getElementById('dashboard-screen').style.display = 'block';
+  if (typeof renderPropertiesList === 'function') renderPropertiesList();
+  if (typeof renderAllClientsList === 'function') renderAllClientsList();
+  if (typeof renderLeaseExpiry === 'function') renderLeaseExpiry();
+  if (typeof loadFeePolicy === 'function') loadFeePolicy();
+}
+
+/* -- TASK 7: REFERRAL CREDIT -- */
+(function captureReferral() {
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  if (ref) { localStorage.setItem('rv_referral_source', ref); }
+})();
+
+/* -- TASK 8: SMARTMOVE SCREENING REFERRAL -- */
+function sendScreeningInvite(applicantName, propertyAddress, listingId) {
+  // TODO: Replace UTM link with real SmartMove Partner Program URL after approval
+  var smartMoveUrl = 'https://www.mysmartmove.com/?utm_source=rentverified&utm_medium=partner&utm_campaign=screening';
+  var msg = 'Hi ' + applicantName + ',\n\nAs part of your rental application for ' + propertyAddress + ', we need to complete a background and credit check.\n\nPlease click the link below to begin your screening:\n' + smartMoveUrl + '\n\nThis is a secure process powered by TransUnion SmartMove.\n\nThank you,\nSanders Property Management';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(msg).then(function() {
+      var invites = JSON.parse(localStorage.getItem('rv_screening_invites') || '[]');
+      invites.push({ applicantName: applicantName, propertyAddress: propertyAddress, listingId: listingId || null, timestamp: new Date().toISOString() });
+      localStorage.setItem('rv_screening_invites', JSON.stringify(invites));
+      var tooltip = document.getElementById('screening-tooltip');
+      if (tooltip) { tooltip.style.display = 'block'; tooltip.textContent = 'Invite copied - paste into email to ' + applicantName; setTimeout(function() { tooltip.style.display = 'none'; }, 4000); }
+      else { alert('Screening invite copied to clipboard! Paste into email to ' + applicantName); }
+    }).catch(function() { alert('Screening invite text:\n\n' + msg); });
+  } else { alert('Screening invite text:\n\n' + msg); }
+}
+
+/* -- TASK 9a: AI APPLICATION RISK SUMMARY -- */
+async function generateAppSummary(applicationId, profileData) {
+  var cached = JSON.parse(localStorage.getItem('rv_app_summaries') || '{}');
+  if (cached[applicationId]) { renderAISummary(cached[applicationId]); return; }
+  var btn = document.getElementById('ai-summary-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'summary', input: profileData }) });
+    var data = await resp.json();
+    cached[applicationId] = data.result;
+    localStorage.setItem('rv_app_summaries', JSON.stringify(cached));
+    renderAISummary(data.result);
+  } catch (err) {
+    renderAISummary('AI summary unavailable. Please review the full application manually.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate AI Summary'; }
+  }
+}
+
+function renderAISummary(text) {
+  var el = document.getElementById('ai-summary-result');
+  if (el) {
+    var safeText = typeof text === 'string' ? text : JSON.stringify(text);
+    el.innerHTML = '<div class="ai-result">' + safeText.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div><div class="ai-note">AI-generated summary - always review the full application before making decisions.</div>';
+  }
+}
+
+
+/* -- APPLICATIONS TAB -- */
+function renderApplicationsTab() {
+  var container = document.getElementById('applications-list');
+  if (!container) return;
+  var apps = typeof getApplications === 'function' ? getApplications() : [];
+  if (apps.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:3rem;"><div style="font-size:3rem;margin-bottom:1rem;">&#128203;</div><h3 style="font-weight:700;margin-bottom:0.5rem;">No Applications Yet</h3><p style="color:var(--gray-500);font-size:0.875rem;">When tenants apply through your listings, their applications will appear here.</p></div>';
+    return;
+  }
+  var html = '<div style="display:flex;flex-direction:column;gap:1rem;">';
+  apps.sort(function(a, b) { return new Date(b.submittedAt) - new Date(a.submittedAt); });
+  for (var i = 0; i < apps.length; i++) {
+    var a = apps[i];
+    var pa = a.primaryApplicant || {};
+    var name = (pa.firstName || a.firstName || '') + ' ' + (pa.lastName || a.lastName || '');
+    var safeName = name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var safeAddr = (a.propertyAddress || 'No property').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var safeEmail = (pa.email || a.email || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var isPaid = a.paymentStatus === 'paid';
+    var statusBadge = a.status === 'approved' ? '<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;">Approved</span>' :
+      a.status === 'declined' ? '<span style="background:#fecaca;color:#991b1b;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;">Declined</span>' :
+      '<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;">Pending Review</span>';
+    var paidBadge = isPaid ? '<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;">&#128179; Paid</span>' : '<span style="background:#fecaca;color:#991b1b;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;">Unpaid</span>';
+    var dateStr = a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : '';
+    html += '<div style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:1.25rem;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">';
+    html += '<div><div style="font-weight:700;font-size:1rem;">' + safeName + '</div>';
+    html += '<div style="font-size:0.85rem;color:var(--gray-500);">' + safeEmail + ' &middot; ' + safeAddr + '</div></div>';
+    html += '<div style="display:flex;gap:0.5rem;align-items:center;">' + paidBadge + statusBadge + '</div></div>';
+    html += '<div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">';
+    html += '<span style="font-size:0.8rem;color:var(--gray-500);">Submitted: ' + dateStr + '</span>';
+    if (a.status === 'pending') {
+      html += '<button class="btn btn-success btn-sm" onclick="approveAppFromTab(\'' + a.id + '\')">Approve</button>';
+      html += '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#dc2626;" onclick="declineAppFromTab(\'' + a.id + '\')">Decline</button>';
+    }
+    if (isPaid && a.status !== 'declined') {
+      html += '<button class="btn btn-primary btn-sm" onclick="sendScreeningInvite(\'' + safeName.replace(/'/g,"\\'") + '\', \'' + safeAddr.replace(/'/g,"\\'") + '\', \'' + (a.listingId || '').replace(/'/g,"\\'") + '\')">Send Screening Invite</button>';
+    }
+    html += '</div></div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function approveAppFromTab(appId) {
+  if (typeof approveApplication === 'function') approveApplication(appId);
+  renderApplicationsTab();
+}
+
+function declineAppFromTab(appId) {
+  if (typeof declineApplication === 'function') declineApplication(appId);
+  renderApplicationsTab();
+}
+
+/* -- TASK 9b: LISTING DESCRIPTION GENERATOR -- */
+async function generateListingDescription() {
+  var addr = document.getElementById('prop-address') ? document.getElementById('prop-address').value : '';
+  var beds = document.getElementById('prop-beds') ? document.getElementById('prop-beds').value : '';
+  var baths = document.getElementById('prop-baths') ? document.getElementById('prop-baths').value : '';
+  var sqft = document.getElementById('prop-sqft') ? document.getElementById('prop-sqft').value : '';
+  var rent = document.getElementById('prop-rent') ? document.getElementById('prop-rent').value : '';
+  var amenities = document.getElementById('prop-amenities') ? document.getElementById('prop-amenities').value : '';
+  var btn = document.getElementById('ai-desc-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
+  var input = { address: addr, beds: beds, baths: baths, sqft: sqft, rent: rent, amenities: amenities };
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'description', input: input }) });
+    var data = await resp.json();
+    var descEl = document.getElementById('prop-description') || document.getElementById('listing-description');
+    if (descEl) descEl.value = typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
+  } catch (err) {
+    var descEl2 = document.getElementById('prop-description') || document.getElementById('listing-description');
+    if (descEl2) descEl2.value = 'Charming rental property in a great location. Features modern amenities and comfortable living space. Contact us for a showing!';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate Description'; }
+  }
+}
+
 </script>
 
-  <!-- BROADCAST MODAL -->
+<!-- BROADCAST MODAL -->
   <div id="broadcast-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center;padding:1.5rem;">
     <div style="background:white;border-radius:16px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.25);">
       <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
@@ -3980,6 +6047,276 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       </div>
     </div>
   </div>
+
+
+
+    <!-- ========== MODAL: Add Ledger Entry ========== -->
+    <div id="modal-add-ledger" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:none;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Add Ledger Entry</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Owner Name</label><input type="text" id="le-owner" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Property Address</label><input type="text" id="le-address" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Tenant Name</label><input type="text" id="le-tenant" class="form-input" style="width:100%;" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+          <div><label style="font-size:0.85rem;font-weight:600;">Rent Owed ($)</label><input type="number" id="le-owed" class="form-input" style="width:100%;" /></div>
+          <div><label style="font-size:0.85rem;font-weight:600;">Rent Paid ($)</label><input type="number" id="le-paid" class="form-input" style="width:100%;" /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+          <div><label style="font-size:0.85rem;font-weight:600;">Payment Method</label>
+            <select id="le-method" class="form-input" style="width:100%;"></select>
+          </div>
+          <div><label style="font-size:0.85rem;font-weight:600;">PM Fee %</label><input type="number" id="le-fee" class="form-input" style="width:100%;" value="7" /></div>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Status</label>
+          <select id="le-status" class="form-input" style="width:100%;"><option value="paid">Paid</option><option value="partial">Partial</option><option value="unpaid">Unpaid</option><option value="late">Late</option></select>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Notes</label><textarea id="le-notes" class="form-input" rows="2" style="width:100%;resize:vertical;"></textarea></div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-ledger')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitLedgerEntry()">Add Entry</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Add Team Member ========== -->
+    <div id="modal-add-team" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Add Team Member</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Name</label><input type="text" id="tm-name" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Email</label><input type="email" id="tm-email" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Role</label>
+          <select id="tm-role" class="form-input" style="width:100%;"><option value="agent">Leasing Agent</option><option value="pm">Property Manager</option><option value="accountant">Accountant</option><option value="attorney">Attorney</option><option value="maintenance">Maintenance</option></select>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Responsibilities</label><input type="text" id="tm-responsibilities" class="form-input" style="width:100%;" placeholder="e.g., Leasing, showings, tenant communication" /></div>
+        <h4 style="font-weight:600;margin:1rem 0 0.5rem;">Permissions</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-accounting" /> Accounting</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-docs" /> Documents</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-messaging" /> Messaging</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-maintenance" /> Maintenance</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="tm-perm-leasing" /> Leasing</label>
+        </div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-team')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitTeamMember()">Add Member</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Add Vendor ========== -->
+    <div id="modal-add-vendor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">Add Approved Vendor</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Vendor Name</label><input type="text" id="av-name" class="form-input" style="width:100%;" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Specialty</label><input type="text" id="av-specialty" class="form-input" style="width:100%;" placeholder="e.g., Plumbing, Electrical, HVAC" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+          <div><label style="font-size:0.85rem;font-weight:600;">Phone</label><input type="tel" id="av-phone" class="form-input" style="width:100%;" /></div>
+          <div><label style="font-size:0.85rem;font-weight:600;">Email</label><input type="email" id="av-email" class="form-input" style="width:100%;" /></div>
+        </div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Repair Dollar Limit (before approval needed)</label><input type="number" id="av-limit" class="form-input" style="width:100%;" value="500" /></div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-vendor')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitVendor()">Add Vendor</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Welcome Letter ========== -->
+    <div id="modal-welcome-letter" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">📬 Welcome Letter</h3>
+        <div id="welcome-letter-content"></div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-welcome-letter')">Close</button>
+          <button class="btn btn-primary btn-sm" onclick="printWelcomeLetter()">🖨 Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: Document Upload ========== -->
+    <div id="modal-doc-upload" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:2rem;max-width:500px;width:90%;">
+        <h3 style="font-weight:700;margin-bottom:1rem;">📄 Upload Document</h3>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Document Name</label><input type="text" id="du-name" class="form-input" style="width:100%;" placeholder="e.g., Signed Lease Agreement" /></div>
+        <div style="margin-bottom:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Category</label>
+          <select id="du-category" class="form-input" style="width:100%;"><option value="lease">Lease</option><option value="contract">Management Contract</option><option value="application">Application</option><option value="inspection">Inspection Report</option><option value="invoice">Invoice/Receipt</option><option value="legal">Legal Document</option><option value="general">General</option></select>
+        </div>
+        <div id="doc-drop-zone" style="border:2px dashed #cbd5e1;border-radius:8px;padding:2rem;text-align:center;cursor:pointer;background:#f8fafc;margin-bottom:0.75rem;" onclick="document.getElementById('du-file-input').click()">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📁</div>
+          <div style="color:#64748b;font-size:0.85rem;">Drag & drop files here or click to browse</div>
+          <div id="du-file-name" style="font-size:0.8rem;color:#2563eb;margin-top:0.5rem;"></div>
+          <input type="file" id="du-file-input" style="display:none;" onchange="handleDocFileSelect(this)" />
+        </div>
+        <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+          <input type="checkbox" id="du-share-owner" />
+          <span style="font-size:0.85rem;">Share with Owner (visible in Owner Portal)</span>
+        </label>
+        <input type="hidden" id="du-listing-id" />
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modal-doc-upload')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitDocUpload()">Upload</button>
+        </div>
+      </div>
+    </div>
+
+<!-- Phase 4: AI Ad Builder Modal -->
+<div id="modal-ad-builder" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div class="card" style="width:700px;max-width:95vw;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h3 style="font-weight:700;">📣 AI Ad Builder</h3>
+      <button onclick="closeModal('modal-ad-builder')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8;">&times;</button>
+    </div>
+    <div style="margin-bottom:0.5rem;font-size:0.85rem;color:#64748b;">Property: <strong id="ad-property-label"></strong></div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Ad Title</label>
+      <div style="position:relative;">
+        <input type="text" id="ad-title-output" class="form-input" style="width:100%;padding-right:70px;box-sizing:border-box;" />
+        <button class="btn btn-sm copy-ad-btn" onclick="copyAdToClipboard('ad-title-output')" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:0.7rem;">📋 Copy</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Ad Body (Facebook / Craigslist)</label>
+      <div style="position:relative;">
+        <textarea id="ad-body-output" rows="12" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:0.75rem;font-size:0.85rem;line-height:1.6;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+        <button class="btn btn-sm copy-ad-btn" onclick="copyAdToClipboard('ad-body-output')" style="position:absolute;right:8px;top:8px;font-size:0.7rem;">📋 Copy</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Hashtags</label>
+      <div style="position:relative;">
+        <input type="text" id="ad-hashtags-output" class="form-input" style="width:100%;padding-right:70px;box-sizing:border-box;" />
+        <button class="btn btn-sm copy-ad-btn" onclick="copyAdToClipboard('ad-hashtags-output')" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:0.7rem;">📋 Copy</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button onclick="closeModal('modal-ad-builder')" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 4: Attorney Packet Modal -->
+<div id="modal-attorney-packet" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div class="card" style="width:500px;max-width:90vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h3 style="font-weight:700;">⚖️ One-Click Attorney Packet</h3>
+      <button onclick="closeModal('modal-attorney-packet')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8;">&times;</button>
+    </div>
+    <div style="background:#f8fafc;border-radius:8px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:0.85rem;color:#64748b;">Property: <strong id="atty-packet-property"></strong></div>
+      <div style="font-size:0.85rem;color:#64748b;">Tenant: <strong id="atty-packet-tenant"></strong></div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">This packet will include:</div>
+      <ul style="font-size:0.82rem;color:#475569;line-height:1.8;padding-left:1.25rem;">
+        <li>📝 Lease Agreement(s)</li>
+        <li>💰 Complete Rent Ledger</li>
+        <li>💬 Communication Log (all messages)</li>
+        <li>📄 Uploaded Documents</li>
+        <li>⚠️ Eviction Notices (if any)</li>
+      </ul>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button onclick="closeModal('modal-attorney-packet')" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Cancel</button>
+      <button onclick="exportAttorneyPacket()" class="btn btn-sm btn-primary">📦 Export Packet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 4: Vendor Invoice Modal -->
+<div id="modal-vendor-invoice" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div class="card" style="width:500px;max-width:90vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h3 style="font-weight:700;">📋 Submit Vendor Invoice</h3>
+      <button onclick="closeModal('modal-vendor-invoice')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8;">&times;</button>
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Vendor Name</label>
+      <input type="text" id="inv-vendor" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="e.g., Mike's Plumbing" />
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Property</label>
+      <input type="text" id="inv-property" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="Property address..." />
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Description</label>
+      <input type="text" id="inv-desc" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="Water heater replacement..." />
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.25rem;">Amount ($)</label>
+      <input type="number" id="inv-amount" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="0.00" step="0.01" />
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button onclick="closeModal('modal-vendor-invoice')" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Cancel</button>
+      <button onclick="submitVendorInvoiceUI()" class="btn btn-sm btn-primary">Submit Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Management Profile JS -->
+<script>
+/* ── Management Profile: Save / Load / Toggle ── */
+function getMgmtProfileKey() {
+  var co = localStorage.getItem('rv_company_id') || 'sanders_pm';
+  return 'rv_mgmt_profile_' + co;
+}
+
+function loadMgmtProfile() {
+  var key = getMgmtProfileKey();
+  var saved = localStorage.getItem(key);
+  if (!saved) return; // defaults: all checked items stay checked
+  try {
+    var profile = JSON.parse(saved);
+    // Payment methods
+    if (profile.paymentMethods) {
+      document.querySelectorAll('[data-mp-pay]').forEach(function(cb) {
+        var k = cb.getAttribute('data-mp-pay');
+        if (typeof profile.paymentMethods[k] !== 'undefined') cb.checked = profile.paymentMethods[k];
+      });
+    }
+    // Card fee policy
+    if (profile.cardFeePolicy) {
+      var radio = document.querySelector('input[name="mp-card-fee"][value="' + profile.cardFeePolicy + '"]');
+      if (radio) radio.checked = true;
+    }
+    // Financial products
+    if (profile.products) {
+      document.querySelectorAll('[data-mp-prod]').forEach(function(cb) {
+        var k = cb.getAttribute('data-mp-prod');
+        if (typeof profile.products[k] !== 'undefined') cb.checked = profile.products[k];
+      });
+    }
+  } catch(e) { /* ignore parse errors */ }
+}
+
+function saveMgmtProfile() {
+  var profile = { paymentMethods: {}, products: {}, cardFeePolicy: 'tenant_pays' };
+  document.querySelectorAll('[data-mp-pay]').forEach(function(cb) {
+    profile.paymentMethods[cb.getAttribute('data-mp-pay')] = cb.checked;
+  });
+  document.querySelectorAll('[data-mp-prod]').forEach(function(cb) {
+    profile.products[cb.getAttribute('data-mp-prod')] = cb.checked;
+  });
+  var feeRadio = document.querySelector('input[name="mp-card-fee"]:checked');
+  if (feeRadio) profile.cardFeePolicy = feeRadio.value;
+  profile.updatedAt = new Date().toISOString();
+  localStorage.setItem(getMgmtProfileKey(), JSON.stringify(profile));
+  var st = document.getElementById('mp-save-status');
+  if (st) { st.style.opacity = '1'; setTimeout(function(){ st.style.opacity = '0'; }, 2500); }
+}
+
+function toggleEdu(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// Load profile on page ready (runs after DOMContentLoaded if tab already exists)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadMgmtProfile);
+} else {
+  loadMgmtProfile();
+}
+</script>
 
 </body>
 </html>
