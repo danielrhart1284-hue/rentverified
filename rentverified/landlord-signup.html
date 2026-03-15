@@ -164,7 +164,44 @@
       padding: 1.25rem; z-index: 999; transform: translateY(100%); transition: transform 0.3s ease;
     }
     .lead-capture-overlay.visible { transform: translateY(0); }
-  </style>
+  
+/* == SUBSCRIPTION GATE == */
+#subscription-gate { display:none; min-height:100vh; background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#1e40af 100%); padding:2rem; }
+.sub-gate-wrap { max-width:1100px; margin:0 auto; }
+.sub-gate-header { text-align:center; color:white; margin-bottom:2.5rem; }
+.sub-gate-header h1 { font-size:2rem; font-weight:800; margin-bottom:.5rem; }
+.sub-gate-header p { color:#94a3b8; font-size:1rem; }
+.sub-tiers { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+@media(max-width:800px){ .sub-tiers { grid-template-columns:1fr; } }
+.sub-tier { background:white; border-radius:16px; padding:2rem; position:relative; transition:transform .2s,box-shadow .2s; }
+.sub-tier:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,.2); }
+.sub-tier.popular { border:3px solid #2563eb; }
+.sub-tier .pop-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#2563eb; color:white; font-size:.75rem; font-weight:700; padding:4px 16px; border-radius:20px; }
+.sub-tier h3 { font-size:1.3rem; font-weight:700; color:#1e293b; margin-bottom:.25rem; }
+.sub-tier .price { font-size:2.2rem; font-weight:800; color:#1e293b; }
+.sub-tier .price span { font-size:.9rem; font-weight:400; color:#64748b; }
+.sub-tier .desc { color:#64748b; font-size:.88rem; margin:.75rem 0 1.25rem; }
+.sub-tier ul { list-style:none; padding:0; margin:0 0 1.5rem; }
+.sub-tier ul li { padding:.4rem 0; font-size:.88rem; color:#374151; }
+.sub-tier ul li::before { content:"\2713 "; color:#10b981; font-weight:700; }
+.sub-tier .sub-btn { display:block; width:100%; padding:.75rem; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.sub-tier .sub-btn.primary { background:#2563eb; color:white; }
+.sub-tier .sub-btn.primary:hover { background:#1d4ed8; }
+.sub-tier .sub-btn.outline { background:transparent; color:#2563eb; border:2px solid #2563eb; }
+.sub-tier .sub-btn.outline:hover { background:#eff6ff; }
+.referral-banner { background:linear-gradient(135deg,#10b981,#059669); color:white; padding:1rem 1.5rem; border-radius:12px; margin-bottom:1.5rem; text-align:center; font-weight:600; display:none; }
+.referral-banner .ref-amount { font-size:1.5rem; font-weight:800; }
+.ai-panel { background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:12px; padding:1.25rem; margin-top:1rem; }
+.ai-panel h4 { font-size:.9rem; font-weight:700; color:#0369a1; margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; }
+.ai-panel .ai-note { font-size:.75rem; color:#64748b; font-style:italic; margin-top:.75rem; }
+.ai-panel .ai-result { background:white; border-radius:8px; padding:1rem; font-size:.88rem; color:#374151; line-height:1.6; }
+.ai-btn { background:linear-gradient(135deg,#7c3aed,#6d28d9); color:white; border:none; padding:.5rem 1rem; border-radius:8px; font-weight:600; cursor:pointer; font-size:.85rem; display:inline-flex; align-items:center; gap:.4rem; transition:all .15s; }
+.ai-btn:hover { background:linear-gradient(135deg,#6d28d9,#5b21b6); }
+.ai-btn:disabled { opacity:.6; cursor:not-allowed; }
+.screening-btn { background:#059669; color:white; border:none; padding:.5rem 1rem; border-radius:8px; font-weight:600; cursor:pointer; font-size:.85rem; margin-top:.75rem; display:inline-flex; align-items:center; gap:.4rem; }
+.screening-tooltip { display:none; background:#065f46; color:white; padding:.5rem .75rem; border-radius:6px; font-size:.8rem; margin-top:.5rem; }
+
+</style>
   <!-- Google Maps Places API (replace YOUR_API_KEY with actual key to enable autocomplete) -->
   <script>
     // Graceful fallback: if Google Maps API key is not configured, autocomplete won't load but manual entry still works
@@ -546,6 +583,67 @@
 </div>
 
 <!-- DASHBOARD (shown after signup) -->
+
+<!-- == SUBSCRIPTION GATE == -->
+<div id="subscription-gate">
+  <div class="sub-gate-wrap">
+    <div class="sub-gate-header">
+      <h1>Choose Your Plan</h1>
+      <p>Professional property management tools for every portfolio size</p>
+    </div>
+    <div id="referral-banner" class="referral-banner" style="display:none;">
+      You have a <span class="ref-amount">$20</span> referral credit! Your first month is discounted.
+    </div>
+    <div class="sub-tiers">
+      <div class="sub-tier">
+        <h3>Starter</h3>
+        <div class="price" id="starter-price">$49<span>/month</span></div>
+        <div class="desc">Perfect for small landlords with 1-10 units</div>
+        <ul>
+          <li>Up to 10 units</li>
+          <li>Tenant screening</li>
+          <li>Lease management</li>
+          <li>Maintenance tracking</li>
+          <li>Basic accounting</li>
+        </ul>
+        <button class="sub-btn primary" onclick="selectPlan('starter')">Get Started</button>
+      </div>
+      <div class="sub-tier popular">
+        <div class="pop-badge">Most Popular</div>
+        <h3>Professional</h3>
+        <div class="price" id="pro-price">$149<span>/month</span></div>
+        <div class="desc">For growing portfolios with 11-50 units</div>
+        <ul>
+          <li>Up to 50 units</li>
+          <li>Everything in Starter</li>
+          <li>AI application screening</li>
+          <li>Advanced accounting</li>
+          <li>Owner statements and 1099s</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="sub-btn primary" onclick="selectPlan('pro')">Get Started</button>
+      </div>
+      <div class="sub-tier">
+        <h3>Enterprise</h3>
+        <div class="price">$299<span>/month</span></div>
+        <div class="desc">Full-service management for 50+ units</div>
+        <ul>
+          <li>Unlimited units</li>
+          <li>Everything in Professional</li>
+          <li>White-label branding</li>
+          <li>API access</li>
+          <li>Dedicated account manager</li>
+          <li>Custom integrations</li>
+        </ul>
+        <button class="sub-btn outline" onclick="selectPlan('enterprise')">Contact Sales</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <button onclick="skipSubscription()" style="background:none;border:none;color:#94a3b8;font-size:.85rem;cursor:pointer;text-decoration:underline;">Skip for now - start free trial</button>
+    </div>
+  </div>
+</div>
+
 <div id="dashboard-screen" style="display:none;">
   <div class="dashboard-layout">
 
@@ -4822,7 +4920,9 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     var content = document.getElementById('welcome-letter-content');
     if (!content) return;
     var win = window.open('', '', 'width=800,height=600');
-    win.document.write('<html><head><title>Welcome Letter</title></head><body>' + content.innerHTML + '</body></html>');
+    win.document.write('<html><head><title>Welcome Letter</title></head><body>' + content.innerHTML + '<!-- SmartMove Screening Panel -->
+<div id="screening-tooltip" class="screening-tooltip"></div>
+</body></html>');
     win.document.close();
     win.print();
   }
@@ -5405,6 +5505,156 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     renderBreadcrumbs();
     addAuditTooltips();
   }, 800);
+
+
+
+/* ================================================================
+   PHASE 6: REVENUE INTEGRATION + AI
+   ================================================================ */
+
+/* -- TASK 1: SUBSCRIPTION GATE -- */
+var STRIPE_LINKS = {
+  starter: 'STRIPE_STARTER_LINK',
+  pro: 'STRIPE_PRO_LINK',
+  enterprise: 'STRIPE_ENTERPRISE_LINK'
+};
+
+function checkSubscriptionGate() {
+  var sub = JSON.parse(localStorage.getItem('rv_subscription') || 'null');
+  if (sub && sub.status === 'active' && new Date(sub.expiresAt) > new Date()) {
+    return true;
+  }
+  return false;
+}
+
+function showSubscriptionGate() {
+  var gate = document.getElementById('subscription-gate');
+  if (!gate) return;
+  var ref = localStorage.getItem('rv_referral_source');
+  if (ref) {
+    var banner = document.getElementById('referral-banner');
+    if (banner) {
+      banner.style.display = 'block';
+      var sp = document.getElementById('starter-price');
+      var pp = document.getElementById('pro-price');
+      if (sp) sp.innerHTML = '<del style="color:#94a3b8;font-size:1.2rem;">$49</del> $29<span>/first month</span>';
+      if (pp) pp.innerHTML = '<del style="color:#94a3b8;font-size:1.2rem;">$149</del> $129<span>/first month</span>';
+    }
+  }
+  gate.style.display = 'block';
+}
+
+function selectPlan(tier) {
+  var link = STRIPE_LINKS[tier];
+  var ref = localStorage.getItem('rv_referral_source');
+  var url = link + (ref ? '?client_reference_id=' + encodeURIComponent(ref) : '');
+  localStorage.setItem('rv_subscription', JSON.stringify({
+    tier: tier, status: 'active',
+    stripeCustomerId: 'YOUR_STRIPE_PUBLISHABLE_KEY',
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    startedAt: new Date().toISOString()
+  }));
+  if (link.indexOf('STRIPE_') === 0) {
+    document.getElementById('subscription-gate').style.display = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+    if (typeof renderPropertiesList === 'function') renderPropertiesList();
+    if (typeof renderAllClientsList === 'function') renderAllClientsList();
+    if (typeof renderLeaseExpiry === 'function') renderLeaseExpiry();
+    if (typeof loadFeePolicy === 'function') loadFeePolicy();
+    alert('Plan activated: ' + tier.charAt(0).toUpperCase() + tier.slice(1) + ' (demo mode - connect Stripe for production billing)');
+    return;
+  }
+  window.open(url, '_blank');
+}
+
+function skipSubscription() {
+  localStorage.setItem('rv_subscription', JSON.stringify({
+    tier: 'trial', status: 'active', stripeCustomerId: null,
+    expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    startedAt: new Date().toISOString()
+  }));
+  document.getElementById('subscription-gate').style.display = 'none';
+  document.getElementById('dashboard-screen').style.display = 'block';
+  if (typeof renderPropertiesList === 'function') renderPropertiesList();
+  if (typeof renderAllClientsList === 'function') renderAllClientsList();
+  if (typeof renderLeaseExpiry === 'function') renderLeaseExpiry();
+  if (typeof loadFeePolicy === 'function') loadFeePolicy();
+}
+
+/* -- TASK 7: REFERRAL CREDIT -- */
+(function captureReferral() {
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  if (ref) { localStorage.setItem('rv_referral_source', ref); }
+})();
+
+/* -- TASK 8: SMARTMOVE SCREENING REFERRAL -- */
+function sendScreeningInvite(applicantName, propertyAddress, listingId) {
+  // TODO: Replace UTM link with real SmartMove Partner Program URL after approval
+  var smartMoveUrl = 'https://www.mysmartmove.com/?utm_source=rentverified&utm_medium=partner&utm_campaign=screening';
+  var msg = 'Hi ' + applicantName + ',\n\nAs part of your rental application for ' + propertyAddress + ', we need to complete a background and credit check.\n\nPlease click the link below to begin your screening:\n' + smartMoveUrl + '\n\nThis is a secure process powered by TransUnion SmartMove.\n\nThank you,\nSanders Property Management';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(msg).then(function() {
+      var invites = JSON.parse(localStorage.getItem('rv_screening_invites') || '[]');
+      invites.push({ applicantName: applicantName, propertyAddress: propertyAddress, listingId: listingId || null, timestamp: new Date().toISOString() });
+      localStorage.setItem('rv_screening_invites', JSON.stringify(invites));
+      var tooltip = document.getElementById('screening-tooltip');
+      if (tooltip) { tooltip.style.display = 'block'; tooltip.textContent = 'Invite copied - paste into email to ' + applicantName; setTimeout(function() { tooltip.style.display = 'none'; }, 4000); }
+      else { alert('Screening invite copied to clipboard! Paste into email to ' + applicantName); }
+    }).catch(function() { alert('Screening invite text:\n\n' + msg); });
+  } else { alert('Screening invite text:\n\n' + msg); }
+}
+
+/* -- TASK 9a: AI APPLICATION RISK SUMMARY -- */
+async function generateAppSummary(applicationId, profileData) {
+  var cached = JSON.parse(localStorage.getItem('rv_app_summaries') || '{}');
+  if (cached[applicationId]) { renderAISummary(cached[applicationId]); return; }
+  var btn = document.getElementById('ai-summary-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'summary', input: profileData }) });
+    var data = await resp.json();
+    cached[applicationId] = data.result;
+    localStorage.setItem('rv_app_summaries', JSON.stringify(cached));
+    renderAISummary(data.result);
+  } catch (err) {
+    renderAISummary('AI summary unavailable. Please review the full application manually.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate AI Summary'; }
+  }
+}
+
+function renderAISummary(text) {
+  var el = document.getElementById('ai-summary-result');
+  if (el) {
+    var safeText = typeof text === 'string' ? text : JSON.stringify(text);
+    el.innerHTML = '<div class="ai-result">' + safeText.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div><div class="ai-note">AI-generated summary - always review the full application before making decisions.</div>';
+  }
+}
+
+/* -- TASK 9b: LISTING DESCRIPTION GENERATOR -- */
+async function generateListingDescription() {
+  var addr = document.getElementById('prop-address') ? document.getElementById('prop-address').value : '';
+  var beds = document.getElementById('prop-beds') ? document.getElementById('prop-beds').value : '';
+  var baths = document.getElementById('prop-baths') ? document.getElementById('prop-baths').value : '';
+  var sqft = document.getElementById('prop-sqft') ? document.getElementById('prop-sqft').value : '';
+  var rent = document.getElementById('prop-rent') ? document.getElementById('prop-rent').value : '';
+  var amenities = document.getElementById('prop-amenities') ? document.getElementById('prop-amenities').value : '';
+  var btn = document.getElementById('ai-desc-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
+  var input = { address: addr, beds: beds, baths: baths, sqft: sqft, rent: rent, amenities: amenities };
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'description', input: input }) });
+    var data = await resp.json();
+    var descEl = document.getElementById('prop-description') || document.getElementById('listing-description');
+    if (descEl) descEl.value = typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
+  } catch (err) {
+    var descEl2 = document.getElementById('prop-description') || document.getElementById('listing-description');
+    if (descEl2) descEl2.value = 'Charming rental property in a great location. Features modern amenities and comfortable living space. Contact us for a showing!';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate Description'; }
+  }
+}
 
 </script>
 

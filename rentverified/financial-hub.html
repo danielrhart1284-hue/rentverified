@@ -196,6 +196,14 @@
   @media(max-width:768px){.wrapper{grid-template-columns:1fr;}.fh-sidebar{display:none;}.form-row{grid-template-columns:1fr;}.product-grid{grid-template-columns:1fr 1fr;}}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
   .fade-up{animation:fadeUp .3s ease;}
+
+/* == AFFILIATE BUTTONS == */
+.affiliate-btn { display:inline-flex; align-items:center; gap:.5rem; padding:.65rem 1.3rem; border-radius:10px; font-weight:700; font-size:.88rem; cursor:pointer; border:none; transition:all .2s; text-decoration:none; color:white; }
+.affiliate-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.15); }
+.affiliate-btn.jetty { background:linear-gradient(135deg,#0ea5e9,#0284c7); }
+.affiliate-btn.lemonade { background:linear-gradient(135deg,#ff6b9d,#c850c0); }
+.affiliate-track { font-size:.75rem; color:#94a3b8; margin-top:.35rem; }
+
 </style>
 </head>
 <body>
@@ -1272,6 +1280,59 @@ document.addEventListener('DOMContentLoaded',()=>{
   seedData();
   renderDashboard();
 });
+
+
+/* ================================================================
+   PHASE 6: AFFILIATE REVENUE INTEGRATION
+   ================================================================ */
+
+function openJettyAffiliate(listingId) {
+  var clicks = JSON.parse(localStorage.getItem('rv_affiliate_clicks') || '[]');
+  clicks.push({ partner: 'jetty', timestamp: new Date().toISOString(), listingId: listingId || null });
+  localStorage.setItem('rv_affiliate_clicks', JSON.stringify(clicks));
+  window.open('https://www.jetty.com?utm_source=rentverified&utm_medium=referral&utm_campaign=deposit_bond', '_blank');
+}
+
+function openLemonadeAffiliate(listingId) {
+  var clicks = JSON.parse(localStorage.getItem('rv_affiliate_clicks') || '[]');
+  clicks.push({ partner: 'lemonade', timestamp: new Date().toISOString(), listingId: listingId || null });
+  localStorage.setItem('rv_affiliate_clicks', JSON.stringify(clicks));
+  window.open('https://www.lemonade.com/renters?utm_source=rentverified&utm_medium=referral&utm_campaign=renters_insurance', '_blank');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var enrollBondBtns = document.querySelectorAll('[onclick*="enrollDeposit"], [onclick*="enrollBond"], [onclick*="jetty"]');
+  enrollBondBtns.forEach(function(btn) {
+    if (!btn.parentElement.querySelector('.affiliate-btn.jetty')) {
+      var aBtn = document.createElement('button');
+      aBtn.className = 'affiliate-btn jetty';
+      aBtn.textContent = 'Apply via Jetty';
+      aBtn.onclick = function(e) { e.preventDefault(); openJettyAffiliate(); };
+      aBtn.style.marginLeft = '.5rem';
+      btn.parentElement.appendChild(aBtn);
+      var track = document.createElement('div');
+      track.className = 'affiliate-track';
+      track.textContent = 'Commission: $9.75/month per tenant';
+      btn.parentElement.appendChild(track);
+    }
+  });
+  var enrollRIBtns = document.querySelectorAll('[onclick*="quickEnrollRI"], [onclick*="enrollRI"], [onclick*="lemonade"]');
+  enrollRIBtns.forEach(function(btn) {
+    if (!btn.parentElement.querySelector('.affiliate-btn.lemonade')) {
+      var aBtn = document.createElement('button');
+      aBtn.className = 'affiliate-btn lemonade';
+      aBtn.textContent = 'Apply via Lemonade';
+      aBtn.onclick = function(e) { e.preventDefault(); openLemonadeAffiliate(); };
+      aBtn.style.marginLeft = '.5rem';
+      btn.parentElement.appendChild(aBtn);
+      var track = document.createElement('div');
+      track.className = 'affiliate-track';
+      track.textContent = 'Commission: $1.50-$6/tenant/month';
+      btn.parentElement.appendChild(track);
+    }
+  });
+});
+
 </script>
 </body>
 </html>
