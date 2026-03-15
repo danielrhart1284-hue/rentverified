@@ -776,16 +776,22 @@ function addCategoryBadge(element, category) {
   if (typeof submitRequest === 'function') {
     var origSubmit = submitRequest;
     submitRequest = async function() {
-      var descEl = document.getElementById('req-desc') || document.getElementById('maint-description') || document.querySelector('textarea[name*="desc"]');
-      if (descEl && descEl.value) {
-        var category = await aiClassifyRequest(descEl.value);
-        var requests = JSON.parse(localStorage.getItem('rv_maint_requests') || '[]');
-        if (requests.length > 0) {
-          requests[requests.length - 1].aiCategory = category;
-          localStorage.setItem('rv_maint_requests', JSON.stringify(requests));
-        }
+      var descEl = document.getElementById('nrDesc') || document.getElementById('req-desc') || document.getElementById('maint-description') || document.querySelector('textarea[name*="desc"]');
+      var descText = descEl ? descEl.value : '';
+      // Call original submit first so the new work order is added via unshift
+      var result = origSubmit.apply(this, arguments);
+      // Now classify and tag the newly added work order (index 0 after unshift)
+      if (descText) {
+        var category = await aiClassifyRequest(descText);
+        try {
+          var orders = JSON.parse(localStorage.getItem('rv_workorders') || '[]');
+          if (orders.length > 0) {
+            orders[0].aiCategory = category;
+            localStorage.setItem('rv_workorders', JSON.stringify(orders));
+          }
+        } catch(e) { /* fail silently */ }
       }
-      return origSubmit.apply(this, arguments);
+      return result;
     };
   }
 })();

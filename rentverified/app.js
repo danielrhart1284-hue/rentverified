@@ -4014,7 +4014,15 @@ function generate1099Data(year) {
   var ownerPayouts = {};
   ledger.forEach(function(entry) {
     if (!entry.ownerName) return;
-    var entryYear = (entry.month || '').substring(0, 4);
+    var monthStr = entry.month || '';
+    var entryYear;
+    if (/^\d{4}/.test(monthStr)) {
+      entryYear = monthStr.substring(0, 4);
+    } else {
+      // Handle 'Jan 2026' or 'January 2026' format
+      var parts = monthStr.split(' ');
+      entryYear = parts.length > 1 ? parts[parts.length - 1] : monthStr.substring(0, 4);
+    }
     if (parseInt(entryYear) !== year) return;
     if (!ownerPayouts[entry.ownerName]) {
       ownerPayouts[entry.ownerName] = { totalRent: 0, totalFees: 0, netPaid: 0, properties: [] };

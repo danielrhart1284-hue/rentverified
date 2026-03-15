@@ -699,10 +699,16 @@ function render1099Report() {
   if (sessionStr) {
     try {
       var session = JSON.parse(sessionStr);
-      if (session && session.role === 'admin') {
-        document.getElementById('admin-login-screen').style.display = 'none';
-        document.getElementById('admin-dashboard').style.display = 'block';
-        renderAdminDashboard();
+      if (session && session.role === 'admin' && session.email) {
+        // Re-validate against ACCOUNTS to prevent sessionStorage tampering
+        var validAdmin = ACCOUNTS.find(function(a) { return a.email === session.email && a.role === 'admin'; });
+        if (validAdmin) {
+          document.getElementById('admin-login-screen').style.display = 'none';
+          document.getElementById('admin-dashboard').style.display = 'block';
+          renderAdminDashboard();
+        } else {
+          sessionStorage.removeItem('rv_admin_session');
+        }
       } else {
         sessionStorage.removeItem('rv_admin_session');
       }
