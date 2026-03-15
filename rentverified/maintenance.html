@@ -129,7 +129,22 @@
     .kcard.pri-low       { border-left-color:#22c55e; }
     @media(max-width:900px){ .kanban{grid-template-columns:1fr 1fr;} }
     @media(max-width:600px){ .kanban{grid-template-columns:1fr;} .maint-wrapper{grid-template-columns:1fr;} .maint-sidebar{display:none;} }
-  </style>
+  
+/* == AI CLASSIFICATION == */
+.ai-category-badge { display:inline-flex; align-items:center; gap:.3rem; padding:.25rem .65rem; border-radius:20px; font-size:.75rem; font-weight:700; margin-left:.5rem; }
+.ai-cat-plumbing { background:#dbeafe; color:#1d4ed8; }
+.ai-cat-electrical { background:#fef3c7; color:#92400e; }
+.ai-cat-hvac { background:#e0e7ff; color:#4338ca; }
+.ai-cat-appliance { background:#fce7f3; color:#be185d; }
+.ai-cat-structural { background:#fee2e2; color:#dc2626; }
+.ai-cat-pestcontrol { background:#fef9c3; color:#854d0e; }
+.ai-cat-cleaning { background:#dcfce7; color:#15803d; }
+.ai-cat-landscaping { background:#d1fae5; color:#047857; }
+.ai-cat-other { background:#f1f5f9; color:#475569; }
+.ai-classifying { animation:pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+
+</style>
 </head>
 <body>
 
@@ -717,6 +732,71 @@ function toast(msg) {
   const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),3000);
 }
+
+
+/* ================================================================
+   PHASE 6: AI MAINTENANCE CLASSIFICATION
+   ================================================================ */
+
+function classifyLocalMaint(desc) {
+  var d = desc.toLowerCase();
+  if (/pipe|leak|faucet|drain|toilet|water|plumb/i.test(d)) return 'Plumbing';
+  if (/electric|outlet|wire|light|switch|breaker|power/i.test(d)) return 'Electrical';
+  if (/heat|cool|hvac|ac |a\/c|furnace|thermostat|air condition/i.test(d)) return 'HVAC';
+  if (/appliance|fridge|refrigerator|oven|stove|dishwasher|washer|dryer|microwave/i.test(d)) return 'Appliance';
+  if (/roof|wall|crack|foundation|struct|floor|ceiling|window|door/i.test(d)) return 'Structural';
+  if (/pest|bug|roach|ant|mouse|rat|termite|bee|wasp/i.test(d)) return 'Pest Control';
+  if (/clean|mold|mildew|stain|carpet|odor|smell/i.test(d)) return 'Cleaning';
+  if (/yard|lawn|tree|bush|garden|landscap|fence|gate/i.test(d)) return 'Landscaping';
+  return 'Other';
+}
+
+async function aiClassifyRequest(description) {
+  try {
+    var resp = await fetch('/api/hf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'classify', input: description }) });
+    var data = await resp.json();
+    if (data.result && data.result.label) return data.result.label;
+    return classifyLocalMaint(description);
+  } catch (err) { return classifyLocalMaint(description); }
+}
+
+function getCategoryClass(cat) {
+  return 'ai-cat-' + cat.toLowerCase().replace(/\s+/g, '');
+}
+
+function addCategoryBadge(element, category) {
+  var badge = document.createElement('span');
+  badge.className = 'ai-category-badge ' + getCategoryClass(category);
+  badge.textContent = category;
+  element.appendChild(badge);
+}
+
+/* Patch submit to auto-classify */
+(function patchMaintSubmit() {
+  if (typeof submitRequest === 'function') {
+    var origSubmit = submitRequest;
+    submitRequest = async function() {
+      var descEl = document.getElementById('nrDesc') || document.getElementById('req-desc') || document.getElementById('maint-description') || document.querySelector('textarea[name*="desc"]');
+      var descText = descEl ? descEl.value : '';
+      // Call original submit first so the new work order is added via unshift
+      var result = origSubmit.apply(this, arguments);
+      // Now classify and tag the newly added work order (index 0 after unshift)
+      if (descText) {
+        var category = await aiClassifyRequest(descText);
+        try {
+          var orders = JSON.parse(localStorage.getItem('rv_workorders') || '[]');
+          if (orders.length > 0) {
+            orders[0].aiCategory = category;
+            if (typeof workOrders !== 'undefined' && workOrders.length > 0) workOrders[0].aiCategory = category;
+            localStorage.setItem('rv_workorders', JSON.stringify(orders));
+          }
+        } catch(e) { /* fail silently */ }
+      }
+      return result;
+    };
+  }
+})();
+
 </script>
 </body>
 </html>
