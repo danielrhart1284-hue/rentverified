@@ -579,6 +579,10 @@ function renderComplianceTab() {
   renderComplianceNotices();
 }
 
+function escapeJsString(str) {
+  return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+}
+
 function renderOverdueTenants() {
   var overdue = getOverdueTenants();
   var container = document.getElementById('overdue-list');
@@ -593,7 +597,7 @@ function renderOverdueTenants() {
       '<td>' + escapeHtml(e.property) + '</td>' +
       '<td>' + fmtCurrency(e.rentDue) + '</td>' +
       '<td>' + fmtCurrency(e.rentPaid) + '</td>' +
-      '<td><button class="btn-reject" style="font-size:0.78rem;" onclick="issueNotice(\'' + escapeHtml(e.tenant).replace(/'/g, "\\'") + '\',\'' + escapeHtml(e.property).replace(/'/g, "\\'") + '\',' + e.rentDue + ')">Generate 3-Day Notice</button></td></tr>';
+      '<td><button class="btn-reject" style="font-size:0.78rem;" onclick="issueNotice(\'' + escapeJsString(e.tenant) + '\',\'' + escapeJsString(e.property) + '\',' + e.rentDue + ')">Generate 3-Day Notice</button></td></tr>';
   });
   html += '</tbody></table>';
   container.innerHTML = html;
