@@ -2456,40 +2456,106 @@
               </div>
             </div>
 
+            <!-- Recent Notifications Sent -->
+            <div style="margin-top:1.5rem;border-top:1px solid #e5e7eb;padding-top:1rem;">
+              <h4 style="margin:0 0 0.75rem 0;font-size:0.9rem;color:#6b7280;">📊 Recent Notifications Sent</h4>
+              <div id="notification-history-list"></div>
+            </div>
+
           </div>
 
-          <!-- Compose Modal (outside tab-inbox so it works from any tab) -->
-          <div id="compose-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
-            <div class="card" style="width:500px;max-width:90vw;max-height:80vh;overflow-y:auto;">
-              <h3 style="font-weight:700;margin-bottom:1rem;">New Message</h3>
-              <div class="form-group" style="margin-bottom:.75rem;">
-                <label style="font-size:.8rem;font-weight:600;">To (Role)</label>
-                <select id="compose-to-role" style="width:100%;padding:.5rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:.85rem;">
-                  <option value="owner">Owner</option>
-                  <option value="tenant">Tenant</option>
-                  <option value="vendor">Vendor</option>
-                  <option value="attorney">Attorney</option>
-                </select>
+          <!-- COMPOSE MESSAGE MODAL -->
+          <div id="compose-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:white;border-radius:12px;width:95%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+              <!-- Header -->
+              <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="margin:0;font-size:1.1rem;">📨 Send Notification</h3>
+                <button onclick="closeCompose()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#6b7280;">&times;</button>
               </div>
-              <div class="form-group" style="margin-bottom:.75rem;">
-                <label style="font-size:.8rem;font-weight:600;">Recipient Name</label>
-                <input type="text" id="compose-to-name" placeholder="Name..." style="width:100%;padding:.5rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:.85rem;box-sizing:border-box;" />
-              </div>
-              <div class="form-group" style="margin-bottom:.75rem;">
-                <label style="font-size:.8rem;font-weight:600;">Property (optional)</label>
-                <input type="text" id="compose-property" placeholder="Property address..." style="width:100%;padding:.5rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:.85rem;box-sizing:border-box;" />
-              </div>
-              <div class="form-group" style="margin-bottom:.75rem;">
-                <label style="font-size:.8rem;font-weight:600;">Subject</label>
-                <input type="text" id="compose-subject" placeholder="Subject..." style="width:100%;padding:.5rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:.85rem;box-sizing:border-box;" />
-              </div>
-              <div class="form-group" style="margin-bottom:1rem;">
-                <label style="font-size:.8rem;font-weight:600;">Message</label>
-                <textarea id="compose-body" rows="4" placeholder="Type your message..." style="width:100%;padding:.5rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:.85rem;resize:vertical;box-sizing:border-box;"></textarea>
-              </div>
-              <div style="display:flex;gap:.5rem;justify-content:flex-end;">
-                <button onclick="closeCompose()" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Cancel</button>
-                <button onclick="sendComposedMessage()" class="btn btn-sm btn-primary">Send Message</button>
+              <div style="padding:1.5rem;">
+                <!-- Recipient Selection -->
+                <div style="margin-bottom:1rem;">
+                  <label style="display:block;font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">To</label>
+                  <select id="compose-recipient" onchange="loadRecipientInfo()" style="width:100%;padding:0.625rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;">
+                    <option value="">Select a tenant or contact...</option>
+                  </select>
+                </div>
+                <!-- Recipient Info Card (shows after selection) -->
+                <div id="recipient-info" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
+                  <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+                    <span id="ri-phone">📱 No phone on file</span>
+                    <span id="ri-email">📧 No email on file</span>
+                  </div>
+                </div>
+                <!-- DELIVERY CHANNELS -->
+                <div style="margin-bottom:1.25rem;">
+                  <label style="display:block;font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">Delivery Channels</label>
+                  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border:2px solid #3b82f6;border-radius:8px;background:#eff6ff;cursor:pointer;font-size:0.85rem;">
+                      <input type="checkbox" id="ch-app" checked style="accent-color:#3b82f6;">
+                      <span>💬 In-App</span>
+                    </label>
+                    <label id="ch-sms-label" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border:2px solid #10b981;border-radius:8px;background:#f0fdf4;cursor:pointer;font-size:0.85rem;">
+                      <input type="checkbox" id="ch-sms" style="accent-color:#10b981;">
+                      <span>📱 Text/SMS</span>
+                    </label>
+                    <label id="ch-email-label" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border:2px solid #8b5cf6;border-radius:8px;background:#f5f3ff;cursor:pointer;font-size:0.85rem;">
+                      <input type="checkbox" id="ch-email" style="accent-color:#8b5cf6;">
+                      <span>📧 Email</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border:2px solid #f59e0b;border-radius:8px;background:#fffbeb;cursor:pointer;font-size:0.85rem;opacity:0.5;" title="Coming soon">
+                      <input type="checkbox" id="ch-call" disabled style="accent-color:#f59e0b;">
+                      <span>📞 Call (soon)</span>
+                    </label>
+                  </div>
+                </div>
+                <!-- Quick Templates -->
+                <div style="margin-bottom:1.25rem;">
+                  <label style="display:block;font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">Quick Template</label>
+                  <select id="compose-template" onchange="applyTemplate()" style="width:100%;padding:0.625rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;">
+                    <option value="">Custom message...</option>
+                    <option value="rent_reminder">💰 Rent Reminder</option>
+                    <option value="late_notice">⚠️ Late Payment Notice</option>
+                    <option value="maintenance_update">🔧 Maintenance Update</option>
+                    <option value="lease_renewal">📋 Lease Renewal</option>
+                    <option value="move_in">🏠 Move-In Instructions</option>
+                    <option value="inspection">🔍 Property Inspection Notice</option>
+                    <option value="general">📝 General Notice</option>
+                    <option value="emergency">🚨 Emergency Alert</option>
+                  </select>
+                </div>
+                <!-- Subject -->
+                <div style="margin-bottom:1rem;">
+                  <label style="display:block;font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">Subject</label>
+                  <input type="text" id="compose-subject" placeholder="Message subject..." style="width:100%;padding:0.625rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
+                </div>
+                <!-- Message Body -->
+                <div style="margin-bottom:1rem;">
+                  <label style="display:block;font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">Message</label>
+                  <textarea id="compose-body" rows="6" placeholder="Type your message..." style="width:100%;padding:0.625rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
+                  <div style="text-align:right;font-size:0.75rem;color:#9ca3af;margin-top:0.25rem;">
+                    SMS messages over 160 chars will be split into multiple texts
+                  </div>
+                </div>
+                <!-- Property Link (optional) -->
+                <div style="margin-bottom:1.25rem;">
+                  <label style="display:block;font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">Link to Property (optional)</label>
+                  <select id="compose-property" style="width:100%;padding:0.625rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;">
+                    <option value="">No property linked</option>
+                  </select>
+                </div>
+                <!-- Send All / Schedule -->
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end;border-top:1px solid #e5e7eb;padding-top:1.25rem;">
+                  <button onclick="closeCompose()" style="padding:0.625rem 1.25rem;border:1px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;font-size:0.875rem;">Cancel</button>
+                  <button onclick="sendMultiChannel()" style="padding:0.625rem 1.5rem;border:none;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;cursor:pointer;font-size:0.875rem;font-weight:600;display:flex;align-items:center;gap:0.5rem;">
+                    <span>🚀</span> Send Now
+                  </button>
+                </div>
+                <!-- Delivery Status (shows after send) -->
+                <div id="delivery-status" style="display:none;margin-top:1rem;padding:1rem;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;">
+                  <div style="font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">Delivery Status</div>
+                  <div id="delivery-results"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -4425,8 +4491,23 @@ dashTab = function(name) {
   function composeMessageForProperty() {
     if (!_selectedPropertyForCommand) return;
     composeMessage();
-    const propInput = document.getElementById('compose-property');
-    if (propInput) propInput.value = _selectedPropertyForCommand.address;
+    // compose-property is now a <select>; set it to matching address value or add it
+    const propSel = document.getElementById('compose-property');
+    if (propSel) {
+      const addr = _selectedPropertyForCommand.address;
+      // Check if option exists
+      let found = false;
+      for (let i = 0; i < propSel.options.length; i++) {
+        if (propSel.options[i].value === addr) { propSel.value = addr; found = true; break; }
+      }
+      if (!found && addr) {
+        const opt = document.createElement('option');
+        opt.value = addr;
+        opt.textContent = addr;
+        propSel.appendChild(opt);
+        propSel.value = addr;
+      }
+    }
   }
 
   function addTenantHistoryUI() {
@@ -4529,6 +4610,7 @@ dashTab = function(name) {
 
     if (msgs.length === 0) {
       container.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8;"><div style="font-size:2rem;margin-bottom:.5rem;">📭</div><p>No messages ' + (filter !== 'all' ? 'matching filter' : 'yet') + '.</p></div>';
+      renderNotificationHistory();
       return;
     }
 
@@ -4545,44 +4627,411 @@ dashTab = function(name) {
         '<div style="font-size:.8rem;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(m.body || '').substring(0, 100) + '</div></div></div>';
     });
     container.innerHTML = html;
+    renderNotificationHistory();
   }
+
+  // ── Multi-Channel Notification Center ──────────────────────────────
+
+  // Message templates
+  const MESSAGE_TEMPLATES = {
+    rent_reminder: {
+      subject: 'Rent Reminder — Payment Due Soon',
+      body: 'Hi {name},\n\nThis is a friendly reminder that your rent of {amount} is due on {date}.\n\nYou can pay through your RentVerified tenant portal or via your preferred payment method.\n\nThank you,\n{landlord}'
+    },
+    late_notice: {
+      subject: '⚠️ Late Payment Notice',
+      body: 'Hi {name},\n\nYour rent payment of {amount} was due on {date} and has not been received.\n\nPlease make your payment immediately to avoid additional late fees. If you are experiencing financial difficulty, please contact us to discuss options.\n\nThank you,\n{landlord}'
+    },
+    maintenance_update: {
+      subject: '🔧 Maintenance Update',
+      body: 'Hi {name},\n\nWe have an update on your maintenance request:\n\n[Describe the update here]\n\nIf you have any questions, please reply to this message.\n\nThank you,\n{landlord}'
+    },
+    lease_renewal: {
+      subject: '📋 Lease Renewal Opportunity',
+      body: 'Hi {name},\n\nYour lease at {property} is approaching its expiration date. We would love to have you renew!\n\nPlease review the renewal terms in your tenant portal or contact us to discuss options.\n\nThank you,\n{landlord}'
+    },
+    move_in: {
+      subject: '🏠 Move-In Instructions',
+      body: 'Hi {name},\n\nWelcome to {property}! Here are your move-in details:\n\n📅 Move-in date: [DATE]\n🔑 Key pickup: [LOCATION/TIME]\n📋 Utilities to set up: Electric, Gas, Internet\n📦 Parking: [DETAILS]\n\nPlease complete any remaining items in your tenant portal before move-in.\n\nWelcome home!\n{landlord}'
+    },
+    inspection: {
+      subject: '🔍 Property Inspection Notice',
+      body: 'Hi {name},\n\nThis is to notify you that a routine property inspection has been scheduled for:\n\n📅 Date: [DATE]\n⏰ Time: [TIME]\n\nPer your lease agreement, we are providing this advance notice. You do not need to be present but are welcome to be.\n\nThank you,\n{landlord}'
+    },
+    general: {
+      subject: 'Notice from Your Property Manager',
+      body: 'Hi {name},\n\n[Your message here]\n\nThank you,\n{landlord}'
+    },
+    emergency: {
+      subject: '🚨 URGENT — Emergency Notice',
+      body: '🚨 EMERGENCY NOTICE\n\nHi {name},\n\n[Describe the emergency situation]\n\nPlease [action required] immediately.\n\nIf you need assistance, call us at [PHONE].\n\n{landlord}'
+    }
+  };
 
   function viewMessage(msgId) {
     markMessageRead(msgId);
     const msgs = getMessages();
     const m = msgs.find(msg => msg.id === msgId);
     if (!m) return;
-    alert('From: ' + m.from + ' (' + m.fromRole + ')\nProperty: ' + (m.property || 'N/A') + '\nSubject: ' + (m.subject || '') + '\n\n' + (m.body || ''));
+    const roleColors = { owner:'#2563eb', tenant:'#16a34a', vendor:'#f59e0b', pm:'#7c3aed', admin:'#7c3aed', attorney:'#64748b', agent:'#8b5cf6' };
+    const rc = roleColors[m.fromRole] || '#64748b';
+    const initials = (m.from || 'U').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    // Show inline message viewer instead of alert
+    const viewer = document.createElement('div');
+    viewer.id = 'msg-viewer-overlay';
+    viewer.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    viewer.innerHTML = '<div style="background:white;border-radius:12px;width:95%;max-width:550px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
+      '<div style="padding:1.25rem 1.5rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">' +
+        '<div style="display:flex;align-items:center;gap:0.75rem;">' +
+          '<div style="width:40px;height:40px;border-radius:50%;background:' + rc + ';color:white;font-weight:700;font-size:0.85rem;display:flex;align-items:center;justify-content:center;">' + escapeHtml(initials) + '</div>' +
+          '<div><div style="font-weight:700;">' + escapeHtml(m.from) + ' <span style="font-size:0.7rem;color:white;background:' + rc + ';padding:1px 6px;border-radius:4px;">' + escapeHtml(m.fromRole) + '</span></div>' +
+          '<div style="font-size:0.75rem;color:#9ca3af;">' + formatDate(m.timestamp) + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'msg-viewer-overlay\').remove()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#6b7280;">&times;</button>' +
+      '</div>' +
+      (m.property ? '<div style="padding:0.5rem 1.5rem;background:#f0f9ff;font-size:0.8rem;color:#0369a1;">📍 ' + escapeHtml(m.property) + '</div>' : '') +
+      '<div style="padding:1.5rem;">' +
+        '<div style="font-weight:700;font-size:1rem;margin-bottom:1rem;">' + escapeHtml(m.subject || 'No subject') + '</div>' +
+        '<div style="font-size:0.9rem;line-height:1.6;color:#374151;white-space:pre-wrap;">' + escapeHtml(m.body || '') + '</div>' +
+      '</div>' +
+      '<div style="padding:1rem 1.5rem;border-top:1px solid #e5e7eb;display:flex;gap:0.5rem;justify-content:flex-end;">' +
+        '<button onclick="document.getElementById(\'msg-viewer-overlay\').remove();composeMessage(\'' + escapeHtml(m.from) + '\')" style="padding:0.5rem 1rem;border:1px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;font-size:0.85rem;">↩️ Reply</button>' +
+        '<button onclick="document.getElementById(\'msg-viewer-overlay\').remove()" style="padding:0.5rem 1rem;border:none;border-radius:8px;background:#3b82f6;color:white;cursor:pointer;font-size:0.85rem;">Close</button>' +
+      '</div>' +
+    '</div>';
+    document.body.appendChild(viewer);
+    viewer.addEventListener('click', function(e) { if (e.target === viewer) viewer.remove(); });
     renderInbox();
   }
 
-  function composeMessage() {
+  function composeMessage(prefillRecipient) {
     const modal = document.getElementById('compose-modal');
-    if (modal) modal.style.display = 'flex';
+    modal.style.display = 'flex';
+
+    // Populate recipient dropdown from tenant/contact data
+    populateRecipients();
+    populateProperties();
+
+    // Reset form
+    document.getElementById('compose-template').value = '';
+    document.getElementById('compose-subject').value = '';
+    document.getElementById('compose-body').value = '';
+    document.getElementById('compose-property').value = '';
+    document.getElementById('ch-app').checked = true;
+    document.getElementById('ch-sms').checked = false;
+    document.getElementById('ch-email').checked = false;
+    document.getElementById('delivery-status').style.display = 'none';
+    document.getElementById('recipient-info').style.display = 'none';
+
+    if (prefillRecipient) {
+      document.getElementById('compose-recipient').value = prefillRecipient;
+      loadRecipientInfo();
+    }
   }
 
   function closeCompose() {
-    const modal = document.getElementById('compose-modal');
-    if (modal) modal.style.display = 'none';
+    document.getElementById('compose-modal').style.display = 'none';
   }
 
-  function sendComposedMessage() {
-    const toRole = (document.getElementById('compose-to-role') || {}).value || 'owner';
-    const toName = (document.getElementById('compose-to-name') || {}).value || '';
-    const property = (document.getElementById('compose-property') || {}).value || '';
-    const subject = (document.getElementById('compose-subject') || {}).value || '';
-    const body = (document.getElementById('compose-body') || {}).value || '';
-    if (!toName || !body) { alert('Please fill in recipient name and message.'); return; }
-    const result = sendMessage({ from: 'Sanders PM', fromRole: 'pm', to: toName, toRole: toRole, property: property, subject: subject, body: body });
-    if (result.success) {
-      closeCompose();
-      renderInbox();
-      // Clear form
-      ['compose-to-name','compose-property','compose-subject','compose-body'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      alert('Message sent to ' + toName + '!');
-    } else {
-      alert(result.error || 'Failed to send message.');
+  function populateRecipients() {
+    const sel = document.getElementById('compose-recipient');
+    sel.innerHTML = '<option value="">Select a tenant or contact...</option>';
+
+    let contacts = [];
+
+    // From localStorage tenant accounts
+    try {
+      const tenants = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
+      tenants.forEach(function(t) {
+        contacts.push({
+          id: t.email,
+          name: t.name || t.firstName + ' ' + (t.lastName || ''),
+          email: t.email,
+          phone: t.phone || '',
+          role: 'tenant'
+        });
+      });
+    } catch(e) {}
+
+    // From client hub / accounts
+    try {
+      const clients = JSON.parse(localStorage.getItem('rv_clients') || '[]');
+      clients.forEach(function(c) {
+        if (!contacts.find(function(x) { return x.email === c.email; })) {
+          contacts.push({
+            id: c.email,
+            name: c.name || (c.firstName + ' ' + (c.lastName || '')),
+            email: c.email || '',
+            phone: c.phone || '',
+            role: c.role || 'tenant'
+          });
+        }
+      });
+    } catch(e) {}
+
+    // From messages (extract unique contacts)
+    try {
+      const msgs = JSON.parse(localStorage.getItem('rv_messages') || '[]');
+      msgs.forEach(function(m) {
+        if (m.from && m.fromRole === 'tenant' && !contacts.find(function(x) { return x.name === m.from; })) {
+          contacts.push({ id: m.from, name: m.from, email: '', phone: '', role: 'tenant' });
+        }
+      });
+    } catch(e) {}
+
+    // Add "All Tenants" broadcast option
+    sel.innerHTML += '<option value="__all_tenants__">📢 All Tenants (Broadcast)</option>';
+    sel.innerHTML += '<option disabled>───────────────</option>';
+
+    contacts.forEach(function(c) {
+      const channelIcons = (c.phone ? '📱' : '') + (c.email ? '📧' : '');
+      sel.innerHTML += '<option value="' + c.id + '" data-phone="' + (c.phone || '') + '" data-email="' + (c.email || '') + '" data-name="' + escapeHtml(c.name) + '" data-role="' + c.role + '">' + escapeHtml(c.name) + ' (' + c.role + ') ' + channelIcons + '</option>';
+    });
+
+    // If no contacts, show helper
+    if (contacts.length === 0) {
+      sel.innerHTML += '<option disabled>No contacts found — add tenants first</option>';
     }
+  }
+
+  function populateProperties() {
+    const sel = document.getElementById('compose-property');
+    sel.innerHTML = '<option value="">No property linked</option>';
+    try {
+      const listings = JSON.parse(localStorage.getItem('rv_listings_data') || localStorage.getItem('rv_listings') || '[]');
+      listings.forEach(function(l) {
+        const addr = l.address || l.title || l.name || 'Property';
+        sel.innerHTML += '<option value="' + escapeHtml(addr) + '">' + escapeHtml(addr) + '</option>';
+      });
+    } catch(e) {}
+  }
+
+  function loadRecipientInfo() {
+    const sel = document.getElementById('compose-recipient');
+    const opt = sel.options[sel.selectedIndex];
+    const infoDiv = document.getElementById('recipient-info');
+
+    if (!opt || !opt.value || opt.value === '__all_tenants__') {
+      infoDiv.style.display = opt && opt.value === '__all_tenants__' ? 'block' : 'none';
+      if (opt && opt.value === '__all_tenants__') {
+        infoDiv.innerHTML = '<div style="color:#059669;font-weight:600;">📢 Broadcasting to all tenants — message will be sent to everyone via selected channels</div>';
+      }
+      updateChannelAvailability(null, null);
+      return;
+    }
+
+    const phone = opt.dataset.phone;
+    const email = opt.dataset.email;
+
+    infoDiv.style.display = 'block';
+    document.getElementById('ri-phone').textContent = phone ? '📱 ' + phone : '📱 No phone on file';
+    document.getElementById('ri-phone').style.color = phone ? '#059669' : '#dc2626';
+    document.getElementById('ri-email').textContent = email ? '📧 ' + email : '📧 No email on file';
+    document.getElementById('ri-email').style.color = email ? '#059669' : '#dc2626';
+
+    updateChannelAvailability(phone, email);
+  }
+
+  function updateChannelAvailability(phone, email) {
+    const smsLabel = document.getElementById('ch-sms-label');
+    const emailLabel = document.getElementById('ch-email-label');
+    const smsBox = document.getElementById('ch-sms');
+    const emailBox = document.getElementById('ch-email');
+
+    if (!phone) {
+      smsLabel.style.opacity = '0.4';
+      smsBox.disabled = true;
+      smsBox.checked = false;
+      smsLabel.title = 'No phone number on file for this contact';
+    } else {
+      smsLabel.style.opacity = '1';
+      smsBox.disabled = false;
+      smsLabel.title = '';
+    }
+
+    if (!email) {
+      emailLabel.style.opacity = '0.4';
+      emailBox.disabled = true;
+      emailBox.checked = false;
+      emailLabel.title = 'No email on file for this contact';
+    } else {
+      emailLabel.style.opacity = '1';
+      emailBox.disabled = false;
+      emailLabel.title = '';
+    }
+  }
+
+  function applyTemplate() {
+    const templateKey = document.getElementById('compose-template').value;
+    if (!templateKey || !MESSAGE_TEMPLATES[templateKey]) return;
+
+    const template = MESSAGE_TEMPLATES[templateKey];
+
+    // Get recipient name and landlord name for placeholders
+    const sel = document.getElementById('compose-recipient');
+    const opt = sel.options[sel.selectedIndex];
+    const recipientName = opt ? (opt.dataset.name || 'Tenant') : 'Tenant';
+
+    // Get landlord info
+    let landlordName = 'Your Property Manager';
+    try {
+      const accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+      if (accts.length) landlordName = accts[0].company || accts[0].name || landlordName;
+    } catch(e) {}
+
+    let subject = template.subject;
+    let body = template.body
+      .replace(/\{name\}/g, recipientName)
+      .replace(/\{landlord\}/g, landlordName)
+      .replace(/\{amount\}/g, '$[AMOUNT]')
+      .replace(/\{date\}/g, '[DATE]')
+      .replace(/\{property\}/g, document.getElementById('compose-property').value || '[PROPERTY ADDRESS]');
+
+    document.getElementById('compose-subject').value = subject;
+    document.getElementById('compose-body').value = body;
+  }
+
+  async function sendMultiChannel() {
+    const recipient = document.getElementById('compose-recipient').value;
+    const subject = document.getElementById('compose-subject').value;
+    const body = document.getElementById('compose-body').value;
+    const property = document.getElementById('compose-property').value;
+    const useApp = document.getElementById('ch-app').checked;
+    const useSMS = document.getElementById('ch-sms').checked;
+    const useEmail = document.getElementById('ch-email').checked;
+
+    if (!recipient) { alert('Please select a recipient'); return; }
+    if (!body.trim()) { alert('Please enter a message'); return; }
+    if (!useApp && !useSMS && !useEmail) { alert('Please select at least one delivery channel'); return; }
+
+    const sel = document.getElementById('compose-recipient');
+    const opt = sel.options[sel.selectedIndex];
+    const recipientName = opt ? (opt.dataset.name || opt.textContent) : recipient;
+    const recipientPhone = opt ? opt.dataset.phone : '';
+    const recipientEmail = opt ? opt.dataset.email : '';
+    const recipientRole = opt ? (opt.dataset.role || 'tenant') : 'tenant';
+
+    // Show delivery status
+    const statusDiv = document.getElementById('delivery-status');
+    const resultsDiv = document.getElementById('delivery-results');
+    statusDiv.style.display = 'block';
+    resultsDiv.innerHTML = '<div style="color:#6b7280;">Sending...</div>';
+
+    let results = [];
+
+    // 1. In-App Message
+    if (useApp) {
+      try {
+        if (typeof sendMessage === 'function') {
+          sendMessage({
+            from: getCurrentLandlordName(),
+            fromRole: 'pm',
+            to: recipientName,
+            toRole: recipientRole,
+            property: property,
+            subject: subject,
+            body: body
+          });
+        }
+        results.push({ channel: '💬 In-App', status: 'delivered', detail: 'Message saved to inbox' });
+      } catch(e) {
+        results.push({ channel: '💬 In-App', status: 'failed', detail: e.message });
+      }
+    }
+
+    // 2. SMS via Twilio
+    if (useSMS && recipientPhone) {
+      try {
+        var sb = typeof getSupabase === 'function' ? getSupabase() : null;
+        if (sb) {
+          var smsBody = subject ? (subject + '\n\n' + body) : body;
+          var smsText = smsBody.substring(0, 1600);
+          var smsResult = await sb.functions.invoke('send-sms', {
+            body: { to: recipientPhone, messageType: 'direct', templateData: { customMessage: smsText } }
+          });
+          if (smsResult.error) throw smsResult.error;
+          results.push({ channel: '📱 SMS', status: 'sent', detail: 'Text sent to ' + recipientPhone });
+        } else {
+          results.push({ channel: '📱 SMS', status: 'queued', detail: 'SMS queued for ' + recipientPhone + ' (Supabase not connected)' });
+        }
+      } catch(e) {
+        results.push({ channel: '📱 SMS', status: 'failed', detail: e.message || 'SMS send failed' });
+      }
+    }
+
+    // 3. Email via Supabase (or log for now)
+    if (useEmail && recipientEmail) {
+      try {
+        results.push({ channel: '📧 Email', status: 'queued', detail: 'Email queued for ' + recipientEmail + ' (email service coming soon)' });
+      } catch(e) {
+        results.push({ channel: '📧 Email', status: 'failed', detail: e.message });
+      }
+    }
+
+    // Show results
+    resultsDiv.innerHTML = results.map(function(r) {
+      var color = r.status === 'delivered' || r.status === 'sent' ? '#059669' : r.status === 'queued' ? '#d97706' : '#dc2626';
+      var icon = r.status === 'delivered' || r.status === 'sent' ? '✅' : r.status === 'queued' ? '⏳' : '❌';
+      return '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;font-size:0.85rem;">' +
+        '<span>' + icon + '</span>' +
+        '<span style="font-weight:600;">' + r.channel + '</span>' +
+        '<span style="color:' + color + ';font-weight:600;">' + r.status + '</span>' +
+        '<span style="color:#6b7280;margin-left:auto;font-size:0.8rem;">' + r.detail + '</span>' +
+      '</div>';
+    }).join('');
+
+    // Log to notification history
+    try {
+      var history = JSON.parse(localStorage.getItem('rv_notification_history') || '[]');
+      history.unshift({
+        id: 'notif-' + Date.now(),
+        to: recipientName,
+        toEmail: recipientEmail,
+        toPhone: recipientPhone,
+        subject: subject,
+        body: body,
+        channels: { app: useApp, sms: useSMS, email: useEmail },
+        results: results,
+        sentAt: new Date().toISOString(),
+        sentBy: getCurrentLandlordName()
+      });
+      localStorage.setItem('rv_notification_history', JSON.stringify(history));
+      renderNotificationHistory();
+    } catch(e) {}
+
+    // Refresh inbox if in-app was sent
+    if (useApp) renderInbox();
+  }
+
+  function getCurrentLandlordName() {
+    try {
+      var accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+      if (accts.length) return accts[0].company || accts[0].name || 'Property Manager';
+    } catch(e) {}
+    return 'Property Manager';
+  }
+
+  function renderNotificationHistory() {
+    var list = document.getElementById('notification-history-list');
+    if (!list) return;
+    var history = JSON.parse(localStorage.getItem('rv_notification_history') || '[]').slice(0, 10);
+    if (!history.length) {
+      list.innerHTML = '<div style="color:#9ca3af;font-size:0.85rem;padding:0.5rem;">No notifications sent yet</div>';
+      return;
+    }
+    list.innerHTML = history.map(function(n) {
+      var channels = [];
+      if (n.channels.app) channels.push('💬');
+      if (n.channels.sms) channels.push('📱');
+      if (n.channels.email) channels.push('📧');
+      var time = new Date(n.sentAt).toLocaleDateString() + ' ' + new Date(n.sentAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      return '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-bottom:1px solid #f3f4f6;font-size:0.85rem;">' +
+        '<span style="font-weight:600;min-width:120px;">' + escapeHtml(n.to) + '</span>' +
+        '<span style="color:#6b7280;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(n.subject || n.body.substring(0,50)) + '</span>' +
+        '<span>' + channels.join(' ') + '</span>' +
+        '<span style="color:#9ca3af;font-size:0.75rem;min-width:100px;text-align:right;">' + time + '</span>' +
+      '</div>';
+    }).join('');
   }
 
   // --- Attorney Document Library ---
