@@ -825,21 +825,45 @@
 
 <script>
 /* ═══════════════════════ CONSTANTS & AUTH ═══════════════════════ */
-const ADMIN_EMAIL = 'admin@rentverified.com';
-const ADMIN_PASS = 'admin123';
 
-function handleLogin() {
+async function handleLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
-  if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+  const errorEl = document.getElementById('loginError');
+  errorEl.style.display = 'none';
+
+  // Try Supabase Auth first
+  if (typeof RVAuth !== 'undefined' && isSupabaseConfigured()) {
+    try {
+      const { data, error } = await RVAuth.signIn(email, pass);
+      if (!error && data?.profile?.role === 'admin') {
+        localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now(), supabase: true }));
+        showDashboard();
+        return;
+      } else if (!error && data?.profile?.role !== 'admin') {
+        errorEl.textContent = 'Access denied. Admin role required.';
+        errorEl.style.display = 'block';
+        return;
+      }
+    } catch(e) {
+      console.warn('Supabase auth failed, trying fallback:', e);
+    }
+  }
+
+  // Fallback: localStorage hardcoded (for offline/dev testing only)
+  if (email === 'admin@rentverified.com' && pass === 'admin123') {
     localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now() }));
     showDashboard();
   } else {
-    document.getElementById('loginError').style.display = 'block';
+    errorEl.textContent = 'Invalid credentials. Please try again.';
+    errorEl.style.display = 'block';
   }
 }
 
-function handleSignOut() {
+async function handleSignOut() {
+  if (typeof RVAuth !== 'undefined') {
+    try { await RVAuth.signOut(); } catch(e) {}
+  }
   localStorage.removeItem('rv_admin_auth');
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = '';
@@ -858,8 +882,23 @@ function showDashboard() {
   loadSettings();
 }
 
-/* Auto-login if session exists */
-(function() {
+/* Auto-login if Supabase session or localStorage session exists */
+(async function() {
+  // Check Supabase session first
+  if (typeof RVAuth !== 'undefined' && isSupabaseConfigured()) {
+    try {
+      const session = await RVAuth.getSession();
+      if (session) {
+        const profile = await RVAuth.getProfile();
+        if (profile?.role === 'admin') {
+          localStorage.setItem('rv_admin_auth', JSON.stringify({ email: profile.email, ts: Date.now(), supabase: true }));
+          showDashboard();
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+  // Fallback: localStorage session
   const auth = localStorage.getItem('rv_admin_auth');
   if (auth) showDashboard();
 })();
