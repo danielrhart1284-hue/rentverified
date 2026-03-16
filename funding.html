@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Funding Hub | RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Page-specific styles ── */
+    .funding-hero {
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 60%, #1e3a8a 100%);
+      color: white;
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+    }
+    .funding-hero h1 {
+      font-size: 2.6rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+    .funding-hero h1 .hl { color: #93c5fd; }
+    .funding-hero p {
+      font-size: 1.1rem;
+      opacity: 0.88;
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* Pathway cards */
+    .pathway-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .pathway-card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      text-align: left;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .pathway-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.15);
+    }
+    .pathway-card .icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .pathway-card .icon.biz { background: rgba(59,130,246,0.3); }
+    .pathway-card .icon.personal { background: rgba(16,185,129,0.3); }
+    .pathway-card h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .pathway-card p { font-size: 0.92rem; opacity: 0.82; line-height: 1.55; margin-bottom: 1.5rem; }
+    .pathway-card .btn-pathway {
+      display: inline-block;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+    .pathway-card .btn-pathway.blue {
+      background: #3b82f6;
+      color: white;
+    }
+    .pathway-card .btn-pathway.blue:hover { background: #2563eb; }
+    .pathway-card .btn-pathway.green {
+      background: #10b981;
+      color: white;
+    }
+    .pathway-card .btn-pathway.green:hover { background: #059669; }
+
+    /* Sections */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Page container */
+    .page-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* Section header */
+    .section-header {
+      margin-bottom: 2rem;
+    }
+    .section-header .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3b82f6;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+    .section-header .back-link:hover { text-decoration: underline; }
+    .section-header h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.35rem;
+    }
+    .section-header p {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    /* Form styles */
+    .form-panel {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-panel h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 5px;
+    }
+    .form-group label .req { color: #ef4444; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: #1e293b;
+      background: white;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .form-group .error-msg {
+      color: #ef4444;
+      font-size: 0.78rem;
+      margin-top: 3px;
+      display: none;
+    }
+    .form-group.has-error input,
+    .form-group.has-error select {
+      border-color: #ef4444;
+    }
+    .form-group.has-error .error-msg { display: block; }
+
+    /* Slider */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .slider-wrap input[type="range"] {
+      flex: 1;
+      border: none;
+      padding: 0;
+      accent-color: #1a56db;
+    }
+    .slider-val {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #1a56db;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    /* Checkbox */
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 0.5rem;
+    }
+    .checkbox-row input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: #1a56db;
+    }
+    .checkbox-row label {
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a56db;
+      color: white;
+      border: none;
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover { background: #1e429f; }
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Tenant Assistance Cards */
+    .assist-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      transition: box-shadow 0.2s;
+    }
+    .assist-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .assist-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .assist-card-header .left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .assist-card-header .icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .assist-card-header .icon.deposit { background: #dbeafe; }
+    .assist-card-header .icon.emergency { background: #fee2e2; }
+    .assist-card-header .icon.loan { background: #d1fae5; }
+    .assist-card-header .icon.rto { background: #ede9fe; }
+    .assist-card-header h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .assist-card-header p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .assist-card-header .chevron {
+      color: #94a3b8;
+      font-size: 1.2rem;
+      transition: transform 0.2s;
+    }
+    .assist-card.open .chevron { transform: rotate(180deg); }
+    .assist-card-body {
+      display: none;
+      padding: 0 1.5rem 1.5rem;
+    }
+    .assist-card.open .assist-card-body { display: block; }
+    .assist-card-body ul {
+      list-style: none;
+      padding: 0;
+    }
+    .assist-card-body li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .assist-card-body li:last-child { border-bottom: none; }
+    .assist-card-body li .bullet {
+      color: #3b82f6;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .assist-card-body a {
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .assist-card-body a:hover { text-decoration: underline; }
+
+    /* Partner cards */
+    .partner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .partner-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .partner-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+      transform: translateY(-2px);
+    }
+    .partner-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .partner-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .partner-card-top h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .partner-card-top p {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .partner-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 0.75rem;
+    }
+    .partner-tags span {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .partner-details {
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .partner-details strong { color: #1e293b; }
+    .partner-card .btn-apply {
+      display: inline-block;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: white;
+      background: #1a56db;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+    .partner-card .btn-apply:hover { background: #1e429f; }
+
+    /* Thank-you view */
+    .ty-header {
+      text-align: center;
+      padding: 2rem 0 1.5rem;
+    }
+    .ty-header .checkmark {
+      width: 64px; height: 64px;
+      background: #d1fae5;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 1rem;
+    }
+    .ty-header h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    .ty-header p {
+      color: #64748b;
+      font-size: 0.95rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .timeline {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin: 2rem 0 2.5rem;
+      flex-wrap: wrap;
+    }
+    .timeline-step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .timeline-step .dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #dbeafe;
+      color: #1a56db;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+    .timeline-step .text {
+      font-size: 0.82rem;
+      color: #475569;
+      font-weight: 600;
+    }
+    .timeline-step .arrow {
+      color: #cbd5e1;
+      margin: 0 0.75rem;
+      font-size: 1rem;
+    }
+
+    /* Footer */
+    .funding-footer {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      font-size: 0.82rem;
+    }
+    .funding-footer a { color: #93c5fd; text-decoration: none; }
+    .funding-footer a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .pathway-grid { grid-template-columns: 1fr; }
+      .partner-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .funding-hero h1 { font-size: 2rem; }
+      .funding-hero { padding: 3.5rem 1.25rem 3rem; }
+      .timeline { flex-direction: column; align-items: center; gap: 0.75rem; }
+      .timeline-step .arrow { display: none; }
+    }
+    @media (max-width: 480px) {
+      .page-container { padding: 1.5rem 1rem 3rem; }
+      .form-panel { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- RentVerified banner -->
+<div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
+  RentVerified &middot; Business Funding &middot; <a href="index.html" style="color:#93c5fd;">Home</a> &middot; <a href="listings.html" style="color:#93c5fd;">Our Rentals</a>
+</div>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="listings.html">Listings</a>
+    <a href="financial-hub.html">Financial Hub</a>
+    <a href="funding.html" class="active">Funding</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login / Sign Up</a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- VIEW: LANDING                                      -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-landing" class="view active">
+  <section class="funding-hero">
+    <h1>Get the <span class="hl">Funding</span> You Need</h1>
+    <p>Whether you're growing a business or handling a personal financial gap, we connect you with trusted partners and local programs.</p>
+
+    <div class="pathway-grid">
+      <!-- Business -->
+      <div class="pathway-card">
+        <div class="icon biz">&#128188;</div>
+        <h3>Business Funding</h3>
+        <p>For business owners and commercial tenants who need working capital, equipment, or buildout funding.</p>
+        <button class="btn-pathway blue" onclick="showView('business-form')">Apply for Business Funding &rarr;</button>
+      </div>
+      <!-- Personal -->
+      <div class="pathway-card">
+        <div class="icon personal">&#128100;</div>
+        <h3>Personal Financial Help</h3>
+        <p>For tenants who need help with deposits, rent gaps, or emergency expenses.</p>
+        <button class="btn-pathway green" onclick="showView('tenant-help')">Get Financial Assistance &rarr;</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- VIEW: BUSINESS FUNDING FORM (C2)                   -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-business-form" class="view">
+  <div class="page-container">
+    <div class="section-header">
+      <a class="back-link" onclick="showView('landing')">&larr; Back to Funding Hub</a>
+      <h2>Business Funding Application</h2>
+      <p>Tell us about your business and funding needs. We'll match you with the best partners.</p>
+    </div>
+
+    <form id="biz-funding-form" novalidate>
+      <!-- Business Information -->
+      <div class="form-panel">
+        <h3>&#127970; Business Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Business Name <span class="req">*</span></label>
+            <input type="text" id="f-biz-name" required />
+            <span class="error-msg">Business name is required</span>
+          </div>
+          <div class="form-group">
+            <label>Business Type <span class="req">*</span></label>
+            <select id="f-biz-type" required>
+              <option value="">Select type...</option>
+              <option>LLC</option>
+              <option>Corporation</option>
+              <option>Sole Proprietorship</option>
+              <option>Partnership</option>
+            </select>
+            <span class="error-msg">Please select a business type</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Industry <span class="req">*</span></label>
+            <select id="f-industry" required>
+              <option value="">Select industry...</option>
+              <option>Retail</option>
+              <option>Restaurant</option>
+              <option>Office Services</option>
+              <option>Medical</option>
+              <option>Construction</option>
+              <option>Real Estate</option>
+              <option>Other</option>
+            </select>
+            <span class="error-msg">Please select an industry</span>
+          </div>
+          <div class="form-group">
+            <label>Years in Business <span class="req">*</span></label>
+            <input type="number" id="f-years" min="0" max="100" placeholder="e.g. 3" required />
+            <span class="error-msg">Years in business is required</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>State <span class="req">*</span></label>
+            <select id="f-state" required>
+              <option value="">Select state...</option>
+              <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option>
+              <option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option>
+              <option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option>
+              <option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option>
+              <option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option>
+              <option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option>
+              <option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option>
+              <option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option>
+              <option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option>
+              <option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option>
+              <option>South Dakota</option><option>Tennessee</option><option>Texas</option><option selected>Utah</option>
+              <option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option>
+              <option>Wisconsin</option><option>Wyoming</option>
+            </select>
+            <span class="error-msg">Please select a state</span>
+          </div>
+          <div class="form-group">
+            <label>Annual Revenue ($) <span class="req">*</span></label>
+            <input type="number" id="f-annual-rev" min="0" placeholder="e.g. 250000" required />
+            <span class="error-msg">Annual revenue is required</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Monthly Revenue ($)</label>
+            <input type="number" id="f-monthly-rev" min="0" placeholder="e.g. 20000" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Funding Needs -->
+      <div class="form-panel">
+        <h3>&#128176; Funding Needs</h3>
+        <div class="form-group full" style="margin-bottom:1.25rem;">
+          <label>Amount Needed <span class="req">*</span></label>
+          <div class="slider-wrap">
+            <input type="range" id="f-amount" min="5000" max="500000" step="5000" value="50000" oninput="updateSlider()" />
+            <span class="slider-val" id="f-amount-display">$50,000</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Purpose <span class="req">*</span></label>
+            <select id="f-purpose" required>
+              <option value="">Select purpose...</option>
+              <option>Tenant Buildout</option>
+              <option>Equipment Purchase</option>
+              <option>Working Capital</option>
+              <option>Inventory</option>
+              <option>Payroll</option>
+              <option>Expansion</option>
+              <option>Debt Refinancing</option>
+              <option>Emergency / Bridge</option>
+              <option>Other</option>
+            </select>
+            <span class="error-msg">Please select a purpose</span>
+          </div>
+          <div class="form-group">
+            <label>How Soon Do You Need It? <span class="req">*</span></label>
+            <select id="f-urgency" required>
+              <option value="">Select timeline...</option>
+              <option>Immediately</option>
+              <option>Within 1 week</option>
+              <option>Within 1 month</option>
+              <option>Just exploring</option>
+            </select>
+            <span class="error-msg">Please select a timeline</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Credit Score Range <span class="req">*</span></label>
+            <select id="f-credit" required>
+              <option value="">Select range...</option>
+              <option>Excellent (750+)</option>
+              <option>Good (700-749)</option>
+              <option>Fair (650-699)</option>
+              <option>Below 650</option>
+              <option>Not Sure</option>
+            </select>
+            <span class="error-msg">Please select a credit score range</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="form-panel">
+        <h3>&#128231; Contact Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" id="f-name" required />
+            <span class="error-msg">Full name is required</span>
+          </div>
+          <div class="form-group">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" id="f-email" required />
+            <span class="error-msg">Valid email is required</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone <span class="req">*</span></label>
+            <input type="tel" id="f-phone" placeholder="(801) 555-1234" required />
+            <span class="error-msg">Phone number is required</span>
+          </div>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="f-consent" />
+          <label for="f-consent">I consent to being contacted by RentVerified and its funding partners regarding my application. I understand my information will be shared with matched lenders.</label>
+        </div>
+        <div class="form-group" id="consent-error" style="display:none;">
+          <span class="error-msg" style="display:block;">You must agree to continue</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Submit Application &rarr;</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- VIEW: TENANT FINANCIAL ASSISTANCE (C3)             -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-tenant-help" class="view">
+  <div class="page-container">
+    <div class="section-header">
+      <a class="back-link" onclick="showView('landing')">&larr; Back to Funding Hub</a>
+      <h2>Tenant Financial Assistance</h2>
+      <p>Explore programs and resources to help with deposits, rent, and unexpected expenses.</p>
+    </div>
+
+    <!-- 1. Security Deposit -->
+    <div class="assist-card open">
+      <div class="assist-card-header" onclick="toggleAssistCard(this)">
+        <div class="left">
+          <div class="icon deposit">&#128274;</div>
+          <div>
+            <h4>Security Deposit Assistance</h4>
+            <p>Alternatives to large upfront deposits</p>
+          </div>
+        </div>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="assist-card-body">
+        <ul>
+          <li><span class="bullet">&#10003;</span><div><strong>Deposit Bond Programs</strong> &mdash; Pay a small monthly fee instead of a full deposit. Ask your landlord if they accept deposit alternatives through services like Rhino or LeaseLock.</div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>Deposit Loan Partners</strong> &mdash; Short-term, low-interest loans specifically for security deposits. Repay over 6&ndash;12 months instead of paying everything upfront.</div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>Local Assistance Programs</strong> &mdash; Utah Community Action and other local nonprofits offer deposit assistance for qualifying tenants. <a href="https://www.utahca.org" target="_blank">Learn more</a></div></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2. Emergency Rent Help -->
+    <div class="assist-card">
+      <div class="assist-card-header" onclick="toggleAssistCard(this)">
+        <div class="left">
+          <div class="icon emergency">&#128680;</div>
+          <div>
+            <h4>Emergency Rent Help</h4>
+            <p>When you need help making this month's rent</p>
+          </div>
+        </div>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="assist-card-body">
+        <ul>
+          <li><span class="bullet">&#10003;</span><div><strong>Utah Rent Assistance Programs</strong> &mdash; State and county programs that help qualified tenants cover rent during hardship. Check eligibility through the Utah Department of Workforce Services.</div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>Flex Rent Option</strong> &mdash; Ask your property manager about flexible payment schedules. Your property manager may offer split-payment plans for qualifying tenants.</div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>211 Helpline</strong> &mdash; Dial <strong>2-1-1</strong> or visit <a href="https://211utah.org" target="_blank">211utah.org</a> to find local emergency assistance, food banks, and utility help in your area.</div></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 3. Short-Term Personal Loan -->
+    <div class="assist-card">
+      <div class="assist-card-header" onclick="toggleAssistCard(this)">
+        <div class="left">
+          <div class="icon loan">&#128179;</div>
+          <div>
+            <h4>Short-Term Personal Loans</h4>
+            <p>Borrow what you need at reasonable rates</p>
+          </div>
+        </div>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="assist-card-body">
+        <ul>
+          <li><span class="bullet">&#10003;</span><div><strong>Round Sky Financial</strong> &mdash; Personal loans for those with limited credit history. Fast approval with manageable repayment terms.</div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>Credit Union Options</strong> &mdash; Local credit unions often offer small personal loans at much lower rates than payday lenders. Mountain America and America First are popular Utah options.</div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>Avoid Payday Lenders</strong> &mdash; Payday loans carry extremely high interest. Explore all alternatives before considering high-interest short-term borrowing.</div></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4. Rent-to-Own -->
+    <div class="assist-card">
+      <div class="assist-card-header" onclick="toggleAssistCard(this)">
+        <div class="left">
+          <div class="icon rto">&#127968;</div>
+          <div>
+            <h4>Rent-to-Own Programs</h4>
+            <p>Build toward homeownership while renting</p>
+          </div>
+        </div>
+        <span class="chevron">&#9660;</span>
+      </div>
+      <div class="assist-card-body">
+        <ul>
+          <li><span class="bullet">&#10003;</span><div><strong>Rent-to-Own Listings</strong> &mdash; Some of our properties offer rent-to-own agreements. A portion of your monthly rent goes toward a future down payment. <a href="listings.html?type=rto">View Rent-to-Own Listings</a></div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>How It Works</strong> &mdash; You sign a lease-option agreement, pay a small option fee, and build equity through monthly credits. At the end of the term, you have the option to purchase.</div></li>
+          <li><span class="bullet">&#10003;</span><div><strong>Who Qualifies</strong> &mdash; Ideal for tenants who want to buy but need time to build credit or save for a down payment. Speak with our team to learn more.</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- VIEW: THANK YOU / PARTNER RESULTS (C4)             -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-thank-you" class="view">
+  <div class="page-container">
+    <div class="section-header">
+      <a class="back-link" onclick="showView('landing')">&larr; Back to Funding Hub</a>
+    </div>
+
+    <div class="ty-header">
+      <div class="checkmark">&#10003;</div>
+      <h2>Application Received!</h2>
+      <p>We've saved your information and are matching you with the best funding partners. Here's what happens next:</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-step">
+        <div class="dot">1</div>
+        <span class="text">Application saved</span>
+        <span class="arrow">&rarr;</span>
+      </div>
+      <div class="timeline-step">
+        <div class="dot">2</div>
+        <span class="text">Partners notified</span>
+        <span class="arrow">&rarr;</span>
+      </div>
+      <div class="timeline-step">
+        <div class="dot">3</div>
+        <span class="text">Offers within 24&ndash;48 hrs</span>
+        <span class="arrow">&rarr;</span>
+      </div>
+      <div class="timeline-step">
+        <div class="dot">4</div>
+        <span class="text">Choose &amp; fund</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin-bottom:0.25rem;">Recommended Funding Partners</h3>
+    <p style="color:#64748b;font-size:0.88rem;margin-bottom:0.5rem;">Based on your application, these partners may be a great fit.</p>
+
+    <div class="partner-grid">
+      <!-- GoKapital -->
+      <div class="partner-card">
+        <div class="partner-card-top">
+          <div class="partner-logo" style="background:#1e40af;">GK</div>
+          <div>
+            <h4>GoKapital</h4>
+            <p>Business Lending Specialists</p>
+          </div>
+        </div>
+        <div class="partner-tags">
+          <span>Business Loans</span>
+          <span>Equipment Leasing</span>
+          <span>Commercial Mortgages</span>
+          <span>SBA Loans</span>
+          <span>Hard Money</span>
+        </div>
+        <div class="partner-details">
+          <strong>$10K &ndash; $5M</strong> &middot; 6 mo &ndash; 25 yr terms<br>
+          1+ year in business &middot; $200K+ annual revenue
+        </div>
+        <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: gokapital -->
+      </div>
+
+      <!-- Clarify Capital -->
+      <div class="partner-card">
+        <div class="partner-card-top">
+          <div class="partner-logo" style="background:#059669;">CC</div>
+          <div>
+            <h4>Clarify Capital</h4>
+            <p>Fast &amp; Flexible Financing</p>
+          </div>
+        </div>
+        <div class="partner-tags">
+          <span>Working Capital</span>
+          <span>Term Loans</span>
+          <span>Lines of Credit</span>
+        </div>
+        <div class="partner-details">
+          <strong>$5K &ndash; $500K</strong> &middot; 24-hour approval<br>
+          6+ months in business
+        </div>
+        <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: clarify -->
+      </div>
+
+      <!-- SBA Loan Referrals -->
+      <div class="partner-card">
+        <div class="partner-card-top">
+          <div class="partner-logo" style="background:#7c3aed;">SBA</div>
+          <div>
+            <h4>SBA Loan Referrals</h4>
+            <p>Government-Backed, Lowest Rates</p>
+          </div>
+        </div>
+        <div class="partner-tags">
+          <span>SBA 7(a)</span>
+          <span>SBA 504</span>
+          <span>Microloans</span>
+        </div>
+        <div class="partner-details">
+          <strong>$25K &ndash; $5M</strong> &middot; Prime + 2.25%&ndash;4.75%<br>
+          7 &ndash; 25 year terms
+        </div>
+        <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: sba -->
+      </div>
+
+      <!-- National Funding -->
+      <div class="partner-card">
+        <div class="partner-card-top">
+          <div class="partner-logo" style="background:#dc2626;">NF</div>
+          <div>
+            <h4>National Funding</h4>
+            <p>Fast Working Capital</p>
+          </div>
+        </div>
+        <div class="partner-tags">
+          <span>Working Capital</span>
+          <span>Equipment Financing</span>
+          <span>Same-Day Possible</span>
+        </div>
+        <div class="partner-details">
+          <strong>$5K &ndash; $500K</strong> &middot; Same-day funding possible<br>
+          3% referral commission
+        </div>
+        <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: nationalfunding -->
+      </div>
+
+      <!-- MCA -->
+      <div class="partner-card">
+        <div class="partner-card-top">
+          <div class="partner-logo" style="background:#d97706;">MCA</div>
+          <div>
+            <h4>Merchant Cash Advance</h4>
+            <p>Kapitus / Credibly</p>
+          </div>
+        </div>
+        <div class="partner-tags">
+          <span>Revenue-Based</span>
+          <span>Retail</span>
+          <span>Restaurants</span>
+          <span>Fast Approval</span>
+        </div>
+        <div class="partner-details">
+          <strong>$5K &ndash; $400K</strong> &middot; Advance on future sales<br>
+          Daily % repayment &middot; Best for retail &amp; restaurants
+        </div>
+        <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: mca -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="funding-footer">
+  <p>&copy; 2026 RentVerified. All rights reserved.</p>
+  <p style="margin-top:0.5rem;">
+    <a href="index.html">Home</a> &middot;
+    <a href="listings.html">Listings</a> &middot;
+    <a href="financial-hub.html">Financial Hub</a> &middot;
+    <a href="tenant-portal.html">Tenant Portal</a>
+  </p>
+  <p style="margin-top:0.75rem;font-size:0.75rem;color:#475569;">Disclaimer: RentVerified is not a lender. Funding partner links are referral-based. Terms, rates, and approval are determined by each partner independently.</p>
+</footer>
+
+<script>
+/* ── View Management ── */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + name);
+  if (el) {
+    el.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+/* ── Slider Display ── */
+function updateSlider() {
+  const val = document.getElementById('f-amount').value;
+  document.getElementById('f-amount-display').textContent = '$' + Number(val).toLocaleString();
+}
+
+/* ── Expandable Assist Cards ── */
+function toggleAssistCard(header) {
+  const card = header.closest('.assist-card');
+  card.classList.toggle('open');
+}
+
+/* ── Pre-fill email from logged-in user ── */
+function prefillEmail() {
+  const emailField = document.getElementById('f-email');
+  if (!emailField) return;
+
+  // Check tenant accounts
+  try {
+    const tenants = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
+    const loggedIn = tenants.find(t => t.loggedIn || t.active);
+    if (loggedIn && loggedIn.email) {
+      emailField.value = loggedIn.email;
+      return;
+    }
+  } catch (e) { /* ignore */ }
+
+  // Check landlord accounts
+  try {
+    const landlords = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+    const loggedIn = landlords.find(l => l.loggedIn || l.active);
+    if (loggedIn && loggedIn.email) {
+      emailField.value = loggedIn.email;
+    }
+  } catch (e) { /* ignore */ }
+}
+
+/* ── Form Validation & Submission ── */
+document.getElementById('biz-funding-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  // Clear previous errors
+  document.querySelectorAll('.form-group.has-error').forEach(g => g.classList.remove('has-error'));
+  document.getElementById('consent-error').style.display = 'none';
+
+  let valid = true;
+
+  // Required fields
+  const requiredFields = [
+    { id: 'f-biz-name', type: 'text' },
+    { id: 'f-biz-type', type: 'select' },
+    { id: 'f-industry', type: 'select' },
+    { id: 'f-years', type: 'text' },
+    { id: 'f-state', type: 'select' },
+    { id: 'f-annual-rev', type: 'text' },
+    { id: 'f-purpose', type: 'select' },
+    { id: 'f-urgency', type: 'select' },
+    { id: 'f-credit', type: 'select' },
+    { id: 'f-name', type: 'text' },
+    { id: 'f-email', type: 'email' },
+    { id: 'f-phone', type: 'text' }
+  ];
+
+  requiredFields.forEach(function(field) {
+    const el = document.getElementById(field.id);
+    if (!el) return;
+    const val = el.value.trim();
+
+    if (!val) {
+      el.closest('.form-group').classList.add('has-error');
+      valid = false;
+    } else if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      el.closest('.form-group').classList.add('has-error');
+      valid = false;
+    }
+  });
+
+  // Consent check
+  if (!document.getElementById('f-consent').checked) {
+    document.getElementById('consent-error').style.display = 'block';
+    valid = false;
+  }
+
+  if (!valid) {
+    // Scroll to first error
+    const firstError = document.querySelector('.form-group.has-error');
+    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // Build application object
+  const application = {
+    id: 'FA-' + Date.now(),
+    timestamp: new Date().toISOString(),
+    business: {
+      name: document.getElementById('f-biz-name').value.trim(),
+      type: document.getElementById('f-biz-type').value,
+      industry: document.getElementById('f-industry').value,
+      yearsInBusiness: document.getElementById('f-years').value,
+      state: document.getElementById('f-state').value,
+      annualRevenue: document.getElementById('f-annual-rev').value,
+      monthlyRevenue: document.getElementById('f-monthly-rev').value || null
+    },
+    funding: {
+      amountNeeded: document.getElementById('f-amount').value,
+      purpose: document.getElementById('f-purpose').value,
+      urgency: document.getElementById('f-urgency').value,
+      creditRange: document.getElementById('f-credit').value
+    },
+    contact: {
+      fullName: document.getElementById('f-name').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      phone: document.getElementById('f-phone').value.trim()
+    }
+  };
+
+  // Save to localStorage
+  try {
+    const apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+    apps.push(application);
+    localStorage.setItem('rv_funding_applications', JSON.stringify(apps));
+  } catch (e) {
+    console.error('Error saving application:', e);
+  }
+
+  // Show thank-you view
+  showView('thank-you');
+});
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function() {
+  prefillEmail();
+  updateSlider();
+});
+</script>
+
+</body>
+</html>
