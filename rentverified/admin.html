@@ -833,17 +833,33 @@ async function handleLogin() {
   errorEl.style.display = 'none';
 
   // Try Supabase Auth first
-  if (typeof RVAuth !== 'undefined' && isSupabaseConfigured()) {
+  if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
     try {
-      const { data, error } = await RVAuth.signIn(email, pass);
-      if (!error && data?.profile?.role === 'admin') {
-        localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now(), supabase: true }));
-        showDashboard();
-        return;
-      } else if (!error && data?.profile?.role !== 'admin') {
-        errorEl.textContent = 'Access denied. Admin role required.';
-        errorEl.style.display = 'block';
-        return;
+      const sb = getSupabase();
+      const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (authError) {
+        console.warn('Supabase sign-in error:', authError.message);
+      } else if (authData?.user) {
+        // Query profile directly (bypasses RVAuth which may have RLS issues)
+        const { data: profile, error: profileError } = await sb.from('profiles')
+          .select('role, first_name, last_name, company, plan')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        console.log('Profile query result:', profile, 'Error:', profileError);
+
+        // Check role from profile, or from user metadata as fallback
+        const role = profile?.role || authData.user.user_metadata?.role;
+
+        if (role === 'admin') {
+          localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now(), supabase: true, userId: authData.user.id }));
+          showDashboard();
+          return;
+        } else {
+          errorEl.textContent = 'Access denied. Admin role required. (Got role: ' + (role || 'none') + ')';
+          errorEl.style.display = 'block';
+          return;
+        }
       }
     } catch(e) {
       console.warn('Supabase auth failed, trying fallback:', e);
@@ -885,18 +901,23 @@ function showDashboard() {
 /* Auto-login if Supabase session or localStorage session exists */
 (async function() {
   // Check Supabase session first
-  if (typeof RVAuth !== 'undefined' && isSupabaseConfigured()) {
+  if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
     try {
-      const session = await RVAuth.getSession();
+      const sb = getSupabase();
+      const { data: { session } } = await sb.auth.getSession();
       if (session) {
-        const profile = await RVAuth.getProfile();
-        if (profile?.role === 'admin') {
-          localStorage.setItem('rv_admin_auth', JSON.stringify({ email: profile.email, ts: Date.now(), supabase: true }));
+        const { data: profile } = await sb.from('profiles')
+          .select('role, email, first_name')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        const role = profile?.role || session.user.user_metadata?.role;
+        if (role === 'admin') {
+          localStorage.setItem('rv_admin_auth', JSON.stringify({ email: profile?.email || session.user.email, ts: Date.now(), supabase: true }));
           showDashboard();
           return;
         }
       }
-    } catch(e) {}
+    } catch(e) { console.warn('Auto-login check failed:', e); }
   }
   // Fallback: localStorage session
   const auth = localStorage.getItem('rv_admin_auth');
