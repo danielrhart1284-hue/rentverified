@@ -463,7 +463,7 @@
   </div>
 </section>
 
-<!-- SCAM ALERT -->
+<!-- SCAM ALERT & AI ANALYSIS -->
 <section class="section-sm">
   <div class="container">
     <div class="scam-banner">
@@ -471,16 +471,58 @@
       <div>
         <h3 style="font-size:1.3rem;font-weight:800;margin-bottom:0.4rem;">Protect Yourself From Facebook Rental Scams</h3>
         <p style="color:var(--gray-700);font-size:0.95rem;max-width:600px;">Scammers copy real listings and ask for wire transfers or gift cards. Every listing on RentVerified has a unique QR code. If a Facebook ad doesn't link here — it may be fake.</p>
+
+        <!-- Listing ID Verification -->
         <div id="verify" style="margin-top:1rem;">
           <div class="verify-input" style="max-width:100%;margin:0;">
-            <input type="text" placeholder="Enter a listing ID (e.g. RV-2024-0123) to verify..." style="padding:0.65rem 1rem;border:1.5px solid #d97706;border-radius:8px;font-size:0.9rem;flex:1;" />
-            <button class="btn btn-sm" style="background:#d97706;color:white;">Verify Now</button>
+            <input type="text" data-verify-input placeholder="Enter a listing ID (e.g. RV-2026-0001) to verify..." style="padding:0.65rem 1rem;border:1.5px solid #d97706;border-radius:8px;font-size:0.9rem;flex:1;" />
+            <button class="btn btn-sm" data-verify-btn style="background:#d97706;color:white;">Verify Now</button>
           </div>
+          <div id="verify-result" style="display:none;"></div>
+        </div>
+
+        <!-- AI Scam Detection -->
+        <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid rgba(0,0,0,0.1);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.5rem;">
+            <span style="font-size:1.1rem;">🧠</span>
+            <h4 style="font-size:1rem;font-weight:700;margin:0;">AI Scam Detector</h4>
+            <span style="background:#dbeafe;color:#1d4ed8;font-size:0.65rem;padding:2px 8px;border-radius:999px;font-weight:700;">POWERED BY HUGGING FACE</span>
+          </div>
+          <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:0.75rem;">Paste a suspicious listing description below. Our open-source ML model analyzes it for fraud indicators — runs entirely in your browser, no data sent to any server.</p>
+          <textarea id="scam-detect-input" rows="4" placeholder="Paste the full text of a listing you want to check for scam indicators..." style="width:100%;padding:0.75rem 1rem;border:1.5px solid #d1d5db;border-radius:10px;font-size:0.9rem;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;align-items:center;">
+            <button id="scam-detect-btn" class="btn btn-sm" onclick="runScamDetection()" style="background:#7c3aed;color:white;">Analyze with AI</button>
+            <div id="scam-detect-status" style="display:none;"></div>
+          </div>
+          <div id="scam-detect-result" style="display:none;"></div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+function runScamDetection() {
+  var input = document.getElementById('scam-detect-input');
+  var btn = document.getElementById('scam-detect-btn');
+  if (!input || !input.value.trim()) {
+    alert('Please paste a listing description to analyze.');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  analyzeListingForFraud(input.value.trim(), function(status, msg) {
+    renderMLStatusBadge('scam-detect-status', status, msg);
+  }).then(function(result) {
+    renderScamAnalysis('scam-detect-result', result);
+    btn.disabled = false;
+    btn.textContent = 'Analyze with AI';
+  }).catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Analyze with AI';
+  });
+}
+</script>
 
 <!-- HOW IT WORKS -->
 <section class="section" style="background:var(--gray-100);">
