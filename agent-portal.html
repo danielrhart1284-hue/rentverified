@@ -89,6 +89,34 @@
     .pipe-move-btn:hover { background:#8b5cf6;color:#fff;border-color:#8b5cf6; }
     .comm-action { cursor:pointer;font-size:.88rem;margin-left:8px;opacity:.6; }
     .comm-action:hover { opacity:1; }
+    /* Follow-up cards */
+    .fu-card { border:1.5px solid #e2e8f0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap; }
+    .fu-card:hover { border-color:#8b5cf6; }
+    .fu-card.overdue { border-left:4px solid #ef4444; }
+    .fu-card.due { border-left:4px solid #f59e0b; }
+    .fu-card.upcoming { border-left:4px solid #10b981; }
+    .fu-card.completed { border-left:4px solid #94a3b8;opacity:.7; }
+    .fu-actions { display:flex;gap:.4rem;flex-wrap:wrap; }
+    .fu-actions .btn { padding:.3rem .6rem;font-size:.75rem; }
+    .fu-badge { display:inline-block;padding:.15rem .5rem;border-radius:99px;font-size:.7rem;font-weight:700;margin-right:.4rem; }
+    .fu-badge.high { background:#fef2f2;color:#dc2626; }
+    .fu-badge.medium { background:#fef9c3;color:#854d0e; }
+    .fu-badge.low { background:#f0fdf4;color:#15803d; }
+    /* Network card */
+    .net-card { border:1.5px solid #e2e8f0;border-radius:10px;padding:1rem;text-align:center; }
+    .net-card:hover { border-color:#8b5cf6;box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .net-avatar { width:48px;height:48px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto .5rem; }
+    /* Invoice line items */
+    .inv-line-row { display:grid;grid-template-columns:1fr 100px 80px 30px;gap:.5rem;align-items:center;margin-bottom:.4rem; }
+    .inv-line-row input { border:1.5px solid #e2e8f0;border-radius:6px;padding:.4rem .6rem;font-size:.85rem;outline:none; }
+    .inv-line-row input:focus { border-color:#8b5cf6; }
+    .inv-line-del { background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;padding:0; }
+    /* Referral feed */
+    .ref-item { display:flex;gap:.75rem;align-items:flex-start;padding:.65rem 0;border-bottom:1px solid #f1f5f9; }
+    .ref-item:last-child { border-bottom:none; }
+    /* Section group header tweaks */
+    .ap-sidebar h3:first-of-type { margin-top:.5rem; }
+    @media(max-width:480px){ .fu-card{flex-direction:column;} .inv-line-row{grid-template-columns:1fr;} }
   </style>
 </head>
 <body>
@@ -269,16 +297,22 @@
       <div style="color:#fff;font-weight:700;font-size:.95rem;" id="agentName">Daniel Hart</div>
       <div style="color:#94a3b8;font-size:.75rem;">Listing Agent · RentVerified Pro</div>
     </div>
-    <h3>My Work</h3>
+    <h3>My Business</h3>
     <a class="active" onclick="showSec('overview',this)">📊 Overview</a>
     <a onclick="showSec('clients',this)">👥 My Clients</a>
     <a onclick="showSec('listings',this)">🏠 Listings</a>
-    <a onclick="showSec('pipeline',this)">📈 Applicant Pipeline</a>
+    <a onclick="showSec('pipeline',this)">📈 Pipeline</a>
     <a onclick="showSec('commissions',this)">💰 Commissions</a>
-    <h3>Tools</h3>
+    <h3>Business Tools</h3>
+    <a onclick="showSec('invoices',this)">📋 Invoices</a>
+    <a onclick="showSec('followups',this)">📞 Follow-Up Scheduler</a>
     <a href="ad-builder.html">📣 Ad Builder</a>
-    <a href="screening.html">🛡 Tenant Screening</a>
+    <a href="screening.html">🛡 Screening</a>
     <a href="leases.html">📝 Leases</a>
+    <h3>Network</h3>
+    <a onclick="showSec('network',this)">🤝 My Network</a>
+    <a onclick="showSec('profile',this)">📣 My Profile</a>
+    <a href="network.html">🔍 Find Pros</a>
     <h3>Account</h3>
     <a onclick="showSec('settings',this)">⚙️ Settings</a>
     <a onclick="agentLogout()" style="color:#ef4444;">🚪 Sign Out</a>
@@ -394,6 +428,102 @@
       </div>
     </div>
 
+    <!-- INVOICES -->
+    <div id="sec-invoices" style="display:none;">
+      <div class="page-header"><div><h1>📋 Commission Invoices &amp; Billing</h1><p>Create and track invoices for commissions, referral fees, and services.</p></div>
+        <button class="btn btn-agent" onclick="openInvoiceModal()">+ Create Invoice</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="lbl">Total Invoiced</div><div class="val" id="invStatTotal">$0</div></div>
+        <div class="stat-card green"><div class="lbl">Paid</div><div class="val" id="invStatPaid">$0</div></div>
+        <div class="stat-card blue"><div class="lbl">Outstanding</div><div class="val" id="invStatOut">$0</div></div>
+        <div class="stat-card gold"><div class="lbl">Drafts</div><div class="val" id="invStatDrafts">0</div></div>
+      </div>
+      <div class="panel">
+        <div style="overflow-x:auto;"><table class="data-table">
+          <thead><tr><th>Invoice #</th><th>Client / Brokerage</th><th>Property</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="invoiceTable"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- FOLLOW-UPS -->
+    <div id="sec-followups" style="display:none;">
+      <div class="page-header"><div><h1>📞 Follow-Up Scheduler</h1><p>Never miss a lead — schedule calls, emails, showings, and check-ins.</p></div>
+        <button class="btn btn-agent" onclick="openFollowUpModal()">+ Schedule Follow-Up</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card" style="border-left-color:#ef4444;"><div class="lbl">Overdue</div><div class="val" id="fuStatOverdue">0</div></div>
+        <div class="stat-card gold"><div class="lbl">Due Today</div><div class="val" id="fuStatToday">0</div></div>
+        <div class="stat-card blue"><div class="lbl">This Week</div><div class="val" id="fuStatWeek">0</div></div>
+        <div class="stat-card green"><div class="lbl">Completed (30d)</div><div class="val" id="fuStatDone">0</div></div>
+      </div>
+      <div id="followupsList"></div>
+    </div>
+
+    <!-- MY NETWORK -->
+    <div id="sec-network" style="display:none;">
+      <div class="page-header"><div><h1>🤝 My Professional Network</h1><p>Connect with vendors, agents, and service providers.</p></div></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="lbl">Connections</div><div class="val" id="netStatConn">0</div></div>
+        <div class="stat-card green"><div class="lbl">Referrals Sent</div><div class="val" id="netStatSent">0</div></div>
+        <div class="stat-card blue"><div class="lbl">Referrals Received</div><div class="val" id="netStatRecv">0</div></div>
+        <div class="stat-card gold"><div class="lbl">Profile Views</div><div class="val" id="netStatViews">0</div></div>
+      </div>
+      <div style="margin-bottom:1.5rem;"><a href="network.html" class="btn btn-agent">🔍 Find Pros on Network →</a></div>
+      <div class="panel">
+        <div class="panel-header"><h2>My Connections</h2></div>
+        <div class="panel-body" id="networkGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Recent Referrals</h2></div>
+        <div class="panel-body" id="referralFeed"></div>
+      </div>
+    </div>
+
+    <!-- MY PROFILE -->
+    <div id="sec-profile" style="display:none;">
+      <div class="page-header"><div><h1>📣 My Public Profile</h1><p>Edit how you appear on the RentVerified professional network.</p></div>
+        <a href="network.html" class="btn btn-outline">Preview on Network →</a>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Profile Information</h2></div>
+        <div class="panel-body">
+          <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1.5rem;">
+            <div style="width:80px;height:80px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px dashed #cbd5e1;">📷</div>
+            <div><div style="font-size:.85rem;color:#64748b;">Profile photo</div><button class="btn btn-outline btn-sm" onclick="toast('Photo upload coming soon')">Upload Photo</button></div>
+          </div>
+          <div class="form-grid">
+            <div class="fg"><label>Full Name</label><input id="profName" placeholder="Jane Smith"></div>
+            <div class="fg"><label>Title</label><input id="profTitle" placeholder="Licensed Real Estate Agent"></div>
+            <div class="fg"><label>Brokerage</label><input id="profBrokerage" placeholder="Equity Real Estate"></div>
+            <div class="fg"><label>License #</label><input id="profLicense" placeholder="UT-RE-12345"></div>
+          </div>
+          <div style="margin-top:1rem;"><label style="font-size:.82rem;font-weight:600;color:#374151;display:block;margin-bottom:.4rem;">Specialties</label>
+            <div id="profSpecialties" style="display:flex;flex-wrap:wrap;gap:.5rem;">
+              <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" value="Residential" style="accent-color:#8b5cf6;"> Residential</label>
+              <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" value="Commercial" style="accent-color:#8b5cf6;"> Commercial</label>
+              <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" value="Investment" style="accent-color:#8b5cf6;"> Investment</label>
+              <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" value="Luxury" style="accent-color:#8b5cf6;"> Luxury</label>
+              <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" value="First-Time Buyers" style="accent-color:#8b5cf6;"> First-Time Buyers</label>
+              <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" value="Relocation" style="accent-color:#8b5cf6;"> Relocation</label>
+            </div>
+          </div>
+          <div class="form-grid" style="margin-top:1rem;">
+            <div class="fg"><label>Service Areas</label><input id="profAreas" placeholder="Salt Lake City, Provo, Orem"></div>
+            <div class="fg"><label>Languages</label><input id="profLangs" placeholder="English, Spanish"></div>
+          </div>
+          <div class="fg" style="margin-top:1rem;"><label>Bio</label><textarea id="profBio" placeholder="Tell clients about your experience, approach, and what makes you different..." style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.55rem .8rem;font-size:.9rem;min-height:100px;width:100%;box-sizing:border-box;resize:vertical;outline:none;"></textarea></div>
+          <div class="form-grid" style="margin-top:1rem;">
+            <div class="fg"><label>Phone</label><input id="profPhone" type="tel" placeholder="(801) 555-0000"></div>
+            <div class="fg"><label>Email</label><input id="profEmail" type="email" placeholder="agent@email.com"></div>
+            <div class="fg"><label>Website</label><input id="profWeb" placeholder="https://yoursite.com"></div>
+          </div>
+          <button class="btn btn-agent" style="margin-top:1.25rem;" onclick="saveAgentProfile()">Save Profile</button>
+        </div>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
     <div id="sec-settings" style="display:none;">
       <div class="page-header"><div><h1>⚙️ Agent Settings</h1></div></div>
@@ -485,6 +615,134 @@
   </div>
 </div>
 
+<!-- Invoice Modal -->
+<div id="invoiceModalOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeInvoiceModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeInvoiceModal()">&times;</button>
+    <h2 id="invoiceModalTitle">Create Invoice</h2>
+    <input type="hidden" id="editInvIdx" value="-1">
+    <div class="form-grid">
+      <div class="fg"><label>Invoice # *</label><input id="invNum" placeholder="AGT-004"></div>
+      <div class="fg"><label>Client / Brokerage *</label><input id="invClient" placeholder="Home Realty LLC"></div>
+      <div class="fg"><label>Property *</label><input id="invProp" placeholder="123 Main St, Provo UT"></div>
+      <div class="fg"><label>Commission Type</label>
+        <select id="invCommType">
+          <option value="Buyer Agent">Buyer Agent</option>
+          <option value="Listing Agent">Listing Agent</option>
+          <option value="Referral Fee">Referral Fee</option>
+          <option value="Property Management">Property Management</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="fg"><label>Transaction / Listing Ref</label><input id="invRef" placeholder="MLS# or ref"></div>
+      <div class="fg"><label>Brokerage Split %</label><input id="invSplit" type="number" placeholder="70" min="0" max="100"></div>
+      <div class="fg"><label>Status</label>
+        <select id="invStatus">
+          <option value="Draft">Draft 📝</option>
+          <option value="Sent">Sent 📤</option>
+          <option value="Paid">Paid ✅</option>
+          <option value="Overdue">Overdue ⚠️</option>
+        </select>
+      </div>
+      <div class="fg"><label>Date *</label><input id="invDate" type="date"></div>
+    </div>
+    <div style="margin-top:1rem;">
+      <label style="font-size:.82rem;font-weight:600;color:#374151;display:block;margin-bottom:.5rem;">Line Items</label>
+      <div id="invLineItems"></div>
+      <button class="btn btn-outline btn-sm" style="margin-top:.5rem;" onclick="addInvLineItem()">+ Add Line Item</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:.75rem;border-top:1px solid #e2e8f0;">
+      <div style="font-weight:700;font-size:1rem;color:#1e293b;">Total: <span id="invTotalDisplay">$0</span></div>
+    </div>
+    <div class="fg" style="margin-top:1rem;"><label>Notes</label><textarea id="invNotes" placeholder="Payment terms, additional details..." style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.55rem .8rem;font-size:.9rem;min-height:60px;width:100%;box-sizing:border-box;resize:vertical;outline:none;"></textarea></div>
+    <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+      <button class="btn btn-agent" onclick="saveInvoice()">Save Invoice</button>
+      <button class="btn btn-outline" onclick="closeInvoiceModal()">Cancel</button>
+      <button class="btn btn-danger" id="invDeleteBtn" style="margin-left:auto;display:none;" onclick="deleteInvoice()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Follow-Up Modal -->
+<div id="followUpModalOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeFollowUpModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeFollowUpModal()">&times;</button>
+    <h2 id="fuModalTitle">Schedule Follow-Up</h2>
+    <input type="hidden" id="editFuIdx" value="-1">
+    <div class="form-grid">
+      <div class="fg"><label>Contact Name *</label><input id="fuName" placeholder="Maria Santos"></div>
+      <div class="fg"><label>Phone</label><input id="fuPhone" type="tel" placeholder="(801) 555-1234"></div>
+      <div class="fg"><label>Email</label><input id="fuEmail" type="email" placeholder="contact@email.com"></div>
+      <div class="fg"><label>Follow-Up Date *</label><input id="fuDate" type="date"></div>
+      <div class="fg"><label>Time</label><input id="fuTime" type="time" value="10:00"></div>
+      <div class="fg"><label>Type</label>
+        <select id="fuType">
+          <option value="Call">📞 Call</option>
+          <option value="Email">📧 Email</option>
+          <option value="Meeting">🤝 Meeting</option>
+          <option value="Showing">🏠 Showing</option>
+          <option value="Check-in">👋 Check-in</option>
+          <option value="Other">📌 Other</option>
+        </select>
+      </div>
+      <div class="fg"><label>Regarding *</label><input id="fuRegarding" placeholder="What's this about?"></div>
+      <div class="fg"><label>Property (optional)</label><input id="fuProperty" placeholder="123 Main St"></div>
+      <div class="fg"><label>Priority</label>
+        <select id="fuPriority">
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:1rem;"><label>Notes</label><textarea id="fuNotes" placeholder="Additional context..." style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.55rem .8rem;font-size:.9rem;min-height:60px;width:100%;box-sizing:border-box;resize:vertical;outline:none;"></textarea></div>
+    <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+      <button class="btn btn-agent" onclick="saveFollowUp()">Save Follow-Up</button>
+      <button class="btn btn-outline" onclick="closeFollowUpModal()">Cancel</button>
+      <button class="btn btn-danger" id="fuDeleteBtn" style="margin-left:auto;display:none;" onclick="deleteFollowUp()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Snooze Modal -->
+<div id="snoozeModalOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeSnoozeModal()">
+  <div class="modal-box" style="max-width:360px;">
+    <button class="modal-close" onclick="closeSnoozeModal()">&times;</button>
+    <h2>⏰ Snooze Follow-Up</h2>
+    <input type="hidden" id="snoozeIdx">
+    <div style="display:flex;flex-direction:column;gap:.5rem;">
+      <button class="btn btn-outline" onclick="snoozeBy(1,'hour')">+1 Hour</button>
+      <button class="btn btn-outline" onclick="snoozeBy(1,'day')">+1 Day</button>
+      <button class="btn btn-outline" onclick="snoozeBy(3,'day')">+3 Days</button>
+      <button class="btn btn-outline" onclick="snoozeBy(7,'day')">+1 Week</button>
+      <div style="margin-top:.5rem;"><label style="font-size:.82rem;font-weight:600;color:#374151;">Custom date:</label><input type="date" id="snoozeCustomDate" style="width:100%;padding:.5rem;border:1.5px solid #e2e8f0;border-radius:8px;margin-top:.3rem;"></div>
+      <button class="btn btn-agent" onclick="snoozeCustom()">Snooze to Custom Date</button>
+    </div>
+  </div>
+</div>
+
+<!-- Done Outcome Modal -->
+<div id="doneModalOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeDoneModal()">
+  <div class="modal-box" style="max-width:420px;">
+    <button class="modal-close" onclick="closeDoneModal()">&times;</button>
+    <h2>✅ Mark as Done</h2>
+    <input type="hidden" id="doneIdx">
+    <div class="fg"><label>Outcome Notes</label><textarea id="doneNotes" placeholder="What happened? How did it go?" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.55rem .8rem;font-size:.9rem;min-height:80px;width:100%;box-sizing:border-box;resize:vertical;outline:none;"></textarea></div>
+    <div style="display:flex;gap:.75rem;margin-top:1rem;">
+      <button class="btn btn-success" onclick="completeDone()">Complete</button>
+      <button class="btn btn-outline" onclick="closeDoneModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice View Modal -->
+<div id="invoiceViewOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('invoiceViewOverlay').style.display='none'">&times;</button>
+    <div id="invoiceViewContent"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <!-- Supabase Backend -->
@@ -495,6 +753,7 @@
 <script>
 // ── DATA ─────────────────────────────────────────────
 let clients = [], commissions = [], pipelineLeads = [];
+let agentInvoices = [], agentFollowups = [], agentConnections = [], agentProfile = {};
 
 const PIPELINE_STAGES = ['New Inquiry','Showing Scheduled','Application Sent','Screening','Approved / Denied'];
 
@@ -502,10 +761,18 @@ function loadData() {
   try { clients = JSON.parse(localStorage.getItem('rv_agent_clients')||'[]'); } catch(e){ clients=[]; }
   try { commissions = JSON.parse(localStorage.getItem('rv_agent_comm')||'[]'); } catch(e){ commissions=[]; }
   try { pipelineLeads = JSON.parse(localStorage.getItem('rv_agent_pipeline')||'[]'); } catch(e){ pipelineLeads=[]; }
+  try { agentInvoices = JSON.parse(localStorage.getItem('rv_agent_invoices')||'[]'); } catch(e){ agentInvoices=[]; }
+  try { agentFollowups = JSON.parse(localStorage.getItem('rv_agent_followups')||'[]'); } catch(e){ agentFollowups=[]; }
+  try { agentConnections = JSON.parse(localStorage.getItem('rv_agent_connections')||'[]'); } catch(e){ agentConnections=[]; }
+  try { agentProfile = JSON.parse(localStorage.getItem('rv_agent_profile')||'{}'); } catch(e){ agentProfile={}; }
 }
 function saveClients() { localStorage.setItem('rv_agent_clients', JSON.stringify(clients)); }
 function saveComm()    { localStorage.setItem('rv_agent_comm', JSON.stringify(commissions)); }
 function savePipeline(){ localStorage.setItem('rv_agent_pipeline', JSON.stringify(pipelineLeads)); }
+function saveInvoices(){ localStorage.setItem('rv_agent_invoices', JSON.stringify(agentInvoices)); }
+function saveFollowups(){ localStorage.setItem('rv_agent_followups', JSON.stringify(agentFollowups)); }
+function saveConnections(){ localStorage.setItem('rv_agent_connections', JSON.stringify(agentConnections)); }
+function saveProfile(){ localStorage.setItem('rv_agent_profile', JSON.stringify(agentProfile)); }
 function uid() { return 'AG-'+Date.now().toString(36).toUpperCase(); }
 
 function loadSample() {
@@ -654,6 +921,10 @@ function renderAll() {
   renderCommissions();
   renderActivityFeed();
   populateCommPropSelect();
+  renderInvoiceTable();
+  renderFollowUps();
+  renderNetworkTab();
+  loadAgentProfile();
 }
 
 // ── STATS ─────────────────────────────────────────────
@@ -923,7 +1194,7 @@ function deleteCommissionDirect(idx) {
 
 // ── SECTION NAV ───────────────────────────────────────
 function showSec(name, el) {
-  ['overview','clients','listings','pipeline','commissions','settings'].forEach(s=>{
+  ['overview','clients','listings','pipeline','commissions','invoices','followups','network','profile','settings'].forEach(s=>{
     const sec = document.getElementById('sec-'+s);
     if(sec) sec.style.display = s===name?'block':'none';
   });
@@ -963,6 +1234,464 @@ function loadAgentSettings() {
     if (settings.serviceAreas) document.getElementById('sZips').value = settings.serviceAreas;
   } catch(e) {}
 }
+
+// ── INVOICES ──────────────────────────────────────────
+function seedInvoices() {
+  if (agentInvoices.length) return;
+  agentInvoices = [
+    { id:'AGT-001', client:'Home Realty LLC', property:'123 Main St, SLC', commType:'Listing Agent', ref:'MLS-445521', split:70, status:'Paid', date:'2026-03-08', lineItems:[{desc:'Listing Commission (3%)',qty:1,rate:4500}], notes:'Closed 3/8', total:4500, createdAt:'2026-03-08' },
+    { id:'AGT-002', client:'Sanders PM', property:'456 Oak Ave, Sandy', commType:'Buyer Agent', ref:'MLS-445890', split:70, status:'Sent', date:'2026-03-14', lineItems:[{desc:'Buyer Commission (2.5%)',qty:1,rate:3200}], notes:'Closing scheduled 3/20', total:3200, createdAt:'2026-03-14' },
+    { id:'AGT-003', client:'Direct Client', property:'789 Elm Dr, Provo', commType:'Referral Fee', ref:'REF-2026-03', split:100, status:'Draft', date:'2026-03-16', lineItems:[{desc:'Referral fee',qty:1,rate:2800}], notes:'', total:2800, createdAt:'2026-03-16' }
+  ];
+  saveInvoices();
+}
+
+function renderInvoiceTable() {
+  seedInvoices();
+  const tbody = document.getElementById('invoiceTable');
+  if (!tbody) return;
+  let totalAll=0, totalPaid=0, totalOut=0, drafts=0;
+  tbody.innerHTML = agentInvoices.map((inv,i) => {
+    totalAll += inv.total||0;
+    if (inv.status==='Paid') totalPaid += inv.total||0;
+    if (inv.status==='Sent'||inv.status==='Overdue') totalOut += inv.total||0;
+    if (inv.status==='Draft') drafts++;
+    const badge = inv.status==='Paid'?'background:#dcfce7;color:#166534':inv.status==='Sent'?'background:#dbeafe;color:#1e40af':inv.status==='Overdue'?'background:#fef2f2;color:#991b1b':'background:#fef9c3;color:#854d0e';
+    return `<tr>
+      <td style="font-weight:600;">${inv.id}</td>
+      <td>${inv.client}</td>
+      <td>${inv.property}</td>
+      <td style="font-weight:600;">$${(inv.total||0).toLocaleString()}</td>
+      <td><span style="padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:600;${badge}">${inv.status}</span></td>
+      <td>${inv.date}</td>
+      <td>
+        <button class="comm-action" onclick="viewInvoice(${i})" title="View">👁️</button>
+        <button class="comm-action" onclick="openInvoiceModal(${i})" title="Edit">✏️</button>
+        ${inv.status==='Draft'?`<button class="comm-action" onclick="deleteInvoice(${i})" title="Delete">🗑️</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('invStatTotal').textContent = '$'+totalAll.toLocaleString();
+  document.getElementById('invStatPaid').textContent = '$'+totalPaid.toLocaleString();
+  document.getElementById('invStatOut').textContent = '$'+totalOut.toLocaleString();
+  document.getElementById('invStatDrafts').textContent = drafts;
+}
+
+function openInvoiceModal(idx) {
+  const isEdit = idx !== undefined && idx >= 0;
+  document.getElementById('invoiceModalTitle').textContent = isEdit ? 'Edit Invoice' : 'Create Invoice';
+  document.getElementById('editInvIdx').value = isEdit ? idx : -1;
+  document.getElementById('invDeleteBtn').style.display = isEdit ? 'inline-block' : 'none';
+  if (isEdit) {
+    const inv = agentInvoices[idx];
+    document.getElementById('invNum').value = inv.id;
+    document.getElementById('invClient').value = inv.client;
+    document.getElementById('invProp').value = inv.property;
+    document.getElementById('invCommType').value = inv.commType||'Other';
+    document.getElementById('invRef').value = inv.ref||'';
+    document.getElementById('invSplit').value = inv.split||70;
+    document.getElementById('invStatus').value = inv.status;
+    document.getElementById('invDate').value = inv.date;
+    document.getElementById('invNotes').value = inv.notes||'';
+    renderInvLineItems(inv.lineItems||[]);
+  } else {
+    document.getElementById('invNum').value = 'AGT-' + String(agentInvoices.length+1).padStart(3,'0');
+    document.getElementById('invClient').value = '';
+    document.getElementById('invProp').value = '';
+    document.getElementById('invCommType').value = 'Buyer Agent';
+    document.getElementById('invRef').value = '';
+    document.getElementById('invSplit').value = 70;
+    document.getElementById('invStatus').value = 'Draft';
+    document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('invNotes').value = '';
+    renderInvLineItems([{desc:'',qty:1,rate:0}]);
+  }
+  document.getElementById('invoiceModalOverlay').style.display = 'flex';
+}
+function closeInvoiceModal() { document.getElementById('invoiceModalOverlay').style.display='none'; }
+
+function renderInvLineItems(items) {
+  const container = document.getElementById('invLineItems');
+  container.innerHTML = items.map((item,i) => `<div class="inv-line-row">
+    <input placeholder="Description" value="${item.desc||''}" onchange="calcInvTotal()" data-li="desc-${i}">
+    <input type="number" placeholder="Rate" value="${item.rate||0}" onchange="calcInvTotal()" data-li="rate-${i}">
+    <input type="number" placeholder="Qty" value="${item.qty||1}" onchange="calcInvTotal()" data-li="qty-${i}">
+    <button class="inv-line-del" onclick="this.parentElement.remove();calcInvTotal()">×</button>
+  </div>`).join('');
+  calcInvTotal();
+}
+function addInvLineItem() {
+  const container = document.getElementById('invLineItems');
+  const i = container.children.length;
+  container.insertAdjacentHTML('beforeend', `<div class="inv-line-row">
+    <input placeholder="Description" data-li="desc-${i}">
+    <input type="number" placeholder="Rate" value="0" onchange="calcInvTotal()" data-li="rate-${i}">
+    <input type="number" placeholder="Qty" value="1" onchange="calcInvTotal()" data-li="qty-${i}">
+    <button class="inv-line-del" onclick="this.parentElement.remove();calcInvTotal()">×</button>
+  </div>`);
+}
+function calcInvTotal() {
+  let total = 0;
+  document.querySelectorAll('#invLineItems .inv-line-row').forEach(row => {
+    const rate = parseFloat(row.querySelector('[data-li^="rate"]')?.value||0);
+    const qty = parseFloat(row.querySelector('[data-li^="qty"]')?.value||1);
+    total += rate * qty;
+  });
+  document.getElementById('invTotalDisplay').textContent = '$' + total.toLocaleString();
+  return total;
+}
+
+function saveInvoice() {
+  const idx = parseInt(document.getElementById('editInvIdx').value);
+  const lineItems = [];
+  document.querySelectorAll('#invLineItems .inv-line-row').forEach(row => {
+    const desc = row.querySelector('[data-li^="desc"]')?.value||'';
+    const rate = parseFloat(row.querySelector('[data-li^="rate"]')?.value||0);
+    const qty = parseFloat(row.querySelector('[data-li^="qty"]')?.value||1);
+    if (desc || rate) lineItems.push({desc, rate, qty});
+  });
+  const inv = {
+    id: document.getElementById('invNum').value,
+    client: document.getElementById('invClient').value,
+    property: document.getElementById('invProp').value,
+    commType: document.getElementById('invCommType').value,
+    ref: document.getElementById('invRef').value,
+    split: parseInt(document.getElementById('invSplit').value)||70,
+    status: document.getElementById('invStatus').value,
+    date: document.getElementById('invDate').value,
+    lineItems: lineItems,
+    total: calcInvTotal(),
+    notes: document.getElementById('invNotes').value,
+    createdAt: idx>=0 ? agentInvoices[idx].createdAt : new Date().toISOString()
+  };
+  if (!inv.client || !inv.property) { toast('Client and Property are required'); return; }
+  if (idx >= 0) agentInvoices[idx] = inv; else agentInvoices.push(inv);
+  saveInvoices();
+  renderInvoiceTable();
+  closeInvoiceModal();
+  toast(idx>=0?'Invoice updated':'Invoice created');
+}
+
+function deleteInvoice(idx) {
+  if (idx === undefined) idx = parseInt(document.getElementById('editInvIdx').value);
+  if (!confirm('Delete this invoice?')) return;
+  agentInvoices.splice(idx, 1);
+  saveInvoices();
+  renderInvoiceTable();
+  closeInvoiceModal();
+  toast('Invoice deleted');
+}
+
+function viewInvoice(idx) {
+  const inv = agentInvoices[idx];
+  const html = `<div style="text-align:center;margin-bottom:1.5rem;">
+    <h2 style="margin:0;">INVOICE</h2>
+    <div style="color:#64748b;font-size:.9rem;">${inv.id} · ${inv.date}</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <div><strong>Bill To:</strong><br>${inv.client}<br>${inv.property}</div>
+    <div style="text-align:right;"><strong>Status:</strong> ${inv.status}<br><strong>Type:</strong> ${inv.commType||'—'}<br><strong>Split:</strong> ${inv.split||0}%</div>
+  </div>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:1rem;">
+    <thead><tr style="border-bottom:2px solid #e2e8f0;"><th style="text-align:left;padding:.5rem;">Description</th><th style="text-align:right;padding:.5rem;">Qty</th><th style="text-align:right;padding:.5rem;">Rate</th><th style="text-align:right;padding:.5rem;">Amount</th></tr></thead>
+    <tbody>${(inv.lineItems||[]).map(li=>`<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.5rem;">${li.desc}</td><td style="text-align:right;padding:.5rem;">${li.qty||1}</td><td style="text-align:right;padding:.5rem;">$${(li.rate||0).toLocaleString()}</td><td style="text-align:right;padding:.5rem;">$${((li.rate||0)*(li.qty||1)).toLocaleString()}</td></tr>`).join('')}</tbody>
+  </table>
+  <div style="text-align:right;font-size:1.25rem;font-weight:700;padding-top:.75rem;border-top:2px solid #1e293b;">Total: $${(inv.total||0).toLocaleString()}</div>
+  ${inv.notes?`<div style="margin-top:1rem;padding:.75rem;background:#f8fafc;border-radius:8px;font-size:.85rem;color:#64748b;"><strong>Notes:</strong> ${inv.notes}</div>`:''}`;
+  document.getElementById('invoiceViewContent').innerHTML = html;
+  document.getElementById('invoiceViewOverlay').style.display = 'flex';
+}
+
+// ── FOLLOW-UPS ──────────────────────────────────────
+function seedFollowUps() {
+  if (agentFollowups.length) return;
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now()+86400000).toISOString().split('T')[0];
+  const in3days = new Date(Date.now()+259200000).toISOString().split('T')[0];
+  const in5days = new Date(Date.now()+432000000).toISOString().split('T')[0];
+  agentFollowups = [
+    { id:'fu1', name:'Maria Santos', phone:'(801) 555-1234', email:'maria@email.com', date:yesterday, time:'14:00', type:'Call', regarding:'Lease renewal discussion', property:'789 Elm Dr', priority:'High', notes:'Wants to discuss rent increase', status:'pending', createdAt:yesterday },
+    { id:'fu2', name:'Robert Lee', phone:'(801) 555-5678', email:'robert@email.com', date:today, time:'10:00', type:'Showing', regarding:'Property showing at 456 Oak Ave', property:'456 Oak Ave', priority:'Medium', notes:'First-time buyer', status:'pending', createdAt:today },
+    { id:'fu3', name:'Jane Doe', phone:'', email:'jane@email.com', date:today, time:'15:00', type:'Email', regarding:'Check on application status', property:'', priority:'Low', notes:'', status:'pending', createdAt:today },
+    { id:'fu4', name:'Tom Wilson', phone:'(801) 555-9012', email:'tom@email.com', date:tomorrow, time:'09:00', type:'Call', regarding:'Investment property interest', property:'', priority:'Medium', notes:'Referred by Mike', status:'pending', createdAt:today },
+    { id:'fu5', name:'Lisa Park', phone:'(801) 555-3456', email:'lisa@email.com', date:in3days, time:'11:00', type:'Meeting', regarding:'Listing presentation', property:'321 Pine St', priority:'High', notes:'Luxury listing potential', status:'pending', createdAt:today },
+    { id:'fu6', name:'Sarah Chen', phone:'(801) 555-7890', email:'', date:in5days, time:'13:00', type:'Check-in', regarding:'Post-closing follow up', property:'555 Cedar Ln', priority:'Low', notes:'Closed last week', status:'pending', createdAt:today },
+    { id:'fu7', name:'Dave Brown', phone:'(801) 555-2222', email:'dave@email.com', date:new Date(Date.now()-604800000).toISOString().split('T')[0], time:'10:00', type:'Call', regarding:'Referred buyer consultation', property:'', priority:'Medium', notes:'Great call, setting up showings next week', status:'completed', completedAt:new Date(Date.now()-518400000).toISOString(), outcome:'Scheduled 3 showings' }
+  ];
+  localStorage.setItem('rv_agent_followups', JSON.stringify(agentFollowups));
+}
+
+function saveFollowUps() { localStorage.setItem('rv_agent_followups', JSON.stringify(agentFollowups)); }
+
+function renderFollowUps() {
+  seedFollowUps();
+  const container = document.getElementById('followupsList');
+  if (!container) return;
+  const today = new Date().toISOString().split('T')[0];
+  const weekEnd = new Date(Date.now()+604800000).toISOString().split('T')[0];
+
+  const overdue = agentFollowups.filter(f=>f.status==='pending'&&f.date<today);
+  const dueToday = agentFollowups.filter(f=>f.status==='pending'&&f.date===today);
+  const upcoming = agentFollowups.filter(f=>f.status==='pending'&&f.date>today&&f.date<=weekEnd);
+  const completed = agentFollowups.filter(f=>f.status==='completed').slice(0,5);
+
+  document.getElementById('fuStatOverdue').textContent = overdue.length;
+  document.getElementById('fuStatToday').textContent = dueToday.length;
+  document.getElementById('fuStatWeek').textContent = upcoming.length;
+  document.getElementById('fuStatDone').textContent = agentFollowups.filter(f=>f.status==='completed').length;
+
+  const renderCard = (f, i, cls) => {
+    const idx = agentFollowups.indexOf(f);
+    const typeIcon = {Call:'📞',Email:'📧',Meeting:'🤝',Showing:'🏠','Check-in':'👋',Other:'📌'}[f.type]||'📌';
+    const priBadge = f.priority==='High'?'high':f.priority==='Low'?'low':'medium';
+    return `<div class="fu-card ${cls}">
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:.95rem;">${typeIcon} ${f.name} — ${f.regarding}</div>
+        <div style="font-size:.8rem;color:#64748b;margin-top:.25rem;">
+          ${f.date} ${f.time?'at '+f.time:''} ${f.property?'· '+f.property:''}
+        </div>
+        <div style="margin-top:.3rem;">
+          <span class="fu-badge ${priBadge}">${f.priority}</span>
+          ${f.phone?'<span style="font-size:.8rem;color:#64748b;">📱 '+f.phone+'</span>':''}
+          ${f.email?'<span style="font-size:.8rem;color:#64748b;">📧 '+f.email+'</span>':''}
+        </div>
+        ${f.notes?'<div style="font-size:.8rem;color:#94a3b8;margin-top:.25rem;">'+f.notes+'</div>':''}
+        ${f.outcome?'<div style="font-size:.8rem;color:#059669;margin-top:.25rem;">✅ '+f.outcome+'</div>':''}
+      </div>
+      ${f.status==='pending'?`<div class="fu-actions">
+        ${f.phone?`<a href="tel:${f.phone.replace(/\D/g,'')}" class="btn" style="background:#dbeafe;color:#1e40af;">📞</a>`:''}
+        ${f.email?`<a href="mailto:${f.email}" class="btn" style="background:#f0fdf4;color:#166534;">📧</a>`:''}
+        <button class="btn" style="background:#dcfce7;color:#166534;" onclick="openDoneModal(${idx})">✅</button>
+        <button class="btn" style="background:#fef9c3;color:#854d0e;" onclick="openSnoozeModal(${idx})">⏰</button>
+        <button class="btn" style="background:#f1f5f9;color:#475569;" onclick="openFollowUpModal(${idx})">✏️</button>
+      </div>`:''}
+    </div>`;
+  };
+
+  let html = '';
+  if (overdue.length) {
+    html += `<div class="panel"><div class="panel-header"><h2 style="color:#dc2626;">🔴 Overdue (${overdue.length})</h2></div><div class="panel-body">${overdue.map((f,i)=>renderCard(f,i,'overdue')).join('')}</div></div>`;
+  }
+  if (dueToday.length) {
+    html += `<div class="panel"><div class="panel-header"><h2 style="color:#d97706;">🟡 Due Today (${dueToday.length})</h2></div><div class="panel-body">${dueToday.map((f,i)=>renderCard(f,i,'due')).join('')}</div></div>`;
+  }
+  if (upcoming.length) {
+    html += `<div class="panel"><div class="panel-header"><h2 style="color:#059669;">🟢 Upcoming This Week (${upcoming.length})</h2></div><div class="panel-body">${upcoming.map((f,i)=>renderCard(f,i,'upcoming')).join('')}</div></div>`;
+  }
+  if (completed.length) {
+    html += `<div class="panel"><div class="panel-header"><h2 style="color:#64748b;">✅ Recently Completed</h2></div><div class="panel-body">${completed.map((f,i)=>renderCard(f,i,'completed')).join('')}</div></div>`;
+  }
+  if (!html) html = '<div class="panel"><div class="panel-body" style="text-align:center;color:#94a3b8;padding:2rem;">No follow-ups scheduled. Click "+ Schedule Follow-Up" to get started.</div></div>';
+  container.innerHTML = html;
+}
+
+function openFollowUpModal(idx) {
+  const isEdit = idx !== undefined && idx >= 0;
+  document.getElementById('fuModalTitle').textContent = isEdit ? 'Edit Follow-Up' : 'Schedule Follow-Up';
+  document.getElementById('editFuIdx').value = isEdit ? idx : -1;
+  document.getElementById('fuDeleteBtn').style.display = isEdit ? 'inline-block' : 'none';
+  if (isEdit) {
+    const f = agentFollowups[idx];
+    document.getElementById('fuName').value = f.name||'';
+    document.getElementById('fuPhone').value = f.phone||'';
+    document.getElementById('fuEmail').value = f.email||'';
+    document.getElementById('fuDate').value = f.date||'';
+    document.getElementById('fuTime').value = f.time||'10:00';
+    document.getElementById('fuType').value = f.type||'Call';
+    document.getElementById('fuRegarding').value = f.regarding||'';
+    document.getElementById('fuProperty').value = f.property||'';
+    document.getElementById('fuPriority').value = f.priority||'Medium';
+    document.getElementById('fuNotes').value = f.notes||'';
+  } else {
+    ['fuName','fuPhone','fuEmail','fuRegarding','fuProperty','fuNotes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fuDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fuTime').value = '10:00';
+    document.getElementById('fuType').value = 'Call';
+    document.getElementById('fuPriority').value = 'Medium';
+  }
+  document.getElementById('followUpModalOverlay').style.display = 'flex';
+}
+function closeFollowUpModal() { document.getElementById('followUpModalOverlay').style.display='none'; }
+
+function saveFollowUp() {
+  const idx = parseInt(document.getElementById('editFuIdx').value);
+  const f = {
+    id: idx>=0 ? agentFollowups[idx].id : 'fu'+Date.now(),
+    name: document.getElementById('fuName').value,
+    phone: document.getElementById('fuPhone').value,
+    email: document.getElementById('fuEmail').value,
+    date: document.getElementById('fuDate').value,
+    time: document.getElementById('fuTime').value,
+    type: document.getElementById('fuType').value,
+    regarding: document.getElementById('fuRegarding').value,
+    property: document.getElementById('fuProperty').value,
+    priority: document.getElementById('fuPriority').value,
+    notes: document.getElementById('fuNotes').value,
+    status: idx>=0 ? agentFollowups[idx].status : 'pending',
+    createdAt: idx>=0 ? agentFollowups[idx].createdAt : new Date().toISOString()
+  };
+  if (!f.name || !f.date || !f.regarding) { toast('Name, date, and reason are required'); return; }
+  if (idx>=0) agentFollowups[idx] = f; else agentFollowups.push(f);
+  saveFollowUps();
+  renderFollowUps();
+  closeFollowUpModal();
+  toast(idx>=0?'Follow-up updated':'Follow-up scheduled');
+}
+
+function deleteFollowUp() {
+  const idx = parseInt(document.getElementById('editFuIdx').value);
+  if (!confirm('Delete this follow-up?')) return;
+  agentFollowups.splice(idx,1);
+  saveFollowUps();
+  renderFollowUps();
+  closeFollowUpModal();
+  toast('Follow-up deleted');
+}
+
+function openSnoozeModal(idx) {
+  document.getElementById('snoozeIdx').value = idx;
+  document.getElementById('snoozeCustomDate').value = '';
+  document.getElementById('snoozeModalOverlay').style.display = 'flex';
+}
+function closeSnoozeModal() { document.getElementById('snoozeModalOverlay').style.display='none'; }
+function snoozeBy(amount, unit) {
+  const idx = parseInt(document.getElementById('snoozeIdx').value);
+  const f = agentFollowups[idx];
+  const d = new Date(f.date+'T'+(f.time||'10:00'));
+  if (unit==='hour') d.setHours(d.getHours()+amount);
+  else d.setDate(d.getDate()+amount);
+  f.date = d.toISOString().split('T')[0];
+  f.time = d.toTimeString().slice(0,5);
+  saveFollowUps(); renderFollowUps(); closeSnoozeModal();
+  toast('Snoozed to '+f.date+' at '+f.time);
+}
+function snoozeCustom() {
+  const d = document.getElementById('snoozeCustomDate').value;
+  if (!d) { toast('Pick a date'); return; }
+  const idx = parseInt(document.getElementById('snoozeIdx').value);
+  agentFollowups[idx].date = d;
+  saveFollowUps(); renderFollowUps(); closeSnoozeModal();
+  toast('Snoozed to '+d);
+}
+
+function openDoneModal(idx) {
+  document.getElementById('doneIdx').value = idx;
+  document.getElementById('doneNotes').value = '';
+  document.getElementById('doneModalOverlay').style.display = 'flex';
+}
+function closeDoneModal() { document.getElementById('doneModalOverlay').style.display='none'; }
+function completeDone() {
+  const idx = parseInt(document.getElementById('doneIdx').value);
+  agentFollowups[idx].status = 'completed';
+  agentFollowups[idx].completedAt = new Date().toISOString();
+  agentFollowups[idx].outcome = document.getElementById('doneNotes').value || 'Completed';
+  saveFollowUps(); renderFollowUps(); closeDoneModal();
+  toast('Follow-up completed');
+}
+
+// ── NETWORK TAB ──────────────────────────────────────
+function seedConnections() {
+  if (agentConnections.length) return;
+  agentConnections = [
+    { name:"Mike's Plumbing", trade:'Plumber', rating:4.8, location:'SLC', color:'#3b82f6', referralsSent:2, referralsRecv:1 },
+    { name:'Bright Electric', trade:'Electrician', rating:4.9, location:'Sandy', color:'#f59e0b', referralsSent:1, referralsRecv:2 },
+    { name:'CleanSlate Turnovers', trade:'Cleaner', rating:5.0, location:'Provo', color:'#10b981', referralsSent:0, referralsRecv:1 },
+    { name:'Utah Property Law', trade:'Attorney', rating:4.7, location:'SLC', color:'#8b5cf6', referralsSent:1, referralsRecv:0 },
+    { name:'Summit Roofing', trade:'Roofer', rating:4.6, location:'Sandy', color:'#ef4444', referralsSent:1, referralsRecv:0 }
+  ];
+  localStorage.setItem('rv_agent_connections', JSON.stringify(agentConnections));
+}
+
+function renderNetworkTab() {
+  seedConnections();
+  const grid = document.getElementById('networkGrid');
+  const feed = document.getElementById('referralFeed');
+  if (!grid) return;
+
+  let totalSent=0, totalRecv=0;
+  agentConnections.forEach(c=>{ totalSent+=c.referralsSent||0; totalRecv+=c.referralsRecv||0; });
+
+  document.getElementById('netStatConn').textContent = agentConnections.length;
+  document.getElementById('netStatSent').textContent = totalSent;
+  document.getElementById('netStatRecv').textContent = totalRecv;
+  document.getElementById('netStatViews').textContent = Math.floor(Math.random()*20)+5;
+
+  grid.innerHTML = agentConnections.map(c => {
+    const initials = c.name.split(' ').map(w=>w[0]).join('').substring(0,2);
+    return `<div class="net-card">
+      <div class="net-avatar" style="background:${c.color};color:white;font-weight:700;">${initials}</div>
+      <div style="font-weight:600;font-size:.9rem;">${c.name}</div>
+      <div style="font-size:.8rem;color:#64748b;">${c.trade} · ${c.location}</div>
+      <div style="font-size:.8rem;color:#f59e0b;">⭐ ${c.rating}</div>
+      <button class="btn btn-outline btn-sm" style="margin-top:.5rem;" onclick="toast('Message sent!')">📨 Message</button>
+    </div>`;
+  }).join('');
+
+  const referrals = [
+    { text:"You referred Sanders PM to Mike's Plumbing", date:'Mar 14' },
+    { text:'Bright Electric referred you a new client — Hart Properties', date:'Mar 12' },
+    { text:'You referred Valley Rentals to Premier Painting', date:'Mar 10' },
+    { text:'Utah Property Law referred you a buyer lead', date:'Mar 5' }
+  ];
+  feed.innerHTML = referrals.map(r => `<div class="ref-item">
+    <span style="font-size:1.1rem;">🔄</span>
+    <div><div style="font-size:.85rem;">${r.text}</div><div style="font-size:.75rem;color:#94a3b8;">${r.date}</div></div>
+  </div>`).join('');
+}
+
+// ── PROFILE TAB ──────────────────────────────────────
+function loadAgentProfile() {
+  if (!agentProfile.name) return;
+  document.getElementById('profName').value = agentProfile.name||'';
+  document.getElementById('profTitle').value = agentProfile.title||'';
+  document.getElementById('profBrokerage').value = agentProfile.brokerage||'';
+  document.getElementById('profLicense').value = agentProfile.license||'';
+  document.getElementById('profAreas').value = agentProfile.areas||'';
+  document.getElementById('profLangs').value = agentProfile.languages||'';
+  document.getElementById('profBio').value = agentProfile.bio||'';
+  document.getElementById('profPhone').value = agentProfile.phone||'';
+  document.getElementById('profEmail').value = agentProfile.email||'';
+  document.getElementById('profWeb').value = agentProfile.website||'';
+  if (agentProfile.specialties) {
+    document.querySelectorAll('#profSpecialties input[type="checkbox"]').forEach(cb => {
+      cb.checked = agentProfile.specialties.includes(cb.value);
+    });
+  }
+}
+
+function saveAgentProfile() {
+  const specialties = [];
+  document.querySelectorAll('#profSpecialties input[type="checkbox"]:checked').forEach(cb => specialties.push(cb.value));
+  agentProfile = {
+    name: document.getElementById('profName').value,
+    title: document.getElementById('profTitle').value,
+    brokerage: document.getElementById('profBrokerage').value,
+    license: document.getElementById('profLicense').value,
+    areas: document.getElementById('profAreas').value,
+    languages: document.getElementById('profLangs').value,
+    bio: document.getElementById('profBio').value,
+    phone: document.getElementById('profPhone').value,
+    email: document.getElementById('profEmail').value,
+    website: document.getElementById('profWeb').value,
+    specialties: specialties,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('rv_agent_profile', JSON.stringify(agentProfile));
+  toast('Profile saved!');
+}
+
+// ── INIT ON TAB SWITCH ──────────────────────────────
+const _origShowSec = showSec;
+// Override showSec to render new tabs
+const origShowSecRef = showSec;
+showSec = function(name, el) {
+  origShowSecRef(name, el);
+  if (name === 'invoices') renderInvoiceTable();
+  if (name === 'followups') renderFollowUps();
+  if (name === 'network') renderNetworkTab();
+  if (name === 'profile') loadAgentProfile();
+};
 
 function toast(msg) {
   const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
