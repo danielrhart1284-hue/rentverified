@@ -50,6 +50,9 @@ const templates: Record<string, (data: any) => string> = {
   funding_status: (d) =>
     `${d.name}, your business funding application status: ${d.status}. View details: ${d.link || 'https://rentverified.com/funding.html'} - RentVerified`,
 
+  direct: (d) =>
+    d.customMessage || d.body || 'You have a new message from your property manager.',
+
   custom: (d) =>
     d.message,
 }
