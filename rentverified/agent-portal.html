@@ -77,6 +77,18 @@
     #toast { position:fixed; bottom:2rem; right:2rem; background:#1e293b; color:#fff; padding:.75rem 1.25rem; border-radius:10px; font-size:.88rem; opacity:0; transform:translateY(10px); transition:all .3s; z-index:9999; pointer-events:none; }
     #toast.show { opacity:1; transform:translateY(0); }
     @media(max-width:768px){ .ap-wrapper{grid-template-columns:1fr;} .ap-sidebar{display:none;} .pipeline{grid-template-columns:1fr 1fr;} }
+    /* Edit Modal */
+    .modal-overlay { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center; }
+    .modal-box { background:#fff;border-radius:14px;padding:2rem;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative; }
+    .modal-box h2 { font-size:1.15rem;font-weight:800;color:#1e293b;margin-bottom:1.25rem; }
+    .modal-close { position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#94a3b8; }
+    .modal-close:hover { color:#1e293b; }
+    .btn-danger { background:#ef4444;color:#fff; }
+    .btn-danger:hover { background:#dc2626; }
+    .pipe-move-btn { padding:3px 8px;font-size:.7rem;font-weight:600;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;background:#f8fafc;color:#374151;margin-top:4px;display:inline-block;margin-right:3px; }
+    .pipe-move-btn:hover { background:#8b5cf6;color:#fff;border-color:#8b5cf6; }
+    .comm-action { cursor:pointer;font-size:.88rem;margin-left:8px;opacity:.6; }
+    .comm-action:hover { opacity:1; }
   </style>
 </head>
 <body>
@@ -396,7 +408,7 @@
             <div class="fg"><label>Brokerage</label><input id="sBrok" placeholder="e.g. Self / KW / Century 21"></div>
             <div class="fg"><label>Service Areas (zip codes)</label><input id="sZips" placeholder="84058, 84601, 84003"></div>
           </div>
-          <button class="btn btn-agent" style="margin-top:1rem;" onclick="toast('✅ Profile saved!')">Save Profile</button>
+          <button class="btn btn-agent" style="margin-top:1rem;" onclick="saveAgentSettings()">Save Profile</button>
         </div>
       </div>
       <div class="panel">
@@ -417,6 +429,62 @@
 </div>
 </div>
 
+<!-- Client Edit Modal -->
+<div id="clientEditOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeClientModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeClientModal()">&times;</button>
+    <h2>Edit Client</h2>
+    <input type="hidden" id="editIdx">
+    <div class="form-grid">
+      <div class="fg"><label>Owner Name *</label><input id="eName"></div>
+      <div class="fg"><label>Email</label><input id="eEmail" type="email"></div>
+      <div class="fg"><label>Phone</label><input id="ePhone" type="tel"></div>
+      <div class="fg"><label>Property Address *</label><input id="eProp"></div>
+      <div class="fg"><label>Monthly Rent ($)</label><input id="eRent" type="number"></div>
+      <div class="fg"><label>Commission Type</label>
+        <select id="eCommType">
+          <option value="flat">Flat fee — one month's rent</option>
+          <option value="pct">Percentage — % of annual rent</option>
+          <option value="monthly">Monthly retainer</option>
+        </select>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select id="eStatus">
+          <option value="active">Active</option>
+          <option value="rented">Rented</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+      <div class="fg" style="grid-column:1/-1;"><label>Notes</label><textarea id="eNotes"></textarea></div>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+      <button class="btn btn-agent" onclick="saveClientEdit()">Save Changes</button>
+      <button class="btn btn-outline" onclick="closeClientModal()">Cancel</button>
+      <button class="btn btn-danger" style="margin-left:auto;" onclick="deleteClient()">Delete Client</button>
+    </div>
+  </div>
+</div>
+
+<!-- Commission Edit Modal -->
+<div id="commEditOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeCommModal()">
+  <div class="modal-box" style="max-width:440px;">
+    <button class="modal-close" onclick="closeCommModal()">&times;</button>
+    <h2>Edit Commission</h2>
+    <input type="hidden" id="editCommIdx">
+    <div class="form-grid">
+      <div class="fg"><label>Property</label><input id="ecProp"></div>
+      <div class="fg"><label>Amount ($)</label><input id="ecAmt" type="number"></div>
+      <div class="fg"><label>Date</label><input id="ecDate" type="date"></div>
+      <div class="fg"><label>Notes</label><input id="ecNote"></div>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
+      <button class="btn btn-success" onclick="saveCommEdit()">Save</button>
+      <button class="btn btn-outline" onclick="closeCommModal()">Cancel</button>
+      <button class="btn btn-danger" style="margin-left:auto;" onclick="deleteCommission()">Delete</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <!-- Supabase Backend -->
@@ -426,16 +494,18 @@
 
 <script>
 // ── DATA ─────────────────────────────────────────────
-let clients = [], commissions = [];
+let clients = [], commissions = [], pipelineLeads = [];
 
 const PIPELINE_STAGES = ['New Inquiry','Showing Scheduled','Application Sent','Screening','Approved / Denied'];
 
 function loadData() {
   try { clients = JSON.parse(localStorage.getItem('rv_agent_clients')||'[]'); } catch(e){ clients=[]; }
   try { commissions = JSON.parse(localStorage.getItem('rv_agent_comm')||'[]'); } catch(e){ commissions=[]; }
+  try { pipelineLeads = JSON.parse(localStorage.getItem('rv_agent_pipeline')||'[]'); } catch(e){ pipelineLeads=[]; }
 }
 function saveClients() { localStorage.setItem('rv_agent_clients', JSON.stringify(clients)); }
 function saveComm()    { localStorage.setItem('rv_agent_comm', JSON.stringify(commissions)); }
+function savePipeline(){ localStorage.setItem('rv_agent_pipeline', JSON.stringify(pipelineLeads)); }
 function uid() { return 'AG-'+Date.now().toString(36).toUpperCase(); }
 
 function loadSample() {
@@ -449,6 +519,16 @@ function loadSample() {
     { id:'CM-1', prop:'12 Elm Ave, Lehi UT', amount:1800, date:'2026-02-01', note:"One month's rent — Sarah Park" },
   ];
   saveClients(); saveComm();
+  if (!pipelineLeads.length) {
+    pipelineLeads = [
+      { id:'PL-1', name:'Alex Torres',    prop:'245 N 500 W, Provo',    stage:0 },
+      { id:'PL-2', name:'Maria Chen',     prop:'245 N 500 W, Provo',    stage:1 },
+      { id:'PL-3', name:'James Williams', prop:'890 Center St #3, Orem', stage:2 },
+      { id:'PL-4', name:'Priya Patel',    prop:'890 Center St #3, Orem', stage:3 },
+      { id:'PL-5', name:'Carlos Ruiz',    prop:'12 Elm Ave, Lehi',       stage:4 },
+    ];
+    savePipeline();
+  }
 }
 
 // ── AUTH ─────────────────────────────────────────────
@@ -558,7 +638,7 @@ function agentLogout() {
 document.addEventListener('keydown',e=>{ if(e.key==='Enter' && document.getElementById('apanel-login').style.display!=='none') agentLogin(); });
 
 // ── INIT ─────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded',()=>{ loadData(); loadSample(); renderAll(); setDefaultDate(); });
+document.addEventListener('DOMContentLoaded',()=>{ loadData(); loadSample(); renderAll(); setDefaultDate(); loadAgentSettings(); });
 
 function setDefaultDate() {
   const d = document.getElementById('commDate');
@@ -626,8 +706,8 @@ function addClient() {
 
 function renderClientList() {
   const el = document.getElementById('clientList');
-  el.innerHTML = clients.length ? clients.map(c=>`
-    <div class="client-card">
+  el.innerHTML = clients.length ? clients.map((c,i)=>`
+    <div class="client-card" style="cursor:pointer;" onclick="editClient(${i})">
       <div>
         <div style="font-weight:700;color:#1e293b;">${c.name}</div>
         <div style="font-size:.82rem;color:#64748b;">🏠 ${c.prop}</div>
@@ -637,9 +717,58 @@ function renderClientList() {
         <span class="badge ${c.status==='rented'?'badge-rented':c.status==='active'?'badge-active':'badge-pending'}">${c.status}</span>
         <div style="font-size:.82rem;color:#374151;margin-top:.35rem;font-weight:600;">$${(c.rent||0).toLocaleString()}/mo</div>
         <div style="font-size:.75rem;color:#94a3b8;">${c.phone}</div>
+        <div style="font-size:.72rem;color:#8b5cf6;margin-top:.25rem;">Click to edit</div>
       </div>
     </div>`).join('')
   : '<div style="text-align:center;padding:2.5rem;color:#94a3b8;"><div style="font-size:2rem;">👥</div><p>No clients yet. Add your first client above.</p></div>';
+}
+
+// ── CLIENT EDIT/DELETE ─────────────────────────────────
+function editClient(idx) {
+  const c = clients[idx];
+  if (!c) return;
+  document.getElementById('editIdx').value = idx;
+  document.getElementById('eName').value = c.name || '';
+  document.getElementById('eEmail').value = c.email || '';
+  document.getElementById('ePhone').value = c.phone || '';
+  document.getElementById('eProp').value = c.prop || '';
+  document.getElementById('eRent').value = c.rent || '';
+  document.getElementById('eCommType').value = c.commType || 'flat';
+  document.getElementById('eStatus').value = c.status || 'active';
+  document.getElementById('eNotes').value = c.notes || '';
+  document.getElementById('clientEditOverlay').style.display = 'flex';
+}
+
+function closeClientModal() {
+  document.getElementById('clientEditOverlay').style.display = 'none';
+}
+
+function saveClientEdit() {
+  const idx = parseInt(document.getElementById('editIdx').value);
+  if (isNaN(idx) || !clients[idx]) return;
+  clients[idx].name = document.getElementById('eName').value.trim();
+  clients[idx].email = document.getElementById('eEmail').value.trim();
+  clients[idx].phone = document.getElementById('ePhone').value.trim();
+  clients[idx].prop = document.getElementById('eProp').value.trim();
+  clients[idx].rent = parseFloat(document.getElementById('eRent').value) || 0;
+  clients[idx].commType = document.getElementById('eCommType').value;
+  clients[idx].status = document.getElementById('eStatus').value;
+  clients[idx].notes = document.getElementById('eNotes').value.trim();
+  saveClients();
+  closeClientModal();
+  renderAll();
+  toast('Client updated!');
+}
+
+function deleteClient() {
+  const idx = parseInt(document.getElementById('editIdx').value);
+  if (isNaN(idx) || !clients[idx]) return;
+  if (!confirm('Delete this client? This cannot be undone.')) return;
+  clients.splice(idx, 1);
+  saveClients();
+  closeClientModal();
+  renderAll();
+  toast('Client deleted.');
 }
 
 // ── LISTINGS ──────────────────────────────────────────
@@ -678,24 +807,30 @@ function renderListingSnap() {
 }
 
 // ── PIPELINE ──────────────────────────────────────────
-const SAMPLE_LEADS = [
-  { name:'Alex Torres',    prop:'245 N 500 W, Provo',    stage:0 },
-  { name:'Maria Chen',     prop:'245 N 500 W, Provo',    stage:1 },
-  { name:'James Williams', prop:'890 Center St #3, Orem', stage:2 },
-  { name:'Priya Patel',    prop:'890 Center St #3, Orem', stage:3 },
-  { name:'Carlos Ruiz',    prop:'12 Elm Ave, Lehi',       stage:4 },
-];
-
 function renderPipeline() {
   const board = document.getElementById('pipelineBoard');
-  board.innerHTML = PIPELINE_STAGES.map((stage, i)=>{
-    const leads = SAMPLE_LEADS.filter(l=>l.stage===i);
+  board.innerHTML = PIPELINE_STAGES.map((stage, si)=>{
+    const stageLeads = pipelineLeads.filter(l=>l.stage===si);
     return `<div class="pipe-col">
-      <h4>${stage} <span style="float:right;">${leads.length}</span></h4>
-      ${leads.map(l=>`<div class="pipe-card"><div class="pname">${l.name}</div><div class="pmeta">${l.prop}</div></div>`).join('')}
-      ${!leads.length?`<div style="font-size:.78rem;color:#cbd5e1;text-align:center;padding:.5rem 0;">Empty</div>`:''}
+      <h4>${stage} <span style="float:right;">${stageLeads.length}</span></h4>
+      ${stageLeads.map(l=>{
+        const moves = [];
+        if(si>0) moves.push(`<span class="pipe-move-btn" onclick="movePipeLead('${l.id}',${si-1})">← ${PIPELINE_STAGES[si-1].split(' ')[0]}</span>`);
+        if(si<PIPELINE_STAGES.length-1) moves.push(`<span class="pipe-move-btn" onclick="movePipeLead('${l.id}',${si+1})">${PIPELINE_STAGES[si+1].split(' ')[0]} →</span>`);
+        return `<div class="pipe-card"><div class="pname">${l.name}</div><div class="pmeta">${l.prop}</div><div style="margin-top:4px;">${moves.join('')}</div></div>`;
+      }).join('')}
+      ${!stageLeads.length?`<div style="font-size:.78rem;color:#cbd5e1;text-align:center;padding:.5rem 0;">Empty</div>`:''}
     </div>`;
   }).join('');
+}
+
+function movePipeLead(id, newStage) {
+  const lead = pipelineLeads.find(l=>l.id===id);
+  if (!lead) return;
+  lead.stage = newStage;
+  savePipeline();
+  renderPipeline();
+  toast('Moved to ' + PIPELINE_STAGES[newStage]);
 }
 
 // ── COMMISSIONS ───────────────────────────────────────
@@ -723,12 +858,67 @@ function renderCommissions() {
   if(el) el.textContent = '$'+total.toLocaleString();
   const list = document.getElementById('commList');
   if(!list) return;
-  list.innerHTML = commissions.length ? commissions.map(c=>`
+  list.innerHTML = commissions.length ? commissions.map((c,i)=>`
     <div class="comm-row">
       <div><div style="font-weight:600;font-size:.88rem;">${c.prop}</div>${c.note?`<div style="font-size:.78rem;color:#64748b;">${c.note}</div>`:''}</div>
-      <div style="text-align:right;"><div style="font-weight:700;color:#059669;">+$${c.amount.toLocaleString()}</div><div style="font-size:.75rem;color:#94a3b8;">${c.date}</div></div>
+      <div style="text-align:right;display:flex;align-items:center;gap:.5rem;">
+        <div><div style="font-weight:700;color:#059669;">+$${c.amount.toLocaleString()}</div><div style="font-size:.75rem;color:#94a3b8;">${c.date}</div></div>
+        <span class="comm-action" title="Edit" onclick="editCommission(${i})">&#9998;</span>
+        <span class="comm-action" title="Delete" onclick="deleteCommissionDirect(${i})" style="color:#ef4444;">&#128465;</span>
+      </div>
     </div>`).join('')
   : '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:.88rem;">No commissions logged yet.</div>';
+}
+
+// ── COMMISSION EDIT/DELETE ─────────────────────────────
+function editCommission(idx) {
+  const c = commissions[idx];
+  if (!c) return;
+  document.getElementById('editCommIdx').value = idx;
+  document.getElementById('ecProp').value = c.prop || '';
+  document.getElementById('ecAmt').value = c.amount || '';
+  document.getElementById('ecDate').value = c.date || '';
+  document.getElementById('ecNote').value = c.note || '';
+  document.getElementById('commEditOverlay').style.display = 'flex';
+}
+
+function closeCommModal() {
+  document.getElementById('commEditOverlay').style.display = 'none';
+}
+
+function saveCommEdit() {
+  const idx = parseInt(document.getElementById('editCommIdx').value);
+  if (isNaN(idx) || !commissions[idx]) return;
+  commissions[idx].prop = document.getElementById('ecProp').value.trim();
+  commissions[idx].amount = parseFloat(document.getElementById('ecAmt').value) || 0;
+  commissions[idx].date = document.getElementById('ecDate').value;
+  commissions[idx].note = document.getElementById('ecNote').value.trim();
+  saveComm();
+  closeCommModal();
+  renderCommissions();
+  renderStats();
+  toast('Commission updated!');
+}
+
+function deleteCommission() {
+  const idx = parseInt(document.getElementById('editCommIdx').value);
+  if (isNaN(idx) || !commissions[idx]) return;
+  if (!confirm('Delete this commission entry?')) return;
+  commissions.splice(idx, 1);
+  saveComm();
+  closeCommModal();
+  renderCommissions();
+  renderStats();
+  toast('Commission deleted.');
+}
+
+function deleteCommissionDirect(idx) {
+  if (!confirm('Delete this commission entry?')) return;
+  commissions.splice(idx, 1);
+  saveComm();
+  renderCommissions();
+  renderStats();
+  toast('Commission deleted.');
 }
 
 // ── SECTION NAV ───────────────────────────────────────
@@ -740,6 +930,38 @@ function showSec(name, el) {
   document.querySelectorAll('.ap-sidebar a').forEach(a=>a.classList.remove('active'));
   if(el) el.classList.add('active');
   window.scrollTo(0,0);
+}
+
+// ── AGENT SETTINGS SAVE/LOAD ─────────────────────────
+function saveAgentSettings() {
+  const settings = {
+    name: document.getElementById('sName').value,
+    email: document.getElementById('sEmail').value,
+    phone: document.getElementById('sPhone').value,
+    license: document.getElementById('sLic').value,
+    brokerage: document.getElementById('sBrok').value,
+    serviceAreas: document.getElementById('sZips').value
+  };
+  localStorage.setItem('rv_agent_settings', JSON.stringify(settings));
+  // Update sidebar name if changed
+  if (settings.name) {
+    document.getElementById('agentName').textContent = settings.name;
+    document.getElementById('agentFirstName').textContent = settings.name.split(' ')[0];
+  }
+  toast('Profile saved!');
+}
+
+function loadAgentSettings() {
+  try {
+    const settings = JSON.parse(localStorage.getItem('rv_agent_settings'));
+    if (!settings) return;
+    if (settings.name) document.getElementById('sName').value = settings.name;
+    if (settings.email) document.getElementById('sEmail').value = settings.email;
+    if (settings.phone) document.getElementById('sPhone').value = settings.phone;
+    if (settings.license) document.getElementById('sLic').value = settings.license;
+    if (settings.brokerage) document.getElementById('sBrok').value = settings.brokerage;
+    if (settings.serviceAreas) document.getElementById('sZips').value = settings.serviceAreas;
+  } catch(e) {}
 }
 
 function toast(msg) {

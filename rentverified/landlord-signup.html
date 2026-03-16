@@ -273,6 +273,120 @@
     .ob-toggle-tag { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--gray-200); color: var(--gray-500); flex-shrink: 0; }
     .ob-toggle-tag.free { background: #dcfce7; color: #15803d; }
     .ob-toggle-tag.earn { background: #d1fae5; color: #065f46; }
+
+    /* ── Tenant CRUD Modal ── */
+    .tenant-modal-overlay {
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;
+      align-items:center;justify-content:center;padding:1rem;
+    }
+    .tenant-modal-overlay.open { display:flex; }
+    .tenant-modal {
+      background:white;border-radius:14px;width:100%;max-width:640px;max-height:90vh;
+      overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    }
+    .tenant-modal-header {
+      display:flex;align-items:center;justify-content:space-between;
+      padding:1.25rem 1.5rem;border-bottom:1px solid #e5e7eb;position:sticky;top:0;background:white;z-index:1;border-radius:14px 14px 0 0;
+    }
+    .tenant-modal-header h2 { font-size:1.1rem;font-weight:800;margin:0; }
+    .tenant-modal-close {
+      width:32px;height:32px;border-radius:8px;border:none;background:#f3f4f6;
+      font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    }
+    .tenant-modal-close:hover { background:#e5e7eb; }
+    .tenant-modal-body { padding:1.5rem; }
+    .tenant-modal-footer {
+      display:flex;align-items:center;gap:.75rem;padding:1rem 1.5rem;
+      border-top:1px solid #e5e7eb;position:sticky;bottom:0;background:white;border-radius:0 0 14px 14px;
+    }
+    .tm-section-title {
+      font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+      color:#6b7280;margin:1.25rem 0 .6rem 0;padding-bottom:.4rem;border-bottom:1px solid #e5e7eb;
+    }
+    .tm-section-title:first-child { margin-top:0; }
+    .tm-grid { display:grid;grid-template-columns:1fr 1fr;gap:.6rem; }
+    .tm-field { display:flex;flex-direction:column;gap:.2rem; }
+    .tm-field.full { grid-column:1/-1; }
+    .tm-field label { font-size:.78rem;font-weight:600;color:#374151; }
+    .tm-field input, .tm-field select, .tm-field textarea {
+      padding:.5rem .65rem;border:1px solid #d1d5db;border-radius:8px;font-size:.85rem;
+      font-family:inherit;transition:border-color .15s;
+    }
+    .tm-field input:focus, .tm-field select:focus, .tm-field textarea:focus {
+      outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);
+    }
+    .tm-toggle-row {
+      display:flex;align-items:center;gap:.75rem;padding:.5rem 0;
+    }
+    .tm-toggle-row label { font-size:.85rem;font-weight:600; }
+    .tm-status-group { display:flex;gap:.75rem;flex-wrap:wrap;padding:.5rem 0; }
+    .tm-status-group label {
+      display:flex;align-items:center;gap:.35rem;font-size:.85rem;font-weight:500;cursor:pointer;
+      padding:.4rem .75rem;border:1px solid #d1d5db;border-radius:8px;transition:all .15s;
+    }
+    .tm-status-group input[type=radio] { accent-color:#3b82f6; }
+    .tm-status-group label:has(input:checked) { border-color:#3b82f6;background:#eff6ff; }
+    .btn-delete-tenant {
+      background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;padding:.45rem 1rem;
+      border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .15s;
+    }
+    .btn-delete-tenant:hover { background:#fee2e2;border-color:#f87171; }
+
+    /* Tenant row enhancements */
+    .tenant-status-dot {
+      display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;
+    }
+    .tenant-status-dot.active { background:#10b981; }
+    .tenant-status-dot.on-notice { background:#f59e0b; }
+    .tenant-status-dot.past { background:#ef4444; }
+    .tenant-row-actions { display:flex;gap:4px;flex-wrap:wrap; }
+    .tenant-row-actions button { font-size:.75rem;padding:.3rem .6rem; }
+
+    @media (max-width:640px) {
+      .tenant-modal { max-width:95vw;max-height:95vh; }
+      .tm-grid { grid-template-columns:1fr; }
+      .tenant-modal-footer { flex-wrap:wrap; }
+    }
+
+    /* ── Payment Management Styles ── */
+    .pm-overlay { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:none;align-items:center;justify-content:center; }
+    .pm-overlay.active { display:flex; }
+    .pm-modal { background:#fff;border-radius:14px;width:95%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25); }
+    .pm-modal-header { display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid #e5e7eb; }
+    .pm-modal-header h3 { font-size:1.1rem;font-weight:700;margin:0; }
+    .pm-modal-close { background:none;border:none;font-size:1.4rem;cursor:pointer;color:#6b7280;line-height:1; }
+    .pm-modal-close:hover { color:#111; }
+    .pm-modal-body { padding:1.25rem 1.5rem; }
+    .pm-modal-footer { padding:1rem 1.5rem;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:0.75rem; }
+    .pm-field { margin-bottom:1rem; }
+    .pm-field label { display:block;font-weight:600;font-size:0.85rem;margin-bottom:4px;color:#374151; }
+    .pm-field input, .pm-field select, .pm-field textarea { width:100%;padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;box-sizing:border-box; }
+    .pm-field textarea { min-height:60px;resize:vertical; }
+    .pm-field .pm-radio-group { display:flex;gap:1.25rem;margin-top:4px; }
+    .pm-field .pm-radio-group label { display:inline-flex;align-items:center;gap:5px;font-weight:500;cursor:pointer; }
+    .pm-field .pm-radio-group input[type="radio"] { width:auto; }
+    .pm-filters { display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;align-items:center; }
+    .pm-filters select, .pm-filters input { padding:0.35rem 0.6rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.82rem; }
+    .pm-totals { display:flex;gap:1.5rem;padding:0.75rem 1rem;background:#f8fafc;border-top:1px solid #e5e7eb;font-size:0.875rem;font-weight:600; }
+    .pm-totals .pm-total-confirmed { color:#15803d; }
+    .pm-totals .pm-total-pending { color:#d97706; }
+    .pm-badge-confirmed { background:#dcfce7;color:#15803d;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;display:inline-block; }
+    .pm-badge-pending { background:#fef3c7;color:#92400e;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;display:inline-block; }
+    .pm-badge-voided { background:#fee2e2;color:#b91c1c;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;display:inline-block; }
+    .pm-row-voided td { text-decoration:line-through;opacity:0.6; }
+    .pm-row-voided td:last-child { text-decoration:none;opacity:1; }
+    .pm-row-voided td .pm-badge-voided { text-decoration:none; }
+    .pm-action-btn { background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:4px;font-size:0.9rem;line-height:1; }
+    .pm-action-btn:hover { background:#f3f4f6; }
+    .pm-action-btn.void-btn { color:#dc2626; }
+    .pm-action-btn.void-btn:hover { background:#fef2f2; }
+    .pm-action-btn.edit-btn { color:#2563eb; }
+    .pm-action-btn.edit-btn:hover { background:#eff6ff; }
+    @media (max-width:640px) {
+      .pm-modal { max-width:98vw; }
+      .pm-filters { flex-direction:column; }
+      .pm-totals { flex-direction:column;gap:0.5rem; }
+    }
   </style>
   <!-- Google Maps Places API (replace YOUR_API_KEY with actual key to enable autocomplete) -->
   <script>
@@ -1257,18 +1371,20 @@
 
       <!-- ACCOUNTS TAB (admin: see each account, suspend/unsuspend) -->
       <div id="dtab-clients" class="tab-content">
-        <div class="page-header">
-          <div><h1>Accounts</h1><p>See every account. View listings, suspend or unsuspend access from this page.</p></div>
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+          <div><h1>Accounts</h1><p>Manage tenants, view listings, suspend or unsuspend access.</p></div>
+          <button class="btn btn-primary btn-sm" onclick="addTenant()" style="display:flex;align-items:center;gap:.4rem;white-space:nowrap;">+ Add Tenant</button>
         </div>
         <div class="card" style="margin-bottom:1.5rem;">
           <div class="card-body" style="padding:0;">
             <div class="property-row" style="background:var(--gray-100);font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray-600);">
               <div style="width:48px;"></div>
               <div style="flex:2;">Account</div>
-              <div style="flex:1;">Email</div>
-              <div style="flex:1;">Listings</div>
-              <div style="flex:1;">Status</div>
-              <div style="width:180px;">Actions</div>
+              <div style="flex:1;">Phone</div>
+              <div style="flex:1;">Property</div>
+              <div style="flex:0.8;">Lease End</div>
+              <div style="flex:0.7;">Status</div>
+              <div style="width:200px;">Actions</div>
             </div>
             <div id="all-clients-list-body"></div>
           </div>
@@ -1294,6 +1410,90 @@
               </div>
               <div id="client-detail-listings-body"></div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TENANT EDIT/ADD MODAL -->
+      <div id="tenant-modal-overlay" class="tenant-modal-overlay" onclick="if(event.target===this)closeTenantModal()">
+        <div class="tenant-modal">
+          <div class="tenant-modal-header">
+            <h2 id="tenant-modal-title">Edit Tenant</h2>
+            <button class="tenant-modal-close" onclick="closeTenantModal()">&times;</button>
+          </div>
+          <div class="tenant-modal-body">
+            <input type="hidden" id="tm-id" />
+
+            <div class="tm-section-title" style="margin-top:0;">Personal Information</div>
+            <div class="tm-grid">
+              <div class="tm-field"><label>First Name</label><input type="text" id="tm-firstName" placeholder="Jane" /></div>
+              <div class="tm-field"><label>Last Name</label><input type="text" id="tm-lastName" placeholder="Doe" /></div>
+              <div class="tm-field"><label>Email</label><input type="email" id="tm-email" placeholder="jane@example.com" /></div>
+              <div class="tm-field"><label>Phone</label><input type="tel" id="tm-phone" placeholder="801-555-1234" /></div>
+              <div class="tm-field full"><label>Alt Phone</label><input type="tel" id="tm-altPhone" placeholder="Optional alternative number" /></div>
+            </div>
+
+            <div class="tm-section-title">Emergency Contact</div>
+            <div class="tm-grid">
+              <div class="tm-field full"><label>Contact Name</label><input type="text" id="tm-ecName" placeholder="John Doe" /></div>
+              <div class="tm-field"><label>Phone</label><input type="tel" id="tm-ecPhone" placeholder="801-555-5678" /></div>
+              <div class="tm-field"><label>Relationship</label><input type="text" id="tm-ecRelationship" placeholder="Spouse, Parent, etc." /></div>
+            </div>
+
+            <div class="tm-section-title">Lease Information</div>
+            <div class="tm-grid">
+              <div class="tm-field"><label>Property</label><select id="tm-property"><option value="">Select property...</option></select></div>
+              <div class="tm-field"><label>Unit / Apt #</label><input type="text" id="tm-unit" placeholder="2A" /></div>
+              <div class="tm-field"><label>Monthly Rent</label><input type="number" id="tm-monthlyRent" placeholder="1200" min="0" step="1" /></div>
+              <div class="tm-field"><label>Security Deposit</label><input type="number" id="tm-securityDeposit" placeholder="1200" min="0" step="1" /></div>
+              <div class="tm-field"><label>Lease Start</label><input type="date" id="tm-leaseStart" /></div>
+              <div class="tm-field"><label>Lease End</label><input type="date" id="tm-leaseEnd" /></div>
+              <div class="tm-field">
+                <label>Deposit Paid</label>
+                <select id="tm-depositPaid"><option value="true">Yes</option><option value="false">No</option></select>
+              </div>
+            </div>
+
+            <div class="tm-section-title">Payment Preferences</div>
+            <div class="tm-grid">
+              <div class="tm-field">
+                <label>Preferred Method</label>
+                <select id="tm-preferredMethod">
+                  <option value="">Not set</option>
+                  <option value="cashApp">Cash App</option>
+                  <option value="zelle">Zelle</option>
+                  <option value="venmo">Venmo</option>
+                  <option value="check">Check</option>
+                  <option value="bankTransfer">Bank Transfer</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="tm-field">
+                <label>Auto-pay Enrolled</label>
+                <select id="tm-autoPay"><option value="false">No</option><option value="true">Yes</option></select>
+              </div>
+              <div class="tm-field"><label>Cash App</label><input type="text" id="tm-cashApp" placeholder="$cashtag" /></div>
+              <div class="tm-field"><label>Zelle</label><input type="text" id="tm-zelle" placeholder="email or phone" /></div>
+              <div class="tm-field full"><label>Venmo</label><input type="text" id="tm-venmo" placeholder="@username" /></div>
+            </div>
+
+            <div class="tm-section-title">Notes</div>
+            <div class="tm-field full" style="margin-bottom:.75rem;">
+              <textarea id="tm-notes" rows="3" placeholder="Internal notes about this tenant..." style="padding:.5rem .65rem;border:1px solid #d1d5db;border-radius:8px;font-size:.85rem;font-family:inherit;resize:vertical;width:100%;box-sizing:border-box;"></textarea>
+            </div>
+
+            <div class="tm-section-title">Status</div>
+            <div class="tm-status-group">
+              <label><input type="radio" name="tm-status" value="active" checked /> Active</label>
+              <label><input type="radio" name="tm-status" value="on-notice" /> On Notice</label>
+              <label><input type="radio" name="tm-status" value="past" /> Past Tenant</label>
+            </div>
+          </div>
+          <div class="tenant-modal-footer">
+            <button class="btn-delete-tenant" id="tm-delete-btn" onclick="deleteTenant()" style="display:none;">Delete Tenant</button>
+            <div style="flex:1;"></div>
+            <button class="btn btn-outline btn-sm" onclick="closeTenantModal()">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="tm-save-btn" onclick="saveTenant()">Save Changes</button>
           </div>
         </div>
       </div>
@@ -1356,58 +1556,108 @@
 
       <!-- PAYMENTS TAB -->
       <div id="dtab-payments" class="tab-content">
-        <div class="page-header"><h1>Rent Payments</h1><p>Confirm incoming payments and configure your fee policy for card transactions.</p></div>
-        <div class="alert alert-warning" style="margin-bottom:1.5rem;">
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-          2 payments are awaiting your confirmation. Review the screenshots and confirm once you've received the funds.
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+          <div><h1>Rent Payments</h1><p>Track, record and manage all rent payments.</p></div>
+          <button class="btn btn-primary" onclick="openRecordPayment()" style="white-space:nowrap;">+ Record Payment</button>
         </div>
+        <div id="pm-pending-alert" class="alert alert-warning" style="margin-bottom:1.5rem;display:none;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          <span id="pm-pending-alert-text"></span>
+        </div>
+        <!-- Filters -->
+        <div class="pm-filters">
+          <select id="pm-filter-tenant" onchange="renderPaymentList()"><option value="">All Tenants</option></select>
+          <select id="pm-filter-status" onchange="renderPaymentList()">
+            <option value="">All Statuses</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="voided">Voided</option>
+          </select>
+          <select id="pm-filter-method" onchange="renderPaymentList()">
+            <option value="">All Methods</option>
+            <option value="cashApp">Cash App</option>
+            <option value="zelle">Zelle</option>
+            <option value="venmo">Venmo</option>
+            <option value="ach">ACH / Bank Transfer</option>
+            <option value="card">Debit / Credit Card</option>
+            <option value="check">Check</option>
+            <option value="moneyOrder">Money Order</option>
+            <option value="cash">Cash</option>
+          </select>
+          <input type="date" id="pm-filter-from" onchange="renderPaymentList()" title="From date" />
+          <input type="date" id="pm-filter-to" onchange="renderPaymentList()" title="To date" />
+        </div>
+        <!-- Payment table -->
         <div class="card">
-          <div class="card-body" style="padding:0;">
-            <table>
-              <thead><tr><th>Tenant</th><th>Property</th><th>Period</th><th>Method</th><th>Amount</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><strong>Jane Doe</strong></td>
-                  <td style="font-size:0.875rem;">123 Maple St 2A</td>
-                  <td style="font-size:0.875rem;">Mar 2026</td>
-                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
-                  <td style="font-weight:800;">$1,200</td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">Mar 4 · 2:15pm</td>
-                  <td><span class="badge badge-pending">Pending</span></td>
-                  <td>
-                    <div style="display:flex;gap:6px;">
-                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;" onclick="showWIP('Screenshot viewer is coming soon.')">View Screenshot</button>
-                      <button class="btn btn-success btn-sm" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">✓ Confirm</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Robert Lee</strong></td>
-                  <td style="font-size:0.875rem;">456 Oak Ave 1B</td>
-                  <td style="font-size:0.875rem;">Mar 2026</td>
-                  <td><span style="color:#7c3aed;font-weight:600;">💜 Zelle</span></td>
-                  <td style="font-weight:800;">$950</td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">Mar 3 · 10:22am</td>
-                  <td><span class="badge badge-pending">Pending</span></td>
-                  <td>
-                    <div style="display:flex;gap:6px;">
-                      <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;" onclick="showWIP('Screenshot viewer is coming soon.')">View Screenshot</button>
-                      <button class="btn btn-success btn-sm" onclick="showWIP('Payment confirmation will be available when the payment gateway is connected.')">✓ Confirm</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Jane Doe</strong></td>
-                  <td style="font-size:0.875rem;">123 Maple St 2A</td>
-                  <td style="font-size:0.875rem;">Feb 2026</td>
-                  <td><span style="color:#15803d;font-weight:600;">💚 Cash App</span></td>
-                  <td style="font-weight:800;">$1,200</td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">Feb 1</td>
-                  <td><span class="badge badge-verified">Confirmed</span></td>
-                  <td><span style="font-size:0.8rem;color:var(--gray-500);">Feb 1, 2026</span></td>
-                </tr>
-              </tbody>
+          <div class="card-body" style="padding:0;overflow-x:auto;">
+            <table id="pm-payment-table">
+              <thead><tr><th>Date</th><th>Tenant</th><th>Property</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th><th style="width:80px;">Actions</th></tr></thead>
+              <tbody id="pm-payment-tbody"></tbody>
             </table>
+          </div>
+          <div class="pm-totals" id="pm-totals-bar"></div>
+        </div>
+      </div>
+
+      <!-- RECORD / EDIT PAYMENT MODAL -->
+      <div class="pm-overlay" id="payment-edit-modal-overlay" onclick="if(event.target===this)closePaymentModal()">
+        <div class="pm-modal">
+          <div class="pm-modal-header">
+            <h3 id="pm-modal-title">Record Payment</h3>
+            <button class="pm-modal-close" onclick="closePaymentModal()">&times;</button>
+          </div>
+          <div class="pm-modal-body">
+            <input type="hidden" id="pm-edit-id" />
+            <div class="pm-field">
+              <label>Tenant</label>
+              <select id="pm-tenant" onchange="pmAutoFillProperty()">
+                <option value="">Select a tenant...</option>
+              </select>
+            </div>
+            <div class="pm-field">
+              <label>Property</label>
+              <input type="text" id="pm-property" placeholder="e.g. 123 Maple St 2A" />
+            </div>
+            <div class="pm-field">
+              <label>Amount ($)</label>
+              <input type="number" id="pm-amount" min="0" step="0.01" placeholder="0.00" />
+            </div>
+            <div class="pm-field">
+              <label>Date</label>
+              <input type="date" id="pm-date" />
+            </div>
+            <div class="pm-field">
+              <label>Payment Method</label>
+              <select id="pm-method">
+                <option value="cashApp">Cash App</option>
+                <option value="zelle">Zelle</option>
+                <option value="venmo">Venmo</option>
+                <option value="ach">ACH / Bank Transfer</option>
+                <option value="card">Debit / Credit Card</option>
+                <option value="check">Check</option>
+                <option value="moneyOrder">Money Order</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+            <div class="pm-field">
+              <label>Reference / Confirmation #</label>
+              <input type="text" id="pm-reference" placeholder="e.g. CA-12345" />
+            </div>
+            <div class="pm-field">
+              <label>Notes</label>
+              <textarea id="pm-notes" placeholder="Optional notes..."></textarea>
+            </div>
+            <div class="pm-field">
+              <label>Status</label>
+              <div class="pm-radio-group">
+                <label><input type="radio" name="pm-status" value="confirmed" checked /> Confirmed</label>
+                <label><input type="radio" name="pm-status" value="pending" /> Pending</label>
+              </div>
+            </div>
+          </div>
+          <div class="pm-modal-footer">
+            <button class="btn" onclick="closePaymentModal()">Cancel</button>
+            <button class="btn btn-primary" id="pm-save-btn" onclick="savePayment()">Record Payment</button>
           </div>
         </div>
       </div>
@@ -3169,34 +3419,162 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     }
     if (window._selectedClientId === clientId) renderClientDetailListings(clientId);
   }
+  // ── TENANT CRUD FUNCTIONS ──
+  function _esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+  function getTenantAccounts(){try{return JSON.parse(localStorage.getItem('rv_tenant_accounts')||'[]');}catch(e){return[];}}
+  function saveTenantAccounts(arr){localStorage.setItem('rv_tenant_accounts',JSON.stringify(arr));}
+  function populateTenantPropertyDropdown(){
+    var sel=document.getElementById('tm-property');if(!sel)return;
+    sel.innerHTML='<option value="">Select property...</option>';
+    try{var ls=JSON.parse(localStorage.getItem('rv_listings_data')||localStorage.getItem('rv_listings')||'[]');
+    ls.forEach(function(l){var a=l.address||l.title||l.name||'Property';sel.innerHTML+='<option value="'+_esc(a)+'">'+_esc(a)+'</option>';});}catch(e){}
+    try{var sl=JSON.parse(localStorage.getItem('rv_listings_sanders-pm')||'[]');
+    sl.forEach(function(l){var a=l.address||'';if(a&&!sel.querySelector('option[value="'+a.replace(/"/g,'\\"')+'"]'))sel.innerHTML+='<option value="'+_esc(a)+'">'+_esc(a)+'</option>';});}catch(e){}
+  }
+  function openTenantModal(tid){
+    var ov=document.getElementById('tenant-modal-overlay');populateTenantPropertyDropdown();
+    if(tid){
+      var ts=getTenantAccounts(),t=ts.find(function(x){return x.id===tid;});
+      if(!t){alert('Tenant not found.');return;}
+      document.getElementById('tenant-modal-title').textContent='Edit Tenant \u2014 '+((t.firstName||'')+' '+(t.lastName||'')).trim();
+      document.getElementById('tm-save-btn').textContent='Save Changes';
+      document.getElementById('tm-delete-btn').style.display='inline-flex';
+      document.getElementById('tm-id').value=tid;
+      document.getElementById('tm-firstName').value=t.firstName||'';
+      document.getElementById('tm-lastName').value=t.lastName||'';
+      document.getElementById('tm-email').value=t.email||'';
+      document.getElementById('tm-phone').value=t.phone||'';
+      document.getElementById('tm-altPhone').value=t.altPhone||'';
+      var ec=t.emergencyContact||{};
+      document.getElementById('tm-ecName').value=ec.name||'';
+      document.getElementById('tm-ecPhone').value=ec.phone||'';
+      document.getElementById('tm-ecRelationship').value=ec.relationship||'';
+      document.getElementById('tm-property').value=t.property||'';
+      document.getElementById('tm-unit').value=t.unit||'';
+      document.getElementById('tm-monthlyRent').value=t.monthlyRent||'';
+      document.getElementById('tm-leaseStart').value=t.leaseStart||'';
+      document.getElementById('tm-leaseEnd').value=t.leaseEnd||'';
+      document.getElementById('tm-securityDeposit').value=t.securityDeposit||'';
+      document.getElementById('tm-depositPaid').value=t.depositPaid?'true':'false';
+      var pp=t.paymentPreferences||{};
+      document.getElementById('tm-preferredMethod').value=pp.preferredMethod||'';
+      document.getElementById('tm-autoPay').value=pp.autoPay?'true':'false';
+      document.getElementById('tm-cashApp').value=pp.cashApp||'';
+      document.getElementById('tm-zelle').value=pp.zelle||'';
+      document.getElementById('tm-venmo').value=pp.venmo||'';
+      document.getElementById('tm-notes').value=t.notes||'';
+      document.querySelectorAll('input[name="tm-status"]').forEach(function(r){r.checked=r.value===(t.status||'active');});
+    }else{
+      document.getElementById('tenant-modal-title').textContent='Add New Tenant';
+      document.getElementById('tm-save-btn').textContent='Create Tenant';
+      document.getElementById('tm-delete-btn').style.display='none';
+      document.getElementById('tm-id').value='';
+      ['tm-firstName','tm-lastName','tm-email','tm-phone','tm-altPhone','tm-ecName','tm-ecPhone','tm-ecRelationship','tm-unit','tm-monthlyRent','tm-leaseStart','tm-leaseEnd','tm-securityDeposit','tm-cashApp','tm-zelle','tm-venmo','tm-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+      document.getElementById('tm-property').value='';
+      document.getElementById('tm-depositPaid').value='false';
+      document.getElementById('tm-preferredMethod').value='';
+      document.getElementById('tm-autoPay').value='false';
+      document.querySelectorAll('input[name="tm-status"]').forEach(function(r){r.checked=r.value==='active';});
+    }
+    ov.classList.add('open');
+  }
+  function closeTenantModal(){document.getElementById('tenant-modal-overlay').classList.remove('open');}
+  function editTenant(tid){openTenantModal(tid);}
+  function addTenant(){openTenantModal(null);}
+  function saveTenant(){
+    var id=document.getElementById('tm-id').value;
+    var fn=document.getElementById('tm-firstName').value.trim(),ln=document.getElementById('tm-lastName').value.trim();
+    if(!fn&&!ln){alert('Please enter at least a first or last name.');return;}
+    var td={
+      id:id||('tenant_'+Date.now()),firstName:fn,lastName:ln,name:(fn+' '+ln).trim(),
+      email:document.getElementById('tm-email').value.trim(),
+      phone:document.getElementById('tm-phone').value.trim(),
+      altPhone:document.getElementById('tm-altPhone').value.trim(),
+      emergencyContact:{name:document.getElementById('tm-ecName').value.trim(),phone:document.getElementById('tm-ecPhone').value.trim(),relationship:document.getElementById('tm-ecRelationship').value.trim()},
+      property:document.getElementById('tm-property').value,
+      unit:document.getElementById('tm-unit').value.trim(),
+      monthlyRent:parseFloat(document.getElementById('tm-monthlyRent').value)||0,
+      leaseStart:document.getElementById('tm-leaseStart').value,
+      leaseEnd:document.getElementById('tm-leaseEnd').value,
+      securityDeposit:parseFloat(document.getElementById('tm-securityDeposit').value)||0,
+      depositPaid:document.getElementById('tm-depositPaid').value==='true',
+      paymentPreferences:{preferredMethod:document.getElementById('tm-preferredMethod').value,autoPay:document.getElementById('tm-autoPay').value==='true',cashApp:document.getElementById('tm-cashApp').value.trim(),zelle:document.getElementById('tm-zelle').value.trim(),venmo:document.getElementById('tm-venmo').value.trim()},
+      notes:document.getElementById('tm-notes').value.trim(),
+      status:(document.querySelector('input[name="tm-status"]:checked')||{}).value||'active',
+      updatedAt:new Date().toISOString()
+    };
+    var tenants=getTenantAccounts();
+    var ei=tenants.findIndex(function(t){return t.id===td.id;});
+    if(ei>=0){td.createdAt=tenants[ei].createdAt;tenants[ei]=td;}
+    else{td.createdAt=new Date().toISOString();tenants.push(td);}
+    saveTenantAccounts(tenants);
+    syncTenantToClients(td);
+    if(typeof RVData!=='undefined'&&RVData.saveTenant){try{RVData.saveTenant(td);}catch(e){}}
+    closeTenantModal();renderAllClientsList();
+    alert(ei>=0?'Tenant updated successfully!':'Tenant created successfully!');
+  }
+  function syncTenantToClients(t){
+    var cls=JSON.parse(localStorage.getItem('rv_clients')||'[]');
+    var i=cls.findIndex(function(c){return c.id===t.id||(t.email&&c.email===t.email);});
+    var r={id:t.id,name:t.name,companyName:t.name,email:t.email,phone:t.phone,createdAt:t.createdAt};
+    if(i>=0)cls[i]=Object.assign(cls[i],r);else cls.push(r);
+    localStorage.setItem('rv_clients',JSON.stringify(cls));populateClientDropdown();
+  }
+  function deleteTenant(){
+    var id=document.getElementById('tm-id').value;if(!id)return;
+    if(!confirm('Are you sure you want to remove this tenant? This cannot be undone.'))return;
+    saveTenantAccounts(getTenantAccounts().filter(function(t){return t.id!==id;}));
+    if(typeof RVData!=='undefined'&&RVData.deleteTenant){try{RVData.deleteTenant(id);}catch(e){}}
+    closeTenantModal();renderAllClientsList();alert('Tenant removed.');
+  }
+  function contactTenant(tid){
+    var t=getTenantAccounts().find(function(x){return x.id===tid;});if(!t)return;
+    if(typeof composeMessage==='function'){composeMessage(t.email||t.name||'');}
+    else{alert('Contact: '+(t.name||'')+'\nEmail: '+(t.email||'N/A')+'\nPhone: '+(t.phone||'N/A'));}
+  }
+
   function renderAllClientsList() {
-    const clients = getClients();
-    const suspended = getSuspendedAccounts();
-    const container = document.getElementById('all-clients-list-body');
-    if (!container) return;
-    container.innerHTML = clients.map(c => {
-      const list = getListingsForClient(c.id);
-      const count = list.length;
-      const suspendedState = suspended.indexOf(c.id) >= 0;
-      const statusBadge = suspendedState
-        ? '<span class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">Suspended</span>'
-        : '<span class="badge badge-available">Active</span>';
-      const suspendBtn = suspendedState
-        ? '<button class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;" onclick="event.stopPropagation();toggleAccountSuspended(\'' + c.id + '\')">Unsuspend</button>'
-        : '<button class="btn btn-sm" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;" onclick="event.stopPropagation();toggleAccountSuspended(\'' + c.id + '\')">Suspend</button>';
-      const rowStyle = suspendedState ? 'cursor:pointer;align-items:center;opacity:0.85;background:#fafafa;' : 'cursor:pointer;align-items:center;';
-      return `<div class="property-row" style="${rowStyle}" onclick="selectClient('${c.id}')" title="View listings">
-        <div class="prop-thumb" style="width:48px;height:48px;background:#e0f2fe;font-size:1.25rem;">👤</div>
-        <div style="flex:2;"><div style="font-weight:600;">${(c.companyName||'').replace(/</g,'&lt;')}</div><div style="font-size:0.8rem;color:var(--gray-600);">ID: ${(c.id||'').replace(/</g,'&lt;')}</div></div>
-        <div style="flex:1;font-size:0.875rem;">${(c.email||'').replace(/</g,'&lt;')}</div>
-        <div style="flex:1;"><span class="badge badge-available">${count} listing${count!==1?'s':''}</span></div>
-        <div style="flex:1;">${statusBadge}</div>
-        <div style="width:180px;display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();selectClient('${c.id}')">View / Edit</button>
-          ${suspendBtn}
-        </div>
-      </div>`;
-    }).join('');
+    var tenants=getTenantAccounts(),clients=getClients(),suspended=getSuspendedAccounts();
+    var container=document.getElementById('all-clients-list-body');if(!container)return;
+    var rows=[];
+    tenants.forEach(function(t){
+      var name=((t.firstName||'')+' '+(t.lastName||'')).trim()||t.name||'Unknown';
+      var sid=(t.id||'').replace(/'/g,"\\'");
+      var sc=t.status==='on-notice'?'on-notice':t.status==='past'?'past':'active';
+      var sl=t.status==='on-notice'?'On Notice':t.status==='past'?'Past':'Active';
+      var sty={active:'background:#dcfce7;color:#15803d;','on-notice':'background:#fef3c7;color:#92400e;',past:'background:#fef2f2;color:#b91c1c;'};
+      var prop=t.property?(t.property+(t.unit?' #'+t.unit:'')):'--';
+      rows.push('<div class="property-row" style="cursor:pointer;align-items:center;" onclick="editTenant(\''+sid+'\')" title="Click to edit">'+
+        '<div class="prop-thumb" style="width:48px;height:48px;background:#e0f2fe;font-size:1.25rem;">\uD83D\uDC64</div>'+
+        '<div style="flex:2;"><div style="font-weight:600;">'+_esc(name)+'</div><div style="font-size:.8rem;color:var(--gray-600);">'+_esc(t.email||'')+'</div></div>'+
+        '<div style="flex:1;font-size:.85rem;">'+_esc(t.phone||'--')+'</div>'+
+        '<div style="flex:1;font-size:.85rem;">'+_esc(prop)+'</div>'+
+        '<div style="flex:.8;font-size:.85rem;">'+_esc(t.leaseEnd||'--')+'</div>'+
+        '<div style="flex:.7;"><span class="badge" style="'+(sty[t.status]||sty.active)+'font-size:.75rem;"><span class="tenant-status-dot '+sc+'"></span>'+sl+'</span></div>'+
+        '<div style="width:200px;" class="tenant-row-actions">'+
+          '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();editTenant(\''+sid+'\')">Edit</button>'+
+          '<button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;" onclick="event.stopPropagation();contactTenant(\''+sid+'\')">Contact</button>'+
+        '</div></div>');
+    });
+    clients.forEach(function(c){
+      if(tenants.find(function(t){return t.id===c.id;}))return;
+      var list=getListingsForClient(c.id),cnt=list.length;
+      var sus=suspended.indexOf(c.id)>=0;
+      var sb=sus?'<span class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">Suspended</span>':'<span class="badge badge-available" style="font-size:.75rem;">Active</span>';
+      var sbtn=sus?'<button class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;" onclick="event.stopPropagation();toggleAccountSuspended(\''+c.id+'\')">Unsuspend</button>':'<button class="btn btn-sm" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;" onclick="event.stopPropagation();toggleAccountSuspended(\''+c.id+'\')">Suspend</button>';
+      var rs=sus?'cursor:pointer;align-items:center;opacity:.85;background:#fafafa;':'cursor:pointer;align-items:center;';
+      rows.push('<div class="property-row" style="'+rs+'" onclick="selectClient(\''+c.id+'\')" title="View listings">'+
+        '<div class="prop-thumb" style="width:48px;height:48px;background:#e0f2fe;font-size:1.25rem;">\uD83D\uDC64</div>'+
+        '<div style="flex:2;"><div style="font-weight:600;">'+_esc(c.companyName||'')+'</div><div style="font-size:.8rem;color:var(--gray-600);">ID: '+_esc(c.id||'')+'</div></div>'+
+        '<div style="flex:1;font-size:.85rem;">'+_esc(c.phone||'--')+'</div>'+
+        '<div style="flex:1;font-size:.85rem;">'+cnt+' listing'+(cnt!==1?'s':'')+'</div>'+
+        '<div style="flex:.8;">--</div>'+
+        '<div style="flex:.7;">'+sb+'</div>'+
+        '<div style="width:200px;display:flex;gap:6px;flex-wrap:wrap;">'+
+          '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();selectClient(\''+c.id+'\')">View</button>'+sbtn+
+        '</div></div>');
+    });
+    container.innerHTML=rows.length?rows.join(''):'<div style="padding:2rem;text-align:center;color:#9ca3af;">No tenants yet. Click <strong>+ Add Tenant</strong> to get started.</div>';
   }
   function selectClient(clientId) {
     window._selectedClientId = clientId;
@@ -5264,7 +5642,356 @@ dashTab = function(name) {
     if (tabName === 'overview') {
       setTimeout(updateOverviewInboxPreview, 200);
     }
+    if (tabName === 'payments') {
+      setTimeout(renderPaymentList, 100);
+    }
   };
+
+  /* ═══════════════════════════════════════════════════════════
+     PAYMENT MANAGEMENT SYSTEM
+     localStorage key: rv_payments
+     ═══════════════════════════════════════════════════════════ */
+
+  var PM_METHOD_LABELS = {
+    cashApp: 'Cash App', zelle: 'Zelle', venmo: 'Venmo',
+    ach: 'ACH / Bank Transfer', card: 'Debit / Credit Card',
+    check: 'Check', moneyOrder: 'Money Order', cash: 'Cash'
+  };
+  var PM_METHOD_ICONS = {
+    cashApp: '💚', zelle: '💜', venmo: '🔵',
+    ach: '🏦', card: '💳', check: '📝', moneyOrder: '📝', cash: '💵'
+  };
+  var PM_METHOD_COLORS = {
+    cashApp: '#15803d', zelle: '#7c3aed', venmo: '#008cff',
+    ach: '#0369a1', card: '#6b7280', check: '#92400e', moneyOrder: '#92400e', cash: '#15803d'
+  };
+
+  // Seed sample payments on first load (merge with any existing data)
+  function pmGetPayments() {
+    try { return JSON.parse(localStorage.getItem('rv_payments') || '[]'); } catch(e) { return []; }
+  }
+  function pmSavePayments(arr) {
+    localStorage.setItem('rv_payments', JSON.stringify(arr));
+  }
+  function pmSeedSampleData() {
+    var existing = pmGetPayments();
+    if (existing.length > 0) return;
+    var samples = [
+      { id:'pay_sample_1', tenantId:'jane_doe', tenantName:'Jane Doe', property:'123 Maple St 2A', amount:1200, date:'2026-03-04', method:'cashApp', reference:'CA-88321', status:'pending', notes:'', voidedAt:null, voidReason:'', createdAt:'2026-03-04T14:15:00Z', updatedAt:'2026-03-04T14:15:00Z' },
+      { id:'pay_sample_2', tenantId:'robert_lee', tenantName:'Robert Lee', property:'456 Oak Ave 1B', amount:950, date:'2026-03-03', method:'zelle', reference:'ZL-44120', status:'pending', notes:'', voidedAt:null, voidReason:'', createdAt:'2026-03-03T10:22:00Z', updatedAt:'2026-03-03T10:22:00Z' },
+      { id:'pay_sample_3', tenantId:'jane_doe', tenantName:'Jane Doe', property:'123 Maple St 2A', amount:1200, date:'2026-02-01', method:'cashApp', reference:'CA-77210', status:'confirmed', notes:'', voidedAt:null, voidReason:'', createdAt:'2026-02-01T09:00:00Z', updatedAt:'2026-02-01T09:00:00Z' }
+    ];
+    pmSavePayments(samples);
+  }
+
+  // Get known tenants from various localStorage sources
+  function pmGetTenants() {
+    var tenants = [];
+    var seen = {};
+    // From rv_tenant_accounts
+    try {
+      var ta = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
+      ta.forEach(function(t) {
+        var name = t.name || ((t.firstName || '') + ' ' + (t.lastName || '')).trim();
+        var id = t.email || name.toLowerCase().replace(/\s+/g,'_');
+        if (name && !seen[id]) { seen[id] = true; tenants.push({ id:id, name:name, property:t.property||t.unit||'' }); }
+      });
+    } catch(e) {}
+    // From rv_clients
+    try {
+      var cl = JSON.parse(localStorage.getItem('rv_clients') || '[]');
+      cl.forEach(function(c) {
+        var name = c.name || ((c.firstName || '') + ' ' + (c.lastName || '')).trim();
+        var id = c.email || name.toLowerCase().replace(/\s+/g,'_');
+        if (name && !seen[id]) { seen[id] = true; tenants.push({ id:id, name:name, property:c.property||c.unit||'' }); }
+      });
+    } catch(e) {}
+    // From SAMPLE_LEASES
+    if (typeof SAMPLE_LEASES !== 'undefined') {
+      SAMPLE_LEASES.forEach(function(l) {
+        var id = l.tenant.toLowerCase().replace(/\s+/g,'_');
+        if (!seen[id]) { seen[id] = true; tenants.push({ id:id, name:l.tenant, property:l.unit||'' }); }
+      });
+    }
+    // From existing payments (catch manually entered names)
+    var pays = pmGetPayments();
+    pays.forEach(function(p) {
+      var id = p.tenantId || p.tenantName.toLowerCase().replace(/\s+/g,'_');
+      if (p.tenantName && !seen[id]) { seen[id] = true; tenants.push({ id:id, name:p.tenantName, property:p.property||'' }); }
+    });
+    return tenants;
+  }
+
+  function pmPopulateTenantDropdowns() {
+    var tenants = pmGetTenants();
+    // Modal tenant dropdown
+    var sel = document.getElementById('pm-tenant');
+    if (sel) {
+      var curVal = sel.value;
+      sel.innerHTML = '<option value="">Select a tenant...</option>';
+      tenants.forEach(function(t) {
+        sel.innerHTML += '<option value="' + t.id + '" data-property="' + (t.property||'').replace(/"/g,'&quot;') + '">' + t.name + '</option>';
+      });
+      if (curVal) sel.value = curVal;
+    }
+    // Filter tenant dropdown
+    var fsel = document.getElementById('pm-filter-tenant');
+    if (fsel) {
+      var fVal = fsel.value;
+      fsel.innerHTML = '<option value="">All Tenants</option>';
+      tenants.forEach(function(t) {
+        fsel.innerHTML += '<option value="' + t.id + '">' + t.name + '</option>';
+      });
+      if (fVal) fsel.value = fVal;
+    }
+  }
+
+  function pmAutoFillProperty() {
+    var sel = document.getElementById('pm-tenant');
+    var propInput = document.getElementById('pm-property');
+    if (!sel || !propInput) return;
+    var opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.property) {
+      propInput.value = opt.dataset.property;
+    }
+  }
+
+  function openRecordPayment(editPaymentId) {
+    pmPopulateTenantDropdowns();
+    var modal = document.getElementById('payment-edit-modal-overlay');
+    var titleEl = document.getElementById('pm-modal-title');
+    var saveBtn = document.getElementById('pm-save-btn');
+    // Reset form
+    document.getElementById('pm-edit-id').value = '';
+    document.getElementById('pm-tenant').value = '';
+    document.getElementById('pm-property').value = '';
+    document.getElementById('pm-amount').value = '';
+    document.getElementById('pm-date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('pm-method').value = 'cashApp';
+    document.getElementById('pm-reference').value = '';
+    document.getElementById('pm-notes').value = '';
+    document.querySelector('input[name="pm-status"][value="confirmed"]').checked = true;
+
+    if (editPaymentId) {
+      // Pre-fill for editing
+      var payments = pmGetPayments();
+      var pay = payments.find(function(p) { return p.id === editPaymentId; });
+      if (!pay) return;
+      titleEl.textContent = 'Edit Payment';
+      saveBtn.textContent = 'Update Payment';
+      document.getElementById('pm-edit-id').value = pay.id;
+      // Set tenant - try matching by id first, then by name
+      var tenantSel = document.getElementById('pm-tenant');
+      tenantSel.value = pay.tenantId || '';
+      if (!tenantSel.value) {
+        // Try to find by name
+        for (var i = 0; i < tenantSel.options.length; i++) {
+          if (tenantSel.options[i].text === pay.tenantName) { tenantSel.value = tenantSel.options[i].value; break; }
+        }
+      }
+      document.getElementById('pm-property').value = pay.property || '';
+      document.getElementById('pm-amount').value = pay.amount || '';
+      document.getElementById('pm-date').value = pay.date || '';
+      document.getElementById('pm-method').value = pay.method || 'cashApp';
+      document.getElementById('pm-reference').value = pay.reference || '';
+      document.getElementById('pm-notes').value = pay.notes || '';
+      var statusRadio = document.querySelector('input[name="pm-status"][value="' + (pay.status || 'confirmed') + '"]');
+      if (statusRadio) statusRadio.checked = true;
+    } else {
+      titleEl.textContent = 'Record Payment';
+      saveBtn.textContent = 'Record Payment';
+    }
+    modal.classList.add('active');
+  }
+
+  function closePaymentModal() {
+    document.getElementById('payment-edit-modal-overlay').classList.remove('active');
+  }
+
+  function savePayment() {
+    var editId = document.getElementById('pm-edit-id').value;
+    var tenantSel = document.getElementById('pm-tenant');
+    var tenantId = tenantSel.value;
+    var tenantName = tenantSel.options[tenantSel.selectedIndex] ? tenantSel.options[tenantSel.selectedIndex].text : '';
+    var property = document.getElementById('pm-property').value.trim();
+    var amount = parseFloat(document.getElementById('pm-amount').value) || 0;
+    var date = document.getElementById('pm-date').value;
+    var method = document.getElementById('pm-method').value;
+    var reference = document.getElementById('pm-reference').value.trim();
+    var notes = document.getElementById('pm-notes').value.trim();
+    var status = document.querySelector('input[name="pm-status"]:checked').value;
+
+    if (!tenantName || tenantName === 'Select a tenant...') { alert('Please select a tenant.'); return; }
+    if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+    if (!date) { alert('Please select a date.'); return; }
+
+    var payments = pmGetPayments();
+    var now = new Date().toISOString();
+
+    if (editId) {
+      // Update existing
+      for (var i = 0; i < payments.length; i++) {
+        if (payments[i].id === editId) {
+          payments[i].tenantId = tenantId;
+          payments[i].tenantName = tenantName;
+          payments[i].property = property;
+          payments[i].amount = amount;
+          payments[i].date = date;
+          payments[i].method = method;
+          payments[i].reference = reference;
+          payments[i].notes = notes;
+          payments[i].status = status;
+          payments[i].updatedAt = now;
+          break;
+        }
+      }
+    } else {
+      // Create new
+      payments.push({
+        id: 'pay_' + Date.now(),
+        tenantId: tenantId,
+        tenantName: tenantName,
+        property: property,
+        amount: amount,
+        date: date,
+        method: method,
+        reference: reference,
+        status: status,
+        notes: notes,
+        voidedAt: null,
+        voidReason: '',
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+
+    pmSavePayments(payments);
+    closePaymentModal();
+    renderPaymentList();
+  }
+
+  function voidPayment(paymentId) {
+    if (!confirm('Void this payment? This marks it as cancelled but keeps the record.')) return;
+    var reason = prompt('Reason for voiding (optional):') || '';
+    var payments = pmGetPayments();
+    for (var i = 0; i < payments.length; i++) {
+      if (payments[i].id === paymentId) {
+        payments[i].status = 'voided';
+        payments[i].voidedAt = new Date().toISOString();
+        payments[i].voidReason = reason;
+        payments[i].updatedAt = new Date().toISOString();
+        break;
+      }
+    }
+    pmSavePayments(payments);
+    renderPaymentList();
+  }
+
+  function renderPaymentList() {
+    pmSeedSampleData();
+    pmPopulateTenantDropdowns();
+
+    var payments = pmGetPayments();
+    var tbody = document.getElementById('pm-payment-tbody');
+    var totalsBar = document.getElementById('pm-totals-bar');
+    var alertEl = document.getElementById('pm-pending-alert');
+    var alertTextEl = document.getElementById('pm-pending-alert-text');
+    if (!tbody) return;
+
+    // Apply filters
+    var fTenant = (document.getElementById('pm-filter-tenant') || {}).value || '';
+    var fStatus = (document.getElementById('pm-filter-status') || {}).value || '';
+    var fMethod = (document.getElementById('pm-filter-method') || {}).value || '';
+    var fFrom = (document.getElementById('pm-filter-from') || {}).value || '';
+    var fTo = (document.getElementById('pm-filter-to') || {}).value || '';
+
+    var filtered = payments.filter(function(p) {
+      if (fTenant && p.tenantId !== fTenant && p.tenantName.toLowerCase().replace(/\s+/g,'_') !== fTenant) return false;
+      if (fStatus && p.status !== fStatus) return false;
+      if (fMethod && p.method !== fMethod) return false;
+      if (fFrom && p.date < fFrom) return false;
+      if (fTo && p.date > fTo) return false;
+      return true;
+    });
+
+    // Sort by date descending
+    filtered.sort(function(a, b) { return (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''); });
+
+    // Pending count for alert
+    var pendingCount = payments.filter(function(p) { return p.status === 'pending'; }).length;
+    if (alertEl && alertTextEl) {
+      if (pendingCount > 0) {
+        alertEl.style.display = '';
+        alertTextEl.textContent = pendingCount + ' payment' + (pendingCount > 1 ? 's are' : ' is') + ' awaiting your confirmation.';
+      } else {
+        alertEl.style.display = 'none';
+      }
+    }
+
+    // Render rows
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#9ca3af;">No payments found. Click "+ Record Payment" to add one.</td></tr>';
+    } else {
+      var html = '';
+      filtered.forEach(function(p) {
+        var isVoided = p.status === 'voided';
+        var rowClass = isVoided ? ' class="pm-row-voided"' : '';
+        var methodIcon = PM_METHOD_ICONS[p.method] || '';
+        var methodLabel = PM_METHOD_LABELS[p.method] || p.method;
+        var methodColor = PM_METHOD_COLORS[p.method] || '#6b7280';
+        var badgeClass = 'pm-badge-' + p.status;
+        var statusLabel = p.status.charAt(0).toUpperCase() + p.status.slice(1);
+        if (isVoided) statusLabel = 'VOIDED';
+
+        var dateDisplay = '';
+        if (p.date) {
+          var dd = new Date(p.date + 'T00:00:00');
+          dateDisplay = dd.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        }
+
+        var actions = '';
+        if (!isVoided) {
+          actions = '<button class="pm-action-btn edit-btn" onclick="openRecordPayment(\'' + p.id + '\')" title="Edit">&#9998;</button>' +
+                    '<button class="pm-action-btn void-btn" onclick="voidPayment(\'' + p.id + '\')" title="Void">&times;</button>';
+        } else {
+          actions = '<span style="font-size:0.72rem;color:#9ca3af;" title="' + (p.voidReason ? 'Reason: ' + p.voidReason.replace(/"/g,'&quot;') : 'Voided') + '">—</span>';
+        }
+
+        html += '<tr' + rowClass + '>' +
+          '<td style="font-size:0.85rem;white-space:nowrap;">' + dateDisplay + '</td>' +
+          '<td><strong>' + (p.tenantName || '—') + '</strong></td>' +
+          '<td style="font-size:0.85rem;">' + (p.property || '—') + '</td>' +
+          '<td style="font-weight:800;">$' + p.amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>' +
+          '<td><span style="color:' + methodColor + ';font-weight:600;">' + methodIcon + ' ' + methodLabel + '</span></td>' +
+          '<td style="font-size:0.82rem;color:var(--gray-500);">' + (p.reference || '—') + '</td>' +
+          '<td><span class="' + badgeClass + '">' + statusLabel + '</span></td>' +
+          '<td style="white-space:nowrap;">' + actions + '</td>' +
+          '</tr>';
+      });
+      tbody.innerHTML = html;
+    }
+
+    // Totals
+    var totalConfirmed = 0, totalPending = 0;
+    payments.forEach(function(p) {
+      if (p.status === 'confirmed') totalConfirmed += p.amount;
+      if (p.status === 'pending') totalPending += p.amount;
+    });
+    if (totalsBar) {
+      totalsBar.innerHTML = '<span class="pm-total-confirmed">Total Collected: $' + totalConfirmed.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</span>' +
+        '<span class="pm-total-pending">Pending: $' + totalPending.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</span>';
+    }
+  }
+
+  // Initialize payment list when page loads (deferred)
+  (function() {
+    var _pmInit = setInterval(function() {
+      if (document.getElementById('pm-payment-tbody')) {
+        clearInterval(_pmInit);
+        renderPaymentList();
+      }
+    }, 300);
+  })();
 
 </script>
 
