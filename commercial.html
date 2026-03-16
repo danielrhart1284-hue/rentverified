@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commercial Property Management | RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Dashboard layout */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 68px);
+    }
+    .dash-sidebar {
+      background: #0f172a;
+      padding: 1.5rem 0;
+    }
+    .dash-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.65rem 1rem;
+      margin: 0 0.75rem;
+      border-radius: 8px;
+      color: #9ca3af;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .dash-link:hover { background: rgba(255,255,255,0.07); color: white; text-decoration: none; }
+    .dash-link.active { background: #1a56db; color: white; }
+    .dash-link svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .dash-main { background: #f8fafc; padding: 2rem; overflow-y: auto; }
+
+    .plan-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #dbeafe;
+      color: #1a56db;
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    /* Tab content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+    .stat-card .stat-label {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .stat-card .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .stat-card .stat-sub {
+      font-size: 0.78rem;
+      color: #10b981;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* Management Profile styles */
+    .mgmt-section { margin-bottom: 2rem; }
+    .mgmt-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .mgmt-toggle-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+      transition: border-color 0.2s;
+    }
+    .mgmt-toggle-row:hover { border-color: #1a56db; }
+    .mgmt-toggle-row .toggle-info { flex: 1; }
+    .mgmt-toggle-row .toggle-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+    .mgmt-toggle-row .toggle-desc { font-size: 0.82rem; color: #64748b; line-height: 1.4; }
+    .mgmt-toggle-row .toggle-commission { font-size: 0.82rem; color: #059669; font-weight: 600; margin-top: 4px; }
+    .mgmt-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .mgmt-toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .mgmt-toggle-switch .slider {
+      position: absolute;
+      inset: 0;
+      background: #d1d5db;
+      border-radius: 999px;
+      transition: background 0.2s;
+    }
+    .mgmt-toggle-switch input:checked + .slider { background: #10b981; }
+    .mgmt-toggle-switch .slider::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .mgmt-toggle-switch input:checked + .slider::after { transform: translateX(22px); }
+
+    /* Education cards */
+    .edu-card-toggle {
+      font-size: 0.82rem;
+      color: #1a56db;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .edu-card-toggle:hover { text-decoration: underline; }
+    .edu-card {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 1.25rem;
+      background: #EFF6FF;
+      border-left: 3px solid #3B82F6;
+      border-radius: 8px;
+    }
+    .edu-card.open { display: block; }
+    .edu-card h4 {
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+    }
+    .edu-card .edu-section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-top: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+    .edu-card p { font-size: 0.85rem; color: #334155; line-height: 1.5; margin-bottom: 0.5rem; }
+    .edu-card .edu-qa { margin-top: 0.5rem; padding: 0.75rem; background: white; border-radius: 6px; border: 1px solid #DBEAFE; }
+    .edu-card .edu-qa .q { font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
+    .edu-card .edu-qa .a { font-size: 0.82rem; color: #475569; line-height: 1.4; }
+    .edu-card .edu-enable-btn {
+      margin-top: 0.75rem;
+      padding: 0.45rem 1rem;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .edu-card .edu-enable-btn:hover { background: #059669; }
+
+    /* Partner cards (funding tab) */
+    .partner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .partner-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .partner-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+      transform: translateY(-2px);
+    }
+    .partner-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .partner-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .partner-card-top h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .partner-card-top p {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .partner-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 0.75rem;
+    }
+    .partner-tags span {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .partner-details {
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .partner-details strong { color: #1e293b; }
+    .partner-card .btn-apply {
+      display: inline-block;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: white;
+      background: #1a56db;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+    .partner-card .btn-apply:hover { background: #1e429f; }
+
+    /* Funding summary card */
+    .funding-summary {
+      background: linear-gradient(135deg, #1e3a5f, #1e40af);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+    .funding-summary h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .funding-summary p { font-size: 0.9rem; opacity: 0.88; line-height: 1.5; }
+
+    /* Applications table */
+    .apps-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .apps-table th {
+      background: #f8fafc;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .apps-table td {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .apps-table tr:last-child td { border-bottom: none; }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.approved { background: #d1fae5; color: #065f46; }
+    .status-badge.funded { background: #dbeafe; color: #1e40af; }
+    .status-badge.declined { background: #fee2e2; color: #991b1b; }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: 1.5rem;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.25rem;
+    }
+    .page-header p {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    /* Card */
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .card-body { padding: 1.5rem; }
+
+    /* Collapsible sidebar groups */
+    .sidebar-group { margin-bottom: 0.25rem; }
+    .sidebar-group-label {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.55rem 1rem; margin: 0;
+      color: #9ca3af; font-size: 0.8rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      cursor: pointer; border-radius: 8px;
+      transition: all 0.15s; user-select: none;
+    }
+    .sidebar-group-label:hover { background: rgba(255,255,255,0.05); color: white; }
+    .sidebar-group-label .chevron { transition: transform 0.2s; flex-shrink: 0; }
+    .sidebar-group.collapsed .sidebar-group-label .chevron { transform: rotate(-90deg); }
+    .sidebar-group-items { padding-left: 0.5rem; }
+    .sidebar-group.collapsed .sidebar-group-items { display: none; }
+
+    /* Commercial onboarding overlay */
+    .comm-ob-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+    }
+    .comm-ob-card {
+      background: white; border-radius: 16px; max-width: 520px; width: 95%;
+      padding: 2.5rem; max-height: 90vh; overflow-y: auto;
+    }
+    .comm-ob-product {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 1rem; background: #f8fafc;
+      border-radius: 8px; margin-bottom: 0.5rem;
+    }
+    .comm-ob-product .comm-toggle {
+      position: relative; display: inline-block; width: 44px; height: 24px;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .comm-ob-product .comm-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .comm-ob-product .comm-toggle .slider {
+      position: absolute; inset: 0; background: #d1d5db; border-radius: 999px; transition: background 0.2s;
+    }
+    .comm-ob-product .comm-toggle input:checked + .slider { background: #10b981; }
+    .comm-ob-product .comm-toggle .slider::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 20px; height: 20px; background: white; border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s;
+    }
+    .comm-ob-product .comm-toggle input:checked + .slider::after { transform: translateX(20px); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .partner-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .dashboard-layout { grid-template-columns: 1fr; }
+      .dash-sidebar {
+        display: flex;
+        overflow-x: auto;
+        padding: 0.75rem;
+        gap: 0.25rem;
+      }
+      .dash-sidebar > div:first-child { display: none; }
+      .dash-sidebar > div:nth-child(2) { display: flex; gap: 0.25rem; flex-wrap: nowrap; }
+      .dash-link { white-space: nowrap; margin: 0; padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+      .dash-link svg { display: none; }
+      .dash-main { padding: 1.25rem; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .mgmt-toggle-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- RentVerified banner -->
+<div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
+  RentVerified &middot; Commercial &middot; <a href="index.html" style="color:#93c5fd;">Home</a> &middot; <a href="tenant-portal.html" style="color:#93c5fd;">Tenant Portal</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="index.html">&larr; Back to Home</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login / Sign Up</a>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <div class="dash-sidebar">
+    <div style="padding:0 1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:#1a56db;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">SP</div>
+        <div>
+          <div style="color:white;font-weight:600;font-size:0.875rem;">Sanders PM</div>
+          <div style="margin-top:3px;"><span class="plan-chip">Commercial</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:0 0.5rem;">
+      <!-- Dashboard (standalone) -->
+      <div class="dash-link active" onclick="dashTab('overview')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+
+      <!-- PROPERTIES -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Properties</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('properties')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Properties
+          </div>
+          <a href="listings.html" class="dash-link" style="color:#9ca3af;text-decoration:none;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            Listings
+          </a>
+        </div>
+      </div>
+
+      <!-- TENANTS -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Tenants</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('tenants')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            Tenants
+          </div>
+          <div class="dash-link" onclick="dashTab('leases')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Leases
+          </div>
+          <div class="dash-link" onclick="dashTab('screening')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Screening
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTING -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Accounting</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('payments')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            Payments <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
+          </div>
+          <div class="dash-link" onclick="dashTab('funding')" style="color:#fbbf24;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Funding
+          </div>
+          <div class="dash-link" onclick="dashTab('reports')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Financial Reports <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPERATIONS -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Operations</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('documents')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
+            Documents
+          </div>
+          <div class="dash-link" onclick="dashTab('maintenance')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+            Maintenance <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
+          </div>
+          <div class="dash-link" onclick="dashTab('compliance')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Compliance <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Settings</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('ai')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            AI Settings
+          </div>
+          <div class="dash-link" onclick="dashTab('mgmt-profile')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+            Management Profile
+          </div>
+          <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="window.location.href='landlord-signup.html';">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Sign Out
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="dash-main">
+
+    <!-- ═══ OVERVIEW TAB ═══ -->
+    <div id="dtab-overview" class="tab-content active">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <h1>Commercial Dashboard</h1>
+            <p>Sanders Property Management &middot; <span class="plan-chip">Commercial</span></p>
+          </div>
+          <button class="btn btn-primary" onclick="dashTab('properties')">+ Add Property</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Properties</div>
+          <div class="stat-value">12</div>
+          <div class="stat-sub">+2 this quarter</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Leases</div>
+          <div class="stat-value">38</div>
+          <div class="stat-sub">3 expiring soon</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Monthly Revenue</div>
+          <div class="stat-value">$84,500</div>
+          <div class="stat-sub">+5.2% vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Occupancy Rate</div>
+          <div class="stat-value">92%</div>
+          <div class="stat-sub">3 vacant units</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Quick Actions</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+            <button class="btn btn-outline btn-sm" onclick="dashTab('tenants')">View Tenants</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('leases')">Manage Leases</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('screening')">Screen Applicant</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('funding')">Tenant Funding</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('mgmt-profile')">Management Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROPERTIES TAB ═══ -->
+    <div id="dtab-properties" class="tab-content">
+      <div class="page-header"><h1>Properties</h1><p>Manage your commercial properties and units.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#127970;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Property Management</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Add and manage your commercial properties. Track units, square footage, and tenant assignments.</p>
+          <button class="btn btn-primary" style="margin-top:1.25rem;">+ Add Commercial Property</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TENANTS TAB ═══ -->
+    <div id="dtab-tenants" class="tab-content">
+      <div class="page-header"><h1>Tenants</h1><p>View and manage your commercial tenants.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128101;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Tenant Directory</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Manage business tenant accounts, contact info, and lease assignments.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LEASES TAB ═══ -->
+    <div id="dtab-leases" class="tab-content">
+      <div class="page-header"><h1>Leases</h1><p>Track commercial lease agreements, renewals, and expirations.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128196;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Lease Management</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Create, manage, and track commercial leases including NNN, gross, and modified gross terms.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREENING TAB ═══ -->
+    <div id="dtab-screening" class="tab-content">
+      <div class="page-header"><h1>Tenant Screening</h1><p>Screen potential commercial tenants with business credit and background checks.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128737;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Commercial Screening</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Run business credit reports, verify financials, and assess tenant viability for your commercial spaces.</p>
+          <button class="btn btn-primary" style="margin-top:1.25rem;">Start New Screening</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FUNDING TAB (C5) ═══ -->
+    <div id="dtab-funding" class="tab-content">
+      <div class="page-header"><h1>Tenant Funding</h1><p>Connect your commercial tenants with buildout and operations funding.</p></div>
+
+      <!-- Summary card -->
+      <div class="funding-summary">
+        <h3>&#128176; Earn From Tenant Funding Referrals</h3>
+        <p>Connect your tenants with funding for their buildout and operations. You earn $200&ndash;$5,000 per funded deal through our lending partners.</p>
+      </div>
+
+      <!-- Partner cards -->
+      <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:0.25rem;">Funding Partners</h3>
+      <p style="color:#64748b;font-size:0.85rem;margin-bottom:0.5rem;">Pre-vetted lending partners for your commercial tenants.</p>
+
+      <div class="partner-grid">
+        <!-- GoKapital -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#1e40af;">GK</div>
+            <div>
+              <h4>GoKapital</h4>
+              <p>Business Lending Specialists</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Business Loans</span>
+            <span>Equipment Leasing</span>
+            <span>Commercial Mortgages</span>
+            <span>SBA Loans</span>
+            <span>Hard Money</span>
+          </div>
+          <div class="partner-details">
+            <strong>$10K &ndash; $5M</strong> &middot; 6 mo &ndash; 25 yr terms<br>
+            1+ year in business &middot; $200K+ annual revenue
+          </div>
+          <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: gokapital -->
+        </div>
+
+        <!-- Clarify Capital -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#059669;">CC</div>
+            <div>
+              <h4>Clarify Capital</h4>
+              <p>Fast &amp; Flexible Financing</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Working Capital</span>
+            <span>Term Loans</span>
+            <span>Lines of Credit</span>
+          </div>
+          <div class="partner-details">
+            <strong>$5K &ndash; $500K</strong> &middot; 24-hour approval<br>
+            6+ months in business
+          </div>
+          <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: clarify -->
+        </div>
+
+        <!-- SBA Loan Referrals -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#7c3aed;">SBA</div>
+            <div>
+              <h4>SBA Loan Referrals</h4>
+              <p>Government-Backed, Lowest Rates</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>SBA 7(a)</span>
+            <span>SBA 504</span>
+            <span>Microloans</span>
+          </div>
+          <div class="partner-details">
+            <strong>$25K &ndash; $5M</strong> &middot; Prime + 2.25%&ndash;4.75%<br>
+            7 &ndash; 25 year terms
+          </div>
+          <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: sba -->
+        </div>
+
+        <!-- National Funding -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#dc2626;">NF</div>
+            <div>
+              <h4>National Funding</h4>
+              <p>Fast Working Capital</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Working Capital</span>
+            <span>Equipment Financing</span>
+            <span>Same-Day Possible</span>
+          </div>
+          <div class="partner-details">
+            <strong>$5K &ndash; $500K</strong> &middot; Same-day funding possible<br>
+            3% referral commission
+          </div>
+          <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: nationalfunding -->
+        </div>
+
+        <!-- MCA -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#d97706;">MCA</div>
+            <div>
+              <h4>Merchant Cash Advance</h4>
+              <p>Kapitus / Credibly</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Revenue-Based</span>
+            <span>Retail</span>
+            <span>Restaurants</span>
+            <span>Fast Approval</span>
+          </div>
+          <div class="partner-details">
+            <strong>$5K &ndash; $400K</strong> &middot; Advance on future sales<br>
+            Daily % repayment &middot; Best for retail &amp; restaurants
+          </div>
+          <a href="#" class="btn-apply" onclick="return false;">Apply Now</a> <!-- // AFFILIATE_LINK: mca -->
+        </div>
+      </div>
+
+      <!-- Funding Applications Table -->
+      <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-top:2rem;margin-bottom:0.75rem;">Tenant Funding Applications</h3>
+      <div id="funding-apps-container">
+        <table class="apps-table">
+          <thead>
+            <tr>
+              <th>Business Name</th>
+              <th>Amount</th>
+              <th>Purpose</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="funding-apps-body">
+            <tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem;">No applications yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ DOCUMENTS TAB ═══ -->
+    <div id="dtab-documents" class="tab-content">
+      <div class="page-header"><h1>Documents</h1><p>Manage commercial lease documents, certificates, and tenant files.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128193;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Document Center</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Upload and manage lease agreements, COIs, buildout plans, and tenant correspondence.</p>
+          <button class="btn btn-primary" style="margin-top:1.25rem;">+ Upload Document</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ AI SETTINGS TAB ═══ -->
+    <div id="dtab-ai" class="tab-content">
+      <div class="page-header"><h1>AI Settings</h1><p>Configure your AI assistant for commercial property inquiries.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#129302;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">AI Configuration</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Customize how your AI assistant handles commercial tenant inquiries, showing information, and lead qualification.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MANAGEMENT PROFILE TAB (A6) ═══ -->
+    <div id="dtab-mgmt-profile" class="tab-content">
+      <div class="page-header"><h1>Management Profile</h1><p>Control what payment methods and financial products your commercial tenants can access.</p></div>
+
+      <!-- PAYMENT METHODS SECTION -->
+      <div class="mgmt-section">
+        <div class="mgmt-section-title">Payment Methods You Accept</div>
+
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Cash App</div>
+            <div class="toggle-desc">Instant, zero-fee payments via Cash App</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-cashApp" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Zelle</div>
+            <div class="toggle-desc">Instant bank-to-bank transfers, zero fees</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-zelle" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Venmo</div>
+            <div class="toggle-desc">Popular mobile payment app</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-venmo" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Bank Transfer (ACH)</div>
+            <div class="toggle-desc">Direct bank transfer, 2-3 business days, zero fees</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-ach" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Credit / Debit Card</div>
+            <div class="toggle-desc">Visa, Mastercard, Amex (2.9% + $0.30 processing fee)</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-card" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Check / Money Order</div>
+            <div class="toggle-desc">Traditional paper payment methods</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-check" /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">PayPal</div>
+            <div class="toggle-desc">Online payments via PayPal account</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-paypal" /><span class="slider"></span></label>
+        </div>
+
+        <!-- Card Fee Policy -->
+        <div style="margin-top:1rem;padding:1rem;background:white;border:1px solid #e2e8f0;border-radius:10px;">
+          <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.75rem;">Card Fee Policy</div>
+          <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem;">
+              <input type="radio" name="cardFeePolicy" value="tenant_pays" checked style="width:auto;" /> Tenant pays fee
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem;">
+              <input type="radio" name="cardFeePolicy" value="landlord_absorbs" style="width:auto;" /> I absorb fees
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCIAL PRODUCTS SECTION -->
+      <div class="mgmt-section">
+        <div class="mgmt-section-title">Financial Products &amp; Services</div>
+
+        <!-- BUSINESS FUNDING -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Business Funding</div>
+
+        <!-- Business Loans & Working Capital -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Business Loans &amp; Working Capital</div>
+              <div class="toggle-desc">Connect your commercial tenants with funding for buildout, equipment, and operations.</div>
+              <div class="toggle-commission">You earn: $200&ndash;5,000 per funded deal</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Business Loans &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>Working capital and term loans for your commercial tenants who need funding for buildout, equipment, inventory, or daily operations.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>A funded tenant is a tenant who can pay rent, complete their buildout, and succeed in your space. The #1 reason commercial tenants default is cash flow problems.</p>
+                <div class="edu-section-label">What You Earn</div>
+                <p>$200&ndash;5,000 per funded deal depending on the loan size and type.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('businessLoans')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-businessLoans" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- SBA Loan Referrals -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">SBA Loan Referrals</div>
+              <div class="toggle-desc">Government-backed small business loans for qualified tenants.</div>
+              <div class="toggle-commission">You earn: $2,500&ndash;5,000 per closed SBA loan</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>SBA Loan Referrals &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>SBA loans are government-backed loans with the lowest interest rates and longest terms. Ideal for established businesses needing significant capital.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>SBA-funded tenants have long-term, affordable financing making them incredibly stable, long-term tenants.</p>
+                <div class="edu-section-label">What You Earn</div>
+                <p>$2,500&ndash;5,000 per closed SBA loan. Large commissions because SBA loans are typically $100K&ndash;$5M.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('sbaLoans')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-sbaLoans" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Merchant Cash Advance -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Merchant Cash Advance Referral</div>
+              <div class="toggle-desc">Quick capital based on future revenue. Good for retail/restaurant tenants.</div>
+              <div class="toggle-commission">You earn: $2,000&ndash;4,500 per funded MCA</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Merchant Cash Advance &mdash; How It Works</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>An advance on future credit card sales. The business receives a lump sum and repays as a small percentage of daily sales.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>MCAs provide fast capital for retail and restaurant tenants who need bridge funding. A tenant with working capital is a tenant who can pay rent.</p>
+                <div class="edu-section-label">What You Earn</div>
+                <p>$2,000&ndash;4,500 per funded MCA. Among the highest-commission referrals in the lending space.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('merchantCashAdvance')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-merchantCashAdvance" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Equipment Financing (COMMERCIAL-SPECIFIC) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Equipment Financing</div>
+              <div class="toggle-desc">Help tenants finance commercial equipment, HVAC, kitchen buildouts, and specialty installations.</div>
+              <div class="toggle-commission">You earn: $200&ndash;2,000 per financed deal</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Equipment Financing &mdash; How It Works</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>Equipment financing allows commercial tenants to purchase or lease equipment needed for their business without large upfront costs. This includes restaurant equipment, medical devices, HVAC systems, and more.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>Tenants with properly equipped spaces are more productive and profitable, leading to longer lease terms and more reliable rent payments. Equipment financing also often results in property improvements that add value to your space.</p>
+                <div class="edu-section-label">What You Earn</div>
+                <p>$200&ndash;2,000 per financed deal depending on equipment value and financing terms. Recurring opportunity as tenants upgrade or expand.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('equipmentFinancing')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-equipmentFinancing" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Commercial Mortgage Referrals (COMMERCIAL-SPECIFIC) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Commercial Mortgage Referrals</div>
+              <div class="toggle-desc">Connect tenants looking to purchase their own commercial space with mortgage lenders.</div>
+              <div class="toggle-commission">You earn: $1,000&ndash;5,000 per closed mortgage</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Commercial Mortgage Referrals &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>When your tenants are ready to purchase their own commercial space, you can refer them to trusted mortgage lenders who specialize in commercial real estate financing.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>Even when a tenant moves on to their own space, you maintain a positive relationship and earn a referral commission. Many tenants who purchase also keep leasing additional space for growth.</p>
+                <div class="edu-section-label">What You Earn</div>
+                <p>$1,000&ndash;5,000 per closed mortgage. Commercial mortgages are large transactions with significant referral commissions.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('commercialMortgage')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-commercialMortgage" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- DEPOSIT ALTERNATIVES -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Deposit Alternatives</div>
+
+        <!-- Deposit Bonds -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Deposit Bonds (Jetty / Obligo)</div>
+              <div class="toggle-desc">Tenants pay a small monthly fee instead of a full deposit. You're still covered for the full deposit amount.</div>
+              <div class="toggle-commission">You earn: ~15% commission on every premium</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Deposit Bonds &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>A deposit bond replaces the traditional upfront security deposit with a small monthly payment. A surety company guarantees the full deposit amount to you.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>You are covered for the same amount as a traditional deposit. If the tenant causes damage, the surety company pays you up to the bonded amount.</p>
+                <div class="edu-section-label">Note for Commercial</div>
+                <p>Commercial leases typically have larger deposits. Deposit bonds are less common in commercial but can reduce barriers for smaller tenants or startups entering your space.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('depositBonds')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-depositBonds" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- INSURANCE PRODUCTS -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Insurance Products</div>
+
+        <!-- Renters Insurance (OFF for commercial) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Renters Insurance (Jetty / Sure)</div>
+              <div class="toggle-desc">Personal renters insurance for residential tenants. Not typically applicable for commercial leases.</div>
+              <div class="toggle-commission">You earn: $2&ndash;5/mo recurring per policy</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-rentersInsurance" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Rent Guarantee Insurance -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Rent Guarantee Insurance</div>
+              <div class="toggle-desc">If your tenant stops paying, the insurer covers missed rent (up to 6&ndash;12 months).</div>
+              <div class="toggle-commission">You earn: $150&ndash;200 per policy (15% of annual premium)</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-rentGuarantee" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- TENANT FINANCIAL TOOLS -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Tenant Financial Tools</div>
+
+        <!-- Credit Builder (OFF for commercial) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Credit Builder (Boom)</div>
+              <div class="toggle-desc">Report tenant's on-time rent payments to credit bureaus. Not relevant for business entities.</div>
+              <div class="toggle-commission">You earn: $1&ndash;2/mo recurring per tenant</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-creditBuilder" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Rent Flexibility -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Rent Flexibility (Flex)</div>
+              <div class="toggle-desc">Tenants split rent into 2 payments/month. You still get paid in full on the 1st.</div>
+              <div class="toggle-commission">Tenant pays $14.99/mo for the service</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Rent Flexibility &mdash; How It Works</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>Flex lets tenants split their monthly rent into 2 payments. Flex pays you the full rent on the 1st &mdash; the tenant repays Flex in two installments.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>You get paid in full, on time, on the 1st. Flex takes on the risk. Useful for smaller commercial tenants with seasonal cash flow.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('rentFlexibility')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-rentFlexibility" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- MOVE-IN SERVICES -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Move-In Services</div>
+
+        <!-- Utility Setup Concierge -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Utility Setup Concierge</div>
+              <div class="toggle-desc">Handle power, gas, and utility transfers for your new commercial tenant.</div>
+              <div class="toggle-commission">You earn: $75 per tenant</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-utilitySetup" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Internet / Cable Setup -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Internet / Cable Setup (AT&amp;T, Xfinity)</div>
+              <div class="toggle-desc">Business internet installation referral at move-in.</div>
+              <div class="toggle-commission">You earn: $50&ndash;150 per installation</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-internetSetup" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Moving Services Referral (OFF for commercial) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Moving Services Referral</div>
+              <div class="toggle-desc">Connect tenants with vetted commercial movers.</div>
+              <div class="toggle-commission">You earn: $50 per booked move</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-movingServices" /><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAVE BUTTON -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;background:white;border:1px solid #e2e8f0;border-radius:10px;margin-top:1rem;">
+        <span id="mgmt-save-status" style="font-size:0.85rem;color:#10b981;font-weight:600;opacity:0;transition:opacity 0.4s;">Profile saved successfully</span>
+        <button class="btn btn-primary" onclick="saveMgmtProfile()">Save Management Profile</button>
+      </div>
+    </div>
+
+  </div><!-- end dash-main -->
+</div><!-- end dashboard-layout -->
+
+<!-- Footer -->
+<footer style="background:#0f172a;color:#94a3b8;padding:2.5rem 2rem;text-align:center;font-size:0.82rem;">
+  <p>&copy; 2026 RentVerified. All rights reserved.</p>
+  <p style="margin-top:0.5rem;">
+    <a href="index.html" style="color:#93c5fd;text-decoration:none;">Home</a> &middot;
+    <a href="listings.html" style="color:#93c5fd;text-decoration:none;">Listings</a> &middot;
+    <a href="landlord-signup.html" style="color:#93c5fd;text-decoration:none;">Landlord Portal</a> &middot;
+    <a href="tenant-portal.html" style="color:#93c5fd;text-decoration:none;">Tenant Portal</a>
+  </p>
+</footer>
+
+<script>
+/* ── Tab Switching ── */
+function dashTab(name) {
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.dash-link').forEach(function(l) { l.classList.remove('active'); });
+  var tab = document.getElementById('dtab-' + name);
+  if (tab) tab.classList.add('active');
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  if (name === 'funding') loadFundingApplications();
+  if (name === 'mgmt-profile') loadMgmtProfile();
+}
+
+/* ── Funding Applications ── */
+function loadFundingApplications() {
+  var apps = [];
+  try { apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]'); } catch(e) {}
+
+  var tbody = document.getElementById('funding-apps-body');
+  if (!tbody) return;
+
+  if (!apps.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem;">No applications yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = apps.map(function(app) {
+    var bizName = app.business ? app.business.name : 'Unknown';
+    var amount = app.funding ? '$' + Number(app.funding.amountNeeded).toLocaleString() : 'N/A';
+    var purpose = app.funding ? app.funding.purpose : 'N/A';
+    var status = app.status || 'pending';
+    var date = app.timestamp ? new Date(app.timestamp).toLocaleDateString() : 'N/A';
+
+    return '<tr>' +
+      '<td>' + escHtml(bizName) + '</td>' +
+      '<td>' + escHtml(amount) + '</td>' +
+      '<td>' + escHtml(purpose) + '</td>' +
+      '<td><span class="status-badge ' + status + '">' + status.charAt(0).toUpperCase() + status.slice(1) + '</span></td>' +
+      '<td>' + escHtml(date) + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ── Management Profile (A6) ── */
+function getCompanyId() {
+  try {
+    var accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+    if (accts.length) return accts[0].company ? accts[0].company.replace(/\s+/g, '_').toLowerCase() : 'default';
+  } catch(e) {}
+  return 'default';
+}
+
+function getMgmtProfileKey() {
+  return 'rv_mgmt_profile_commercial_' + getCompanyId();
+}
+
+function getDefaultMgmtProfile() {
+  return {
+    paymentMethods: { cashApp: true, zelle: true, venmo: true, ach: true, card: true, check: false, paypal: false },
+    cardFeePolicy: 'tenant_pays',
+    financialProducts: {
+      businessLoans: true,
+      sbaLoans: true,
+      merchantCashAdvance: false,
+      equipmentFinancing: true,
+      commercialMortgage: true,
+      depositBonds: false,
+      rentersInsurance: false,
+      rentGuarantee: false,
+      creditBuilder: false,
+      rentFlexibility: true,
+      utilitySetup: true,
+      internetSetup: true,
+      movingServices: false
+    },
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function loadMgmtProfile() {
+  var profile;
+  try { profile = JSON.parse(localStorage.getItem(getMgmtProfileKey())); } catch(e) {}
+  if (!profile) profile = getDefaultMgmtProfile();
+
+  // Set payment method toggles
+  Object.keys(profile.paymentMethods).forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="pm-' + key + '"]');
+    if (el) el.checked = profile.paymentMethods[key];
+  });
+
+  // Set card fee policy
+  var feeRadio = document.querySelector('input[name="cardFeePolicy"][value="' + profile.cardFeePolicy + '"]');
+  if (feeRadio) feeRadio.checked = true;
+
+  // Set financial product toggles
+  Object.keys(profile.financialProducts).forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="fp-' + key + '"]');
+    if (el) el.checked = profile.financialProducts[key];
+  });
+}
+
+function saveMgmtProfile() {
+  var profile = { paymentMethods: {}, cardFeePolicy: 'tenant_pays', financialProducts: {}, updatedAt: new Date().toISOString() };
+
+  // Read payment methods
+  ['cashApp','zelle','venmo','ach','card','check','paypal'].forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="pm-' + key + '"]');
+    profile.paymentMethods[key] = el ? el.checked : false;
+  });
+
+  // Read card fee policy
+  var feeRadio = document.querySelector('input[name="cardFeePolicy"]:checked');
+  profile.cardFeePolicy = feeRadio ? feeRadio.value : 'tenant_pays';
+
+  // Read financial products
+  ['businessLoans','sbaLoans','merchantCashAdvance','equipmentFinancing','commercialMortgage','depositBonds','rentersInsurance','rentGuarantee','creditBuilder','rentFlexibility','utilitySetup','internetSetup','movingServices'].forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="fp-' + key + '"]');
+    profile.financialProducts[key] = el ? el.checked : false;
+  });
+
+  localStorage.setItem(getMgmtProfileKey(), JSON.stringify(profile));
+
+  var status = document.getElementById('mgmt-save-status');
+  if (status) { status.style.opacity = '1'; setTimeout(function() { status.style.opacity = '0'; }, 3000); }
+}
+
+function enableProduct(productKey) {
+  var el = document.querySelector('[data-mgmt="fp-' + productKey + '"]');
+  if (el) el.checked = true;
+}
+
+/* ── Collapsible sidebar groups ── */
+function toggleSidebarGroup(label) {
+  var group = label.parentElement;
+  group.classList.toggle('collapsed');
+  var collapsed = [];
+  document.querySelectorAll('.sidebar-group.collapsed').forEach(function(g) {
+    var span = g.querySelector('.sidebar-group-label span');
+    if (span) collapsed.push(span.textContent);
+  });
+  localStorage.setItem('rv_comm_sidebar_collapsed', JSON.stringify(collapsed));
+}
+
+// Restore collapsed state
+(function() {
+  try {
+    var collapsed = JSON.parse(localStorage.getItem('rv_comm_sidebar_collapsed') || '[]');
+    document.querySelectorAll('.sidebar-group-label span').forEach(function(span) {
+      if (collapsed.indexOf(span.textContent) !== -1) {
+        span.closest('.sidebar-group').classList.add('collapsed');
+      }
+    });
+  } catch(e) {}
+})();
+
+/* ── Commercial Onboarding ── */
+function showCommercialOnboarding() {
+  if (localStorage.getItem('rv_commercial_onboarding_done')) return;
+  var overlay = document.getElementById('comm-onboarding');
+  if (!overlay) return;
+
+  // Build products list
+  var products = [
+    { key:'businessLoans', icon:'🏦', name:'Business Loans', desc:'Access working capital for commercial property operations.', recommended:true },
+    { key:'sbaLoans', icon:'🏛️', name:'SBA Loans', desc:'Government-backed small business loans with favorable terms.', recommended:true },
+    { key:'equipmentFinancing', icon:'🔧', name:'Equipment Financing', desc:'Finance commercial equipment purchases with flexible terms.', recommended:true },
+    { key:'commercialMortgage', icon:'🏢', name:'Commercial Mortgage', desc:'Refinance or acquire commercial properties at competitive rates.', recommended:true },
+    { key:'utilitySetup', icon:'⚡', name:'Utility Setup', desc:'Streamline utility connections for your commercial tenants.', recommended:true },
+    { key:'internetSetup', icon:'🌐', name:'Internet Setup', desc:'Help tenants get business internet installed quickly.', recommended:true }
+  ];
+
+  var container = document.getElementById('cob-products');
+  if (container) {
+    container.innerHTML = products.map(function(p) {
+      return '<div class="comm-ob-product">' +
+        '<label class="comm-toggle"><input type="checkbox" id="cob-' + p.key + '"' + (p.recommended ? ' checked' : '') + ' /><span class="slider"></span></label>' +
+        '<div style="font-size:1.25rem;flex-shrink:0;">' + p.icon + '</div>' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:700;font-size:0.9rem;">' + p.name + (p.recommended ? ' <span style="font-size:0.7rem;color:#10b981;font-weight:600;">Recommended</span>' : '') + '</div>' +
+          '<div style="font-size:0.8rem;color:#64748b;line-height:1.3;">' + p.desc + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  overlay.style.display = 'flex';
+}
+
+function cobNext(step) {
+  document.getElementById('cob-step-1').style.display = step === 1 ? 'block' : 'none';
+  document.getElementById('cob-step-2').style.display = step === 2 ? 'block' : 'none';
+}
+
+function cobFinish() {
+  localStorage.setItem('rv_commercial_onboarding_done', 'true');
+  document.getElementById('comm-onboarding').style.display = 'none';
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function() {
+  loadFundingApplications();
+  showCommercialOnboarding();
+});
+</script>
+
+<!-- COMMERCIAL ONBOARDING OVERLAY -->
+<div id="comm-onboarding" class="comm-ob-overlay" style="display:none;">
+  <div class="comm-ob-card">
+    <!-- Step 1: Welcome -->
+    <div id="cob-step-1">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:3rem;margin-bottom:0.75rem;">🏢</div>
+        <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">Welcome to the RentVerified Commercial Portal</h2>
+        <p style="color:#64748b;font-size:0.95rem;line-height:1.5;">Manage your commercial properties, tenants, and business funding all from one dashboard.</p>
+      </div>
+      <div style="background:#f8fafc;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+        <div style="font-size:0.82rem;color:#64748b;line-height:1.5;">As a RentVerified commercial partner, you earn referral commissions when your tenants and business contacts use our funding products. We handle everything from application to funding.</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;background:#1a56db;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="cobNext(2)">Continue</button>
+    </div>
+
+    <!-- Step 2: Products -->
+    <div id="cob-step-2" style="display:none;">
+      <div style="text-align:center;margin-bottom:1.25rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:0.3rem;">Recommended Products</h2>
+        <p style="color:#64748b;font-size:0.85rem;">These funding products are pre-selected based on commercial property best practices. Toggle any you don't need.</p>
+      </div>
+
+      <div id="cob-products"></div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;margin-top:1rem;background:#1a56db;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="cobFinish()">Go to Dashboard</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>119 E 600 S #119, Orem UT – RentVerified</title>
+  <title>Property Details | RentVerified</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     .detail-hero {
@@ -113,6 +113,19 @@
       border: 1px solid var(--gray-200);
     }
 
+    .accepts-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.65rem 1rem;
+      background: var(--gray-100);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .accepts-badge .ab-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .accepts-badge .ab-text { font-weight: 600; }
+    .accepts-badge .ab-desc { font-size: 0.8rem; color: var(--gray-500); margin-left: auto; }
+
     @media (max-width: 900px) {
       .detail-layout { grid-template-columns: 1fr; }
       .sticky-card { position: static; }
@@ -121,16 +134,16 @@
 </head>
 <body>
 
-<!-- Sanders PM live banner -->
+<!-- RentVerified banner -->
 <div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
-  🏢 Sanders Property Management · <a href="listings.html" style="color:#93c5fd;">Our Rentals</a> · <a href="tenant-portal.html" style="color:#93c5fd;">Log In / Sign Up</a>
+  RentVerified · Property Details · <a href="listings.html" style="color:#93c5fd;">Our Rentals</a> · <a href="tenant-portal.html" style="color:#93c5fd;">Log In / Sign Up</a>
 </div>
 
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
     <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
-    Sanders PM <span style="opacity:0.85;">· RentVerified</span>
+    RentVerified
   </a>
   <div class="nav-links">
     <a href="listings.html">← Our Rentals</a>
@@ -201,6 +214,17 @@
         <div style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><span style="color:var(--danger);">✗</span> Natural Gas (Tenant Pays)</div>
         <div style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><span style="color:var(--danger);">✗</span> Internet (Tenant Pays)</div>
         <div style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><span style="color:var(--warning);">?</span> Pets: Case-by-Case</div>
+      </div>
+    </div>
+
+    <!-- This Property Accepts -->
+    <div class="detail-section" id="property-accepts-section">
+      <h3>This Property Accepts</h3>
+      <div id="property-accepts-list" style="display:flex;flex-direction:column;gap:0.6rem;">
+        <!-- Populated by JS -->
+      </div>
+      <div style="margin-top:1rem;">
+        <a href="tenant-portal.html" class="btn btn-primary">Apply Now</a>
       </div>
     </div>
 
@@ -321,6 +345,22 @@
           <h4 style="font-weight:700;margin-bottom:0.5rem;">Application Sent!</h4>
           <p style="font-size:0.875rem;color:var(--gray-600);">Check your email for the rental application from Sanders Property Management.</p>
         </div>
+      </div>
+
+      <!-- Funding CTA: Commercial -->
+      <div id="commercial-funding-cta" style="display:none;margin-top:1rem;padding:1.25rem;background:linear-gradient(135deg,#1e3a8a,#1e40af);border-radius:12px;color:white;">
+        <div style="font-size:1.25rem;margin-bottom:0.5rem;">🏢</div>
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.35rem;">Need Funding for Your Buildout?</div>
+        <div style="font-size:0.82rem;opacity:0.85;line-height:1.4;margin-bottom:0.75rem;">RentVerified connects commercial tenants with working capital, equipment financing, and SBA loans.</div>
+        <a href="funding.html" style="display:inline-block;padding:0.5rem 1rem;background:white;color:#1e3a8a;border-radius:8px;font-weight:700;font-size:0.85rem;text-decoration:none;">Explore Funding Options</a>
+      </div>
+
+      <!-- Funding CTA: Residential / RTO -->
+      <div id="residential-funding-cta" style="margin-top:1rem;padding:1.25rem;background:linear-gradient(135deg,#065f46,#059669);border-radius:12px;color:white;">
+        <div style="font-size:1.25rem;margin-bottom:0.5rem;">🏠</div>
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.35rem;">Need Help with Move-In Costs?</div>
+        <div style="font-size:0.82rem;opacity:0.85;line-height:1.4;margin-bottom:0.75rem;">Deposit alternatives, emergency assistance, and financial resources to help you get started.</div>
+        <a href="funding.html" style="display:inline-block;padding:0.5rem 1rem;background:white;color:#065f46;border-radius:8px;font-weight:700;font-size:0.85rem;text-decoration:none;">See Financial Resources</a>
       </div>
     </div>
   </div>
@@ -458,6 +498,59 @@ window.PROPERTY_DATA = {
       }, 300);
     }
   }
+
+  /* === A5: "This Property Accepts" badges === */
+  (function renderAcceptsBadges() {
+    var BADGE_MAP = [
+      { key: 'depositBonds',     icon: '\uD83D\uDEE1\uFE0F', text: 'Deposit Bond Available',  desc: 'Move in without a full deposit' },
+      { key: 'rentersInsurance', icon: '\uD83D\uDCCB',       text: 'Renters Insurance',        desc: 'Get covered from $10/mo' },
+      { key: 'creditBuilder',    icon: '\uD83D\uDCC8',       text: 'Credit Builder',           desc: 'Build your score with on-time rent' },
+      { key: 'rentFlexibility',  icon: '\uD83D\uDCB3',       text: 'Flex Pay',                 desc: 'Split rent into 2 payments' },
+      { key: 'depositFree',     icon: '\uD83C\uDFE6',       text: 'Deposit-Free Option',      desc: 'Move in with $0 deposit' },
+      { key: 'rentGuarantee',   icon: '\uD83D\uDD12',       text: 'Rent Guarantee',           desc: 'Landlord-backed rent protection' },
+      { key: 'utilitySetup',    icon: '\u26A1',              text: 'Utility Setup Included',   desc: 'We handle your utility transfers' },
+      { key: 'internetSetup',   icon: '\uD83D\uDCE1',       text: 'Internet Setup',           desc: 'Get connected at move-in' }
+    ];
+
+    var profileRaw = localStorage.getItem('rv_mgmt_profile_default');
+    var prefs = null;
+    try { prefs = profileRaw ? JSON.parse(profileRaw) : null; } catch(e) { prefs = null; }
+
+    var container = document.getElementById('property-accepts-list');
+    if (!container) return;
+
+    BADGE_MAP.forEach(function(b) {
+      // If no profile exists, default all ON (opt-out model). Otherwise check preference.
+      var enabled = prefs ? (prefs[b.key] !== false) : true;
+      if (!enabled) return;
+
+      var el = document.createElement('div');
+      el.className = 'accepts-badge';
+      el.innerHTML = '<span class="ab-icon">' + b.icon + '</span>'
+                   + '<span class="ab-text">' + b.text + '</span>'
+                   + '<span class="ab-desc">' + b.desc + '</span>';
+      container.appendChild(el);
+    });
+  })();
+
+  /* === C7: Funding CTAs — show based on property type === */
+  (function renderFundingCTA() {
+    // For this demo listing, treat as residential. A real implementation would
+    // check window.PROPERTY_DATA.type or a similar field.
+    var propertyType = (window.PROPERTY_DATA && window.PROPERTY_DATA.type) || 'residential';
+
+    var commercialCTA  = document.getElementById('commercial-funding-cta');
+    var residentialCTA = document.getElementById('residential-funding-cta');
+
+    if (propertyType === 'commercial') {
+      if (commercialCTA)  commercialCTA.style.display  = 'block';
+      if (residentialCTA) residentialCTA.style.display = 'none';
+    } else {
+      // residential / rent-to-own — show residential CTA (already visible by default)
+      if (commercialCTA)  commercialCTA.style.display  = 'none';
+      if (residentialCTA) residentialCTA.style.display = 'block';
+    }
+  })();
 </script>
 </body>
 </html>
