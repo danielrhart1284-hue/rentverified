@@ -7,8 +7,8 @@
 // 3. Replace the placeholders below
 // ============================================================================
 
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';       // e.g., https://xyzcompany.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // e.g., eyJhbGciOiJIUzI1NiIs...
+const SUPABASE_URL = 'https://apwzjhkuvndcowfihdys.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_z5B8ZOUBzjvi69IvGSeP5Q_x9FYrkVn';
 
 // Load Supabase client from CDN (added via <script> tag in HTML)
 // <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
