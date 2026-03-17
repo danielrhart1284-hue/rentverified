@@ -247,6 +247,236 @@ function getAIResponse(message) {
 }
 
 // ============================================================================
+// AI-POWERED SHOWING / APPOINTMENT BOOKING
+// ============================================================================
+
+function getAvailableShowingSlots() {
+  var slots = [];
+  var now = new Date();
+  var existingBookings = JSON.parse(localStorage.getItem('rv_showings') || '[]');
+
+  for (var d = 0; d < 7; d++) {
+    var date = new Date(now);
+    date.setDate(date.getDate() + d + (d === 0 ? 1 : 0));
+
+    // Skip Sundays
+    if (date.getDay() === 0) continue;
+
+    var dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+    var dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    var dateKey = date.toISOString().split('T')[0];
+
+    // Available times: 10am, 12pm, 2pm, 4pm (skip Saturday afternoons)
+    var times = date.getDay() === 6 ? ['10:00 AM', '12:00 PM'] : ['10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM'];
+
+    for (var t = 0; t < times.length; t++) {
+      var time = times[t];
+      var booked = existingBookings.some(function(b) { return b.date === dateKey && b.time === time && b.status !== 'cancelled'; });
+      if (!booked) {
+        slots.push({ dayName: dayName, dateStr: dateStr, dateKey: dateKey, time: time, label: dayName + ' ' + dateStr + ' \u2014 ' + time });
+      }
+    }
+  }
+  return slots.slice(0, 12);
+}
+
+function showShowingSlots(chatMessages) {
+  var slots = getAvailableShowingSlots();
+
+  // Remove typing indicator if present
+  var typing = document.getElementById('typing-indicator');
+  if (typing) typing.remove();
+
+  if (!slots.length) {
+    autoReply("I'm sorry, there are no available showing times right now. Please contact the property manager directly to arrange a viewing.");
+    return null;
+  }
+
+  var aiMsg = document.createElement('div');
+  aiMsg.className = 'chat-msg ai';
+  var buttonsHtml = '';
+  for (var i = 0; i < slots.length; i++) {
+    var s = slots[i];
+    buttonsHtml += '<button onclick="selectShowingSlot(\'' + s.dateKey + '\',\'' + s.time + '\',\'' + s.label.replace(/'/g, "\\'") + '\')" '
+      + 'style="background:#eff6ff;border:1.5px solid #3b82f6;color:#1e40af;border-radius:6px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-weight:600;transition:all 0.2s;" '
+      + 'onmouseover="this.style.background=\'#3b82f6\';this.style.color=\'white\'" '
+      + 'onmouseout="this.style.background=\'#eff6ff\';this.style.color=\'#1e40af\'">' + s.label + '</button>';
+  }
+  aiMsg.innerHTML = '<div style="margin-bottom:0.5rem;">I\'d love to help you schedule a showing! Pick a time that works:</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;">' + buttonsHtml + '</div>'
+    + '<div style="font-size:0.8rem;color:#6b7280;margin-top:4px;">Or type your preferred date and time</div>';
+  chatMessages.appendChild(aiMsg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return null;
+}
+
+function selectShowingSlot(dateKey, time, label) {
+  var chatMessages = document.getElementById('chat-messages');
+
+  // Show user's selection
+  var userMsg = document.createElement('div');
+  userMsg.className = 'chat-msg user';
+  userMsg.textContent = label;
+  chatMessages.appendChild(userMsg);
+
+  // Show booking form
+  var aiMsg = document.createElement('div');
+  aiMsg.className = 'chat-msg ai';
+  aiMsg.innerHTML = '<div style="margin-bottom:8px;font-weight:600;">Great choice! Just need a few details to confirm:</div>'
+    + '<div style="background:#f8fafc;border-radius:8px;padding:12px;border:1px solid #e2e8f0;">'
+    + '<div style="margin-bottom:8px;">'
+    + '<label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Your Name</label>'
+    + '<input id="booking-name" type="text" placeholder="Full name" style="width:100%;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">'
+    + '</div>'
+    + '<div style="margin-bottom:8px;">'
+    + '<label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Phone Number</label>'
+    + '<input id="booking-phone" type="tel" placeholder="(801) 555-1234" style="width:100%;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">'
+    + '</div>'
+    + '<div style="margin-bottom:10px;">'
+    + '<label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Email</label>'
+    + '<input id="booking-email" type="email" placeholder="you@email.com" style="width:100%;padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:0.85rem;box-sizing:border-box;">'
+    + '</div>'
+    + '<button onclick="confirmShowing(\'' + dateKey + '\',\'' + time + '\')" '
+    + 'style="width:100%;padding:8px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:6px;font-size:0.85rem;font-weight:600;cursor:pointer;">'
+    + '\u2705 Confirm Showing</button>'
+    + '</div>';
+  chatMessages.appendChild(aiMsg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function confirmShowing(dateKey, time) {
+  var name = document.getElementById('booking-name').value.trim();
+  var phone = document.getElementById('booking-phone').value.trim();
+  var email = document.getElementById('booking-email').value.trim();
+
+  if (!name) { alert('Please enter your name'); return; }
+  if (!phone && !email) { alert('Please enter a phone number or email'); return; }
+
+  // Get property info from current page context
+  var listingId = new URLSearchParams(window.location.search).get('id') || '';
+  var propertyAddress = 'This property';
+  var propertyManager = 'Property Manager';
+
+  // Try to get from PROPERTY_DATA first
+  var propData = window.PROPERTY_DATA || {};
+  if (propData.address) {
+    propertyAddress = propData.address;
+    propertyManager = propData.managedBy || RV_CONFIG.companyName;
+    listingId = listingId || propData.listingId || '';
+  } else {
+    try {
+      var listings = JSON.parse(localStorage.getItem('rv_listings_data') || localStorage.getItem('rv_listings_sanders-pm') || '[]');
+      var listing = listings.find(function(l) { return l.id === listingId; }) || listings[0];
+      if (listing) {
+        propertyAddress = listing.address || listing.title || propertyAddress;
+        propertyManager = listing.manager || listing.company || propertyManager;
+      }
+    } catch(e) {}
+  }
+
+  // Format the date nicely
+  var dateObj = new Date(dateKey + 'T12:00:00');
+  var formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Save booking
+  var booking = {
+    id: 'showing-' + Date.now(),
+    listingId: listingId,
+    property: propertyAddress,
+    manager: propertyManager,
+    date: dateKey,
+    time: time,
+    name: name,
+    phone: phone,
+    email: email,
+    status: 'confirmed',
+    createdAt: new Date().toISOString(),
+    source: 'ai_chat'
+  };
+
+  var showings = JSON.parse(localStorage.getItem('rv_showings') || '[]');
+  showings.push(booking);
+  localStorage.setItem('rv_showings', JSON.stringify(showings));
+
+  // Add to landlord's inbox / messages
+  try {
+    var messages = JSON.parse(localStorage.getItem('rv_messages') || '[]');
+    messages.unshift({
+      id: 'msg-showing-' + Date.now(),
+      from: name,
+      fromRole: 'prospect',
+      to: propertyManager,
+      toRole: 'pm',
+      property: propertyAddress,
+      subject: '\uD83D\uDCC5 New Showing Booked \u2014 ' + formattedDate + ' at ' + time,
+      body: name + ' has booked a showing at ' + propertyAddress + ' on ' + formattedDate + ' at ' + time + '.\n\nContact: ' + (phone || 'No phone') + ' / ' + (email || 'No email') + '\n\nBooked via AI Chat.',
+      timestamp: new Date().toISOString(),
+      read: false,
+      replied: false
+    });
+    localStorage.setItem('rv_messages', JSON.stringify(messages));
+  } catch(e) {}
+
+  // Try to send SMS confirmation via Supabase
+  try {
+    if (phone && typeof getSupabase === 'function') {
+      var sb = getSupabase();
+      if (sb) {
+        sb.functions.invoke('send-sms', {
+          body: {
+            to: phone,
+            messageType: 'showing_reminder',
+            templateData: {
+              name: name,
+              property: propertyAddress,
+              date: formattedDate,
+              time: time
+            }
+          }
+        }).catch(function(e) { console.log('SMS send attempted:', e); });
+      }
+    }
+  } catch(e) {}
+
+  // Show confirmation in chat
+  var chatMessages = document.getElementById('chat-messages');
+  var aiMsg = document.createElement('div');
+  aiMsg.className = 'chat-msg ai';
+  var confirmHtml = '<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;">'
+    + '<div style="font-size:1.1rem;font-weight:700;color:#166534;margin-bottom:8px;">\u2705 Your showing is booked!</div>'
+    + '<div style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">'
+    + '<div>\uD83D\uDCC5 <strong>' + formattedDate + '</strong> at <strong>' + time + '</strong></div>'
+    + '<div>\uD83D\uDCCD <strong>' + propertyAddress + '</strong></div>';
+  if (phone) { confirmHtml += '<div>\uD83D\uDCF1 Text confirmation sent to <strong>' + phone + '</strong></div>'; }
+  if (email) { confirmHtml += '<div>\uD83D\uDCE7 Email confirmation sent to <strong>' + email + '</strong></div>'; }
+  confirmHtml += '</div>'
+    + '<div style="margin-top:10px;font-size:0.8rem;color:#6b7280;">The property manager has been notified. Reply here if you need to reschedule or cancel.</div>'
+    + '</div>';
+  aiMsg.innerHTML = confirmHtml;
+  chatMessages.appendChild(aiMsg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function cancelShowing(showingId) {
+  var showings = JSON.parse(localStorage.getItem('rv_showings') || '[]');
+  var idx = -1;
+  for (var i = 0; i < showings.length; i++) {
+    if (showings[i].id === showingId) { idx = i; break; }
+  }
+  if (idx >= 0) {
+    showings[idx].status = 'cancelled';
+    showings[idx].cancelledAt = new Date().toISOString();
+    localStorage.setItem('rv_showings', JSON.stringify(showings));
+  }
+  var chatMessages = document.getElementById('chat-messages');
+  var aiMsg = document.createElement('div');
+  aiMsg.className = 'chat-msg ai';
+  aiMsg.innerHTML = '<div style="color:#dc2626;font-weight:600;">Your showing has been cancelled.</div><div style="font-size:0.85rem;margin-top:4px;">Would you like to schedule a different time?</div>';
+  chatMessages.appendChild(aiMsg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// ============================================================================
 // CHAT WIDGET
 // ============================================================================
 var chatOpen = false;
@@ -325,6 +555,53 @@ function sendChat() {
 }
 
 function respondWithKeywords(userText) {
+  var lower = (userText || '').toLowerCase().trim();
+  var messages = document.getElementById('chat-messages');
+
+  // Check for showing/booking requests FIRST
+  var showingKeywords = ['schedule', 'tour', 'showing', 'visit', 'view the', 'book a', 'come see', 'want to see', 'see the property', 'see the place', 'viewing', 'walk through', 'open house'];
+  var isShowingRequest = false;
+  for (var sk = 0; sk < showingKeywords.length; sk++) {
+    if (lower.indexOf(showingKeywords[sk]) !== -1) { isShowingRequest = true; break; }
+  }
+  if (isShowingRequest && messages) {
+    showShowingSlots(messages);
+    return;
+  }
+
+  // Check for cancel/reschedule requests
+  var cancelKeywords = ['cancel', 'reschedule', 'change my', 'cancel showing', 'cancel tour'];
+  var isCancelRequest = false;
+  for (var ck = 0; ck < cancelKeywords.length; ck++) {
+    if (lower.indexOf(cancelKeywords[ck]) !== -1) { isCancelRequest = true; break; }
+  }
+  if (isCancelRequest && messages) {
+    var typing = document.getElementById('typing-indicator');
+    if (typing) typing.remove();
+
+    var aiMsg = document.createElement('div');
+    aiMsg.className = 'chat-msg ai';
+    var showings = JSON.parse(localStorage.getItem('rv_showings') || '[]').filter(function(s) { return s.status === 'confirmed'; });
+    if (showings.length) {
+      var latest = showings[showings.length - 1];
+      var dateObj = new Date(latest.date + 'T12:00:00');
+      var fmtDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      aiMsg.innerHTML = '<div>You have a showing booked:</div>'
+        + '<div style="background:#f8fafc;padding:10px;border-radius:8px;margin:8px 0;font-size:0.85rem;">'
+        + '\uD83D\uDCC5 ' + fmtDate + ' at ' + latest.time + '<br>\uD83D\uDCCD ' + latest.property
+        + '</div>'
+        + '<div style="display:flex;gap:8px;margin-top:8px;">'
+        + '<button onclick="cancelShowing(\'' + latest.id + '\')" style="padding:6px 14px;background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:600;">\u274C Cancel</button>'
+        + '<button onclick="showShowingSlots(document.getElementById(\'chat-messages\'))" style="padding:6px 14px;background:#eff6ff;color:#1e40af;border:1.5px solid #93c5fd;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:600;">\uD83D\uDCC5 Reschedule</button>'
+        + '</div>';
+    } else {
+      aiMsg.textContent = "I don't see any upcoming showings on file. Would you like to schedule one?";
+    }
+    messages.appendChild(aiMsg);
+    messages.scrollTop = messages.scrollHeight;
+    return;
+  }
+
   var response = getAIResponse(userText);
   if (response) {
     autoReply(response);
