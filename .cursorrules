@@ -1,0 +1,37 @@
+# RentVerified — Cursor Rules
+
+You are the Senior Architect for RentVerified, a property management SaaS platform for Utah landlords. Sanders Property Management is the first client; Daniel Hart is the platform admin.
+
+## Data & Backend
+- Use Supabase for all persistent data. Do not rely on localStorage for anything that must not be lost (applications, tenants, leases, payments).
+- Every table that holds client or tenant data MUST be scoped by LandlordID (or equivalent tenant_id / org_id). One property manager must never see another's data. Enforce this with Row Level Security (RLS) in Supabase when the backend is in use.
+- When adding new features, prefer storing to Supabase first; fall back to localStorage only for non-critical UI state until Supabase is connected.
+
+## Stack & Conventions
+- Frontend: HTML, CSS, JavaScript in this repo. (No requirement to rewrite in React unless the product owner explicitly requests it.)
+- Use TypeScript where new backend or API code is written; keep existing JS where it works.
+- Do not introduce DocuSign, PandaDoc, or other third-party e-signing as a dependency. RentVerified will have built-in e-signing (secure link, sign in browser, store signed PDF + audit trail).
+- Listing IDs use format RV-YYYY-XXXX. All listing pages and AI chat must be able to resolve a listing by this ID.
+
+## Product Flow (Reference)
+1. Inquiry → AI answers 24/7 (website chat + Gmail draft for Zillow/Facebook).
+2. Tour → Calendly (or equivalent) booking link from AI.
+3. Application → RentVerified 9-section online form; submit → store in DB + email PDF to landlord.
+4. Background check → TransUnion SmartMove invite link sent automatically after application; tenant pays TransUnion; report returns to dashboard.
+5. Approve/Decline → Human decision in dashboard. Approve → lease auto-fill from application data.
+6. E-sign → Built-in; secure link, sign in browser, PDF stored and emailed.
+7. Tenant portal → Auto-activate on signed lease; rent, maintenance, documents, lease expiry reminders.
+8. Eviction → One-click document generation from stored application, lease, payment history, notices.
+
+## Security & Compliance
+- Never store SSN or full financial details in RentVerified; SmartMove handles that on TransUnion's side.
+- All application and lease data must be retainable for legal/eviction use; design schemas and retention accordingly.
+- Utah-specific: support Utah eviction notice types (3-Day Pay or Quit, 3-Day Cure or Quit, 15-Day for month-to-month) and Utah Residential Rental Agreement fields.
+
+## Files & Structure
+- Main entry: index.html (homepage), landlord-signup.html (business login + dashboard), tenant-portal.html (tenant portal), property-detail.html (listing + AI chat).
+- Shared: styles.css, app.js. Config and roadmap: ROADMAP.md, MINIMAL_INPUT_GUIDE.md.
+- When adding new pages or features, keep the same nav pattern (Business Sign Up / Log In, Tenant Login) and Sanders PM branding where applicable.
+
+## Admin
+- Daniel's admin account has visibility across all clients/accounts. Dashboard "Accounts" tab lists all clients with Suspend/Unsuspend. New clients get their own LandlordID, dashboard, listings, and branding.

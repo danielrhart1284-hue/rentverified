@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tenant Portal – Sanders Property Management | RentVerified</title>
+  <title>Tenant Portal – RentVerified</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     .portal-layout {
@@ -134,26 +134,129 @@
     .rent-card .label { opacity: 0.8; font-size: 0.9rem; }
     .rent-card .due { font-size: 0.85rem; opacity: 0.75; margin-top: 4px; }
     .rent-card-grid { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+
+    .fin-card { background: white; border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 1rem; border-left: 3px solid #3B82F6; }
+    .fin-card h4 { font-weight: 700; font-size: 1rem; margin-bottom: 0.35rem; }
+    .fin-card p { font-size: 0.875rem; color: #6B7280; margin-bottom: 0.75rem; }
+    .fin-card .btn-fin { display: inline-block; padding: 0.5rem 1.25rem; background: #1a56db; color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
+    .fin-card .btn-fin:hover { background: #1e40af; }
+    .fin-card-hidden { display: none; }
+
+    /* Deep link / QR payment panel */
+    .deep-link-panel {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      text-align: center;
+      border: 2px solid var(--gray-200);
+    }
+    .deep-link-panel .qr-wrap {
+      background: white;
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 1rem;
+      display: inline-block;
+      margin: 1rem 0;
+    }
+    .deep-link-panel .qr-wrap img { width: 180px; height: 180px; }
+    .deep-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: none;
+      cursor: pointer;
+    }
+    .deep-link-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration: none; color: white; }
+    .deep-link-btn.cashapp { background: #00D632; }
+    .deep-link-btn.venmo { background: #008CFF; }
+    .deep-link-btn.zelle { background: #6D1ED4; }
+
+    /* Agree & pay checkbox */
+    .agree-pay-box {
+      background: #FFFBEB;
+      border: 2px solid #F59E0B;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .agree-pay-box input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: #1a56db;
+    }
+    .agree-pay-box label {
+      font-size: 0.85rem;
+      color: #78350F;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    /* Auto-pay toggle */
+    .autopay-card {
+      background: linear-gradient(135deg, #064E3B, #065F46);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1.25rem;
+      color: white;
+    }
+    .autopay-toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .autopay-toggle.active { background: #34D399; }
+    .autopay-toggle::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+    }
+    .autopay-toggle.active::after { transform: translateX(22px); }
+
+    /* Payment method hidden if landlord disabled */
+    .pay-method-disabled { display: none !important; }
   </style>
 </head>
 <body>
 
-<!-- Sanders PM live banner -->
+<!-- RentVerified banner -->
 <div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
-  🏢 Sanders Property Management · Tenant Portal · <a href="index.html" style="color:#93c5fd;">Back to listings</a>
+  🏢 RentVerified · Tenant Portal · <a href="index.html" style="color:#93c5fd;">Back to listings</a>
 </div>
 
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
     <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
-    Sanders PM <span style="opacity:0.85;">· Tenant Portal</span>
+    RentVerified <span style="opacity:0.85;">· Tenant Portal</span>
   </a>
   <div class="nav-links">
     <a href="index.html">← Back to Home</a>
   </div>
   <div class="nav-cta">
-    <span style="font-size:0.85rem;color:var(--gray-600);">Sanders Property Management</span>
+    <span style="font-size:0.85rem;color:var(--gray-600);">Powered by RentVerified</span>
   </div>
 </nav>
 
@@ -163,7 +266,7 @@
     <div class="login-logo">
       <div style="font-size:2.5rem;">🔑</div>
       <h2>Tenant Portal</h2>
-      <p>Sanders Property Management</p>
+      <p>Powered by RentVerified</p>
     </div>
 
     <div class="form-group">
@@ -185,7 +288,7 @@
     </p>
     <div class="divider"></div>
     <p style="text-align:center;font-size:0.82rem;color:var(--gray-600);">
-      🔒 Secure login · Managed by Sanders Property Management
+      🔒 Secure login · Powered by RentVerified
     </p>
   </div>
 </div>
@@ -231,6 +334,10 @@
         <div class="sidebar-link" onclick="showTab('messages')">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
           Messages
+        </div>
+        <div class="sidebar-link" onclick="showTab('financial');renderFinancialResources()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Financial Resources
         </div>
       </div>
 
@@ -350,7 +457,7 @@
               </div>
               <div>
                 <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">LANDLORD</div>
-                <div style="font-weight:600;">Sanders Property Management</div>
+                <div style="font-weight:600;">Your Property Manager</div>
               </div>
               <div>
                 <div style="font-size:0.8rem;color:var(--gray-600);font-weight:600;margin-bottom:2px;">CONTACT</div>
@@ -456,7 +563,20 @@
             <div style="font-size:1.8rem;">💚</div>
             <div style="flex:1;">
               <h4 style="margin:0;font-size:.95rem;">Cash App</h4>
-              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);">Send to $SandersRentals · Instant</p>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);" id="cashapp-tag-display">Send to landlord's Cash App · Instant</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-weight:800;font-size:1rem;color:#16a34a;">FREE</div>
+              <div style="font-size:.7rem;color:var(--gray-500);">No fees</div>
+            </div>
+          </div>
+
+          <!-- Venmo -->
+          <div class="pay-method" id="method-venmo" onclick="selectMethod('venmo')" style="display:flex;align-items:center;gap:14px;padding:1rem 1.25rem;margin-bottom:.6rem;max-width:520px;">
+            <div style="font-size:1.8rem;">🔵</div>
+            <div style="flex:1;">
+              <h4 style="margin:0;font-size:.95rem;">Venmo</h4>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);" id="venmo-tag-display">Send to landlord's Venmo · Instant</p>
             </div>
             <div style="text-align:right;flex-shrink:0;">
               <div style="font-weight:800;font-size:1rem;color:#16a34a;">FREE</div>
@@ -469,7 +589,7 @@
             <div style="font-size:1.8rem;">💜</div>
             <div style="flex:1;">
               <h4 style="margin:0;font-size:.95rem;">Zelle</h4>
-              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);">Send to (555) 000-0000 · Instant</p>
+              <p style="margin:.2rem 0 0;font-size:.78rem;color:var(--gray-600);" id="zelle-info-display">Send via your banking app · Instant</p>
             </div>
             <div style="text-align:right;flex-shrink:0;">
               <div style="font-weight:800;font-size:1rem;color:#16a34a;">FREE</div>
@@ -514,54 +634,123 @@
         <!-- ── STEP 2: Payment details ── -->
         <div id="pay-step-2" style="display:none;">
 
-          <!-- ACH Form -->
+          <!-- ACH Form — Stripe Checkout redirect -->
           <div id="form-ach">
             <div class="card" style="margin-bottom:1.5rem;">
               <div class="card-body">
-                <h3 style="font-weight:700;margin-bottom:.3rem;">🏦 Bank Account Details</h3>
-                <p style="color:var(--gray-600);font-size:.85rem;margin-bottom:1.25rem;">Your information is encrypted and never stored on our servers. Powered by Stripe.</p>
-                <div class="form-group">
-                  <label>Account Holder Name</label>
-                  <input type="text" placeholder="Full name as it appears on your account" />
+                <h3 style="font-weight:700;margin-bottom:.3rem;">🏦 Bank Transfer (ACH)</h3>
+                <p style="color:var(--gray-600);font-size:.85rem;margin-bottom:1.25rem;">You'll be redirected to Stripe's secure checkout to connect your bank account.</p>
+
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:.75rem;">
+                    <span style="font-size:1.4rem;">🔒</span>
+                    <span style="font-weight:700;color:#166534;">Secure ACH Transfer via Stripe</span>
+                  </div>
+                  <ul style="margin:0;padding-left:1.25rem;font-size:.85rem;color:#166534;line-height:1.8;">
+                    <li>256-bit encryption — bank-level security</li>
+                    <li>No fees — ever. Bank transfers are always free.</li>
+                    <li>Funds arrive in 2–3 business days</li>
+                    <li>Your bank credentials are NEVER stored by RentVerified</li>
+                  </ul>
                 </div>
-                <div class="form-group">
-                  <label>Routing Number</label>
-                  <input type="text" placeholder="9-digit routing number" maxlength="9" />
-                </div>
-                <div class="form-group">
-                  <label>Account Number</label>
-                  <input type="text" placeholder="Your checking or savings account number" />
-                </div>
-                <div class="form-group">
-                  <label>Account Type</label>
-                  <select><option>Checking</option><option>Savings</option></select>
-                </div>
-                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:.85rem 1rem;margin-top:1rem;font-size:.78rem;color:#166534;display:flex;gap:8px;align-items:flex-start;">
-                  <span style="flex-shrink:0;">🔒</span>
-                  <span>ACH transfers are processed by Stripe and protected by 256-bit encryption. Your bank credentials are never stored by RentVerified.</span>
+
+                <!-- Auto-pay enrollment -->
+                <div class="autopay-card">
+                  <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="flex:1;">
+                      <div style="font-weight:700;font-size:.95rem;">🔄 Set Up Auto-Pay</div>
+                      <div style="font-size:.8rem;color:#A7F3D0;margin-top:.25rem;">Never miss a payment. Rent is automatically withdrawn on the 1st of each month. Cancel anytime.</div>
+                    </div>
+                    <div class="autopay-toggle" id="autopay-toggle" onclick="toggleAutoPay()"></div>
+                  </div>
+                  <div id="autopay-details" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.15);">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;font-size:.82rem;">
+                      <div>
+                        <div style="color:#6EE7B7;font-weight:600;font-size:.72rem;text-transform:uppercase;">Withdrawal Date</div>
+                        <div style="margin-top:2px;">1st of each month</div>
+                      </div>
+                      <div>
+                        <div style="color:#6EE7B7;font-weight:600;font-size:.72rem;text-transform:uppercase;">Amount</div>
+                        <div style="margin-top:2px;">$1,200.00/month</div>
+                      </div>
+                    </div>
+                    <div style="font-size:.75rem;color:#A7F3D0;margin-top:.75rem;">You'll receive an email reminder 3 days before each withdrawal. Cancel anytime from this portal.</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Cash App instructions -->
+          <!-- Cash App — Deep Link + QR Code -->
           <div id="form-cashapp" style="display:none;">
             <div class="card" style="margin-bottom:1.5rem;">
               <div class="card-body">
-                <h3 style="font-weight:700;margin-bottom:1rem;">💚 Send via Cash App</h3>
+                <h3 style="font-weight:700;margin-bottom:.5rem;">💚 Pay with Cash App</h3>
                 <div class="alert alert-warning" style="margin-bottom:1rem;">
                   <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                  <span><strong>Important:</strong> Sanders Property Management will never ask you to pay via gift cards or any other method.</span>
+                  <span><strong>Security Notice:</strong> Your property manager will never ask you to pay via gift cards or cryptocurrency.</span>
                 </div>
-                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
-                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">CASH APP $CASHTAG</div>
-                  <div style="font-size:1.8rem;font-weight:900;color:#15803d;font-family:monospace;">$SandersRentals</div>
+
+                <div class="deep-link-panel" style="border-color:#00D632;">
+                  <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">Send To</div>
+                  <div style="font-size:2rem;font-weight:900;color:#00D632;font-family:monospace;" id="cashapp-cashtag-display">$SandersRentals</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#1E293B;margin:.5rem 0;">$1,200.00</div>
+
+                  <!-- QR Code -->
+                  <div class="qr-wrap" id="cashapp-qr-wrap">
+                    <img id="cashapp-qr" src="" alt="Cash App QR Code" style="width:160px;height:160px;" />
+                    <div style="font-size:.72rem;color:#94A3B8;margin-top:.5rem;">Scan with Cash App</div>
+                  </div>
+
+                  <!-- Deep Link Button (opens Cash App on mobile) -->
+                  <div style="margin-top:.75rem;">
+                    <a id="cashapp-deeplink" href="#" target="_blank" class="deep-link-btn cashapp">
+                      💚 Open Cash App & Pay $1,200.00
+                    </a>
+                  </div>
+                  <div style="font-size:.75rem;color:#94A3B8;margin-top:.75rem;">On mobile? Tap the button to open Cash App with the amount pre-filled.</div>
                 </div>
-                <div style="background:var(--gray-100);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;">
-                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
-                  <div style="font-size:1.4rem;font-weight:800;">$1,200.00</div>
+
+                <div style="background:var(--gray-100);border-radius:var(--radius);padding:.85rem 1rem;margin-top:1rem;font-size:.82rem;color:#475569;">
+                  <strong>In the note field:</strong> <span id="cashapp-note">"Rent – 123 Maple St Unit 2A – March 2026"</span>
                 </div>
-                <p style="font-size:.9rem;"><strong>In the note field:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Venmo — Deep Link + QR Code -->
+          <div id="form-venmo" style="display:none;">
+            <div class="card" style="margin-bottom:1.5rem;">
+              <div class="card-body">
+                <h3 style="font-weight:700;margin-bottom:.5rem;">🔵 Pay with Venmo</h3>
+                <div class="alert alert-warning" style="margin-bottom:1rem;">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                  <span><strong>Security Notice:</strong> Always verify the recipient username before sending.</span>
+                </div>
+
+                <div class="deep-link-panel" style="border-color:#008CFF;">
+                  <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">Send To</div>
+                  <div style="font-size:2rem;font-weight:900;color:#008CFF;font-family:monospace;" id="venmo-user-display">@SandersRentals</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#1E293B;margin:.5rem 0;">$1,200.00</div>
+
+                  <!-- QR Code -->
+                  <div class="qr-wrap" id="venmo-qr-wrap">
+                    <img id="venmo-qr" src="" alt="Venmo QR Code" style="width:160px;height:160px;" />
+                    <div style="font-size:.72rem;color:#94A3B8;margin-top:.5rem;">Scan with Venmo</div>
+                  </div>
+
+                  <!-- Deep Link Button -->
+                  <div style="margin-top:.75rem;">
+                    <a id="venmo-deeplink" href="#" target="_blank" class="deep-link-btn venmo">
+                      🔵 Open Venmo & Pay $1,200.00
+                    </a>
+                  </div>
+                  <div style="font-size:.75rem;color:#94A3B8;margin-top:.75rem;">On mobile? Tap the button to open Venmo with the amount pre-filled.</div>
+                </div>
+
+                <div style="background:var(--gray-100);border-radius:var(--radius);padding:.85rem 1rem;margin-top:1rem;font-size:.82rem;color:#475569;">
+                  <strong>In the note field:</strong> <span id="venmo-note">"Rent – 123 Maple St Unit 2A – March 2026"</span>
+                </div>
               </div>
             </div>
           </div>
@@ -570,52 +759,76 @@
           <div id="form-zelle" style="display:none;">
             <div class="card" style="margin-bottom:1.5rem;">
               <div class="card-body">
-                <h3 style="font-weight:700;margin-bottom:1rem;">💜 Send via Zelle</h3>
+                <h3 style="font-weight:700;margin-bottom:.5rem;">💜 Pay with Zelle</h3>
                 <div class="alert alert-warning" style="margin-bottom:1rem;">
                   <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                  <span><strong>Important:</strong> Only send to the number/email below — verify carefully before sending.</span>
+                  <span><strong>Important:</strong> Only send to the number/email shown below — verify carefully.</span>
                 </div>
-                <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
-                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">SEND TO PHONE NUMBER</div>
-                  <div style="font-size:1.8rem;font-weight:900;color:#7c3aed;font-family:monospace;">(555) 000-0000</div>
-                  <div style="font-size:.8rem;color:var(--gray-600);margin-top:4px;">OR email: payments@sanderspm.com</div>
+
+                <div class="deep-link-panel" style="border-color:#6D1ED4;">
+                  <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">Send To</div>
+                  <div style="font-size:1.6rem;font-weight:900;color:#6D1ED4;font-family:monospace;" id="zelle-contact-display">(555) 000-0000</div>
+                  <div style="font-size:.85rem;color:#64748B;margin:.25rem 0;" id="zelle-email-display">or email: payments@rentverified.com</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#1E293B;margin:.75rem 0;">$1,200.00</div>
+
+                  <div style="margin-top:.5rem;">
+                    <button onclick="openZelleApp()" class="deep-link-btn zelle">
+                      💜 Open Your Banking App
+                    </button>
+                  </div>
+                  <div style="font-size:.75rem;color:#94A3B8;margin-top:.75rem;">Zelle is built into most banking apps — look for the Zelle icon in yours.</div>
                 </div>
-                <div style="background:var(--gray-100);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;">
-                  <div style="font-size:.8rem;color:var(--gray-600);font-weight:600;margin-bottom:4px;">AMOUNT TO SEND</div>
-                  <div style="font-size:1.4rem;font-weight:800;">$1,200.00</div>
+
+                <div style="background:var(--gray-100);border-radius:var(--radius);padding:.85rem 1rem;margin-top:1rem;font-size:.82rem;color:#475569;">
+                  <strong>In the memo:</strong> <span id="zelle-note">"Rent – 123 Maple St Unit 2A – March 2026"</span>
                 </div>
-                <p style="font-size:.9rem;"><strong>In the memo:</strong> "Rent – 123 Maple St Unit 2A – March 2026"</p>
               </div>
             </div>
           </div>
 
-          <!-- Card form -->
+          <!-- Card form — Stripe Checkout redirect with Agree & Pay -->
           <div id="form-card" style="display:none;">
             <div class="card" style="margin-bottom:1.5rem;">
               <div class="card-body">
-                <h3 style="font-weight:700;margin-bottom:.3rem;">💳 Card Details</h3>
-                <p style="color:var(--gray-600);font-size:.85rem;margin-bottom:1.25rem;">Encrypted and processed by Stripe. RentVerified never stores your card number.</p>
-                <div class="form-group">
-                  <label>Cardholder Name</label>
-                  <input type="text" placeholder="Name as it appears on card" />
-                </div>
-                <div class="form-group">
-                  <label>Card Number</label>
-                  <input type="text" placeholder="1234  5678  9012  3456" maxlength="19" />
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                  <div class="form-group">
-                    <label>Expiry Date</label>
-                    <input type="text" placeholder="MM / YY" maxlength="7" />
+                <h3 style="font-weight:700;margin-bottom:.3rem;">💳 Pay with Card</h3>
+                <p style="color:var(--gray-600);font-size:.85rem;margin-bottom:1.25rem;">You'll be redirected to Stripe's secure checkout to complete your payment.</p>
+
+                <!-- Fee breakdown -->
+                <div style="border:2px solid #FDE68A;border-radius:12px;overflow:hidden;margin-bottom:1.25rem;">
+                  <div style="background:#FFFBEB;padding:.75rem 1.25rem;border-bottom:1px solid #FDE68A;">
+                    <div style="font-size:.72rem;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.05em;">💳 Card Payment Fee Breakdown</div>
                   </div>
-                  <div class="form-group">
-                    <label>CVV</label>
-                    <input type="text" placeholder="123" maxlength="4" />
+                  <div style="padding:.25rem 0;background:white;">
+                    <div style="display:flex;justify-content:space-between;padding:.6rem 1.25rem;">
+                      <span style="font-size:.88rem;">Monthly Rent</span>
+                      <span style="font-weight:700;" id="card-rent-display">$1,200.00</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:.6rem 1.25rem;">
+                      <span style="font-size:.88rem;color:#D97706;">Stripe Processing Fee (2.9% + $0.30)</span>
+                      <span style="font-weight:700;color:#D97706;" id="card-fee-display">$35.10</span>
+                    </div>
+                    <div style="height:1px;background:#F1F5F9;margin:.2rem 0;"></div>
+                    <div style="display:flex;justify-content:space-between;padding:.75rem 1.25rem;">
+                      <span style="font-weight:700;font-size:1rem;">Total You Pay</span>
+                      <span style="font-weight:800;font-size:1.15rem;color:var(--primary);" id="card-total-display">$1,235.10</span>
+                    </div>
+                  </div>
+                  <div style="background:#F0FDF4;padding:.5rem 1.25rem;border-top:1px solid #D1FAE5;font-size:.82rem;color:#166534;">
+                    Your landlord receives the full <strong>$1,200.00</strong> — the fee only covers Stripe processing.
                   </div>
                 </div>
-                <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:.85rem 1rem;margin-top:1rem;font-size:.78rem;color:#9a3412;display:flex;gap:8px;align-items:flex-start;">
-                  <span style="flex-shrink:0;">ℹ️</span>
-                  <span>A convenience fee is added to cover Stripe's processing cost. This is disclosed on every transaction — you will see the exact total before confirming.</span>
+
+                <!-- AGREE & PAY Checkbox -->
+                <div class="agree-pay-box" id="agree-pay-box">
+                  <input type="checkbox" id="agree-fee-checkbox" onchange="updateAgreeState()" />
+                  <label for="agree-fee-checkbox">
+                    <strong>I understand and agree</strong> that a convenience fee of <strong id="agree-fee-amount">$35.10</strong> will be added to my rent payment to cover card processing costs. This fee is charged by Stripe and passed through at cost with no markup by RentVerified. I authorize the total charge of <strong id="agree-total-amount">$1,235.10</strong> to my card.
+                  </label>
+                </div>
+
+                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:#1E40AF;display:flex;gap:10px;align-items:flex-start;">
+                  <span style="flex-shrink:0;">💡</span>
+                  <span><strong>Tip:</strong> Bank Transfer (ACH) is always free. Switch to ACH to save <span id="card-save-amount">$35.10</span> on this payment.</span>
                 </div>
               </div>
             </div>
@@ -819,7 +1032,7 @@
       <div id="tab-docs" class="tab-content">
         <div class="page-header">
           <h1>Documents</h1>
-          <p>Your lease, rental application, and other documents from Sanders Property Management.</p>
+          <p>Your lease, rental application, and other documents from Your Property Manager.</p>
         </div>
 
         <div class="grid-2">
@@ -989,7 +1202,7 @@
       <div id="tab-messages" class="tab-content">
         <div class="page-header">
           <h1>📨 Messages</h1>
-          <p>Communicate directly with Sanders Property Management.</p>
+          <p>Communicate directly with Your Property Manager.</p>
         </div>
         <div style="display:grid;grid-template-columns:280px 1fr;gap:1.5rem;max-height:600px;">
           <!-- Thread list -->
@@ -998,7 +1211,7 @@
               <div id="msgThreads">
                 <div onclick="openThread('general')" style="padding:.75rem;border-radius:8px;cursor:pointer;background:var(--primary);color:#fff;margin-bottom:.5rem;">
                   <div style="font-weight:700;font-size:.88rem;">💬 General</div>
-                  <div style="font-size:.75rem;opacity:.85;">Sanders Property Mgmt</div>
+                  <div style="font-size:.75rem;opacity:.85;">Property Manager</div>
                 </div>
                 <div onclick="openThread('maintenance')" style="padding:.75rem;border-radius:8px;cursor:pointer;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:.5rem;">
                   <div style="font-weight:600;font-size:.88rem;">🔧 Maintenance Updates</div>
@@ -1017,7 +1230,7 @@
             <div id="msgBody" style="flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:.75rem;min-height:350px;">
               <div style="display:flex;gap:.75rem;">
                 <div style="width:32px;height:32px;border-radius:50%;background:#1a56db;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">SP</div>
-                <div style="background:#f1f5f9;border-radius:0 10px 10px 10px;padding:.65rem .9rem;max-width:75%;font-size:.88rem;color:#374151;">Hi Jane! Welcome to your tenant portal. Feel free to message us anytime. Typical response time is within 24 hours.<div style="font-size:.72rem;color:#94a3b8;margin-top:.3rem;">Sanders PM · Mar 1</div></div>
+                <div style="background:#f1f5f9;border-radius:0 10px 10px 10px;padding:.65rem .9rem;max-width:75%;font-size:.88rem;color:#374151;">Hi Jane! Welcome to your tenant portal. Feel free to message us anytime. Typical response time is within 24 hours.<div style="font-size:.72rem;color:#94a3b8;margin-top:.3rem;">Property Manager · Mar 1</div></div>
               </div>
             </div>
             <div style="padding:1rem;border-top:1px solid #f1f5f9;display:flex;gap:.75rem;">
@@ -1025,6 +1238,50 @@
               <button class="btn btn-primary btn-sm" onclick="sendTenantMsg()">Send</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- FINANCIAL RESOURCES TAB -->
+      <div id="tab-financial" class="tab-content">
+        <div class="page-header">
+          <h1>Financial Resources</h1>
+          <p>Tools and services available through your property manager to help you save money and build your future.</p>
+        </div>
+
+        <div id="fin-deposit-bonds" class="fin-card">
+          <h4>Move In Without a Full Deposit</h4>
+          <p>Your landlord accepts deposit bonds. Pay ~$17/month instead of a $2,000 upfront deposit. You're covered for the full amount.</p>
+          <button class="btn-fin">Learn More & Apply</button>
+        </div>
+
+        <div id="fin-renters-insurance" class="fin-card">
+          <h4>Renters Insurance from $10/mo</h4>
+          <p>Protect your belongings and get liability coverage. Required by many landlords.</p>
+          <button class="btn-fin">Get a Quote</button>
+        </div>
+
+        <div id="fin-credit-builder" class="fin-card">
+          <h4>Build Your Credit with Rent</h4>
+          <p>Your on-time rent payments reported to all 3 credit bureaus. Most tenants see a 20-50 point increase in 3-6 months.</p>
+          <button class="btn-fin">Enroll Now</button>
+        </div>
+
+        <div id="fin-rent-flex" class="fin-card">
+          <h4>Split Your Rent Into 2 Payments</h4>
+          <p>Pay half on the 1st, half on the 15th. Your landlord gets paid in full on the 1st — Flex covers the difference.</p>
+          <button class="btn-fin">Set Up Flex</button>
+        </div>
+
+        <div id="fin-emergency" class="fin-card">
+          <h4>Need Help This Month?</h4>
+          <p>Find emergency rent assistance programs in Utah, deposit help, and other resources.</p>
+          <button class="btn-fin" onclick="window.location.href='tenant-assistance.html'">Find Help</button>
+        </div>
+
+        <div id="fin-personal-loan" class="fin-card">
+          <h4>Short on Move-In Cash?</h4>
+          <p>Compare personal loan and deposit assistance options.</p>
+          <button class="btn-fin" onclick="window.location.href='funding.html'">See Options</button>
         </div>
       </div>
 
@@ -1044,7 +1301,7 @@
     <div class="chat-header-info">
       <div class="chat-avatar">AI</div>
       <div>
-        <div class="chat-title">Sanders PM Assistant</div>
+        <div class="chat-title">RentVerified Assistant</div>
         <div class="chat-status">🟢 Online · Replies instantly</div>
       </div>
     </div>
@@ -1063,11 +1320,13 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="app.js"></script>
 <script>
   // Landlords who are clients (have listed properties under their account). Tenant login only allowed if their unit is under one of these.
   const CLIENT_LANDLORDS = [
-    { id: 'sanders-pm', company: 'Sanders Property Management' }
+    { id: 'sanders-pm', company: 'Your Property Manager' }
   ];
   // Tenant accounts — each tenant must belong to a client landlord (landlordId matches CLIENT_LANDLORDS[].id)
   const TENANT_ACCOUNTS = [
@@ -1080,7 +1339,7 @@
     const lease = JSON.parse(localStorage.getItem('rv_tenant_lease') || 'null') || {
       end: '2026-05-15',
       address: '123 Maple Street, Unit 2A',
-      landlord: 'Sanders Property Management'
+      landlord: 'Your Property Manager'
     };
     const today = new Date(); today.setHours(0,0,0,0);
     const endDate = new Date(lease.end); endDate.setHours(0,0,0,0);
@@ -1206,7 +1465,7 @@
     setTimeout(()=>{
       const reply=document.createElement('div');
       reply.style.cssText='display:flex;gap:.75rem;';
-      reply.innerHTML=`<div style="width:32px;height:32px;border-radius:50%;background:#1a56db;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">SP</div><div style="background:#f1f5f9;border-radius:0 10px 10px 10px;padding:.65rem .9rem;max-width:75%;font-size:.88rem;color:#374151;">Thanks for your message! We'll get back to you shortly.<div style="font-size:.72rem;color:#94a3b8;margin-top:.3rem;">Sanders PM · just now</div></div>`;
+      reply.innerHTML=`<div style="width:32px;height:32px;border-radius:50%;background:#1a56db;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">SP</div><div style="background:#f1f5f9;border-radius:0 10px 10px 10px;padding:.65rem .9rem;max-width:75%;font-size:.88rem;color:#374151;">Thanks for your message! We'll get back to you shortly.<div style="font-size:.72rem;color:#94a3b8;margin-top:.3rem;">Property Manager · just now</div></div>`;
       body.appendChild(reply);
       body.scrollTop=body.scrollHeight;
     },1200);
@@ -1217,47 +1476,293 @@
   const METHOD_META = {
     ach:    { label:'Bank Transfer (ACH)', icon:'🏦', timing:'2–3 business days', pct:0,     flat:0,    free:true  },
     cashapp:{ label:'Cash App',            icon:'💚', timing:'Instant',           pct:0,     flat:0,    free:true  },
+    venmo:  { label:'Venmo',               icon:'🔵', timing:'Instant',           pct:0,     flat:0,    free:true  },
     zelle:  { label:'Zelle',               icon:'💜', timing:'Instant',           pct:0,     flat:0,    free:true  },
     debit:  { label:'Debit Card',          icon:'💳', timing:'Instant',           pct:0.029, flat:0.30, free:false },
     credit: { label:'Credit Card',         icon:'💳', timing:'Instant',           pct:0.029, flat:0.30, free:false },
   };
-  const feePolicy  = JSON.parse(localStorage.getItem('rv_fee_policy') || '{}');
-  const absorbCard = !!feePolicy.absorbCard;
+  // Fee policy from landlord's management profile
+  // 'no-surcharge' = landlord absorbs ALL fees
+  // 'pass-through' = tenant pays ALL fees (default)
+  // 'hybrid' = 50/50 split
+  function getCardFeePolicy() {
+    const allKeys = Object.keys(localStorage);
+    const mgmtKeys = allKeys.filter(k => k.startsWith('rv_mgmt_profile_'));
+    if (mgmtKeys.length > 0) {
+      const profile = JSON.parse(localStorage.getItem(mgmtKeys[0]) || 'null');
+      if (profile && profile.cardFeePolicy) return profile.cardFeePolicy;
+    }
+    const legacy = JSON.parse(localStorage.getItem('rv_fee_policy') || '{}');
+    if (legacy.absorbCard) return 'no-surcharge';
+    return 'pass-through';
+  }
+  const cardFeePolicy = getCardFeePolicy();
 
-  function calcFee(method, amount) {
+  // ── Landlord payment config (loaded from management profile) ──
+  function getLandlordPaymentConfig() {
+    const allKeys = Object.keys(localStorage);
+    const mgmtKeys = allKeys.filter(k => k.startsWith('rv_mgmt_profile_'));
+    if (mgmtKeys.length > 0) {
+      const profile = JSON.parse(localStorage.getItem(mgmtKeys[0]) || 'null');
+      if (profile) return profile;
+    }
+    // Defaults — all payment methods ON
+    return {
+      paymentMethods: { cashApp: true, zelle: true, venmo: true, ach: true, card: true, check: false, paypal: false },
+      cashAppTag: '$SandersRentals',
+      venmoUsername: '@SandersRentals',
+      zellePhone: '(555) 000-0000',
+      zelleEmail: 'payments@rentverified.com',
+      cardFeePolicy: 'tenant_pays'
+    };
+  }
+
+  // ── Initialize payment method visibility from landlord config ──
+  function initPaymentMethods() {
+    const config = getLandlordPaymentConfig();
+    const pm = config.paymentMethods || {};
+
+    // Show/hide payment methods based on landlord settings
+    const methodMap = {
+      'method-ach': pm.ach !== false,
+      'method-cashapp': pm.cashApp !== false,
+      'method-venmo': pm.venmo !== false,
+      'method-zelle': pm.zelle !== false,
+      'method-debit': pm.card !== false,
+      'method-credit': pm.card !== false,
+    };
+
+    Object.entries(methodMap).forEach(([id, enabled]) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = enabled ? 'flex' : 'none';
+    });
+
+    // Set display info from landlord config
+    const tag = config.cashAppTag || '$SandersRentals';
+    const venmo = config.venmoUsername || '@SandersRentals';
+    const zelleP = config.zellePhone || '(555) 000-0000';
+    const zelleE = config.zelleEmail || 'payments@rentverified.com';
+
+    const tagEl = document.getElementById('cashapp-tag-display');
+    if (tagEl) tagEl.textContent = 'Send to ' + tag + ' · Instant';
+    const venmoEl = document.getElementById('venmo-tag-display');
+    if (venmoEl) venmoEl.textContent = 'Send to ' + venmo + ' · Instant';
+    const zelleEl = document.getElementById('zelle-info-display');
+    if (zelleEl) zelleEl.textContent = 'Send to ' + zelleP + ' · Instant';
+
+    // Update form details
+    const cashtagDisp = document.getElementById('cashapp-cashtag-display');
+    if (cashtagDisp) cashtagDisp.textContent = tag;
+    const venmoDisp = document.getElementById('venmo-user-display');
+    if (venmoDisp) venmoDisp.textContent = venmo;
+    const zelleDisp = document.getElementById('zelle-contact-display');
+    if (zelleDisp) zelleDisp.textContent = zelleP;
+    const zelleEmailDisp = document.getElementById('zelle-email-display');
+    if (zelleEmailDisp) zelleEmailDisp.textContent = 'or email: ' + zelleE;
+
+    // Generate deep links
+    generateDeepLinks(tag, venmo);
+
+    // Generate QR codes
+    generateQRCodes(tag, venmo);
+  }
+
+  // ── Deep links ──
+  function generateDeepLinks(cashtag, venmoUser) {
+    const tag = (cashtag || '$SandersRentals').replace('$', '');
+    const user = (venmoUser || '@SandersRentals').replace('@', '');
+    const amount = RENT_AMOUNT;
+    const note = encodeURIComponent('Rent Payment - ' + new Date().toLocaleDateString('en-US', {month:'long', year:'numeric'}));
+
+    // Cash App deep link: https://cash.app/$tag/amount
+    const cashLink = document.getElementById('cashapp-deeplink');
+    if (cashLink) {
+      cashLink.href = 'https://cash.app/$' + tag + '/' + amount;
+      cashLink.textContent = '💚 Open Cash App & Pay ' + fmtMoney(amount);
+    }
+
+    // Venmo deep link: venmo://paycharge?txn=pay&recipients=user&amount=amount&note=note
+    const venmoLink = document.getElementById('venmo-deeplink');
+    if (venmoLink) {
+      // Use web fallback for desktop, deep link for mobile
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        venmoLink.href = 'venmo://paycharge?txn=pay&recipients=' + user + '&amount=' + amount + '&note=' + note;
+      } else {
+        venmoLink.href = 'https://venmo.com/' + user + '?txn=pay&amount=' + amount + '&note=' + note;
+      }
+      venmoLink.textContent = '🔵 Open Venmo & Pay ' + fmtMoney(amount);
+    }
+  }
+
+  // ── QR Codes (using QR Server API) ──
+  function generateQRCodes(cashtag, venmoUser) {
+    const tag = (cashtag || '$SandersRentals').replace('$', '');
+    const user = (venmoUser || '@SandersRentals').replace('@', '');
+
+    // Cash App QR — link to Cash App payment URL
+    const cashQR = document.getElementById('cashapp-qr');
+    if (cashQR) {
+      const cashUrl = 'https://cash.app/$' + tag + '/' + RENT_AMOUNT;
+      cashQR.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(cashUrl);
+    }
+
+    // Venmo QR — link to Venmo payment URL
+    const venmoQR = document.getElementById('venmo-qr');
+    if (venmoQR) {
+      const venmoUrl = 'https://venmo.com/' + user + '?txn=pay&amount=' + RENT_AMOUNT + '&note=' + encodeURIComponent('Rent Payment');
+      venmoQR.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(venmoUrl);
+    }
+  }
+
+  // ── Zelle "open app" helper ──
+  function openZelleApp() {
+    // Zelle doesn't have a universal deep link — it's built into banking apps
+    // Show helpful instructions
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      alert('Look for the Zelle icon in your banking app (Chase, Bank of America, Wells Fargo, etc.) to send the payment.');
+    } else {
+      alert('Open your banking app on your phone or visit your bank\'s website. Look for Zelle in the "Send Money" or "Transfers" section.');
+    }
+  }
+
+  // ── Auto-pay toggle ──
+  let autoPayEnabled = JSON.parse(localStorage.getItem('rv_autopay_enabled') || 'false');
+  function toggleAutoPay() {
+    autoPayEnabled = !autoPayEnabled;
+    localStorage.setItem('rv_autopay_enabled', JSON.stringify(autoPayEnabled));
+    const toggle = document.getElementById('autopay-toggle');
+    const details = document.getElementById('autopay-details');
+    if (toggle) toggle.classList.toggle('active', autoPayEnabled);
+    if (details) details.style.display = autoPayEnabled ? 'block' : 'none';
+  }
+
+  // ── Agree & Pay state ──
+  function updateAgreeState() {
+    const cb = document.getElementById('agree-fee-checkbox');
+    const btn = document.getElementById('step2-next-btn');
+    if (selectedMethod === 'debit' || selectedMethod === 'credit') {
+      if (btn) {
+        btn.disabled = !cb.checked;
+        btn.style.opacity = cb.checked ? '1' : '0.5';
+        btn.style.cursor = cb.checked ? 'pointer' : 'not-allowed';
+      }
+    }
+  }
+
+  function updateCardFeeDisplay() {
+    const tenantFee = calcFee('debit', RENT_AMOUNT);
+    const total = RENT_AMOUNT + tenantFee;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('card-rent-display', fmtMoney(RENT_AMOUNT));
+    set('card-fee-display', tenantFee === 0 ? '$0.00' : fmtMoney(tenantFee));
+    set('card-total-display', fmtMoney(total));
+    set('agree-fee-amount', fmtMoney(tenantFee));
+    set('agree-total-amount', fmtMoney(total));
+    set('card-save-amount', fmtMoney(tenantFee));
+
+    // Update agree box messaging based on policy
+    const agreeBox = document.getElementById('agree-pay-box');
+    if (agreeBox) {
+      if (cardFeePolicy === 'no-surcharge') {
+        agreeBox.style.display = 'none'; // No fee = no need to agree
+      } else {
+        agreeBox.style.display = 'flex';
+      }
+    }
+
+    // Update the fee policy label in the card form
+    const feeLabel = document.querySelector('#form-card .card-body div[style*="font-size:.72rem"]');
+    if (feeLabel && cardFeePolicy === 'no-surcharge') {
+      const feeSection = document.querySelector('#form-card .card-body > div:nth-child(3)');
+      // Hide fee breakdown if landlord absorbs
+    }
+  }
+
+  function calcFullFee(method, amount) {
     const m = METHOD_META[method];
     if (!m || m.free) return 0;
-    if (absorbCard) return 0;
     return Math.round((amount * m.pct + m.flat) * 100) / 100;
+  }
+  // What the TENANT pays based on landlord's fee policy
+  function calcFee(method, amount) {
+    const full = calcFullFee(method, amount);
+    if (full === 0) return 0;
+    if (cardFeePolicy === 'no-surcharge') return 0;         // Landlord absorbs all
+    if (cardFeePolicy === 'hybrid') return Math.round(full * 50) / 100; // 50/50 split
+    return full; // pass-through: tenant pays all
+  }
+  // What the LANDLORD absorbs
+  function calcLandlordFee(method, amount) {
+    const full = calcFullFee(method, amount);
+    if (full === 0) return 0;
+    if (cardFeePolicy === 'no-surcharge') return full;      // Landlord absorbs all
+    if (cardFeePolicy === 'hybrid') return full - calcFee(method, amount); // 50/50 split
+    return 0; // pass-through: landlord pays nothing
   }
   function fmtMoney(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 
   function updateFeeDisplay(method) {
-    const fee   = calcFee(method, RENT_AMOUNT);
-    const total = RENT_AMOUNT + fee;
-    const m     = METHOD_META[method];
-    const landlordAmt = m.free ? RENT_AMOUNT : (absorbCard ? RENT_AMOUNT - fee : RENT_AMOUNT);
+    const tenantFee   = calcFee(method, RENT_AMOUNT);
+    const landlordFee = calcLandlordFee(method, RENT_AMOUNT);
+    const total       = RENT_AMOUNT + tenantFee;
+    const m           = METHOD_META[method];
+    const landlordAmt = RENT_AMOUNT - landlordFee;
 
     const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
     const setStyle = (id, prop, val) => { const el=document.getElementById(id); if(el) el.style[prop]=val; };
 
-    set('fee-amount', fee===0 ? '$0.00 FREE' : fmtMoney(fee));
-    setStyle('fee-amount','color', fee===0 ? 'var(--success)' : '#d97706');
-    set('fee-label', fee===0 ? 'Convenience Fee' : 'Convenience Fee ('+((m.pct||0)*100)+'% + $'+(m.flat||0).toFixed(2)+')');
+    // Fee label changes based on policy
+    let feeLabel = 'Convenience Fee';
+    if (!m.free) {
+      const fullFee = calcFullFee(method, RENT_AMOUNT);
+      if (cardFeePolicy === 'no-surcharge') {
+        feeLabel = 'Convenience Fee (covered by landlord)';
+      } else if (cardFeePolicy === 'hybrid') {
+        feeLabel = 'Your share of fee (50% of ' + fmtMoney(fullFee) + ')';
+      } else {
+        feeLabel = 'Convenience Fee (' + ((m.pct||0)*100) + '% + $' + (m.flat||0).toFixed(2) + ')';
+      }
+    }
+
+    set('fee-amount', tenantFee===0 ? '$0.00 FREE' : fmtMoney(tenantFee));
+    setStyle('fee-amount','color', tenantFee===0 ? 'var(--success)' : '#d97706');
+    set('fee-label', feeLabel);
     set('disp-total', fmtMoney(total));
     set('disp-landlord', fmtMoney(landlordAmt));
 
-    const cardFee = absorbCard ? 0 : calcFee('debit', RENT_AMOUNT);
-    set('debit-fee-val',  absorbCard ? '$0.00' : '+'+fmtMoney(cardFee));
-    set('credit-fee-val', absorbCard ? '$0.00' : '+'+fmtMoney(cardFee));
-    setStyle('debit-fee-val','color',  absorbCard ? 'var(--success)' : '#d97706');
-    setStyle('credit-fee-val','color', absorbCard ? 'var(--success)' : '#d97706');
-    const absorbNote = document.getElementById('landlord-absorb-note');
-    if (absorbNote) absorbNote.style.display = (absorbCard && (method==='debit'||method==='credit')) ? 'block' : 'none';
+    // Card method fee display on step 1
+    const tenantCardFee = calcFee('debit', RENT_AMOUNT);
+    const noTenantFee = tenantCardFee === 0;
+    if (noTenantFee) {
+      set('debit-fee-val',  '$0.00');
+      set('credit-fee-val', '$0.00');
+    } else {
+      set('debit-fee-val',  '+' + fmtMoney(tenantCardFee));
+      set('credit-fee-val', '+' + fmtMoney(tenantCardFee));
+    }
+    setStyle('debit-fee-val','color',  noTenantFee ? 'var(--success)' : '#d97706');
+    setStyle('credit-fee-val','color', noTenantFee ? 'var(--success)' : '#d97706');
 
-    set('review-fee-label', fee===0 ? 'Convenience Fee' : 'Convenience Fee ('+((m.pct||0)*100)+'% + $'+(m.flat||0).toFixed(2)+')');
-    set('review-fee-val',   fee===0 ? '$0.00' : fmtMoney(fee));
-    setStyle('review-fee-val','color', fee===0 ? 'var(--success)' : '#d97706');
+    // Landlord absorb note
+    const absorbNote = document.getElementById('landlord-absorb-note');
+    if (absorbNote) {
+      if (cardFeePolicy === 'no-surcharge' && (method==='debit'||method==='credit')) {
+        absorbNote.textContent = '✓ Your property manager covers all card processing fees.';
+        absorbNote.style.display = 'block';
+      } else if (cardFeePolicy === 'hybrid' && (method==='debit'||method==='credit')) {
+        absorbNote.textContent = '✓ Your property manager covers 50% of the processing fee.';
+        absorbNote.style.display = 'block';
+      } else {
+        absorbNote.style.display = 'none';
+      }
+    }
+
+    // Review step
+    set('review-fee-label', feeLabel);
+    set('review-fee-val',   tenantFee===0 ? '$0.00' : fmtMoney(tenantFee));
+    setStyle('review-fee-val','color', tenantFee===0 ? 'var(--success)' : '#d97706');
     set('review-total',         fmtMoney(total));
     set('review-landlord',      fmtMoney(landlordAmt));
     set('review-method-icon',   m.icon);
@@ -1265,7 +1770,7 @@
     set('review-method-timing', m.timing);
     set('confirm-total-btn',    fmtMoney(total));
     set('rcpt-fee-lbl',  'Convenience Fee');
-    set('rcpt-fee-val',  fee===0 ? '$0.00' : fmtMoney(fee));
+    set('rcpt-fee-val',  tenantFee===0 ? '$0.00' : fmtMoney(tenantFee));
     set('rcpt-total',    fmtMoney(total));
   }
 
@@ -1301,7 +1806,7 @@
       if (line) { if (i<n) line.classList.add('done'); else line.classList.remove('done'); }
     });
     if (n===2) {
-      ['ach','cashapp','zelle','card'].forEach(k => {
+      ['ach','cashapp','venmo','zelle','card'].forEach(k => {
         const el = document.getElementById('form-'+k);
         if (el) el.style.display='none';
       });
@@ -1309,11 +1814,25 @@
       const formEl = document.getElementById('form-'+formKey);
       if (formEl) formEl.style.display='block';
       const btn = document.getElementById('step2-next-btn');
-      if (btn) btn.textContent = (selectedMethod==='cashapp'||selectedMethod==='zelle') ? "I've Sent the Payment →" : 'Review Payment →';
+      const isP2P = (selectedMethod==='cashapp'||selectedMethod==='zelle'||selectedMethod==='venmo');
+      if (btn) {
+        btn.textContent = isP2P ? "I've Sent the Payment →" : 'Review Payment →';
+        // Reset agree state for card payments
+        if (selectedMethod==='debit'||selectedMethod==='credit') {
+          const cb = document.getElementById('agree-fee-checkbox');
+          if (cb) cb.checked = false;
+          updateAgreeState();
+          updateCardFeeDisplay();
+        } else {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+        }
+      }
     }
     if (n===3) {
       updateFeeDisplay(selectedMethod);
-      const isP2P = (selectedMethod==='cashapp'||selectedMethod==='zelle');
+      const isP2P = (selectedMethod==='cashapp'||selectedMethod==='zelle'||selectedMethod==='venmo');
       const uploadSec = document.getElementById('p2p-upload-section');
       const stripeSec = document.getElementById('stripe-confirm-section');
       if (uploadSec) uploadSec.style.display = isP2P ? 'block' : 'none';
@@ -1321,11 +1840,11 @@
     }
     if (n===4) {
       const isACH = selectedMethod==='ach';
-      const isP2P = (selectedMethod==='cashapp'||selectedMethod==='zelle');
+      const isP2P = (selectedMethod==='cashapp'||selectedMethod==='zelle'||selectedMethod==='venmo');
       const msgEl = document.getElementById('success-msg');
       const detEl = document.getElementById('success-detail');
       if (msgEl) msgEl.textContent = isACH ? 'Your ACH transfer has been initiated.' : isP2P ? 'Your payment confirmation has been received.' : 'Your card payment has been processed.';
-      if (detEl) detEl.textContent = isACH ? 'Funds arrive in 2–3 business days. Your landlord will be notified.' : isP2P ? 'Sanders Property Management will verify within 24 hours.' : "Your landlord has been notified. You'll receive a receipt by email.";
+      if (detEl) detEl.textContent = isACH ? 'Funds arrive in 2–3 business days. Your landlord will be notified.' : isP2P ? 'Your property manager will verify within 24 hours.' : "Your landlord has been notified. You'll receive a receipt by email.";
       updateFeeDisplay(selectedMethod);
     }
   }
@@ -1337,9 +1856,110 @@
     }
   }
 
-  function submitPayment() { nextPayStep(4); }
+  async function submitPayment() {
+    const isStripe = (selectedMethod === 'ach' || selectedMethod === 'debit' || selectedMethod === 'credit');
 
-  document.addEventListener('DOMContentLoaded', () => { updateFeeDisplay('ach'); });
+    if (isStripe && typeof RVPayments !== 'undefined') {
+      // Use Stripe Checkout
+      const payMethod = selectedMethod === 'ach' ? 'ach' : 'card';
+      const result = await RVPayments.payWithStripe({
+        amount: RENT_AMOUNT,
+        tenantName: 'Current Tenant',
+        tenantEmail: 'tenant@example.com',
+        propertyAddress: '123 Maple Street, Unit 2A',
+        paymentMethod: payMethod,
+        landlordStripeAccountId: localStorage.getItem('rv_stripe_account_id') || null
+      });
+
+      if (result && result.error) {
+        // Stripe not fully connected yet — fallback to demo flow
+        console.log('Stripe not ready, using demo flow:', result.error);
+        nextPayStep(4);
+        return;
+      }
+      // If Stripe works, it redirects — so we won't get here
+      // But if we do (e.g. fallback), show success
+      if (!result || !result.url) {
+        nextPayStep(4);
+      }
+    } else {
+      // P2P payments — show success with upload confirmation
+      nextPayStep(4);
+    }
+
+    // Save to localStorage history
+    const payment = {
+      id: 'pay_' + Date.now(),
+      date: new Date().toISOString(),
+      method: selectedMethod,
+      amount: RENT_AMOUNT,
+      fee: calcFee(selectedMethod, RENT_AMOUNT),
+      status: isStripe ? 'processing' : 'pending_verification',
+      property: '123 Maple St, Unit 2A',
+      period: new Date().toLocaleDateString('en-US', {month:'long', year:'numeric'})
+    };
+    const history = JSON.parse(localStorage.getItem('rv_tenant_payments') || '[]');
+    history.unshift(payment);
+    localStorage.setItem('rv_tenant_payments', JSON.stringify(history));
+
+    // Save auto-pay preference
+    if (autoPayEnabled && selectedMethod === 'ach') {
+      localStorage.setItem('rv_autopay_config', JSON.stringify({
+        enabled: true,
+        method: 'ach',
+        amount: RENT_AMOUNT,
+        dayOfMonth: 1,
+        enrolledAt: new Date().toISOString()
+      }));
+    }
+  }
+
+  function renderFinancialResources() {
+    // Try to find landlord ID from tenant's lease data
+    const session = JSON.parse(localStorage.getItem('rv_tenant_session') || '{}');
+    let profile = null;
+
+    // Try to find the management profile - check various possible keys
+    const allKeys = Object.keys(localStorage);
+    const mgmtKeys = allKeys.filter(k => k.startsWith('rv_mgmt_profile_'));
+    if (mgmtKeys.length > 0) {
+      profile = JSON.parse(localStorage.getItem(mgmtKeys[0]) || 'null');
+    }
+
+    // Default all ON if no profile found
+    const prefs = profile ? profile.financialProducts : {
+      depositBonds: true, depositFree: true, rentersInsurance: true,
+      rentGuarantee: true, leaseGuarantee: true, creditBuilder: true,
+      rentFlexibility: true, utilitySetup: true, internetSetup: true,
+      movingServices: true, businessLoans: true, sbaLoans: true, merchantCashAdvance: true
+    };
+
+    // Show/hide cards based on preferences
+    const mapping = {
+      'fin-deposit-bonds': prefs.depositBonds,
+      'fin-renters-insurance': prefs.rentersInsurance,
+      'fin-credit-builder': prefs.creditBuilder,
+      'fin-rent-flex': prefs.rentFlexibility
+    };
+
+    Object.entries(mapping).forEach(([id, enabled]) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = enabled ? 'block' : 'none';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateFeeDisplay('ach');
+    initPaymentMethods();
+    updateCardFeeDisplay();
+    // Restore auto-pay state
+    if (autoPayEnabled) {
+      const toggle = document.getElementById('autopay-toggle');
+      const details = document.getElementById('autopay-details');
+      if (toggle) toggle.classList.add('active');
+      if (details) details.style.display = 'block';
+    }
+  });
 </script>
 </body>
 </html>

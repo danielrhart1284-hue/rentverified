@@ -113,6 +113,64 @@
       border: 1px solid var(--gray-200);
     }
 
+    .accepts-section {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: #F0FDF4;
+      border-radius: 10px;
+      border: 1px solid #BBF7D0;
+    }
+    .accepts-section h4 {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: #166534;
+    }
+    .accepts-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .accepts-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.4rem 0.85rem;
+      background: white;
+      border: 1px solid #D1FAE5;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #065F46;
+    }
+    .funding-cta {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, #1E3A8A, #1a56db);
+      border-radius: 10px;
+      color: white;
+    }
+    .funding-cta h4 {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+    .funding-cta p {
+      font-size: 0.875rem;
+      opacity: 0.9;
+      margin-bottom: 0.75rem;
+    }
+    .funding-cta .btn-fund {
+      display: inline-block;
+      padding: 0.5rem 1.25rem;
+      background: white;
+      color: #1a56db;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+
     @media (max-width: 900px) {
       .detail-layout { grid-template-columns: 1fr; }
       .sticky-card { position: static; }
@@ -234,6 +292,25 @@
         <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
         <div><strong>Zero fees.</strong> Rent is paid via Cash App or Zelle directly to Sanders Property Management. No processing fees, ever. Your tenant portal tracks every payment with photo confirmation.</div>
       </div>
+    </div>
+
+    <!-- This Property Accepts -->
+    <div class="accepts-section" id="property-accepts" style="display:none;">
+      <h4>This Property Accepts</h4>
+      <div class="accepts-badges" id="accepts-badges-list"></div>
+    </div>
+
+    <!-- Funding CTA (commercial or RTO) -->
+    <div class="funding-cta" id="funding-cta-commercial" style="display:none;">
+      <h4>Need Funding for Your Buildout?</h4>
+      <p>RentVerified connects commercial tenants with working capital, equipment financing, and SBA loans.</p>
+      <a href="funding.html" class="btn-fund">Explore Funding Options</a>
+    </div>
+
+    <div class="funding-cta" id="funding-cta-rto" style="display:none;background:linear-gradient(135deg, #92400E, #D97706);">
+      <h4>Need Help with Move-In Costs?</h4>
+      <p>Deposit alternatives, emergency assistance, and financial resources to help you get started.</p>
+      <a href="funding.html" class="btn-fund" style="color:#D97706;">See Financial Resources</a>
     </div>
 
     <!-- Map placeholder -->
@@ -371,8 +448,64 @@ window.PROPERTY_DATA = {
   description: 'This 2-bedroom, 1-bathroom condo in Orem offers a clean, versatile living space perfect for modern lifestyles. Ideal for students and professionals near UVU and BYU.'
 };
 </script>
+<script>window.RV_CHAT_API = '/api/chat';</script>
 <script src="app.js"></script>
 <script>
+  function renderPropertyAccepts() {
+    // Find management profile - try all rv_mgmt_profile_ keys
+    const allKeys = Object.keys(localStorage);
+    const mgmtKeys = allKeys.filter(k => k.startsWith('rv_mgmt_profile_'));
+    let prefs = null;
+    if (mgmtKeys.length > 0) {
+      try { prefs = JSON.parse(localStorage.getItem(mgmtKeys[0])); } catch(e) {}
+    }
+
+    const fp = prefs ? prefs.financialProducts : {
+      depositBonds: true, rentersInsurance: true, creditBuilder: true,
+      rentFlexibility: true, utilitySetup: true, internetSetup: true
+    };
+
+    const badges = [];
+    if (fp.depositBonds) badges.push({ icon: '🛡️', text: 'Deposit Bond Available' });
+    if (fp.rentersInsurance) badges.push({ icon: '📋', text: 'Renters Insurance' });
+    if (fp.creditBuilder) badges.push({ icon: '📈', text: 'Credit Builder' });
+    if (fp.rentFlexibility) badges.push({ icon: '💳', text: 'Flex Pay' });
+    if (fp.utilitySetup) badges.push({ icon: '⚡', text: 'Utility Setup' });
+    if (fp.internetSetup) badges.push({ icon: '📡', text: 'Internet Setup' });
+
+    const container = document.getElementById('accepts-badges-list');
+    const section = document.getElementById('property-accepts');
+    if (badges.length > 0 && container && section) {
+      container.innerHTML = badges.map(b =>
+        `<span class="accepts-badge">${b.icon} ${b.text}</span>`
+      ).join('');
+      section.style.display = 'block';
+    }
+  }
+
+  function detectListingType() {
+    // Detect if property is commercial or RTO
+    // Check property data in window or localStorage
+    let isCommercial = false;
+    let isRTO = false;
+
+    // Try to detect from window.PROPERTY_DATA
+    if (window.PROPERTY_DATA && window.PROPERTY_DATA.type === 'commercial') {
+      isCommercial = true;
+    }
+    if (window.PROPERTY_DATA && window.PROPERTY_DATA.isRTO === true) {
+      isRTO = true;
+    }
+
+    // Show appropriate CTA if commercial or RTO
+    if (isCommercial) {
+      document.getElementById('funding-cta-commercial').style.display = 'block';
+    }
+    if (isRTO) {
+      document.getElementById('funding-cta-rto').style.display = 'block';
+    }
+  }
+
   function openApp() {
     document.getElementById('app-form').style.display = 'block';
     document.getElementById('app-form').scrollIntoView({ behavior: 'smooth' });
@@ -395,6 +528,12 @@ window.PROPERTY_DATA = {
       }, 300);
     }
   }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    renderPropertyAccepts();
+    detectListingType();
+  });
 </script>
 </body>
 </html>

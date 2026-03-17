@@ -196,7 +196,60 @@ function sendChat() {
   messages.appendChild(typing);
   messages.scrollTop = messages.scrollHeight;
 
-  setTimeout(() => { autoReply(text); }, 700 + Math.random() * 600);
+  // Optional: if RV_CHAT_API is set (e.g. /api/chat), use Claude API via serverless; else local keyword replies
+  const chatApi = window.RV_CHAT_API;
+  if (chatApi) {
+    aiChatReply(text, chatApi, messages, typing);
+  } else {
+    setTimeout(() => { autoReply(text); }, 700 + Math.random() * 600);
+  }
+}
+
+function getPropertyContext() {
+  const P = window.PROPERTY_DATA || {};
+  if (!P.address && !P.rent) return '';
+  const parts = [];
+  if (P.address) parts.push('Address: ' + P.address);
+  if (P.rent) parts.push('Rent: $' + Number(P.rent));
+  if (P.beds != null) parts.push('Beds: ' + P.beds);
+  if (P.baths != null) parts.push('Baths: ' + P.baths);
+  if (P.sqft) parts.push('Sq ft: ' + P.sqft);
+  if (P.status) parts.push('Status: ' + P.status);
+  if (P.listingId) parts.push('Listing ID: ' + P.listingId);
+  return parts.join('. ');
+}
+
+function aiChatReply(userText, apiUrl, messages, typing) {
+  const context = getPropertyContext();
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: userText,
+      propertyContext: context || 'General RentVerified / Sanders Property Management inquiry.',
+      listingId: (window.PROPERTY_DATA || {}).listingId || ''
+    })
+  })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('Chat API error')))
+    .then(data => {
+      if (typing) typing.remove();
+      const reply = (data && (data.reply || data.response || data.text)) || '';
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'chat-msg ai';
+      aiMsg.textContent = typeof reply === 'string' ? reply : (reply && reply.message) || 'Sorry, I couldn\'t get a response.';
+      messages.appendChild(aiMsg);
+      messages.scrollTop = messages.scrollHeight;
+    })
+    .catch(() => {
+      if (typing) typing.remove();
+      autoReply(userText);
+    });
+  setTimeout(function() {
+    if (document.getElementById('typing-indicator')) {
+      if (typing) typing.remove();
+      autoReply(userText);
+    }
+  }, 10000);
 }
 
 function autoReply(userText) {
