@@ -3051,3 +3051,366 @@ function seedAdvancedLedger() {
     });
   });
 }
+
+// ============================================================================
+// PHASE 4: NAVIGATION, ACCOUNTING TRUST, PROFESSIONAL ECOSYSTEM, SECURITY, QR
+// ============================================================================
+
+// --- Breadcrumb Navigation ---
+RV_KEYS.BREADCRUMBS = 'rv_breadcrumbs';
+RV_KEYS.LEAD_CAPTURES = 'rv_lead_captures';
+RV_KEYS.VENDOR_INVOICES = 'rv_vendor_invoices';
+
+var _breadcrumbStack = [];
+
+function pushBreadcrumb(label, action) {
+  _breadcrumbStack.push({ label: label, action: action });
+}
+
+function popBreadcrumb() {
+  if (_breadcrumbStack.length > 0) _breadcrumbStack.pop();
+}
+
+function getBreadcrumbs() {
+  return _breadcrumbStack.slice();
+}
+
+function clearBreadcrumbs() {
+  _breadcrumbStack = [];
+}
+
+function navigateBreadcrumb(index) {
+  if (index < 0 || index >= _breadcrumbStack.length) return;
+  var crumb = _breadcrumbStack[index];
+  _breadcrumbStack = _breadcrumbStack.slice(0, index + 1);
+  if (crumb.action && typeof crumb.action === 'string') {
+    if (typeof window.dashTab === 'function') window.dashTab(crumb.action);
+  }
+}
+
+// --- Contextual Sidebar State ---
+var _contextualSidebarActive = false;
+var _contextualPropertyId = null;
+
+function enterPropertyContext(listingId) {
+  _contextualSidebarActive = true;
+  _contextualPropertyId = listingId;
+}
+
+function exitPropertyContext() {
+  _contextualSidebarActive = false;
+  _contextualPropertyId = null;
+  clearBreadcrumbs();
+}
+
+function isInPropertyContext() {
+  return _contextualSidebarActive;
+}
+
+function getContextualPropertyId() {
+  return _contextualPropertyId;
+}
+
+// --- Audit Trail with Hover Details ---
+function getAuditDetailsForEntry(entryId) {
+  var log = getAuditLog();
+  var matches = log.filter(function(a) {
+    return a.context && a.context === entryId;
+  });
+  return matches.length > 0 ? matches[0] : null;
+}
+
+function addAuditEntryWithContext(action, context, entryId) {
+  var acct = rvGet('rv_account');
+  var initials = 'PM';
+  if (acct && acct.company) {
+    initials = acct.company.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase();
+  }
+  var entry = {
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    action: action,
+    context: entryId || context,
+    initials: initials,
+    timestamp: new Date().toISOString(),
+    details: context
+  };
+  var log = getAuditLog();
+  log.unshift(entry);
+  if (log.length > 500) log = log.slice(0, 500);
+  rvSet(RV_KEYS.AUDIT_LOG, log);
+  return entry;
+}
+
+// --- Statement Math Validation ---
+function validateStatementMath(statementData) {
+  var errors = [];
+  if (!statementData || !statementData.entries) return { valid: true, errors: [] };
+
+  var calcTotalRent = 0, calcTotalFees = 0, calcTotalNet = 0;
+  statementData.entries.forEach(function(e, i) {
+    var rent = e.rentPaid || 0;
+    var feePercent = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
+    var expectedFee = Math.round(rent * (feePercent / 100) * 100) / 100;
+    var expectedNet = Math.round((rent - expectedFee) * 100) / 100;
+
+    if (Math.abs((e.pmFeeAmount || 0) - expectedFee) > 0.01) {
+      errors.push('Entry ' + (i+1) + ': Fee mismatch. Expected $' + expectedFee.toFixed(2) + ', got $' + (e.pmFeeAmount || 0).toFixed(2));
+    }
+    if (Math.abs((e.netToOwner || 0) - expectedNet) > 0.01) {
+      errors.push('Entry ' + (i+1) + ': Net mismatch. Expected $' + expectedNet.toFixed(2) + ', got $' + (e.netToOwner || 0).toFixed(2));
+    }
+
+    calcTotalRent += rent;
+    calcTotalFees += expectedFee;
+    calcTotalNet += expectedNet;
+  });
+
+  if (Math.abs((statementData.totalRent || 0) - calcTotalRent) > 0.01) {
+    errors.push('Total rent mismatch: Expected $' + calcTotalRent.toFixed(2) + ', got $' + (statementData.totalRent || 0).toFixed(2));
+  }
+  if (Math.abs((statementData.totalFees || 0) - calcTotalFees) > 0.01) {
+    errors.push('Total fees mismatch: Expected $' + calcTotalFees.toFixed(2) + ', got $' + (statementData.totalFees || 0).toFixed(2));
+  }
+  if (Math.abs((statementData.totalNet || 0) - calcTotalNet) > 0.01) {
+    errors.push('Total net mismatch: Expected $' + calcTotalNet.toFixed(2) + ', got $' + (statementData.totalNet || 0).toFixed(2));
+  }
+
+  return { valid: errors.length === 0, errors: errors };
+}
+
+function generateMathReport(statementData) {
+  var validation = validateStatementMath(statementData);
+  var report = {
+    generatedAt: new Date().toISOString(),
+    valid: validation.valid,
+    errors: validation.errors,
+    summary: {}
+  };
+  if (statementData && statementData.entries) {
+    var totalRent = 0, totalFees = 0, totalNet = 0;
+    statementData.entries.forEach(function(e) {
+      var rp = e.rentPaid || 0;
+      totalRent += rp;
+      var fp = (e.pmFeePercent !== undefined && e.pmFeePercent !== null) ? e.pmFeePercent : 7;
+      var fee = Math.round(rp * (fp / 100) * 100) / 100;
+      totalFees += fee;
+      totalNet += Math.round((rp - fee) * 100) / 100;
+    });
+    report.summary = { totalRent: totalRent, totalFees: totalFees, totalNet: totalNet, entryCount: statementData.entries.length };
+  }
+  addAuditEntry('Math validation report generated: ' + (validation.valid ? 'PASSED' : 'FAILED with ' + validation.errors.length + ' errors'), '');
+  return report;
+}
+
+// --- AI Ad Builder ---
+function generateAIAd(property) {
+  if (!property) return { title: '', body: '', hashtags: '' };
+
+  var addr = property.address || 'Beautiful Rental Property';
+  var rent = property.rent || 0;
+  var beds = property.beds || '';
+  var baths = property.baths || '';
+  var sqft = property.sqft || '';
+  var desc = property.description || '';
+  var type = property.propertyType || 'Long-term';
+
+  var title = addr + ' | $' + rent + '/mo';
+  if (beds) title += ' | ' + beds + 'BD';
+  if (baths) title += '/' + baths + 'BA';
+
+  var body = 'VERIFIED RENTAL LISTING\n\n';
+  body += 'Address: ' + addr + '\n';
+  body += 'Rent: $' + rent + '/month\n';
+  if (beds) body += 'Bedrooms: ' + beds + '\n';
+  if (baths) body += 'Bathrooms: ' + baths + '\n';
+  if (sqft) body += 'Sq Ft: ' + sqft + '\n';
+  body += '\n';
+
+  if (desc) {
+    body += desc + '\n\n';
+  }
+
+  if (type === 'Short-term') {
+    body += 'Short-term / Vacation rental available!\n';
+    body += 'Flexible dates - Fully furnished\n\n';
+  } else {
+    body += 'Application process:\n';
+    body += '1. Visit our verified listing page\n';
+    body += '2. Complete online application\n';
+    body += '3. Background & credit check via TransUnion\n';
+    body += '4. Move in!\n\n';
+  }
+
+  body += 'RentVerified Listing - Scam-Free Guarantee\n';
+  body += 'Apply now: ' + (RV_CONFIG.websiteUrl || 'https://rentverified.vercel.app') + '\n';
+  body += '\n' + RV_CONFIG.companyName + ' | Licensed Property Management';
+
+  var hashtags = '#ForRent #' + (addr.split(',')[1] || 'Utah').trim().replace(/\s+/g, '') + ' #RentVerified #PropertyManagement';
+  if (type === 'Short-term') hashtags += ' #Airbnb #VRBO #VacationRental';
+  else hashtags += ' #Apartment #Rental #NowLeasing';
+
+  addAuditEntry('AI ad generated for ' + addr, '');
+
+  return { title: title, body: body, hashtags: hashtags };
+}
+
+// --- One-Click Attorney Packet ---
+function generateAttorneyPacketZip(listingIdOrAddress, tenantName) {
+  var q = (listingIdOrAddress || '').toLowerCase();
+  var packet = {
+    generatedAt: new Date().toISOString(),
+    property: listingIdOrAddress,
+    tenant: tenantName || '',
+    lease: null,
+    ledger: [],
+    communications: [],
+    documents: [],
+    evictions: []
+  };
+
+  var leases = rvGet(RV_KEYS.LEASES) || [];
+  packet.lease = leases.filter(function(l) {
+    return (l.property || '').toLowerCase().indexOf(q) >= 0 ||
+           (l.listingId || '').toLowerCase() === q ||
+           (tenantName && (l.tenant || '').toLowerCase().indexOf(tenantName.toLowerCase()) >= 0);
+  });
+
+  var ledger = getAdvancedLedger();
+  packet.ledger = ledger.filter(function(e) {
+    return (e.propertyAddress || '').toLowerCase().indexOf(q) >= 0 ||
+           (e.listingId || '').toLowerCase() === q;
+  });
+
+  var msgs = getMessages();
+  packet.communications = msgs.filter(function(m) {
+    return (m.property || '').toLowerCase().indexOf(q) >= 0 ||
+           (m.listingId || '').toLowerCase() === q;
+  });
+
+  var evictions = rvGet(RV_KEYS.EVICTION_DOCS) || [];
+  packet.evictions = evictions.filter(function(e) {
+    return (e.property || '').toLowerCase().indexOf(q) >= 0;
+  });
+
+  var docs = rvGet(RV_KEYS.PROPERTY_DOCS_ENHANCED) || [];
+  packet.documents = docs.filter(function(d) {
+    return (d.listingId || '').toLowerCase() === q ||
+           (d.listingId || '').toLowerCase().indexOf(q) >= 0;
+  });
+
+  addAuditEntry('Attorney packet generated for ' + listingIdOrAddress + ' / ' + (tenantName || 'N/A'), '');
+
+  return packet;
+}
+
+// --- Vendor Invoice & Dollar Limit ---
+function getVendorInvoices() { return rvGet(RV_KEYS.VENDOR_INVOICES) || []; }
+
+function submitVendorInvoice(invoice) {
+  var invoices = getVendorInvoices();
+  var vendors = rvGet(RV_KEYS.APPROVED_VENDORS) || [];
+
+  var newInvoice = {
+    id: 'inv-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+    vendorName: invoice.vendorName || '',
+    vendorId: invoice.vendorId || '',
+    listingId: invoice.listingId || invoice.propertyAddress || '',
+    description: invoice.description || '',
+    amount: parseFloat(invoice.amount) || 0,
+    submittedAt: new Date().toISOString(),
+    status: 'pending',
+    flagged: false,
+    flagReason: ''
+  };
+
+  var vendor = vendors.find(function(v) { return v.name === invoice.vendorName || v.id === invoice.vendorId; });
+  if (vendor && vendor.repairLimit && newInvoice.amount > vendor.repairLimit) {
+    newInvoice.flagged = true;
+    newInvoice.flagReason = 'Amount $' + newInvoice.amount.toFixed(2) + ' exceeds vendor limit of $' + vendor.repairLimit.toFixed(2) + '. Requires Owner Approval.';
+    newInvoice.status = 'pending_approval';
+    addAuditEntry('Vendor invoice FLAGGED: ' + newInvoice.vendorName + ' $' + newInvoice.amount.toFixed(2) + ' exceeds limit', '');
+  } else {
+    addAuditEntry('Vendor invoice submitted: ' + newInvoice.vendorName + ' $' + newInvoice.amount.toFixed(2), '');
+  }
+
+  invoices.unshift(newInvoice);
+  rvSet(RV_KEYS.VENDOR_INVOICES, invoices);
+  return newInvoice;
+}
+
+function approveVendorInvoice(invoiceId) {
+  var invoices = getVendorInvoices();
+  var inv = invoices.find(function(i) { return i.id === invoiceId; });
+  if (inv) {
+    inv.status = 'approved';
+    inv.flagged = false;
+    inv.approvedAt = new Date().toISOString();
+    rvSet(RV_KEYS.VENDOR_INVOICES, invoices);
+    addAuditEntry('Vendor invoice approved: ' + inv.vendorName + ' $' + inv.amount.toFixed(2), '');
+  }
+  return inv;
+}
+
+function denyVendorInvoice(invoiceId) {
+  var invoices = getVendorInvoices();
+  var inv = invoices.find(function(i) { return i.id === invoiceId; });
+  if (inv) {
+    inv.status = 'denied';
+    inv.deniedAt = new Date().toISOString();
+    rvSet(RV_KEYS.VENDOR_INVOICES, invoices);
+    addAuditEntry('Vendor invoice denied: ' + inv.vendorName + ' $' + inv.amount.toFixed(2), '');
+  }
+  return inv;
+}
+
+// --- Lead Capture (QR Viral) ---
+function getLeadCaptures() { return rvGet(RV_KEYS.LEAD_CAPTURES) || []; }
+
+function capturePropertyLead(listingIdOrData, emailParam) {
+  var leads = getLeadCaptures();
+  var lead;
+  // Support both (listingId, email) and ({...data}) signatures
+  if (typeof listingIdOrData === 'object' && listingIdOrData !== null) {
+    lead = {
+      id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      email: listingIdOrData.email || '',
+      name: listingIdOrData.name || '',
+      phone: listingIdOrData.phone || '',
+      propertyAddress: listingIdOrData.propertyAddress || '',
+      listingId: listingIdOrData.listingId || '',
+      source: listingIdOrData.source || 'qr_scan',
+      capturedAt: new Date().toISOString(),
+      followedUp: false
+    };
+  } else {
+    lead = {
+      id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      email: emailParam || '',
+      listingId: listingIdOrData || '',
+      source: 'qr_scan',
+      capturedAt: new Date().toISOString(),
+      followedUp: false
+    };
+  }
+  leads.unshift(lead);
+  rvSet(RV_KEYS.LEAD_CAPTURES, leads);
+  return lead;
+}
+
+// --- Verified Professional Badge ---
+function getVerifiedProfessionals() {
+  return rvGet('rv_verified_professionals') || [];
+}
+
+function verifyProfessional(profileId) {
+  var verified = getVerifiedProfessionals();
+  if (verified.indexOf(profileId) < 0) {
+    verified.push(profileId);
+    rvSet('rv_verified_professionals', verified);
+  }
+}
+
+function isVerifiedProfessional(profileId) {
+  var verified = getVerifiedProfessionals();
+  return verified.indexOf(profileId) >= 0;
+}
