@@ -296,6 +296,22 @@
     display: flex; align-items: center; gap: 10px;
   }
 
+  /* Lead note area */
+  .lead-note-area { margin-top:10px; }
+  .lead-note-area textarea { width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.85rem;resize:vertical;min-height:60px;font-family:inherit; }
+  .lead-note-area textarea:focus { outline:none;border-color:var(--amber); }
+  .lead-note-btn { padding:5px 14px;background:var(--amber);color:#fff;border:none;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer;margin-top:6px; }
+  .lead-note-btn:hover { background:var(--amber-d); }
+  .lead-note-saved { font-size:.82rem;color:#374151;background:#f9fafb;border-radius:8px;padding:8px 12px;margin-top:8px;border-left:3px solid var(--amber); }
+  .lead-complete-btn { padding:7px 14px;background:var(--green);color:#fff;border:none;border-radius:7px;font-size:.82rem;font-weight:700;cursor:pointer; }
+  .lead-complete-btn:hover { background:#059669; }
+  /* Review response */
+  .review-respond-btn { padding:4px 12px;background:var(--amber);color:#fff;border:none;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;margin-top:8px; }
+  .review-respond-btn:hover { background:var(--amber-d); }
+  .review-response-area textarea { width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.85rem;resize:vertical;min-height:50px;margin-top:8px;font-family:inherit; }
+  .review-response-area textarea:focus { outline:none;border-color:var(--amber); }
+  .review-response-saved { font-size:.82rem;color:#374151;background:var(--amber-l);border-radius:8px;padding:8px 12px;margin-top:8px;border-left:3px solid var(--amber); }
+
   @media (max-width: 900px) {
     .stats { grid-template-columns: 1fr 1fr; }
     .two-col { grid-template-columns: 1fr; }
@@ -1198,6 +1214,8 @@ function launchApp() {
   renderEarnings();
   renderReviews();
   renderOverviewActivity();
+  // Load saved settings (overrides defaults if vendor previously saved)
+  loadVendorSettings();
 }
 
 /* Check for existing session */
@@ -1309,9 +1327,14 @@ function renderLeads() {
     return;
   }
 
+  // Load saved lead notes
+  let leadNotes = {};
+  try { leadNotes = JSON.parse(localStorage.getItem('rv_vendor_lead_notes') || '{}'); } catch(e){}
+
   container.innerHTML = filtered.map(lead => {
     const isAccepted = lead.status === 'accepted';
     const priClass = lead.priority.toLowerCase();
+    const note = leadNotes[lead.id] || '';
     return `
     <div class="lead-card ${isAccepted ? 'accepted' : ''}" id="lc-${lead.id}">
       <div class="lead-header">
@@ -1332,12 +1355,21 @@ function renderLeads() {
           <strong>📞 Contact Info:</strong> ${lead.contact}<br>
           <strong>📍 Full Address:</strong> ${lead.address}
         </div>
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button class="lead-complete-btn" onclick="completeLeadFromFeed('${lead.id}')">Mark Complete</button>
+          <button class="lead-note-btn" onclick="toggleLeadNote('${lead.id}')" style="background:#f3f4f6;color:#374151;">Add Note</button>
+        </div>
       ` : `
         <div class="lead-actions">
           <button class="btn-accept" onclick="acceptLead('${lead.id}')">✓ Accept Lead — $5</button>
           <button class="btn-decline" onclick="declineLead('${lead.id}')">✗ Not Interested</button>
         </div>
       `}
+      ${note ? `<div class="lead-note-saved"><strong>Note:</strong> ${note}</div>` : ''}
+      <div class="lead-note-area" id="note-area-${lead.id}" style="display:none;">
+        <textarea id="note-input-${lead.id}" placeholder="Add a note about this lead...">${note}</textarea>
+        <button class="lead-note-btn" onclick="saveLeadNote('${lead.id}')">Save Note</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -1376,6 +1408,28 @@ function declineLead(id) {
   if (lead) { lead.status = 'declined'; saveLeads(); }
   renderLeads();
   refreshStats();
+}
+
+function toggleLeadNote(id) {
+  const area = document.getElementById('note-area-' + id);
+  if (area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveLeadNote(id) {
+  const input = document.getElementById('note-input-' + id);
+  if (!input) return;
+  let notes = {};
+  try { notes = JSON.parse(localStorage.getItem('rv_vendor_lead_notes') || '{}'); } catch(e){}
+  notes[id] = input.value.trim();
+  localStorage.setItem('rv_vendor_lead_notes', JSON.stringify(notes));
+  renderLeads();
+}
+
+function completeLeadFromFeed(leadId) {
+  const job = acceptedJobs.find(j => j.leadId === leadId);
+  if (!job) { alert('No matching job found.'); return; }
+  if (job.status === 'completed') { alert('This job is already completed.'); return; }
+  markComplete(job.id);
 }
 
 /* ══════════════════════════════
@@ -1468,12 +1522,39 @@ function renderEarnings() {
 ══════════════════════════════ */
 function renderReviews() {
   const container = document.getElementById('reviews-list');
-  container.innerHTML = SAMPLE_REVIEWS.map(r => `
+  let responses = {};
+  try { responses = JSON.parse(localStorage.getItem('rv_vendor_review_responses') || '{}'); } catch(e){}
+
+  container.innerHTML = SAMPLE_REVIEWS.map((r, i) => {
+    const resp = responses['review-' + i] || '';
+    return `
     <div class="review-card">
       <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>
       <div class="review-text">"${r.text}"</div>
       <div class="review-meta">— ${r.landlord} · ${r.date}</div>
-    </div>`).join('');
+      ${resp ? `<div class="review-response-saved"><strong>Your response:</strong> ${resp}</div>` : ''}
+      ${!resp ? `<button class="review-respond-btn" onclick="toggleReviewResponse(${i})">Respond</button>` : `<button class="review-respond-btn" onclick="toggleReviewResponse(${i})" style="background:#f3f4f6;color:#374151;margin-top:6px;">Edit Response</button>`}
+      <div class="review-response-area" id="review-resp-${i}" style="display:none;">
+        <textarea id="review-resp-input-${i}" placeholder="Write your response to this review...">${resp}</textarea>
+        <button class="lead-note-btn" onclick="saveReviewResponse(${i})" style="margin-top:6px;">Save Response</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleReviewResponse(idx) {
+  const area = document.getElementById('review-resp-' + idx);
+  if (area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveReviewResponse(idx) {
+  const input = document.getElementById('review-resp-input-' + idx);
+  if (!input) return;
+  let responses = {};
+  try { responses = JSON.parse(localStorage.getItem('rv_vendor_review_responses') || '{}'); } catch(e){}
+  responses['review-' + idx] = input.value.trim();
+  localStorage.setItem('rv_vendor_review_responses', JSON.stringify(responses));
+  renderReviews();
 }
 
 /* ══════════════════════════════
@@ -1508,12 +1589,44 @@ function saveSettings() {
   currentVendor.zips = document.getElementById('set-zips').value.split(',').map(z => z.trim());
   currentVendor.trades = [...settingsTrades];
   localStorage.setItem('rv_vendor_session', JSON.stringify(currentVendor));
+  // Also persist to rv_vendor_settings for independent recall
+  const settings = {
+    name: currentVendor.name,
+    email: currentVendor.email,
+    phone: currentVendor.phone,
+    biz: currentVendor.biz,
+    zips: currentVendor.zips,
+    trades: currentVendor.trades
+  };
+  localStorage.setItem('rv_vendor_settings', JSON.stringify(settings));
   document.getElementById('sb-name').textContent = currentVendor.name;
   document.getElementById('settings-name').textContent = currentVendor.name;
+  document.getElementById('settings-email').textContent = currentVendor.email;
   document.getElementById('settings-avatar').textContent = currentVendor.name.charAt(0).toUpperCase();
   renderLeads(); // re-filter by new ZIPs/trades
   refreshStats();
-  alert('✅ Settings saved!');
+  alert('Settings saved!');
+}
+
+function loadVendorSettings() {
+  try {
+    const settings = JSON.parse(localStorage.getItem('rv_vendor_settings'));
+    if (!settings) return;
+    if (settings.name) document.getElementById('set-name').value = settings.name;
+    if (settings.email) document.getElementById('set-email').value = settings.email;
+    if (settings.phone) document.getElementById('set-phone').value = settings.phone;
+    if (settings.biz) document.getElementById('set-biz').value = settings.biz;
+    if (settings.zips) document.getElementById('set-zips').value = Array.isArray(settings.zips) ? settings.zips.join(', ') : settings.zips;
+    // Highlight saved trades in settings grid
+    if (settings.trades && settings.trades.length) {
+      settingsTrades = [...settings.trades];
+      document.querySelectorAll('#settings-trade-grid .trade-chip').forEach(chip => {
+        const t = chip.textContent.trim().split(' ').slice(1).join(' ');
+        if (settingsTrades.includes(t)) chip.classList.add('sel');
+        else chip.classList.remove('sel');
+      });
+    }
+  } catch(e) {}
 }
 </script>
 </body>
