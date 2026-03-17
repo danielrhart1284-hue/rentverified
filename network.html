@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Professional Network</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Hero */
+    .network-hero {
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 60%, #1e3a8a 100%);
+      color: white;
+      padding: 5rem 2rem 3.5rem;
+      text-align: center;
+    }
+    .network-hero h1 {
+      font-size: 2.6rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .network-hero p {
+      font-size: 1.1rem;
+      opacity: 0.88;
+      max-width: 550px;
+      margin: 0 auto 2rem;
+    }
+    .search-bar {
+      display: flex;
+      gap: 0;
+      max-width: 720px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 1rem 1.2rem;
+      border: none;
+      font-size: 1rem;
+      color: #1f2937;
+      outline: none;
+      min-width: 0;
+    }
+    .search-bar input::placeholder { color: #9ca3af; }
+    .search-bar .search-divider {
+      width: 1px;
+      background: #e5e7eb;
+      margin: 10px 0;
+    }
+    .search-bar button {
+      padding: 1rem 2rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .search-bar button:hover { background: #2563eb; }
+
+    /* Category pills */
+    .categories-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .cat-pill {
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid #e5e7eb;
+      background: white;
+      color: #4b5563;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .cat-pill:hover { border-color: #3b82f6; color: #3b82f6; }
+    .cat-pill.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+
+    /* Controls bar */
+    .controls-bar {
+      max-width: 1200px;
+      margin: 1.5rem auto 0;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .results-count { font-size: 0.95rem; color: #6b7280; font-weight: 500; }
+    .sort-select {
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #374151;
+      background: white;
+      cursor: pointer;
+    }
+
+    /* Pro cards grid */
+    .pros-grid {
+      max-width: 1200px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .pro-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .pro-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .pro-card-header {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    .pro-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .pro-card-info { flex: 1; min-width: 0; }
+    .pro-card-name {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: #d1fae5;
+      color: #059669;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .pro-card-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .stars { color: #f59e0b; font-size: 0.85rem; }
+    .rating-num { font-weight: 700; font-size: 0.85rem; color: #374151; }
+    .review-count { font-size: 0.8rem; color: #9ca3af; }
+    .pro-card-trade {
+      display: inline-block;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+    .pro-card-location {
+      font-size: 0.82rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    .pro-card-tagline {
+      font-size: 0.88rem;
+      color: #4b5563;
+      margin: 0.75rem 0;
+      line-height: 1.5;
+      flex: 1;
+    }
+    .pro-card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+    .service-tag {
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .pro-card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .pro-card-actions button {
+      padding: 0.5rem 0.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-view { background: #3b82f6; color: white; }
+    .btn-view:hover { background: #2563eb; }
+    .btn-contact { background: #10b981; color: white; }
+    .btn-contact:hover { background: #059669; }
+    .btn-save { background: white; color: #6b7280; border: 2px solid #e5e7eb !important; }
+    .btn-save:hover { border-color: #f59e0b !important; color: #f59e0b; }
+    .btn-save.saved { background: #fef3c7; color: #d97706; border-color: #f59e0b !important; }
+    .btn-book { background: white; color: #7c3aed; border: 2px solid #e5e7eb !important; }
+    .btn-book:hover { border-color: #7c3aed !important; }
+
+    /* CTA section */
+    .list-cta {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1a56db 100%);
+      color: white;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .list-cta h2 { font-size: 2rem; font-weight: 900; margin-bottom: 0.75rem; }
+    .list-cta p { font-size: 1.05rem; opacity: 0.88; max-width: 500px; margin: 0 auto 2rem; }
+    .list-cta button {
+      padding: 0.85rem 2.5rem;
+      background: white;
+      color: #1a56db;
+      border: none;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .list-cta button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+      overflow-y: auto;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      max-width: 680px;
+      width: 100%;
+      padding: 2rem;
+      position: relative;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #f3f4f6;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+    }
+    .modal-close:hover { background: #e5e7eb; }
+
+    /* Profile modal */
+    .profile-header {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .profile-name { font-size: 1.4rem; font-weight: 800; color: #111827; }
+    .profile-section { margin-bottom: 1.5rem; }
+    .profile-section h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .profile-section p { font-size: 0.92rem; color: #4b5563; line-height: 1.65; }
+    .service-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 0.9rem;
+    }
+    .service-row span:first-child { color: #374151; }
+    .service-row span:last-child { color: #1d4ed8; font-weight: 600; }
+    .cred-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .cred-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #d1fae5;
+      color: #059669;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .cred-badge.inactive { background: #f3f4f6; color: #9ca3af; }
+    .review-card {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .review-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+    .review-author { font-weight: 700; font-size: 0.9rem; color: #111827; }
+    .review-date { font-size: 0.78rem; color: #9ca3af; }
+    .review-text { font-size: 0.88rem; color: #4b5563; line-height: 1.55; }
+    .profile-contact-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .contact-item { font-size: 0.88rem; color: #374151; }
+    .contact-item strong { display: block; font-size: 0.78rem; color: #6b7280; font-weight: 600; margin-bottom: 2px; }
+
+    /* Contact form modal */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.3rem;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: #1f2937;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #3b82f6;
+    }
+    .form-group textarea { resize: vertical; min-height: 100px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-submit {
+      width: 100%;
+      padding: 0.75rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .form-submit:hover { background: #2563eb; }
+
+    /* No results */
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #9ca3af;
+    }
+    .no-results h3 { font-size: 1.3rem; color: #6b7280; margin-bottom: 0.5rem; }
+
+    /* Footer */
+    .network-footer {
+      background: #111827;
+      color: #9ca3af;
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #111827;
+      color: white;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      z-index: 9999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .pros-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .network-hero { padding: 3.5rem 1.25rem 2.5rem; }
+      .network-hero h1 { font-size: 1.75rem; }
+      .search-bar { flex-direction: column; border-radius: 12px; }
+      .search-bar .search-divider { width: auto; height: 1px; margin: 0 12px; }
+      .search-bar button { border-radius: 0 0 12px 12px; }
+      .categories-wrap { padding: 1rem; justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
+      .cat-pill { flex-shrink: 0; }
+      .controls-bar { padding: 0 1rem; flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+      .pros-grid { grid-template-columns: 1fr; padding: 0 1rem; }
+      .pro-card-actions { grid-template-columns: 1fr 1fr; }
+      .profile-header { flex-direction: column; align-items: center; text-align: center; }
+      .profile-contact-info { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .list-cta h2 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">Browse Rentals</a>
+    <a href="network.html" style="color:var(--primary);font-weight:700;">Pro Network</a>
+    <a href="index.html#roles">Who We Serve</a>
+    <a href="funding.html">Funding</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login / Sign Up</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="network-hero">
+  <h1>RentVerified Professional Network</h1>
+  <p>Find trusted pros. Get referrals. Grow your business.</p>
+  <div class="search-bar">
+    <input type="text" id="searchName" placeholder="Search by name or trade..." />
+    <div class="search-divider"></div>
+    <input type="text" id="searchLocation" placeholder="Location (city)..." />
+    <button onclick="applyFilters()">Search</button>
+  </div>
+</section>
+
+<!-- CATEGORY PILLS -->
+<div class="categories-wrap" id="categoriesWrap"></div>
+
+<!-- CONTROLS -->
+<div class="controls-bar">
+  <div class="results-count" id="resultsCount">15 professionals found</div>
+  <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+    <option value="highest_rated">Highest Rated</option>
+    <option value="most_reviews">Most Reviews</option>
+    <option value="newest">Newest</option>
+    <option value="alpha">Alphabetical</option>
+  </select>
+</div>
+
+<!-- PROS GRID -->
+<div class="pros-grid" id="prosGrid"></div>
+
+<!-- LIST YOUR BUSINESS CTA -->
+<section class="list-cta">
+  <h2>List Your Business on RentVerified</h2>
+  <p>Join hundreds of professionals getting found by landlords, tenants, and property managers across Utah.</p>
+  <button onclick="showToast('Coming soon! We\'ll notify you when business listings open.')">List Your Business</button>
+</section>
+
+<!-- FOOTER -->
+<div class="network-footer">
+  &copy; 2026 RentVerified. All rights reserved. | <a href="index.html" style="color:#93c5fd;">Home</a>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-box" style="max-width:720px;">
+    <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<!-- CONTACT MODAL -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal-box" style="max-width:540px;">
+    <button class="modal-close" onclick="closeModal('contactModal')">&times;</button>
+    <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:0.25rem;">Send a Message</h2>
+    <p style="font-size:0.88rem;color:#6b7280;margin-bottom:1.25rem;" id="contactSubtitle">to Professional</p>
+    <form id="contactForm" onsubmit="submitContact(event)">
+      <input type="hidden" id="contactProId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input type="text" id="contactName" required />
+        </div>
+        <div class="form-group">
+          <label>Your Email *</label>
+          <input type="email" id="contactEmail" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="contactPhone" />
+        </div>
+        <div class="form-group">
+          <label>Property Address</label>
+          <input type="text" id="contactProperty" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Service Needed</label>
+        <select id="contactService">
+          <option value="">Select a service...</option>
+          <option>Repair / Maintenance</option>
+          <option>New Installation</option>
+          <option>Inspection</option>
+          <option>Consultation</option>
+          <option>Estimate / Quote</option>
+          <option>Emergency Service</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message *</label>
+        <textarea id="contactMessage" required placeholder="Describe what you need help with..."></textarea>
+      </div>
+      <button type="submit" class="form-submit">Send Message</button>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SEED DATA ──
+const CATEGORIES = [
+  'All','Plumbers','Electricians','General Contractors','Cleaners','Painters',
+  'Property Managers','Real Estate Agents','Attorneys','Insurance Agents',
+  'Lenders','Roofers','Landscaping','Locksmiths','Pest Control',
+  'Photographers','Movers','Commercial Services'
+];
+
+function seedProfessionals() {
+  return [
+    {
+      id:'mikes-plumbing', name:"Mike's Plumbing", trade:'Plumber', category:'Plumbers',
+      location:'Salt Lake City, UT', rating:4.8, reviewCount:23,
+      tagline:'Reliable residential & commercial plumbing with same-day service.',
+      bio:"Mike's Plumbing has served the Salt Lake Valley for over 12 years. We specialize in emergency repairs, water heater installation, drain cleaning, and full bathroom/kitchen remodels. Licensed, bonded, and insured with a commitment to honest pricing.",
+      services:[{name:'Drain Cleaning',rate:'$95-150'},{name:'Water Heater Install',rate:'$800-2,500'},{name:'Leak Repair',rate:'$120-350'},{name:'Bathroom Remodel',rate:'$3,000-12,000'},{name:'Emergency Call',rate:'$150+'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Salt Lake City','Murray','Millcreek','Holladay','South Salt Lake'],
+      phone:'(801) 555-0101', email:'mike@mikesplumbing.com', website:'mikesplumbing.com',
+      reviews:[
+        {author:'Sarah T.',rating:5,text:'Mike came out same day and fixed our burst pipe. Very professional and fair pricing.',date:'2025-12-15'},
+        {author:'David L.',rating:5,text:'Installed a new water heater quickly. Clean work, explained everything.',date:'2025-11-03'},
+        {author:'Karen W.',rating:4,text:'Good work on our kitchen sink. Slightly late but communicated well.',date:'2025-09-20'}
+      ],
+      schedulingLink:'', avatarColor:'#2563eb'
+    },
+    {
+      id:'bright-electric', name:'Bright Electric', trade:'Electrician', category:'Electricians',
+      location:'Sandy, UT', rating:4.9, reviewCount:31,
+      tagline:'Licensed electricians specializing in residential upgrades and smart home wiring.',
+      bio:"Bright Electric provides full-service electrical work for homes and small businesses in the South Valley. From panel upgrades to smart home installations, our team of certified electricians delivers safe, code-compliant work every time.",
+      services:[{name:'Panel Upgrade',rate:'$1,200-3,000'},{name:'Outlet/Switch Install',rate:'$85-200'},{name:'Smart Home Wiring',rate:'$500-2,000'},{name:'EV Charger Install',rate:'$600-1,500'},{name:'Whole House Rewire',rate:'$8,000-15,000'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Sandy','Draper','South Jordan','Riverton','Midvale'],
+      phone:'(801) 555-0202', email:'info@brightelectric.com', website:'brightelectric.com',
+      reviews:[
+        {author:'James R.',rating:5,text:'Upgraded our panel and added a Tesla charger. Flawless work.',date:'2026-01-10'},
+        {author:'Emily K.',rating:5,text:'Installed smart switches throughout our home. Very knowledgeable team.',date:'2025-12-05'},
+        {author:'Tom B.',rating:5,text:'Fast response for an emergency outlet issue. Highly recommend.',date:'2025-10-18'}
+      ],
+      schedulingLink:'', avatarColor:'#f59e0b'
+    },
+    {
+      id:'utah-property-law', name:'Utah Property Law', trade:'Attorney', category:'Attorneys',
+      location:'Salt Lake City, UT', rating:4.7, reviewCount:18,
+      tagline:'Expert legal counsel for landlords, tenants, and real estate transactions.',
+      bio:"Utah Property Law is a boutique firm focused exclusively on residential and commercial real estate law. We handle evictions, lease disputes, HOA issues, purchase agreements, and regulatory compliance for property owners across the Wasatch Front.",
+      services:[{name:'Eviction Filing',rate:'$500-1,200'},{name:'Lease Review',rate:'$250-500'},{name:'Purchase Agreement',rate:'$600-1,000'},{name:'HOA Dispute',rate:'$300/hr'},{name:'Consultation',rate:'$175/hr'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Salt Lake City','Park City','Provo','Ogden','Entire Wasatch Front'],
+      phone:'(801) 555-0303', email:'contact@utpropertylaw.com', website:'utpropertylaw.com',
+      reviews:[
+        {author:'Greg M.',rating:5,text:'Handled our eviction case quickly and professionally. Worth every penny.',date:'2025-11-22'},
+        {author:'Lisa P.',rating:4,text:'Thorough lease review. Found issues I never would have caught.',date:'2025-09-14'}
+      ],
+      schedulingLink:'', avatarColor:'#6366f1'
+    },
+    {
+      id:'premier-painting', name:'Premier Painting', trade:'Painter', category:'Painters',
+      location:'West Valley City, UT', rating:4.6, reviewCount:15,
+      tagline:'Interior and exterior painting with premium finishes and fast turnarounds.',
+      bio:"Premier Painting delivers high-quality residential and commercial painting services. We use top-brand paints, provide color consultations, and guarantee clean, precise work with minimal disruption to your tenants or family.",
+      services:[{name:'Interior Room',rate:'$250-600'},{name:'Full Interior',rate:'$2,000-6,000'},{name:'Exterior Home',rate:'$3,000-8,000'},{name:'Cabinet Painting',rate:'$1,500-4,000'},{name:'Touch-Up Service',rate:'$150-300'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:false,verified:true},
+      serviceAreas:['West Valley City','Taylorsville','Kearns','Magna','Salt Lake City'],
+      phone:'(801) 555-0404', email:'info@premierpainting.com', website:'premierpainting.com',
+      reviews:[
+        {author:'Nancy D.',rating:5,text:'Painted 4 units between tenants in record time. Great color matching.',date:'2025-10-30'},
+        {author:'Steve H.',rating:4,text:'Good exterior job. Came back to fix a small missed spot without complaint.',date:'2025-08-12'}
+      ],
+      schedulingLink:'', avatarColor:'#ec4899'
+    },
+    {
+      id:'cleanslate-turnovers', name:'CleanSlate Turnovers', trade:'Cleaner', category:'Cleaners',
+      location:'Provo, UT', rating:5.0, reviewCount:42,
+      tagline:'5-star deep cleaning and turnover service for rental properties.',
+      bio:"CleanSlate Turnovers is Utah County's top-rated turnover cleaning company. We specialize in move-in/move-out deep cleans, Airbnb turnovers, and recurring property maintenance cleaning. Our detailed checklist ensures nothing is missed.",
+      services:[{name:'Studio/1BR Turnover',rate:'$150-250'},{name:'2-3BR Turnover',rate:'$250-400'},{name:'Deep Clean Add-On',rate:'+$100-200'},{name:'Carpet Shampoo',rate:'$75-150/room'},{name:'Monthly Maintenance',rate:'$120-250'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Provo','Orem','Springville','Spanish Fork','Lehi'],
+      phone:'(801) 555-0505', email:'book@cleanslateturnovers.com', website:'cleanslateturnovers.com',
+      reviews:[
+        {author:'Amanda R.',rating:5,text:'Best turnover cleaning service in Utah County. My units are spotless every time.',date:'2026-01-20'},
+        {author:'Carlos M.',rating:5,text:'They handle all 8 of our Airbnb turnovers. Never had a guest complaint.',date:'2025-12-11'},
+        {author:'Jenny L.',rating:5,text:'Incredible attention to detail. Even cleaned inside the oven and fridge!',date:'2025-10-05'}
+      ],
+      schedulingLink:'', avatarColor:'#10b981'
+    },
+    {
+      id:'mountain-west-insurance', name:'Mountain West Insurance', trade:'Insurance Agent', category:'Insurance Agents',
+      location:'Murray, UT', rating:4.5, reviewCount:12,
+      tagline:'Landlord, rental, and liability insurance tailored for property investors.',
+      bio:"Mountain West Insurance specializes in coverage for property owners and managers. We offer competitive rates on landlord policies, renters insurance, umbrella coverage, and builder's risk. Our agents understand the unique needs of Utah's rental market.",
+      services:[{name:'Landlord Policy',rate:'Quote-based'},{name:'Renters Insurance',rate:'$15-40/mo'},{name:'Umbrella Coverage',rate:'Quote-based'},{name:'Builders Risk',rate:'Quote-based'},{name:'Policy Review',rate:'Free'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:false,verified:true},
+      serviceAreas:['Murray','Salt Lake City','West Jordan','South Jordan','Statewide'],
+      phone:'(801) 555-0606', email:'quotes@mtnwestins.com', website:'mtnwestins.com',
+      reviews:[
+        {author:'Robert K.',rating:5,text:'Saved us $2,400/year across 6 rental properties. Highly recommend.',date:'2025-11-08'},
+        {author:'Diane T.',rating:4,text:'Good service. Helped us understand landlord liability coverage.',date:'2025-08-25'}
+      ],
+      schedulingLink:'', avatarColor:'#0ea5e9'
+    },
+    {
+      id:'beehive-pest-control', name:'Beehive Pest Control', trade:'Pest Control', category:'Pest Control',
+      location:'Lehi, UT', rating:4.8, reviewCount:27,
+      tagline:'Eco-friendly pest control for homes and rental properties.',
+      bio:"Beehive Pest Control provides safe, effective pest management using eco-friendly products that are safe for families and pets. We handle ants, spiders, wasps, rodents, bed bugs, and more with quarterly maintenance plans perfect for property managers.",
+      services:[{name:'Initial Treatment',rate:'$150-300'},{name:'Quarterly Plan',rate:'$99/quarter'},{name:'Bed Bug Treatment',rate:'$400-800'},{name:'Rodent Control',rate:'$200-500'},{name:'One-Time Service',rate:'$125-250'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Lehi','American Fork','Pleasant Grove','Eagle Mountain','Saratoga Springs'],
+      phone:'(801) 555-0707', email:'service@beehivepest.com', website:'beehivepest.com',
+      reviews:[
+        {author:'Matt W.',rating:5,text:'Quarterly service keeps our rentals pest-free. Tenants love it.',date:'2026-02-01'},
+        {author:'Sandra G.',rating:5,text:'Got rid of a wasp nest same day. Very professional crew.',date:'2025-11-15'},
+        {author:'Paul N.',rating:4,text:'Effective treatment. Needed one follow-up for ants but they came back free of charge.',date:'2025-09-03'}
+      ],
+      schedulingLink:'', avatarColor:'#f97316'
+    },
+    {
+      id:'wasatch-landscaping', name:'Wasatch Landscaping', trade:'Landscaper', category:'Landscaping',
+      location:'Draper, UT', rating:4.7, reviewCount:19,
+      tagline:'Full-service landscaping, snow removal, and property curb appeal.',
+      bio:"Wasatch Landscaping provides year-round property maintenance including lawn care, irrigation, hardscaping, tree trimming, and snow removal. We serve both residential homeowners and commercial property managers with reliable, scheduled service.",
+      services:[{name:'Weekly Mowing',rate:'$35-75/visit'},{name:'Spring Cleanup',rate:'$200-500'},{name:'Sprinkler Repair',rate:'$75-250'},{name:'Snow Removal',rate:'$50-150/visit'},{name:'Full Landscape Design',rate:'$2,000-10,000'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:false,verified:true},
+      serviceAreas:['Draper','Sandy','South Jordan','Riverton','Bluffdale'],
+      phone:'(801) 555-0808', email:'info@wasatchlandscaping.com', website:'wasatchlandscaping.com',
+      reviews:[
+        {author:'Brian C.',rating:5,text:'They maintain all our rental property lawns. Always on schedule.',date:'2025-12-20'},
+        {author:'Kelly A.',rating:4,text:'Great spring cleanup. Sprinklers working perfectly now.',date:'2025-10-10'}
+      ],
+      schedulingLink:'', avatarColor:'#22c55e'
+    },
+    {
+      id:'keymaster-locksmith', name:'KeyMaster Locksmith', trade:'Locksmith', category:'Locksmiths',
+      location:'Salt Lake City, UT', rating:4.9, reviewCount:35,
+      tagline:'24/7 emergency locksmith and rekeying for rental properties.',
+      bio:"KeyMaster Locksmith specializes in residential and commercial lock services. We provide 24/7 emergency lockouts, lock rekeying between tenants, smart lock installation, master key systems, and security assessments for property managers.",
+      services:[{name:'Lock Rekey',rate:'$75-120/lock'},{name:'Emergency Lockout',rate:'$85-150'},{name:'Smart Lock Install',rate:'$150-350'},{name:'Master Key System',rate:'$200-500'},{name:'Lock Change',rate:'$100-200/lock'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Salt Lake City','Murray','Millcreek','South Salt Lake','Cottonwood Heights'],
+      phone:'(801) 555-0909', email:'service@keymasterslc.com', website:'keymasterslc.com',
+      reviews:[
+        {author:'Frank J.',rating:5,text:'Rekeyed 12 units in one day during a turnover. Lifesaver for property managers.',date:'2026-01-05'},
+        {author:'Maria S.',rating:5,text:'Fast emergency lockout service at 11pm. Very reasonable price.',date:'2025-11-28'},
+        {author:'Derek P.',rating:5,text:'Installed smart locks on all our rentals. Great recommendation on the Schlage system.',date:'2025-10-01'}
+      ],
+      schedulingLink:'', avatarColor:'#8b5cf6'
+    },
+    {
+      id:'summit-roofing', name:'Summit Roofing', trade:'Roofer', category:'Roofers',
+      location:'Sandy, UT', rating:4.6, reviewCount:14,
+      tagline:'Expert roof repair, replacement, and inspection for residential properties.',
+      bio:"Summit Roofing provides comprehensive roofing services including emergency leak repair, full roof replacement, routine inspections, and gutter installation. We work with all major roofing materials and offer financing options for larger projects.",
+      services:[{name:'Roof Inspection',rate:'$150-300'},{name:'Leak Repair',rate:'$250-800'},{name:'Full Replacement',rate:'$8,000-18,000'},{name:'Gutter Install',rate:'$1,000-3,000'},{name:'Storm Damage Claim',rate:'Free assessment'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:false,verified:true},
+      serviceAreas:['Sandy','Midvale','Cottonwood Heights','Murray','Draper'],
+      phone:'(801) 555-1010', email:'info@summitroofingut.com', website:'summitroofingut.com',
+      reviews:[
+        {author:'Roger T.',rating:5,text:'Fixed a complex leak that two other roofers couldn\'t find. Excellent diagnostics.',date:'2025-12-01'},
+        {author:'Helen M.',rating:4,text:'Full reroof done in two days. Good crew, minor cleanup needed after.',date:'2025-09-15'}
+      ],
+      schedulingLink:'', avatarColor:'#dc2626'
+    },
+    {
+      id:'valley-movers', name:'Valley Movers', trade:'Mover', category:'Movers',
+      location:'West Jordan, UT', rating:4.4, reviewCount:9,
+      tagline:'Affordable, careful moving services for tenants and property managers.',
+      bio:"Valley Movers provides local and intra-state moving services with a focus on care and affordability. We offer full-service packing, furniture assembly, junk removal, and specialize in apartment and rental property moves.",
+      services:[{name:'Studio Move',rate:'$250-400'},{name:'1-2 BR Move',rate:'$400-700'},{name:'3+ BR Move',rate:'$700-1,200'},{name:'Packing Service',rate:'$50/hr per mover'},{name:'Junk Removal',rate:'$150-400'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:false},
+      serviceAreas:['West Jordan','Taylorsville','Kearns','South Jordan','West Valley City'],
+      phone:'(801) 555-1111', email:'book@valleymoversut.com', website:'valleymoversut.com',
+      reviews:[
+        {author:'Chris L.',rating:5,text:'Moved our tenant into a new unit quickly. Nothing damaged.',date:'2025-11-10'},
+        {author:'Amber D.',rating:4,text:'Good movers. On time and careful with furniture.',date:'2025-08-20'}
+      ],
+      schedulingLink:'', avatarColor:'#78716c'
+    },
+    {
+      id:'snapshot-property-photos', name:'SnapShot Property Photos', trade:'Photographer', category:'Photographers',
+      location:'Salt Lake City, UT', rating:5.0, reviewCount:28,
+      tagline:'Professional real estate photography, virtual tours, and drone shots.',
+      bio:"SnapShot Property Photos specializes in high-quality real estate photography designed to fill vacancies fast. We offer HDR photography, 3D Matterport tours, drone aerial shots, twilight photography, and video walkthroughs for listings of all sizes.",
+      services:[{name:'Standard Photo Package',rate:'$150-250'},{name:'3D Virtual Tour',rate:'$250-400'},{name:'Drone Aerial',rate:'$100-200 add-on'},{name:'Video Walkthrough',rate:'$300-500'},{name:'Twilight Shoot',rate:'$150 add-on'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Salt Lake City','Park City','Provo','Ogden','Statewide'],
+      phone:'(801) 555-1212', email:'shoots@snapshotphotos.com', website:'snapshotphotos.com',
+      reviews:[
+        {author:'Rachel B.',rating:5,text:'Our listing got 3x more views with their photos. Absolutely worth it.',date:'2026-02-10'},
+        {author:'Justin M.',rating:5,text:'The 3D tour sold our listing before in-person showings even started.',date:'2025-12-18'},
+        {author:'Laura K.',rating:5,text:'Beautiful twilight shots. Every listing deserves this level of photography.',date:'2025-10-22'}
+      ],
+      schedulingLink:'', avatarColor:'#0d9488'
+    },
+    {
+      id:'hart-construction', name:'Hart Construction', trade:'General Contractor', category:'General Contractors',
+      location:'Orem, UT', rating:4.8, reviewCount:22,
+      tagline:'Full-service renovations and remodels for rental properties.',
+      bio:"Hart Construction handles everything from small repairs to full-unit renovations. We specialize in rental property upgrades that maximize ROI, including kitchen and bath remodels, flooring, drywall, and ADA compliance modifications.",
+      services:[{name:'Kitchen Remodel',rate:'$5,000-25,000'},{name:'Bath Remodel',rate:'$3,000-15,000'},{name:'Flooring Install',rate:'$3-8/sq ft'},{name:'Drywall Repair',rate:'$200-600'},{name:'Unit Renovation',rate:'$10,000-50,000'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Orem','Provo','Lindon','Pleasant Grove','American Fork'],
+      phone:'(801) 555-1313', email:'bids@hartconstruction.com', website:'hartconstruction.com',
+      reviews:[
+        {author:'Kevin P.',rating:5,text:'Renovated 3 units simultaneously. On budget and ahead of schedule.',date:'2026-01-15'},
+        {author:'Susan W.',rating:5,text:'Beautiful kitchen remodel that increased our rental rate by $200/month.',date:'2025-11-20'},
+        {author:'Tim G.',rating:4,text:'Great flooring work. Minor scheduling hiccup but quality was excellent.',date:'2025-09-08'}
+      ],
+      schedulingLink:'', avatarColor:'#b45309'
+    },
+    {
+      id:'granite-state-mortgage', name:'Granite State Mortgage', trade:'Lender', category:'Lenders',
+      location:'Salt Lake City, UT', rating:4.7, reviewCount:16,
+      tagline:'Investment property loans, refinancing, and portfolio lending.',
+      bio:"Granite State Mortgage is a local lender specializing in investment property financing. We offer conventional loans, DSCR loans, portfolio lending, bridge loans, and refinancing for real estate investors. Our team understands the Utah rental market inside and out.",
+      services:[{name:'Investment Property Loan',rate:'Competitive rates'},{name:'DSCR Loan',rate:'No income verification'},{name:'Cash-Out Refinance',rate:'Up to 75% LTV'},{name:'Bridge Loan',rate:'Short-term financing'},{name:'Pre-Approval',rate:'Free'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Salt Lake City','Statewide Utah','Wasatch Front','Utah County','Davis County'],
+      phone:'(801) 555-1414', email:'loans@granitemortgage.com', website:'granitemortgage.com',
+      reviews:[
+        {author:'Michael R.',rating:5,text:'Closed our 4-plex loan in 21 days. Best investment lender in Utah.',date:'2025-12-28'},
+        {author:'Patricia H.',rating:4,text:'Good DSCR loan product. Communication could be slightly faster.',date:'2025-10-15'}
+      ],
+      schedulingLink:'', avatarColor:'#475569'
+    },
+    {
+      id:'pinnacle-real-estate', name:'Pinnacle Real Estate', trade:'Real Estate Agent', category:'Real Estate Agents',
+      location:'Park City, UT', rating:4.9, reviewCount:38,
+      tagline:'Investment property specialists serving the Wasatch Front and Park City.',
+      bio:"Pinnacle Real Estate is a boutique brokerage focused on investment properties. Our agents specialize in multifamily acquisitions, 1031 exchanges, vacation rental properties, and market analysis for real estate investors looking to build wealth in Utah's booming market.",
+      services:[{name:'Buyer Representation',rate:'Commission-based'},{name:'Seller Listing',rate:'Commission-based'},{name:'Market Analysis (CMA)',rate:'Free'},{name:'1031 Exchange Guidance',rate:'Included'},{name:'Investment Strategy Session',rate:'Free consultation'}],
+      credentials:{licensed:true,insured:true,backgroundChecked:true,verified:true},
+      serviceAreas:['Park City','Salt Lake City','Heber City','Midway','Entire Wasatch Front'],
+      phone:'(801) 555-1515', email:'agents@pinnacle-re.com', website:'pinnacle-re.com',
+      reviews:[
+        {author:'Victoria S.',rating:5,text:'Found us a perfect 6-unit building in Sugar House. Incredible market knowledge.',date:'2026-02-05'},
+        {author:'Andrew T.',rating:5,text:'Guided us through our first 1031 exchange seamlessly. True professionals.',date:'2025-12-12'},
+        {author:'Diana L.',rating:5,text:'Sold our Park City STR above asking price. Best agent experience ever.',date:'2025-10-28'}
+      ],
+      schedulingLink:'', avatarColor:'#be185d'
+    }
+  ];
+}
+
+// ── INIT ──
+let currentCategory = 'All';
+let savedPros = JSON.parse(localStorage.getItem('rv_saved_pros') || '[]');
+
+function getProfessionals() {
+  let data = localStorage.getItem('rv_network_professionals');
+  if (!data) {
+    const pros = seedProfessionals();
+    localStorage.setItem('rv_network_professionals', JSON.stringify(pros));
+    return pros;
+  }
+  return JSON.parse(data);
+}
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+}
+
+function renderStars(rating) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= Math.floor(rating)) s += '\u2605';
+    else if (i - rating < 1) s += '\u2605';
+    else s += '\u2606';
+  }
+  return s;
+}
+
+// ── CATEGORY PILLS ──
+function renderCategories() {
+  const wrap = document.getElementById('categoriesWrap');
+  wrap.innerHTML = CATEGORIES.map(cat =>
+    `<div class="cat-pill${cat === currentCategory ? ' active' : ''}" onclick="selectCategory('${cat}')">${cat}</div>`
+  ).join('');
+}
+
+function selectCategory(cat) {
+  currentCategory = cat;
+  renderCategories();
+  applyFilters();
+}
+
+// ── FILTER & SORT ──
+function applyFilters() {
+  const nameQ = document.getElementById('searchName').value.toLowerCase().trim();
+  const locQ = document.getElementById('searchLocation').value.toLowerCase().trim();
+  const sort = document.getElementById('sortSelect').value;
+  let pros = getProfessionals();
+
+  // category filter
+  if (currentCategory !== 'All') {
+    pros = pros.filter(p => p.category === currentCategory);
+  }
+  // search filter
+  if (nameQ) {
+    pros = pros.filter(p => p.name.toLowerCase().includes(nameQ) || p.trade.toLowerCase().includes(nameQ) || p.category.toLowerCase().includes(nameQ));
+  }
+  if (locQ) {
+    pros = pros.filter(p => p.location.toLowerCase().includes(locQ));
+  }
+  // sort
+  switch (sort) {
+    case 'highest_rated': pros.sort((a, b) => b.rating - a.rating); break;
+    case 'most_reviews': pros.sort((a, b) => b.reviewCount - a.reviewCount); break;
+    case 'newest': pros.sort((a, b) => b.id.localeCompare(a.id)); break;
+    case 'alpha': pros.sort((a, b) => a.name.localeCompare(b.name)); break;
+  }
+
+  document.getElementById('resultsCount').textContent = `${pros.length} professional${pros.length !== 1 ? 's' : ''} found`;
+  renderCards(pros);
+}
+
+// ── RENDER CARDS ──
+function renderCards(pros) {
+  const grid = document.getElementById('prosGrid');
+  if (pros.length === 0) {
+    grid.innerHTML = '<div class="no-results"><h3>No professionals found</h3><p>Try adjusting your search or category filters.</p></div>';
+    return;
+  }
+  grid.innerHTML = pros.map(p => {
+    const isSaved = savedPros.includes(p.id);
+    const serviceTags = p.services.slice(0, 3).map(s => `<span class="service-tag">${s.name}</span>`).join('');
+    return `
+      <div class="pro-card">
+        <div class="pro-card-header">
+          <div class="pro-avatar" style="background:${p.avatarColor}">${getInitials(p.name)}</div>
+          <div class="pro-card-info">
+            <div class="pro-card-name">
+              ${p.name}
+              ${p.credentials.verified ? '<span class="verified-badge"><svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Verified</span>' : ''}
+            </div>
+            <div class="pro-card-rating">
+              <span class="stars">${renderStars(p.rating)}</span>
+              <span class="rating-num">${p.rating}</span>
+              <span class="review-count">(${p.reviewCount} reviews)</span>
+            </div>
+          </div>
+        </div>
+        <span class="pro-card-trade">${p.trade}</span>
+        <div class="pro-card-location">${p.location}</div>
+        <div class="pro-card-tagline">${p.tagline}</div>
+        <div class="pro-card-tags">${serviceTags}</div>
+        <div class="pro-card-actions">
+          <button class="btn-view" onclick="openProfile('${p.id}')">View Profile</button>
+          <button class="btn-contact" onclick="openContact('${p.id}')">Contact</button>
+          <button class="btn-save${isSaved ? ' saved' : ''}" onclick="toggleSave('${p.id}', this)">${isSaved ? '\u2605 Saved' : '\u2606 Save'}</button>
+          <button class="btn-book" onclick="bookPro('${p.id}')">Book</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── SAVE / UNSAVE ──
+function toggleSave(id, btn) {
+  const idx = savedPros.indexOf(id);
+  if (idx > -1) {
+    savedPros.splice(idx, 1);
+    btn.classList.remove('saved');
+    btn.textContent = '\u2606 Save';
+    showToast('Removed from saved pros');
+  } else {
+    savedPros.push(id);
+    btn.classList.add('saved');
+    btn.textContent = '\u2605 Saved';
+    showToast('Saved to your favorites!');
+  }
+  localStorage.setItem('rv_saved_pros', JSON.stringify(savedPros));
+}
+
+// ── PROFILE MODAL ──
+function openProfile(id) {
+  const pros = getProfessionals();
+  const p = pros.find(x => x.id === id);
+  if (!p) return;
+  const creds = [
+    {label:'Licensed', active:p.credentials.licensed},
+    {label:'Insured', active:p.credentials.insured},
+    {label:'Background Checked', active:p.credentials.backgroundChecked},
+    {label:'RentVerified', active:p.credentials.verified}
+  ];
+  const credsHtml = creds.map(c => `<span class="cred-badge${c.active ? '' : ' inactive'}">${c.active ? '\u2713' : '\u2717'} ${c.label}</span>`).join('');
+  const servicesHtml = p.services.map(s => `<div class="service-row"><span>${s.name}</span><span>${s.rate}</span></div>`).join('');
+  const reviewsHtml = p.reviews.map(r => `
+    <div class="review-card">
+      <div class="review-card-header">
+        <div><span class="review-author">${r.author}</span> <span class="stars" style="font-size:0.8rem;">${renderStars(r.rating)}</span></div>
+        <span class="review-date">${r.date}</span>
+      </div>
+      <div class="review-text">${r.text}</div>
+    </div>`).join('');
+
+  document.getElementById('profileContent').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar" style="background:${p.avatarColor}">${getInitials(p.name)}</div>
+      <div>
+        <div class="profile-name">${p.name} ${p.credentials.verified ? '<span class="verified-badge" style="font-size:0.75rem;vertical-align:middle;"><svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Verified</span>' : ''}</div>
+        <div style="margin-top:4px;"><span class="pro-card-trade">${p.trade}</span></div>
+        <div style="margin-top:4px;color:#6b7280;font-size:0.88rem;">${p.location}</div>
+        <div class="pro-card-rating" style="margin-top:4px;">
+          <span class="stars">${renderStars(p.rating)}</span>
+          <span class="rating-num">${p.rating}</span>
+          <span class="review-count">(${p.reviewCount} reviews)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h3>About</h3>
+      <p>${p.bio}</p>
+    </div>
+
+    <div class="profile-section">
+      <h3>Services &amp; Rates</h3>
+      ${servicesHtml}
+    </div>
+
+    <div class="profile-section">
+      <h3>Credentials</h3>
+      <div class="cred-badges">${credsHtml}</div>
+    </div>
+
+    <div class="profile-section">
+      <h3>Service Area</h3>
+      <p>${p.serviceAreas.join(' &bull; ')}</p>
+    </div>
+
+    <div class="profile-section">
+      <h3>Reviews</h3>
+      ${reviewsHtml}
+    </div>
+
+    <div class="profile-section">
+      <h3>Contact Information</h3>
+      <div class="profile-contact-info">
+        <div class="contact-item"><strong>Phone</strong>${p.phone}</div>
+        <div class="contact-item"><strong>Email</strong>${p.email}</div>
+        <div class="contact-item"><strong>Website</strong><a href="https://${p.website}" target="_blank">${p.website}</a></div>
+        <div class="contact-item"><strong>Trade</strong>${p.trade}</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+      <button style="flex:1;padding:0.75rem;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="closeModal('profileModal');openContact('${p.id}')">Send Message</button>
+      <button style="flex:1;padding:0.75rem;background:#10b981;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="window.open('tel:${p.phone}')">Call Now</button>
+    </div>`;
+  openModal('profileModal');
+}
+
+// ── CONTACT MODAL ──
+function openContact(id) {
+  const pros = getProfessionals();
+  const p = pros.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('contactProId').value = p.id;
+  document.getElementById('contactSubtitle').textContent = `to ${p.name}`;
+  document.getElementById('contactForm').reset();
+  document.getElementById('contactProId').value = p.id;
+  openModal('contactModal');
+}
+
+function submitContact(e) {
+  e.preventDefault();
+  const inquiry = {
+    proId: document.getElementById('contactProId').value,
+    name: document.getElementById('contactName').value,
+    email: document.getElementById('contactEmail').value,
+    phone: document.getElementById('contactPhone').value,
+    property: document.getElementById('contactProperty').value,
+    service: document.getElementById('contactService').value,
+    message: document.getElementById('contactMessage').value,
+    date: new Date().toISOString()
+  };
+  const inquiries = JSON.parse(localStorage.getItem('rv_network_inquiries') || '[]');
+  inquiries.push(inquiry);
+  localStorage.setItem('rv_network_inquiries', JSON.stringify(inquiries));
+  closeModal('contactModal');
+  showToast('Message sent! The professional will respond shortly.');
+}
+
+// ── BOOK ──
+function bookPro(id) {
+  const pros = getProfessionals();
+  const p = pros.find(x => x.id === id);
+  if (!p) return;
+  if (p.schedulingLink) {
+    window.open(p.schedulingLink, '_blank');
+  } else {
+    showToast(`Online booking coming soon for ${p.name}. Contact them directly!`);
+  }
+}
+
+// ── MODAL HELPERS ──
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+// close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) closeModal(m.id);
+  });
+});
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── ENTER KEY SEARCH ──
+document.getElementById('searchName').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+document.getElementById('searchLocation').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+
+// ── BOOT ──
+renderCategories();
+applyFilters();
+</script>
+</body>
+</html>

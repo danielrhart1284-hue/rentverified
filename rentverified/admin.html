@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Admin Dashboard | RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Login Screen ── */
+    .admin-login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+    }
+    .admin-login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .admin-login-card .logo-area {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .admin-login-card .logo-area .shield {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, #4F46E5, #6366F1);
+      border-radius: 14px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; color: white;
+      margin-bottom: 0.75rem;
+    }
+    .admin-login-card .logo-area h2 {
+      font-size: 1.3rem; font-weight: 800; color: #1e1b4b;
+    }
+    .admin-login-card .logo-area p {
+      font-size: 0.85rem; color: #6b7280; margin-top: 4px;
+    }
+    .admin-login-card label {
+      display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px;
+    }
+    .admin-login-card input[type="email"],
+    .admin-login-card input[type="password"] {
+      width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 0.9rem; margin-bottom: 1rem; transition: border-color 0.2s;
+    }
+    .admin-login-card input:focus {
+      outline: none; border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+    .admin-login-btn {
+      width: 100%; padding: 0.75rem; background: #4F46E5; color: white;
+      border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .admin-login-btn:hover { background: #4338ca; }
+    .admin-login-error {
+      background: #fef2f2; color: #dc2626; padding: 0.6rem 0.75rem;
+      border-radius: 8px; font-size: 0.82rem; margin-bottom: 1rem; display: none;
+    }
+
+    /* ── Dashboard Layout ── */
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+    .admin-sidebar {
+      background: #1e1b4b;
+      padding: 0 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .admin-sidebar-brand {
+      background: #312e81;
+      color: #a5b4fc;
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .admin-sidebar-links {
+      padding: 1rem 0;
+      flex: 1;
+    }
+    .admin-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.65rem 1rem;
+      margin: 0 0.75rem;
+      border-radius: 8px;
+      color: #a5b4fc;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .admin-link:hover { background: rgba(255,255,255,0.07); color: white; text-decoration: none; }
+    .admin-link.active { background: #4F46E5; color: white; }
+    .admin-link svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .admin-link.signout {
+      margin-top: auto;
+      color: #f87171;
+    }
+    .admin-link.signout:hover { background: rgba(248,113,113,0.12); color: #fca5a5; }
+
+    .admin-main {
+      background: #f3f4f6;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    /* ── Shared Components ── */
+    .admin-page-title {
+      font-size: 1.5rem; font-weight: 800; color: #1e1b4b; margin-bottom: 0.25rem;
+    }
+    .admin-page-sub {
+      font-size: 0.9rem; color: #6b7280; margin-bottom: 1.5rem;
+    }
+
+    .admin-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .stat-card .stat-label {
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #6b7280; margin-bottom: 6px;
+    }
+    .stat-card .stat-value {
+      font-size: 1.6rem; font-weight: 800; color: #1e1b4b;
+    }
+    .stat-card .stat-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; margin-bottom: 8px;
+    }
+    .stat-icon.purple  { background: #ede9fe; color: #7c3aed; }
+    .stat-icon.blue    { background: #dbeafe; color: #2563eb; }
+    .stat-icon.green   { background: #d1fae5; color: #059669; }
+    .stat-icon.amber   { background: #fef3c7; color: #d97706; }
+    .stat-icon.pink    { background: #fce7f3; color: #db2777; }
+    .stat-icon.cyan    { background: #cffafe; color: #0891b2; }
+    .stat-icon.red     { background: #fee2e2; color: #dc2626; }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .quick-action {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .quick-action:hover {
+      border-color: #4F46E5;
+      box-shadow: 0 4px 12px rgba(79,70,229,0.12);
+      transform: translateY(-2px);
+    }
+    .quick-action .qa-icon {
+      width: 42px; height: 42px;
+      background: #ede9fe;
+      color: #4F46E5;
+      border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+    .quick-action .qa-label {
+      font-size: 0.88rem; font-weight: 700; color: #1e1b4b;
+    }
+
+    .activity-feed .af-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .activity-feed .af-item:last-child { border-bottom: none; }
+    .af-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 6px; flex-shrink: 0;
+    }
+    .af-dot.green  { background: #10b981; }
+    .af-dot.blue   { background: #3b82f6; }
+    .af-dot.amber  { background: #f59e0b; }
+    .af-dot.purple { background: #8b5cf6; }
+    .af-text { font-size: 0.88rem; color: #374151; }
+    .af-time { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
+
+    /* ── Tables ── */
+    .admin-table-wrap {
+      overflow-x: auto;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .admin-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      background: #f9fafb;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .admin-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f3f4f6;
+      color: #374151;
+    }
+    .admin-table tr:hover td { background: #f9fafb; }
+    .admin-table .actions-cell { white-space: nowrap; }
+    .tbl-btn {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+      margin-right: 4px;
+    }
+    .tbl-btn:hover { opacity: 0.85; }
+    .tbl-btn.view  { background: #ede9fe; color: #4F46E5; }
+    .tbl-btn.edit  { background: #dbeafe; color: #2563eb; }
+    .tbl-btn.disable { background: #fee2e2; color: #dc2626; }
+
+    .toggle-tabs {
+      display: inline-flex;
+      background: #e5e7eb;
+      border-radius: 8px;
+      padding: 3px;
+      margin-bottom: 1rem;
+    }
+    .toggle-tab {
+      padding: 0.45rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.15s;
+      border: none;
+      background: none;
+    }
+    .toggle-tab.active {
+      background: #4F46E5;
+      color: white;
+      box-shadow: 0 1px 3px rgba(79,70,229,0.3);
+    }
+
+    /* ── Revenue ── */
+    .rev-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .rev-card {
+      background: white; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 1rem; text-align: center;
+    }
+    .rev-card .rev-amount { font-size: 1.35rem; font-weight: 800; color: #1e1b4b; }
+    .rev-card .rev-label { font-size: 0.75rem; color: #6b7280; margin-top: 4px; font-weight: 600; }
+
+    .chart-bar-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 0.6rem; font-size: 0.85rem;
+    }
+    .chart-bar-label {
+      width: 36px; font-weight: 700; color: #374151; text-align: right;
+    }
+    .chart-bar-track {
+      flex: 1; height: 28px; background: #f3f4f6; border-radius: 6px; overflow: hidden;
+    }
+    .chart-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #4F46E5, #818cf8);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 8px;
+      font-size: 0.75rem; font-weight: 700; color: white;
+    }
+
+    .commission-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .commission-item label {
+      display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px;
+    }
+    .commission-item input {
+      width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.88rem;
+    }
+    .commission-item input:focus {
+      outline: none; border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+
+    /* ── Status badges ── */
+    .status-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    }
+    .status-badge.active   { background: #d1fae5; color: #065f46; }
+    .status-badge.occupied { background: #dbeafe; color: #1e40af; }
+    .status-badge.vacant   { background: #fef3c7; color: #92400e; }
+    .status-badge.submitted { background: #ede9fe; color: #5b21b6; }
+    .status-badge.review    { background: #fef3c7; color: #92400e; }
+    .status-badge.funded    { background: #d1fae5; color: #065f46; }
+    .status-badge.declined  { background: #fee2e2; color: #991b1b; }
+
+    .funding-status-select {
+      padding: 4px 8px; border-radius: 6px; border: 1px solid #d1d5db;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    }
+
+    /* ── Products ── */
+    .product-toggle-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.85rem 1rem;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+      transition: border-color 0.2s;
+    }
+    .product-toggle-row:hover { border-color: #4F46E5; }
+    .product-toggle-row .pt-name {
+      flex: 1; font-weight: 700; font-size: 0.9rem; color: #1e1b4b;
+    }
+    .product-toggle-row .pt-status {
+      font-size: 0.78rem; font-weight: 600; min-width: 28px;
+    }
+    .pt-status.on  { color: #059669; }
+    .pt-status.off { color: #dc2626; }
+
+    .toggle-switch {
+      position: relative; display: inline-block;
+      width: 44px; height: 24px; cursor: pointer; flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-switch .slider {
+      position: absolute; inset: 0; background: #d1d5db;
+      border-radius: 999px; transition: background 0.2s;
+    }
+    .toggle-switch input:checked + .slider { background: #4F46E5; }
+    .toggle-switch .slider::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; background: white;
+      border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .toggle-switch input:checked + .slider::after { transform: translateX(20px); }
+
+    /* ── Settings ── */
+    .settings-group {
+      margin-bottom: 1.25rem;
+    }
+    .settings-group label {
+      display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px;
+    }
+    .settings-group input[type="text"],
+    .settings-group input[type="email"] {
+      width: 100%; max-width: 400px;
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem;
+    }
+    .settings-group input:focus {
+      outline: none; border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+    .radio-group {
+      display: flex; gap: 1.5rem; margin-top: 4px;
+    }
+    .radio-group label {
+      display: inline-flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer;
+    }
+    .radio-group input[type="radio"] { accent-color: #4F46E5; }
+
+    .save-btn {
+      padding: 0.65rem 2rem;
+      background: #4F46E5;
+      color: white; border: none; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .save-btn:hover { background: #4338ca; }
+    .save-toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: #065f46; color: white;
+      padding: 0.75rem 1.5rem; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+    .save-toast.show { transform: translateY(0); opacity: 1; }
+
+    .section-title {
+      font-size: 1rem; font-weight: 800; color: #1e1b4b; margin-bottom: 0.75rem;
+    }
+    .section-sub-title {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #6b7280;
+      margin: 1.5rem 0 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    /* ── Tab Panels ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .admin-layout { grid-template-columns: 1fr; }
+      .admin-sidebar {
+        position: fixed; top: 0; left: -260px; width: 240px;
+        height: 100vh; z-index: 1000;
+        transition: left 0.3s;
+      }
+      .admin-sidebar.open { left: 0; }
+      .mobile-overlay {
+        display: none;
+        position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .mobile-overlay.show { display: block; }
+      .mobile-topbar {
+        display: flex !important;
+        align-items: center; gap: 12px;
+        background: #1e1b4b; color: white;
+        padding: 0.75rem 1rem;
+      }
+      .mobile-topbar button {
+        background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer;
+      }
+      .stats-grid, .rev-cards, .quick-actions { grid-template-columns: 1fr 1fr; }
+      .commission-grid { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 769px) {
+      .mobile-topbar { display: none; }
+      .mobile-overlay { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════ LOGIN SCREEN ════════════════════════════════════════ -->
+<div id="loginScreen" class="admin-login-wrap">
+  <div class="admin-login-card">
+    <div class="logo-area">
+      <div class="shield">&#128737;</div>
+      <h2>RentVerified Admin</h2>
+      <p>Platform Owner Dashboard</p>
+    </div>
+    <div id="loginError" class="admin-login-error">Invalid credentials. Please try again.</div>
+    <label for="loginEmail">Email</label>
+    <input type="email" id="loginEmail" placeholder="admin@rentverified.com" />
+    <label for="loginPass">Password</label>
+    <input type="password" id="loginPass" placeholder="Enter admin password" />
+    <button class="admin-login-btn" onclick="handleLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ DASHBOARD ════════════════════════════════════════ -->
+<div id="dashboardScreen" style="display:none;">
+
+  <!-- Mobile top bar -->
+  <div class="mobile-topbar">
+    <button onclick="toggleSidebar()">&#9776;</button>
+    <span style="font-weight:700;">RentVerified Admin</span>
+  </div>
+  <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-brand">RentVerified Platform Admin</div>
+      <div class="admin-sidebar-links">
+        <a class="admin-link active" data-tab="dashboard" onclick="switchTab('dashboard')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 8.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 018.25 20.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z"/></svg>
+          Dashboard
+        </a>
+        <a class="admin-link" data-tab="users" onclick="switchTab('users')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          Users
+        </a>
+        <a class="admin-link" data-tab="revenue" onclick="switchTab('revenue')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Revenue
+        </a>
+        <a class="admin-link" data-tab="properties" onclick="switchTab('properties')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 3v18m4.5-18v18m4.5-18v18m4.5-18v18M6 6.75h.75m-.75 3h.75m-.75 3h.75m3-6.75h.75m-.75 3h.75m-.75 3h.75m3-6.75h.75m-.75 3h.75m-.75 3h.75"/></svg>
+          Properties
+        </a>
+        <a class="admin-link" data-tab="funding" onclick="switchTab('funding')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
+          Funding
+        </a>
+        <a class="admin-link" data-tab="products" onclick="switchTab('products')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+          Products
+        </a>
+        <a class="admin-link" data-tab="settings" onclick="switchTab('settings')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Settings
+        </a>
+      </div>
+      <a class="admin-link signout" onclick="handleSignOut()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+        Sign Out
+      </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+
+      <!-- ──────── DASHBOARD TAB ──────── -->
+      <div class="tab-panel active" id="tab-dashboard">
+        <h1 class="admin-page-title">Platform Overview</h1>
+        <p class="admin-page-sub">Welcome back, Admin. Here's your platform at a glance.</p>
+
+        <div class="stats-grid" id="overviewStats">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="quick-actions">
+          <div class="quick-action" onclick="switchTab('users')">
+            <div class="qa-icon">&#128101;</div>
+            <div class="qa-label">View All Users</div>
+          </div>
+          <div class="quick-action" onclick="switchTab('revenue')">
+            <div class="qa-icon">&#128200;</div>
+            <div class="qa-label">Revenue Report</div>
+          </div>
+          <div class="quick-action" onclick="switchTab('funding')">
+            <div class="qa-icon">&#128176;</div>
+            <div class="qa-label">Funding Applications</div>
+          </div>
+          <div class="quick-action" onclick="switchTab('products')">
+            <div class="qa-icon">&#128230;</div>
+            <div class="qa-label">Product Settings</div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="section-title">Recent Activity</div>
+          <div class="activity-feed" id="activityFeed">
+            <div class="af-item"><div class="af-dot green"></div><div><div class="af-text">New landlord signup: Sanders PM</div><div class="af-time">2 hours ago</div></div></div>
+            <div class="af-item"><div class="af-dot purple"></div><div><div class="af-text">Funding application: Joe's Pizza &mdash; $50,000 Working Capital</div><div class="af-time">5 hours ago</div></div></div>
+            <div class="af-item"><div class="af-dot blue"></div><div><div class="af-text">New tenant: Jane Doe &mdash; 123 Maple St</div><div class="af-time">1 day ago</div></div></div>
+            <div class="af-item"><div class="af-dot amber"></div><div><div class="af-text">Deposit bond enrolled: Unit 4B &mdash; $2.55/mo commission</div><div class="af-time">1 day ago</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── USERS TAB ──────── -->
+      <div class="tab-panel" id="tab-users">
+        <h1 class="admin-page-title">Users</h1>
+        <p class="admin-page-sub">All landlords and tenants on the platform.</p>
+
+        <div class="toggle-tabs">
+          <button class="toggle-tab active" onclick="switchUserView('landlords', this)">Landlords</button>
+          <button class="toggle-tab" onclick="switchUserView('tenants', this)">Tenants</button>
+        </div>
+
+        <div id="landlordsList" class="admin-card">
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="landlordsTable">
+              <thead>
+                <tr><th>Company</th><th>Email</th><th>Properties</th><th>Products Enabled</th><th>Revenue/Mo</th><th>Joined</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="landlordsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tenantsList" class="admin-card" style="display:none;">
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="tenantsTable">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Property</th><th>Landlord</th><th>Products</th><th>Joined</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="tenantsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── REVENUE TAB ──────── -->
+      <div class="tab-panel" id="tab-revenue">
+        <h1 class="admin-page-title">Revenue</h1>
+        <p class="admin-page-sub">Affiliate earnings and commission tracking.</p>
+
+        <div class="rev-cards">
+          <div class="rev-card">
+            <div class="rev-amount">$3,280</div>
+            <div class="rev-label">Total Affiliate Revenue (this month)</div>
+          </div>
+          <div class="rev-card">
+            <div class="rev-amount">$510</div>
+            <div class="rev-label">Deposit Bond Commissions</div>
+          </div>
+          <div class="rev-card">
+            <div class="rev-amount">$890</div>
+            <div class="rev-label">Insurance Commissions</div>
+          </div>
+          <div class="rev-card">
+            <div class="rev-amount">$240</div>
+            <div class="rev-label">Credit Builder</div>
+          </div>
+          <div class="rev-card">
+            <div class="rev-amount">$1,150</div>
+            <div class="rev-label">Utility/Internet Setup</div>
+          </div>
+          <div class="rev-card">
+            <div class="rev-amount">$490</div>
+            <div class="rev-label">Business Funding Referrals</div>
+          </div>
+        </div>
+
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div class="section-title">Monthly Revenue Trend</div>
+          <div style="padding: 0.5rem 0;">
+            <div class="chart-bar-row">
+              <div class="chart-bar-label">Jan</div>
+              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:64%;">$2,100</div></div>
+            </div>
+            <div class="chart-bar-row">
+              <div class="chart-bar-label">Feb</div>
+              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:85%;">$2,800</div></div>
+            </div>
+            <div class="chart-bar-row">
+              <div class="chart-bar-label">Mar</div>
+              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:100%;">$3,280</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="section-title">Commission Rate Settings</div>
+          <p style="font-size:0.82rem;color:#6b7280;margin-bottom:1rem;">Adjust commission rates for affiliate products.</p>
+          <div class="commission-grid" id="commissionGrid">
+            <div class="commission-item">
+              <label>Deposit Bond Commission %</label>
+              <input type="number" id="cr_deposit_bond" value="15" step="0.5" />
+            </div>
+            <div class="commission-item">
+              <label>Insurance Commission $/mo</label>
+              <input type="number" id="cr_insurance" value="3" step="0.25" />
+            </div>
+            <div class="commission-item">
+              <label>Credit Builder Commission $/mo</label>
+              <input type="number" id="cr_credit_builder" value="1.50" step="0.25" />
+            </div>
+            <div class="commission-item">
+              <label>Utility Setup Referral $</label>
+              <input type="number" id="cr_utility" value="75" step="5" />
+            </div>
+            <div class="commission-item">
+              <label>Business Loan Referral $</label>
+              <input type="number" id="cr_business_loan" value="500" step="25" />
+            </div>
+          </div>
+          <div style="margin-top:1rem;">
+            <button class="save-btn" onclick="saveCommissionRates()">Save Commission Rates</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── PROPERTIES TAB ──────── -->
+      <div class="tab-panel" id="tab-properties">
+        <h1 class="admin-page-title">Properties</h1>
+        <p class="admin-page-sub">All listings across the platform.</p>
+
+        <div class="admin-card">
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="propertiesTable">
+              <thead>
+                <tr><th>Address</th><th>Landlord</th><th>Type</th><th>Rent</th><th>Status</th><th>Products Enabled</th></tr>
+              </thead>
+              <tbody id="propertiesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── FUNDING TAB ──────── -->
+      <div class="tab-panel" id="tab-funding">
+        <h1 class="admin-page-title">Funding Applications</h1>
+        <p class="admin-page-sub">All business funding applications across the platform.</p>
+
+        <div class="admin-card">
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="fundingTable">
+              <thead>
+                <tr><th>Business</th><th>Amount</th><th>Purpose</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="fundingBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── PRODUCTS TAB ──────── -->
+      <div class="tab-panel" id="tab-products">
+        <h1 class="admin-page-title">Products</h1>
+        <p class="admin-page-sub">Control which products are available platform-wide.</p>
+
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div class="section-title">Platform Product Availability</div>
+          <p style="font-size:0.82rem;color:#6b7280;margin-bottom:1rem;">Disabling a product removes it from the entire platform. No landlord can enable a disabled product.</p>
+          <div id="productToggles"></div>
+          <div style="margin-top:1rem;">
+            <button class="save-btn" onclick="saveProducts()">Save Product Settings</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="section-title">Partner Management</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Partner</th><th>Product</th><th>Commission</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>GoKapital</td><td>Business Loans</td><td>$200-5,000/deal</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
+                <tr><td>Clarify Capital</td><td>Working Capital</td><td>$200-2,000/deal</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
+                <tr><td>Jetty</td><td>Deposit Bonds</td><td>15%</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
+                <tr><td>Sure</td><td>Renters Insurance</td><td>$2-5/mo</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
+                <tr><td>Boom</td><td>Credit Builder</td><td>$1-2/mo</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
+                <tr><td>Flex</td><td>Rent Flexibility</td><td>Referral</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── SETTINGS TAB ──────── -->
+      <div class="tab-panel" id="tab-settings">
+        <h1 class="admin-page-title">Settings</h1>
+        <p class="admin-page-sub">Platform configuration and preferences.</p>
+
+        <div class="admin-card">
+          <div class="settings-group">
+            <label for="settPlatformName">Platform Name</label>
+            <input type="text" id="settPlatformName" value="RentVerified" />
+          </div>
+          <div class="settings-group">
+            <label for="settAdminEmail">Admin Email</label>
+            <input type="email" id="settAdminEmail" value="admin@rentverified.com" />
+          </div>
+          <div class="settings-group">
+            <label for="settSupportEmail">Support Email</label>
+            <input type="email" id="settSupportEmail" value="support@rentverified.com" />
+          </div>
+          <div class="settings-group">
+            <label>Default Card Fee Policy</label>
+            <div class="radio-group">
+              <label><input type="radio" name="feePolicy" value="tenant" checked /> Tenant pays</label>
+              <label><input type="radio" name="feePolicy" value="platform" /> Platform absorbs</label>
+            </div>
+          </div>
+          <div class="settings-group">
+            <label>Maintenance Mode</label>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+              <label class="toggle-switch">
+                <input type="checkbox" id="settMaintenance" />
+                <span class="slider"></span>
+              </label>
+              <span style="font-size:0.82rem;color:#6b7280;" id="maintenanceLabel">Off</span>
+            </div>
+            <p style="font-size:0.78rem;color:#9ca3af;margin-top:6px;">When enabled, a "Platform under maintenance" banner appears on all pages.</p>
+          </div>
+          <div style="margin-top:1.5rem;">
+            <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Save toast -->
+<div class="save-toast" id="saveToast">Settings saved successfully.</div>
+
+<!-- Supabase Backend -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="twilio-integration.js"></script>
+
+<script>
+/* ═══════════════════════ CONSTANTS & AUTH ═══════════════════════ */
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const errorEl = document.getElementById('loginError');
+  errorEl.style.display = 'none';
+
+  // Try Supabase Auth first
+  if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
+    try {
+      const sb = getSupabase();
+      const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (authError) {
+        console.warn('Supabase sign-in error:', authError.message);
+      } else if (authData?.user) {
+        // Query profile directly (bypasses RVAuth which may have RLS issues)
+        const { data: profile, error: profileError } = await sb.from('profiles')
+          .select('role, first_name, last_name, company, plan')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        console.log('Profile query result:', profile, 'Error:', profileError);
+
+        // Check role from profile, or from user metadata as fallback
+        const role = profile?.role || authData.user.user_metadata?.role;
+
+        if (role === 'admin') {
+          localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now(), supabase: true, userId: authData.user.id }));
+          showDashboard();
+          return;
+        } else {
+          errorEl.textContent = 'Access denied. Admin role required. (Got role: ' + (role || 'none') + ')';
+          errorEl.style.display = 'block';
+          return;
+        }
+      }
+    } catch(e) {
+      console.warn('Supabase auth failed, trying fallback:', e);
+    }
+  }
+
+  // Fallback: localStorage hardcoded (for offline/dev testing only)
+  if (email === 'admin@rentverified.com' && pass === 'admin123') {
+    localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now() }));
+    showDashboard();
+  } else {
+    errorEl.textContent = 'Invalid credentials. Please try again.';
+    errorEl.style.display = 'block';
+  }
+}
+
+async function handleSignOut() {
+  if (typeof RVAuth !== 'undefined') {
+    try { await RVAuth.signOut(); } catch(e) {}
+  }
+  localStorage.removeItem('rv_admin_auth');
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = '';
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = '';
+  loadOverviewStats();
+  loadLandlords();
+  loadTenants();
+  loadProperties();
+  loadFunding();
+  loadProducts();
+  loadCommissionRates();
+  loadSettings();
+}
+
+/* Auto-login if Supabase session or localStorage session exists */
+(async function() {
+  // Check Supabase session first
+  if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
+    try {
+      const sb = getSupabase();
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const { data: profile } = await sb.from('profiles')
+          .select('role, email, first_name')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        const role = profile?.role || session.user.user_metadata?.role;
+        if (role === 'admin') {
+          localStorage.setItem('rv_admin_auth', JSON.stringify({ email: profile?.email || session.user.email, ts: Date.now(), supabase: true }));
+          showDashboard();
+          return;
+        }
+      }
+    } catch(e) { console.warn('Auto-login check failed:', e); }
+  }
+  // Fallback: localStorage session
+  const auth = localStorage.getItem('rv_admin_auth');
+  if (auth) showDashboard();
+})();
+
+/* Allow Enter key on login */
+document.getElementById('loginPass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') handleLogin();
+});
+
+/* ═══════════════════════ TAB SWITCHING ═══════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.admin-link[data-tab]').forEach(l => l.classList.remove('active'));
+  const link = document.querySelector('.admin-link[data-tab="' + tab + '"]');
+  if (link) link.classList.add('active');
+  // close mobile sidebar
+  document.getElementById('adminSidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('show');
+}
+
+function toggleSidebar() {
+  document.getElementById('adminSidebar').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('show');
+}
+
+/* ═══════════════════════ USERS ═══════════════════════ */
+function switchUserView(view, btn) {
+  document.querySelectorAll('.toggle-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('landlordsList').style.display = view === 'landlords' ? '' : 'none';
+  document.getElementById('tenantsList').style.display = view === 'tenants' ? '' : 'none';
+}
+
+const actionButtons = '<button class="tbl-btn view">View</button><button class="tbl-btn edit">Edit</button><button class="tbl-btn disable">Disable</button>';
+
+function loadLandlords() {
+  const accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+  const body = document.getElementById('landlordsBody');
+  if (accts.length) {
+    body.innerHTML = accts.map(a => `<tr>
+      <td>${a.company || a.companyName || 'N/A'}</td>
+      <td>${a.email || ''}</td>
+      <td>${a.properties || 0}</td>
+      <td>${a.productsEnabled || 0}</td>
+      <td>$${a.revenueMo || 0}</td>
+      <td>${a.joined || a.created || 'N/A'}</td>
+      <td class="actions-cell">${actionButtons}</td>
+    </tr>`).join('');
+  } else {
+    body.innerHTML = `
+      <tr><td>Sanders PM</td><td>admin@sanderspm.com</td><td>12</td><td>8</td><td>$1,240</td><td>Jan 2025</td><td class="actions-cell">${actionButtons}</td></tr>
+      <tr><td>Maple Realty</td><td>info@maplerealty.com</td><td>6</td><td>5</td><td>$680</td><td>Mar 2025</td><td class="actions-cell">${actionButtons}</td></tr>
+      <tr><td>Urban Nest LLC</td><td>ops@urbannest.io</td><td>24</td><td>11</td><td>$3,100</td><td>Nov 2024</td><td class="actions-cell">${actionButtons}</td></tr>
+      <tr><td>Crest Living</td><td>hello@crestliving.com</td><td>5</td><td>4</td><td>$410</td><td>Jun 2025</td><td class="actions-cell">${actionButtons}</td></tr>`;
+  }
+}
+
+function loadTenants() {
+  const accts = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
+  const body = document.getElementById('tenantsBody');
+  if (accts.length) {
+    body.innerHTML = accts.map(a => `<tr>
+      <td>${a.name || (a.firstName || '') + ' ' + (a.lastName || '')}</td>
+      <td>${a.email || ''}</td>
+      <td>${a.property || 'N/A'}</td>
+      <td>${a.landlord || 'N/A'}</td>
+      <td>${a.products || 0}</td>
+      <td>${a.joined || a.created || 'N/A'}</td>
+      <td class="actions-cell">${actionButtons}</td>
+    </tr>`).join('');
+  } else {
+    body.innerHTML = `
+      <tr><td>Jane Doe</td><td>jane@email.com</td><td>123 Maple St</td><td>Sanders PM</td><td>3</td><td>Feb 2025</td><td class="actions-cell">${actionButtons}</td></tr>
+      <tr><td>Marcus Lee</td><td>marcus.lee@email.com</td><td>456 Oak Ave #2B</td><td>Urban Nest LLC</td><td>5</td><td>Jan 2025</td><td class="actions-cell">${actionButtons}</td></tr>
+      <tr><td>Aisha Patel</td><td>aisha.p@email.com</td><td>789 Pine Rd</td><td>Maple Realty</td><td>2</td><td>Apr 2025</td><td class="actions-cell">${actionButtons}</td></tr>
+      <tr><td>Carlos Rivera</td><td>c.rivera@email.com</td><td>12 Elm St #1A</td><td>Crest Living</td><td>4</td><td>May 2025</td><td class="actions-cell">${actionButtons}</td></tr>`;
+  }
+}
+
+/* ═══════════════════════ OVERVIEW STATS ═══════════════════════ */
+function loadOverviewStats() {
+  const landlords = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+  const tenants   = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
+  const props     = JSON.parse(localStorage.getItem('rv_properties') || '[]');
+  const funding   = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+
+  const stats = [
+    { label: 'Total Landlords',    value: landlords.length || 4,  icon: 'purple', emoji: '&#127970;' },
+    { label: 'Total Tenants',      value: tenants.length || 23,   icon: 'blue',   emoji: '&#128101;' },
+    { label: 'Total Properties',   value: props.length || 47,     icon: 'green',  emoji: '&#127968;' },
+    { label: 'Active Leases',      value: 89,                     icon: 'cyan',   emoji: '&#128196;' },
+    { label: 'Monthly Revenue',    value: '$12,450',              icon: 'green',  emoji: '&#128176;' },
+    { label: 'Affiliate Earnings', value: '$3,280',               icon: 'amber',  emoji: '&#128200;' },
+    { label: 'Funding Apps',       value: funding.length || 6,    icon: 'pink',   emoji: '&#128179;' },
+  ];
+
+  document.getElementById('overviewStats').innerHTML = stats.map(s => `
+    <div class="stat-card">
+      <div class="stat-icon ${s.icon}">${s.emoji}</div>
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════ PROPERTIES ═══════════════════════ */
+function loadProperties() {
+  const props = JSON.parse(localStorage.getItem('rv_properties') || '[]');
+  const body = document.getElementById('propertiesBody');
+  if (props.length) {
+    body.innerHTML = props.map(p => `<tr>
+      <td>${p.address || p.name || 'N/A'}</td>
+      <td>${p.landlord || 'N/A'}</td>
+      <td>${p.type || 'Residential'}</td>
+      <td>${p.rent ? '$' + p.rent : 'N/A'}</td>
+      <td><span class="status-badge ${(p.status || 'occupied').toLowerCase()}">${p.status || 'Occupied'}</span></td>
+      <td>${p.productsEnabled || 0}</td>
+    </tr>`).join('');
+  } else {
+    body.innerHTML = `
+      <tr><td>123 Maple St</td><td>Sanders PM</td><td>Single Family</td><td>$1,800</td><td><span class="status-badge occupied">Occupied</span></td><td>6</td></tr>
+      <tr><td>456 Oak Ave #2B</td><td>Urban Nest LLC</td><td>Apartment</td><td>$1,450</td><td><span class="status-badge occupied">Occupied</span></td><td>8</td></tr>
+      <tr><td>789 Pine Rd</td><td>Maple Realty</td><td>Townhouse</td><td>$2,200</td><td><span class="status-badge vacant">Vacant</span></td><td>4</td></tr>
+      <tr><td>12 Elm St #1A</td><td>Crest Living</td><td>Apartment</td><td>$1,100</td><td><span class="status-badge occupied">Occupied</span></td><td>5</td></tr>
+      <tr><td>55 Birch Ln</td><td>Sanders PM</td><td>Duplex</td><td>$1,650</td><td><span class="status-badge occupied">Occupied</span></td><td>7</td></tr>`;
+  }
+}
+
+/* ═══════════════════════ FUNDING ═══════════════════════ */
+function loadFunding() {
+  let apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  const body = document.getElementById('fundingBody');
+  if (!apps.length) {
+    apps = [
+      { business: "Joe's Pizza", amount: '$50,000', purpose: 'Working Capital', status: 'Submitted', date: '2025-03-15' },
+      { business: 'Sunny Daycare', amount: '$25,000', purpose: 'Equipment Purchase', status: 'In Review', date: '2025-03-12' },
+      { business: 'Urban Threads', amount: '$100,000', purpose: 'Expansion', status: 'Funded', date: '2025-03-08' },
+      { business: 'Quick Auto', amount: '$75,000', purpose: 'Inventory', status: 'Submitted', date: '2025-03-14' },
+      { business: 'Fresh Bites Catering', amount: '$30,000', purpose: 'Marketing', status: 'Declined', date: '2025-02-28' },
+      { business: 'Green Lawn Co', amount: '$15,000', purpose: 'Equipment', status: 'In Review', date: '2025-03-10' },
+    ];
+  }
+  body.innerHTML = apps.map((a, i) => {
+    const statusClass = (a.status || 'Submitted').toLowerCase().replace(/\s+/g, '');
+    const statusMap = { submitted: 'submitted', inreview: 'review', funded: 'funded', declined: 'declined' };
+    return `<tr>
+      <td>${a.business || a.businessName || 'N/A'}</td>
+      <td>${a.amount || 'N/A'}</td>
+      <td>${a.purpose || 'N/A'}</td>
+      <td>
+        <select class="funding-status-select" onchange="updateFundingStatus(${i}, this.value)" data-idx="${i}">
+          <option value="Submitted" ${a.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
+          <option value="In Review" ${a.status === 'In Review' ? 'selected' : ''}>In Review</option>
+          <option value="Funded" ${a.status === 'Funded' ? 'selected' : ''}>Funded</option>
+          <option value="Declined" ${a.status === 'Declined' ? 'selected' : ''}>Declined</option>
+        </select>
+      </td>
+      <td>${a.date || 'N/A'}</td>
+      <td class="actions-cell"><button class="tbl-btn view">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateFundingStatus(idx, newStatus) {
+  let apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  const demoApps = [
+    { business: "Joe's Pizza", amount: '$50,000', purpose: 'Working Capital', status: 'Submitted', date: '2025-03-15' },
+    { business: 'Sunny Daycare', amount: '$25,000', purpose: 'Equipment Purchase', status: 'In Review', date: '2025-03-12' },
+    { business: 'Urban Threads', amount: '$100,000', purpose: 'Expansion', status: 'Funded', date: '2025-03-08' },
+    { business: 'Quick Auto', amount: '$75,000', purpose: 'Inventory', status: 'Submitted', date: '2025-03-14' },
+    { business: 'Fresh Bites Catering', amount: '$30,000', purpose: 'Marketing', status: 'Declined', date: '2025-02-28' },
+    { business: 'Green Lawn Co', amount: '$15,000', purpose: 'Equipment', status: 'In Review', date: '2025-03-10' },
+  ];
+  if (!apps.length) apps = demoApps;
+  if (apps[idx]) {
+    apps[idx].status = newStatus;
+    localStorage.setItem('rv_funding_applications', JSON.stringify(apps));
+    showToast('Funding status updated.');
+  }
+}
+
+/* ═══════════════════════ PRODUCTS ═══════════════════════ */
+const PRODUCTS = [
+  'Deposit Bonds', 'Deposit-Free', 'Renters Insurance', 'Rent Guarantee',
+  'Lease Guarantee', 'Credit Builder', 'Rent Flexibility', 'Utility Setup',
+  'Internet Setup', 'Moving Services', 'Business Loans', 'SBA Loans', 'MCA'
+];
+
+function loadProducts() {
+  let saved = JSON.parse(localStorage.getItem('rv_admin_products') || '{}');
+  const container = document.getElementById('productToggles');
+  container.innerHTML = PRODUCTS.map(p => {
+    const key = p.toLowerCase().replace(/[\s\-]+/g, '_');
+    const on = saved[key] !== undefined ? saved[key] : true;
+    return `<div class="product-toggle-row">
+      <span class="pt-name">${p}</span>
+      <span class="pt-status ${on ? 'on' : 'off'}" id="pts_${key}">${on ? 'ON' : 'OFF'}</span>
+      <label class="toggle-switch">
+        <input type="checkbox" data-product="${key}" ${on ? 'checked' : ''} onchange="toggleProductLabel('${key}', this.checked)" />
+        <span class="slider"></span>
+      </label>
+    </div>`;
+  }).join('');
+}
+
+function toggleProductLabel(key, isOn) {
+  const label = document.getElementById('pts_' + key);
+  label.textContent = isOn ? 'ON' : 'OFF';
+  label.className = 'pt-status ' + (isOn ? 'on' : 'off');
+}
+
+function saveProducts() {
+  const obj = {};
+  document.querySelectorAll('#productToggles input[type="checkbox"]').forEach(cb => {
+    obj[cb.dataset.product] = cb.checked;
+  });
+  localStorage.setItem('rv_admin_products', JSON.stringify(obj));
+  showToast('Product settings saved.');
+}
+
+/* ═══════════════════════ COMMISSION RATES ═══════════════════════ */
+function loadCommissionRates() {
+  const saved = JSON.parse(localStorage.getItem('rv_admin_commission_rates') || '{}');
+  if (saved.deposit_bond !== undefined) document.getElementById('cr_deposit_bond').value = saved.deposit_bond;
+  if (saved.insurance !== undefined) document.getElementById('cr_insurance').value = saved.insurance;
+  if (saved.credit_builder !== undefined) document.getElementById('cr_credit_builder').value = saved.credit_builder;
+  if (saved.utility !== undefined) document.getElementById('cr_utility').value = saved.utility;
+  if (saved.business_loan !== undefined) document.getElementById('cr_business_loan').value = saved.business_loan;
+}
+
+function saveCommissionRates() {
+  const rates = {
+    deposit_bond:  parseFloat(document.getElementById('cr_deposit_bond').value),
+    insurance:     parseFloat(document.getElementById('cr_insurance').value),
+    credit_builder: parseFloat(document.getElementById('cr_credit_builder').value),
+    utility:       parseFloat(document.getElementById('cr_utility').value),
+    business_loan: parseFloat(document.getElementById('cr_business_loan').value),
+  };
+  localStorage.setItem('rv_admin_commission_rates', JSON.stringify(rates));
+  showToast('Commission rates saved.');
+}
+
+/* ═══════════════════════ SETTINGS ═══════════════════════ */
+function loadSettings() {
+  const saved = JSON.parse(localStorage.getItem('rv_admin_settings') || '{}');
+  if (saved.platformName) document.getElementById('settPlatformName').value = saved.platformName;
+  if (saved.adminEmail) document.getElementById('settAdminEmail').value = saved.adminEmail;
+  if (saved.supportEmail) document.getElementById('settSupportEmail').value = saved.supportEmail;
+  if (saved.feePolicy) {
+    document.querySelectorAll('input[name="feePolicy"]').forEach(r => { r.checked = r.value === saved.feePolicy; });
+  }
+  if (saved.maintenance) {
+    document.getElementById('settMaintenance').checked = true;
+    document.getElementById('maintenanceLabel').textContent = 'On';
+  }
+  document.getElementById('settMaintenance').addEventListener('change', function() {
+    document.getElementById('maintenanceLabel').textContent = this.checked ? 'On' : 'Off';
+  });
+}
+
+function saveSettings() {
+  const feePolicy = document.querySelector('input[name="feePolicy"]:checked').value;
+  const settings = {
+    platformName: document.getElementById('settPlatformName').value,
+    adminEmail:   document.getElementById('settAdminEmail').value,
+    supportEmail: document.getElementById('settSupportEmail').value,
+    feePolicy:    feePolicy,
+    maintenance:  document.getElementById('settMaintenance').checked,
+  };
+  localStorage.setItem('rv_admin_settings', JSON.stringify(settings));
+  showToast('Settings saved.');
+}
+
+/* ═══════════════════════ TOAST ═══════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('saveToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
