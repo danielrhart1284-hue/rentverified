@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Platform Admin Dashboard | RentVerified</title>
+  <title>Site Operations | RentVerified Admin</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     /* ── Login Screen ── */
@@ -165,7 +165,7 @@
 
     .quick-actions {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
@@ -210,13 +210,12 @@
     .af-dot.blue   { background: #3b82f6; }
     .af-dot.amber  { background: #f59e0b; }
     .af-dot.purple { background: #8b5cf6; }
+    .af-dot.red    { background: #ef4444; }
     .af-text { font-size: 0.88rem; color: #374151; }
     .af-time { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
 
     /* ── Tables ── */
-    .admin-table-wrap {
-      overflow-x: auto;
-    }
+    .admin-table-wrap { overflow-x: auto; }
     .admin-table {
       width: 100%;
       border-collapse: collapse;
@@ -255,6 +254,7 @@
     .tbl-btn.view  { background: #ede9fe; color: #4F46E5; }
     .tbl-btn.edit  { background: #dbeafe; color: #2563eb; }
     .tbl-btn.disable { background: #fee2e2; color: #dc2626; }
+    .tbl-btn.run   { background: #d1fae5; color: #059669; }
 
     .toggle-tabs {
       display: inline-flex;
@@ -334,12 +334,16 @@
       font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
     }
     .status-badge.active   { background: #d1fae5; color: #065f46; }
+    .status-badge.ok       { background: #d1fae5; color: #065f46; }
+    .status-badge.warning  { background: #fef3c7; color: #92400e; }
+    .status-badge.error    { background: #fee2e2; color: #991b1b; }
     .status-badge.occupied { background: #dbeafe; color: #1e40af; }
     .status-badge.vacant   { background: #fef3c7; color: #92400e; }
     .status-badge.submitted { background: #ede9fe; color: #5b21b6; }
     .status-badge.review    { background: #fef3c7; color: #92400e; }
     .status-badge.funded    { background: #d1fae5; color: #065f46; }
     .status-badge.declined  { background: #fee2e2; color: #991b1b; }
+    .status-badge.pending   { background: #fef3c7; color: #92400e; }
 
     .funding-status-select {
       padding: 4px 8px; border-radius: 6px; border: 1px solid #d1d5db;
@@ -438,6 +442,108 @@
       border-bottom: 2px solid #e5e7eb;
     }
 
+    /* ── Site Health ── */
+    .health-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .health-card {
+      background: white; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 1.25rem; text-align: center; position: relative; overflow: hidden;
+    }
+    .health-card .hc-value { font-size: 2rem; font-weight: 900; }
+    .health-card .hc-label { font-size: 0.78rem; color: #6b7280; font-weight: 600; margin-top: 4px; }
+    .health-card.good .hc-value { color: #059669; }
+    .health-card.warn .hc-value { color: #d97706; }
+    .health-card.bad .hc-value { color: #dc2626; }
+    .health-card .hc-bar {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+    }
+    .health-card.good .hc-bar { background: #10b981; }
+    .health-card.warn .hc-bar { background: #f59e0b; }
+    .health-card.bad .hc-bar { background: #ef4444; }
+
+    .scan-controls {
+      display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .scan-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
+    }
+    .scan-btn.primary { background: #4F46E5; color: white; }
+    .scan-btn.primary:hover { background: #4338ca; }
+    .scan-btn.secondary { background: white; color: #4F46E5; border-color: #4F46E5; }
+    .scan-btn.secondary:hover { background: #ede9fe; }
+    .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .scan-btn .spinner {
+      width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%; display: none;
+      animation: spin 0.8s linear infinite;
+    }
+    .scan-btn.loading .spinner { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .scan-progress {
+      background: #f3f4f6; border-radius: 8px; padding: 1rem;
+      margin-bottom: 1rem; display: none;
+    }
+    .scan-progress.active { display: block; }
+    .scan-progress .sp-bar-wrap {
+      background: #e5e7eb; border-radius: 4px; height: 8px; overflow: hidden; margin-top: 8px;
+    }
+    .scan-progress .sp-bar {
+      height: 100%; background: linear-gradient(90deg, #4F46E5, #818cf8);
+      border-radius: 4px; transition: width 0.3s;
+      width: 0%;
+    }
+    .scan-progress .sp-text {
+      font-size: 0.82rem; color: #374151; font-weight: 600;
+    }
+    .scan-progress .sp-detail {
+      font-size: 0.75rem; color: #6b7280; margin-top: 4px;
+    }
+
+    .results-log {
+      max-height: 400px; overflow-y: auto;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 0.78rem;
+      background: #1e1b4b; color: #a5b4fc;
+      border-radius: 10px; padding: 1rem;
+      line-height: 1.6;
+    }
+    .results-log .log-ok { color: #34d399; }
+    .results-log .log-warn { color: #fbbf24; }
+    .results-log .log-error { color: #f87171; }
+    .results-log .log-info { color: #93c5fd; }
+
+    /* ── Alerts ── */
+    .alert-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 1rem;
+      background: white; border: 1px solid #e5e7eb; border-radius: 10px;
+      margin-bottom: 0.6rem;
+      transition: border-color 0.2s;
+    }
+    .alert-item:hover { border-color: #4F46E5; }
+    .alert-item.unread { border-left: 3px solid #4F46E5; }
+    .alert-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .alert-icon.info    { background: #dbeafe; color: #2563eb; }
+    .alert-icon.success { background: #d1fae5; color: #059669; }
+    .alert-icon.warning { background: #fef3c7; color: #d97706; }
+    .alert-icon.danger  { background: #fee2e2; color: #dc2626; }
+    .alert-content { flex: 1; }
+    .alert-title { font-size: 0.88rem; font-weight: 700; color: #1e1b4b; }
+    .alert-desc { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+    .alert-time { font-size: 0.72rem; color: #9ca3af; margin-top: 4px; }
+
     /* ── Tab Panels ── */
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
@@ -466,7 +572,7 @@
       .mobile-topbar button {
         background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer;
       }
-      .stats-grid, .rev-cards, .quick-actions { grid-template-columns: 1fr 1fr; }
+      .stats-grid, .rev-cards, .quick-actions, .health-summary { grid-template-columns: 1fr 1fr; }
       .commission-grid { grid-template-columns: 1fr; }
     }
     @media (min-width: 769px) {
@@ -483,7 +589,7 @@
     <div class="logo-area">
       <div class="shield">&#128737;</div>
       <h2>RentVerified Admin</h2>
-      <p>Platform Owner Dashboard</p>
+      <p>Site Operations Dashboard</p>
     </div>
     <div id="loginError" class="admin-login-error">Invalid credentials. Please try again.</div>
     <label for="loginEmail">Email</label>
@@ -507,11 +613,20 @@
   <div class="admin-layout">
     <!-- Sidebar -->
     <aside class="admin-sidebar" id="adminSidebar">
-      <div class="admin-sidebar-brand">RentVerified Platform Admin</div>
+      <div class="admin-sidebar-brand">RentVerified Site Ops</div>
       <div class="admin-sidebar-links">
         <a class="admin-link active" data-tab="dashboard" onclick="switchTab('dashboard')">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 8.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 018.25 20.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z"/></svg>
           Dashboard
+        </a>
+        <a class="admin-link" data-tab="sitehealth" onclick="switchTab('sitehealth')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+          Site Health
+        </a>
+        <a class="admin-link" data-tab="alerts" onclick="switchTab('alerts')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+          Alerts
+          <span id="alertBadge" style="background:#ef4444;color:white;font-size:0.65rem;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:auto;display:none;">0</span>
         </a>
         <a class="admin-link" data-tab="users" onclick="switchTab('users')">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
@@ -520,10 +635,6 @@
         <a class="admin-link" data-tab="revenue" onclick="switchTab('revenue')">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           Revenue
-        </a>
-        <a class="admin-link" data-tab="properties" onclick="switchTab('properties')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 3v18m4.5-18v18m4.5-18v18m4.5-18v18M6 6.75h.75m-.75 3h.75m-.75 3h.75m3-6.75h.75m-.75 3h.75m-.75 3h.75m3-6.75h.75m-.75 3h.75m-.75 3h.75"/></svg>
-          Properties
         </a>
         <a class="admin-link" data-tab="funding" onclick="switchTab('funding')">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
@@ -549,17 +660,23 @@
 
       <!-- ──────── DASHBOARD TAB ──────── -->
       <div class="tab-panel active" id="tab-dashboard">
-        <h1 class="admin-page-title">Platform Overview</h1>
-        <p class="admin-page-sub">Welcome back, Admin. Here's your platform at a glance.</p>
+        <h1 class="admin-page-title">Site Operations</h1>
+        <p class="admin-page-sub">Welcome back, Daniel. Here's your site at a glance.</p>
 
-        <div class="stats-grid" id="overviewStats">
-          <!-- filled by JS -->
-        </div>
+        <div class="stats-grid" id="overviewStats"></div>
 
         <div class="quick-actions">
+          <div class="quick-action" onclick="switchTab('sitehealth')">
+            <div class="qa-icon">&#128737;</div>
+            <div class="qa-label">Run Site Scan</div>
+          </div>
+          <div class="quick-action" onclick="switchTab('alerts')">
+            <div class="qa-icon">&#128276;</div>
+            <div class="qa-label">View Alerts</div>
+          </div>
           <div class="quick-action" onclick="switchTab('users')">
             <div class="qa-icon">&#128101;</div>
-            <div class="qa-label">View All Users</div>
+            <div class="qa-label">Manage Users</div>
           </div>
           <div class="quick-action" onclick="switchTab('revenue')">
             <div class="qa-icon">&#128200;</div>
@@ -567,23 +684,147 @@
           </div>
           <div class="quick-action" onclick="switchTab('funding')">
             <div class="qa-icon">&#128176;</div>
-            <div class="qa-label">Funding Applications</div>
+            <div class="qa-label">Funding Apps</div>
           </div>
           <div class="quick-action" onclick="switchTab('products')">
             <div class="qa-icon">&#128230;</div>
-            <div class="qa-label">Product Settings</div>
+            <div class="qa-label">Product Controls</div>
+          </div>
+        </div>
+
+        <!-- Site Health Mini-Summary on Dashboard -->
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div class="section-title" style="margin-bottom:0;">Site Health Snapshot</div>
+            <button class="scan-btn secondary" onclick="switchTab('sitehealth')" style="padding:0.4rem 1rem;font-size:0.78rem;">View Full Report &rarr;</button>
+          </div>
+          <div id="dashHealthSummary" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.75rem;">
+            <div style="text-align:center;padding:0.75rem;background:#f0fdf4;border-radius:8px;">
+              <div style="font-size:1.4rem;font-weight:900;color:#059669;" id="dashPagesUp">--</div>
+              <div style="font-size:0.72rem;color:#6b7280;font-weight:600;">Pages Live</div>
+            </div>
+            <div style="text-align:center;padding:0.75rem;background:#fef3c7;border-radius:8px;">
+              <div style="font-size:1.4rem;font-weight:900;color:#d97706;" id="dashBrokenLinks">--</div>
+              <div style="font-size:0.72rem;color:#6b7280;font-weight:600;">Broken Links</div>
+            </div>
+            <div style="text-align:center;padding:0.75rem;background:#fee2e2;border-radius:8px;">
+              <div style="font-size:1.4rem;font-weight:900;color:#dc2626;" id="dashErrors">--</div>
+              <div style="font-size:0.72rem;color:#6b7280;font-weight:600;">Errors Found</div>
+            </div>
+            <div style="text-align:center;padding:0.75rem;background:#ede9fe;border-radius:8px;">
+              <div style="font-size:1.4rem;font-weight:900;color:#7c3aed;" id="dashLastScan">Never</div>
+              <div style="font-size:0.72rem;color:#6b7280;font-weight:600;">Last Scan</div>
+            </div>
           </div>
         </div>
 
         <div class="admin-card">
           <div class="section-title">Recent Activity</div>
-          <div class="activity-feed" id="activityFeed">
-            <div class="af-item"><div class="af-dot green"></div><div><div class="af-text">New landlord signup: Sanders PM</div><div class="af-time">2 hours ago</div></div></div>
-            <div class="af-item"><div class="af-dot purple"></div><div><div class="af-text">Funding application: Joe's Pizza &mdash; $50,000 Working Capital</div><div class="af-time">5 hours ago</div></div></div>
-            <div class="af-item"><div class="af-dot blue"></div><div><div class="af-text">New tenant: Jane Doe &mdash; 123 Maple St</div><div class="af-time">1 day ago</div></div></div>
-            <div class="af-item"><div class="af-dot amber"></div><div><div class="af-text">Deposit bond enrolled: Unit 4B &mdash; $2.55/mo commission</div><div class="af-time">1 day ago</div></div></div>
+          <div class="activity-feed" id="activityFeed"></div>
+        </div>
+      </div>
+
+      <!-- ──────── SITE HEALTH TAB ──────── -->
+      <div class="tab-panel" id="tab-sitehealth">
+        <h1 class="admin-page-title">Site Health</h1>
+        <p class="admin-page-sub">Scan your live site for broken links, missing pages, and errors.</p>
+
+        <div class="health-summary" id="healthSummary">
+          <div class="health-card good" id="hcPagesLive">
+            <div class="hc-value">--</div>
+            <div class="hc-label">Pages Live (200 OK)</div>
+            <div class="hc-bar"></div>
+          </div>
+          <div class="health-card warn" id="hcBrokenLinks">
+            <div class="hc-value">--</div>
+            <div class="hc-label">Broken Links Found</div>
+            <div class="hc-bar"></div>
+          </div>
+          <div class="health-card bad" id="hcErrors">
+            <div class="hc-value">--</div>
+            <div class="hc-label">Page Errors (4xx/5xx)</div>
+            <div class="hc-bar"></div>
+          </div>
+          <div class="health-card good" id="hcAvgLoad">
+            <div class="hc-value">--</div>
+            <div class="hc-label">Avg Load Time</div>
+            <div class="hc-bar"></div>
           </div>
         </div>
+
+        <div class="scan-controls">
+          <button class="scan-btn primary" id="btnFullScan" onclick="runFullSiteScan()">
+            <span class="spinner"></span>
+            Run Full Site Scan
+          </button>
+          <button class="scan-btn secondary" id="btnLinkCheck" onclick="runLinkChecker()">
+            <span class="spinner"></span>
+            Check All Links
+          </button>
+          <button class="scan-btn secondary" id="btnPageStatus" onclick="runPageStatusCheck()">
+            <span class="spinner"></span>
+            Page Status Check
+          </button>
+        </div>
+
+        <div class="scan-progress" id="scanProgress">
+          <div class="sp-text" id="scanProgressText">Scanning...</div>
+          <div class="sp-detail" id="scanProgressDetail">Initializing...</div>
+          <div class="sp-bar-wrap"><div class="sp-bar" id="scanProgressBar"></div></div>
+        </div>
+
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div class="section-title" style="margin-bottom:0;">Page Status Results</div>
+            <span style="font-size:0.75rem;color:#9ca3af;" id="lastScanTime">No scan run yet</span>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="pageStatusTable">
+              <thead>
+                <tr><th>Page</th><th>URL</th><th>Status</th><th>Load Time</th><th>Links</th><th>Issues</th></tr>
+              </thead>
+              <tbody id="pageStatusBody">
+                <tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:2rem;">Click "Run Full Site Scan" to check all pages</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-card" style="margin-bottom:1.5rem;">
+          <div class="section-title">Broken Links</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Found On</th><th>Broken Link</th><th>Link Text</th><th>Status</th><th>Type</th></tr>
+              </thead>
+              <tbody id="brokenLinksBody">
+                <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:2rem;">No broken links detected yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="section-title">Scan Log</div>
+          <div class="results-log" id="scanLog">
+            <div class="log-info">[Ready] Site health scanner initialized. Click a scan button above to begin.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── ALERTS TAB ──────── -->
+      <div class="tab-panel" id="tab-alerts">
+        <h1 class="admin-page-title">Alerts & Notifications</h1>
+        <p class="admin-page-sub">System alerts, user activity, and issues that need your attention.</p>
+
+        <div class="toggle-tabs" style="margin-bottom:1.25rem;">
+          <button class="toggle-tab active" onclick="filterAlerts('all', this)">All</button>
+          <button class="toggle-tab" onclick="filterAlerts('errors', this)">Errors</button>
+          <button class="toggle-tab" onclick="filterAlerts('warnings', this)">Warnings</button>
+          <button class="toggle-tab" onclick="filterAlerts('activity', this)">Activity</button>
+        </div>
+
+        <div id="alertsList"></div>
       </div>
 
       <!-- ──────── USERS TAB ──────── -->
@@ -625,47 +866,20 @@
         <p class="admin-page-sub">Affiliate earnings and commission tracking.</p>
 
         <div class="rev-cards">
-          <div class="rev-card">
-            <div class="rev-amount">$3,280</div>
-            <div class="rev-label">Total Affiliate Revenue (this month)</div>
-          </div>
-          <div class="rev-card">
-            <div class="rev-amount">$510</div>
-            <div class="rev-label">Deposit Bond Commissions</div>
-          </div>
-          <div class="rev-card">
-            <div class="rev-amount">$890</div>
-            <div class="rev-label">Insurance Commissions</div>
-          </div>
-          <div class="rev-card">
-            <div class="rev-amount">$240</div>
-            <div class="rev-label">Credit Builder</div>
-          </div>
-          <div class="rev-card">
-            <div class="rev-amount">$1,150</div>
-            <div class="rev-label">Utility/Internet Setup</div>
-          </div>
-          <div class="rev-card">
-            <div class="rev-amount">$490</div>
-            <div class="rev-label">Business Funding Referrals</div>
-          </div>
+          <div class="rev-card"><div class="rev-amount">$3,280</div><div class="rev-label">Total Affiliate Revenue (this month)</div></div>
+          <div class="rev-card"><div class="rev-amount">$510</div><div class="rev-label">Deposit Bond Commissions</div></div>
+          <div class="rev-card"><div class="rev-amount">$890</div><div class="rev-label">Insurance Commissions</div></div>
+          <div class="rev-card"><div class="rev-amount">$240</div><div class="rev-label">Credit Builder</div></div>
+          <div class="rev-card"><div class="rev-amount">$1,150</div><div class="rev-label">Utility/Internet Setup</div></div>
+          <div class="rev-card"><div class="rev-amount">$490</div><div class="rev-label">Business Funding Referrals</div></div>
         </div>
 
         <div class="admin-card" style="margin-bottom:1.5rem;">
           <div class="section-title">Monthly Revenue Trend</div>
           <div style="padding: 0.5rem 0;">
-            <div class="chart-bar-row">
-              <div class="chart-bar-label">Jan</div>
-              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:64%;">$2,100</div></div>
-            </div>
-            <div class="chart-bar-row">
-              <div class="chart-bar-label">Feb</div>
-              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:85%;">$2,800</div></div>
-            </div>
-            <div class="chart-bar-row">
-              <div class="chart-bar-label">Mar</div>
-              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:100%;">$3,280</div></div>
-            </div>
+            <div class="chart-bar-row"><div class="chart-bar-label">Jan</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:64%;">$2,100</div></div></div>
+            <div class="chart-bar-row"><div class="chart-bar-label">Feb</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:85%;">$2,800</div></div></div>
+            <div class="chart-bar-row"><div class="chart-bar-label">Mar</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:100%;">$3,280</div></div></div>
           </div>
         </div>
 
@@ -673,47 +887,13 @@
           <div class="section-title">Commission Rate Settings</div>
           <p style="font-size:0.82rem;color:#6b7280;margin-bottom:1rem;">Adjust commission rates for affiliate products.</p>
           <div class="commission-grid" id="commissionGrid">
-            <div class="commission-item">
-              <label>Deposit Bond Commission %</label>
-              <input type="number" id="cr_deposit_bond" value="15" step="0.5" />
-            </div>
-            <div class="commission-item">
-              <label>Insurance Commission $/mo</label>
-              <input type="number" id="cr_insurance" value="3" step="0.25" />
-            </div>
-            <div class="commission-item">
-              <label>Credit Builder Commission $/mo</label>
-              <input type="number" id="cr_credit_builder" value="1.50" step="0.25" />
-            </div>
-            <div class="commission-item">
-              <label>Utility Setup Referral $</label>
-              <input type="number" id="cr_utility" value="75" step="5" />
-            </div>
-            <div class="commission-item">
-              <label>Business Loan Referral $</label>
-              <input type="number" id="cr_business_loan" value="500" step="25" />
-            </div>
+            <div class="commission-item"><label>Deposit Bond Commission %</label><input type="number" id="cr_deposit_bond" value="15" step="0.5" /></div>
+            <div class="commission-item"><label>Insurance Commission $/mo</label><input type="number" id="cr_insurance" value="3" step="0.25" /></div>
+            <div class="commission-item"><label>Credit Builder Commission $/mo</label><input type="number" id="cr_credit_builder" value="1.50" step="0.25" /></div>
+            <div class="commission-item"><label>Utility Setup Referral $</label><input type="number" id="cr_utility" value="75" step="5" /></div>
+            <div class="commission-item"><label>Business Loan Referral $</label><input type="number" id="cr_business_loan" value="500" step="25" /></div>
           </div>
-          <div style="margin-top:1rem;">
-            <button class="save-btn" onclick="saveCommissionRates()">Save Commission Rates</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ──────── PROPERTIES TAB ──────── -->
-      <div class="tab-panel" id="tab-properties">
-        <h1 class="admin-page-title">Properties</h1>
-        <p class="admin-page-sub">All listings across the platform.</p>
-
-        <div class="admin-card">
-          <div class="admin-table-wrap">
-            <table class="admin-table" id="propertiesTable">
-              <thead>
-                <tr><th>Address</th><th>Landlord</th><th>Type</th><th>Rent</th><th>Status</th><th>Products Enabled</th></tr>
-              </thead>
-              <tbody id="propertiesBody"></tbody>
-            </table>
-          </div>
+          <div style="margin-top:1rem;"><button class="save-btn" onclick="saveCommissionRates()">Save Commission Rates</button></div>
         </div>
       </div>
 
@@ -721,13 +901,10 @@
       <div class="tab-panel" id="tab-funding">
         <h1 class="admin-page-title">Funding Applications</h1>
         <p class="admin-page-sub">All business funding applications across the platform.</p>
-
         <div class="admin-card">
           <div class="admin-table-wrap">
             <table class="admin-table" id="fundingTable">
-              <thead>
-                <tr><th>Business</th><th>Amount</th><th>Purpose</th><th>Status</th><th>Date</th><th>Actions</th></tr>
-              </thead>
+              <thead><tr><th>Business</th><th>Amount</th><th>Purpose</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
               <tbody id="fundingBody"></tbody>
             </table>
           </div>
@@ -741,20 +918,16 @@
 
         <div class="admin-card" style="margin-bottom:1.5rem;">
           <div class="section-title">Platform Product Availability</div>
-          <p style="font-size:0.82rem;color:#6b7280;margin-bottom:1rem;">Disabling a product removes it from the entire platform. No landlord can enable a disabled product.</p>
+          <p style="font-size:0.82rem;color:#6b7280;margin-bottom:1rem;">Disabling a product removes it from the entire platform.</p>
           <div id="productToggles"></div>
-          <div style="margin-top:1rem;">
-            <button class="save-btn" onclick="saveProducts()">Save Product Settings</button>
-          </div>
+          <div style="margin-top:1rem;"><button class="save-btn" onclick="saveProducts()">Save Product Settings</button></div>
         </div>
 
         <div class="admin-card">
           <div class="section-title">Partner Management</div>
           <div class="admin-table-wrap">
             <table class="admin-table">
-              <thead>
-                <tr><th>Partner</th><th>Product</th><th>Commission</th><th>Status</th><th>Actions</th></tr>
-              </thead>
+              <thead><tr><th>Partner</th><th>Product</th><th>Commission</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr><td>GoKapital</td><td>Business Loans</td><td>$200-5,000/deal</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
                 <tr><td>Clarify Capital</td><td>Working Capital</td><td>$200-2,000/deal</td><td><span class="status-badge active">Active</span></td><td><button class="tbl-btn edit">Edit</button></td></tr>
@@ -772,19 +945,14 @@
       <div class="tab-panel" id="tab-settings">
         <h1 class="admin-page-title">Settings</h1>
         <p class="admin-page-sub">Platform configuration and preferences.</p>
-
         <div class="admin-card">
+          <div class="settings-group"><label for="settPlatformName">Platform Name</label><input type="text" id="settPlatformName" value="RentVerified" /></div>
+          <div class="settings-group"><label for="settAdminEmail">Admin Email</label><input type="email" id="settAdminEmail" value="admin@rentverified.com" /></div>
+          <div class="settings-group"><label for="settSupportEmail">Support Email</label><input type="email" id="settSupportEmail" value="support@rentverified.com" /></div>
           <div class="settings-group">
-            <label for="settPlatformName">Platform Name</label>
-            <input type="text" id="settPlatformName" value="RentVerified" />
-          </div>
-          <div class="settings-group">
-            <label for="settAdminEmail">Admin Email</label>
-            <input type="email" id="settAdminEmail" value="admin@rentverified.com" />
-          </div>
-          <div class="settings-group">
-            <label for="settSupportEmail">Support Email</label>
-            <input type="email" id="settSupportEmail" value="support@rentverified.com" />
+            <label for="settSiteUrl">Live Site URL</label>
+            <input type="text" id="settSiteUrl" value="https://rentrealverified.com" />
+            <p style="font-size:0.75rem;color:#9ca3af;margin-top:4px;">Used for site health scans and link checks.</p>
           </div>
           <div class="settings-group">
             <label>Default Card Fee Policy</label>
@@ -796,17 +964,12 @@
           <div class="settings-group">
             <label>Maintenance Mode</label>
             <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
-              <label class="toggle-switch">
-                <input type="checkbox" id="settMaintenance" />
-                <span class="slider"></span>
-              </label>
+              <label class="toggle-switch"><input type="checkbox" id="settMaintenance" /><span class="slider"></span></label>
               <span style="font-size:0.82rem;color:#6b7280;" id="maintenanceLabel">Off</span>
             </div>
             <p style="font-size:0.78rem;color:#9ca3af;margin-top:6px;">When enabled, a "Platform under maintenance" banner appears on all pages.</p>
           </div>
-          <div style="margin-top:1.5rem;">
-            <button class="save-btn" onclick="saveSettings()">Save Settings</button>
-          </div>
+          <div style="margin-top:1.5rem;"><button class="save-btn" onclick="saveSettings()">Save Settings</button></div>
         </div>
       </div>
 
@@ -824,7 +987,45 @@
 <script src="twilio-integration.js"></script>
 
 <script>
-/* ═══════════════════════ CONSTANTS & AUTH ═══════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   RENTVERIFIED ADMIN - SITE OPERATIONS DASHBOARD
+   ═══════════════════════════════════════════════════════════════════ */
+
+const SITE_PAGES = [
+  { name: 'Homepage', file: 'index.html' },
+  { name: 'Landlord Signup', file: 'landlord-signup.html' },
+  { name: 'Tenant Portal', file: 'tenant-portal.html' },
+  { name: 'Agent Portal', file: 'agent-portal.html' },
+  { name: 'Guest Portal', file: 'guest-portal.html' },
+  { name: 'Vendor Portal', file: 'vendor-portal.html' },
+  { name: 'Listings', file: 'listings.html' },
+  { name: 'Property Detail', file: 'property-detail.html' },
+  { name: 'Screening', file: 'screening.html' },
+  { name: 'Leases', file: 'leases.html' },
+  { name: 'Maintenance', file: 'maintenance.html' },
+  { name: 'Documents', file: 'documents.html' },
+  { name: 'Accounting', file: 'accounting.html' },
+  { name: 'Owner Statements', file: 'owner-statements.html' },
+  { name: 'Insurance Agents', file: 'insurance-agents.html' },
+  { name: 'Credit Builder', file: 'credit-builder.html' },
+  { name: 'Financial Hub', file: 'financial-hub.html' },
+  { name: 'Funding', file: 'funding.html' },
+  { name: 'Referral', file: 'referral.html' },
+  { name: 'Compliance', file: 'compliance.html' },
+  { name: 'Eviction', file: 'eviction.html' },
+  { name: 'Tenant Assistance', file: 'tenant-assistance.html' },
+  { name: 'Network', file: 'network.html' },
+  { name: 'Ad Builder', file: 'ad-builder.html' },
+  { name: 'STR Manager', file: 'str-manager.html' },
+  { name: 'STR Demo', file: 'str-demo.html' },
+  { name: 'Attorney Demo', file: 'attorney-demo.html' },
+  { name: 'Contractor Demo', file: 'contractor-demo.html' },
+  { name: 'Commercial', file: 'commercial.html' },
+  { name: 'Test Accounts', file: 'test-accounts.html' },
+  { name: 'Admin', file: 'admin.html' },
+];
+
+/* ═══════════════════════ AUTH ═══════════════════════ */
 
 async function handleLogin() {
   const email = document.getElementById('loginEmail').value.trim();
@@ -832,7 +1033,6 @@ async function handleLogin() {
   const errorEl = document.getElementById('loginError');
   errorEl.style.display = 'none';
 
-  // Try Supabase Auth first
   if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
     try {
       const sb = getSupabase();
@@ -840,17 +1040,11 @@ async function handleLogin() {
       if (authError) {
         console.warn('Supabase sign-in error:', authError.message);
       } else if (authData?.user) {
-        // Query profile directly (bypasses RVAuth which may have RLS issues)
-        const { data: profile, error: profileError } = await sb.from('profiles')
+        const { data: profile } = await sb.from('profiles')
           .select('role, first_name, last_name, company, plan')
           .eq('id', authData.user.id)
           .maybeSingle();
-
-        console.log('Profile query result:', profile, 'Error:', profileError);
-
-        // Check role from profile, or from user metadata as fallback
         const role = profile?.role || authData.user.user_metadata?.role;
-
         if (role === 'admin') {
           localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now(), supabase: true, userId: authData.user.id }));
           showDashboard();
@@ -866,7 +1060,6 @@ async function handleLogin() {
     }
   }
 
-  // Fallback: localStorage hardcoded (for offline/dev testing only)
   if (email === 'admin@rentverified.com' && pass === 'admin123') {
     localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now() }));
     showDashboard();
@@ -877,9 +1070,7 @@ async function handleLogin() {
 }
 
 async function handleSignOut() {
-  if (typeof RVAuth !== 'undefined') {
-    try { await RVAuth.signOut(); } catch(e) {}
-  }
+  if (typeof RVAuth !== 'undefined') { try { await RVAuth.signOut(); } catch(e) {} }
   localStorage.removeItem('rv_admin_auth');
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = '';
@@ -891,25 +1082,22 @@ function showDashboard() {
   loadOverviewStats();
   loadLandlords();
   loadTenants();
-  loadProperties();
   loadFunding();
   loadProducts();
   loadCommissionRates();
   loadSettings();
+  loadAlerts();
+  loadHealthFromCache();
+  loadActivityFeed();
 }
 
-/* Auto-login if Supabase session or localStorage session exists */
 (async function() {
-  // Check Supabase session first
   if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
     try {
       const sb = getSupabase();
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
-        const { data: profile } = await sb.from('profiles')
-          .select('role, email, first_name')
-          .eq('id', session.user.id)
-          .maybeSingle();
+        const { data: profile } = await sb.from('profiles').select('role, email, first_name').eq('id', session.user.id).maybeSingle();
         const role = profile?.role || session.user.user_metadata?.role;
         if (role === 'admin') {
           localStorage.setItem('rv_admin_auth', JSON.stringify({ email: profile?.email || session.user.email, ts: Date.now(), supabase: true }));
@@ -919,15 +1107,11 @@ function showDashboard() {
       }
     } catch(e) { console.warn('Auto-login check failed:', e); }
   }
-  // Fallback: localStorage session
   const auth = localStorage.getItem('rv_admin_auth');
   if (auth) showDashboard();
 })();
 
-/* Allow Enter key on login */
-document.getElementById('loginPass').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') handleLogin();
-});
+document.getElementById('loginPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') handleLogin(); });
 
 /* ═══════════════════════ TAB SWITCHING ═══════════════════════ */
 function switchTab(tab) {
@@ -936,7 +1120,6 @@ function switchTab(tab) {
   document.querySelectorAll('.admin-link[data-tab]').forEach(l => l.classList.remove('active'));
   const link = document.querySelector('.admin-link[data-tab="' + tab + '"]');
   if (link) link.classList.add('active');
-  // close mobile sidebar
   document.getElementById('adminSidebar').classList.remove('open');
   document.getElementById('mobileOverlay').classList.remove('show');
 }
@@ -946,75 +1129,22 @@ function toggleSidebar() {
   document.getElementById('mobileOverlay').classList.toggle('show');
 }
 
-/* ═══════════════════════ USERS ═══════════════════════ */
-function switchUserView(view, btn) {
-  document.querySelectorAll('.toggle-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('landlordsList').style.display = view === 'landlords' ? '' : 'none';
-  document.getElementById('tenantsList').style.display = view === 'tenants' ? '' : 'none';
-}
-
-const actionButtons = '<button class="tbl-btn view">View</button><button class="tbl-btn edit">Edit</button><button class="tbl-btn disable">Disable</button>';
-
-function loadLandlords() {
-  const accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
-  const body = document.getElementById('landlordsBody');
-  if (accts.length) {
-    body.innerHTML = accts.map(a => `<tr>
-      <td>${a.company || a.companyName || 'N/A'}</td>
-      <td>${a.email || ''}</td>
-      <td>${a.properties || 0}</td>
-      <td>${a.productsEnabled || 0}</td>
-      <td>$${a.revenueMo || 0}</td>
-      <td>${a.joined || a.created || 'N/A'}</td>
-      <td class="actions-cell">${actionButtons}</td>
-    </tr>`).join('');
-  } else {
-    body.innerHTML = `
-      <tr><td>Sanders PM</td><td>admin@sanderspm.com</td><td>12</td><td>8</td><td>$1,240</td><td>Jan 2025</td><td class="actions-cell">${actionButtons}</td></tr>
-      <tr><td>Maple Realty</td><td>info@maplerealty.com</td><td>6</td><td>5</td><td>$680</td><td>Mar 2025</td><td class="actions-cell">${actionButtons}</td></tr>
-      <tr><td>Urban Nest LLC</td><td>ops@urbannest.io</td><td>24</td><td>11</td><td>$3,100</td><td>Nov 2024</td><td class="actions-cell">${actionButtons}</td></tr>
-      <tr><td>Crest Living</td><td>hello@crestliving.com</td><td>5</td><td>4</td><td>$410</td><td>Jun 2025</td><td class="actions-cell">${actionButtons}</td></tr>`;
-  }
-}
-
-function loadTenants() {
-  const accts = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
-  const body = document.getElementById('tenantsBody');
-  if (accts.length) {
-    body.innerHTML = accts.map(a => `<tr>
-      <td>${a.name || (a.firstName || '') + ' ' + (a.lastName || '')}</td>
-      <td>${a.email || ''}</td>
-      <td>${a.property || 'N/A'}</td>
-      <td>${a.landlord || 'N/A'}</td>
-      <td>${a.products || 0}</td>
-      <td>${a.joined || a.created || 'N/A'}</td>
-      <td class="actions-cell">${actionButtons}</td>
-    </tr>`).join('');
-  } else {
-    body.innerHTML = `
-      <tr><td>Jane Doe</td><td>jane@email.com</td><td>123 Maple St</td><td>Sanders PM</td><td>3</td><td>Feb 2025</td><td class="actions-cell">${actionButtons}</td></tr>
-      <tr><td>Marcus Lee</td><td>marcus.lee@email.com</td><td>456 Oak Ave #2B</td><td>Urban Nest LLC</td><td>5</td><td>Jan 2025</td><td class="actions-cell">${actionButtons}</td></tr>
-      <tr><td>Aisha Patel</td><td>aisha.p@email.com</td><td>789 Pine Rd</td><td>Maple Realty</td><td>2</td><td>Apr 2025</td><td class="actions-cell">${actionButtons}</td></tr>
-      <tr><td>Carlos Rivera</td><td>c.rivera@email.com</td><td>12 Elm St #1A</td><td>Crest Living</td><td>4</td><td>May 2025</td><td class="actions-cell">${actionButtons}</td></tr>`;
-  }
-}
-
 /* ═══════════════════════ OVERVIEW STATS ═══════════════════════ */
 function loadOverviewStats() {
   const landlords = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
   const tenants   = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
-  const props     = JSON.parse(localStorage.getItem('rv_properties') || '[]');
   const funding   = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  const cached    = JSON.parse(localStorage.getItem('rv_site_health_cache') || '{}');
 
   const stats = [
-    { label: 'Total Landlords',    value: landlords.length || 4,  icon: 'purple', emoji: '&#127970;' },
-    { label: 'Total Tenants',      value: tenants.length || 23,   icon: 'blue',   emoji: '&#128101;' },
-    { label: 'Total Properties',   value: props.length || 47,     icon: 'green',  emoji: '&#127968;' },
-    { label: 'Active Leases',      value: 89,                     icon: 'cyan',   emoji: '&#128196;' },
-    { label: 'Monthly Revenue',    value: '$12,450',              icon: 'green',  emoji: '&#128176;' },
-    { label: 'Affiliate Earnings', value: '$3,280',               icon: 'amber',  emoji: '&#128200;' },
-    { label: 'Funding Apps',       value: funding.length || 6,    icon: 'pink',   emoji: '&#128179;' },
+    { label: 'Site Pages',         value: SITE_PAGES.length,             icon: 'purple', emoji: '&#128196;' },
+    { label: 'Pages Healthy',      value: cached.pagesOk || '--',        icon: 'green',  emoji: '&#9989;' },
+    { label: 'Issues Found',       value: cached.totalIssues || '--',    icon: 'red',    emoji: '&#9888;' },
+    { label: 'Total Landlords',    value: landlords.length || 4,         icon: 'blue',   emoji: '&#127970;' },
+    { label: 'Total Tenants',      value: tenants.length || 23,          icon: 'cyan',   emoji: '&#128101;' },
+    { label: 'Monthly Revenue',    value: '$12,450',                     icon: 'green',  emoji: '&#128176;' },
+    { label: 'Affiliate Earnings', value: '$3,280',                      icon: 'amber',  emoji: '&#128200;' },
+    { label: 'Funding Apps',       value: funding.length || 6,           icon: 'pink',   emoji: '&#128179;' },
   ];
 
   document.getElementById('overviewStats').innerHTML = stats.map(s => `
@@ -1025,33 +1155,496 @@ function loadOverviewStats() {
     </div>`).join('');
 }
 
-/* ═══════════════════════ PROPERTIES ═══════════════════════ */
-function loadProperties() {
-  const props = JSON.parse(localStorage.getItem('rv_properties') || '[]');
-  const body = document.getElementById('propertiesBody');
-  if (props.length) {
-    body.innerHTML = props.map(p => `<tr>
-      <td>${p.address || p.name || 'N/A'}</td>
-      <td>${p.landlord || 'N/A'}</td>
-      <td>${p.type || 'Residential'}</td>
-      <td>${p.rent ? '$' + p.rent : 'N/A'}</td>
-      <td><span class="status-badge ${(p.status || 'occupied').toLowerCase()}">${p.status || 'Occupied'}</span></td>
-      <td>${p.productsEnabled || 0}</td>
-    </tr>`).join('');
+/* ═══════════════════════ SITE HEALTH SCANNER ═══════════════════════ */
+
+function getSiteUrl() {
+  const saved = JSON.parse(localStorage.getItem('rv_admin_settings') || '{}');
+  return (saved.siteUrl || 'https://rentrealverified.com').replace(/\/+$/, '');
+}
+
+let scanResults = { pages: [], brokenLinks: [], errors: [], startTime: null };
+
+function logScan(msg, type) {
+  type = type || 'info';
+  const log = document.getElementById('scanLog');
+  const time = new Date().toLocaleTimeString();
+  log.innerHTML += '<div class="log-' + type + '">[' + time + '] ' + msg + '</div>';
+  log.scrollTop = log.scrollHeight;
+}
+
+function updateProgress(text, detail, pct) {
+  document.getElementById('scanProgressText').textContent = text;
+  document.getElementById('scanProgressDetail').textContent = detail;
+  document.getElementById('scanProgressBar').style.width = pct + '%';
+}
+
+function showProgress(show) {
+  document.getElementById('scanProgress').classList.toggle('active', show);
+}
+
+async function fetchPageStatus(url) {
+  const start = performance.now();
+  try {
+    const resp = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-store' });
+    const elapsed = Math.round(performance.now() - start);
+    const html = resp.ok ? await resp.text() : '';
+    return { url: url, status: resp.status, ok: resp.ok, loadTime: elapsed, html: html };
+  } catch(e) {
+    const elapsed = Math.round(performance.now() - start);
+    try {
+      await fetch(url, { method: 'HEAD', mode: 'no-cors', cache: 'no-store' });
+      return { url: url, status: 0, ok: true, loadTime: elapsed, html: '', note: 'CORS blocked but page exists' };
+    } catch(e2) {
+      return { url: url, status: 0, ok: false, loadTime: elapsed, html: '', error: e.message };
+    }
+  }
+}
+
+function extractLinks(html, baseUrl) {
+  var links = [];
+  var hrefRegex = /href\s*=\s*["']([^"'#][^"']*)["']/gi;
+  var match;
+  while ((match = hrefRegex.exec(html)) !== null) {
+    var href = match[1].trim();
+    if (href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0 || href.indexOf('javascript:') === 0 || href.indexOf('data:') === 0) continue;
+    if (href.indexOf('//') === 0) href = 'https:' + href;
+    else if (href.indexOf('/') === 0) href = baseUrl + href;
+    else if (href.indexOf('http') !== 0) href = baseUrl + '/' + href;
+    var textMatch = html.substring(Math.max(0, match.index - 100), match.index + match[0].length + 100);
+    var textClean = textMatch.replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
+    links.push({ href: href, text: textClean });
+  }
+  return links;
+}
+
+async function checkLink(url) {
+  try {
+    var resp = await fetch(url, { method: 'HEAD', mode: 'cors', cache: 'no-store' });
+    return { url: url, status: resp.status, ok: resp.ok };
+  } catch(e) {
+    try {
+      await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+      return { url: url, status: 0, ok: true, note: 'CORS opaque' };
+    } catch(e2) {
+      return { url: url, status: 0, ok: false, error: e.message };
+    }
+  }
+}
+
+async function runFullSiteScan() {
+  var btn = document.getElementById('btnFullScan');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  var baseUrl = getSiteUrl();
+  scanResults = { pages: [], brokenLinks: [], errors: [], startTime: Date.now() };
+  document.getElementById('scanLog').innerHTML = '';
+
+  logScan('Starting full site scan on ' + baseUrl, 'info');
+  logScan('Scanning ' + SITE_PAGES.length + ' pages...', 'info');
+  showProgress(true);
+
+  for (var i = 0; i < SITE_PAGES.length; i++) {
+    var page = SITE_PAGES[i];
+    var url = baseUrl + '/' + page.file;
+    updateProgress('Phase 1/2: Checking Pages', page.name + ' (' + (i+1) + '/' + SITE_PAGES.length + ')', Math.round(((i+1) / SITE_PAGES.length) * 50));
+
+    var result = await fetchPageStatus(url);
+    result.name = page.name;
+    result.file = page.file;
+
+    if (result.ok) {
+      var links = result.html ? extractLinks(result.html, baseUrl) : [];
+      result.linkCount = links.length;
+      result.links = links;
+      logScan('&#9989; ' + page.name + ' &mdash; ' + (result.status || 'OK') + ' (' + result.loadTime + 'ms, ' + links.length + ' links)', 'ok');
+    } else {
+      result.linkCount = 0;
+      result.links = [];
+      logScan('&#10060; ' + page.name + ' &mdash; ' + (result.status || 'FAILED') + ' ' + (result.error || ''), 'error');
+      scanResults.errors.push({ page: page.name, url: url, status: result.status, error: result.error });
+    }
+    scanResults.pages.push(result);
+  }
+
+  var allLinks = [];
+  var checkedUrls = {};
+  scanResults.pages.forEach(function(p) {
+    if (p.links) {
+      p.links.forEach(function(link) {
+        if (!checkedUrls[link.href]) {
+          checkedUrls[link.href] = true;
+          allLinks.push({ href: link.href, text: link.text, foundOn: p.name });
+        }
+      });
+    }
+  });
+
+  logScan('Found ' + allLinks.length + ' unique links. Checking for broken ones...', 'info');
+
+  var batchSize = 5;
+  for (var i = 0; i < allLinks.length; i += batchSize) {
+    var batch = allLinks.slice(i, i + batchSize);
+    updateProgress('Phase 2/2: Checking Links', Math.min(i + batchSize, allLinks.length) + '/' + allLinks.length + ' links checked', 50 + Math.round(((i + batchSize) / allLinks.length) * 50));
+
+    var results = await Promise.all(batch.map(function(link) { return checkLink(link.href); }));
+    results.forEach(function(r, idx) {
+      if (!r.ok && !r.note) {
+        var linkInfo = batch[idx];
+        scanResults.brokenLinks.push({
+          foundOn: linkInfo.foundOn,
+          href: r.url,
+          text: linkInfo.text,
+          status: r.status,
+          error: r.error,
+          type: r.url.indexOf(baseUrl) !== -1 ? 'Internal' : 'External'
+        });
+        logScan('&#128279; Broken: ' + r.url + ' (on ' + linkInfo.foundOn + ') - ' + (r.error || r.status), 'error');
+      }
+    });
+  }
+
+  var pagesOk = scanResults.pages.filter(function(p) { return p.ok; }).length;
+  updateProgress('Scan Complete', scanResults.pages.length + ' pages, ' + allLinks.length + ' links checked', 100);
+  logScan('========================================', 'info');
+  logScan('Scan complete! ' + pagesOk + '/' + SITE_PAGES.length + ' pages healthy, ' + scanResults.brokenLinks.length + ' broken links, ' + scanResults.errors.length + ' page errors', pagesOk === SITE_PAGES.length ? 'ok' : 'warn');
+
+  renderPageStatusTable();
+  renderBrokenLinksTable();
+  updateHealthCards();
+  cacheHealthResults();
+  loadAlerts();
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  setTimeout(function() { showProgress(false); }, 3000);
+}
+
+async function runLinkChecker() {
+  var btn = document.getElementById('btnLinkCheck');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  var baseUrl = getSiteUrl();
+  scanResults.brokenLinks = [];
+  document.getElementById('scanLog').innerHTML = '';
+  logScan('Starting link checker...', 'info');
+  showProgress(true);
+
+  var allLinks = [];
+  var checkedUrls = {};
+
+  for (var i = 0; i < SITE_PAGES.length; i++) {
+    var page = SITE_PAGES[i];
+    var url = baseUrl + '/' + page.file;
+    updateProgress('Fetching pages for links', page.name + ' (' + (i+1) + '/' + SITE_PAGES.length + ')', Math.round(((i+1)/SITE_PAGES.length)*30));
+    var result = await fetchPageStatus(url);
+    if (result.ok && result.html) {
+      var links = extractLinks(result.html, baseUrl);
+      links.forEach(function(link) {
+        if (!checkedUrls[link.href]) {
+          checkedUrls[link.href] = true;
+          allLinks.push({ href: link.href, text: link.text, foundOn: page.name });
+        }
+      });
+    }
+  }
+
+  logScan('Found ' + allLinks.length + ' unique links. Checking...', 'info');
+  var batchSize = 5;
+  for (var i = 0; i < allLinks.length; i += batchSize) {
+    var batch = allLinks.slice(i, i + batchSize);
+    updateProgress('Checking links', Math.min(i+batchSize, allLinks.length) + '/' + allLinks.length, 30 + Math.round(((i+batchSize)/allLinks.length)*70));
+    var results = await Promise.all(batch.map(function(l) { return checkLink(l.href); }));
+    results.forEach(function(r, idx) {
+      if (!r.ok && !r.note) {
+        scanResults.brokenLinks.push({
+          foundOn: batch[idx].foundOn, href: r.url, text: batch[idx].text,
+          status: r.status, error: r.error, type: r.url.indexOf(baseUrl) !== -1 ? 'Internal' : 'External'
+        });
+        logScan('&#128279; Broken: ' + r.url + ' (on ' + batch[idx].foundOn + ')', 'error');
+      }
+    });
+  }
+
+  logScan('Link check done. ' + scanResults.brokenLinks.length + ' broken links found.', scanResults.brokenLinks.length === 0 ? 'ok' : 'warn');
+  renderBrokenLinksTable();
+  updateHealthCards();
+  cacheHealthResults();
+  updateProgress('Link Check Complete', allLinks.length + ' links checked', 100);
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  setTimeout(function() { showProgress(false); }, 3000);
+}
+
+async function runPageStatusCheck() {
+  var btn = document.getElementById('btnPageStatus');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  var baseUrl = getSiteUrl();
+  scanResults.pages = [];
+  scanResults.errors = [];
+  document.getElementById('scanLog').innerHTML = '';
+  logScan('Starting page status check...', 'info');
+  showProgress(true);
+
+  for (var i = 0; i < SITE_PAGES.length; i++) {
+    var page = SITE_PAGES[i];
+    var url = baseUrl + '/' + page.file;
+    updateProgress('Checking pages', page.name + ' (' + (i+1) + '/' + SITE_PAGES.length + ')', Math.round(((i+1)/SITE_PAGES.length)*100));
+    var result = await fetchPageStatus(url);
+    result.name = page.name;
+    result.file = page.file;
+    result.linkCount = 0;
+    result.links = [];
+    if (result.ok) {
+      if (result.html) { result.linkCount = extractLinks(result.html, baseUrl).length; }
+      logScan('&#9989; ' + page.name + ' &mdash; ' + (result.status || 'OK') + ' (' + result.loadTime + 'ms)', 'ok');
+    } else {
+      logScan('&#10060; ' + page.name + ' &mdash; ' + (result.status || 'FAILED') + ' ' + (result.error || ''), 'error');
+      scanResults.errors.push({ page: page.name, url: url, status: result.status, error: result.error });
+    }
+    scanResults.pages.push(result);
+  }
+
+  logScan('Page check done. ' + scanResults.pages.filter(function(p){return p.ok;}).length + '/' + SITE_PAGES.length + ' pages healthy.', 'ok');
+  renderPageStatusTable();
+  updateHealthCards();
+  cacheHealthResults();
+  updateProgress('Page Check Complete', SITE_PAGES.length + ' pages checked', 100);
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  setTimeout(function() { showProgress(false); }, 3000);
+}
+
+function renderPageStatusTable() {
+  var body = document.getElementById('pageStatusBody');
+  if (!scanResults.pages.length) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:2rem;">No scan data yet</td></tr>';
+    return;
+  }
+  body.innerHTML = scanResults.pages.map(function(p) {
+    var statusClass = p.ok ? 'ok' : 'error';
+    var statusText = p.ok ? (p.status || 'OK') : (p.status || 'FAIL');
+    var issues = p.ok ? (p.note || 'None') : (p.error || 'Error ' + p.status);
+    return '<tr>' +
+      '<td><strong>' + p.name + '</strong></td>' +
+      '<td style="font-size:0.78rem;color:#6b7280;">' + p.file + '</td>' +
+      '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
+      '<td>' + p.loadTime + 'ms</td>' +
+      '<td>' + (p.linkCount || 0) + '</td>' +
+      '<td style="font-size:0.78rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;">' + issues + '</td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('lastScanTime').textContent = 'Last scan: ' + new Date().toLocaleString();
+}
+
+function renderBrokenLinksTable() {
+  var body = document.getElementById('brokenLinksBody');
+  if (!scanResults.brokenLinks.length) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#10b981;padding:2rem;">&#9989; No broken links found!</td></tr>';
+    return;
+  }
+  body.innerHTML = scanResults.brokenLinks.map(function(bl) {
+    return '<tr>' +
+      '<td>' + bl.foundOn + '</td>' +
+      '<td style="font-size:0.78rem;max-width:250px;overflow:hidden;text-overflow:ellipsis;word-break:break-all;">' + bl.href + '</td>' +
+      '<td style="font-size:0.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;">' + (bl.text || '(no text)') + '</td>' +
+      '<td><span class="status-badge error">' + (bl.status || 'FAIL') + '</span></td>' +
+      '<td><span class="status-badge ' + (bl.type === 'Internal' ? 'warning' : 'pending') + '">' + bl.type + '</span></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function updateHealthCards() {
+  var pagesOk = scanResults.pages.filter(function(p) { return p.ok; }).length;
+  var brokenCount = scanResults.brokenLinks.length;
+  var errorCount = scanResults.errors.length;
+  var avgLoad = scanResults.pages.length ?
+    Math.round(scanResults.pages.reduce(function(sum, p) { return sum + (p.loadTime || 0); }, 0) / scanResults.pages.length) : 0;
+
+  var hcPages = document.getElementById('hcPagesLive');
+  hcPages.querySelector('.hc-value').textContent = pagesOk + '/' + SITE_PAGES.length;
+  hcPages.className = 'health-card ' + (pagesOk === SITE_PAGES.length ? 'good' : pagesOk > SITE_PAGES.length * 0.8 ? 'warn' : 'bad');
+
+  var hcBroken = document.getElementById('hcBrokenLinks');
+  hcBroken.querySelector('.hc-value').textContent = brokenCount;
+  hcBroken.className = 'health-card ' + (brokenCount === 0 ? 'good' : brokenCount < 5 ? 'warn' : 'bad');
+
+  var hcErrors = document.getElementById('hcErrors');
+  hcErrors.querySelector('.hc-value').textContent = errorCount;
+  hcErrors.className = 'health-card ' + (errorCount === 0 ? 'good' : 'bad');
+
+  var hcAvg = document.getElementById('hcAvgLoad');
+  hcAvg.querySelector('.hc-value').textContent = avgLoad ? avgLoad + 'ms' : '--';
+  hcAvg.className = 'health-card ' + (avgLoad < 1000 ? 'good' : avgLoad < 3000 ? 'warn' : 'bad');
+
+  document.getElementById('dashPagesUp').textContent = pagesOk + '/' + SITE_PAGES.length;
+  document.getElementById('dashBrokenLinks').textContent = brokenCount;
+  document.getElementById('dashErrors').textContent = errorCount;
+  document.getElementById('dashLastScan').textContent = 'Just now';
+}
+
+function cacheHealthResults() {
+  var pagesOk = scanResults.pages.filter(function(p) { return p.ok; }).length;
+  var cache = {
+    pagesOk: pagesOk,
+    totalIssues: scanResults.errors.length + scanResults.brokenLinks.length,
+    brokenLinks: scanResults.brokenLinks.length,
+    errors: scanResults.errors.length,
+    avgLoad: scanResults.pages.length ?
+      Math.round(scanResults.pages.reduce(function(s, p) { return s + (p.loadTime || 0); }, 0) / scanResults.pages.length) : 0,
+    lastScan: new Date().toISOString(),
+    pageResults: scanResults.pages.map(function(p) { return { name: p.name, file: p.file, ok: p.ok, status: p.status, loadTime: p.loadTime, linkCount: p.linkCount }; }),
+    brokenLinkResults: scanResults.brokenLinks
+  };
+  localStorage.setItem('rv_site_health_cache', JSON.stringify(cache));
+}
+
+function loadHealthFromCache() {
+  var cache = JSON.parse(localStorage.getItem('rv_site_health_cache') || 'null');
+  if (!cache) return;
+  document.getElementById('dashPagesUp').textContent = (cache.pagesOk || 0) + '/' + SITE_PAGES.length;
+  document.getElementById('dashBrokenLinks').textContent = cache.brokenLinks || 0;
+  document.getElementById('dashErrors').textContent = cache.errors || 0;
+  document.getElementById('dashLastScan').textContent = cache.lastScan ? timeAgo(new Date(cache.lastScan)) : 'Never';
+
+  if (cache.pageResults) {
+    scanResults.pages = cache.pageResults;
+    scanResults.brokenLinks = cache.brokenLinkResults || [];
+    scanResults.errors = cache.pageResults.filter(function(p) { return !p.ok; });
+    renderPageStatusTable();
+    renderBrokenLinksTable();
+    updateHealthCards();
+    document.getElementById('lastScanTime').textContent = 'Last scan: ' + new Date(cache.lastScan).toLocaleString();
+  }
+  loadOverviewStats();
+}
+
+function timeAgo(date) {
+  var mins = Math.round((Date.now() - date.getTime()) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  if (mins < 1440) return Math.round(mins / 60) + 'h ago';
+  return Math.round(mins / 1440) + 'd ago';
+}
+
+/* ═══════════════════════ ALERTS ═══════════════════════ */
+
+var allAlerts = [];
+
+function loadAlerts() {
+  allAlerts = [];
+  var cache = JSON.parse(localStorage.getItem('rv_site_health_cache') || 'null');
+  if (cache) {
+    if (cache.errors > 0) {
+      allAlerts.push({ type:'danger', category:'errors', icon:'&#10060;', title: cache.errors + ' page(s) returning errors', desc:'Run a site health scan to see which pages are down.', time: cache.lastScan });
+    }
+    if (cache.brokenLinks > 0) {
+      allAlerts.push({ type:'warning', category:'warnings', icon:'&#128279;', title: cache.brokenLinks + ' broken link(s) detected', desc:'Some links on your site point to pages that no longer exist.', time: cache.lastScan });
+    }
+    if (cache.avgLoad > 2000) {
+      allAlerts.push({ type:'warning', category:'warnings', icon:'&#9888;', title:'Slow page load times', desc:'Average: ' + cache.avgLoad + 'ms. Consider optimizing.', time: cache.lastScan });
+    }
+    if (cache.pagesOk === SITE_PAGES.length && cache.brokenLinks === 0) {
+      allAlerts.push({ type:'success', category:'activity', icon:'&#9989;', title:'All pages healthy', desc:'All ' + SITE_PAGES.length + ' pages loading correctly.', time: cache.lastScan });
+    }
   } else {
-    body.innerHTML = `
-      <tr><td>123 Maple St</td><td>Sanders PM</td><td>Single Family</td><td>$1,800</td><td><span class="status-badge occupied">Occupied</span></td><td>6</td></tr>
-      <tr><td>456 Oak Ave #2B</td><td>Urban Nest LLC</td><td>Apartment</td><td>$1,450</td><td><span class="status-badge occupied">Occupied</span></td><td>8</td></tr>
-      <tr><td>789 Pine Rd</td><td>Maple Realty</td><td>Townhouse</td><td>$2,200</td><td><span class="status-badge vacant">Vacant</span></td><td>4</td></tr>
-      <tr><td>12 Elm St #1A</td><td>Crest Living</td><td>Apartment</td><td>$1,100</td><td><span class="status-badge occupied">Occupied</span></td><td>5</td></tr>
-      <tr><td>55 Birch Ln</td><td>Sanders PM</td><td>Duplex</td><td>$1,650</td><td><span class="status-badge occupied">Occupied</span></td><td>7</td></tr>`;
+    allAlerts.push({ type:'info', category:'warnings', icon:'&#128161;', title:'No site scan run yet', desc:'Go to Site Health and run your first scan.', time: new Date().toISOString() });
+  }
+
+  var landlords = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+  if (landlords.length > 0) {
+    allAlerts.push({ type:'info', category:'activity', icon:'&#127970;', title: landlords.length + ' landlord account(s) registered', desc:'Landlords have signed up on the platform.', time: new Date().toISOString() });
+  }
+
+  var funding = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  var pendingFunding = funding.filter(function(f) { return f.status === 'Submitted' || f.status === 'In Review'; });
+  if (pendingFunding.length > 0) {
+    allAlerts.push({ type:'warning', category:'activity', icon:'&#128176;', title: pendingFunding.length + ' funding app(s) need review', desc:'Applications waiting for your decision.', time: new Date().toISOString() });
+  }
+
+  var settings = JSON.parse(localStorage.getItem('rv_admin_settings') || '{}');
+  if (settings.maintenance) {
+    allAlerts.push({ type:'danger', category:'errors', icon:'&#128679;', title:'Maintenance mode is ON', desc:'Your site shows a maintenance banner to all visitors.', time: new Date().toISOString() });
+  }
+
+  var errorCount = allAlerts.filter(function(a) { return a.type === 'danger' || a.type === 'warning'; }).length;
+  var badge = document.getElementById('alertBadge');
+  if (errorCount > 0) { badge.textContent = errorCount; badge.style.display = ''; }
+  else { badge.style.display = 'none'; }
+
+  renderAlerts('all');
+}
+
+function renderAlerts(filter) {
+  var list = document.getElementById('alertsList');
+  var filtered = filter === 'all' ? allAlerts : allAlerts.filter(function(a) { return a.category === filter; });
+  if (!filtered.length) {
+    list.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:3rem;">No alerts in this category.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(a) {
+    var typeClass = a.type === 'danger' ? 'danger' : a.type === 'warning' ? 'warning' : a.type === 'success' ? 'success' : 'info';
+    var isUnread = (a.type === 'danger' || a.type === 'warning') ? ' unread' : '';
+    return '<div class="alert-item' + isUnread + '">' +
+      '<div class="alert-icon ' + typeClass + '">' + a.icon + '</div>' +
+      '<div class="alert-content">' +
+        '<div class="alert-title">' + a.title + '</div>' +
+        '<div class="alert-desc">' + a.desc + '</div>' +
+        '<div class="alert-time">' + (a.time ? timeAgo(new Date(a.time)) : '') + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function filterAlerts(type, btn) {
+  document.querySelectorAll('#tab-alerts .toggle-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  renderAlerts(type);
+}
+
+/* ═══════════════════════ USERS ═══════════════════════ */
+function switchUserView(view, btn) {
+  document.querySelectorAll('#tab-users .toggle-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('landlordsList').style.display = view === 'landlords' ? '' : 'none';
+  document.getElementById('tenantsList').style.display = view === 'tenants' ? '' : 'none';
+}
+
+var actionButtons = '<button class="tbl-btn view">View</button><button class="tbl-btn edit">Edit</button><button class="tbl-btn disable">Disable</button>';
+
+function loadLandlords() {
+  var accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+  var body = document.getElementById('landlordsBody');
+  if (accts.length) {
+    body.innerHTML = accts.map(function(a) { return '<tr><td>' + (a.company || a.companyName || 'N/A') + '</td><td>' + (a.email || '') + '</td><td>' + (a.properties || 0) + '</td><td>' + (a.productsEnabled || 0) + '</td><td>$' + (a.revenueMo || 0) + '</td><td>' + (a.joined || a.created || 'N/A') + '</td><td class="actions-cell">' + actionButtons + '</td></tr>'; }).join('');
+  } else {
+    body.innerHTML = '<tr><td>Sanders PM</td><td>admin@sanderspm.com</td><td>12</td><td>8</td><td>$1,240</td><td>Jan 2025</td><td class="actions-cell">' + actionButtons + '</td></tr>' +
+      '<tr><td>Maple Realty</td><td>info@maplerealty.com</td><td>6</td><td>5</td><td>$680</td><td>Mar 2025</td><td class="actions-cell">' + actionButtons + '</td></tr>' +
+      '<tr><td>Urban Nest LLC</td><td>ops@urbannest.io</td><td>24</td><td>11</td><td>$3,100</td><td>Nov 2024</td><td class="actions-cell">' + actionButtons + '</td></tr>' +
+      '<tr><td>Crest Living</td><td>hello@crestliving.com</td><td>5</td><td>4</td><td>$410</td><td>Jun 2025</td><td class="actions-cell">' + actionButtons + '</td></tr>';
+  }
+}
+
+function loadTenants() {
+  var accts = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
+  var body = document.getElementById('tenantsBody');
+  if (accts.length) {
+    body.innerHTML = accts.map(function(a) { return '<tr><td>' + (a.name || (a.firstName || '') + ' ' + (a.lastName || '')) + '</td><td>' + (a.email || '') + '</td><td>' + (a.property || 'N/A') + '</td><td>' + (a.landlord || 'N/A') + '</td><td>' + (a.products || 0) + '</td><td>' + (a.joined || a.created || 'N/A') + '</td><td class="actions-cell">' + actionButtons + '</td></tr>'; }).join('');
+  } else {
+    body.innerHTML = '<tr><td>Jane Doe</td><td>jane@email.com</td><td>123 Maple St</td><td>Sanders PM</td><td>3</td><td>Feb 2025</td><td class="actions-cell">' + actionButtons + '</td></tr>' +
+      '<tr><td>Marcus Lee</td><td>marcus.lee@email.com</td><td>456 Oak Ave #2B</td><td>Urban Nest LLC</td><td>5</td><td>Jan 2025</td><td class="actions-cell">' + actionButtons + '</td></tr>' +
+      '<tr><td>Aisha Patel</td><td>aisha.p@email.com</td><td>789 Pine Rd</td><td>Maple Realty</td><td>2</td><td>Apr 2025</td><td class="actions-cell">' + actionButtons + '</td></tr>' +
+      '<tr><td>Carlos Rivera</td><td>c.rivera@email.com</td><td>12 Elm St #1A</td><td>Crest Living</td><td>4</td><td>May 2025</td><td class="actions-cell">' + actionButtons + '</td></tr>';
   }
 }
 
 /* ═══════════════════════ FUNDING ═══════════════════════ */
 function loadFunding() {
-  let apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
-  const body = document.getElementById('fundingBody');
+  var apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  var body = document.getElementById('fundingBody');
   if (!apps.length) {
     apps = [
       { business: "Joe's Pizza", amount: '$50,000', purpose: 'Working Capital', status: 'Submitted', date: '2025-03-15' },
@@ -1062,30 +1655,20 @@ function loadFunding() {
       { business: 'Green Lawn Co', amount: '$15,000', purpose: 'Equipment', status: 'In Review', date: '2025-03-10' },
     ];
   }
-  body.innerHTML = apps.map((a, i) => {
-    const statusClass = (a.status || 'Submitted').toLowerCase().replace(/\s+/g, '');
-    const statusMap = { submitted: 'submitted', inreview: 'review', funded: 'funded', declined: 'declined' };
-    return `<tr>
-      <td>${a.business || a.businessName || 'N/A'}</td>
-      <td>${a.amount || 'N/A'}</td>
-      <td>${a.purpose || 'N/A'}</td>
-      <td>
-        <select class="funding-status-select" onchange="updateFundingStatus(${i}, this.value)" data-idx="${i}">
-          <option value="Submitted" ${a.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
-          <option value="In Review" ${a.status === 'In Review' ? 'selected' : ''}>In Review</option>
-          <option value="Funded" ${a.status === 'Funded' ? 'selected' : ''}>Funded</option>
-          <option value="Declined" ${a.status === 'Declined' ? 'selected' : ''}>Declined</option>
-        </select>
-      </td>
-      <td>${a.date || 'N/A'}</td>
-      <td class="actions-cell"><button class="tbl-btn view">View</button></td>
-    </tr>`;
+  body.innerHTML = apps.map(function(a, i) {
+    return '<tr><td>' + (a.business || a.businessName || 'N/A') + '</td><td>' + (a.amount || 'N/A') + '</td><td>' + (a.purpose || 'N/A') + '</td><td>' +
+      '<select class="funding-status-select" onchange="updateFundingStatus(' + i + ', this.value)">' +
+      '<option value="Submitted"' + (a.status === 'Submitted' ? ' selected' : '') + '>Submitted</option>' +
+      '<option value="In Review"' + (a.status === 'In Review' ? ' selected' : '') + '>In Review</option>' +
+      '<option value="Funded"' + (a.status === 'Funded' ? ' selected' : '') + '>Funded</option>' +
+      '<option value="Declined"' + (a.status === 'Declined' ? ' selected' : '') + '>Declined</option>' +
+      '</select></td><td>' + (a.date || 'N/A') + '</td><td class="actions-cell"><button class="tbl-btn view">View</button></td></tr>';
   }).join('');
 }
 
 function updateFundingStatus(idx, newStatus) {
-  let apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
-  const demoApps = [
+  var apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+  if (!apps.length) apps = [
     { business: "Joe's Pizza", amount: '$50,000', purpose: 'Working Capital', status: 'Submitted', date: '2025-03-15' },
     { business: 'Sunny Daycare', amount: '$25,000', purpose: 'Equipment Purchase', status: 'In Review', date: '2025-03-12' },
     { business: 'Urban Threads', amount: '$100,000', purpose: 'Expansion', status: 'Funded', date: '2025-03-08' },
@@ -1093,56 +1676,38 @@ function updateFundingStatus(idx, newStatus) {
     { business: 'Fresh Bites Catering', amount: '$30,000', purpose: 'Marketing', status: 'Declined', date: '2025-02-28' },
     { business: 'Green Lawn Co', amount: '$15,000', purpose: 'Equipment', status: 'In Review', date: '2025-03-10' },
   ];
-  if (!apps.length) apps = demoApps;
-  if (apps[idx]) {
-    apps[idx].status = newStatus;
-    localStorage.setItem('rv_funding_applications', JSON.stringify(apps));
-    showToast('Funding status updated.');
-  }
+  if (apps[idx]) { apps[idx].status = newStatus; localStorage.setItem('rv_funding_applications', JSON.stringify(apps)); showToast('Funding status updated.'); }
 }
 
 /* ═══════════════════════ PRODUCTS ═══════════════════════ */
-const PRODUCTS = [
-  'Deposit Bonds', 'Deposit-Free', 'Renters Insurance', 'Rent Guarantee',
-  'Lease Guarantee', 'Credit Builder', 'Rent Flexibility', 'Utility Setup',
-  'Internet Setup', 'Moving Services', 'Business Loans', 'SBA Loans', 'MCA'
-];
+var PRODUCTS = ['Deposit Bonds','Deposit-Free','Renters Insurance','Rent Guarantee','Lease Guarantee','Credit Builder','Rent Flexibility','Utility Setup','Internet Setup','Moving Services','Business Loans','SBA Loans','MCA'];
 
 function loadProducts() {
-  let saved = JSON.parse(localStorage.getItem('rv_admin_products') || '{}');
-  const container = document.getElementById('productToggles');
-  container.innerHTML = PRODUCTS.map(p => {
-    const key = p.toLowerCase().replace(/[\s\-]+/g, '_');
-    const on = saved[key] !== undefined ? saved[key] : true;
-    return `<div class="product-toggle-row">
-      <span class="pt-name">${p}</span>
-      <span class="pt-status ${on ? 'on' : 'off'}" id="pts_${key}">${on ? 'ON' : 'OFF'}</span>
-      <label class="toggle-switch">
-        <input type="checkbox" data-product="${key}" ${on ? 'checked' : ''} onchange="toggleProductLabel('${key}', this.checked)" />
-        <span class="slider"></span>
-      </label>
-    </div>`;
+  var saved = JSON.parse(localStorage.getItem('rv_admin_products') || '{}');
+  var container = document.getElementById('productToggles');
+  container.innerHTML = PRODUCTS.map(function(p) {
+    var key = p.toLowerCase().replace(/[\s\-]+/g, '_');
+    var on = saved[key] !== undefined ? saved[key] : true;
+    return '<div class="product-toggle-row"><span class="pt-name">' + p + '</span><span class="pt-status ' + (on ? 'on' : 'off') + '" id="pts_' + key + '">' + (on ? 'ON' : 'OFF') + '</span><label class="toggle-switch"><input type="checkbox" data-product="' + key + '"' + (on ? ' checked' : '') + ' onchange="toggleProductLabel(\'' + key + '\', this.checked)" /><span class="slider"></span></label></div>';
   }).join('');
 }
 
 function toggleProductLabel(key, isOn) {
-  const label = document.getElementById('pts_' + key);
+  var label = document.getElementById('pts_' + key);
   label.textContent = isOn ? 'ON' : 'OFF';
   label.className = 'pt-status ' + (isOn ? 'on' : 'off');
 }
 
 function saveProducts() {
-  const obj = {};
-  document.querySelectorAll('#productToggles input[type="checkbox"]').forEach(cb => {
-    obj[cb.dataset.product] = cb.checked;
-  });
+  var obj = {};
+  document.querySelectorAll('#productToggles input[type="checkbox"]').forEach(function(cb) { obj[cb.dataset.product] = cb.checked; });
   localStorage.setItem('rv_admin_products', JSON.stringify(obj));
   showToast('Product settings saved.');
 }
 
 /* ═══════════════════════ COMMISSION RATES ═══════════════════════ */
 function loadCommissionRates() {
-  const saved = JSON.parse(localStorage.getItem('rv_admin_commission_rates') || '{}');
+  var saved = JSON.parse(localStorage.getItem('rv_admin_commission_rates') || '{}');
   if (saved.deposit_bond !== undefined) document.getElementById('cr_deposit_bond').value = saved.deposit_bond;
   if (saved.insurance !== undefined) document.getElementById('cr_insurance').value = saved.insurance;
   if (saved.credit_builder !== undefined) document.getElementById('cr_credit_builder').value = saved.credit_builder;
@@ -1151,11 +1716,11 @@ function loadCommissionRates() {
 }
 
 function saveCommissionRates() {
-  const rates = {
-    deposit_bond:  parseFloat(document.getElementById('cr_deposit_bond').value),
-    insurance:     parseFloat(document.getElementById('cr_insurance').value),
+  var rates = {
+    deposit_bond: parseFloat(document.getElementById('cr_deposit_bond').value),
+    insurance: parseFloat(document.getElementById('cr_insurance').value),
     credit_builder: parseFloat(document.getElementById('cr_credit_builder').value),
-    utility:       parseFloat(document.getElementById('cr_utility').value),
+    utility: parseFloat(document.getElementById('cr_utility').value),
     business_loan: parseFloat(document.getElementById('cr_business_loan').value),
   };
   localStorage.setItem('rv_admin_commission_rates', JSON.stringify(rates));
@@ -1164,12 +1729,13 @@ function saveCommissionRates() {
 
 /* ═══════════════════════ SETTINGS ═══════════════════════ */
 function loadSettings() {
-  const saved = JSON.parse(localStorage.getItem('rv_admin_settings') || '{}');
+  var saved = JSON.parse(localStorage.getItem('rv_admin_settings') || '{}');
   if (saved.platformName) document.getElementById('settPlatformName').value = saved.platformName;
   if (saved.adminEmail) document.getElementById('settAdminEmail').value = saved.adminEmail;
   if (saved.supportEmail) document.getElementById('settSupportEmail').value = saved.supportEmail;
+  if (saved.siteUrl) document.getElementById('settSiteUrl').value = saved.siteUrl;
   if (saved.feePolicy) {
-    document.querySelectorAll('input[name="feePolicy"]').forEach(r => { r.checked = r.value === saved.feePolicy; });
+    document.querySelectorAll('input[name="feePolicy"]').forEach(function(r) { r.checked = r.value === saved.feePolicy; });
   }
   if (saved.maintenance) {
     document.getElementById('settMaintenance').checked = true;
@@ -1181,24 +1747,53 @@ function loadSettings() {
 }
 
 function saveSettings() {
-  const feePolicy = document.querySelector('input[name="feePolicy"]:checked').value;
-  const settings = {
+  var feePolicy = document.querySelector('input[name="feePolicy"]:checked').value;
+  var settings = {
     platformName: document.getElementById('settPlatformName').value,
-    adminEmail:   document.getElementById('settAdminEmail').value,
+    adminEmail: document.getElementById('settAdminEmail').value,
     supportEmail: document.getElementById('settSupportEmail').value,
-    feePolicy:    feePolicy,
-    maintenance:  document.getElementById('settMaintenance').checked,
+    siteUrl: document.getElementById('settSiteUrl').value,
+    feePolicy: feePolicy,
+    maintenance: document.getElementById('settMaintenance').checked,
   };
   localStorage.setItem('rv_admin_settings', JSON.stringify(settings));
   showToast('Settings saved.');
 }
 
+/* ═══════════════════════ ACTIVITY FEED ═══════════════════════ */
+function loadActivityFeed() {
+  var feed = document.getElementById('activityFeed');
+  var landlords = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+  var cache = JSON.parse(localStorage.getItem('rv_site_health_cache') || 'null');
+  var items = [];
+
+  if (cache && cache.lastScan) {
+    items.push({ dot: cache.errors > 0 ? 'red' : 'green', text: 'Site scan: ' + cache.pagesOk + '/' + SITE_PAGES.length + ' pages healthy, ' + (cache.brokenLinks || 0) + ' broken links', time: timeAgo(new Date(cache.lastScan)) });
+  }
+  landlords.slice(-2).reverse().forEach(function(l) {
+    items.push({ dot: 'green', text: 'New landlord signup: ' + (l.company || l.companyName || l.email || 'Unknown'), time: l.created ? timeAgo(new Date(l.created)) : 'Recently' });
+  });
+
+  if (!items.length) {
+    items = [
+      { dot: 'green', text: 'New landlord signup: Sanders PM', time: '2 hours ago' },
+      { dot: 'purple', text: "Funding application: Joe's Pizza &mdash; $50,000 Working Capital", time: '5 hours ago' },
+      { dot: 'blue', text: 'New tenant: Jane Doe &mdash; 123 Maple St', time: '1 day ago' },
+      { dot: 'amber', text: 'Deposit bond enrolled: Unit 4B &mdash; $2.55/mo commission', time: '1 day ago' },
+    ];
+  }
+
+  feed.innerHTML = items.map(function(item) {
+    return '<div class="af-item"><div class="af-dot ' + item.dot + '"></div><div><div class="af-text">' + item.text + '</div><div class="af-time">' + item.time + '</div></div></div>';
+  }).join('');
+}
+
 /* ═══════════════════════ TOAST ═══════════════════════ */
 function showToast(msg) {
-  const t = document.getElementById('saveToast');
+  var t = document.getElementById('saveToast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
 </script>
 </body>
