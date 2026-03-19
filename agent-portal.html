@@ -164,7 +164,7 @@
         Sign In →
       </button>
       <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#64748b;">No account? <a onclick="agentShowTab('signup')" style="color:#8b5cf6;font-weight:600;cursor:pointer;">Apply as Agent →</a></p>
-      <p style="text-align:center;margin-top:.4rem;font-size:.75rem;color:#94a3b8;">Demo: danielrhart1284@gmail.com / SPMis#1!</p>
+      <p style="text-align:center;margin-top:.4rem;font-size:.75rem;color:#94a3b8;">Sign in with your Supabase account</p>
     </div>
 
     <!-- ── SIGNUP PANEL ── -->
@@ -748,6 +748,7 @@
 <!-- Supabase Backend -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="auth.js"></script>
 <script src="data-layer.js"></script>
 
 <script>
@@ -799,10 +800,6 @@ function loadSample() {
 }
 
 // ── AUTH ─────────────────────────────────────────────
-const AGENT_ACCOUNTS = [
-  { email:'danielrhart1284@gmail.com', password:'SPMis#1!', name:'Daniel Hart' },
-  { email:'agent@rentverified.test', password:'TestAgent49', name:'Test Agent' }
-];
 
 // Tab toggle
 function agentShowTab(tab) {
@@ -833,19 +830,21 @@ function agentLaunchDashboard(acct) {
   if (pendingBanner) pendingBanner.style.display = isApproved ? 'none' : 'flex';
 }
 
-function agentLogin() {
+async function agentLogin() {
   const email = document.getElementById('aLoginEmail').value.trim().toLowerCase();
   const pw    = document.getElementById('aLoginPw').value;
   const errEl = document.getElementById('aLoginErr');
-  let acct  = AGENT_ACCOUNTS.find(a=>a.email.toLowerCase()===email && a.password===pw);
-  // Also check localStorage signups
-  if (!acct) {
-    const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
-    acct = stored.find(a=>a.email.toLowerCase()===email && a.password===pw);
+  if (!email || !pw) { errEl.textContent='⚠️ Please enter email and password.'; errEl.style.display='block'; return; }
+  try {
+    const result = await Auth.signIn(email, pw);
+    if (result.error) { errEl.textContent='⚠️ ' + result.error.message; errEl.style.display='block'; return; }
+    const profile = result.profile || {};
+    if (profile.role !== 'agent') { errEl.textContent='⚠️ This account is not registered as an agent.'; errEl.style.display='block'; await Auth.signOut(); return; }
+    errEl.style.display='none';
+    agentLaunchDashboard({ name: profile.full_name || email, email: email });
+  } catch(e) {
+    errEl.textContent='⚠️ Login failed: ' + e.message; errEl.style.display='block';
   }
-  if(!acct){ errEl.textContent='⚠️ Incorrect credentials.'; errEl.style.display='block'; return; }
-  errEl.style.display='none';
-  agentLaunchDashboard(acct);
 }
 
 function agentSignup() {
@@ -896,7 +895,8 @@ function agentSignup() {
   agentLaunchDashboard(acct);
 }
 
-function agentLogout() {
+async function agentLogout() {
+  await Auth.signOut();
   document.getElementById('agent-dashboard').style.display='none';
   document.getElementById('agent-login').style.display='flex';
   localStorage.removeItem('rv_doc_role');

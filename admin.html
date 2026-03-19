@@ -984,6 +984,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="data-layer.js"></script>
+<script src="auth.js"></script>
 <script src="twilio-integration.js"></script>
 
 <script>
@@ -1025,7 +1026,7 @@ const SITE_PAGES = [
   { name: 'Admin', file: 'admin.html' },
 ];
 
-/* ═══════════════════════ AUTH ═══════════════════════ */
+/* ═══════════════════════ AUTH (Supabase) ═══════════════════════ */
 
 async function handleLogin() {
   const email = document.getElementById('loginEmail').value.trim();
@@ -1033,45 +1034,32 @@ async function handleLogin() {
   const errorEl = document.getElementById('loginError');
   errorEl.style.display = 'none';
 
-  if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
-    try {
-      const sb = getSupabase();
-      const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
-      if (authError) {
-        console.warn('Supabase sign-in error:', authError.message);
-      } else if (authData?.user) {
-        const { data: profile } = await sb.from('profiles')
-          .select('role, first_name, last_name, company, plan')
-          .eq('id', authData.user.id)
-          .maybeSingle();
-        const role = profile?.role || authData.user.user_metadata?.role;
-        if (role === 'admin') {
-          localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now(), supabase: true, userId: authData.user.id }));
-          showDashboard();
-          return;
-        } else {
-          errorEl.textContent = 'Access denied. Admin role required. (Got role: ' + (role || 'none') + ')';
-          errorEl.style.display = 'block';
-          return;
-        }
-      }
-    } catch(e) {
-      console.warn('Supabase auth failed, trying fallback:', e);
-    }
+  if (!email || !pass) {
+    errorEl.textContent = 'Please enter your email and password.';
+    errorEl.style.display = 'block';
+    return;
   }
 
-  if (email === 'admin@rentverified.com' && pass === 'admin123') {
-    localStorage.setItem('rv_admin_auth', JSON.stringify({ email, ts: Date.now() }));
-    showDashboard();
-  } else {
-    errorEl.textContent = 'Invalid credentials. Please try again.';
+  const { data, error } = await Auth.signIn(email, pass);
+  if (error) {
+    errorEl.textContent = error.message;
     errorEl.style.display = 'block';
+    return;
   }
+
+  const role = data.profile?.role || 'unknown';
+  if (role !== 'admin') {
+    errorEl.textContent = 'Access denied. Admin role required. (Got role: ' + role + ')';
+    errorEl.style.display = 'block';
+    await Auth.signOut();
+    return;
+  }
+
+  showDashboard();
 }
 
 async function handleSignOut() {
-  if (typeof RVAuth !== 'undefined') { try { await RVAuth.signOut(); } catch(e) {} }
-  localStorage.removeItem('rv_admin_auth');
+  await Auth.signOut();
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = '';
 }
@@ -1091,24 +1079,19 @@ function showDashboard() {
   loadActivityFeed();
 }
 
+/* Auto-login: check existing Supabase session */
 (async function() {
-  if (typeof getSupabase !== 'undefined' && isSupabaseConfigured()) {
-    try {
-      const sb = getSupabase();
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        const { data: profile } = await sb.from('profiles').select('role, email, first_name').eq('id', session.user.id).maybeSingle();
-        const role = profile?.role || session.user.user_metadata?.role;
-        if (role === 'admin') {
-          localStorage.setItem('rv_admin_auth', JSON.stringify({ email: profile?.email || session.user.email, ts: Date.now(), supabase: true }));
-          showDashboard();
-          return;
-        }
+  try {
+    const session = await Auth.getSession();
+    if (session) {
+      const profile = await Auth.getProfile();
+      const role = profile?.role || session.user?.user_metadata?.role;
+      if (role === 'admin') {
+        showDashboard();
+        return;
       }
-    } catch(e) { console.warn('Auto-login check failed:', e); }
-  }
-  const auth = localStorage.getItem('rv_admin_auth');
-  if (auth) showDashboard();
+    }
+  } catch(e) { console.warn('Auto-login check failed:', e); }
 })();
 
 document.getElementById('loginPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') handleLogin(); });

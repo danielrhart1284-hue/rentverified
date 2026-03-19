@@ -369,7 +369,7 @@
         </div>
         <div class="sidebar-link" onclick="showPortal(); this.parentNode.parentNode.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-          <span onclick="document.getElementById('portal-screen').style.display='none';document.getElementById('login-screen').style.display='flex';" style="color:inherit;">Sign Out</span>
+          <span onclick="Auth.signOut().then(function(){ document.getElementById('portal-screen').style.display='none';document.getElementById('login-screen').style.display='flex'; });" style="color:inherit;">Sign Out</span>
         </div>
       </div>
     </div>
@@ -1322,17 +1322,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="auth.js"></script>
 <script src="app.js"></script>
 <script>
   // Landlords who are clients (have listed properties under their account). Tenant login only allowed if their unit is under one of these.
   const CLIENT_LANDLORDS = [
     { id: 'sanders-pm', company: 'Your Property Manager' }
   ];
-  // Tenant accounts — each tenant must belong to a client landlord (landlordId matches CLIENT_LANDLORDS[].id)
-  const TENANT_ACCOUNTS = [
-    { email: 'tenant@example.com', password: 'tenant123', name: 'Current Tenant', unit: '119 E 600 S #119, Orem UT', landlordId: 'sanders-pm' }
-  ];
-
   /* ── LEASE EXPIRY REMINDER (tenant) ── */
   function renderTenantLeaseReminder() {
     // Seeded lease data (will read from rv_tenant_lease in future)
@@ -1386,30 +1382,29 @@
   document.addEventListener('DOMContentLoaded', renderTenantLeaseReminder);
 
   function switchTab(name) {}
-  function doTenantLogin() {
+  async function doTenantLogin() {
     const email = document.getElementById('tLoginEmail').value.trim().toLowerCase();
     const pw    = document.getElementById('tLoginPw').value;
     const errEl = document.getElementById('tLoginErr');
-    const acct  = TENANT_ACCOUNTS.find(a => a.email.toLowerCase() === email && a.password === pw);
-    if (!acct) {
+    errEl.style.display = 'none';
+
+    const { data, error } = await Auth.signIn(email, pw);
+    if (error) {
       errEl.textContent = 'Incorrect email or password. Please try again.';
       errEl.style.display = 'block';
       return;
     }
-    const landlord = CLIENT_LANDLORDS.find(c => c.id === acct.landlordId);
-    if (!landlord) {
-      errEl.textContent = 'This property is not under a current client account. Please request access from your landlord.';
+
+    const profile = data.profile || {};
+    if (profile.role !== 'tenant') {
+      errEl.textContent = 'This account is not registered as a tenant. Please use the correct portal.';
       errEl.style.display = 'block';
+      await Auth.signOut();
       return;
     }
-    const suspended = (function(){ try { return JSON.parse(localStorage.getItem('rv_suspended_accounts') || '[]'); } catch(e){ return []; } })();
-    if (suspended.indexOf(acct.landlordId) >= 0) {
-      errEl.textContent = 'This account has been suspended. Please contact your property manager or support.';
-      errEl.style.display = 'block';
-      return;
-    }
+
     errEl.style.display = 'none';
-    showPortal(acct.name);
+    showPortal(profile.full_name || profile.name || 'Tenant');
   }
 
   document.addEventListener('keydown', function(e) {

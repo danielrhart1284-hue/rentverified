@@ -164,7 +164,7 @@
         Sign In →
       </button>
       <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#64748b;">No account? <a onclick="agentShowTab('signup')" style="color:#8b5cf6;font-weight:600;cursor:pointer;">Apply as Agent →</a></p>
-      <p style="text-align:center;margin-top:.4rem;font-size:.75rem;color:#94a3b8;">Demo: danielrhart1284@gmail.com / SPMis#1!</p>
+      <p style="text-align:center;margin-top:.4rem;font-size:.75rem;color:#94a3b8;">Sign in with your RentVerified agent account</p>
     </div>
 
     <!-- ── SIGNUP PANEL ── -->
@@ -748,6 +748,7 @@
 <!-- Supabase Backend -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="../auth.js"></script>
 <script src="data-layer.js"></script>
 
 <script>
@@ -799,10 +800,6 @@ function loadSample() {
 }
 
 // ── AUTH ─────────────────────────────────────────────
-const AGENT_ACCOUNTS = [
-  { email:'danielrhart1284@gmail.com', password:'SPMis#1!', name:'Daniel Hart' },
-  { email:'agent@rentverified.test', password:'TestAgent49', name:'Test Agent' }
-];
 
 // Tab toggle
 function agentShowTab(tab) {
@@ -833,22 +830,24 @@ function agentLaunchDashboard(acct) {
   if (pendingBanner) pendingBanner.style.display = isApproved ? 'none' : 'flex';
 }
 
-function agentLogin() {
+async function agentLogin() {
   const email = document.getElementById('aLoginEmail').value.trim().toLowerCase();
   const pw    = document.getElementById('aLoginPw').value;
   const errEl = document.getElementById('aLoginErr');
-  let acct  = AGENT_ACCOUNTS.find(a=>a.email.toLowerCase()===email && a.password===pw);
-  // Also check localStorage signups
-  if (!acct) {
-    const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
-    acct = stored.find(a=>a.email.toLowerCase()===email && a.password===pw);
-  }
-  if(!acct){ errEl.textContent='⚠️ Incorrect credentials.'; errEl.style.display='block'; return; }
+  if (!email || !pw) { errEl.textContent='⚠️ Please enter email and password.'; errEl.style.display='block'; return; }
   errEl.style.display='none';
+  const { data, error } = await Auth.signIn(email, pw);
+  if (error) { errEl.textContent='⚠️ ' + error.message; errEl.style.display='block'; return; }
+  const profile = data.profile || await Auth.getProfile(true);
+  if (!profile || profile.role !== 'agent') {
+    await Auth.signOut();
+    errEl.textContent='⚠️ Access denied. Agent account required.'; errEl.style.display='block'; return;
+  }
+  const acct = { name: (profile.first_name || '') + ' ' + (profile.last_name || ''), verificationStatus: profile.verification_status || 'approved' };
   agentLaunchDashboard(acct);
 }
 
-function agentSignup() {
+async function agentSignup() {
   const name      = document.getElementById('as-name').value.trim();
   const email     = document.getElementById('as-email').value.trim();
   const phone     = document.getElementById('as-phone').value.trim();
@@ -880,26 +879,24 @@ function agentSignup() {
     errEl.textContent = '⚠️ You must certify your credentials are accurate to continue.'; errEl.style.display='block'; return;
   }
   errEl.style.display = 'none';
-  const acct = {
-    name, email, phone, brokerage, password: pw,
-    verificationStatus: 'pending',
-    joined: new Date().toISOString().split('T')[0],
-    credentials: {
-      dre: { number: dreNum, type: dreType, expires: dreExp, broker: brokerName, fileName: dreFile.name },
-      eo:  { carrier: eoCarrier, policy: eoPolicy, coverage: eoCoverage, expires: eoExp, fileName: eoFile.name },
-      submittedAt: new Date().toISOString()
-    }
-  };
-  const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
-  stored.push(acct);
-  localStorage.setItem('rv_agent_signups', JSON.stringify(stored));
+
+  const nameParts = name.split(' ');
+  const firstName = nameParts[0];
+  const lastName  = nameParts.slice(1).join(' ') || '';
+
+  const { data, error } = await Auth.signUp({
+    email, password: pw, firstName, lastName, phone, company: brokerage, role: 'agent'
+  });
+  if (error) { errEl.textContent = '⚠️ ' + error.message; errEl.style.display='block'; return; }
+
+  const acct = { name, verificationStatus: 'pending' };
   agentLaunchDashboard(acct);
 }
 
-function agentLogout() {
+async function agentLogout() {
+  await Auth.signOut();
   document.getElementById('agent-dashboard').style.display='none';
   document.getElementById('agent-login').style.display='flex';
-  localStorage.removeItem('rv_doc_role');
 }
 
 document.addEventListener('keydown',e=>{ if(e.key==='Enter' && document.getElementById('apanel-login').style.display!=='none') agentLogin(); });

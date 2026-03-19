@@ -233,22 +233,29 @@
           </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="font-weight:600;font-size:.88rem;">Email Address</label>
-            <input type="email" id="loginEmail" placeholder="you@email.com" value="danielrhart1284@gmail.com"
+            <input type="email" id="loginEmail" placeholder="you@email.com"
               style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
           </div>
           <div class="form-group" style="margin-bottom:.5rem;">
             <label style="font-weight:600;font-size:.88rem;">Password</label>
             <div style="position:relative;">
               <input type="password" id="loginPw" placeholder="••••••••"
+                onkeydown="if(event.key==='Enter')doSignupLogin()"
                 style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
               <span onclick="togglePw()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);cursor:pointer;font-size:.85rem;color:#94a3b8;">👁</span>
             </div>
           </div>
           <div id="loginErr" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:.75rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;"></div>
-          <button onclick="doLogin()"
+          <button onclick="doSignupLogin()"
             style="width:100%;padding:.75rem;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.75rem;transition:background .15s;"
             onmouseover="this.style.background='#1e40af'" onmouseout="this.style.background='#1a56db'">
             Sign In →
+          </button>
+          <button onclick="Auth.signInWithGoogle()"
+            style="width:100%;padding:.7rem;background:#fff;color:#374151;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:border-color .15s;"
+            onmouseover="this.style.borderColor='#4285f4'" onmouseout="this.style.borderColor='#e2e8f0'">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Sign in with Google
           </button>
           <p style="text-align:center;margin-top:1.25rem;font-size:.85rem;color:var(--gray-600);">
             Don't have an account? <a href="#" onclick="showSignupForm()" style="color:#1a56db;font-weight:600;">Create one free →</a>
@@ -496,10 +503,9 @@
         New to RentVerified? <a href="#" onclick="showSignup();return false;" style="color:var(--primary);font-weight:600;">Create Account</a>
       </div>
 
-      <!-- Business login hint -->
-      <div style="margin-top:1.5rem;padding:.75rem 1rem;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;font-size:.78rem;color:#0369A1;">
-        <strong>Sanders PM:</strong> Danielrhart1284@gmail.com / Sandersis#1PM!<br/>
-        <a href="test-accounts.html" style="color:#0369A1;font-weight:600;">View all test accounts by category →</a>
+      <!-- Password reset link -->
+      <div style="margin-top:1.5rem;padding:.75rem 1rem;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;font-size:.78rem;color:#0369A1;text-align:center;">
+        Having trouble signing in? <a href="#" onclick="Auth.resetPassword(document.getElementById('login-email')?.value||prompt('Enter your email:')).then(()=>alert('Password reset email sent!'))" style="color:#0369A1;font-weight:600;">Reset your password →</a>
       </div>
     </div>
   </div>
@@ -636,7 +642,7 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           Management Profile
         </div>
-        <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="document.getElementById('dashboard-screen').style.display='none';document.getElementById('signup-screen').style.display='block';">
+        <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="Auth.signOut().then(()=>{document.getElementById('dashboard-screen').style.display='none';document.getElementById('signup-screen').style.display='block';})">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           Sign Out
         </div>
@@ -1407,6 +1413,10 @@
   </div><!-- end dashboard-layout -->
 </div><!-- end dashboard-screen -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
 <script src="app.js"></script>
 <script>
   let selectedPlan = 'annual';
@@ -1440,11 +1450,7 @@
     }
   }
 
-  // ── AUTH ──────────────────────────────────────────
-  const ACCOUNTS = [
-    { email: 'danielrhart1284@gmail.com', password: 'SPMis#1!',   name: 'Daniel', company: 'Sanders Property Management', role: 'landlord' },
-    { email: 'danielhart1284',            password: 'Mayais#1dog!', name: 'Daniel', company: 'Sanders Property Management', role: 'admin',    username: 'danielhart1284' },
-  ];
+  // ── AUTH (Supabase) ──────────────────────────────────────────
 
   let currentLoginRole = 'landlord';
 
@@ -1462,30 +1468,47 @@
     });
   }
 
-  function doLogin() {
+  async function doSignupLogin() {
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const pw    = document.getElementById('loginPw').value;
     const errEl = document.getElementById('loginErr');
-    const acct  = ACCOUNTS.find(a => (a.email.toLowerCase() === email || (a.username && a.username.toLowerCase() === email)) && a.password === pw);
-    if (!acct) {
-      errEl.textContent = '⚠️ Incorrect email or password. Please try again.';
+    errEl.style.display = 'none';
+
+    if (!email || !pw) {
+      errEl.textContent = '⚠️ Please enter your email and password.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const { data, error } = await Auth.signIn(email, pw);
+    if (error) {
+      errEl.textContent = '⚠️ ' + error.message;
       errEl.style.display = 'block';
       document.getElementById('loginPw').style.borderColor = '#ef4444';
       return;
     }
-    errEl.style.display = 'none';
-    // Route by role
-    if (currentLoginRole === 'agent') {
-      window.location.href = 'agent-portal.html';
+
+    // Route by role from profile
+    const role = data.profile?.role || 'landlord';
+    const routes = {
+      agent:  'rentverified/agent-portal.html',
+      vendor: 'rentverified/vendor-portal.html',
+      tenant: 'rentverified/tenant-portal.html',
+      admin:  'admin.html'
+    };
+
+    if (routes[role] && role !== 'landlord') {
+      window.location.href = routes[role];
       return;
     }
-    if (currentLoginRole === 'vendor') {
-      window.location.href = 'vendor-portal.html';
-      return;
-    }
+
     // Landlord / PM → dashboard
     document.getElementById('signup-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
+    renderPropertiesList();
+    renderAllClientsList();
+    renderLeaseExpiry();
+    loadFeePolicy();
   }
 
   function togglePw() {
@@ -1507,22 +1530,46 @@
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && document.getElementById('login-panel') &&
         document.getElementById('login-panel').style.display !== 'none') {
-      doLogin();
+      doSignupLogin();
     }
   });
 
-  function submitSignup() {
-    // Save credentials from step-1 inputs to localStorage
+  async function submitSignup() {
     const inputs = document.querySelectorAll('#form-step-1 input');
-    const acct = {
-      firstName: inputs[0] ? inputs[0].value || 'Daniel'  : 'Daniel',
-      lastName:  inputs[1] ? inputs[1].value || 'Sanders' : 'Sanders',
-      email:     inputs[2] ? inputs[2].value.toLowerCase() : 'daniel@sanderspm.com',
-      phone:     inputs[3] ? inputs[3].value : '',
-      password:  inputs[4] ? inputs[4].value || 'Sanders2026' : 'Sanders2026',
-      company:   'Sanders Property Management',
-    };
-    localStorage.setItem('rv_account', JSON.stringify(acct));
+    const firstName = inputs[0] ? inputs[0].value.trim() : '';
+    const lastName  = inputs[1] ? inputs[1].value.trim() : '';
+    const email     = inputs[2] ? inputs[2].value.trim().toLowerCase() : '';
+    const phone     = inputs[3] ? inputs[3].value.trim() : '';
+    const password  = inputs[4] ? inputs[4].value : '';
+
+    if (!email || !password) {
+      alert('Please enter an email and password.');
+      return;
+    }
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters.');
+      return;
+    }
+
+    const { data, error } = await Auth.signUp({
+      email, password, firstName, lastName, phone,
+      company: 'Sanders Property Management',
+      role: 'landlord',
+      plan: selectedPlan === 'annual' ? 'pro' : selectedPlan === 'perlisting' ? 'pay-per-listing' : 'starter'
+    });
+
+    if (error) {
+      alert('Signup error: ' + error.message);
+      return;
+    }
+
+    // Check if email confirmation is required
+    if (data.user && !data.session) {
+      alert('Account created! Please check your email to confirm, then sign in.');
+      showLoginForm();
+      return;
+    }
+
     document.getElementById('signup-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
   }
@@ -1545,63 +1592,52 @@
     if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
   }
 
-  // Test accounts by category (see test-accounts.html)
-  const TEST_ACCOUNTS = [
-    { email: 'starter@rentverified.test', password: 'TestStarter79', plan: 'Starter', name: 'Starter Test', company: 'Starter Demo' },
-    { email: 'pro@rentverified.test', password: 'TestPro179', plan: 'Pro', name: 'Pro Test', company: 'Pro Demo' },
-    { email: 'contractor@rentverified.test', password: 'TestContractor19', redirect: 'vendor-portal.html' },
-    { email: 'agent@rentverified.test', password: 'TestAgent49', redirect: 'agent-portal.html' },
-    { email: 'attorney@rentverified.test', password: 'TestAttorney99', redirect: 'attorney-demo.html' },
-    { email: 'listing@rentverified.test', password: 'TestListing49', plan: 'Pay-per-listing', name: 'Listing Test', company: 'Listing Demo' },
-    { email: 'screening@rentverified.test', password: 'TestScreening35', plan: 'Tenant screening', name: 'Screening Test', company: 'Screening Demo' },
-    { email: 'creditbuilder@rentverified.test', password: 'TestCredit699', plan: 'Credit builder', name: 'Credit Builder Test', company: 'Credit Builder Demo' },
-    { email: 'insurance@rentverified.test', password: 'TestInsuranceRef', plan: 'Renters insurance referral', name: 'Insurance Ref Test', company: 'Insurance Referral Demo' },
-    { email: 'insagent@rentverified.test', password: 'TestInsAgent49', redirect: 'insurance-agents.html#agent' },
-  ];
-
-  function doLogin() {
+  // Second login screen (login-screen) also uses Supabase Auth
+  async function doLogin() {
     const email    = (document.getElementById('login-email').value || '').toLowerCase().trim();
     const password = document.getElementById('login-password').value || '';
     const errEl    = document.getElementById('login-error');
+    errEl.style.display = 'none';
 
-    const DANIEL = { email: 'danielrhart1284@gmail.com', password: 'Sandersis#1PM!', company: 'Sanders Property Management' };
-    const DEMO   = { email: 'daniel@sanderspm.com', password: 'Sanders2026' };
-    const stored = JSON.parse(localStorage.getItem('rv_account') || 'null');
-    const matchStored = stored && stored.email === email && stored.password === password;
-    const matchDaniel = email === DANIEL.email && password === DANIEL.password;
-    const matchDemo   = email === DEMO.email && password === DEMO.password;
-    const testAcct    = TEST_ACCOUNTS.find(a => a.email === email && a.password === password);
-
-    if (testAcct && testAcct.redirect) {
-      errEl.style.display = 'none';
-      if (testAcct.redirect.indexOf('insurance-agents') !== -1) {
-        localStorage.setItem('rv_ins_agent', JSON.stringify({ name: 'Test Ins Agent', company: 'Test Insurance Co', license: '12345678', tier: 'featured' }));
-      }
-      window.location.href = testAcct.redirect;
+    if (!email || !password) {
+      errEl.textContent = 'Please enter your email and password.';
+      errEl.style.display = 'block';
       return;
     }
 
-    if (matchStored || matchDaniel || matchDemo || (testAcct && !testAcct.redirect)) {
-      errEl.style.display = 'none';
-      const acct = matchDaniel ? { firstName: 'Daniel', lastName: 'Sanders', email: DANIEL.email, password: DANIEL.password, company: DANIEL.company } :
-        matchDemo ? { firstName: 'Daniel', lastName: 'Sanders', email: DEMO.email, password: DEMO.password, company: 'Sanders Property Management' } :
-        testAcct ? { firstName: (testAcct.name || '').split(' ')[0], lastName: '', email: testAcct.email, password: testAcct.password, company: testAcct.company || '', plan: testAcct.plan } :
-        stored;
-      if (!stored || testAcct) localStorage.setItem('rv_account', JSON.stringify(acct));
-      if (testAcct && testAcct.plan) localStorage.setItem('rv_plan', testAcct.plan);
-      document.getElementById('login-screen').style.display   = 'none';
-      document.getElementById('dashboard-screen').style.display = 'block';
-      if (document.querySelector('.plan-chip')) document.querySelector('.plan-chip').textContent = (testAcct && testAcct.plan) ? testAcct.plan : 'Pro Plan';
-      renderPropertiesList();
-      renderAllClientsList();
-      renderLeaseExpiry();
-      loadFeePolicy();
-    } else {
-      errEl.textContent = 'Incorrect email or password. Please try again.';
+    const { data, error } = await Auth.signIn(email, password);
+    if (error) {
+      errEl.textContent = error.message;
       errEl.style.display = 'block';
       document.getElementById('login-password').value = '';
       document.getElementById('login-password').focus();
+      return;
     }
+
+    // Route based on role
+    const role = data.profile?.role || 'landlord';
+    const routes = {
+      agent:  'rentverified/agent-portal.html',
+      vendor: 'rentverified/vendor-portal.html',
+      tenant: 'rentverified/tenant-portal.html',
+      admin:  'admin.html'
+    };
+
+    if (routes[role] && role !== 'landlord') {
+      window.location.href = routes[role];
+      return;
+    }
+
+    // Landlord → dashboard
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+    if (document.querySelector('.plan-chip') && data.profile?.plan) {
+      document.querySelector('.plan-chip').textContent = data.profile.plan;
+    }
+    renderPropertiesList();
+    renderAllClientsList();
+    renderLeaseExpiry();
+    loadFeePolicy();
   }
 
   /* ── FEE POLICY FUNCTIONS ── */

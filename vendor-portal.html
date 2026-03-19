@@ -855,32 +855,13 @@
   </div><!-- /main -->
 </div><!-- /app -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth.js"></script>
 <script>
 /* ══════════════════════════════
-   DATA & ACCOUNTS
+   DATA
 ══════════════════════════════ */
-const VENDOR_ACCOUNTS = [
-  {
-    email: 'danielrhart1284@gmail.com',
-    password: 'SPMis#1!',
-    name: 'Daniel Hart',
-    biz: 'Hart Handyman Services',
-    phone: '(801) 555-0199',
-    trades: ['Plumbing','Electrical','General'],
-    zips: ['84601','84604','84097','84062'],
-    joined: '2026-01-10'
-  },
-  {
-    email: 'contractor@rentverified.test',
-    password: 'TestContractor19',
-    name: 'Test Contractor',
-    biz: 'Test Contractor Co',
-    phone: '(801) 555-0000',
-    trades: ['Plumbing','Electrical','HVAC','General'],
-    zips: ['84601','84604','84097','84062','84058'],
-    joined: '2026-01-15'
-  }
-];
 
 /* Sample leads — in production these come from maintenance.html work orders */
 const SAMPLE_LEADS = [
@@ -1031,24 +1012,33 @@ function toggleTrade(el, trade, context) {
   }
 }
 
-function doLogin() {
+async function doLogin() {
   const email = document.getElementById('l-email').value.trim().toLowerCase();
   const pw = document.getElementById('l-pw').value;
   const err = document.getElementById('login-err');
-  // Check hardcoded accounts
-  let acct = VENDOR_ACCOUNTS.find(a => a.email.toLowerCase() === email && a.password === pw);
-  // Also check localStorage signups
-  const stored = JSON.parse(localStorage.getItem('rv_vendor_accounts') || '[]');
-  if (!acct) acct = stored.find(a => a.email.toLowerCase() === email && a.password === pw);
-  if (!acct) {
+  try {
+    const { user, profile } = await Auth.signIn(email, pw);
+    if (!profile || profile.role !== 'vendor') {
+      err.textContent = 'This account is not registered as a vendor.';
+      err.style.display = 'block';
+      await Auth.signOut();
+      return;
+    }
+    err.style.display = 'none';
+    currentVendor = {
+      name: profile.full_name || user.email,
+      email: user.email,
+      phone: profile.phone || '',
+      biz: profile.business_name || '',
+      trades: profile.trades || [],
+      zips: profile.zips || [],
+      joined: profile.created_at ? profile.created_at.split('T')[0] : ''
+    };
+    launchApp();
+  } catch (e) {
+    err.textContent = e.message || 'Invalid email or password.';
     err.style.display = 'block';
-    return;
   }
-  err.style.display = 'none';
-  currentVendor = acct;
-  localStorage.setItem('rv_vendor_session', JSON.stringify(acct));
-  localStorage.setItem('rv_doc_role', 'vendor');
-  launchApp();
 }
 
 function previewFile(input, previewId) {
@@ -1112,13 +1102,11 @@ function doSignup() {
   stored.push(acct);
   localStorage.setItem('rv_vendor_accounts', JSON.stringify(stored));
   currentVendor = acct;
-  localStorage.setItem('rv_vendor_session', JSON.stringify(acct));
   launchApp();
 }
 
-function logout() {
-  localStorage.removeItem('rv_vendor_session');
-  localStorage.removeItem('rv_doc_role');
+async function logout() {
+  await Auth.signOut();
   location.reload();
 }
 
@@ -1196,10 +1184,19 @@ function launchApp() {
 }
 
 /* Check for existing session */
-window.addEventListener('DOMContentLoaded', () => {
-  const sess = localStorage.getItem('rv_vendor_session');
-  if (sess) {
-    currentVendor = JSON.parse(sess);
+window.addEventListener('DOMContentLoaded', async () => {
+  const session = await Auth.getSession();
+  if (session && session.profile && session.profile.role === 'vendor') {
+    const p = session.profile;
+    currentVendor = {
+      name: p.full_name || session.user.email,
+      email: session.user.email,
+      phone: p.phone || '',
+      biz: p.business_name || '',
+      trades: p.trades || [],
+      zips: p.zips || [],
+      joined: p.created_at ? p.created_at.split('T')[0] : ''
+    };
     launchApp();
     // Show compliance badge if any credentials expiring/expired
     (function() {
@@ -1502,7 +1499,6 @@ function saveSettings() {
   currentVendor.biz = document.getElementById('set-biz').value;
   currentVendor.zips = document.getElementById('set-zips').value.split(',').map(z => z.trim());
   currentVendor.trades = [...settingsTrades];
-  localStorage.setItem('rv_vendor_session', JSON.stringify(currentVendor));
   document.getElementById('sb-name').textContent = currentVendor.name;
   document.getElementById('settings-name').textContent = currentVendor.name;
   document.getElementById('settings-avatar').textContent = currentVendor.name.charAt(0).toUpperCase();
