@@ -19,6 +19,14 @@ const RVData = {
     return user?.id || 'local';
   },
 
+  /** Scope a query by the current user's workspace (if Workspace module is loaded) */
+  _scopeByWorkspace(query) {
+    if (typeof Workspace !== 'undefined' && Workspace.cached()?.id) {
+      return query.eq('workspace_id', Workspace.cached().id);
+    }
+    return query;
+  },
+
   // ─── PROPERTIES ──────────────────────────────────────────────────────
 
   async getProperties() {
