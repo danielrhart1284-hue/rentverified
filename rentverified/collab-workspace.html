@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Collaboration Workspace</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Workspace Header ── */
+    .ws-header {
+      background: linear-gradient(135deg, #059669 0%, #047857 60%, #065f46 100%);
+      color: white;
+      padding: 3.5rem 2rem 0;
+    }
+    .ws-header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .ws-breadcrumb {
+      font-size: 0.82rem;
+      opacity: 0.8;
+      margin-bottom: 0.75rem;
+    }
+    .ws-breadcrumb a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .ws-breadcrumb a:hover { color: white; }
+    .ws-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .ws-title-left { display: flex; align-items: flex-start; gap: 1rem; }
+    .ws-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; flex-shrink: 0;
+    }
+    .ws-name { font-size: 1.7rem; font-weight: 900; line-height: 1.2; }
+    .ws-purpose { font-size: 0.92rem; opacity: 0.85; margin-top: 4px; }
+    .ws-meta-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 8px; }
+    .ws-meta-pill {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 600;
+    }
+    .ws-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; }
+    .ws-progress-ring { position: relative; width: 72px; height: 72px; }
+    .ws-progress-ring svg { transform: rotate(-90deg); }
+    .ws-progress-ring .ring-track { fill: none; stroke: rgba(255,255,255,0.25); stroke-width: 5; }
+    .ws-progress-ring .ring-fill { fill: none; stroke: white; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+    .ws-progress-pct {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800; color: white;
+    }
+    .ws-header-stats { display: flex; gap: 1.5rem; }
+    .ws-stat { text-align: right; }
+    .ws-stat-val { font-size: 1.4rem; font-weight: 800; }
+    .ws-stat-lbl { font-size: 0.72rem; opacity: 0.75; margin-top: 1px; }
+
+    /* ── Nav Tabs ── */
+    .ws-tabs {
+      background: white;
+      border-bottom: 2px solid #e5e7eb;
+      position: sticky; top: 60px; z-index: 100;
+    }
+    .ws-tabs-inner {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 2rem;
+      display: flex; gap: 0; overflow-x: auto;
+    }
+    .ws-tab {
+      padding: 0.9rem 1.4rem;
+      border: none; background: none;
+      font-size: 0.88rem; font-weight: 600; color: #6b7280;
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+    }
+    .ws-tab:hover { color: #374151; }
+    .ws-tab.active { color: #059669; border-bottom-color: #059669; }
+
+    /* ── Content Area ── */
+    .ws-body { max-width: 1280px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+    .ws-panel { display: none; }
+    .ws-panel.active { display: block; }
+
+    /* ── Member Avatars Row ── */
+    .ws-members-strip {
+      background: white; border-bottom: 1px solid #e5e7eb;
+      padding: 0.6rem 2rem;
+    }
+    .ws-members-strip-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .ws-member-chip {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 999px; padding: 4px 10px 4px 4px;
+      font-size: 0.78rem; font-weight: 600; color: #374151;
+      cursor: default;
+    }
+    .ws-member-chip .chip-av {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 800; color: white; flex-shrink: 0;
+    }
+    .ws-member-chip.client { background: #fffbeb; border-color: #fde68a; }
+    .invite-chip-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: #eff6ff; border: 1.5px dashed #93c5fd;
+      border-radius: 999px; padding: 4px 10px;
+      font-size: 0.78rem; font-weight: 700; color: #1d4ed8;
+      cursor: pointer; transition: background 0.12s;
+    }
+    .invite-chip-btn:hover { background: #dbeafe; }
+
+    /* ── Cards ── */
+    .card {
+      background: white; border: 1px solid #e5e7eb;
+      border-radius: 12px; overflow: hidden;
+    }
+    .card-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title { font-size: 0.95rem; font-weight: 700; color: #111827; }
+    .card-body { padding: 1.25rem; }
+
+    /* ── Overview grid ── */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .overview-stat-row {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 0.85rem; margin-bottom: 1.25rem;
+    }
+    .stat-card {
+      background: white; border: 1px solid #e5e7eb;
+      border-radius: 10px; padding: 1rem;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .stat-card-val { font-size: 1.6rem; font-weight: 800; color: #111827; }
+    .stat-card-lbl { font-size: 0.75rem; color: #6b7280; font-weight: 600; }
+    .stat-card.green .stat-card-val { color: #059669; }
+    .stat-card.yellow .stat-card-val { color: #d97706; }
+    .stat-card.red .stat-card-val { color: #dc2626; }
+    .stat-card.blue .stat-card-val { color: #2563eb; }
+
+    /* ── Checklist ── */
+    .checklist-section { margin-bottom: 1.5rem; }
+    .checklist-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.6rem; padding: 0 0.25rem;
+    }
+    .checklist-section-name {
+      font-size: 0.88rem; font-weight: 700; color: #374151;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .checklist-section-pct { font-size: 0.8rem; color: #9ca3af; font-weight: 600; }
+    .checklist-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid #e5e7eb; border-radius: 8px;
+      margin-bottom: 0.4rem; background: white;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .checklist-item.completed { background: #f0fdf4; border-color: #bbf7d0; }
+    .checklist-item input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #059669; flex-shrink: 0; }
+    .checklist-item-label { flex: 1; font-size: 0.88rem; color: #374151; font-weight: 500; }
+    .checklist-item.completed .checklist-item-label { text-decoration: line-through; color: #9ca3af; }
+    .checklist-item-meta { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+    .ci-assignee { font-size: 0.72rem; color: #9ca3af; font-weight: 500; }
+    .ci-due { font-size: 0.72rem; color: #9ca3af; font-weight: 500; }
+    .ci-due.overdue { color: #dc2626; font-weight: 700; }
+    .ci-remove {
+      background: none; border: none; color: #d1d5db;
+      cursor: pointer; font-size: 1rem; padding: 0 2px; line-height: 1;
+    }
+    .ci-remove:hover { color: #ef4444; }
+    .checklist-add-row {
+      display: flex; gap: 0.5rem; margin-top: 0.5rem;
+    }
+    .checklist-add-row input {
+      flex: 1; padding: 0.5rem 0.75rem;
+      border: 1.5px dashed #d1d5db; border-radius: 8px;
+      font-size: 0.85rem; outline: none; color: #374151;
+    }
+    .checklist-add-row input:focus { border-color: #059669; border-style: solid; }
+    .btn-add-ci {
+      padding: 0.5rem 1rem; background: #059669; color: white;
+      border: none; border-radius: 8px; font-size: 0.82rem;
+      font-weight: 700; cursor: pointer;
+    }
+    .btn-add-ci:hover { background: #047857; }
+
+    /* ── Kanban ── */
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      align-items: start;
+    }
+    .kanban-col {
+      background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 10px; overflow: hidden;
+    }
+    .kanban-col-header {
+      padding: 0.75rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .kanban-col-title { font-size: 0.82rem; font-weight: 800; color: #374151; display: flex; align-items: center; gap: 0.4rem; }
+    .kanban-col-count {
+      min-width: 20px; height: 20px;
+      background: #e5e7eb; color: #6b7280;
+      border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; padding: 0 5px;
+    }
+    .kanban-cards { padding: 0.75rem; min-height: 80px; display: flex; flex-direction: column; gap: 0.5rem; }
+    .kanban-card {
+      background: white; border: 1px solid #e5e7eb;
+      border-radius: 8px; padding: 0.75rem;
+      cursor: pointer; transition: box-shadow 0.12s, border-color 0.12s;
+    }
+    .kanban-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: #93c5fd; }
+    .kanban-card-title { font-size: 0.85rem; font-weight: 700; color: #111827; margin-bottom: 0.35rem; }
+    .kanban-card-meta { display: flex; align-items: center; justify-content: space-between; }
+    .kc-assignee-av {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.58rem; font-weight: 800; color: white;
+    }
+    .kc-due { font-size: 0.72rem; color: #9ca3af; }
+    .kc-due.overdue { color: #dc2626; font-weight: 700; }
+    .priority-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .priority-high { background: #ef4444; }
+    .priority-medium { background: #f59e0b; }
+    .priority-low { background: #10b981; }
+    .kanban-add-btn {
+      width: 100%; background: none; border: none;
+      color: #9ca3af; font-size: 0.82rem; font-weight: 600;
+      padding: 0.5rem; cursor: pointer; border-radius: 6px;
+      transition: background 0.12s, color 0.12s; text-align: left;
+    }
+    .kanban-add-btn:hover { background: #eff6ff; color: #2563eb; }
+
+    /* ── Timeline ── */
+    .timeline-wrap { position: relative; padding-left: 2rem; }
+    .timeline-wrap::before {
+      content: ''; position: absolute; left: 0.75rem; top: 0; bottom: 0;
+      width: 2px; background: #e5e7eb;
+    }
+    .milestone {
+      position: relative; margin-bottom: 1.25rem;
+      padding: 0.85rem 1rem; background: white;
+      border: 1px solid #e5e7eb; border-radius: 10px;
+      transition: border-color 0.12s;
+    }
+    .milestone:hover { border-color: #93c5fd; }
+    .milestone.done { border-color: #bbf7d0; background: #f0fdf4; }
+    .milestone.done .ms-title { text-decoration: line-through; color: #9ca3af; }
+    .milestone-dot {
+      position: absolute; left: -1.65rem; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #e5e7eb; border: 3px solid white;
+      box-shadow: 0 0 0 2px #e5e7eb;
+    }
+    .milestone.done .milestone-dot { background: #059669; box-shadow: 0 0 0 2px #6ee7b7; }
+    .milestone.in_progress .milestone-dot { background: #f59e0b; box-shadow: 0 0 0 2px #fde68a; }
+    .ms-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+    .ms-title { font-size: 0.9rem; font-weight: 700; color: #111827; }
+    .ms-meta { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.35rem; flex-wrap: wrap; }
+    .ms-date { font-size: 0.78rem; color: #6b7280; }
+    .ms-assignee { font-size: 0.78rem; color: #6b7280; }
+    .ms-status-badge {
+      font-size: 0.7rem; font-weight: 700; padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .ms-status-badge.pending { background: #f3f4f6; color: #6b7280; }
+    .ms-status-badge.in_progress { background: #fef3c7; color: #92400e; }
+    .ms-status-badge.done { background: #dcfce7; color: #15803d; }
+    .ms-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
+    .ms-btn {
+      background: none; border: 1px solid #e5e7eb;
+      border-radius: 6px; padding: 2px 8px;
+      font-size: 0.72rem; font-weight: 600; color: #6b7280;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .ms-btn:hover { background: #f9fafb; color: #374151; }
+    .ms-btn.done-btn { color: #059669; border-color: #6ee7b7; }
+    .ms-btn.done-btn:hover { background: #f0fdf4; }
+
+    /* ── Activity Feed ── */
+    .activity-post-box {
+      background: white; border: 1px solid #e5e7eb;
+      border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;
+    }
+    .activity-post-box textarea {
+      width: 100%; border: 1.5px solid #e5e7eb; border-radius: 8px;
+      padding: 0.65rem 0.85rem; font-size: 0.88rem; color: #374151;
+      resize: none; outline: none; box-sizing: border-box; font-family: inherit;
+    }
+    .activity-post-box textarea:focus { border-color: #059669; }
+    .activity-post-footer { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
+    .btn-post {
+      padding: 0.5rem 1.25rem; background: #059669; color: white;
+      border: none; border-radius: 8px; font-size: 0.85rem;
+      font-weight: 700; cursor: pointer;
+    }
+    .btn-post:hover { background: #047857; }
+    .activity-feed { display: flex; flex-direction: column; gap: 0; }
+    .activity-item {
+      display: flex; gap: 0.85rem; padding: 0.85rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-av {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; color: white;
+    }
+    .activity-av.system { background: #e5e7eb; color: #6b7280; font-size: 1rem; }
+    .activity-body { flex: 1; }
+    .activity-text { font-size: 0.87rem; color: #374151; line-height: 1.5; }
+    .activity-text strong { color: #111827; }
+    .activity-time { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
+    .activity-update-text {
+      background: #f9fafb; border-left: 3px solid #d1d5db;
+      padding: 0.5rem 0.75rem; border-radius: 0 6px 6px 0;
+      font-size: 0.85rem; color: #374151; margin-top: 0.35rem; font-style: italic;
+    }
+
+    /* ── Team panel ── */
+    .team-members-panel { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.85rem; }
+    .team-member-card {
+      background: white; border: 1px solid #e5e7eb;
+      border-radius: 10px; padding: 1rem;
+      display: flex; gap: 0.85rem; align-items: flex-start;
+    }
+    .tm-av {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.88rem; font-weight: 800; color: white;
+    }
+    .tm-info { flex: 1; }
+    .tm-name { font-size: 0.92rem; font-weight: 700; color: #111827; }
+    .tm-role { font-size: 0.78rem; color: #6b7280; margin-top: 1px; }
+    .tm-progress-bar { height: 5px; background: #e5e7eb; border-radius: 999px; margin-top: 0.6rem; overflow: hidden; }
+    .tm-progress-fill { height: 100%; background: #059669; border-radius: 999px; transition: width 0.5s ease; }
+    .tm-progress-lbl { font-size: 0.72rem; color: #9ca3af; margin-top: 3px; font-weight: 500; }
+    .tm-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; flex-shrink: 0; margin-top: 6px; }
+    .tm-status-dot.active { background: #10b981; }
+    .client-card { background: #fffbeb; border-color: #fde68a; }
+    .client-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #fef3c7; color: #92400e;
+      font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+      margin-top: 3px;
+    }
+
+    /* ── Modals ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: white; border-radius: 16px;
+      padding: 1.75rem; width: 100%; max-width: 540px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; font-size: 1.4rem;
+      color: #9ca3af; cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: #374151; }
+    .modal-title { font-size: 1.2rem; font-weight: 800; color: #111827; margin-bottom: 0.25rem; }
+    .modal-subtitle { font-size: 0.88rem; color: #6b7280; margin-bottom: 1.25rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.6rem 0.85rem;
+      border: 1.5px solid #e5e7eb; border-radius: 8px;
+      font-size: 0.88rem; color: #374151; outline: none;
+      box-sizing: border-box; font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #059669; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .form-submit {
+      width: 100%; padding: 0.75rem; background: #059669; color: white;
+      border: none; border-radius: 10px; font-size: 0.95rem;
+      font-weight: 700; cursor: pointer; margin-top: 0.5rem;
+    }
+    .form-submit:hover { background: #047857; }
+
+    /* ── Template picker ── */
+    .template-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.85rem; margin: 1rem 0; }
+    .template-card {
+      border: 2px solid #e5e7eb; border-radius: 10px;
+      padding: 1.1rem; cursor: pointer; text-align: center;
+      transition: all 0.15s;
+    }
+    .template-card:hover { border-color: #059669; background: #f0fdf4; }
+    .template-card.selected { border-color: #059669; background: #ecfdf5; }
+    .template-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+    .template-name { font-size: 0.85rem; font-weight: 700; color: #374151; }
+    .template-desc { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
+
+    /* ── Empty states ── */
+    .empty-state {
+      text-align: center; padding: 3rem 1rem; color: #9ca3af;
+    }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state h3 { font-size: 1rem; font-weight: 700; color: #6b7280; margin-bottom: 0.5rem; }
+    .empty-state p { font-size: 0.85rem; max-width: 320px; margin: 0 auto 1.25rem; }
+
+    /* ── Quick actions bar ── */
+    .quick-actions {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+    }
+    .qa-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 1rem; border: 1.5px solid #e5e7eb;
+      border-radius: 8px; background: white; font-size: 0.82rem;
+      font-weight: 600; color: #374151; cursor: pointer;
+      transition: all 0.12s;
+    }
+    .qa-btn:hover { border-color: #059669; color: #059669; background: #f0fdf4; }
+    .qa-btn.primary { background: #059669; color: white; border-color: #059669; }
+    .qa-btn.primary:hover { background: #047857; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: #111827; color: white; padding: 0.85rem 1.5rem;
+      border-radius: 10px; font-weight: 600; font-size: 0.9rem;
+      z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(100px); opacity: 0;
+      transition: all 0.3s ease; max-width: 340px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+    .toast.info { background: #1a56db; }
+
+    /* ── Workspace setup screen ── */
+    .ws-setup-screen {
+      max-width: 760px; margin: 3rem auto; text-align: center;
+      padding: 0 1rem;
+    }
+    .ws-setup-screen h2 { font-size: 1.6rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; }
+    .ws-setup-screen p { font-size: 0.95rem; color: #6b7280; margin-bottom: 2rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 860px) {
+      .overview-stat-row { grid-template-columns: repeat(2, 1fr); }
+      .overview-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .ws-header { padding: 3rem 1.25rem 0; }
+      .ws-name { font-size: 1.3rem; }
+      .ws-tabs-inner { padding: 0 0.75rem; }
+      .ws-body { padding: 1rem 1rem 3rem; }
+      .ws-members-strip { padding: 0.5rem 1rem; }
+      .kanban-board { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .ws-title-row { flex-direction: column; }
+      .ws-header-right { flex-direction: row; align-items: center; }
+      .overview-stat-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">Browse Rentals</a>
+    <a href="network.html">Pro Network</a>
+    <a href="teams.html">Teams</a>
+    <a href="index.html#roles">Who We Serve</a>
+    <a href="funding.html">Funding</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login</a>
+  </div>
+</nav>
+
+<!-- WORKSPACE SETUP SCREEN (shown when no workspace for this team) -->
+<div id="setupScreen" style="display:none; background:#f9fafb; min-height:calc(100vh - 60px);">
+  <div class="ws-setup-screen">
+    <div style="font-size:3rem; margin-bottom:1rem;">🚀</div>
+    <h2>Launch a Collaboration Workspace</h2>
+    <p>Choose a template to get started, or build a custom workspace from scratch. Everyone on your team will see checklists, tasks, timelines, and progress in one place.</p>
+    <div class="template-picker" id="setupTemplatePicker"></div>
+    <button class="form-submit" style="max-width:320px;margin:1rem auto 0;" onclick="createWorkspace()">Launch Workspace</button>
+    <p style="font-size:0.8rem;color:#9ca3af;margin-top:0.75rem;">You can always change the template or add custom items after launching.</p>
+  </div>
+</div>
+
+<!-- WORKSPACE HEADER (shown when workspace exists) -->
+<div id="wsHeader" style="display:none;">
+  <div class="ws-header">
+    <div class="ws-header-inner">
+      <div class="ws-breadcrumb">
+        <a href="teams.html">← Teams</a> &nbsp;/&nbsp; <span id="hdrBreadcrumbTeam"></span>
+      </div>
+      <div class="ws-title-row">
+        <div class="ws-title-left">
+          <div class="ws-icon" id="hdrIcon">🏡</div>
+          <div>
+            <div class="ws-name" id="hdrName">Workspace</div>
+            <div class="ws-purpose" id="hdrPurpose"></div>
+            <div class="ws-meta-pills">
+              <span class="ws-meta-pill" id="hdrTemplatePill"></span>
+              <span class="ws-meta-pill" id="hdrMemberCount"></span>
+              <span class="ws-meta-pill" id="hdrStatus"></span>
+            </div>
+          </div>
+        </div>
+        <div class="ws-header-right">
+          <div class="ws-progress-ring" title="Overall completion">
+            <svg width="72" height="72" viewBox="0 0 72 72">
+              <circle class="ring-track" cx="36" cy="36" r="30"/>
+              <circle class="ring-fill" id="ringFill" cx="36" cy="36" r="30"
+                stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+            </svg>
+            <div class="ws-progress-pct" id="pctLabel">0%</div>
+          </div>
+          <div class="ws-header-stats">
+            <div class="ws-stat">
+              <div class="ws-stat-val" id="hdrTasksDone">0</div>
+              <div class="ws-stat-lbl">Tasks Done</div>
+            </div>
+            <div class="ws-stat">
+              <div class="ws-stat-val" id="hdrCheckDone">0</div>
+              <div class="ws-stat-lbl">Check Items</div>
+            </div>
+            <div class="ws-stat">
+              <div class="ws-stat-val" id="hdrMembers">0</div>
+              <div class="ws-stat-lbl">Members</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Members strip -->
+  <div class="ws-members-strip">
+    <div class="ws-members-strip-inner" id="memberStrip"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="ws-tabs">
+    <div class="ws-tabs-inner">
+      <button class="ws-tab active" onclick="switchTab('overview',this)">Overview</button>
+      <button class="ws-tab" onclick="switchTab('checklist',this)">Checklist</button>
+      <button class="ws-tab" onclick="switchTab('tasks',this)">Task Board</button>
+      <button class="ws-tab" onclick="switchTab('timeline',this)">Timeline</button>
+      <button class="ws-tab" onclick="switchTab('activity',this)">Activity</button>
+      <button class="ws-tab" onclick="switchTab('team',this)">Team</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANELS -->
+<div id="wsPanels" style="display:none; background:#f3f4f6; min-height:calc(100vh - 60px);">
+  <div class="ws-body">
+
+    <!-- OVERVIEW -->
+    <div class="ws-panel active" id="panel-overview">
+      <div class="overview-stat-row" id="overviewStats"></div>
+      <div class="overview-grid">
+        <div>
+          <div class="card" style="margin-bottom:1.25rem;">
+            <div class="card-header">
+              <div class="card-title">Recent Activity</div>
+              <button class="qa-btn" style="font-size:0.78rem;padding:0.3rem 0.75rem;" onclick="switchTab('activity', document.querySelectorAll('.ws-tab')[4])">See All</button>
+            </div>
+            <div class="card-body" id="overviewActivity" style="padding:0.5rem 0;"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Upcoming Milestones</div>
+              <button class="qa-btn" style="font-size:0.78rem;padding:0.3rem 0.75rem;" onclick="switchTab('timeline', document.querySelectorAll('.ws-tab')[3])">See All</button>
+            </div>
+            <div class="card-body" id="overviewMilestones" style="padding:0.5rem 0;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:1.25rem;">
+            <div class="card-header">
+              <div class="card-title">Checklist Progress</div>
+              <button class="qa-btn" style="font-size:0.78rem;padding:0.3rem 0.75rem;" onclick="switchTab('checklist', document.querySelectorAll('.ws-tab')[1])">See All</button>
+            </div>
+            <div class="card-body" id="overviewChecklist"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Member Progress</div>
+            </div>
+            <div class="card-body" id="overviewMembers" style="padding:0.75rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="ws-panel" id="panel-checklist">
+      <div class="quick-actions">
+        <button class="qa-btn primary" onclick="openAddChecklistItem()">+ Add Item</button>
+        <button class="qa-btn" onclick="openAddSection()">+ Add Section</button>
+        <button class="qa-btn" onclick="markAllComplete()">✓ Mark All Done</button>
+      </div>
+      <div id="checklistContent"></div>
+    </div>
+
+    <!-- TASKS / KANBAN -->
+    <div class="ws-panel" id="panel-tasks">
+      <div class="quick-actions">
+        <button class="qa-btn primary" onclick="openAddTask()">+ Add Task</button>
+      </div>
+      <div class="kanban-board" id="kanbanBoard"></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="ws-panel" id="panel-timeline">
+      <div class="quick-actions">
+        <button class="qa-btn primary" onclick="openAddMilestone()">+ Add Milestone</button>
+      </div>
+      <div class="timeline-wrap" id="timelineContent"></div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="ws-panel" id="panel-activity">
+      <div class="activity-post-box">
+        <textarea id="activityPostText" rows="2" placeholder="Post an update for the team..."></textarea>
+        <div class="activity-post-footer">
+          <button class="btn-post" onclick="postActivity()">Post Update</button>
+        </div>
+      </div>
+      <div class="activity-feed" id="activityFeed"></div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="ws-panel" id="panel-team">
+      <div class="quick-actions">
+        <button class="qa-btn primary" onclick="openInviteClient()">+ Invite Client</button>
+        <a href="teams.html" class="qa-btn">← Back to Teams</a>
+      </div>
+      <div class="team-members-panel" id="teamMembersPanel"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+
+<!-- Add Task -->
+<div class="modal-overlay" id="addTaskModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('addTaskModal')">&times;</button>
+    <div class="modal-title">Add Task</div>
+    <div class="modal-subtitle">Add to the task board</div>
+    <div class="form-group">
+      <label>Task Title *</label>
+      <input type="text" id="taskTitle" placeholder="e.g., Order inspection report..." />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status</label>
+        <select id="taskStatus">
+          <option value="todo">To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="waiting">Waiting</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="taskPriority">
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Assign To</label>
+        <select id="taskAssignee"></select>
+      </div>
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" id="taskDue" />
+      </div>
+    </div>
+    <button class="form-submit" onclick="saveTask()">Add Task</button>
+  </div>
+</div>
+
+<!-- Edit Task -->
+<div class="modal-overlay" id="editTaskModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('editTaskModal')">&times;</button>
+    <div class="modal-title">Edit Task</div>
+    <input type="hidden" id="editTaskId" />
+    <div class="form-group">
+      <label>Task Title *</label>
+      <input type="text" id="editTaskTitle" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status</label>
+        <select id="editTaskStatus">
+          <option value="todo">To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="waiting">Waiting</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="editTaskPriority">
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Assign To</label>
+        <select id="editTaskAssignee"></select>
+      </div>
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" id="editTaskDue" />
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="form-submit" onclick="updateTask()">Save Changes</button>
+      <button class="form-submit" style="background:#dc2626;" onclick="deleteTask()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Milestone -->
+<div class="modal-overlay" id="addMilestoneModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('addMilestoneModal')">&times;</button>
+    <div class="modal-title">Add Milestone</div>
+    <div class="form-group">
+      <label>Milestone Title *</label>
+      <input type="text" id="msTitle" placeholder="e.g., Inspection Complete..." />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Target Date</label>
+        <input type="date" id="msDate" />
+      </div>
+      <div class="form-group">
+        <label>Assigned To</label>
+        <select id="msAssignee"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="msNotes" rows="2" placeholder="Optional notes..."></textarea>
+    </div>
+    <button class="form-submit" onclick="saveMilestone()">Add Milestone</button>
+  </div>
+</div>
+
+<!-- Add Checklist Item -->
+<div class="modal-overlay" id="addCheckItemModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('addCheckItemModal')">&times;</button>
+    <div class="modal-title">Add Checklist Item</div>
+    <div class="form-group">
+      <label>Item *</label>
+      <input type="text" id="ciLabel" placeholder="e.g., Upload last 2 years of tax returns..." />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Section</label>
+        <select id="ciSection"></select>
+      </div>
+      <div class="form-group">
+        <label>Assign To</label>
+        <select id="ciAssignee"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Due Date</label>
+      <input type="date" id="ciDue" />
+    </div>
+    <button class="form-submit" onclick="saveCheckItem()">Add Item</button>
+  </div>
+</div>
+
+<!-- Add Section -->
+<div class="modal-overlay" id="addSectionModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('addSectionModal')">&times;</button>
+    <div class="modal-title">Add Checklist Section</div>
+    <div class="form-group">
+      <label>Section Name *</label>
+      <input type="text" id="sectionName" placeholder="e.g., Documents Needed, Pre-Closing Steps..." />
+    </div>
+    <button class="form-submit" onclick="saveSection()">Add Section</button>
+  </div>
+</div>
+
+<!-- Invite Client -->
+<div class="modal-overlay" id="inviteClientModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('inviteClientModal')">&times;</button>
+    <div class="modal-title">Invite Client to Workspace</div>
+    <div class="modal-subtitle">Clients get limited access: they can view the checklist, see progress, and upload requested documents. They cannot see internal notes or financials.</div>
+    <div class="form-group">
+      <label>Client Name *</label>
+      <input type="text" id="clientName" placeholder="e.g., John &amp; Sarah Smith" />
+    </div>
+    <div class="form-group">
+      <label>Email Address *</label>
+      <input type="email" id="clientEmail" placeholder="client@email.com" />
+    </div>
+    <div class="form-group">
+      <label>Role / Relationship</label>
+      <input type="text" id="clientRole" placeholder="e.g., Home Buyer, Tenant, Business Owner..." />
+    </div>
+    <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:0.75rem;margin-bottom:1rem;">
+      <div style="font-size:0.8rem;color:#92400e;font-weight:600;">Temporary Account</div>
+      <div style="font-size:0.78rem;color:#78350f;margin-top:2px;">A lightweight access link will be created. The client account expires after 90 days of inactivity.</div>
+    </div>
+    <button class="form-submit" onclick="inviteClient()">Send Invite &amp; Create Access</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// RentVerified — Collaboration Workspaces
+// Phase 2: Deal/Project Workspaces
+// ─────────────────────────────────────────────
+
+// Monkey-patch for testing (localStorage mode)
+// RVData._useSupabase = function() { return false; };
+
+// ── Template Definitions ──
+const WS_TEMPLATES = [
+  {
+    id: 'home_purchase',
+    name: 'Home Purchase',
+    icon: '🏡',
+    desc: 'Guide a buyer from pre-approval to keys',
+    sections: ['Pre-Approval', 'Offer & Contract', 'Inspection & Appraisal', 'Title & Closing'],
+    checklist: [
+      { section: 'Pre-Approval', label: 'Pre-approval letter obtained' },
+      { section: 'Pre-Approval', label: 'Proof of funds / down payment verified' },
+      { section: 'Pre-Approval', label: 'Last 2 years tax returns uploaded' },
+      { section: 'Pre-Approval', label: 'Last 2 months pay stubs uploaded' },
+      { section: 'Pre-Approval', label: 'Last 2 months bank statements uploaded' },
+      { section: 'Pre-Approval', label: 'Photo ID (front and back) uploaded' },
+      { section: 'Offer & Contract', label: 'Offer submitted' },
+      { section: 'Offer & Contract', label: 'Offer accepted / counter signed' },
+      { section: 'Offer & Contract', label: 'Purchase agreement fully executed' },
+      { section: 'Offer & Contract', label: 'Earnest money deposited' },
+      { section: 'Inspection & Appraisal', label: 'Home inspection scheduled' },
+      { section: 'Inspection & Appraisal', label: 'Inspection report reviewed' },
+      { section: 'Inspection & Appraisal', label: 'Repair requests negotiated' },
+      { section: 'Inspection & Appraisal', label: 'Appraisal ordered' },
+      { section: 'Inspection & Appraisal', label: 'Appraisal received (at value)' },
+      { section: 'Title & Closing', label: 'Title search complete' },
+      { section: 'Title & Closing', label: 'Title insurance ordered' },
+      { section: 'Title & Closing', label: 'Clear to close received' },
+      { section: 'Title & Closing', label: 'Final walkthrough completed' },
+      { section: 'Title & Closing', label: 'Closing documents signed' },
+      { section: 'Title & Closing', label: 'Keys handed over 🎉' },
+    ],
+    milestones: [
+      { title: 'Pre-Approval Complete', daysFromNow: 3 },
+      { title: 'Offer Submitted', daysFromNow: 7 },
+      { title: 'Inspection Complete', daysFromNow: 21 },
+      { title: 'Clear to Close', daysFromNow: 35 },
+      { title: 'Closing Day', daysFromNow: 45 },
+    ],
+    tasks: [
+      { title: 'Collect client documents', status: 'todo', priority: 'high' },
+      { title: 'Submit loan application', status: 'todo', priority: 'high' },
+      { title: 'Order title search', status: 'todo', priority: 'medium' },
+      { title: 'Schedule inspection', status: 'todo', priority: 'medium' },
+      { title: 'Review inspection report', status: 'todo', priority: 'medium' },
+    ]
+  },
+  {
+    id: 'eviction',
+    name: 'Eviction Process',
+    icon: '⚖️',
+    desc: 'Step-by-step eviction proceedings',
+    sections: ['Notice', 'Court Filing', 'Judgment'],
+    checklist: [
+      { section: 'Notice', label: 'Pay or Quit notice drafted' },
+      { section: 'Notice', label: 'Notice served (documented)' },
+      { section: 'Notice', label: 'Waiting period elapsed' },
+      { section: 'Court Filing', label: 'Unlawful detainer complaint filed' },
+      { section: 'Court Filing', label: 'Court hearing date received' },
+      { section: 'Court Filing', label: 'Tenant served with summons' },
+      { section: 'Judgment', label: 'Court hearing attended' },
+      { section: 'Judgment', label: 'Judgment obtained' },
+      { section: 'Judgment', label: 'Writ of restitution issued' },
+      { section: 'Judgment', label: 'Sheriff lockout scheduled' },
+      { section: 'Judgment', label: 'Unit recovered and re-keyed' },
+    ],
+    milestones: [
+      { title: 'Notice Served', daysFromNow: 1 },
+      { title: 'Waiting Period Ends', daysFromNow: 5 },
+      { title: 'Court Filing Deadline', daysFromNow: 7 },
+      { title: 'Hearing Date', daysFromNow: 21 },
+      { title: 'Unit Recovered', daysFromNow: 35 },
+    ],
+    tasks: [
+      { title: 'Draft notice to pay or quit', status: 'todo', priority: 'high' },
+      { title: 'Document service of notice', status: 'todo', priority: 'high' },
+      { title: 'File court complaint', status: 'todo', priority: 'high' },
+      { title: 'Prepare hearing documents', status: 'todo', priority: 'medium' },
+    ]
+  },
+  {
+    id: 'marketing',
+    name: 'Marketing Campaign',
+    icon: '📣',
+    desc: 'From brief to launch to review',
+    sections: ['Pre-Production', 'Production', 'Launch & Review'],
+    checklist: [
+      { section: 'Pre-Production', label: 'Campaign brief approved' },
+      { section: 'Pre-Production', label: 'Budget confirmed' },
+      { section: 'Pre-Production', label: 'Target audience defined' },
+      { section: 'Pre-Production', label: 'Creative concepts presented' },
+      { section: 'Production', label: 'Design round 1 complete' },
+      { section: 'Production', label: 'Client feedback received' },
+      { section: 'Production', label: 'Revisions complete' },
+      { section: 'Production', label: 'Final assets approved' },
+      { section: 'Launch & Review', label: 'Campaign launched' },
+      { section: 'Launch & Review', label: '7-day performance review' },
+      { section: 'Launch & Review', label: 'Final report delivered' },
+    ],
+    milestones: [
+      { title: 'Brief Approved', daysFromNow: 3 },
+      { title: 'Creative Concepts', daysFromNow: 10 },
+      { title: 'Final Assets Approved', daysFromNow: 21 },
+      { title: 'Campaign Launch', daysFromNow: 28 },
+      { title: 'Performance Review', daysFromNow: 35 },
+    ],
+    tasks: [
+      { title: 'Write campaign brief', status: 'todo', priority: 'high' },
+      { title: 'Design initial concepts', status: 'todo', priority: 'high' },
+      { title: 'Set up ad accounts', status: 'todo', priority: 'medium' },
+      { title: 'Schedule launch', status: 'todo', priority: 'medium' },
+    ]
+  },
+  {
+    id: 'tax_prep',
+    name: 'Tax Preparation',
+    icon: '📁',
+    desc: 'Year-end filing coordination',
+    sections: ['Document Collection', 'Review & Filing'],
+    checklist: [
+      { section: 'Document Collection', label: 'W-2s / 1099s collected' },
+      { section: 'Document Collection', label: 'Business income / expense records' },
+      { section: 'Document Collection', label: 'Prior year return provided' },
+      { section: 'Document Collection', label: 'Bookkeeping reconciled' },
+      { section: 'Review & Filing', label: 'Draft return prepared' },
+      { section: 'Review & Filing', label: 'Client review meeting held' },
+      { section: 'Review & Filing', label: 'Client signature obtained' },
+      { section: 'Review & Filing', label: 'Return filed' },
+      { section: 'Review & Filing', label: 'Confirmation received' },
+    ],
+    milestones: [
+      { title: 'Documents Gathered', daysFromNow: 7 },
+      { title: 'Draft Return Ready', daysFromNow: 21 },
+      { title: 'Client Review', daysFromNow: 28 },
+      { title: 'Return Filed', daysFromNow: 35 },
+    ],
+    tasks: [
+      { title: 'Send document request list to client', status: 'todo', priority: 'high' },
+      { title: 'Reconcile bookkeeping', status: 'todo', priority: 'high' },
+      { title: 'Prepare draft return', status: 'todo', priority: 'medium' },
+      { title: 'Schedule review meeting', status: 'todo', priority: 'medium' },
+    ]
+  },
+  {
+    id: 'business_formation',
+    name: 'Business Formation',
+    icon: '🏢',
+    desc: 'Entity setup with attorney, accountant & insurance',
+    sections: ['Legal Setup', 'Financial Setup', 'Insurance & Operations'],
+    checklist: [
+      { section: 'Legal Setup', label: 'Business name confirmed / searched' },
+      { section: 'Legal Setup', label: 'Entity type selected (LLC, Corp, etc.)' },
+      { section: 'Legal Setup', label: 'Articles of incorporation filed' },
+      { section: 'Legal Setup', label: 'Operating agreement drafted' },
+      { section: 'Financial Setup', label: 'EIN obtained from IRS' },
+      { section: 'Financial Setup', label: 'Business bank account opened' },
+      { section: 'Financial Setup', label: 'Accounting software set up' },
+      { section: 'Insurance & Operations', label: 'Business liability insurance quoted' },
+      { section: 'Insurance & Operations', label: 'Insurance policy bound' },
+      { section: 'Insurance & Operations', label: 'Business address established' },
+      { section: 'Insurance & Operations', label: 'First payroll or K-1 structure decided' },
+    ],
+    milestones: [
+      { title: 'Entity Filed', daysFromNow: 5 },
+      { title: 'EIN Received', daysFromNow: 10 },
+      { title: 'Bank Account Opened', daysFromNow: 14 },
+      { title: 'Insurance Bound', daysFromNow: 21 },
+      { title: 'Business Operational', daysFromNow: 30 },
+    ],
+    tasks: [
+      { title: 'File articles of incorporation', status: 'todo', priority: 'high' },
+      { title: 'Draft operating agreement', status: 'todo', priority: 'high' },
+      { title: 'Apply for EIN', status: 'todo', priority: 'high' },
+      { title: 'Get insurance quotes', status: 'todo', priority: 'medium' },
+    ]
+  },
+  {
+    id: 'renovation',
+    name: 'Renovation Project',
+    icon: '🏗️',
+    desc: 'Property renovation from planning to completion',
+    sections: ['Planning & Permits', 'Construction', 'Completion'],
+    checklist: [
+      { section: 'Planning & Permits', label: 'Scope of work finalized' },
+      { section: 'Planning & Permits', label: 'Contractor bids received' },
+      { section: 'Planning & Permits', label: 'Contract signed' },
+      { section: 'Planning & Permits', label: 'Permits pulled' },
+      { section: 'Construction', label: 'Demo complete' },
+      { section: 'Construction', label: 'Rough-in inspections passed' },
+      { section: 'Construction', label: 'Drywall / finishes complete' },
+      { section: 'Construction', label: 'Final inspections passed' },
+      { section: 'Completion', label: 'Punch list complete' },
+      { section: 'Completion', label: 'Final payment released' },
+      { section: 'Completion', label: 'Photos taken for listing' },
+    ],
+    milestones: [
+      { title: 'Permits Approved', daysFromNow: 7 },
+      { title: 'Demo & Rough-In', daysFromNow: 21 },
+      { title: 'Inspections Passed', daysFromNow: 42 },
+      { title: 'Project Complete', daysFromNow: 60 },
+    ],
+    tasks: [
+      { title: 'Get contractor bids', status: 'todo', priority: 'high' },
+      { title: 'Pull permits', status: 'todo', priority: 'high' },
+      { title: 'Order materials', status: 'todo', priority: 'medium' },
+      { title: 'Schedule inspections', status: 'todo', priority: 'medium' },
+    ]
+  },
+  {
+    id: 'property_mgmt_onboarding',
+    name: 'PM Onboarding',
+    icon: '🔑',
+    desc: 'New property management client onboarding',
+    sections: ['Owner Setup', 'Property Setup', 'Leasing'],
+    checklist: [
+      { section: 'Owner Setup', label: 'Management agreement signed' },
+      { section: 'Owner Setup', label: 'Direct deposit info collected' },
+      { section: 'Owner Setup', label: 'Owner portal access created' },
+      { section: 'Property Setup', label: 'Property inspection complete' },
+      { section: 'Property Setup', label: 'Maintenance log started' },
+      { section: 'Property Setup', label: 'Utility info collected' },
+      { section: 'Property Setup', label: 'Listing photos taken' },
+      { section: 'Leasing', label: 'Listing published' },
+      { section: 'Leasing', label: 'Showings scheduled' },
+      { section: 'Leasing', label: 'Application(s) received' },
+      { section: 'Leasing', label: 'Tenant screening complete' },
+      { section: 'Leasing', label: 'Lease signed' },
+      { section: 'Leasing', label: 'Move-in inspection complete' },
+    ],
+    milestones: [
+      { title: 'Agreement Signed', daysFromNow: 1 },
+      { title: 'Property Listed', daysFromNow: 7 },
+      { title: 'Tenant Screened', daysFromNow: 21 },
+      { title: 'Lease Signed', daysFromNow: 28 },
+      { title: 'Move-In Day', daysFromNow: 35 },
+    ],
+    tasks: [
+      { title: 'Complete property inspection', status: 'todo', priority: 'high' },
+      { title: 'Take listing photos', status: 'todo', priority: 'high' },
+      { title: 'Publish listing', status: 'todo', priority: 'medium' },
+      { title: 'Review applications', status: 'todo', priority: 'medium' },
+    ]
+  },
+  {
+    id: 'lease_signing',
+    name: 'Lease Signing',
+    icon: '📝',
+    desc: 'From application to move-in',
+    sections: ['Screening', 'Lease', 'Move-In'],
+    checklist: [
+      { section: 'Screening', label: 'Application received' },
+      { section: 'Screening', label: 'Credit / background check run' },
+      { section: 'Screening', label: 'Employment / income verified' },
+      { section: 'Screening', label: 'References checked' },
+      { section: 'Lease', label: 'Lease drafted' },
+      { section: 'Lease', label: 'Lease sent for signature' },
+      { section: 'Lease', label: 'Lease fully executed' },
+      { section: 'Lease', label: 'Security deposit collected' },
+      { section: 'Move-In', label: 'Move-in inspection scheduled' },
+      { section: 'Move-In', label: 'Move-in inspection complete' },
+      { section: 'Move-In', label: 'Keys handed over' },
+    ],
+    milestones: [
+      { title: 'Screening Complete', daysFromNow: 3 },
+      { title: 'Lease Sent', daysFromNow: 5 },
+      { title: 'Lease Signed', daysFromNow: 7 },
+      { title: 'Move-In Day', daysFromNow: 14 },
+    ],
+    tasks: [
+      { title: 'Run background check', status: 'todo', priority: 'high' },
+      { title: 'Draft lease agreement', status: 'todo', priority: 'high' },
+      { title: 'Schedule move-in inspection', status: 'todo', priority: 'medium' },
+    ]
+  }
+];
+
+// ── State ──
+let ws = null;        // current workspace object
+let team = null;      // current team object
+let teamId = null;
+let selectedTemplate = 'home_purchase';
+let _editingTaskId = null;
+
+// ── Helpers ──
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function getInitials(name) { return String(name||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase(); }
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+function formatRelative(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff/60000);
+  if (mins < 2) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins/60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs/24);
+  if (days < 7) return `${days}d ago`;
+  return formatDate(iso);
+}
+function isoDate(d) {
+  return d.toISOString().split('T')[0];
+}
+function addDays(n) {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return isoDate(d);
+}
+
+// ── Storage ──
+function getWorkspaces() { return JSON.parse(localStorage.getItem('rv_workspaces') || '[]'); }
+function saveWorkspaces(arr) { localStorage.setItem('rv_workspaces', JSON.stringify(arr)); }
+function getTeams() { return JSON.parse(localStorage.getItem('rv_teams') || '[]'); }
+function getWsById(id) { return getWorkspaces().find(w => w.id === id) || null; }
+function getWsForTeam(tid) { return getWorkspaces().find(w => w.teamId === tid) || null; }
+
+function saveWs() {
+  const all = getWorkspaces();
+  const idx = all.findIndex(w => w.id === ws.id);
+  if (idx >= 0) all[idx] = ws; else all.push(ws);
+  saveWorkspaces(all);
+}
+
+// ── Member list for selects ──
+function getMemberOptions(includeAll = true) {
+  const members = ws?.members || [];
+  const clients = (ws?.clients || []).filter(c => c.status === 'active');
+  const all = [...members.map(m => ({id: m.proId, name: m.proName, role: m.role})),
+               ...clients.map(c => ({id: c.id, name: c.name, role: c.role || 'Client'}))];
+  return all;
+}
+
+function populateAssigneeSelects() {
+  const opts = getMemberOptions();
+  const baseOpts = '<option value="">Unassigned</option>' + opts.map(m => `<option value="${esc(m.id)}">${esc(m.name)} (${esc(m.role)})</option>`).join('');
+  ['taskAssignee','editTaskAssignee','msAssignee','ciAssignee'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = baseOpts;
+  });
+}
+
+// ── Overall % calc ──
+function calcProgress() {
+  if (!ws) return 0;
+  const cl = ws.checklist || [];
+  const tasks = ws.tasks || [];
+  const ms = ws.milestones || [];
+  const total = cl.length + tasks.length + ms.length;
+  if (!total) return 0;
+  const done = cl.filter(i=>i.completed).length
+             + tasks.filter(t=>t.status==='done').length
+             + ms.filter(m=>m.status==='done').length;
+  return Math.round((done/total)*100);
+}
+
+function updateProgressRing() {
+  const pct = calcProgress();
+  const circumference = 188.5;
+  const offset = circumference - (pct/100)*circumference;
+  const ring = document.getElementById('ringFill');
+  const lbl = document.getElementById('pctLabel');
+  if (ring) ring.style.strokeDashoffset = offset;
+  if (lbl) lbl.textContent = pct + '%';
+}
+
+function updateHeaderStats() {
+  if (!ws) return;
+  const tasksDone = (ws.tasks||[]).filter(t=>t.status==='done').length;
+  const checkDone = (ws.checklist||[]).filter(i=>i.completed).length;
+  const memberCount = (ws.members||[]).length + (ws.clients||[]).filter(c=>c.status==='active').length;
+  const el = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  el('hdrTasksDone', tasksDone);
+  el('hdrCheckDone', checkDone + '/' + (ws.checklist||[]).length);
+  el('hdrMembers', memberCount);
+  el('hdrMemberCount', memberCount + ' members');
+  el('hdrStatus', ws.status === 'active' ? 'Active' : ws.status);
+  updateProgressRing();
+}
+
+// ── Activity helpers ──
+function addActivity(type, actor, message, color) {
+  if (!ws.activities) ws.activities = [];
+  ws.activities.unshift({ id: uid(), type, actor, message, color: color || '#6b7280', createdAt: new Date().toISOString() });
+  if (ws.activities.length > 100) ws.activities = ws.activities.slice(0, 100);
+}
+
+// ── Setup Screen ──
+function showSetupScreen() {
+  document.getElementById('setupScreen').style.display = 'block';
+  document.getElementById('wsHeader').style.display = 'none';
+  document.getElementById('wsPanels').style.display = 'none';
+  renderSetupTemplates();
+}
+
+function showWorkspace() {
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('wsHeader').style.display = 'block';
+  document.getElementById('wsPanels').style.display = 'block';
+  renderHeader();
+  renderMemberStrip();
+  renderOverview();
+  renderChecklist();
+  renderKanban();
+  renderTimeline();
+  renderActivity();
+  renderTeamPanel();
+  updateHeaderStats();
+  updateProgressRing();
+}
+
+function renderSetupTemplates() {
+  const grid = document.getElementById('setupTemplatePicker');
+  grid.innerHTML = WS_TEMPLATES.map(t => `
+    <div class="template-card${t.id === selectedTemplate ? ' selected' : ''}" onclick="selectTemplate('${t.id}', this)">
+      <div class="template-icon">${t.icon}</div>
+      <div class="template-name">${esc(t.name)}</div>
+      <div class="template-desc">${esc(t.desc)}</div>
+    </div>`).join('');
+}
+
+function selectTemplate(id, el) {
+  selectedTemplate = id;
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function createWorkspace() {
+  const tmpl = WS_TEMPLATES.find(t => t.id === selectedTemplate) || WS_TEMPLATES[0];
+  const now = new Date().toISOString();
+
+  // Build checklist from template
+  const checklist = tmpl.checklist.map(item => ({
+    id: uid(), section: item.section, label: item.label,
+    completed: false, completedAt: null, completedBy: null,
+    assignedTo: null, due: null
+  }));
+
+  // Build milestones
+  const milestones = tmpl.milestones.map(m => ({
+    id: uid(), title: m.title, date: addDays(m.daysFromNow),
+    assignedTo: null, status: 'pending', notes: ''
+  }));
+
+  // Build tasks
+  const tasks = tmpl.tasks.map(t => ({
+    id: uid(), title: t.title, status: t.status, priority: t.priority,
+    assignedTo: null, due: null, createdAt: now
+  }));
+
+  // Build members from team
+  const members = (team?.members || []).map(m => ({
+    proId: m.proId, proName: m.proName, proTrade: m.proTrade,
+    proColor: m.proColor, role: m.role,
+    progress: 0, lastActive: now
+  }));
+
+  ws = {
+    id: uid(),
+    teamId: team?.id || teamId,
+    name: team?.name || 'Workspace',
+    purpose: team?.purpose || '',
+    type: team?.type || 'real_estate',
+    template: tmpl.id,
+    templateName: tmpl.name,
+    templateIcon: tmpl.icon,
+    status: 'active',
+    createdAt: now,
+    sections: [...tmpl.sections],
+    checklist,
+    tasks,
+    milestones,
+    members,
+    clients: [],
+    activities: [{
+      id: uid(), type: 'system',
+      actor: 'System', message: `Workspace created from ${tmpl.name} template`,
+      color: '#6b7280', createdAt: now
+    }]
+  };
+
+  saveWs();
+  showWorkspace();
+  showToast(`Workspace launched with ${tmpl.name} template!`, 'success');
+}
+
+// ── Header ──
+function renderHeader() {
+  const teamName = team?.name || ws.name;
+  document.getElementById('hdrBreadcrumbTeam').textContent = teamName;
+  document.getElementById('hdrIcon').textContent = ws.templateIcon || '🏢';
+  document.getElementById('hdrName').textContent = ws.name;
+  document.getElementById('hdrPurpose').textContent = ws.purpose || '';
+  document.getElementById('hdrTemplatePill').textContent = ws.templateName || 'Custom';
+  document.title = `${ws.name} — Workspace`;
+}
+
+// ── Member strip ──
+function renderMemberStrip() {
+  const strip = document.getElementById('memberStrip');
+  const members = ws.members || [];
+  const clients = (ws.clients || []).filter(c => c.status === 'active');
+  let html = members.map(m => `
+    <div class="ws-member-chip" title="${esc(m.role)}">
+      <div class="chip-av" style="background:${esc(m.proColor||'#6b7280')}">${getInitials(m.proName)}</div>
+      ${esc(m.proName)}
+    </div>`).join('');
+  html += clients.map(c => `
+    <div class="ws-member-chip client" title="Client — ${esc(c.role||'Client')}">
+      <div class="chip-av" style="background:#f59e0b">${getInitials(c.name)}</div>
+      ${esc(c.name)} <span style="font-size:0.68rem;opacity:0.7;">client</span>
+    </div>`).join('');
+  html += `<button class="invite-chip-btn" onclick="openInviteClient()">+ Invite Client</button>`;
+  strip.innerHTML = html;
+}
+
+// ── Tab switching ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.ws-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ws-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'overview') renderOverview();
+  if (id === 'checklist') renderChecklist();
+  if (id === 'tasks') renderKanban();
+  if (id === 'timeline') renderTimeline();
+  if (id === 'activity') renderActivity();
+  if (id === 'team') renderTeamPanel();
+}
+
+// ── OVERVIEW ──
+function renderOverview() {
+  const pct = calcProgress();
+  const tasks = ws.tasks || [];
+  const cl = ws.checklist || [];
+  const ms = ws.milestones || [];
+
+  // Stats
+  const statsEl = document.getElementById('overviewStats');
+  const blocking = tasks.filter(t => t.status === 'waiting').length;
+  const overdue = tasks.filter(t => t.due && t.status !== 'done' && new Date(t.due) < new Date()).length;
+  statsEl.innerHTML = `
+    <div class="stat-card green">
+      <div class="stat-card-val">${pct}%</div>
+      <div class="stat-card-lbl">Overall Complete</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-card-val">${cl.filter(i=>i.completed).length}/${cl.length}</div>
+      <div class="stat-card-lbl">Checklist Items</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-card-val">${blocking}</div>
+      <div class="stat-card-lbl">Blocked / Waiting</div>
+    </div>
+    <div class="stat-card${overdue > 0 ? ' red' : ''}">
+      <div class="stat-card-val">${overdue}</div>
+      <div class="stat-card-lbl">Overdue Tasks</div>
+    </div>`;
+
+  // Recent activity
+  const acts = (ws.activities || []).slice(0, 5);
+  const actEl = document.getElementById('overviewActivity');
+  if (acts.length === 0) {
+    actEl.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><p style="margin:0;">No activity yet.</p></div>';
+  } else {
+    actEl.innerHTML = acts.map(a => `
+      <div class="activity-item" style="padding:0.6rem 1.25rem;">
+        <div class="activity-av${a.type==='system'?' system':''}" style="${a.type!=='system'?'background:'+esc(a.color||'#6b7280'):''}">${a.type==='system'?'⚙':''+getInitials(a.actor)}</div>
+        <div class="activity-body">
+          <div class="activity-text">${esc(a.message)}</div>
+          <div class="activity-time">${formatRelative(a.createdAt)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Upcoming milestones
+  const upcomingMs = ms.filter(m => m.status !== 'done').slice(0, 4);
+  const msEl = document.getElementById('overviewMilestones');
+  if (upcomingMs.length === 0) {
+    msEl.innerHTML = '<div style="padding:1rem 1.25rem;color:#9ca3af;font-size:0.85rem;">No upcoming milestones.</div>';
+  } else {
+    msEl.innerHTML = upcomingMs.map(m => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1.25rem;border-bottom:1px solid #f3f4f6;">
+        <div>
+          <div style="font-size:0.87rem;font-weight:600;color:#374151;">${esc(m.title)}</div>
+          <div style="font-size:0.75rem;color:#9ca3af;margin-top:1px;">${m.date ? formatDate(m.date) : 'No date set'}</div>
+        </div>
+        <span class="ms-status-badge ${m.status}">${m.status.replace('_',' ')}</span>
+      </div>`).join('');
+  }
+
+  // Checklist summary
+  const sections = [...new Set((ws.checklist||[]).map(i=>i.section))];
+  const ckEl = document.getElementById('overviewChecklist');
+  if (sections.length === 0) {
+    ckEl.innerHTML = '<div style="color:#9ca3af;font-size:0.85rem;">No checklist items yet.</div>';
+  } else {
+    ckEl.innerHTML = sections.map(sec => {
+      const items = cl.filter(i => i.section === sec);
+      const done = items.filter(i => i.completed).length;
+      const pct = items.length ? Math.round((done/items.length)*100) : 0;
+      return `
+        <div style="margin-bottom:0.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:0.82rem;font-weight:700;color:#374151;">${esc(sec)}</span>
+            <span style="font-size:0.75rem;color:#6b7280;">${done}/${items.length}</span>
+          </div>
+          <div style="height:6px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:#059669;border-radius:999px;transition:width 0.5s;"></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Member progress
+  const memEl = document.getElementById('overviewMembers');
+  const allMembers = [...(ws.members||[]).map(m=>({name:m.proName,role:m.role,color:m.proColor,progress:m.progress||0})),
+                      ...(ws.clients||[]).filter(c=>c.status==='active').map(c=>({name:c.name,role:'Client',color:'#f59e0b',progress:c.progress||0}))];
+  if (allMembers.length === 0) {
+    memEl.innerHTML = '<div style="color:#9ca3af;font-size:0.85rem;">No team members yet.</div>';
+  } else {
+    memEl.innerHTML = allMembers.map(m => `
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+        <div style="width:32px;height:32px;border-radius:50%;background:${esc(m.color||'#6b7280')};display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;color:white;flex-shrink:0;">${getInitials(m.name)}</div>
+        <div style="flex:1;">
+          <div style="font-size:0.82rem;font-weight:700;color:#374151;">${esc(m.name)} <span style="font-weight:400;color:#9ca3af;font-size:0.75rem;">${esc(m.role)}</span></div>
+          <div style="height:4px;background:#e5e7eb;border-radius:999px;margin-top:4px;overflow:hidden;">
+            <div style="height:100%;width:${m.progress}%;background:#059669;border-radius:999px;"></div>
+          </div>
+        </div>
+        <span style="font-size:0.78rem;color:#6b7280;font-weight:600;min-width:32px;text-align:right;">${m.progress}%</span>
+      </div>`).join('');
+  }
+}
+
+// ── CHECKLIST ──
+function renderChecklist() {
+  const container = document.getElementById('checklistContent');
+  const sections = ws.sections || [...new Set((ws.checklist||[]).map(i=>i.section))];
+  if ((ws.checklist||[]).length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">☑️</div>
+        <h3>No checklist items yet</h3>
+        <p>Add items to track everything that needs to happen for this project.</p>
+        <button class="qa-btn primary" onclick="openAddChecklistItem()">+ Add First Item</button>
+      </div>`;
+    return;
+  }
+  container.innerHTML = sections.map(sec => {
+    const items = (ws.checklist||[]).filter(i => i.section === sec);
+    if (!items.length) return '';
+    const done = items.filter(i => i.completed).length;
+    const pct = Math.round((done/items.length)*100);
+    return `
+      <div class="checklist-section">
+        <div class="checklist-section-header">
+          <div class="checklist-section-name">${esc(sec)}</div>
+          <div class="checklist-section-pct">${done}/${items.length} · ${pct}%</div>
+        </div>
+        ${items.map(item => `
+          <div class="checklist-item${item.completed ? ' completed' : ''}" id="ci-${item.id}">
+            <input type="checkbox" ${item.completed?'checked':''} onchange="toggleCheckItem('${item.id}', this.checked)" />
+            <div class="checklist-item-label">${esc(item.label)}</div>
+            <div class="checklist-item-meta">
+              ${item.assignedTo ? `<span class="ci-assignee">👤 ${esc(item.assignedTo)}</span>` : ''}
+              ${item.due ? `<span class="ci-due${new Date(item.due)<new Date()&&!item.completed?' overdue':''}">📅 ${formatDate(item.due)}</span>` : ''}
+              <button class="ci-remove" onclick="removeCheckItem('${item.id}')" title="Remove">&times;</button>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }).join('');
+}
+
+function toggleCheckItem(id, checked) {
+  const item = (ws.checklist||[]).find(i => i.id === id);
+  if (!item) return;
+  item.completed = checked;
+  item.completedAt = checked ? new Date().toISOString() : null;
+  addActivity('checklist', 'You', `${checked ? 'Completed' : 'Unchecked'} checklist item: "${item.label}"`, '#059669');
+  saveWs();
+  updateHeaderStats();
+  updateProgressRing();
+  renderChecklist();
+  // Update overview if visible
+  if (document.getElementById('panel-overview').classList.contains('active')) renderOverview();
+}
+
+function removeCheckItem(id) {
+  ws.checklist = (ws.checklist||[]).filter(i => i.id !== id);
+  saveWs();
+  renderChecklist();
+  showToast('Item removed');
+}
+
+function markAllComplete() {
+  (ws.checklist||[]).forEach(i => { i.completed = true; i.completedAt = new Date().toISOString(); });
+  addActivity('checklist', 'You', 'Marked all checklist items complete', '#059669');
+  saveWs();
+  updateHeaderStats();
+  updateProgressRing();
+  renderChecklist();
+  showToast('All items marked complete!', 'success');
+}
+
+function openAddChecklistItem() {
+  populateAssigneeSelects();
+  // Populate section select
+  const sel = document.getElementById('ciSection');
+  const sections = ws.sections || [...new Set((ws.checklist||[]).map(i=>i.section))];
+  sel.innerHTML = sections.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if (!sel.options.length) sel.innerHTML = '<option value="General">General</option>';
+  document.getElementById('ciLabel').value = '';
+  document.getElementById('ciDue').value = '';
+  openModal('addCheckItemModal');
+}
+
+function saveCheckItem() {
+  const label = document.getElementById('ciLabel').value.trim();
+  if (!label) { showToast('Please enter an item', 'error'); return; }
+  const section = document.getElementById('ciSection').value || 'General';
+  const assignedTo = document.getElementById('ciAssignee').value || null;
+  const due = document.getElementById('ciDue').value || null;
+  const item = { id: uid(), section, label, completed: false, completedAt: null, assignedTo, due };
+  if (!ws.checklist) ws.checklist = [];
+  ws.checklist.push(item);
+  if (!ws.sections) ws.sections = [];
+  if (!ws.sections.includes(section)) ws.sections.push(section);
+  addActivity('checklist', 'You', `Added checklist item: "${label}"`, '#059669');
+  saveWs();
+  closeModal('addCheckItemModal');
+  renderChecklist();
+  updateHeaderStats();
+  showToast('Item added');
+}
+
+function openAddSection() {
+  document.getElementById('sectionName').value = '';
+  openModal('addSectionModal');
+}
+
+function saveSection() {
+  const name = document.getElementById('sectionName').value.trim();
+  if (!name) { showToast('Please enter a section name', 'error'); return; }
+  if (!ws.sections) ws.sections = [];
+  if (!ws.sections.includes(name)) ws.sections.push(name);
+  saveWs();
+  closeModal('addSectionModal');
+  renderChecklist();
+  showToast('Section added');
+}
+
+// ── KANBAN ──
+const KANBAN_COLS = [
+  { id: 'todo',       label: 'To Do',       dot: '#6b7280' },
+  { id: 'inprogress', label: 'In Progress',  dot: '#f59e0b' },
+  { id: 'waiting',    label: 'Waiting',      dot: '#ef4444' },
+  { id: 'done',       label: 'Done',         dot: '#10b981' },
+];
+
+function renderKanban() {
+  const board = document.getElementById('kanbanBoard');
+  const tasks = ws.tasks || [];
+  board.innerHTML = KANBAN_COLS.map(col => {
+    const colTasks = tasks.filter(t => t.status === col.id);
+    const cardsHtml = colTasks.map(t => {
+      const member = (ws.members||[]).find(m=>m.proId===t.assignedTo) || (ws.clients||[]).find(c=>c.id===t.assignedTo);
+      const avColor = member?.proColor || member?.color || '#9ca3af';
+      const avName = member?.proName || member?.name || '';
+      const isOverdue = t.due && t.status !== 'done' && new Date(t.due) < new Date();
+      return `
+        <div class="kanban-card" onclick="openEditTask('${t.id}')">
+          <div style="display:flex;align-items:flex-start;gap:0.4rem;margin-bottom:0.35rem;">
+            <div class="priority-dot priority-${t.priority}" style="margin-top:4px;"></div>
+            <div class="kanban-card-title">${esc(t.title)}</div>
+          </div>
+          <div class="kanban-card-meta">
+            ${avName ? `<div class="kc-assignee-av" style="background:${esc(avColor)}" title="${esc(avName)}">${getInitials(avName)}</div>` : '<div style="width:22px;"></div>'}
+            <span class="kc-due${isOverdue?' overdue':''}">${t.due ? formatDate(t.due) : ''}</span>
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="kanban-col">
+        <div class="kanban-col-header">
+          <div class="kanban-col-title">
+            <div class="priority-dot" style="background:${col.dot}"></div>
+            ${col.label}
+          </div>
+          <div class="kanban-col-count">${colTasks.length}</div>
+        </div>
+        <div class="kanban-cards" id="kcol-${col.id}">
+          ${cardsHtml}
+        </div>
+        <button class="kanban-add-btn" onclick="openAddTaskInCol('${col.id}')">+ Add task</button>
+      </div>`;
+  }).join('');
+}
+
+function openAddTask() {
+  _editingTaskId = null;
+  populateAssigneeSelects();
+  document.getElementById('taskTitle').value = '';
+  document.getElementById('taskStatus').value = 'todo';
+  document.getElementById('taskPriority').value = 'medium';
+  document.getElementById('taskDue').value = '';
+  openModal('addTaskModal');
+}
+
+function openAddTaskInCol(colId) {
+  openAddTask();
+  document.getElementById('taskStatus').value = colId;
+}
+
+function saveTask() {
+  const title = document.getElementById('taskTitle').value.trim();
+  if (!title) { showToast('Please enter a title', 'error'); return; }
+  const task = {
+    id: uid(), title,
+    status: document.getElementById('taskStatus').value,
+    priority: document.getElementById('taskPriority').value,
+    assignedTo: document.getElementById('taskAssignee').value || null,
+    due: document.getElementById('taskDue').value || null,
+    createdAt: new Date().toISOString()
+  };
+  if (!ws.tasks) ws.tasks = [];
+  ws.tasks.push(task);
+  addActivity('task', 'You', `Added task: "${title}"`, '#2563eb');
+  saveWs();
+  closeModal('addTaskModal');
+  renderKanban();
+  updateHeaderStats();
+  updateProgressRing();
+  showToast('Task added');
+}
+
+function openEditTask(id) {
+  const task = (ws.tasks||[]).find(t => t.id === id);
+  if (!task) return;
+  _editingTaskId = id;
+  populateAssigneeSelects();
+  document.getElementById('editTaskId').value = id;
+  document.getElementById('editTaskTitle').value = task.title;
+  document.getElementById('editTaskStatus').value = task.status;
+  document.getElementById('editTaskPriority').value = task.priority;
+  document.getElementById('editTaskAssignee').value = task.assignedTo || '';
+  document.getElementById('editTaskDue').value = task.due || '';
+  openModal('editTaskModal');
+}
+
+function updateTask() {
+  const id = document.getElementById('editTaskId').value;
+  const task = (ws.tasks||[]).find(t => t.id === id);
+  if (!task) return;
+  const prevStatus = task.status;
+  task.title = document.getElementById('editTaskTitle').value.trim() || task.title;
+  task.status = document.getElementById('editTaskStatus').value;
+  task.priority = document.getElementById('editTaskPriority').value;
+  task.assignedTo = document.getElementById('editTaskAssignee').value || null;
+  task.due = document.getElementById('editTaskDue').value || null;
+  if (prevStatus !== task.status) {
+    addActivity('task', 'You', `Moved "${task.title}" to ${KANBAN_COLS.find(c=>c.id===task.status)?.label}`, '#2563eb');
+  }
+  saveWs();
+  closeModal('editTaskModal');
+  renderKanban();
+  updateHeaderStats();
+  updateProgressRing();
+  showToast('Task updated');
+}
+
+function deleteTask() {
+  const id = document.getElementById('editTaskId').value;
+  ws.tasks = (ws.tasks||[]).filter(t => t.id !== id);
+  saveWs();
+  closeModal('editTaskModal');
+  renderKanban();
+  updateHeaderStats();
+  showToast('Task deleted');
+}
+
+// ── TIMELINE ──
+function renderTimeline() {
+  const container = document.getElementById('timelineContent');
+  const milestones = ws.milestones || [];
+  if (milestones.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <h3>No milestones yet</h3>
+        <p>Add milestones to track key dates and deadlines.</p>
+        <button class="qa-btn primary" onclick="openAddMilestone()">+ Add First Milestone</button>
+      </div>`;
+    return;
+  }
+  // Sort by date
+  const sorted = [...milestones].sort((a,b) => (a.date||'') < (b.date||'') ? -1 : 1);
+  container.innerHTML = sorted.map(m => {
+    const isOverdue = m.date && m.status !== 'done' && new Date(m.date) < new Date();
+    return `
+      <div class="milestone ${m.status}" id="ms-${m.id}">
+        <div class="milestone-dot"></div>
+        <div class="ms-header">
+          <div>
+            <div class="ms-title">${esc(m.title)}</div>
+            <div class="ms-meta">
+              <span class="ms-date${isOverdue?' overdue':''}">📅 ${m.date ? formatDate(m.date) : 'No date'}</span>
+              ${m.assignedTo ? `<span class="ms-assignee">👤 ${esc(getMemberName(m.assignedTo))}</span>` : ''}
+              <span class="ms-status-badge ${m.status}">${m.status.replace('_',' ')}</span>
+            </div>
+            ${m.notes ? `<div style="font-size:0.8rem;color:#6b7280;margin-top:4px;">${esc(m.notes)}</div>` : ''}
+          </div>
+          <div class="ms-actions">
+            ${m.status !== 'done' ? `<button class="ms-btn done-btn" onclick="completeMilestone('${m.id}')">✓ Done</button>` : ''}
+            ${m.status === 'pending' ? `<button class="ms-btn" onclick="startMilestone('${m.id}')">Start</button>` : ''}
+            <button class="ms-btn" style="color:#dc2626;border-color:#fca5a5;" onclick="removeMilestone('${m.id}')">×</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function getMemberName(id) {
+  const m = (ws.members||[]).find(m=>m.proId===id) || (ws.clients||[]).find(c=>c.id===id);
+  return m?.proName || m?.name || id || '';
+}
+
+function openAddMilestone() {
+  populateAssigneeSelects();
+  document.getElementById('msTitle').value = '';
+  document.getElementById('msDate').value = '';
+  document.getElementById('msNotes').value = '';
+  openModal('addMilestoneModal');
+}
+
+function saveMilestone() {
+  const title = document.getElementById('msTitle').value.trim();
+  if (!title) { showToast('Please enter a title', 'error'); return; }
+  const ms = {
+    id: uid(), title,
+    date: document.getElementById('msDate').value || null,
+    assignedTo: document.getElementById('msAssignee').value || null,
+    notes: document.getElementById('msNotes').value.trim(),
+    status: 'pending'
+  };
+  if (!ws.milestones) ws.milestones = [];
+  ws.milestones.push(ms);
+  addActivity('milestone', 'You', `Added milestone: "${title}"`, '#7c3aed');
+  saveWs();
+  closeModal('addMilestoneModal');
+  renderTimeline();
+  updateHeaderStats();
+  showToast('Milestone added');
+}
+
+function completeMilestone(id) {
+  const ms = (ws.milestones||[]).find(m => m.id === id);
+  if (!ms) return;
+  ms.status = 'done';
+  addActivity('milestone', 'You', `Completed milestone: "${ms.title}"`, '#059669');
+  saveWs();
+  renderTimeline();
+  updateHeaderStats();
+  updateProgressRing();
+  showToast('Milestone complete!', 'success');
+  if (document.getElementById('panel-overview').classList.contains('active')) renderOverview();
+}
+
+function startMilestone(id) {
+  const ms = (ws.milestones||[]).find(m => m.id === id);
+  if (!ms) return;
+  ms.status = 'in_progress';
+  saveWs();
+  renderTimeline();
+  showToast('Milestone started');
+}
+
+function removeMilestone(id) {
+  ws.milestones = (ws.milestones||[]).filter(m => m.id !== id);
+  saveWs();
+  renderTimeline();
+  updateHeaderStats();
+  showToast('Milestone removed');
+}
+
+// ── ACTIVITY ──
+function renderActivity() {
+  const feed = document.getElementById('activityFeed');
+  const activities = ws.activities || [];
+  if (activities.length === 0) {
+    feed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><h3>No activity yet</h3><p>Post an update to start the conversation.</p></div>';
+    return;
+  }
+  feed.innerHTML = activities.map(a => `
+    <div class="activity-item">
+      <div class="activity-av${a.type==='system'?' system':''}" style="${a.type!=='system'?'background:'+esc(a.color||'#6b7280'):''}">${a.type==='system'?'⚙️':getInitials(a.actor)}</div>
+      <div class="activity-body">
+        <div class="activity-text"><strong>${esc(a.actor)}</strong> ${esc(a.message)}</div>
+        ${a.updateText ? `<div class="activity-update-text">"${esc(a.updateText)}"</div>` : ''}
+        <div class="activity-time">${formatRelative(a.createdAt)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function postActivity() {
+  const text = document.getElementById('activityPostText').value.trim();
+  if (!text) return;
+  const act = {
+    id: uid(), type: 'update',
+    actor: 'You', message: 'posted an update:',
+    updateText: text,
+    color: '#059669', createdAt: new Date().toISOString()
+  };
+  if (!ws.activities) ws.activities = [];
+  ws.activities.unshift(act);
+  saveWs();
+  document.getElementById('activityPostText').value = '';
+  renderActivity();
+  showToast('Update posted', 'success');
+}
+
+// ── TEAM PANEL ──
+function renderTeamPanel() {
+  const container = document.getElementById('teamMembersPanel');
+  const members = ws.members || [];
+  const clients = ws.clients || [];
+  let html = members.map(m => `
+    <div class="team-member-card">
+      <div class="tm-av" style="background:${esc(m.proColor||'#6b7280')}">${getInitials(m.proName)}</div>
+      <div class="tm-info">
+        <div class="tm-name">${esc(m.proName)}</div>
+        <div class="tm-role">${esc(m.role)}</div>
+        <div class="tm-progress-bar"><div class="tm-progress-fill" style="width:${m.progress||0}%"></div></div>
+        <div class="tm-progress-lbl">${m.progress||0}% complete</div>
+      </div>
+      <div class="tm-status-dot active"></div>
+    </div>`).join('');
+  html += clients.map(c => `
+    <div class="team-member-card client-card">
+      <div class="tm-av" style="background:#f59e0b">${getInitials(c.name)}</div>
+      <div class="tm-info">
+        <div class="tm-name">${esc(c.name)}</div>
+        <div class="tm-role">${esc(c.email)}</div>
+        <span class="client-badge">🔒 Client Access</span>
+        <div style="font-size:0.72rem;color:#9ca3af;margin-top:4px;">Invited ${formatRelative(c.invitedAt)}</div>
+      </div>
+      <div class="tm-status-dot${c.status==='active'?' active':''}"></div>
+    </div>`).join('');
+  if (!html) html = `
+    <div style="grid-column:1/-1;">
+      <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <h3>No team members</h3>
+        <p>Go back to <a href="teams.html" style="color:#059669;">Teams</a> to add members, or invite a client below.</p>
+      </div>
+    </div>`;
+  container.innerHTML = html;
+}
+
+// ── INVITE CLIENT ──
+function openInviteClient() {
+  document.getElementById('clientName').value = '';
+  document.getElementById('clientEmail').value = '';
+  document.getElementById('clientRole').value = '';
+  openModal('inviteClientModal');
+}
+
+function inviteClient() {
+  const name = document.getElementById('clientName').value.trim();
+  const email = document.getElementById('clientEmail').value.trim();
+  if (!name || !email) { showToast('Name and email are required', 'error'); return; }
+  const role = document.getElementById('clientRole').value.trim() || 'Client';
+  const client = {
+    id: uid(), name, email, role,
+    status: 'active',
+    invitedAt: new Date().toISOString(),
+    progress: 0,
+    accessLevel: 'limited' // can view checklist + upload docs
+  };
+  if (!ws.clients) ws.clients = [];
+  ws.clients.push(client);
+  addActivity('client', 'You', `invited ${name} as a client (limited access)`, '#f59e0b');
+  // Store in rv_client_invites as well
+  const invites = JSON.parse(localStorage.getItem('rv_client_invites')||'[]');
+  invites.push({ ...client, workspaceId: ws.id, teamId: ws.teamId });
+  localStorage.setItem('rv_client_invites', JSON.stringify(invites));
+  saveWs();
+  closeModal('inviteClientModal');
+  renderMemberStrip();
+  renderTeamPanel();
+  updateHeaderStats();
+  showToast(`${name} invited! They have limited workspace access.`, 'success');
+}
+
+// ── Modal helpers ──
+function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); });
+});
+
+// ── Toast ──
+let _toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Boot ──
+function init() {
+  // Get teamId from URL
+  const params = new URLSearchParams(window.location.search);
+  teamId = params.get('teamId');
+
+  // Load team data
+  const teams = getTeams();
+  team = teams.find(t => t.id === teamId) || null;
+
+  // If no teamId or no team, show a demo/fallback
+  if (!team && !teamId) {
+    // Demo mode — create a fake team
+    team = {
+      id: 'demo',
+      name: '456 Oak Ave Purchase',
+      type: 'real_estate',
+      purpose: 'Home purchase at 456 Oak Ave, Salt Lake City',
+      status: 'active',
+      members: [
+        { proId: 'pinnacle-real-estate', proName: 'Pinnacle Real Estate', proTrade: 'Agent', proColor: '#be185d', role: "Buyer's Agent" },
+        { proId: 'granite-state-mortgage', proName: 'Granite State Mortgage', proTrade: 'Lender', proColor: '#475569', role: 'Loan Officer' },
+        { proId: 'mountain-west-insurance', proName: 'Mountain West Insurance', proTrade: 'Insurance', proColor: '#0ea5e9', role: 'Insurance Agent' },
+        { proId: 'utah-property-law', proName: 'Utah Property Law', proTrade: 'Attorney', proColor: '#6366f1', role: 'Title Attorney' },
+      ]
+    };
+    teamId = 'demo';
+  }
+
+  // Look for existing workspace for this team
+  ws = getWsForTeam(teamId);
+
+  if (!ws) {
+    showSetupScreen();
+  } else {
+    showWorkspace();
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Teams &amp; Connections</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Page Header ── */
+    .teams-hero {
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 60%, #1e3a8a 100%);
+      color: white;
+      padding: 4rem 2rem 2.5rem;
+    }
+    .teams-hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .teams-hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: 0.35rem; }
+    .teams-hero p { font-size: 1rem; opacity: 0.88; margin: 0; }
+    .hero-stats {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .btn-create-team {
+      background: white;
+      color: #1a56db;
+      border: none;
+      padding: 0.75rem 1.75rem;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .btn-create-team:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+
+    /* ── Tabs ── */
+    .teams-tabs {
+      background: white;
+      border-bottom: 2px solid #e5e7eb;
+      position: sticky;
+      top: 60px;
+      z-index: 100;
+    }
+    .teams-tabs-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      gap: 0;
+    }
+    .tab-btn {
+      padding: 1rem 1.5rem;
+      border: none;
+      background: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: #374151; }
+    .tab-btn.active { color: #1a56db; border-bottom-color: #1a56db; }
+    .tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 0.7rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      padding: 0 5px;
+      margin-left: 6px;
+    }
+    .tab-btn.active .tab-count { background: #dbeafe; color: #1a56db; }
+
+    /* ── Tab Panels ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── My Teams Layout ── */
+    .teams-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* Sidebar */
+    .teams-sidebar {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      position: sticky;
+      top: 110px;
+    }
+    .sidebar-header {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sidebar-header h3 { font-size: 0.88rem; font-weight: 700; color: #374151; margin: 0; }
+    .sidebar-new-btn {
+      background: #eff6ff;
+      color: #1a56db;
+      border: none;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sidebar-new-btn:hover { background: #dbeafe; }
+    .sidebar-search {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .sidebar-search input {
+      width: 100%;
+      padding: 0.45rem 0.75rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .sidebar-search input:focus { border-color: #3b82f6; }
+    .team-list { max-height: 60vh; overflow-y: auto; }
+    .team-list-item {
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.12s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .team-list-item:hover { background: #f9fafb; }
+    .team-list-item.active { background: #eff6ff; border-left: 3px solid #1a56db; }
+    .team-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .team-list-info { flex: 1; min-width: 0; }
+    .team-list-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .team-list-meta { font-size: 0.75rem; color: #9ca3af; margin-top: 1px; }
+    .team-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      flex-shrink: 0;
+    }
+    .team-status-dot.archived { background: #d1d5db; }
+    .team-status-dot.completed { background: #6366f1; }
+    .teams-empty-sidebar {
+      padding: 2rem 1rem;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 0.85rem;
+    }
+
+    /* Main team detail */
+    .team-detail {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+    .team-detail-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .team-detail-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .team-detail-title { flex: 1; min-width: 0; }
+    .team-detail-name { font-size: 1.3rem; font-weight: 800; color: #111827; }
+    .team-detail-purpose { font-size: 0.88rem; color: #6b7280; margin-top: 3px; }
+    .team-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      margin-top: 6px;
+    }
+    .team-detail-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .btn-sm-outline {
+      padding: 0.45rem 0.9rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .btn-sm-outline:hover { border-color: #9ca3af; background: #f9fafb; }
+    .btn-sm-primary {
+      padding: 0.45rem 0.9rem;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .btn-sm-primary:hover { background: #2563eb; }
+
+    /* Members section */
+    .team-members-section { padding: 1.5rem; }
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #111827;
+    }
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.85rem;
+    }
+    .member-card {
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      position: relative;
+      transition: border-color 0.12s;
+    }
+    .member-card:hover { border-color: #93c5fd; }
+    .member-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .member-info { flex: 1; min-width: 0; }
+    .member-name { font-size: 0.9rem; font-weight: 700; color: #111827; }
+    .member-trade { font-size: 0.78rem; color: #6b7280; margin-top: 1px; }
+    .member-role-badge {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+    .member-actions {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      display: flex;
+      gap: 4px;
+    }
+    .member-action-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: none;
+      background: #f3f4f6;
+      color: #6b7280;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s;
+    }
+    .member-action-btn:hover { background: #e5e7eb; }
+    .member-action-btn.danger:hover { background: #fee2e2; color: #dc2626; }
+    .add-member-card {
+      border: 2px dashed #e5e7eb;
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: #9ca3af;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      min-height: 80px;
+    }
+    .add-member-card:hover { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
+
+    /* Empty state */
+    .teams-empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+    .teams-empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .teams-empty h3 { font-size: 1.3rem; font-weight: 800; color: #374151; margin-bottom: 0.5rem; }
+    .teams-empty p { max-width: 380px; margin: 0 auto 1.5rem; font-size: 0.92rem; line-height: 1.65; }
+
+    /* ── Templates Section ── */
+    .templates-section {
+      background: #f9fafb;
+      border-top: 2px solid #e5e7eb;
+      padding: 2.5rem 2rem;
+    }
+    .templates-inner { max-width: 1200px; margin: 0 auto; }
+    .templates-inner h2 { font-size: 1.4rem; font-weight: 800; color: #111827; margin-bottom: 0.35rem; }
+    .templates-inner > p { font-size: 0.92rem; color: #6b7280; margin-bottom: 1.5rem; }
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .template-card {
+      background: white;
+      border-radius: 12px;
+      border: 1.5px solid #e5e7eb;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .template-card:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.12);
+      transform: translateY(-2px);
+    }
+    .template-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+    .template-name { font-size: 0.95rem; font-weight: 800; color: #111827; margin-bottom: 0.4rem; }
+    .template-desc { font-size: 0.8rem; color: #6b7280; line-height: 1.5; margin-bottom: 0.75rem; }
+    .template-roles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .template-role-tag {
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ── My Connections Tab ── */
+    .connections-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+    }
+    .connections-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .filter-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-pill {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid #e5e7eb;
+      background: white;
+      color: #4b5563;
+      transition: all 0.12s;
+    }
+    .filter-pill:hover { border-color: #3b82f6; color: #3b82f6; }
+    .filter-pill.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .connections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .connection-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 1.25rem;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .connection-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .conn-card-header { display: flex; gap: 0.85rem; align-items: flex-start; margin-bottom: 0.75rem; }
+    .conn-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .conn-info { flex: 1; min-width: 0; }
+    .conn-name { font-size: 0.95rem; font-weight: 800; color: #111827; }
+    .conn-trade { font-size: 0.8rem; color: #6b7280; }
+    .conn-category-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+    }
+    .cat-colleague { background: #dbeafe; color: #1d4ed8; }
+    .cat-vendor { background: #d1fae5; color: #059669; }
+    .cat-client { background: #fef3c7; color: #d97706; }
+    .cat-referral_partner { background: #ede9fe; color: #6d28d9; }
+    .cat-uncategorized { background: #f3f4f6; color: #6b7280; }
+    .conn-strength-bar {
+      margin: 0.75rem 0;
+    }
+    .strength-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .strength-track {
+      height: 5px;
+      background: #f3f4f6;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .strength-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      transition: width 0.4s ease;
+    }
+    .conn-meta {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 0.85rem;
+    }
+    .conn-meta span { display: flex; align-items: center; gap: 3px; }
+    .conn-actions { display: flex; gap: 0.5rem; }
+    .conn-actions button {
+      flex: 1;
+      padding: 0.45rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.12s;
+    }
+    .btn-message { background: #3b82f6; color: white; }
+    .btn-message:hover { background: #2563eb; }
+    .btn-add-team { background: #f3f4f6; color: #374151; }
+    .btn-add-team:hover { background: #e5e7eb; }
+    .btn-categorize { background: white; color: #6b7280; border: 1.5px solid #e5e7eb !important; font-size: 0.72rem !important; }
+    .btn-categorize:hover { border-color: #9ca3af !important; }
+    .pending-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fef3c7;
+      color: #d97706;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+    }
+    .connections-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem;
+      color: #9ca3af;
+    }
+    .connections-empty h3 { font-size: 1.1rem; color: #6b7280; margin-bottom: 0.5rem; }
+
+    /* ── Recommended Tab ── */
+    .recommended-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+    }
+    .recommended-intro {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+      color: #1e40af;
+    }
+    .recommended-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .recommended-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 1.25rem;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .recommended-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .rec-card-header { display: flex; gap: 0.85rem; align-items: flex-start; margin-bottom: 0.75rem; }
+    .rec-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .rec-info { flex: 1; min-width: 0; }
+    .rec-name { font-size: 0.95rem; font-weight: 800; color: #111827; }
+    .rec-trade { font-size: 0.8rem; color: #6b7280; }
+    .rec-why {
+      font-size: 0.78rem;
+      color: #6b7280;
+      background: #f9fafb;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.85rem;
+      line-height: 1.5;
+    }
+    .rec-mutuals { font-size: 0.75rem; color: #6b7280; margin-bottom: 0.85rem; }
+    .rec-mutuals strong { color: #374151; }
+    .btn-connect {
+      width: 100%;
+      padding: 0.55rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      transition: background 0.12s;
+    }
+    .btn-connect:hover { background: #2563eb; }
+    .btn-connect.pending { background: #fef3c7; color: #d97706; }
+    .btn-connect.connected { background: #d1fae5; color: #059669; }
+
+    /* ── Modals ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+      overflow-y: auto;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 100%;
+      padding: 2rem;
+      position: relative;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #f3f4f6;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close:hover { background: #e5e7eb; }
+    .modal-title { font-size: 1.25rem; font-weight: 800; color: #111827; margin-bottom: 0.25rem; }
+    .modal-subtitle { font-size: 0.88rem; color: #6b7280; margin-bottom: 1.5rem; }
+
+    /* Form elements */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: #1f2937;
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #3b82f6; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-submit {
+      width: 100%;
+      padding: 0.8rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .form-submit:hover { background: #2563eb; }
+
+    /* Type selector */
+    .type-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+    .type-option {
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .type-option:hover { border-color: #93c5fd; }
+    .type-option.selected { border-color: #3b82f6; background: #eff6ff; }
+    .type-option-icon { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .type-option-label { font-size: 0.72rem; font-weight: 700; color: #374151; line-height: 1.2; }
+    .type-option.selected .type-option-label { color: #1d4ed8; }
+
+    /* Member picker */
+    .member-picker { margin-top: 1rem; }
+    .member-picker-search input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .member-picker-search input:focus { border-color: #3b82f6; }
+    .member-picker-results {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+    }
+    .picker-result {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .picker-result:last-child { border-bottom: none; }
+    .picker-result:hover { background: #f9fafb; }
+    .picker-result.selected { background: #eff6ff; }
+    .picker-result-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .picker-result-info { flex: 1; }
+    .picker-result-name { font-size: 0.88rem; font-weight: 700; color: #111827; }
+    .picker-result-trade { font-size: 0.75rem; color: #6b7280; }
+    .picker-check { color: #3b82f6; font-size: 1.1rem; }
+    .selected-members-list { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .selected-member-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+    .chip-remove {
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0.6;
+    }
+    .chip-remove:hover { opacity: 1; }
+
+    /* Category modal */
+    .category-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
+    .cat-option {
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.12s;
+      text-align: center;
+    }
+    .cat-option:hover { border-color: #93c5fd; }
+    .cat-option.selected { border-color: #3b82f6; background: #eff6ff; }
+    .cat-option-icon { font-size: 1.2rem; margin-bottom: 0.2rem; }
+    .cat-option-name { font-size: 0.82rem; font-weight: 700; color: #374151; }
+    .cat-option.selected .cat-option-name { color: #1d4ed8; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #111827;
+      color: white;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      z-index: 9999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      max-width: 340px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #059669; }
+    .toast.info { background: #1a56db; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .teams-layout { grid-template-columns: 1fr; }
+      .teams-sidebar { position: static; }
+      .team-list { max-height: 220px; }
+    }
+    @media (max-width: 640px) {
+      .teams-hero { padding: 3rem 1.25rem 2rem; }
+      .teams-hero h1 { font-size: 1.6rem; }
+      .teams-hero-inner { flex-direction: column; align-items: flex-start; }
+      .btn-create-team { width: 100%; text-align: center; }
+      .teams-tabs-inner { padding: 0 0.75rem; overflow-x: auto; }
+      .tab-btn { padding: 0.85rem 1rem; font-size: 0.82rem; white-space: nowrap; }
+      .teams-layout, .connections-layout, .recommended-layout { padding: 1rem; }
+      .type-selector { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+      .templates-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 420px) {
+      .templates-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">Browse Rentals</a>
+    <a href="network.html">Pro Network</a>
+    <a href="teams.html" style="color:var(--primary);font-weight:700;">Teams</a>
+    <a href="index.html#roles">Who We Serve</a>
+    <a href="funding.html">Funding</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="teams-hero">
+  <div class="teams-hero-inner">
+    <div>
+      <h1>Teams &amp; Connections</h1>
+      <p>Build working teams with your trusted professional network</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-pill" id="statTeams">0 Teams</div>
+      <div class="stat-pill" id="statMembers">0 Members</div>
+      <div class="stat-pill" id="statConnections">0 Connections</div>
+    </div>
+    <button class="btn-create-team" onclick="openCreateTeam()">+ Create Team</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="teams-tabs">
+  <div class="teams-tabs-inner">
+    <button class="tab-btn active" onclick="switchTab('teams', this)">
+      My Teams <span class="tab-count" id="teamsTabCount">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('connections', this)">
+      My Connections <span class="tab-count" id="connectionsTabCount">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('recommended', this)">
+      Recommended <span class="tab-count" id="recommendedTabCount">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- TAB: MY TEAMS -->
+<div class="tab-panel active" id="panel-teams">
+  <div class="teams-layout">
+    <!-- Sidebar -->
+    <aside class="teams-sidebar">
+      <div class="sidebar-header">
+        <h3>My Teams</h3>
+        <button class="sidebar-new-btn" onclick="openCreateTeam()">+ New</button>
+      </div>
+      <div class="sidebar-search">
+        <input type="text" placeholder="Search teams..." oninput="filterTeamsList(this.value)" id="teamSearchInput" />
+      </div>
+      <div class="team-list" id="teamsList"></div>
+    </aside>
+
+    <!-- Main -->
+    <main id="teamsMain"></main>
+  </div>
+
+  <!-- Templates section -->
+  <div class="templates-section" id="templatesSection">
+    <div class="templates-inner">
+      <h2>Start with a Team Template</h2>
+      <p>Pre-built configurations for common workflows — click to create instantly</p>
+      <div class="templates-grid" id="templatesGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: MY CONNECTIONS -->
+<div class="tab-panel" id="panel-connections">
+  <div class="connections-layout">
+    <div class="connections-toolbar">
+      <div class="filter-pills" id="connFilterPills"></div>
+      <a href="network.html" style="font-size:0.85rem;color:#3b82f6;font-weight:600;text-decoration:none;">
+        + Find More Professionals &rarr;
+      </a>
+    </div>
+    <div class="connections-grid" id="connectionsGrid"></div>
+  </div>
+</div>
+
+<!-- TAB: RECOMMENDED -->
+<div class="tab-panel" id="panel-recommended">
+  <div class="recommended-layout">
+    <div class="recommended-intro">
+      <strong>Suggested for you</strong> — Based on your industry, location, and who your connections work with.
+      Connect with these professionals to grow your trusted network.
+    </div>
+    <div class="recommended-grid" id="recommendedGrid"></div>
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+
+<!-- Create Team Modal -->
+<div class="modal-overlay" id="createTeamModal">
+  <div class="modal-box" style="max-width:640px;">
+    <button class="modal-close" onclick="closeModal('createTeamModal')">&times;</button>
+    <div class="modal-title">Create a Team</div>
+    <div class="modal-subtitle">Assemble your team of professionals for a shared goal</div>
+
+    <div class="form-row">
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label>Team Name *</label>
+        <input type="text" id="newTeamName" placeholder="e.g., 456 Oak Ave Purchase, Q2 Marketing Campaign..." />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Team Type</label>
+      <div class="type-selector" id="teamTypeSelector"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Purpose / Goal</label>
+      <input type="text" id="newTeamPurpose" placeholder="Brief description of what this team is working toward..." />
+    </div>
+
+    <div class="form-group">
+      <label>Add Members from Your Network</label>
+      <div class="member-picker">
+        <div class="member-picker-search">
+          <input type="text" id="memberPickerSearch" placeholder="Search by name or trade..." oninput="searchMemberPicker(this.value)" />
+        </div>
+        <div class="member-picker-results" id="memberPickerResults"></div>
+        <div class="selected-members-list" id="selectedMembersList"></div>
+      </div>
+    </div>
+
+    <button class="form-submit" onclick="createTeam()">Create Team</button>
+  </div>
+</div>
+
+<!-- Add Member to Existing Team Modal -->
+<div class="modal-overlay" id="addMemberModal">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('addMemberModal')">&times;</button>
+    <div class="modal-title">Add Team Member</div>
+    <div class="modal-subtitle" id="addMemberSubtitle">Search your network or find new professionals</div>
+
+    <div class="form-group">
+      <label>Search Professionals</label>
+      <input type="text" id="addMemberSearch" placeholder="Name or trade..." oninput="searchAddMember(this.value)" />
+    </div>
+    <div class="member-picker-results" id="addMemberResults" style="max-height:280px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;"></div>
+
+    <div class="form-group" style="margin-top:1rem;">
+      <label>Role on This Team</label>
+      <input type="text" id="addMemberRole" placeholder="e.g., Loan Officer, Inspector, Lead Contractor..." />
+    </div>
+
+    <button class="form-submit" onclick="confirmAddMember()">Add to Team</button>
+  </div>
+</div>
+
+<!-- Categorize Connection Modal -->
+<div class="modal-overlay" id="categorizeModal">
+  <div class="modal-box" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('categorizeModal')">&times;</button>
+    <div class="modal-title">Categorize Connection</div>
+    <div class="modal-subtitle" id="categorizeSubtitle">How do you work with this person?</div>
+    <input type="hidden" id="categorizeConnId" />
+    <div class="category-options">
+      <div class="cat-option" onclick="selectCategory('colleague', this)">
+        <div class="cat-option-icon">🤝</div>
+        <div class="cat-option-name">Colleague</div>
+      </div>
+      <div class="cat-option" onclick="selectCategory('vendor', this)">
+        <div class="cat-option-icon">🔧</div>
+        <div class="cat-option-name">Vendor / Service</div>
+      </div>
+      <div class="cat-option" onclick="selectCategory('client', this)">
+        <div class="cat-option-icon">👤</div>
+        <div class="cat-option-name">Client</div>
+      </div>
+      <div class="cat-option" onclick="selectCategory('referral_partner', this)">
+        <div class="cat-option-icon">⭐</div>
+        <div class="cat-option-name">Referral Partner</div>
+      </div>
+    </div>
+    <button class="form-submit" style="margin-top:1rem;" onclick="saveCategory()">Save Category</button>
+  </div>
+</div>
+
+<!-- Add to Team from Connection Modal -->
+<div class="modal-overlay" id="addToTeamModal">
+  <div class="modal-box" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('addToTeamModal')">&times;</button>
+    <div class="modal-title">Add to Team</div>
+    <div class="modal-subtitle" id="addToTeamSubtitle">Select which team to add this member to</div>
+    <input type="hidden" id="addToTeamConnId" />
+    <div id="addToTeamList" style="margin-bottom:1rem;"></div>
+    <div class="form-group">
+      <label>Role</label>
+      <input type="text" id="addToTeamRole" placeholder="e.g., Insurance Agent, Inspector..." />
+    </div>
+    <button class="form-submit" onclick="confirmAddToTeam()">Add to Team</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────
+// RentVerified — Teams & Connections
+// Phase 1: Team Assembly & Professional Connections
+// ─────────────────────────────────────────────────
+
+// Monkey-patch for testing (localStorage mode)
+// RVData._useSupabase = function() { return false; };
+
+// ── Constants ──
+const TEAM_TYPES = [
+  { id: 'real_estate', label: 'Real Estate Deal', icon: '🏠', color: '#2563eb' },
+  { id: 'legal',       label: 'Legal Case',        icon: '⚖️', color: '#6d28d9' },
+  { id: 'business',    label: 'Business Project',  icon: '📊', color: '#d97706' },
+  { id: 'financial',   label: 'Financial Review',  icon: '💼', color: '#059669' },
+  { id: 'maintenance', label: 'Maintenance Job',   icon: '🔨', color: '#dc2626' },
+  { id: 'marketing',   label: 'Marketing Campaign',icon: '📣', color: '#7c3aed' },
+];
+
+const TEAM_TEMPLATES = [
+  {
+    id: 'home_purchase',
+    name: 'Home Purchase Team',
+    type: 'real_estate',
+    icon: '🏡',
+    desc: 'Assemble everyone for a smooth home purchase transaction.',
+    roles: ['Buyer\'s Agent', 'Loan Officer', 'Insurance Agent', 'Title Co.', 'Inspector', 'Buyer'],
+    purposeTemplate: 'Home purchase transaction'
+  },
+  {
+    id: 'eviction_case',
+    name: 'Eviction Case',
+    type: 'legal',
+    icon: '⚖️',
+    desc: 'Coordinate your legal and property team for eviction proceedings.',
+    roles: ['Attorney', 'Property Manager', 'Process Server', 'Client'],
+    purposeTemplate: 'Eviction proceedings'
+  },
+  {
+    id: 'marketing_campaign',
+    name: 'Marketing Campaign',
+    type: 'marketing',
+    icon: '📣',
+    desc: 'Bring together your creative and marketing team for a campaign.',
+    roles: ['Business Owner', 'Marketing Agency', 'Graphic Designer', 'Social Media Mgr'],
+    purposeTemplate: 'Marketing campaign'
+  },
+  {
+    id: 'tax_prep',
+    name: 'Financial Review',
+    type: 'financial',
+    icon: '📁',
+    desc: 'Year-end tax preparation with your financial professionals.',
+    roles: ['Business Owner', 'CPA', 'Bookkeeper', 'Attorney'],
+    purposeTemplate: 'Year-end financial review'
+  },
+  {
+    id: 'renovation',
+    name: 'Renovation Team',
+    type: 'maintenance',
+    icon: '🏗️',
+    desc: 'Coordinate all contractors for a property renovation.',
+    roles: ['Property Manager', 'General Contractor', 'Plumber', 'Electrician', 'Painter'],
+    purposeTemplate: 'Property renovation project'
+  },
+  {
+    id: 'property_mgmt',
+    name: 'Property Mgmt Team',
+    type: 'real_estate',
+    icon: '🔑',
+    desc: 'Ongoing operations team for a rental property.',
+    roles: ['Property Manager', 'Maintenance Tech', 'Leasing Agent', 'Accountant'],
+    purposeTemplate: 'Ongoing property management'
+  },
+];
+
+const CONN_CATEGORIES = [
+  { id: 'colleague',        label: 'Colleague',       cssClass: 'cat-colleague' },
+  { id: 'vendor',           label: 'Vendor',          cssClass: 'cat-vendor' },
+  { id: 'client',           label: 'Client',          cssClass: 'cat-client' },
+  { id: 'referral_partner', label: 'Referral Partner',cssClass: 'cat-referral_partner' },
+];
+
+const CATEGORY_LABELS = {
+  colleague: 'Colleague',
+  vendor: 'Vendor',
+  client: 'Client',
+  referral_partner: 'Referral Partner',
+  uncategorized: 'Uncategorized'
+};
+
+// ── State ──
+let selectedTeamId = null;
+let selectedTeamType = 'real_estate';
+let selectedMembers = []; // proIds for create modal
+let addMemberTargetTeamId = null;
+let addMemberSelectedPro = null;
+let categorizingConnId = null;
+let selectedCategoryValue = null;
+let addToTeamConnId = null;
+let connFilter = 'all';
+
+// ── Data Helpers ──
+function getTeams() {
+  return JSON.parse(localStorage.getItem('rv_teams') || '[]');
+}
+function saveTeams(teams) {
+  localStorage.setItem('rv_teams', JSON.stringify(teams));
+}
+function getConnections() {
+  return JSON.parse(localStorage.getItem('rv_connections') || '[]');
+}
+function saveConnections(conns) {
+  localStorage.setItem('rv_connections', JSON.stringify(conns));
+}
+function getProfessionals() {
+  let data = localStorage.getItem('rv_network_professionals');
+  if (!data) return [];
+  return JSON.parse(data);
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+}
+function getTypeInfo(typeId) {
+  return TEAM_TYPES.find(t => t.id === typeId) || TEAM_TYPES[0];
+}
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ── Seed demo data if empty ──
+function seedDemoData() {
+  const pros = getProfessionals();
+  if (!pros.length) return; // No professionals loaded yet
+
+  // Seed some demo connections if none exist
+  let conns = getConnections();
+  if (conns.length === 0 && pros.length >= 5) {
+    const demoConns = [
+      { id: uid(), proId: pros[0].id, proName: pros[0].name, proTrade: pros[0].trade, proColor: pros[0].avatarColor, category: 'vendor', status: 'connected', connectedDate: '2026-01-15', strength: 78, mutuals: 3 },
+      { id: uid(), proId: pros[1].id, proName: pros[1].name, proTrade: pros[1].trade, proColor: pros[1].avatarColor, category: 'vendor', status: 'connected', connectedDate: '2026-02-01', strength: 62, mutuals: 2 },
+      { id: uid(), proId: pros[2].id, proName: pros[2].name, proTrade: pros[2].trade, proColor: pros[2].avatarColor, category: 'referral_partner', status: 'connected', connectedDate: '2026-02-20', strength: 91, mutuals: 5 },
+      { id: uid(), proId: pros[4].id, proName: pros[4].name, proTrade: pros[4].trade, proColor: pros[4].avatarColor, category: 'colleague', status: 'connected', connectedDate: '2026-03-01', strength: 55, mutuals: 1 },
+      { id: uid(), proId: pros[5].id, proName: pros[5].name, proTrade: pros[5].trade, proColor: pros[5].avatarColor, category: 'uncategorized', status: 'pending_sent', connectedDate: null, strength: 0, mutuals: 2 },
+    ];
+    saveConnections(demoConns);
+    conns = demoConns;
+  }
+
+  // Seed a demo team if none exist
+  let teams = getTeams();
+  if (teams.length === 0 && conns.length >= 2) {
+    const connected = conns.filter(c => c.status === 'connected');
+    const demoTeam = {
+      id: uid(),
+      name: '456 Oak Ave Purchase',
+      type: 'real_estate',
+      purpose: 'Home purchase at 456 Oak Ave, Salt Lake City',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      members: [
+        { proId: connected[0].proId, proName: connected[0].proName, proTrade: connected[0].proTrade, proColor: connected[0].proColor, role: "Plumber / Inspector", status: 'active', joinedAt: new Date().toISOString() },
+        { proId: connected[1].proId, proName: connected[1].proName, proTrade: connected[1].proTrade, proColor: connected[1].proColor, role: "Electrician", status: 'active', joinedAt: new Date().toISOString() },
+        { proId: connected[2].proId, proName: connected[2].proName, proTrade: connected[2].proTrade, proColor: connected[2].proColor, role: "Legal Counsel", status: 'active', joinedAt: new Date().toISOString() },
+      ]
+    };
+    teams = [demoTeam];
+    saveTeams(teams);
+  }
+}
+
+// ── Stats ──
+function updateStats() {
+  const teams = getTeams();
+  const conns = getConnections();
+  const totalMembers = teams.reduce((s, t) => s + (t.members?.length || 0), 0);
+  const connected = conns.filter(c => c.status === 'connected').length;
+
+  document.getElementById('statTeams').textContent = `${teams.length} Team${teams.length !== 1 ? 's' : ''}`;
+  document.getElementById('statMembers').textContent = `${totalMembers} Member${totalMembers !== 1 ? 's' : ''}`;
+  document.getElementById('statConnections').textContent = `${connected} Connection${connected !== 1 ? 's' : ''}`;
+  document.getElementById('teamsTabCount').textContent = teams.length;
+  document.getElementById('connectionsTabCount').textContent = connected;
+  document.getElementById('recommendedTabCount').textContent = getRecommended().length;
+}
+
+// ── Tab switching ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'connections') renderConnections();
+  if (id === 'recommended') renderRecommended();
+}
+
+// ═══════════════════════════════════════════════
+// MY TEAMS
+// ═══════════════════════════════════════════════
+
+function renderTeams() {
+  const teams = getTeams();
+  renderTeamsList(teams);
+  if (selectedTeamId) {
+    const team = teams.find(t => t.id === selectedTeamId);
+    if (team) renderTeamDetail(team);
+    else { selectedTeamId = null; renderTeamMain(); }
+  } else {
+    renderTeamMain();
+  }
+  // Show/hide templates section
+  const tmpl = document.getElementById('templatesSection');
+  if (tmpl) tmpl.style.display = teams.length === 0 ? 'block' : 'none';
+}
+
+function renderTeamMain() {
+  const teams = getTeams();
+  const main = document.getElementById('teamsMain');
+  if (teams.length === 0) {
+    main.innerHTML = `
+      <div class="team-detail" style="padding:3rem;text-align:center;">
+        <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
+        <h3 style="font-size:1.3rem;font-weight:800;color:#374151;margin-bottom:0.5rem;">No teams yet</h3>
+        <p style="color:#6b7280;max-width:360px;margin:0 auto 1.5rem;font-size:0.92rem;line-height:1.65;">
+          Create your first team to start collaborating with professionals on deals, projects, and cases.
+        </p>
+        <button class="btn-sm-primary" style="padding:0.7rem 2rem;font-size:0.95rem;" onclick="openCreateTeam()">
+          + Create Your First Team
+        </button>
+      </div>`;
+  } else {
+    main.innerHTML = `
+      <div class="team-detail" style="padding:3rem;text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">👈</div>
+        <h3 style="font-size:1.1rem;font-weight:700;color:#6b7280;">Select a team from the sidebar</h3>
+        <p style="color:#9ca3af;font-size:0.88rem;margin-top:0.5rem;">or</p>
+        <button class="btn-sm-primary" style="margin-top:0.75rem;padding:0.6rem 1.5rem;" onclick="openCreateTeam()">+ Create New Team</button>
+      </div>`;
+  }
+}
+
+function renderTeamsList(teams) {
+  const list = document.getElementById('teamsList');
+  if (teams.length === 0) {
+    list.innerHTML = '<div class="teams-empty-sidebar">No teams yet. Create one!</div>';
+    return;
+  }
+  list.innerHTML = teams.map(team => {
+    const type = getTypeInfo(team.type);
+    const dotClass = team.status === 'archived' ? 'archived' : team.status === 'completed' ? 'completed' : '';
+    return `
+      <div class="team-list-item${team.id === selectedTeamId ? ' active' : ''}" onclick="selectTeam('${team.id}')">
+        <div class="team-icon" style="background:${type.color}22;">${type.icon}</div>
+        <div class="team-list-info">
+          <div class="team-list-name">${team.name}</div>
+          <div class="team-list-meta">${team.members?.length || 0} member${(team.members?.length || 0) !== 1 ? 's' : ''} &bull; ${type.label}</div>
+        </div>
+        <div class="team-status-dot ${dotClass}"></div>
+      </div>`;
+  }).join('');
+}
+
+function filterTeamsList(q) {
+  const teams = getTeams();
+  const filtered = q ? teams.filter(t => t.name.toLowerCase().includes(q.toLowerCase()) || t.purpose?.toLowerCase().includes(q.toLowerCase())) : teams;
+  renderTeamsList(filtered);
+}
+
+function selectTeam(id) {
+  selectedTeamId = id;
+  const teams = getTeams();
+  const team = teams.find(t => t.id === id);
+  if (!team) return;
+  renderTeamsList(teams);
+  renderTeamDetail(team);
+}
+
+function renderTeamDetail(team) {
+  const type = getTypeInfo(team.type);
+  const main = document.getElementById('teamsMain');
+  const membersHtml = (team.members || []).map(m => `
+    <div class="member-card">
+      <div class="member-avatar" style="background:${m.proColor || '#6b7280'}">${getInitials(m.proName)}</div>
+      <div class="member-info">
+        <div class="member-name">${m.proName}</div>
+        <div class="member-trade">${m.proTrade || ''}</div>
+        <span class="member-role-badge">${m.role}</span>
+      </div>
+      <div class="member-actions">
+        <button class="member-action-btn" title="Edit role" onclick="editMemberRole('${team.id}', '${m.proId}')">✏️</button>
+        <button class="member-action-btn danger" title="Remove" onclick="removeMember('${team.id}', '${m.proId}')">×</button>
+      </div>
+    </div>`).join('');
+
+  main.innerHTML = `
+    <div class="team-detail">
+      <div class="team-detail-header">
+        <div class="team-detail-icon" style="background:${type.color}22;">${type.icon}</div>
+        <div class="team-detail-title">
+          <div class="team-detail-name">${team.name}</div>
+          <div class="team-detail-purpose">${team.purpose || 'No purpose set'}</div>
+          <span class="team-type-badge">${type.icon} ${type.label}</span>
+        </div>
+        <div class="team-detail-actions">
+          <button class="btn-sm-primary" style="background:#059669;" onclick="launchWorkspace('${team.id}')">
+            🚀 Launch Workspace
+          </button>
+          <button class="btn-sm-outline" onclick="archiveTeam('${team.id}')">
+            ${team.status === 'archived' ? 'Restore' : 'Archive'}
+          </button>
+          <button class="btn-sm-outline" style="color:#dc2626;border-color:#fca5a5;" onclick="deleteTeam('${team.id}')">Delete</button>
+        </div>
+      </div>
+
+      <div class="team-members-section">
+        <div class="section-title-row">
+          <div class="section-title">Team Members (${team.members?.length || 0})</div>
+          <button class="btn-sm-primary" onclick="openAddMember('${team.id}')">+ Add Member</button>
+        </div>
+        <div class="members-grid">
+          ${membersHtml}
+          <div class="add-member-card" onclick="openAddMember('${team.id}')">
+            <span style="font-size:1.2rem;">+</span> Add Member
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:0 1.5rem 1rem;border-top:1px solid #f3f4f6;">
+        <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1.5px solid #6ee7b7;border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:700;color:#065f46;font-size:0.92rem;">Collaboration Workspace</div>
+            <div style="font-size:0.82rem;color:#047857;margin-top:2px;">Shared checklist, task board, timeline &amp; activity feed for this team</div>
+          </div>
+          <button class="btn-sm-primary" style="background:#059669;white-space:nowrap;" onclick="launchWorkspace('${team.id}')">🚀 Open Workspace</button>
+        </div>
+      </div>
+
+      <div style="padding:0 1.5rem 1.5rem;">
+        <div class="section-title-row" style="margin-bottom:0.75rem;">
+          <div class="section-title">Team Info</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;">
+          <div style="background:#f9fafb;border-radius:8px;padding:0.75rem;">
+            <div style="font-size:0.72rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">Created</div>
+            <div style="font-size:0.88rem;font-weight:600;color:#374151;">${formatDate(team.createdAt)}</div>
+          </div>
+          <div style="background:#f9fafb;border-radius:8px;padding:0.75rem;">
+            <div style="font-size:0.72rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">Status</div>
+            <div style="font-size:0.88rem;font-weight:600;color:#374151;text-transform:capitalize;">${team.status}</div>
+          </div>
+          <div style="background:#f9fafb;border-radius:8px;padding:0.75rem;">
+            <div style="font-size:0.72rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">Members</div>
+            <div style="font-size:0.88rem;font-weight:600;color:#374151;">${team.members?.length || 0} people</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Team CRUD ──
+function selectTeamType(typeId, el) {
+  selectedTeamType = typeId;
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  // Update purpose placeholder
+  const tmpl = TEAM_TEMPLATES.find(t => {
+    const info = getTypeInfo(typeId);
+    return t.type === typeId;
+  });
+}
+
+function createTeam() {
+  const name = document.getElementById('newTeamName').value.trim();
+  if (!name) { showToast('Please enter a team name', 'error'); return; }
+
+  const purpose = document.getElementById('newTeamPurpose').value.trim();
+  const pros = getProfessionals();
+
+  const members = selectedMembers.map(proId => {
+    const p = pros.find(x => x.id === proId);
+    return p ? {
+      proId: p.id, proName: p.name, proTrade: p.trade, proColor: p.avatarColor,
+      role: p.trade, status: 'active', joinedAt: new Date().toISOString()
+    } : null;
+  }).filter(Boolean);
+
+  const team = {
+    id: uid(),
+    name,
+    type: selectedTeamType,
+    purpose,
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    members
+  };
+
+  const teams = getTeams();
+  teams.unshift(team);
+  saveTeams(teams);
+  selectedTeamId = team.id;
+  selectedMembers = [];
+
+  closeModal('createTeamModal');
+  renderTeams();
+  updateStats();
+  showToast(`Team "${name}" created!`, 'success');
+}
+
+function createFromTemplate(templateId) {
+  const tmpl = TEAM_TEMPLATES.find(t => t.id === templateId);
+  if (!tmpl) return;
+  // Pre-fill create modal
+  document.getElementById('newTeamName').value = tmpl.name;
+  document.getElementById('newTeamPurpose').value = tmpl.purposeTemplate;
+  selectedTeamType = tmpl.type;
+  document.querySelectorAll('.type-option').forEach(o => {
+    o.classList.toggle('selected', o.dataset.type === tmpl.type);
+  });
+  selectedMembers = [];
+  renderSelectedMembers();
+  searchMemberPicker('');
+  openModal('createTeamModal');
+}
+
+function archiveTeam(id) {
+  const teams = getTeams();
+  const team = teams.find(t => t.id === id);
+  if (!team) return;
+  team.status = team.status === 'archived' ? 'active' : 'archived';
+  saveTeams(teams);
+  renderTeamDetail(team);
+  renderTeamsList(teams);
+  showToast(team.status === 'archived' ? 'Team archived' : 'Team restored');
+}
+
+function deleteTeam(id) {
+  if (!confirm('Delete this team? This cannot be undone.')) return;
+  let teams = getTeams();
+  teams = teams.filter(t => t.id !== id);
+  saveTeams(teams);
+  selectedTeamId = null;
+  renderTeams();
+  updateStats();
+  showToast('Team deleted');
+}
+
+function removeMember(teamId, proId) {
+  const teams = getTeams();
+  const team = teams.find(t => t.id === teamId);
+  if (!team) return;
+  team.members = team.members.filter(m => m.proId !== proId);
+  saveTeams(teams);
+  renderTeamDetail(team);
+  updateStats();
+  showToast('Member removed');
+}
+
+function editMemberRole(teamId, proId) {
+  const teams = getTeams();
+  const team = teams.find(t => t.id === teamId);
+  const member = team?.members.find(m => m.proId === proId);
+  if (!member) return;
+  const newRole = prompt('Enter new role:', member.role);
+  if (newRole === null) return;
+  member.role = newRole.trim() || member.role;
+  saveTeams(teams);
+  renderTeamDetail(team);
+  showToast('Role updated');
+}
+
+// ── Add Member Modal ──
+function openAddMember(teamId) {
+  addMemberTargetTeamId = teamId;
+  addMemberSelectedPro = null;
+  const teams = getTeams();
+  const team = teams.find(t => t.id === teamId);
+  document.getElementById('addMemberSubtitle').textContent = `Adding to: ${team?.name || 'team'}`;
+  document.getElementById('addMemberSearch').value = '';
+  document.getElementById('addMemberRole').value = '';
+  searchAddMember('');
+  openModal('addMemberModal');
+}
+
+function searchAddMember(q) {
+  const pros = getProfessionals();
+  const teams = getTeams();
+  const team = teams.find(t => t.id === addMemberTargetTeamId);
+  const existingIds = (team?.members || []).map(m => m.proId);
+
+  const filtered = pros.filter(p => {
+    if (existingIds.includes(p.id)) return false;
+    if (!q) return true;
+    return p.name.toLowerCase().includes(q.toLowerCase()) || p.trade.toLowerCase().includes(q.toLowerCase());
+  }).slice(0, 12);
+
+  const container = document.getElementById('addMemberResults');
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="padding:1rem;text-align:center;color:#9ca3af;font-size:0.85rem;">No results</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(p => `
+    <div class="picker-result${addMemberSelectedPro === p.id ? ' selected' : ''}" onclick="selectAddMemberPro('${p.id}')">
+      <div class="picker-result-avatar" style="background:${p.avatarColor}">${getInitials(p.name)}</div>
+      <div class="picker-result-info">
+        <div class="picker-result-name">${p.name}</div>
+        <div class="picker-result-trade">${p.trade} &bull; ${p.location}</div>
+      </div>
+      ${addMemberSelectedPro === p.id ? '<span class="picker-check">✓</span>' : ''}
+    </div>`).join('');
+}
+
+function selectAddMemberPro(proId) {
+  addMemberSelectedPro = proId;
+  const pros = getProfessionals();
+  const p = pros.find(x => x.id === proId);
+  if (p) document.getElementById('addMemberRole').value = p.trade;
+  searchAddMember(document.getElementById('addMemberSearch').value);
+}
+
+function confirmAddMember() {
+  if (!addMemberSelectedPro) { showToast('Please select a professional', 'error'); return; }
+  const role = document.getElementById('addMemberRole').value.trim();
+  if (!role) { showToast('Please enter a role', 'error'); return; }
+
+  const pros = getProfessionals();
+  const p = pros.find(x => x.id === addMemberSelectedPro);
+  if (!p) return;
+
+  const teams = getTeams();
+  const team = teams.find(t => t.id === addMemberTargetTeamId);
+  if (!team) return;
+
+  if (!team.members) team.members = [];
+  if (team.members.find(m => m.proId === p.id)) {
+    showToast('This person is already on the team');
+    return;
+  }
+
+  team.members.push({
+    proId: p.id, proName: p.name, proTrade: p.trade, proColor: p.avatarColor,
+    role, status: 'active', joinedAt: new Date().toISOString()
+  });
+  saveTeams(teams);
+  closeModal('addMemberModal');
+  renderTeamDetail(team);
+  renderTeamsList(teams);
+  updateStats();
+  showToast(`${p.name} added to team!`, 'success');
+}
+
+// ── Member Picker in Create Modal ──
+function searchMemberPicker(q) {
+  const pros = getProfessionals();
+  const filtered = pros.filter(p => {
+    if (selectedMembers.includes(p.id)) return false;
+    if (!q) return true;
+    return p.name.toLowerCase().includes(q.toLowerCase()) || p.trade.toLowerCase().includes(q.toLowerCase());
+  }).slice(0, 10);
+
+  const container = document.getElementById('memberPickerResults');
+  if (!q && filtered.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="padding:0.75rem;text-align:center;color:#9ca3af;font-size:0.85rem;">No results</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(p => `
+    <div class="picker-result" onclick="addToSelectedMembers('${p.id}')">
+      <div class="picker-result-avatar" style="background:${p.avatarColor}">${getInitials(p.name)}</div>
+      <div class="picker-result-info">
+        <div class="picker-result-name">${p.name}</div>
+        <div class="picker-result-trade">${p.trade} &bull; ${p.location}</div>
+      </div>
+      <span style="color:#3b82f6;font-size:0.85rem;font-weight:600;">+</span>
+    </div>`).join('');
+}
+
+function addToSelectedMembers(proId) {
+  if (selectedMembers.includes(proId)) return;
+  selectedMembers.push(proId);
+  renderSelectedMembers();
+  document.getElementById('memberPickerSearch').value = '';
+  searchMemberPicker('');
+}
+
+function removeFromSelectedMembers(proId) {
+  selectedMembers = selectedMembers.filter(id => id !== proId);
+  renderSelectedMembers();
+}
+
+function renderSelectedMembers() {
+  const pros = getProfessionals();
+  const list = document.getElementById('selectedMembersList');
+  list.innerHTML = selectedMembers.map(id => {
+    const p = pros.find(x => x.id === id);
+    if (!p) return '';
+    return `<div class="selected-member-chip">
+      ${p.name}
+      <span class="chip-remove" onclick="removeFromSelectedMembers('${id}')">&times;</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Templates ──
+function renderTemplates() {
+  const grid = document.getElementById('templatesGrid');
+  if (!grid) return;
+  grid.innerHTML = TEAM_TEMPLATES.map(t => `
+    <div class="template-card" onclick="createFromTemplate('${t.id}')">
+      <div class="template-icon">${t.icon}</div>
+      <div class="template-name">${t.name}</div>
+      <div class="template-desc">${t.desc}</div>
+      <div class="template-roles">
+        ${t.roles.map(r => `<span class="template-role-tag">${r}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// MY CONNECTIONS
+// ═══════════════════════════════════════════════
+
+function renderConnections() {
+  const conns = getConnections();
+  renderConnFilterPills(conns);
+
+  let filtered = conns;
+  if (connFilter !== 'all') filtered = conns.filter(c => c.category === connFilter);
+
+  const grid = document.getElementById('connectionsGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="connections-empty">
+        <h3>${connFilter === 'all' ? 'No connections yet' : 'No ' + CATEGORY_LABELS[connFilter] + ' connections'}</h3>
+        <p style="font-size:0.88rem;margin-top:0.35rem;">
+          ${connFilter === 'all' ? 'Go to the <a href="network.html" style="color:#3b82f6;">Pro Network</a> to connect with professionals.' : 'Categorize existing connections or connect with more pros.'}
+        </p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(conn => {
+    const catInfo = CONN_CATEGORIES.find(c => c.id === conn.category) || { label: 'Uncategorized', cssClass: 'cat-uncategorized' };
+    const isPending = conn.status === 'pending_sent' || conn.status === 'pending_received';
+    const strengthLabel = conn.strength >= 80 ? 'Strong' : conn.strength >= 50 ? 'Good' : conn.strength > 0 ? 'Building' : '—';
+    return `
+      <div class="connection-card">
+        <div class="conn-card-header">
+          <div class="conn-avatar" style="background:${conn.proColor || '#6b7280'}">${getInitials(conn.proName)}</div>
+          <div class="conn-info">
+            <div class="conn-name">${conn.proName}</div>
+            <div class="conn-trade">${conn.proTrade}</div>
+            ${isPending
+              ? `<span class="pending-badge">⏳ ${conn.status === 'pending_sent' ? 'Request Sent' : 'Pending Approval'}</span>`
+              : `<span class="conn-category-badge ${catInfo.cssClass}">${catInfo.label}</span>`
+            }
+          </div>
+        </div>
+
+        ${conn.strength > 0 ? `
+        <div class="conn-strength-bar">
+          <div class="strength-label">
+            <span>Connection Strength</span>
+            <span>${conn.strength}% — ${strengthLabel}</span>
+          </div>
+          <div class="strength-track">
+            <div class="strength-fill" style="width:${conn.strength}%"></div>
+          </div>
+        </div>` : ''}
+
+        <div class="conn-meta">
+          ${conn.mutuals > 0 ? `<span>👥 ${conn.mutuals} mutual connection${conn.mutuals !== 1 ? 's' : ''}</span>` : ''}
+          ${conn.connectedDate ? `<span>📅 Connected ${formatDate(conn.connectedDate)}</span>` : ''}
+        </div>
+
+        <div class="conn-actions">
+          ${isPending
+            ? `<button class="btn-message" style="background:#fef3c7;color:#d97706;" onclick="showToast('Connection request pending')">Pending</button>
+               <button class="btn-add-team" style="background:#fee2e2;color:#dc2626;" onclick="cancelConnection('${conn.id}')">Cancel</button>`
+            : `<button class="btn-message" onclick="showToast('Messaging coming in Phase 2!')">Message</button>
+               <button class="btn-add-team" onclick="openAddToTeam('${conn.id}')">+ Team</button>
+               <button class="btn-categorize" style="border:1.5px solid #e5e7eb;background:white;color:#6b7280;font-size:0.72rem;" onclick="openCategorize('${conn.id}')">Tag</button>`
+          }
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderConnFilterPills(conns) {
+  const pills = document.getElementById('connFilterPills');
+  const counts = { all: conns.filter(c => c.status === 'connected').length };
+  CONN_CATEGORIES.forEach(cat => {
+    counts[cat.id] = conns.filter(c => c.category === cat.id && c.status === 'connected').length;
+  });
+
+  const filters = [
+    { id: 'all', label: 'All' },
+    ...CONN_CATEGORIES.map(c => ({ id: c.id, label: c.label }))
+  ];
+
+  pills.innerHTML = filters.map(f => `
+    <div class="filter-pill${connFilter === f.id ? ' active' : ''}" onclick="setConnFilter('${f.id}')">
+      ${f.label} <span style="font-size:0.72rem;font-weight:700;margin-left:3px;">(${counts[f.id] || 0})</span>
+    </div>`).join('');
+}
+
+function setConnFilter(f) {
+  connFilter = f;
+  renderConnections();
+}
+
+function cancelConnection(connId) {
+  if (!confirm('Cancel this connection request?')) return;
+  let conns = getConnections();
+  conns = conns.filter(c => c.id !== connId);
+  saveConnections(conns);
+  renderConnections();
+  updateStats();
+  showToast('Connection request cancelled');
+}
+
+// ── Categorize Modal ──
+function openCategorize(connId) {
+  categorizingConnId = connId;
+  selectedCategoryValue = null;
+  const conn = getConnections().find(c => c.id === connId);
+  document.getElementById('categorizeSubtitle').textContent = `How do you know ${conn?.proName}?`;
+  document.getElementById('categorizeConnId').value = connId;
+  document.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
+  openModal('categorizeModal');
+}
+
+function selectCategory(val, el) {
+  selectedCategoryValue = val;
+  document.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveCategory() {
+  if (!selectedCategoryValue) { showToast('Please select a category', 'error'); return; }
+  const conns = getConnections();
+  const conn = conns.find(c => c.id === categorizingConnId);
+  if (!conn) return;
+  conn.category = selectedCategoryValue;
+  saveConnections(conns);
+  closeModal('categorizeModal');
+  renderConnections();
+  showToast('Connection categorized!', 'success');
+}
+
+// ── Add to Team from Connection ──
+function openAddToTeam(connId) {
+  addToTeamConnId = connId;
+  const conn = getConnections().find(c => c.id === connId);
+  const teams = getTeams().filter(t => t.status === 'active');
+  document.getElementById('addToTeamSubtitle').textContent = `Add ${conn?.proName} to which team?`;
+  document.getElementById('addToTeamRole').value = conn?.proTrade || '';
+
+  if (teams.length === 0) {
+    document.getElementById('addToTeamList').innerHTML = `
+      <div style="padding:1rem;text-align:center;color:#9ca3af;font-size:0.85rem;">
+        No active teams. <button onclick="closeModal('addToTeamModal');openCreateTeam();" style="color:#3b82f6;border:none;background:none;cursor:pointer;font-weight:600;">Create one first</button>
+      </div>`;
+  } else {
+    document.getElementById('addToTeamList').innerHTML = teams.map(t => {
+      const type = getTypeInfo(t.type);
+      return `<div onclick="document.querySelectorAll('.team-select-option').forEach(o=>o.classList.remove('selected'));this.classList.add('selected');this.dataset.teamId='${t.id}';"
+        class="team-select-option" data-team-id="${t.id}"
+        style="border:2px solid #e5e7eb;border-radius:10px;padding:0.75rem;margin-bottom:0.5rem;cursor:pointer;display:flex;align-items:center;gap:0.75rem;transition:border-color 0.12s;"
+        onmouseover="if(!this.classList.contains('selected'))this.style.borderColor='#93c5fd'" onmouseout="if(!this.classList.contains('selected'))this.style.borderColor='#e5e7eb'">
+        <span style="font-size:1.3rem;">${type.icon}</span>
+        <div>
+          <div style="font-size:0.9rem;font-weight:700;color:#111827;">${t.name}</div>
+          <div style="font-size:0.75rem;color:#6b7280;">${t.members?.length || 0} members &bull; ${type.label}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  openModal('addToTeamModal');
+}
+
+function confirmAddToTeam() {
+  const selected = document.querySelector('.team-select-option.selected');
+  if (!selected) { showToast('Please select a team', 'error'); return; }
+  const teamId = selected.dataset.teamId;
+  const role = document.getElementById('addToTeamRole').value.trim();
+  if (!role) { showToast('Please enter a role', 'error'); return; }
+
+  const conn = getConnections().find(c => c.id === addToTeamConnId);
+  if (!conn) return;
+
+  const teams = getTeams();
+  const team = teams.find(t => t.id === teamId);
+  if (!team) return;
+
+  if (!team.members) team.members = [];
+  if (team.members.find(m => m.proId === conn.proId)) {
+    showToast('Already on this team!'); return;
+  }
+
+  team.members.push({
+    proId: conn.proId, proName: conn.proName, proTrade: conn.proTrade,
+    proColor: conn.proColor, role, status: 'active',
+    joinedAt: new Date().toISOString()
+  });
+  saveTeams(teams);
+  closeModal('addToTeamModal');
+  updateStats();
+  if (selectedTeamId === teamId) renderTeamDetail(team);
+  showToast(`${conn.proName} added to ${team.name}!`, 'success');
+}
+
+// ═══════════════════════════════════════════════
+// RECOMMENDED
+// ═══════════════════════════════════════════════
+
+function getRecommended() {
+  const pros = getProfessionals();
+  const conns = getConnections();
+  const connectedIds = conns.map(c => c.proId);
+  return pros.filter(p => !connectedIds.includes(p.id)).slice(0, 9);
+}
+
+function getRecommendReason(p) {
+  const reasons = [
+    `${p.reviewCount} verified reviews in ${p.category}`,
+    `Trusted by landlords and property managers in ${p.location}`,
+    `Commonly paired with your existing connections`,
+    `Top-rated ${p.trade.toLowerCase()} in your area`,
+    `Frequently referred by similar professionals`,
+  ];
+  return reasons[Math.abs(p.id.charCodeAt(0) - 97) % reasons.length];
+}
+
+function renderRecommended() {
+  const recs = getRecommended();
+  const conns = getConnections();
+  const pendingIds = conns.filter(c => c.status === 'pending_sent').map(c => c.proId);
+
+  const grid = document.getElementById('recommendedGrid');
+  if (recs.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ca3af;"><h3 style="color:#6b7280;">You\'ve connected with everyone!</h3><p>Check back as more professionals join.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = recs.map(p => {
+    const isPending = pendingIds.includes(p.id);
+    return `
+      <div class="recommended-card">
+        <div class="rec-card-header">
+          <div class="rec-avatar" style="background:${p.avatarColor}">${getInitials(p.name)}</div>
+          <div class="rec-info">
+            <div class="rec-name">${p.name}</div>
+            <div class="rec-trade">${p.trade} &bull; ${p.location}</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
+              <span style="color:#f59e0b;font-size:0.8rem;">${'★'.repeat(Math.round(p.rating))}</span>
+              <span style="font-size:0.78rem;color:#374151;font-weight:600;">${p.rating}</span>
+              <span style="font-size:0.75rem;color:#9ca3af;">(${p.reviewCount})</span>
+            </div>
+          </div>
+        </div>
+        <div class="rec-why">💡 ${getRecommendReason(p)}</div>
+        <div class="rec-mutuals"><strong>${Math.floor(Math.random() * 4) + 1}</strong> people in your network work with them</div>
+        <button class="btn-connect${isPending ? ' pending' : ''}" onclick="sendConnectionRequest('${p.id}', this)">
+          ${isPending ? '⏳ Request Sent' : '+ Connect'}
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function sendConnectionRequest(proId, btn) {
+  const conns = getConnections();
+  if (conns.find(c => c.proId === proId)) { showToast('Already connected or pending'); return; }
+
+  const pros = getProfessionals();
+  const p = pros.find(x => x.id === proId);
+  if (!p) return;
+
+  const newConn = {
+    id: uid(), proId: p.id, proName: p.name, proTrade: p.trade,
+    proColor: p.avatarColor, category: 'uncategorized',
+    status: 'pending_sent', connectedDate: null, strength: 0,
+    mutuals: Math.floor(Math.random() * 4) + 1
+  };
+  conns.push(newConn);
+  saveConnections(conns);
+
+  btn.textContent = '⏳ Request Sent';
+  btn.classList.add('pending');
+  updateStats();
+  showToast(`Connection request sent to ${p.name}!`, 'success');
+}
+
+// ── Create Team Modal Setup ──
+function renderTypeSelector() {
+  const sel = document.getElementById('teamTypeSelector');
+  sel.innerHTML = TEAM_TYPES.map(t => `
+    <div class="type-option${t.id === selectedTeamType ? ' selected' : ''}" data-type="${t.id}" onclick="selectTeamType('${t.id}', this)">
+      <div class="type-option-icon">${t.icon}</div>
+      <div class="type-option-label">${t.label}</div>
+    </div>`).join('');
+}
+
+function openCreateTeam() {
+  selectedMembers = [];
+  document.getElementById('newTeamName').value = '';
+  document.getElementById('newTeamPurpose').value = '';
+  selectedTeamType = 'real_estate';
+  renderTypeSelector();
+  renderSelectedMembers();
+  document.getElementById('memberPickerSearch').value = '';
+  document.getElementById('memberPickerResults').innerHTML = '';
+  openModal('createTeamModal');
+}
+
+// ── Modal Helpers ──
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) closeModal(m.id);
+  });
+});
+
+// ── Toast ──
+let _toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Workspace Launch ──
+function launchWorkspace(teamId) {
+  window.location.href = `collab-workspace.html?teamId=${teamId}`;
+}
+
+// ── Boot ──
+function init() {
+  // Seed professionals from network.html localStorage if empty
+  let pros = localStorage.getItem('rv_network_professionals');
+  if (!pros) {
+    // Load network.html's seed data by fetching it inline
+    // In real usage this would be loaded from data-layer.js / Supabase
+    // For demo: we seed a minimal set if no pros exist
+    seedFallbackProfessionals();
+  }
+
+  seedDemoData();
+  renderTeams();
+  renderTemplates();
+  updateStats();
+}
+
+function seedFallbackProfessionals() {
+  const fallback = [
+    { id:'mikes-plumbing', name:"Mike's Plumbing", trade:'Plumber', category:'Plumbers', location:'Salt Lake City, UT', rating:4.8, reviewCount:23, avatarColor:'#2563eb' },
+    { id:'bright-electric', name:'Bright Electric', trade:'Electrician', category:'Electricians', location:'Sandy, UT', rating:4.9, reviewCount:31, avatarColor:'#f59e0b' },
+    { id:'utah-property-law', name:'Utah Property Law', trade:'Attorney', category:'Attorneys', location:'Salt Lake City, UT', rating:4.7, reviewCount:18, avatarColor:'#6366f1' },
+    { id:'premier-painting', name:'Premier Painting', trade:'Painter', category:'Painters', location:'West Valley City, UT', rating:4.6, reviewCount:15, avatarColor:'#ec4899' },
+    { id:'cleanslate-turnovers', name:'CleanSlate Turnovers', trade:'Cleaner', category:'Cleaners', location:'Provo, UT', rating:5.0, reviewCount:42, avatarColor:'#10b981' },
+    { id:'mountain-west-insurance', name:'Mountain West Insurance', trade:'Insurance Agent', category:'Insurance Agents', location:'Murray, UT', rating:4.5, reviewCount:12, avatarColor:'#0ea5e9' },
+    { id:'beehive-pest-control', name:'Beehive Pest Control', trade:'Pest Control', category:'Pest Control', location:'Lehi, UT', rating:4.8, reviewCount:27, avatarColor:'#f97316' },
+    { id:'wasatch-landscaping', name:'Wasatch Landscaping', trade:'Landscaper', category:'Landscaping', location:'Draper, UT', rating:4.7, reviewCount:19, avatarColor:'#22c55e' },
+    { id:'keymaster-locksmith', name:'KeyMaster Locksmith', trade:'Locksmith', category:'Locksmiths', location:'Salt Lake City, UT', rating:4.9, reviewCount:35, avatarColor:'#8b5cf6' },
+    { id:'summit-roofing', name:'Summit Roofing', trade:'Roofer', category:'Roofers', location:'Sandy, UT', rating:4.6, reviewCount:14, avatarColor:'#dc2626' },
+    { id:'granite-state-mortgage', name:'Granite State Mortgage', trade:'Lender', category:'Lenders', location:'Salt Lake City, UT', rating:4.7, reviewCount:16, avatarColor:'#475569' },
+    { id:'pinnacle-real-estate', name:'Pinnacle Real Estate', trade:'Real Estate Agent', category:'Real Estate Agents', location:'Park City, UT', rating:4.9, reviewCount:38, avatarColor:'#be185d' },
+    { id:'hart-construction', name:'Hart Construction', trade:'General Contractor', category:'General Contractors', location:'Orem, UT', rating:4.8, reviewCount:22, avatarColor:'#b45309' },
+  ];
+  localStorage.setItem('rv_network_professionals', JSON.stringify(fallback));
+}
+
+init();
+</script>
+</body>
+</html>
