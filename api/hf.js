@@ -1,4 +1,4 @@
-// RentVerified – Hugging Face API Proxy (Vercel Serverless Function)
+// 3120 Life – Hugging Face API Proxy (Vercel Serverless Function)
 // Keeps HF_API_KEY secret on the server, never exposed to the browser.
 // POST /api/hf  { task, prompt, context }
 // Returns      { result: "..." }

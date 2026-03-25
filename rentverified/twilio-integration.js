@@ -33,7 +33,7 @@ const RVMessages = {
       `Your 3120 Life verification code is ${code}. Expires in 10 minutes.`,
 
     welcome: (name) =>
-      `Welcome to 3120 Life, ${name}! Your account is set up and ready to go. Log in: https://rentverified.com - 3120 Life`,
+      `Welcome to 3120 Life, ${name}! Your account is set up and ready to go. Log in: https://3120life.com - 3120 Life`,
 
     deposit_bond_offer: (name, savings, applyLink) =>
       `Great news ${name}! This property accepts deposit bonds — move in for just ~$17/mo instead of $${savings}. Apply: ${applyLink} - 3120 Life`,
@@ -132,7 +132,7 @@ const templates: Record<string, (data: any) => string> = {
   maintenance_update: (d) => `${d.name}, maintenance request #${d.requestId} status: ${d.status}. - 3120 Life`,
   lease_expiry: (d) => `${d.name}, your lease expires on ${d.expiryDate}. Renew now: ${d.renewLink} - 3120 Life`,
   verification_code: (d) => `Your 3120 Life verification code is ${d.code}. Expires in 10 minutes.`,
-  welcome: (d) => `Welcome to 3120 Life, ${d.name}! Your account is set up. Log in: https://rentverified.com - 3120 Life`,
+  welcome: (d) => `Welcome to 3120 Life, ${d.name}! Your account is set up. Log in: https://3120life.com - 3120 Life`,
   deposit_bond_offer: (d) => `Great news ${d.name}! Deposit bonds available — move in for ~$17/mo instead of $${d.savings}. Apply: ${d.applyLink} - 3120 Life`,
   funding_status: (d) => `${d.name}, your funding application status: ${d.status}. Details: ${d.link} - 3120 Life`,
 }
@@ -245,7 +245,7 @@ serve(async () => {
           name: lease.tenant?.first_name || 'Tenant',
           amount: lease.rent_amount,
           dueDate: dueDate.toLocaleDateString(),
-          payLink: 'https://rentverified.com/tenant-portal.html'
+          payLink: 'https://3120life.com/tenant-portal.html'
         }
       }
     })

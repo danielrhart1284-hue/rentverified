@@ -122,7 +122,7 @@ function saveMaintenanceRequests(arr) { rvSet(RV_KEYS.MAINTENANCE_REQUESTS, arr)
 // ============================================================================
 var ACCOUNTS = [
   { email: 'danielrhart1284@gmail.com', username: 'danielrhart1284', password: 'SPMdemo2026', name: 'Sanders PM', role: 'admin', clientId: 'sanders-pm' },
-  { email: 'admin@rentverified.com', username: 'admin', password: 'RVadmin2026', name: 'Admin', role: 'admin', clientId: 'admin' },
+  { email: 'admin@3120life.com', username: 'admin', password: 'RVadmin2026', name: 'Admin', role: 'admin', clientId: 'admin' },
 ];
 
 function authenticateUser(emailOrUsername, password) {

@@ -1,4 +1,4 @@
-// RentVerified – Vercel serverless: chat via Anthropic Claude API
+// 3120 Life – Vercel serverless: chat via Anthropic Claude API
 // Set ANTHROPIC_API_KEY in Vercel env. Request: { message, propertyContext?, listingId? }. Response: { reply }.
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
@@ -26,8 +26,8 @@ export default async function handler(req, res) {
   const message = (body.message || '').trim();
   if (!message) return res.status(400).json({ error: 'Missing message', reply: '' });
 
-  const propertyContext = body.propertyContext || 'General RentVerified / Sanders Property Management inquiry.';
-  const system = `You are the friendly AI assistant for Sanders Property Management on RentVerified. Answer briefly and helpfully about rentals, applications, tours, and this property. Do not make up rent or addresses; use only the context below. If you don't know, suggest they request an application or contact management.
+  const propertyContext = body.propertyContext || 'General 3120 Life / Sanders Property Management inquiry.';
+  const system = `You are the friendly AI assistant for Sanders Property Management on 3120 Life. Answer briefly and helpfully about rentals, applications, tours, and this property. Do not make up rent or addresses; use only the context below. If you don't know, suggest they request an application or contact management.
 
 Property context: ${propertyContext}
 

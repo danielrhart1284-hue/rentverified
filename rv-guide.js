@@ -39,7 +39,7 @@
         title: 'Get Help',
         steps: [
           { text: 'You\'re using it! Type any question in this search box to get step-by-step guidance.' },
-          { text: 'For account issues, visit the Support page or email support@rentverified.com.' }
+          { text: 'For account issues, visit the Support page or email support@3120life.com.' }
         ]
       },
       {
