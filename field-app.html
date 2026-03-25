@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Field App – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --amber: #f59e0b;
+      --green: #10b981;
+      --red: #ef4444;
+      --nav-bg: #ffffff;
+      --shadow: 0 2px 8px rgba(0,0,0,.08);
+      --top-bar: #1e293b;
+    }
+    @media(prefers-color-scheme:dark){
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --border: #334155;
+        --nav-bg: #1e293b;
+        --shadow: 0 2px 8px rgba(0,0,0,.3);
+        --top-bar: #0f172a;
+      }
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-top: 56px;
+      padding-bottom: 68px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* === TOP BAR === */
+    .top-bar {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      background: var(--top-bar);
+      height: 56px;
+      display: flex; align-items:center; justify-content:space-between;
+      padding: 0 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    }
+    .top-bar-left { display:flex; align-items:center; gap:10px; }
+    .top-bar-logo {
+      width:32px; height:32px; border-radius:8px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:#fff; font-size:14px;
+    }
+    .top-bar-title { color:#fff; font-size:1.1rem; font-weight:700; }
+    .top-bar-right { display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      background:none; border:none; color:#94a3b8; font-size:1.3rem; cursor:pointer;
+      position:relative; padding:4px;
+    }
+    .notif-btn .badge {
+      position:absolute; top:0; right:0;
+      width:16px; height:16px; border-radius:50%;
+      background: var(--red); color:#fff; font-size:10px;
+      display:flex; align-items:center; justify-content:center; font-weight:700;
+    }
+    .avatar {
+      width:32px; height:32px; border-radius:50%;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-weight:700; font-size:13px;
+    }
+
+    /* === BOTTOM NAV === */
+    .bottom-nav {
+      position:fixed; bottom:0; left:0; right:0; z-index:100;
+      background: var(--nav-bg);
+      height:60px;
+      display:flex; align-items:center; justify-content:space-around;
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -2px 8px rgba(0,0,0,.06);
+    }
+    .nav-item {
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      background:none; border:none; color:var(--text-secondary);
+      font-size:10px; font-weight:600; cursor:pointer;
+      padding:6px 12px; min-width:56px;
+      transition: color .15s;
+    }
+    .nav-item .nav-icon { font-size:22px; line-height:1; }
+    .nav-item.active { color: var(--blue); }
+
+    /* === TAB PANELS === */
+    .tab-panel { display:none; padding:16px; }
+    .tab-panel.active { display:block; }
+
+    /* === DATE HEADER === */
+    .date-header {
+      font-size:.85rem; font-weight:700; color:var(--text-secondary);
+      text-transform:uppercase; letter-spacing:.05em;
+      margin-bottom:12px; padding:0 2px;
+    }
+
+    /* === JOB CARDS === */
+    .job-card {
+      background: var(--card);
+      border-radius:14px;
+      padding:16px;
+      margin-bottom:12px;
+      box-shadow: var(--shadow);
+      border-left:4px solid var(--border);
+      cursor:pointer;
+      transition: transform .1s;
+    }
+    .job-card:active { transform:scale(.98); }
+    .job-card.status-scheduled   { border-left-color: var(--blue); }
+    .job-card.status-en_route    { border-left-color: var(--purple); }
+    .job-card.status-in_progress { border-left-color: var(--amber); }
+    .job-card.status-completed   { border-left-color: var(--green); }
+
+    .job-time {
+      font-size:.78rem; font-weight:700; color:var(--text-secondary);
+      margin-bottom:4px; display:flex; align-items:center; gap:6px;
+    }
+    .job-duration { font-weight:400; color:var(--text-secondary); font-size:.72rem; }
+    .job-title { font-size:1rem; font-weight:700; margin-bottom:2px; }
+    .job-address { font-size:.82rem; color:var(--text-secondary); margin-bottom:4px; }
+    .job-customer { font-size:.82rem; color:var(--text-secondary); }
+    .status-pill {
+      display:inline-block; padding:3px 10px; border-radius:99px;
+      font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    }
+    .pill-scheduled   { background:#dbeafe; color:#1d4ed8; }
+    .pill-en_route    { background:#ede9fe; color:#7c3aed; }
+    .pill-in_progress { background:#fef3c7; color:#b45309; }
+    .pill-completed   { background:#dcfce7; color:#15803d; }
+
+    .job-actions {
+      display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;
+    }
+    .job-action-btn {
+      flex:1; min-width:80px;
+      display:flex; align-items:center; justify-content:center; gap:4px;
+      padding:10px 8px; border-radius:10px;
+      font-size:.78rem; font-weight:600;
+      border:1.5px solid var(--border); background:var(--card);
+      color:var(--text); cursor:pointer;
+      min-height:44px; transition: all .15s;
+    }
+    .job-action-btn:active { transform:scale(.96); }
+    .job-action-btn.primary {
+      background:var(--blue); color:#fff; border-color:var(--blue);
+    }
+    .job-action-btn.success {
+      background:var(--green); color:#fff; border-color:var(--green);
+    }
+
+    .section-divider {
+      font-size:.8rem; font-weight:700; color:var(--text-secondary);
+      margin:20px 0 10px; padding:0 2px;
+    }
+
+    /* === PHOTOS TAB === */
+    .photo-capture-btn {
+      width:100%; min-height:56px; border-radius:14px;
+      background: var(--blue); color:#fff; border:none;
+      font-size:1rem; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      margin-bottom:16px;
+    }
+    .photo-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+    }
+    .photo-thumb {
+      aspect-ratio:1; border-radius:10px; overflow:hidden;
+      background: var(--border); position:relative;
+    }
+    .photo-thumb img { width:100%; height:100%; object-fit:cover; }
+    .photo-thumb .photo-tag {
+      position:absolute; bottom:0; left:0; right:0;
+      background:rgba(0,0,0,.6); color:#fff; font-size:.65rem;
+      padding:3px 6px; text-align:center;
+    }
+    .photo-thumb .photo-time {
+      position:absolute; top:4px; right:4px;
+      background:rgba(0,0,0,.5); color:#fff; font-size:.6rem;
+      padding:2px 5px; border-radius:4px;
+    }
+
+    /* === PAYMENTS TAB === */
+    .payment-amount-wrap {
+      text-align:center; margin-bottom:20px;
+    }
+    .payment-amount-wrap label { font-size:.85rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:6px; }
+    .payment-amount-input {
+      width:100%; font-size:2.5rem; font-weight:800;
+      text-align:center; border:2px solid var(--border); border-radius:14px;
+      padding:16px; background:var(--card); color:var(--text);
+      outline:none;
+    }
+    .payment-amount-input:focus { border-color:var(--blue); }
+    .payment-methods {
+      display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;
+    }
+    .pay-method-btn {
+      min-height:56px; border-radius:12px; border:2px solid var(--border);
+      background:var(--card); color:var(--text); font-size:.9rem; font-weight:600;
+      cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+      transition: all .15s;
+    }
+    .pay-method-btn.selected { border-color:var(--blue); background:rgba(59,130,246,.08); color:var(--blue); }
+    .collect-btn {
+      width:100%; min-height:56px; border-radius:14px;
+      background:var(--green); color:#fff; border:none;
+      font-size:1.1rem; font-weight:700; cursor:pointer;
+      margin-bottom:20px;
+    }
+    .recent-payments { margin-top:12px; }
+    .recent-payment-item {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 0; border-bottom:1px solid var(--border);
+    }
+    .rp-title { font-weight:600; font-size:.9rem; }
+    .rp-detail { font-size:.78rem; color:var(--text-secondary); }
+    .rp-amount { font-weight:700; font-size:1rem; color:var(--green); }
+
+    /* === NOTES TAB === */
+    .note-input {
+      width:100%; min-height:120px; border:2px solid var(--border); border-radius:14px;
+      padding:14px; font-size:1rem; font-family:inherit; resize:vertical;
+      background:var(--card); color:var(--text); outline:none; margin-bottom:12px;
+    }
+    .note-input:focus { border-color:var(--blue); }
+    .note-actions { display:flex; gap:8px; margin-bottom:20px; }
+    .note-btn {
+      flex:1; min-height:48px; border-radius:12px; border:none;
+      font-size:.9rem; font-weight:600; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:6px;
+    }
+    .note-btn.save { background:var(--blue); color:#fff; }
+    .note-btn.voice { background:var(--card); color:var(--text); border:2px solid var(--border); }
+    .note-tag-select {
+      width:100%; padding:10px 14px; border:2px solid var(--border);
+      border-radius:10px; font-size:.9rem; background:var(--card); color:var(--text);
+      margin-bottom:16px; outline:none;
+    }
+    .saved-note {
+      background:var(--card); border-radius:12px; padding:14px;
+      margin-bottom:10px; box-shadow:var(--shadow);
+    }
+    .saved-note .note-header { display:flex; justify-content:space-between; margin-bottom:6px; }
+    .saved-note .note-job-tag { font-size:.72rem; font-weight:700; color:var(--blue); }
+    .saved-note .note-time { font-size:.72rem; color:var(--text-secondary); }
+    .saved-note .note-text { font-size:.88rem; line-height:1.5; }
+
+    /* === MORE TAB === */
+    .more-link {
+      display:flex; align-items:center; gap:12px;
+      padding:14px 16px; background:var(--card); border-radius:12px;
+      margin-bottom:8px; text-decoration:none; color:var(--text);
+      box-shadow:var(--shadow); min-height:48px;
+      font-weight:600; font-size:.92rem;
+    }
+    .more-link .more-icon { font-size:1.3rem; width:36px; text-align:center; }
+    .more-link .more-arrow { margin-left:auto; color:var(--text-secondary); }
+
+    /* === JOB DETAIL OVERLAY === */
+    .job-detail-overlay {
+      display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+      z-index:200; background:var(--bg);
+      overflow-y:auto; -webkit-overflow-scrolling:touch;
+    }
+    .job-detail-overlay.open { display:block; }
+    .jd-topbar {
+      position:sticky; top:0; z-index:10;
+      background:var(--top-bar); height:56px;
+      display:flex; align-items:center; padding:0 16px; gap:12px;
+    }
+    .jd-back-btn {
+      background:none; border:none; color:#fff; font-size:1.5rem;
+      cursor:pointer; padding:4px; min-width:44px; min-height:44px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .jd-topbar-title { color:#fff; font-size:1rem; font-weight:700; flex:1; }
+    .jd-content { padding:16px; padding-bottom:100px; }
+    .jd-section {
+      background:var(--card); border-radius:14px; padding:16px;
+      margin-bottom:14px; box-shadow:var(--shadow);
+    }
+    .jd-section h3 {
+      font-size:.78rem; text-transform:uppercase; letter-spacing:.05em;
+      color:var(--text-secondary); margin-bottom:10px;
+    }
+    .jd-info-row {
+      display:flex; align-items:flex-start; gap:10px;
+      margin-bottom:10px; font-size:.9rem;
+    }
+    .jd-info-icon { font-size:1.1rem; min-width:24px; text-align:center; }
+    .jd-info-label { color:var(--text-secondary); font-size:.78rem; }
+    .jd-info-value { font-weight:600; }
+    .jd-info-link { color:var(--blue); text-decoration:none; font-weight:600; }
+    .jd-status-btns { display:flex; gap:8px; flex-wrap:wrap; }
+    .jd-status-btn {
+      flex:1; min-height:52px; border-radius:12px; border:2px solid var(--border);
+      background:var(--card); color:var(--text);
+      font-size:.9rem; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:6px;
+      transition: all .15s;
+    }
+    .jd-status-btn.active-status { border-width:3px; }
+    .jd-status-btn[data-status="scheduled"].active-status { border-color:var(--blue); color:var(--blue); }
+    .jd-status-btn[data-status="in_progress"].active-status { border-color:var(--amber); color:var(--amber); }
+    .jd-status-btn[data-status="completed"].active-status { border-color:var(--green); color:var(--green); }
+
+    /* Signature */
+    .sig-canvas-wrap {
+      border:2px solid var(--border); border-radius:12px; overflow:hidden;
+      margin-bottom:10px; background:#fff;
+    }
+    .sig-canvas { width:100%; height:150px; display:block; touch-action:none; }
+    .sig-actions { display:flex; gap:8px; }
+    .sig-btn {
+      flex:1; min-height:44px; border-radius:10px; border:none;
+      font-size:.85rem; font-weight:600; cursor:pointer;
+    }
+    .sig-btn.clear { background:var(--border); color:var(--text); }
+    .sig-btn.save-sig { background:var(--blue); color:#fff; }
+
+    .jd-invoice-btn {
+      width:100%; min-height:52px; border-radius:14px;
+      background:var(--green); color:#fff; border:none;
+      font-size:1rem; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+
+    .jd-photo-btn {
+      width:100%; min-height:48px; border-radius:12px;
+      background:var(--blue); color:#fff; border:none;
+      font-size:.9rem; font-weight:600; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:6px;
+      margin-bottom:10px;
+    }
+    .jd-photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+    .jd-note-input {
+      width:100%; min-height:80px; border:2px solid var(--border);
+      border-radius:10px; padding:12px; font-size:.9rem; font-family:inherit;
+      resize:vertical; background:var(--card); color:var(--text); outline:none;
+      margin-bottom:8px;
+    }
+    .jd-note-save {
+      min-height:44px; border-radius:10px; border:none;
+      background:var(--blue); color:#fff; font-weight:600;
+      font-size:.85rem; cursor:pointer; padding:0 20px;
+    }
+
+    /* === TOAST === */
+    .toast {
+      position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#1e293b; color:#fff; padding:10px 20px; border-radius:10px;
+      font-size:.85rem; font-weight:600; opacity:0; transition: all .3s;
+      z-index:300; pointer-events:none;
+      white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,.2);
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* === RECEIPT MODAL === */
+    .receipt-modal {
+      display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+      z-index:250; background:rgba(0,0,0,.5);
+      align-items:center; justify-content:center; padding:20px;
+    }
+    .receipt-modal.open { display:flex; }
+    .receipt-card {
+      background:var(--card); border-radius:16px; padding:24px;
+      width:100%; max-width:360px; text-align:center;
+      box-shadow:0 8px 32px rgba(0,0,0,.2);
+    }
+    .receipt-check { font-size:3rem; margin-bottom:8px; }
+    .receipt-title { font-size:1.1rem; font-weight:700; margin-bottom:16px; }
+    .receipt-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:.88rem; }
+    .receipt-total { font-size:1.3rem; font-weight:800; margin-top:12px; color:var(--green); }
+    .receipt-close-btn {
+      margin-top:16px; width:100%; min-height:48px; border-radius:12px;
+      background:var(--blue); color:#fff; border:none;
+      font-size:.95rem; font-weight:600; cursor:pointer;
+    }
+
+    /* === RESPONSIVE SCALE UP === */
+    @media(min-width:600px){
+      .tab-panel { padding:20px; max-width:600px; margin:0 auto; }
+      .jd-content { max-width:600px; margin:0 auto; }
+      .photo-grid { grid-template-columns:repeat(4,1fr); }
+    }
+    @media(min-width:900px){
+      body { padding-top:64px; }
+      .top-bar { height:64px; padding:0 24px; }
+      .tab-panel { max-width:700px; }
+      .jd-content { max-width:700px; }
+      .jd-topbar { height:64px; }
+    }
+
+    /* hidden file input */
+    .hidden-file { display:none; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="top-bar">
+  <div class="top-bar-left">
+    <div class="top-bar-logo">RV</div>
+    <span class="top-bar-title">Field App</span>
+  </div>
+  <div class="top-bar-right">
+    <button class="notif-btn" aria-label="Notifications">
+      🔔
+      <span class="badge">2</span>
+    </button>
+    <div class="avatar">DH</div>
+  </div>
+</header>
+
+<!-- TAB PANELS -->
+
+<!-- JOBS TAB -->
+<div id="tab-jobs" class="tab-panel active">
+  <div class="date-header">Today, Saturday March 22</div>
+  <div id="today-jobs"></div>
+  <div class="section-divider">Upcoming</div>
+  <div id="upcoming-jobs"></div>
+</div>
+
+<!-- PHOTOS TAB -->
+<div id="tab-photos" class="tab-panel">
+  <button class="photo-capture-btn" onclick="capturePhoto()">📷 Take Photo</button>
+  <input type="file" accept="image/*" capture="environment" class="hidden-file" id="photoInput" onchange="handlePhotoCapture(event)">
+  <label style="font-size:.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;display:block;">Tag to Job:</label>
+  <select id="photoJobTag" class="note-tag-select"></select>
+  <div id="photoGrid" class="photo-grid"></div>
+</div>
+
+<!-- PAYMENTS TAB -->
+<div id="tab-payments" class="tab-panel">
+  <div class="payment-amount-wrap">
+    <label>Amount</label>
+    <input type="number" class="payment-amount-input" id="payAmount" placeholder="0.00" inputmode="decimal">
+  </div>
+  <label style="font-size:.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;display:block;">Select Job:</label>
+  <select id="payJobSelect" class="note-tag-select" style="margin-bottom:16px;"></select>
+  <div class="payment-methods" id="payMethods">
+    <button class="pay-method-btn" data-method="cash" onclick="selectPayMethod('cash')">💵 Cash</button>
+    <button class="pay-method-btn" data-method="check" onclick="selectPayMethod('check')">🧾 Check</button>
+    <button class="pay-method-btn" data-method="card" onclick="selectPayMethod('card')">💳 Card</button>
+    <button class="pay-method-btn" data-method="invoice" onclick="selectPayMethod('invoice')">📄 Invoice Later</button>
+  </div>
+  <button class="collect-btn" onclick="collectPayment()">Collect Payment</button>
+  <div class="section-divider">Recent Payments</div>
+  <div id="recentPayments" class="recent-payments"></div>
+</div>
+
+<!-- NOTES TAB -->
+<div id="tab-notes" class="tab-panel">
+  <label style="font-size:.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;display:block;">Tag to Job:</label>
+  <select id="noteJobTag" class="note-tag-select"></select>
+  <textarea class="note-input" id="noteInput" placeholder="Write a note..."></textarea>
+  <div class="note-actions">
+    <button class="note-btn save" onclick="saveNote()">💾 Save Note</button>
+    <button class="note-btn voice" onclick="toast('Voice recording coming soon')">🎙️ Voice Note</button>
+  </div>
+  <div class="section-divider">Saved Notes</div>
+  <div id="savedNotes"></div>
+</div>
+
+<!-- MORE TAB -->
+<div id="tab-more" class="tab-panel">
+  <a class="more-link" href="contractor-demo.html"><span class="more-icon">📊</span> Full Dashboard <span class="more-arrow">›</span></a>
+  <a class="more-link" href="vendor-portal.html"><span class="more-icon">💬</span> Messages <span class="more-arrow">›</span></a>
+  <a class="more-link" href="crm.html"><span class="more-icon">👥</span> CRM <span class="more-arrow">›</span></a>
+  <a class="more-link" href="time-tracking.html"><span class="more-icon">⏱️</span> Time Tracking <span class="more-arrow">›</span></a>
+  <a class="more-link" href="materials.html"><span class="more-icon">🧱</span> Materials <span class="more-arrow">›</span></a>
+  <div style="margin-top:20px;"></div>
+  <a class="more-link" href="#" onclick="toast('Profile settings coming soon');return false;"><span class="more-icon">⚙️</span> Profile Settings <span class="more-arrow">›</span></a>
+  <a class="more-link" href="index.html" style="color:var(--red);"><span class="more-icon">🚪</span> Logout <span class="more-arrow">›</span></a>
+</div>
+
+<!-- JOB DETAIL OVERLAY -->
+<div class="job-detail-overlay" id="jobDetail">
+  <div class="jd-topbar">
+    <button class="jd-back-btn" onclick="closeJobDetail()">←</button>
+    <span class="jd-topbar-title" id="jdTitle">Job Detail</span>
+  </div>
+  <div class="jd-content">
+    <!-- Info -->
+    <div class="jd-section">
+      <h3>Job Information</h3>
+      <div id="jdInfo"></div>
+    </div>
+    <!-- Status -->
+    <div class="jd-section">
+      <h3>Update Status</h3>
+      <div class="jd-status-btns" id="jdStatusBtns">
+        <button class="jd-status-btn" data-status="scheduled" onclick="updateJobStatus('scheduled')">📋 Scheduled</button>
+        <button class="jd-status-btn" data-status="in_progress" onclick="updateJobStatus('in_progress')">🔨 In Progress</button>
+        <button class="jd-status-btn" data-status="completed" onclick="updateJobStatus('completed')">✅ Complete</button>
+      </div>
+    </div>
+    <!-- Photos -->
+    <div class="jd-section">
+      <h3>Photos</h3>
+      <button class="jd-photo-btn" onclick="captureJobPhoto()">📷 Take Photo</button>
+      <input type="file" accept="image/*" capture="environment" class="hidden-file" id="jobPhotoInput" onchange="handleJobPhoto(event)">
+      <div id="jdPhotos" class="jd-photo-grid"></div>
+    </div>
+    <!-- Signature -->
+    <div class="jd-section">
+      <h3>Customer Signature</h3>
+      <div class="sig-canvas-wrap">
+        <canvas id="sigCanvas" class="sig-canvas"></canvas>
+      </div>
+      <div class="sig-actions">
+        <button class="sig-btn clear" onclick="clearSignature()">Clear</button>
+        <button class="sig-btn save-sig" onclick="saveSignature()">Save Signature</button>
+      </div>
+    </div>
+    <!-- Notes -->
+    <div class="jd-section">
+      <h3>Notes</h3>
+      <textarea class="jd-note-input" id="jdNoteInput" placeholder="Add a note for this job..."></textarea>
+      <button class="jd-note-save" onclick="saveJobNote()">Save Note</button>
+      <div id="jdNotes" style="margin-top:10px;"></div>
+    </div>
+    <!-- Invoice -->
+    <div class="jd-section">
+      <button class="jd-invoice-btn" onclick="sendInvoice()">📄 Send Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="receipt-modal" id="receiptModal">
+  <div class="receipt-card">
+    <div class="receipt-check">✅</div>
+    <div class="receipt-title">Payment Collected</div>
+    <div id="receiptBody"></div>
+    <button class="receipt-close-btn" onclick="closeReceipt()">Done</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-tab="jobs" onclick="switchTab('jobs')">
+    <span class="nav-icon">📋</span>
+    Jobs
+  </button>
+  <button class="nav-item" data-tab="photos" onclick="switchTab('photos')">
+    <span class="nav-icon">📷</span>
+    Photos
+  </button>
+  <button class="nav-item" data-tab="payments" onclick="switchTab('payments')">
+    <span class="nav-icon">💰</span>
+    Payments
+  </button>
+  <button class="nav-item" data-tab="notes" onclick="switchTab('notes')">
+    <span class="nav-icon">📝</span>
+    Notes
+  </button>
+  <button class="nav-item" data-tab="more" onclick="switchTab('more')">
+    <span class="nav-icon">⚙️</span>
+    More
+  </button>
+</nav>
+
+<script>
+if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
+</script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>
+/* ============ SEED DATA ============ */
+var TODAY_JOBS = [
+  { id:'fj_1', title:'Kitchen Remodel - Phase 2', address:'142 E 300 S, Salt Lake City, UT', customer:'John Martinez', phone:'801-555-0101', time:'8:00 AM', duration:'4 hrs', status:'completed', notes:'Cabinets installed, countertop template done' },
+  { id:'fj_2', title:'Bathroom Tile Installation', address:'567 State St, Orem, UT', customer:'Sarah Chen', phone:'801-555-0102', time:'1:00 PM', duration:'3 hrs', status:'in_progress', notes:'Subway tile, white grout' },
+  { id:'fj_3', title:'Deck Repair - Replace Boards', address:'890 Canyon Rd, Provo, UT', customer:'Mike Thompson', phone:'801-555-0103', time:'4:30 PM', duration:'2 hrs', status:'scheduled', notes:'12 boards need replacement, materials on truck' },
+  { id:'fj_4', title:'Electrical Panel Upgrade', address:'234 Main St, Sandy, UT', customer:'Lisa Park', phone:'801-555-0104', time:'Tomorrow 9:00 AM', duration:'5 hrs', status:'scheduled', notes:'200 amp upgrade, permit pulled' }
+];
+
+var savedPhotos = [];
+var savedNotes = [];
+var recentPayments = [
+  { job:'Kitchen Remodel', customer:'John Martinez', amount:1250, method:'Check', date:'Today 11:30 AM' },
+  { job:'Plumbing Fix', customer:'Amy Lewis', amount:350, method:'Cash', date:'Yesterday 3:00 PM' }
+];
+var selectedPayMethod = '';
+var currentDetailJob = null;
+var jobPhotos = {};
+var jobNotes = {};
+var signatureData = null;
+
+/* ============ TAB SWITCHING ============ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector('.nav-item[data-tab="'+tab+'"]').classList.add('active');
+}
+
+/* ============ RENDER JOBS ============ */
+function renderJobs() {
+  var todayHTML = '';
+  var upcomingHTML = '';
+  TODAY_JOBS.forEach(function(job) {
+    var isTomorrow = job.time.indexOf('Tomorrow') === 0;
+    var card = buildJobCard(job);
+    if (isTomorrow) upcomingHTML += card;
+    else todayHTML += card;
+  });
+  document.getElementById('today-jobs').innerHTML = todayHTML || '<p style="color:var(--text-secondary);text-align:center;padding:20px;">No jobs today</p>';
+  document.getElementById('upcoming-jobs').innerHTML = upcomingHTML || '<p style="color:var(--text-secondary);text-align:center;padding:20px;">No upcoming jobs</p>';
+}
+
+function buildJobCard(job) {
+  var statusLabel = job.status.replace('_',' ');
+  var actionBtn = '';
+  if (job.status === 'scheduled') {
+    actionBtn = '<button class="job-action-btn primary" onclick="event.stopPropagation();startJob(\''+job.id+'\')">▶️ Start</button>';
+  } else if (job.status === 'in_progress') {
+    actionBtn = '<button class="job-action-btn success" onclick="event.stopPropagation();completeJob(\''+job.id+'\')">✅ Complete</button>';
+  } else {
+    actionBtn = '<button class="job-action-btn" style="opacity:.5;" disabled>Done</button>';
+  }
+  var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(job.address);
+  return '<div class="job-card status-'+job.status+'" onclick="openJobDetail(\''+job.id+'\')">'
+    + '<div class="job-time">'+job.time+' <span class="job-duration">· '+job.duration+'</span></div>'
+    + '<div class="job-title">'+job.title+'</div>'
+    + '<div class="job-address">📍 '+job.address+'</div>'
+    + '<div class="job-customer">👤 '+job.customer+'</div>'
+    + '<div style="margin-top:8px;"><span class="status-pill pill-'+job.status+'">'+statusLabel+'</span></div>'
+    + '<div class="job-actions">'
+    + '<a class="job-action-btn" href="'+mapsUrl+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">📍 Navigate</a>'
+    + '<a class="job-action-btn" href="tel:'+job.phone+'" onclick="event.stopPropagation()">📞 Call</a>'
+    + actionBtn
+    + '</div>'
+    + '</div>';
+}
+
+function startJob(id) {
+  var job = TODAY_JOBS.find(function(j){ return j.id === id; });
+  if (job) { job.status = 'in_progress'; renderJobs(); toast('Job started'); }
+}
+function completeJob(id) {
+  var job = TODAY_JOBS.find(function(j){ return j.id === id; });
+  if (job) { job.status = 'completed'; renderJobs(); toast('Job completed!'); }
+}
+
+/* ============ JOB DETAIL ============ */
+function openJobDetail(id) {
+  var job = TODAY_JOBS.find(function(j){ return j.id === id; });
+  if (!job) return;
+  currentDetailJob = job;
+  document.getElementById('jdTitle').textContent = job.title;
+  var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(job.address);
+  document.getElementById('jdInfo').innerHTML =
+    '<div class="jd-info-row"><span class="jd-info-icon">📍</span><div><div class="jd-info-label">Address</div><a class="jd-info-link" href="'+mapsUrl+'" target="_blank" rel="noopener">'+job.address+'</a></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">👤</span><div><div class="jd-info-label">Customer</div><div class="jd-info-value">'+job.customer+'</div></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">📞</span><div><div class="jd-info-label">Phone</div><a class="jd-info-link" href="tel:'+job.phone+'">'+job.phone+'</a></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">🕐</span><div><div class="jd-info-label">Scheduled</div><div class="jd-info-value">'+job.time+' ('+job.duration+')</div></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">📝</span><div><div class="jd-info-label">Description</div><div class="jd-info-value">'+job.notes+'</div></div></div>';
+
+  // Status buttons
+  document.querySelectorAll('.jd-status-btn').forEach(function(btn){
+    btn.classList.remove('active-status');
+    if (btn.getAttribute('data-status') === job.status) btn.classList.add('active-status');
+  });
+
+  // Job photos
+  renderJobPhotos(id);
+  // Job notes
+  renderJobNotes(id);
+
+  document.getElementById('jobDetail').classList.add('open');
+  initSignatureCanvas();
+}
+
+function closeJobDetail() {
+  document.getElementById('jobDetail').classList.remove('open');
+  currentDetailJob = null;
+  renderJobs();
+}
+
+function updateJobStatus(status) {
+  if (!currentDetailJob) return;
+  currentDetailJob.status = status;
+  document.querySelectorAll('.jd-status-btn').forEach(function(btn){
+    btn.classList.remove('active-status');
+    if (btn.getAttribute('data-status') === status) btn.classList.add('active-status');
+  });
+  toast('Status updated to ' + status.replace('_',' '));
+}
+
+/* ============ PHOTOS ============ */
+function capturePhoto() {
+  document.getElementById('photoInput').click();
+}
+function handlePhotoCapture(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var tag = document.getElementById('photoJobTag').value || 'General';
+    savedPhotos.unshift({ src:ev.target.result, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), tag:tag });
+    renderPhotos();
+    toast('Photo saved');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+function renderPhotos() {
+  var html = '';
+  savedPhotos.forEach(function(p){
+    html += '<div class="photo-thumb"><img src="'+p.src+'" alt="Photo"><span class="photo-time">'+p.time+'</span><span class="photo-tag">'+p.tag+'</span></div>';
+  });
+  document.getElementById('photoGrid').innerHTML = html || '<p style="color:var(--text-secondary);text-align:center;padding:20px;grid-column:1/-1;">No photos yet. Tap the button above to capture.</p>';
+}
+
+function captureJobPhoto() {
+  document.getElementById('jobPhotoInput').click();
+}
+function handleJobPhoto(e) {
+  if (!currentDetailJob) return;
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    if (!jobPhotos[currentDetailJob.id]) jobPhotos[currentDetailJob.id] = [];
+    jobPhotos[currentDetailJob.id].push({ src:ev.target.result, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+    renderJobPhotos(currentDetailJob.id);
+    toast('Job photo saved');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+function renderJobPhotos(id) {
+  var photos = jobPhotos[id] || [];
+  var html = '';
+  photos.forEach(function(p){
+    html += '<div class="photo-thumb"><img src="'+p.src+'" alt="Photo"><span class="photo-time">'+p.time+'</span></div>';
+  });
+  document.getElementById('jdPhotos').innerHTML = html || '<p style="color:var(--text-secondary);font-size:.82rem;">No photos for this job yet.</p>';
+}
+
+/* ============ PAYMENTS ============ */
+function selectPayMethod(method) {
+  selectedPayMethod = method;
+  document.querySelectorAll('.pay-method-btn').forEach(function(b){
+    b.classList.toggle('selected', b.getAttribute('data-method') === method);
+  });
+}
+function collectPayment() {
+  var amount = parseFloat(document.getElementById('payAmount').value);
+  if (!amount || amount <= 0) { toast('Enter a valid amount'); return; }
+  if (!selectedPayMethod) { toast('Select a payment method'); return; }
+  var jobSel = document.getElementById('payJobSelect');
+  var jobName = jobSel.options[jobSel.selectedIndex] ? jobSel.options[jobSel.selectedIndex].text : 'General';
+  var payment = {
+    job: jobName,
+    customer: '',
+    amount: amount,
+    method: selectedPayMethod.charAt(0).toUpperCase() + selectedPayMethod.slice(1),
+    date: 'Just now'
+  };
+  // Find customer
+  var matchJob = TODAY_JOBS.find(function(j){ return j.title === jobName; });
+  if (matchJob) payment.customer = matchJob.customer;
+
+  recentPayments.unshift(payment);
+  renderRecentPayments();
+
+  // Show receipt
+  document.getElementById('receiptBody').innerHTML =
+    '<div class="receipt-row"><span>Job</span><span>'+payment.job+'</span></div>'
+    + '<div class="receipt-row"><span>Customer</span><span>'+(payment.customer||'—')+'</span></div>'
+    + '<div class="receipt-row"><span>Method</span><span>'+payment.method+'</span></div>'
+    + '<div class="receipt-total">$'+amount.toFixed(2)+'</div>';
+  document.getElementById('receiptModal').classList.add('open');
+
+  document.getElementById('payAmount').value = '';
+  selectedPayMethod = '';
+  document.querySelectorAll('.pay-method-btn').forEach(function(b){ b.classList.remove('selected'); });
+}
+function closeReceipt() {
+  document.getElementById('receiptModal').classList.remove('open');
+}
+function renderRecentPayments() {
+  var html = '';
+  recentPayments.forEach(function(p){
+    html += '<div class="recent-payment-item"><div><div class="rp-title">'+p.job+'</div><div class="rp-detail">'+p.method+' · '+(p.customer||'—')+' · '+p.date+'</div></div><div class="rp-amount">$'+p.amount.toFixed(2)+'</div></div>';
+  });
+  document.getElementById('recentPayments').innerHTML = html;
+}
+
+/* ============ NOTES ============ */
+function saveNote() {
+  var text = document.getElementById('noteInput').value.trim();
+  if (!text) { toast('Write something first'); return; }
+  var tag = document.getElementById('noteJobTag').value || 'General';
+  savedNotes.unshift({ text:text, tag:tag, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+  document.getElementById('noteInput').value = '';
+  renderSavedNotes();
+  toast('Note saved');
+}
+function renderSavedNotes() {
+  var html = '';
+  savedNotes.forEach(function(n){
+    html += '<div class="saved-note"><div class="note-header"><span class="note-job-tag">'+n.tag+'</span><span class="note-time">'+n.time+'</span></div><div class="note-text">'+n.text+'</div></div>';
+  });
+  document.getElementById('savedNotes').innerHTML = html || '<p style="color:var(--text-secondary);text-align:center;padding:20px;">No notes yet.</p>';
+}
+
+function saveJobNote() {
+  if (!currentDetailJob) return;
+  var text = document.getElementById('jdNoteInput').value.trim();
+  if (!text) { toast('Write something first'); return; }
+  if (!jobNotes[currentDetailJob.id]) jobNotes[currentDetailJob.id] = [];
+  jobNotes[currentDetailJob.id].push({ text:text, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+  document.getElementById('jdNoteInput').value = '';
+  renderJobNotes(currentDetailJob.id);
+  toast('Job note saved');
+}
+function renderJobNotes(id) {
+  var notes = jobNotes[id] || [];
+  var html = '';
+  notes.forEach(function(n){
+    html += '<div class="saved-note"><div class="note-header"><span class="note-time">'+n.time+'</span></div><div class="note-text">'+n.text+'</div></div>';
+  });
+  document.getElementById('jdNotes').innerHTML = html;
+}
+
+/* ============ SIGNATURE ============ */
+var sigCanvas, sigCtx, sigDrawing = false;
+function initSignatureCanvas() {
+  sigCanvas = document.getElementById('sigCanvas');
+  sigCtx = sigCanvas.getContext('2d');
+  var rect = sigCanvas.parentElement.getBoundingClientRect();
+  sigCanvas.width = rect.width;
+  sigCanvas.height = 150;
+  sigCtx.strokeStyle = '#000';
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+  sigCtx.fillStyle = '#fff';
+  sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+
+  sigCanvas.addEventListener('pointerdown', sigStart);
+  sigCanvas.addEventListener('pointermove', sigMove);
+  sigCanvas.addEventListener('pointerup', sigEnd);
+  sigCanvas.addEventListener('pointerleave', sigEnd);
+}
+function sigStart(e) {
+  sigDrawing = true;
+  sigCtx.beginPath();
+  var r = sigCanvas.getBoundingClientRect();
+  sigCtx.moveTo(e.clientX - r.left, e.clientY - r.top);
+}
+function sigMove(e) {
+  if (!sigDrawing) return;
+  var r = sigCanvas.getBoundingClientRect();
+  sigCtx.lineTo(e.clientX - r.left, e.clientY - r.top);
+  sigCtx.stroke();
+}
+function sigEnd() { sigDrawing = false; }
+function clearSignature() {
+  if (!sigCtx) return;
+  sigCtx.fillStyle = '#fff';
+  sigCtx.fillRect(0, 0, sigCanvas.width, sigCanvas.height);
+  signatureData = null;
+  toast('Signature cleared');
+}
+function saveSignature() {
+  if (!sigCanvas) return;
+  signatureData = sigCanvas.toDataURL();
+  toast('Signature saved');
+}
+
+/* ============ INVOICE ============ */
+function sendInvoice() {
+  if (!currentDetailJob) return;
+  toast('Invoice sent to ' + currentDetailJob.customer);
+}
+
+/* ============ POPULATE JOB SELECTS ============ */
+function populateJobSelects() {
+  var opts = '<option value="">— Select Job —</option>';
+  TODAY_JOBS.forEach(function(j){
+    opts += '<option value="'+j.id+'">'+j.title+'</option>';
+  });
+  document.getElementById('photoJobTag').innerHTML = opts;
+  document.getElementById('payJobSelect').innerHTML = opts;
+  document.getElementById('noteJobTag').innerHTML = opts;
+}
+
+/* ============ TOAST ============ */
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 2500);
+}
+
+/* ============ INIT ============ */
+renderJobs();
+renderPhotos();
+renderRecentPayments();
+renderSavedNotes();
+populateJobSelects();
+</script>
+</body>
+</html>

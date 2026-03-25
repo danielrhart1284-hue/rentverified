@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Signature – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .esig-layout { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .esig-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .esig-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+
+    .esig-tabs { display: inline-flex; background: #e5e7eb; border-radius: 8px; padding: 3px; margin-bottom: 1.5rem; }
+    .esig-tab { padding: 0.45rem 1.25rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #6b7280; border: none; background: none; }
+    .esig-tab.active { background: #4F46E5; color: white; }
+    .esig-panel { display: none; }
+    .esig-panel.active { display: block; }
+
+    .esig-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .esig-card h3 { font-size: 1rem; font-weight: 800; color: #1e1b4b; margin-bottom: 1rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+    .form-full { margin-bottom: 0.75rem; }
+    label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+    textarea { resize: vertical; }
+
+    /* Signature Pad */
+    .sig-pad-wrap { border: 2px dashed #d1d5db; border-radius: 12px; padding: 1rem; text-align: center; background: #fafafa; }
+    .sig-pad-wrap canvas { border: 1px solid #e5e7eb; border-radius: 8px; cursor: crosshair; background: white; touch-action: none; }
+    .sig-controls { display: flex; gap: 0.75rem; justify-content: center; margin-top: 0.75rem; }
+    .btn-sig { padding: 0.5rem 1.25rem; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-sig.primary { background: #4F46E5; color: white; }
+    .btn-sig.primary:hover { background: #4338ca; }
+    .btn-sig.green { background: #059669; color: white; }
+    .btn-sig.green:hover { background: #047857; }
+    .btn-sig.outline { background: white; color: #374151; border: 1px solid #d1d5db; }
+    .btn-sig.danger { background: #fee2e2; color: #dc2626; }
+
+    /* Type signature */
+    .type-sig-preview { font-family: 'Brush Script MT', 'Segoe Script', cursive; font-size: 2.5rem; color: #1e1b4b; padding: 1rem; border-bottom: 2px solid #1e1b4b; margin: 1rem 0; min-height: 60px; }
+
+    /* Document list */
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .doc-table th { text-align: left; padding: 0.65rem 0.75rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .doc-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
+    .doc-table tr:hover td { background: #f9fafb; }
+    .badge-doc { padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
+    .badge-doc.pending { background: #fef3c7; color: #92400e; }
+    .badge-doc.signed { background: #d1fae5; color: #065f46; }
+    .badge-doc.declined { background: #fee2e2; color: #991b1b; }
+
+    /* Saved sigs */
+    .saved-sigs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .saved-sig { background: white; border: 2px solid #e5e7eb; border-radius: 10px; padding: 1rem; text-align: center; cursor: pointer; transition: 0.2s; }
+    .saved-sig:hover { border-color: #4F46E5; }
+    .saved-sig img { max-width: 100%; max-height: 80px; margin-bottom: 0.5rem; }
+    .saved-sig .sig-label { font-size: 0.78rem; font-weight: 600; color: #6b7280; }
+
+    @media (max-width: 640px) {
+      .form-row { grid-template-columns: 1fr; }
+      .type-sig-preview { font-size: 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">RentVerified</span> <span style="font-weight:500;opacity:0.9;">E-Sign</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="documents.html">Documents</a>
+    <a href="leases.html">Leases</a>
+    <a href="e-signature.html" style="color:#1a56db;font-weight:700;">E-Sign</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<div class="esig-layout">
+  <div class="esig-header">
+    <h1>E-Signature</h1>
+  </div>
+
+  <div class="esig-tabs">
+    <button class="esig-tab active" onclick="switchEsigTab('sign')">Sign Document</button>
+    <button class="esig-tab" onclick="switchEsigTab('documents')">My Documents</button>
+    <button class="esig-tab" onclick="switchEsigTab('saved')">Saved Signatures</button>
+  </div>
+
+  <!-- SIGN PANEL -->
+  <div class="esig-panel active" id="panel-sign">
+    <div class="esig-card">
+      <h3>Document Info</h3>
+      <div class="form-row">
+        <div><label>Document Title</label><input type="text" id="docTitle" placeholder="e.g. Lease Agreement - Unit 4B" /></div>
+        <div><label>Document Type</label>
+          <select id="docType">
+            <option>Lease Agreement</option>
+            <option>Addendum</option>
+            <option>Move-In Checklist</option>
+            <option>Vendor Contract</option>
+            <option>Non-Disclosure Agreement</option>
+            <option>Service Agreement</option>
+            <option>Power of Attorney</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div><label>Signer Name</label><input type="text" id="signerName" /></div>
+        <div><label>Signer Email</label><input type="email" id="signerEmail" /></div>
+      </div>
+    </div>
+
+    <div class="esig-card">
+      <h3>Draw Your Signature</h3>
+      <div class="sig-pad-wrap">
+        <canvas id="sigCanvas" width="500" height="180"></canvas>
+        <div class="sig-controls">
+          <button class="btn-sig outline" onclick="clearCanvas()">Clear</button>
+          <button class="btn-sig primary" onclick="saveSignature()">Save Signature</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="esig-card">
+      <h3>Or Type Your Signature</h3>
+      <div class="form-full">
+        <input type="text" id="typeSigInput" placeholder="Type your full name..." oninput="updateTypeSig()" />
+      </div>
+      <div class="type-sig-preview" id="typeSigPreview"></div>
+      <button class="btn-sig primary" onclick="saveTypedSignature()" style="margin-top:0.75rem;">Use Typed Signature</button>
+    </div>
+
+    <div class="esig-card">
+      <h3>Agreement</h3>
+      <div style="font-size:0.82rem;color:#6b7280;line-height:1.6;margin-bottom:1rem;">
+        By signing below, I acknowledge that this electronic signature is legally binding and has the same legal effect as a handwritten signature. I consent to conducting this transaction electronically under the E-SIGN Act and UETA.
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-weight:500;cursor:pointer;">
+        <input type="checkbox" id="consentCheck" style="width:auto;" />
+        I agree to sign this document electronically
+      </label>
+    </div>
+
+    <div style="display:flex;gap:0.75rem;">
+      <button class="btn-sig green" onclick="signDocument()" style="padding:0.7rem 2rem;font-size:0.95rem;">Sign & Submit</button>
+      <button class="btn-sig outline" onclick="resetSignForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- DOCUMENTS PANEL -->
+  <div class="esig-panel" id="panel-documents">
+    <div class="esig-card">
+      <h3>Signed Documents</h3>
+      <div style="overflow-x:auto;">
+        <table class="doc-table">
+          <thead><tr><th>Title</th><th>Type</th><th>Signer</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="docsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVED SIGNATURES PANEL -->
+  <div class="esig-panel" id="panel-saved">
+    <div class="esig-card">
+      <h3>Saved Signatures</h3>
+      <p style="font-size:0.82rem;color:#6b7280;margin-bottom:1rem;">Click a signature to use it for signing documents.</p>
+      <div class="saved-sigs" id="savedSigs"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SIGS_KEY = 'rv_saved_signatures';
+const DOCS_KEY = 'rv_signed_documents';
+var isDrawing = false;
+var ctx = null;
+
+// Canvas setup
+function initCanvas() {
+  var canvas = document.getElementById('sigCanvas');
+  ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#1e1b4b';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var x, y;
+    if (e.touches) { x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; }
+    else { x = e.clientX - rect.left; y = e.clientY - rect.top; }
+    // Scale for CSS vs canvas size
+    x = x * (canvas.width / rect.width);
+    y = y * (canvas.height / rect.height);
+    return { x: x, y: y };
+  }
+
+  canvas.addEventListener('mousedown', function(e) { isDrawing = true; var p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', function(e) { if (!isDrawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+  canvas.addEventListener('mouseup', function() { isDrawing = false; });
+  canvas.addEventListener('mouseleave', function() { isDrawing = false; });
+
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); isDrawing = true; var p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!isDrawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+  canvas.addEventListener('touchend', function() { isDrawing = false; });
+}
+
+function clearCanvas() {
+  var canvas = document.getElementById('sigCanvas');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function isCanvasEmpty() {
+  var canvas = document.getElementById('sigCanvas');
+  var data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  for (var i = 3; i < data.length; i += 4) {
+    if (data[i] > 0) return false;
+  }
+  return true;
+}
+
+function saveSignature() {
+  if (isCanvasEmpty()) { alert('Please draw your signature first.'); return; }
+  var canvas = document.getElementById('sigCanvas');
+  var dataUrl = canvas.toDataURL('image/png');
+  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  sigs.push({
+    type: 'drawn',
+    data: dataUrl,
+    created: new Date().toISOString(),
+    name: document.getElementById('signerName').value || 'Signature'
+  });
+  localStorage.setItem(SIGS_KEY, JSON.stringify(sigs));
+  alert('Signature saved!');
+  renderSavedSigs();
+}
+
+function saveTypedSignature() {
+  var text = document.getElementById('typeSigInput').value.trim();
+  if (!text) { alert('Please type your name.'); return; }
+  // Create a canvas image from typed text
+  var tempCanvas = document.createElement('canvas');
+  tempCanvas.width = 500; tempCanvas.height = 100;
+  var tCtx = tempCanvas.getContext('2d');
+  tCtx.font = 'italic 48px "Brush Script MT", "Segoe Script", cursive';
+  tCtx.fillStyle = '#1e1b4b';
+  tCtx.fillText(text, 20, 65);
+  var dataUrl = tempCanvas.toDataURL('image/png');
+
+  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  sigs.push({
+    type: 'typed',
+    text: text,
+    data: dataUrl,
+    created: new Date().toISOString(),
+    name: text
+  });
+  localStorage.setItem(SIGS_KEY, JSON.stringify(sigs));
+  alert('Typed signature saved!');
+  renderSavedSigs();
+}
+
+function updateTypeSig() {
+  document.getElementById('typeSigPreview').textContent = document.getElementById('typeSigInput').value;
+}
+
+function signDocument() {
+  if (!document.getElementById('consentCheck').checked) {
+    alert('Please agree to sign electronically.');
+    return;
+  }
+  var title = document.getElementById('docTitle').value.trim();
+  if (!title) { alert('Please enter a document title.'); return; }
+
+  // Get signature data
+  var sigData = null;
+  if (!isCanvasEmpty()) {
+    sigData = document.getElementById('sigCanvas').toDataURL('image/png');
+  } else if (document.getElementById('typeSigInput').value.trim()) {
+    sigData = 'typed:' + document.getElementById('typeSigInput').value.trim();
+  } else {
+    alert('Please draw or type your signature.');
+    return;
+  }
+
+  var doc = {
+    title: title,
+    type: document.getElementById('docType').value,
+    signer: document.getElementById('signerName').value,
+    signerEmail: document.getElementById('signerEmail').value,
+    signedAt: new Date().toISOString(),
+    status: 'signed',
+    signatureData: sigData,
+    hash: 'SHA256-' + Date.now().toString(36).toUpperCase(),
+  };
+
+  var docs = JSON.parse(localStorage.getItem(DOCS_KEY) || '[]');
+  docs.unshift(doc);
+  localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
+
+  alert('Document signed successfully!\nDocument: ' + title + '\nSigned by: ' + doc.signer + '\nHash: ' + doc.hash);
+  resetSignForm();
+  renderDocs();
+}
+
+function resetSignForm() {
+  document.getElementById('docTitle').value = '';
+  document.getElementById('signerName').value = '';
+  document.getElementById('signerEmail').value = '';
+  document.getElementById('typeSigInput').value = '';
+  document.getElementById('typeSigPreview').textContent = '';
+  document.getElementById('consentCheck').checked = false;
+  clearCanvas();
+}
+
+function renderDocs() {
+  var docs = JSON.parse(localStorage.getItem(DOCS_KEY) || '[]');
+  var body = document.getElementById('docsBody');
+  if (!docs.length) {
+    docs = [
+      { title: 'Lease Agreement - Unit 4B', type: 'Lease Agreement', signer: 'Jane Doe', signedAt: '2025-03-15T10:30:00Z', status: 'signed', hash: 'SHA256-M1K2N3' },
+      { title: 'Vendor NDA - Rivera Contracting', type: 'Non-Disclosure Agreement', signer: 'Tom Rivera', signedAt: '2025-03-12T14:00:00Z', status: 'signed', hash: 'SHA256-P4Q5R6' },
+      { title: 'Move-In Checklist - Apt 2A', type: 'Move-In Checklist', signer: 'Marcus Lee', signedAt: '2025-03-10T09:15:00Z', status: 'signed', hash: 'SHA256-S7T8U9' },
+    ];
+    localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
+  }
+  body.innerHTML = docs.map(function(d) {
+    var date = new Date(d.signedAt).toLocaleDateString();
+    return '<tr>' +
+      '<td><strong>' + d.title + '</strong></td>' +
+      '<td>' + d.type + '</td>' +
+      '<td>' + (d.signer || '') + '</td>' +
+      '<td>' + date + '</td>' +
+      '<td><span class="badge-doc ' + d.status + '">' + d.status.toUpperCase() + '</span></td>' +
+      '<td style="font-size:0.72rem;color:#9ca3af;">' + (d.hash || '') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function renderSavedSigs() {
+  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  var container = document.getElementById('savedSigs');
+  if (!sigs.length) {
+    container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:2rem;grid-column:1/-1;">No saved signatures yet. Draw or type one to get started.</div>';
+    return;
+  }
+  container.innerHTML = sigs.map(function(s, i) {
+    return '<div class="saved-sig" onclick="useSavedSig(' + i + ')">' +
+      '<img src="' + s.data + '" alt="Signature" />' +
+      '<div class="sig-label">' + (s.name || 'Signature ' + (i+1)) + '</div>' +
+      '<div style="font-size:0.68rem;color:#9ca3af;">' + new Date(s.created).toLocaleDateString() + '</div>' +
+      '<button class="btn-sig danger" style="margin-top:0.5rem;font-size:0.7rem;padding:2px 8px;" onclick="event.stopPropagation();deleteSig(' + i + ')">Delete</button>' +
+    '</div>';
+  }).join('');
+}
+
+function useSavedSig(idx) {
+  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  var sig = sigs[idx];
+  if (!sig) return;
+  // Draw on canvas
+  switchEsigTab('sign');
+  clearCanvas();
+  var img = new Image();
+  img.onload = function() {
+    ctx.drawImage(img, 0, 0, 500, 180);
+  };
+  img.src = sig.data;
+  if (sig.name) document.getElementById('signerName').value = sig.name;
+}
+
+function deleteSig(idx) {
+  if (!confirm('Delete this signature?')) return;
+  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  sigs.splice(idx, 1);
+  localStorage.setItem(SIGS_KEY, JSON.stringify(sigs));
+  renderSavedSigs();
+}
+
+function switchEsigTab(tab) {
+  document.querySelectorAll('.esig-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.esig-panel').forEach(function(p) { p.classList.remove('active'); });
+  var tabs = { sign: 0, documents: 1, saved: 2 };
+  document.querySelectorAll('.esig-tab')[tabs[tab]].classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'documents') renderDocs();
+  if (tab === 'saved') renderSavedSigs();
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+  initCanvas();
+  renderDocs();
+  renderSavedSigs();
+});
+</script>
+</body>
+</html>

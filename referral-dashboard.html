@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Referral Dashboard – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Referral Dashboard ── */
+    .rd-hero {
+      background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+      color: white; padding: 3rem 2rem 2.5rem; text-align: center;
+    }
+    .rd-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .rd-hero p { font-size: 1rem; opacity: 0.8; max-width: 520px; margin: 0 auto; }
+    .rd-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ── Revenue Cards ── */
+    .rd-revenue {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+      margin: -1.5rem auto 2rem; position: relative; z-index: 2;
+    }
+    .rd-rev-card {
+      background: white; border-radius: 14px; padding: 1.25rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08); text-align: center;
+    }
+    .rd-rev-card .rd-rev-num {
+      font-size: 1.7rem; font-weight: 900; color: #065f46; margin-bottom: 2px;
+    }
+    .rd-rev-card .rd-rev-label {
+      font-size: 0.75rem; color: #6b7280; text-transform: uppercase;
+      letter-spacing: 0.04em; font-weight: 600;
+    }
+    .rd-rev-card .rd-rev-sub {
+      font-size: 0.72rem; color: #9ca3af; margin-top: 4px;
+    }
+    .rd-rev-card.highlight { border: 2px solid #10b981; }
+
+    /* ── Tabs ── */
+    .rd-tabs {
+      display: flex; gap: 0.5rem; border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .rd-tab {
+      padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; border-bottom: 3px solid transparent;
+      color: #6b7280; transition: 0.15s;
+    }
+    .rd-tab:hover { color: #111827; }
+    .rd-tab.active { color: #065f46; border-bottom-color: #10b981; }
+    .rd-tab-panel { display: none; }
+    .rd-tab-panel.active { display: block; }
+
+    /* ── Referral Table ── */
+    .rd-table-wrap {
+      background: white; border-radius: 14px; border: 1px solid #e5e7eb;
+      overflow: hidden; margin-bottom: 2rem;
+    }
+    .rd-table-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .rd-table-header h3 { font-size: 1.05rem; font-weight: 800; }
+    .rd-table {
+      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+    }
+    .rd-table th {
+      text-align: left; padding: 0.7rem 1rem; background: #f8fafc;
+      font-weight: 700; font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.04em; color: #6b7280; border-bottom: 2px solid #e5e7eb;
+    }
+    .rd-table td {
+      padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;
+      vertical-align: middle;
+    }
+    .rd-table tr:hover td { background: #f9fafb; }
+
+    /* ── Status Badges ── */
+    .rd-status {
+      font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 99px; display: inline-block;
+    }
+    .rd-status.active { background: #d1fae5; color: #065f46; }
+    .rd-status.pending { background: #fef3c7; color: #92400e; }
+    .rd-status.paid { background: #dbeafe; color: #1e40af; }
+    .rd-status.expired { background: #f3f4f6; color: #6b7280; }
+    .rd-status.converted { background: #ede9fe; color: #5b21b6; }
+
+    /* ── Source Badges ── */
+    .rd-source {
+      font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
+      border-radius: 6px; display: inline-block;
+    }
+    .rd-source.loan { background: #dbeafe; color: #1e40af; }
+    .rd-source.professional { background: #ede9fe; color: #5b21b6; }
+    .rd-source.tenant { background: #d1fae5; color: #065f46; }
+    .rd-source.product { background: #fef3c7; color: #92400e; }
+    .rd-source.user { background: #fce7f3; color: #be185d; }
+
+    /* ── Payout Section ── */
+    .rd-payout {
+      background: white; border-radius: 14px; border: 1px solid #e5e7eb;
+      overflow: hidden; margin-bottom: 2rem;
+    }
+    .rd-payout-head {
+      background: linear-gradient(135deg, #065f46, #059669);
+      color: white; padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .rd-payout-head h3 { font-size: 1.05rem; font-weight: 800; }
+    .rd-payout-body { padding: 1.25rem 1.5rem; }
+
+    .rd-payout-row {
+      display: flex; align-items: center; gap: 1rem; padding: 0.65rem 0;
+      border-bottom: 1px solid #f3f4f6; flex-wrap: wrap;
+    }
+    .rd-payout-row:last-child { border-bottom: none; }
+
+    /* ── Share Link Box ── */
+    .rd-share {
+      background: linear-gradient(135deg, #1e3a5f, #1e40af);
+      color: white; border-radius: 14px; padding: 1.5rem 2rem;
+      margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .rd-share-icon { font-size: 2.5rem; flex-shrink: 0; }
+    .rd-share h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+    .rd-share p { font-size: 0.85rem; opacity: 0.8; }
+    .rd-share-link-wrap {
+      margin-left: auto; display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0;
+    }
+    .rd-share-link {
+      background: rgba(255,255,255,0.15); padding: 0.5rem 1rem;
+      border-radius: 8px; font-size: 0.82rem; color: #93c5fd;
+      font-family: monospace; min-width: 200px; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .rd-share-copy {
+      padding: 0.5rem 1rem; background: #10b981; color: white; border: none;
+      border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    }
+
+    /* ── Commission Breakdown Chart (CSS bars) ── */
+    .rd-chart { margin-bottom: 2rem; }
+    .rd-chart h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 1rem; }
+    .rd-bar-row {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem;
+    }
+    .rd-bar-label { width: 140px; font-size: 0.82rem; font-weight: 600; color: #374151; flex-shrink: 0; }
+    .rd-bar-track { flex: 1; height: 24px; background: #f3f4f6; border-radius: 6px; overflow: hidden; }
+    .rd-bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; min-width: 2px; }
+    .rd-bar-value { width: 70px; font-size: 0.82rem; font-weight: 700; color: #111827; text-align: right; flex-shrink: 0; }
+
+    /* ── Payout Settings ── */
+    .rd-settings {
+      background: white; border-radius: 14px; border: 1px solid #e5e7eb;
+      padding: 1.5rem; margin-bottom: 2rem;
+    }
+    .rd-settings h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 1rem; }
+    .rd-settings label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; color: #374151; }
+    .rd-settings input, .rd-settings select {
+      width: 100%; max-width: 400px; padding: 0.6rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem;
+    }
+    .rd-settings-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 600px; }
+    .rd-settings-save {
+      padding: 0.65rem 1.5rem; background: #059669; color: white; border: none;
+      border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+    }
+
+    /* ── Empty State ── */
+    .rd-empty { text-align: center; padding: 3rem 1rem; color: #9ca3af; }
+    .rd-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    /* ── Footer ── */
+    .rd-footer {
+      background: #111827; color: #9CA3AF; text-align: center;
+      padding: 2rem; font-size: 0.8rem; margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .rd-revenue { grid-template-columns: repeat(2, 1fr); }
+      .rd-hero h1 { font-size: 1.75rem; }
+      .rd-share { flex-direction: column; text-align: center; }
+      .rd-share-link-wrap { margin-left: 0; width: 100%; }
+      .rd-share-link { flex: 1; }
+      .rd-settings-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .rd-revenue { grid-template-columns: 1fr 1fr; }
+      .rd-table { font-size: 0.78rem; }
+      .rd-table th, .rd-table td { padding: 0.55rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">Sanders PM</span> <span style="font-weight:500;opacity:0.9;">· RentVerified</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="index.html">Dashboard</a>
+    <a href="referral-dashboard.html" style="color:#059669;font-weight:700;">Referral Dashboard</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="rd-hero">
+  <h1>Referral & Commission Dashboard</h1>
+  <p>Track every referral, monitor commissions, and manage your $5/mo automated payouts — all in one place.</p>
+</section>
+
+<div class="rd-wrap">
+
+  <!-- Revenue Summary Cards -->
+  <div class="rd-revenue">
+    <div class="rd-rev-card highlight">
+      <div class="rd-rev-num" id="rd-total-earned">$0.00</div>
+      <div class="rd-rev-label">Total Earned</div>
+      <div class="rd-rev-sub">All time commissions</div>
+    </div>
+    <div class="rd-rev-card">
+      <div class="rd-rev-num" id="rd-pending">$0.00</div>
+      <div class="rd-rev-label">Pending</div>
+      <div class="rd-rev-sub">Awaiting payout</div>
+    </div>
+    <div class="rd-rev-card">
+      <div class="rd-rev-num" id="rd-this-month">$0.00</div>
+      <div class="rd-rev-label">This Month</div>
+      <div class="rd-rev-sub" id="rd-month-label"></div>
+    </div>
+    <div class="rd-rev-card">
+      <div class="rd-rev-num" id="rd-active-refs">0</div>
+      <div class="rd-rev-label">Active Referrals</div>
+      <div class="rd-rev-sub">Within 90-day window</div>
+    </div>
+  </div>
+
+  <!-- Share Referral Link -->
+  <div class="rd-share">
+    <div class="rd-share-icon">🔗</div>
+    <div style="flex:1;">
+      <h3>Your Referral Link</h3>
+      <p>Share this link. When someone signs up and uses RentVerified, you earn $5/month for their first year.</p>
+    </div>
+    <div class="rd-share-link-wrap">
+      <div class="rd-share-link" id="rd-ref-link">rentverified.com/r/loading...</div>
+      <button class="rd-share-copy" onclick="copyRefLink()">Copy</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="rd-tabs">
+    <div class="rd-tab active" data-tab="overview" onclick="switchRdTab('overview')">Overview</div>
+    <div class="rd-tab" data-tab="referrals" onclick="switchRdTab('referrals')">All Referrals</div>
+    <div class="rd-tab" data-tab="commissions" onclick="switchRdTab('commissions')">Commissions</div>
+    <div class="rd-tab" data-tab="payouts" onclick="switchRdTab('payouts')">Payouts</div>
+    <div class="rd-tab" data-tab="settings" onclick="switchRdTab('settings')">Settings</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB: OVERVIEW -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="rd-tab-panel active" id="rdtab-overview">
+
+    <!-- Commission Breakdown Chart -->
+    <div class="rd-chart">
+      <h3>Commission Breakdown by Source</h3>
+      <div id="rd-chart-bars"></div>
+    </div>
+
+    <!-- Recent Referrals -->
+    <div class="rd-table-wrap">
+      <div class="rd-table-header">
+        <h3>Recent Activity</h3>
+        <span style="font-size:0.78rem; color:#6b7280;" id="rd-recent-count"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="rd-table">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Referral</th>
+              <th>Date</th>
+              <th>Commission</th>
+              <th>Status</th>
+              <th>Window</th>
+            </tr>
+          </thead>
+          <tbody id="rd-recent-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB: ALL REFERRALS -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="rd-tab-panel" id="rdtab-referrals">
+    <div class="rd-table-wrap">
+      <div class="rd-table-header">
+        <h3>All Referrals</h3>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <select id="rd-filter-source" onchange="renderAllReferrals()" style="padding:0.4rem 0.6rem; border:1px solid #d1d5db; border-radius:8px; font-size:0.82rem;">
+            <option value="all">All Sources</option>
+            <option value="loan">Loan Marketplace</option>
+            <option value="professional">Professional Marketplace</option>
+            <option value="user">User Referrals ($5/mo)</option>
+            <option value="product">Financial Products</option>
+            <option value="tenant">Tenant Services</option>
+          </select>
+          <select id="rd-filter-status" onchange="renderAllReferrals()" style="padding:0.4rem 0.6rem; border:1px solid #d1d5db; border-radius:8px; font-size:0.82rem;">
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="converted">Converted</option>
+            <option value="paid">Paid</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="rd-table">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Referral</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Commission</th>
+              <th>Status</th>
+              <th>Expires</th>
+            </tr>
+          </thead>
+          <tbody id="rd-all-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB: COMMISSIONS -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="rd-tab-panel" id="rdtab-commissions">
+    <div class="rd-table-wrap">
+      <div class="rd-table-header">
+        <h3>Commission Ledger</h3>
+        <span style="font-size:0.78rem; color:#6b7280;" id="rd-comm-total"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="rd-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Source</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="rd-comm-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB: PAYOUTS -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="rd-tab-panel" id="rdtab-payouts">
+    <div class="rd-payout">
+      <div class="rd-payout-head">
+        <h3>Payout History</h3>
+        <span style="font-size:0.78rem; opacity:0.7;" id="rd-payout-total"></span>
+      </div>
+      <div class="rd-payout-body" id="rd-payout-body">
+        <div class="rd-empty">
+          <div class="rd-empty-icon">💳</div>
+          <p>No payouts yet. Commissions are paid out monthly when balance exceeds $25.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Automated $5/mo Payout Summary -->
+    <div class="rd-table-wrap">
+      <div class="rd-table-header">
+        <h3>$5/mo Recurring Referral Payouts</h3>
+        <span style="font-size:0.78rem; color:#6b7280;" id="rd-recurring-count"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="rd-table">
+          <thead>
+            <tr>
+              <th>Referred User</th>
+              <th>Signed Up</th>
+              <th>Months Active</th>
+              <th>Total Earned</th>
+              <th>Next Payout</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="rd-recurring-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB: SETTINGS -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="rd-tab-panel" id="rdtab-settings">
+    <div class="rd-settings">
+      <h3>Payout Settings</h3>
+      <div class="rd-settings-row">
+        <div>
+          <label>Payout Method</label>
+          <select id="rd-payout-method">
+            <option value="stripe">Stripe (Direct Deposit)</option>
+            <option value="paypal">PayPal</option>
+            <option value="venmo">Venmo</option>
+            <option value="check">Paper Check</option>
+            <option value="credit">Platform Credit</option>
+          </select>
+        </div>
+        <div>
+          <label>Minimum Payout Threshold</label>
+          <select id="rd-payout-threshold">
+            <option value="25">$25 (default)</option>
+            <option value="50">$50</option>
+            <option value="100">$100</option>
+            <option value="250">$250</option>
+          </select>
+        </div>
+      </div>
+      <div class="rd-settings-row">
+        <div>
+          <label>Payout Email (PayPal/Venmo)</label>
+          <input type="email" id="rd-payout-email" placeholder="you@example.com" />
+        </div>
+        <div>
+          <label>Payout Frequency</label>
+          <select id="rd-payout-freq">
+            <option value="monthly">Monthly (1st of each month)</option>
+            <option value="biweekly">Bi-Weekly</option>
+            <option value="weekly">Weekly</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <label style="display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer;">
+          <input type="checkbox" id="rd-auto-payout" checked style="width:auto;" />
+          Enable automatic payouts when balance exceeds threshold
+        </label>
+      </div>
+      <div style="margin-top:1rem;">
+        <button class="rd-settings-save" onclick="savePayoutSettings()">Save Payout Settings</button>
+      </div>
+    </div>
+
+    <div class="rd-settings">
+      <h3>Referral Link Settings</h3>
+      <label>Custom Referral Code</label>
+      <div style="display:flex; gap:0.5rem; max-width:400px;">
+        <span style="padding:0.6rem 0.75rem; background:#f3f4f6; border:1px solid #d1d5db; border-radius:8px 0 0 8px; font-size:0.85rem; color:#6b7280; white-space:nowrap;">rentverified.com/r/</span>
+        <input type="text" id="rd-custom-code" placeholder="your-code" style="border-radius:0 8px 8px 0; margin-bottom:0;" />
+      </div>
+      <div style="margin-top:0.75rem;">
+        <button class="rd-settings-save" onclick="saveRefCode()">Update Referral Code</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="rd-footer">
+  &copy; 2026 Sanders Property Management &middot; RentVerified &middot;
+  <a href="index.html" style="color:#93c5fd;">Home</a> &middot;
+  <a href="index.html" style="color:#93c5fd;">Dashboard</a> &middot;
+  <a href="funding.html" style="color:#93c5fd;">Funding</a>
+</div>
+
+<script src="app.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script>
+  // ═══════════════════════════════════════════════════════════════════════
+  // Referral Dashboard Engine
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // ── Commission Rate Map ──
+  var COMMISSION_RATES = {
+    loan_application:     { label: 'Loan Application',       min: 200,  max: 5000, type: 'one-time' },
+    sba_referral:         { label: 'SBA Loan Referral',      min: 2500, max: 5000, type: 'one-time' },
+    professional_booking: { label: 'Professional Booking',   min: 15,   max: 50,   type: 'per-booking' },
+    deposit_bond:         { label: 'Deposit Bond',           min: 25,   max: 25,   type: 'per-bond' },
+    renters_insurance:    { label: 'Renters Insurance',      min: 3,    max: 8,    type: 'monthly' },
+    credit_builder:       { label: 'Credit Builder (Boom)',  min: 1,    max: 2,    type: 'monthly' },
+    user_referral:        { label: 'User Referral',          min: 5,    max: 5,    type: 'monthly-12' },
+    tenant_screening:     { label: 'Tenant Screening',       min: 12,   max: 12,   type: 'per-screen' }
+  };
+
+  // ── Tab Switching ──
+  function switchRdTab(tab) {
+    document.querySelectorAll('.rd-tab').forEach(function(el) {
+      el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+    });
+    document.querySelectorAll('.rd-tab-panel').forEach(function(el) {
+      el.classList.toggle('active', el.id === 'rdtab-' + tab);
+    });
+    if (tab === 'referrals') renderAllReferrals();
+    if (tab === 'commissions') renderCommissions();
+    if (tab === 'payouts') renderPayouts();
+  }
+
+  // ── Aggregate All Referral Data ──
+  function getAllReferrals() {
+    var all = [];
+
+    // 1. Referral log (loan marketplace, professional marketplace, funding page clicks)
+    var refLog = JSON.parse(localStorage.getItem('rv_referral_log') || '[]');
+    refLog.forEach(function(r) {
+      var source = 'loan';
+      if (r.type === 'professional' || r.source === 'professional_marketplace') source = 'professional';
+      else if (r.source === 'funding_page') source = 'loan';
+      else if (r.source === 'application_submit') source = 'loan';
+
+      var commission = 0;
+      if (source === 'loan') commission = 200 + Math.floor(Math.random() * 300);
+      if (source === 'professional') commission = 15 + Math.floor(Math.random() * 35);
+
+      all.push({
+        id: r.appId || r.proId || ('ref_' + r.timestamp),
+        source: source,
+        name: r.lender || r.proName || r.business || 'Referral Click',
+        type: source === 'loan' ? 'loan_application' : 'professional_booking',
+        commission: commission,
+        status: r.action === 'consultation_submit' ? 'converted' : (Math.random() > 0.5 ? 'active' : 'pending'),
+        date: r.timestamp,
+        expires: r.expiresAt
+      });
+    });
+
+    // 2. Marketplace applications
+    var mktApps = JSON.parse(localStorage.getItem('rv_marketplace_apps') || '[]');
+    mktApps.forEach(function(a) {
+      if (!all.find(function(x) { return x.id === a.id; })) {
+        all.push({
+          id: a.id,
+          source: 'loan',
+          name: a.lenderLabel + ' Application',
+          type: 'loan_application',
+          commission: 200 + Math.floor(Math.random() * 800),
+          status: a.status === 'funded' ? 'paid' : a.status === 'approved' ? 'converted' : 'active',
+          date: a.submittedAt,
+          expires: a.referralWindowEnd
+        });
+      }
+    });
+
+    // 3. Professional engagements
+    var engagements = JSON.parse(localStorage.getItem('rv_pro_engagements') || '[]');
+    engagements.forEach(function(e) {
+      all.push({
+        id: e.id,
+        source: 'professional',
+        name: e.proName + ' — ' + e.service,
+        type: 'professional_booking',
+        commission: 25,
+        status: e.status === 'completed' ? 'paid' : e.status === 'accepted' || e.status === 'in_progress' ? 'converted' : 'pending',
+        date: e.submittedAt,
+        expires: e.referralWindowEnd
+      });
+    });
+
+    // 4. Funding applications
+    var fundApps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]');
+    fundApps.forEach(function(f) {
+      if (!all.find(function(x) { return x.id === f.id; })) {
+        all.push({
+          id: f.id,
+          source: 'loan',
+          name: f.businessName + ' — ' + f.purpose,
+          type: f.purpose && f.purpose.includes('SBA') ? 'sba_referral' : 'loan_application',
+          commission: f.purpose && f.purpose.includes('SBA') ? 2500 : 500,
+          status: f.status === 'funded' ? 'paid' : 'active',
+          date: f.submittedAt,
+          expires: f.referralWindowEnd
+        });
+      }
+    });
+
+    // 5. User referrals ($5/mo)
+    var userRefs = JSON.parse(localStorage.getItem('rv_user_referrals') || '[]');
+    userRefs.forEach(function(u) {
+      var months = Math.max(1, Math.min(12, monthsSince(u.signedUpAt)));
+      all.push({
+        id: u.id,
+        source: 'user',
+        name: u.name || u.email,
+        type: 'user_referral',
+        commission: 5 * months,
+        status: months >= 12 ? 'paid' : 'active',
+        date: u.signedUpAt,
+        expires: addMonths(u.signedUpAt, 12),
+        monthsActive: months,
+        isRecurring: true
+      });
+    });
+
+    // Deduplicate by id
+    var seen = {};
+    all = all.filter(function(r) {
+      if (seen[r.id]) return false;
+      seen[r.id] = true;
+      return true;
+    });
+
+    // Sort by date desc
+    all.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+
+    return all;
+  }
+
+  // ── Helpers ──
+  function monthsSince(dateStr) {
+    var d = new Date(dateStr);
+    var now = new Date();
+    return (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+  }
+
+  function addMonths(dateStr, n) {
+    var d = new Date(dateStr);
+    d.setMonth(d.getMonth() + n);
+    return d.toISOString();
+  }
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString();
+  }
+
+  function fmtMoney(n) {
+    return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function daysRemaining(expiresAt) {
+    if (!expiresAt) return '—';
+    var diff = Math.ceil((new Date(expiresAt) - new Date()) / 86400000);
+    if (diff <= 0) return '<span style="color:#dc2626;">Expired</span>';
+    if (diff <= 14) return '<span style="color:#d97706;">' + diff + 'd left</span>';
+    return diff + 'd left';
+  }
+
+  function sourceLabel(s) {
+    var map = { loan: 'Loan', professional: 'Pro', user: 'User $5/mo', product: 'Product', tenant: 'Tenant' };
+    return '<span class="rd-source ' + s + '">' + (map[s] || s) + '</span>';
+  }
+
+  function statusLabel(s) {
+    return '<span class="rd-status ' + s + '">' + s.charAt(0).toUpperCase() + s.slice(1) + '</span>';
+  }
+
+  // ── Update Revenue Cards ──
+  function updateRevenueSummary() {
+    var refs = getAllReferrals();
+
+    var totalEarned = 0, pending = 0, thisMonth = 0, activeCount = 0;
+    var now = new Date();
+    var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    refs.forEach(function(r) {
+      if (r.status === 'paid' || r.status === 'converted') totalEarned += r.commission;
+      if (r.status === 'active' || r.status === 'pending') pending += r.commission;
+      if (new Date(r.date) >= monthStart) thisMonth += r.commission;
+      if (r.status === 'active' && r.expires && new Date(r.expires) > now) activeCount++;
+    });
+
+    document.getElementById('rd-total-earned').textContent = fmtMoney(totalEarned);
+    document.getElementById('rd-pending').textContent = fmtMoney(pending);
+    document.getElementById('rd-this-month').textContent = fmtMoney(thisMonth);
+    document.getElementById('rd-active-refs').textContent = activeCount;
+    document.getElementById('rd-month-label').textContent = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+  }
+
+  // ── Render Commission Breakdown Chart ──
+  function renderBreakdownChart() {
+    var refs = getAllReferrals();
+    var bySource = {};
+    refs.forEach(function(r) {
+      if (!bySource[r.source]) bySource[r.source] = 0;
+      bySource[r.source] += r.commission;
+    });
+
+    var sources = [
+      { key: 'loan', label: 'Loan Marketplace', color: '#2563eb' },
+      { key: 'professional', label: 'Professional Marketplace', color: '#7c3aed' },
+      { key: 'user', label: 'User Referrals ($5/mo)', color: '#059669' },
+      { key: 'product', label: 'Financial Products', color: '#d97706' },
+      { key: 'tenant', label: 'Tenant Services', color: '#be185d' }
+    ];
+
+    var maxVal = Math.max(1, Math.max.apply(null, sources.map(function(s) { return bySource[s.key] || 0; })));
+    var container = document.getElementById('rd-chart-bars');
+
+    container.innerHTML = sources.map(function(s) {
+      var val = bySource[s.key] || 0;
+      var pct = Math.round((val / maxVal) * 100);
+      return '<div class="rd-bar-row">' +
+        '<div class="rd-bar-label">' + s.label + '</div>' +
+        '<div class="rd-bar-track"><div class="rd-bar-fill" style="width:' + pct + '%; background:' + s.color + ';"></div></div>' +
+        '<div class="rd-bar-value">' + fmtMoney(val) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Render Recent Activity (Overview tab) ──
+  function renderRecentActivity() {
+    var refs = getAllReferrals().slice(0, 10);
+    var tbody = document.getElementById('rd-recent-body');
+    document.getElementById('rd-recent-count').textContent = 'Last ' + refs.length + ' activities';
+
+    if (refs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:#9ca3af;">No referral activity yet. Share your link or use the marketplace to start earning.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = refs.map(function(r) {
+      return '<tr>' +
+        '<td>' + sourceLabel(r.source) + '</td>' +
+        '<td style="font-weight:600;">' + r.name + '</td>' +
+        '<td>' + fmtDate(r.date) + '</td>' +
+        '<td style="font-weight:700; color:#065f46;">' + fmtMoney(r.commission) + '</td>' +
+        '<td>' + statusLabel(r.status) + '</td>' +
+        '<td style="font-size:0.78rem;">' + daysRemaining(r.expires) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ── Render All Referrals Tab ──
+  function renderAllReferrals() {
+    var refs = getAllReferrals();
+    var sourceFilter = document.getElementById('rd-filter-source').value;
+    var statusFilter = document.getElementById('rd-filter-status').value;
+
+    if (sourceFilter !== 'all') refs = refs.filter(function(r) { return r.source === sourceFilter; });
+    if (statusFilter !== 'all') refs = refs.filter(function(r) { return r.status === statusFilter; });
+
+    var tbody = document.getElementById('rd-all-body');
+    if (refs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:#9ca3af;">No referrals match your filters.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = refs.map(function(r) {
+      var typeLabel = COMMISSION_RATES[r.type] ? COMMISSION_RATES[r.type].label : r.type;
+      return '<tr>' +
+        '<td>' + sourceLabel(r.source) + '</td>' +
+        '<td style="font-weight:600;">' + r.name + '</td>' +
+        '<td>' + fmtDate(r.date) + '</td>' +
+        '<td style="font-size:0.78rem;">' + typeLabel + '</td>' +
+        '<td style="font-weight:700; color:#065f46;">' + fmtMoney(r.commission) + '</td>' +
+        '<td>' + statusLabel(r.status) + '</td>' +
+        '<td style="font-size:0.78rem;">' + daysRemaining(r.expires) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ── Render Commissions Tab ──
+  function renderCommissions() {
+    var refs = getAllReferrals();
+    var tbody = document.getElementById('rd-comm-body');
+    var total = refs.reduce(function(sum, r) { return sum + r.commission; }, 0);
+    document.getElementById('rd-comm-total').textContent = 'Total: ' + fmtMoney(total);
+
+    if (refs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:#9ca3af;">No commissions yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = refs.map(function(r) {
+      var rateInfo = COMMISSION_RATES[r.type];
+      var typeStr = rateInfo ? rateInfo.type : 'one-time';
+      return '<tr>' +
+        '<td>' + fmtDate(r.date) + '</td>' +
+        '<td>' + sourceLabel(r.source) + '</td>' +
+        '<td style="font-weight:600;">' + r.name + '</td>' +
+        '<td style="font-weight:700; color:#065f46;">' + fmtMoney(r.commission) + '</td>' +
+        '<td style="font-size:0.78rem;">' + typeStr + '</td>' +
+        '<td>' + statusLabel(r.status) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ── Render Payouts Tab ──
+  function renderPayouts() {
+    var payouts = JSON.parse(localStorage.getItem('rv_payouts') || '[]');
+    var body = document.getElementById('rd-payout-body');
+    var totalPaid = payouts.reduce(function(s, p) { return s + p.amount; }, 0);
+    document.getElementById('rd-payout-total').textContent = 'Total Paid: ' + fmtMoney(totalPaid);
+
+    if (payouts.length === 0) {
+      body.innerHTML = '<div class="rd-empty"><div class="rd-empty-icon">💳</div><p>No payouts yet. Commissions are paid monthly when balance exceeds $25.</p></div>';
+    } else {
+      body.innerHTML = payouts.map(function(p) {
+        return '<div class="rd-payout-row">' +
+          '<div style="flex:1;"><div style="font-weight:700;">' + fmtMoney(p.amount) + '</div><div style="font-size:0.72rem;color:#6b7280;">' + p.method + '</div></div>' +
+          '<div style="font-size:0.82rem;">' + fmtDate(p.date) + '</div>' +
+          '<div>' + statusLabel(p.status || 'paid') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // Recurring $5/mo referrals
+    var userRefs = JSON.parse(localStorage.getItem('rv_user_referrals') || '[]');
+    var recBody = document.getElementById('rd-recurring-body');
+    document.getElementById('rd-recurring-count').textContent = userRefs.length + ' referred user' + (userRefs.length !== 1 ? 's' : '');
+
+    if (userRefs.length === 0) {
+      recBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:#9ca3af;">No user referrals yet. Share your link to earn $5/month per user for 12 months.</td></tr>';
+    } else {
+      recBody.innerHTML = userRefs.map(function(u) {
+        var months = Math.max(1, Math.min(12, monthsSince(u.signedUpAt)));
+        var earned = months * 5;
+        var nextDate = new Date(u.signedUpAt);
+        nextDate.setMonth(nextDate.getMonth() + months + 1);
+        nextDate.setDate(1);
+        var isComplete = months >= 12;
+        return '<tr>' +
+          '<td style="font-weight:600;">' + (u.name || u.email) + '</td>' +
+          '<td>' + fmtDate(u.signedUpAt) + '</td>' +
+          '<td style="text-align:center;">' + months + '/12</td>' +
+          '<td style="font-weight:700; color:#065f46;">' + fmtMoney(earned) + '</td>' +
+          '<td>' + (isComplete ? '—' : fmtDate(nextDate.toISOString())) + '</td>' +
+          '<td>' + (isComplete ? statusLabel('paid') : statusLabel('active')) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+  }
+
+  // ── Generate Referral Link ──
+  function generateRefLink() {
+    var settings = JSON.parse(localStorage.getItem('rv_referral_settings') || '{}');
+    var code = settings.customCode || 'ref-' + Math.random().toString(36).substring(2, 8);
+    if (!settings.customCode) {
+      settings.customCode = code;
+      localStorage.setItem('rv_referral_settings', JSON.stringify(settings));
+    }
+    document.getElementById('rd-ref-link').textContent = 'rentverified.com/r/' + code;
+    document.getElementById('rd-custom-code').value = code;
+  }
+
+  function copyRefLink() {
+    var link = document.getElementById('rd-ref-link').textContent;
+    navigator.clipboard.writeText('https://' + link).then(function() {
+      var btn = document.querySelector('.rd-share-copy');
+      btn.textContent = 'Copied!';
+      btn.style.background = '#065f46';
+      setTimeout(function() { btn.textContent = 'Copy'; btn.style.background = '#10b981'; }, 2000);
+    });
+  }
+
+  function saveRefCode() {
+    var code = document.getElementById('rd-custom-code').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!code || code.length < 3) { alert('Code must be at least 3 characters (letters, numbers, dashes).'); return; }
+    var settings = JSON.parse(localStorage.getItem('rv_referral_settings') || '{}');
+    settings.customCode = code;
+    localStorage.setItem('rv_referral_settings', JSON.stringify(settings));
+    document.getElementById('rd-ref-link').textContent = 'rentverified.com/r/' + code;
+    alert('Referral code updated to: ' + code);
+  }
+
+  // ── Save Payout Settings ──
+  function savePayoutSettings() {
+    var settings = JSON.parse(localStorage.getItem('rv_referral_settings') || '{}');
+    settings.payoutMethod = document.getElementById('rd-payout-method').value;
+    settings.payoutThreshold = parseInt(document.getElementById('rd-payout-threshold').value);
+    settings.payoutEmail = document.getElementById('rd-payout-email').value;
+    settings.payoutFreq = document.getElementById('rd-payout-freq').value;
+    settings.autoPayout = document.getElementById('rd-auto-payout').checked;
+    localStorage.setItem('rv_referral_settings', JSON.stringify(settings));
+    alert('Payout settings saved!');
+  }
+
+  // ── Load Payout Settings ──
+  function loadPayoutSettings() {
+    var settings = JSON.parse(localStorage.getItem('rv_referral_settings') || '{}');
+    if (settings.payoutMethod) document.getElementById('rd-payout-method').value = settings.payoutMethod;
+    if (settings.payoutThreshold) document.getElementById('rd-payout-threshold').value = settings.payoutThreshold;
+    if (settings.payoutEmail) document.getElementById('rd-payout-email').value = settings.payoutEmail;
+    if (settings.payoutFreq) document.getElementById('rd-payout-freq').value = settings.payoutFreq;
+    if (settings.autoPayout !== undefined) document.getElementById('rd-auto-payout').checked = settings.autoPayout;
+  }
+
+  // ── Seed Demo Data (if empty) ──
+  function seedDemoData() {
+    // Only seed if no data exists
+    var refs = JSON.parse(localStorage.getItem('rv_user_referrals') || '[]');
+    if (refs.length > 0) return;
+
+    // Seed some user referrals for demo
+    var demoRefs = [
+      { id: 'uref_1', name: 'Alex Thompson', email: 'alex@example.com', signedUpAt: '2025-10-15T10:00:00Z' },
+      { id: 'uref_2', name: 'Jordan Lee', email: 'jordan@example.com', signedUpAt: '2025-12-01T10:00:00Z' },
+      { id: 'uref_3', name: 'Casey Martinez', email: 'casey@example.com', signedUpAt: '2026-01-20T10:00:00Z' },
+      { id: 'uref_4', name: 'Sam Wilson', email: 'sam@example.com', signedUpAt: '2026-02-10T10:00:00Z' },
+      { id: 'uref_5', name: 'Taylor Brown', email: 'taylor@example.com', signedUpAt: '2026-03-05T10:00:00Z' }
+    ];
+    localStorage.setItem('rv_user_referrals', JSON.stringify(demoRefs));
+
+    // Seed a payout
+    var demoPayout = [
+      { id: 'po_1', amount: 45, method: 'Stripe (Direct Deposit)', date: '2026-02-01T10:00:00Z', status: 'paid' },
+      { id: 'po_2', amount: 67.50, method: 'Stripe (Direct Deposit)', date: '2026-03-01T10:00:00Z', status: 'paid' }
+    ];
+    localStorage.setItem('rv_payouts', JSON.stringify(demoPayout));
+  }
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', function() {
+    seedDemoData();
+    generateRefLink();
+    loadPayoutSettings();
+    updateRevenueSummary();
+    renderBreakdownChart();
+    renderRecentActivity();
+  });
+</script>
+<script src="share-widget.js" data-share-title="Refer & Earn" data-share-text="Earn money referring people to RentVerified"></script>
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loan Pipeline – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Lending Pipeline Page ── */
+    .ln-hero {
+      background: linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .ln-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .ln-hero p { font-size: 1rem; opacity: 0.8; max-width: 520px; margin: 0 auto 1.25rem; }
+    .ln-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .ln-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #6ee7b7; }
+    .ln-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .ln-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    /* ── Toolbar ── */
+    .ln-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; padding: 1.25rem 0;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .ln-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .ln-search:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.12); }
+    .ln-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; color: #374151; min-width: 120px;
+    }
+    .ln-btn {
+      padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700;
+      font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s;
+    }
+    .ln-btn-primary { background: #059669; color: white; }
+    .ln-btn-primary:hover { background: #047857; }
+    .ln-btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; }
+    .ln-btn-outline:hover { border-color: #059669; color: #065f46; }
+    .ln-btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+    .ln-btn-danger { background: #fee2e2; color: #dc2626; }
+    .ln-btn-danger:hover { background: #fecaca; }
+    .ln-btn-success { background: #d1fae5; color: #065f46; }
+
+    /* ── View Tabs ── */
+    .ln-view-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .ln-view-tab {
+      padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb;
+      background: white; color: #6b7280; transition: 0.15s;
+    }
+    .ln-view-tab:hover { border-color: #059669; color: #065f46; }
+    .ln-view-tab.active { background: #059669; color: white; border-color: #059669; }
+
+    /* ── Pipeline (Kanban) ── */
+    .pipeline {
+      display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;
+      min-height: 400px;
+    }
+    .pipeline-col {
+      flex: 0 0 220px; background: #f8fafc; border-radius: 12px;
+      padding: 0.75rem; min-height: 300px;
+    }
+    .pipeline-col-header {
+      font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 0.4rem 0.5rem; margin-bottom: 0.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pipeline-col-header .count {
+      background: #e5e7eb; border-radius: 99px; padding: 0.1rem 0.5rem;
+      font-size: 0.7rem; font-weight: 700; color: #374151;
+    }
+    .pipeline-card {
+      background: white; border-radius: 10px; padding: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 0.5rem;
+      cursor: pointer; transition: 0.15s; border-left: 3px solid #059669;
+    }
+    .pipeline-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .pipeline-card .pc-title { font-weight: 700; font-size: 0.82rem; color: #1e293b; margin-bottom: 0.25rem; }
+    .pipeline-card .pc-borrower { font-size: 0.75rem; color: #64748b; }
+    .pipeline-card .pc-amount { font-size: 0.78rem; font-weight: 700; color: #059669; margin-top: 0.3rem; }
+    .pipeline-card .pc-type { font-size: 0.68rem; color: #94a3b8; text-transform: uppercase; }
+
+    /* ── Status Pills ── */
+    .status-pill {
+      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 99px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .status-lead { background: #f3f4f6; color: #6b7280; }
+    .status-application { background: #dbeafe; color: #2563eb; }
+    .status-processing { background: #ede9fe; color: #7c3aed; }
+    .status-underwriting { background: #fef3c7; color: #92400e; }
+    .status-conditional_approval { background: #fce7f3; color: #be185d; }
+    .status-clear_to_close { background: #d1fae5; color: #065f46; }
+    .status-closing { background: #cffafe; color: #0e7490; }
+    .status-funded { background: #059669; color: white; }
+    .status-servicing { background: #1e293b; color: white; }
+    .status-default { background: #fee2e2; color: #dc2626; }
+    .status-closed { background: #f3f4f6; color: #9ca3af; }
+
+    /* ── Summary Cards ── */
+    .ln-summary {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem; margin-bottom: 1.75rem;
+    }
+    .ln-sum-card {
+      background: white; border-radius: 14px; padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid #f1f5f9;
+    }
+    .ln-sum-card .num { font-size: 1.5rem; font-weight: 900; color: #1e293b; }
+    .ln-sum-card .lbl { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ── Table ── */
+    .ln-table { width: 100%; border-collapse: collapse; }
+    .ln-table th {
+      text-align: left; font-size: 0.72rem; color: #64748b; text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 0.6rem 0.75rem; border-bottom: 2px solid #e5e7eb;
+    }
+    .ln-table td {
+      padding: 0.75rem; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; color: #1e293b;
+    }
+    .ln-table tr:hover td { background: #f0fdf4; }
+    .ln-table .loan-link { color: #059669; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .ln-table .loan-link:hover { text-decoration: underline; }
+    .ln-empty { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+    .ln-empty .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+
+    /* ── Modal Overlay ── */
+    .ln-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 9999; justify-content: center; align-items: flex-start;
+      padding: 2rem 1rem; overflow-y: auto;
+    }
+    .ln-overlay.show { display: flex; }
+    .ln-modal {
+      background: white; border-radius: 18px; width: 100%; max-width: 720px;
+      box-shadow: 0 24px 48px rgba(0,0,0,.15); animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .ln-modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+    }
+    .ln-modal-header h2 { font-size: 1.2rem; color: #1e293b; }
+    .ln-modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+    .ln-modal-close:hover { color: #ef4444; }
+    .ln-modal-body { padding: 1.5rem; }
+    .ln-modal-footer {
+      display: flex; justify-content: flex-end; gap: 0.75rem;
+      padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb;
+    }
+
+    /* ── Form ── */
+    .ln-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .ln-form-full { grid-column: 1 / -1; }
+    .ln-label { display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .ln-input, .ln-textarea {
+      width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;
+    }
+    .ln-input:focus, .ln-textarea:focus {
+      outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+    }
+    .ln-textarea { resize: vertical; min-height: 70px; }
+
+    /* ── Detail Tabs ── */
+    .det-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0; }
+    .det-tab {
+      padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: 0.15s;
+    }
+    .det-tab:hover { color: #065f46; }
+    .det-tab.active { color: #059669; border-bottom-color: #059669; }
+    .det-panel { display: none; }
+    .det-panel.show { display: block; }
+
+    /* ── Doc Checklist ── */
+    .doc-item { display: flex; align-items: center; gap: 10px; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
+    .doc-item:last-child { border-bottom: none; }
+    .doc-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .doc-status-dot.missing { background: #dc2626; }
+    .doc-status-dot.requested { background: #f59e0b; }
+    .doc-status-dot.received { background: #3b82f6; }
+    .doc-status-dot.approved { background: #10b981; }
+    .doc-status-dot.waived { background: #94a3b8; }
+
+    /* ── LTV Bar ── */
+    .ltv-bar { background: #e5e7eb; border-radius: 99px; height: 8px; overflow: hidden; }
+    .ltv-fill { height: 100%; border-radius: 99px; transition: width 0.3s; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .ln-form-grid { grid-template-columns: 1fr; }
+      .ln-hero h1 { font-size: 1.5rem; }
+      .pipeline { flex-direction: column; }
+      .pipeline-col { flex: none; min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:68px;display:flex;align-items:center;justify-content:space-between;">
+  <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:800;color:#059669;text-decoration:none;">
+    <span style="font-size:1.5rem;">🏦</span> RentVerified <span style="font-size:.7rem;color:#94a3b8;margin-left:4px;">Lending</span>
+  </a>
+  <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+    <a href="accounting.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Accounting</a>
+    <a href="invoice-builder.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Invoices</a>
+    <a href="documents.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Docs</a>
+    <a href="crm.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">CRM</a>
+    <a href="screening.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Screening</a>
+    <a href="funding.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Funding</a>
+    <a href="index.html" style="color:#059669;font-weight:600;text-decoration:none;font-size:.88rem;">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="ln-hero">
+  <h1>Loan Pipeline</h1>
+  <p>Track every deal from lead to funded. Manage borrowers, documents, and closing timelines.</p>
+  <div class="ln-hero-stats">
+    <div class="ln-hero-stat"><div class="num" id="stat-active">0</div><div class="lbl">Active Loans</div></div>
+    <div class="ln-hero-stat"><div class="num" id="stat-volume">$0</div><div class="lbl">Pipeline Volume</div></div>
+    <div class="ln-hero-stat"><div class="num" id="stat-funded">0</div><div class="lbl">Funded This Month</div></div>
+    <div class="ln-hero-stat"><div class="num" id="stat-avg-ltv">0%</div><div class="lbl">Avg LTV</div></div>
+  </div>
+</section>
+
+<div class="ln-wrap">
+  <!-- ── View Tabs ── -->
+  <div class="ln-view-tabs">
+    <div class="ln-view-tab active" onclick="switchView('pipeline')">Pipeline</div>
+    <div class="ln-view-tab" onclick="switchView('list')">List View</div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="ln-toolbar">
+    <input class="ln-search" type="text" id="search" placeholder="Search loans, borrowers, addresses..." oninput="renderAll()" />
+    <select class="ln-select" id="filter-type" onchange="renderAll()">
+      <option value="">All Types</option>
+      <option value="hard_money">Hard Money</option>
+      <option value="bridge">Bridge</option>
+      <option value="fix_and_flip">Fix & Flip</option>
+      <option value="rental_long_term">Rental (Long-Term)</option>
+      <option value="construction">Construction</option>
+      <option value="commercial">Commercial</option>
+      <option value="conventional">Conventional</option>
+      <option value="fha">FHA</option>
+      <option value="va">VA</option>
+      <option value="jumbo">Jumbo</option>
+      <option value="other">Other</option>
+    </select>
+    <button class="ln-btn ln-btn-primary" onclick="openNewLoan()">+ New Loan</button>
+  </div>
+
+  <!-- ── Summary Cards ── -->
+  <div class="ln-summary" id="summary-cards"></div>
+
+  <!-- ── Pipeline View ── -->
+  <div id="view-pipeline">
+    <div class="pipeline" id="pipeline"></div>
+  </div>
+
+  <!-- ── List View ── -->
+  <div id="view-list" style="display:none;">
+    <div style="background:white;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #f1f5f9;overflow-x:auto;">
+      <table class="ln-table">
+        <thead>
+          <tr>
+            <th>Loan #</th>
+            <th>Borrower</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>LTV</th>
+            <th>Rate</th>
+            <th>Status</th>
+            <th>Closing</th>
+          </tr>
+        </thead>
+        <tbody id="loans-body"></tbody>
+      </table>
+      <div class="ln-empty" id="loans-empty" style="display:none;">
+        <div class="icon">🏦</div>
+        <div style="font-weight:700;font-size:1.1rem;margin-bottom:.25rem;">No loans yet</div>
+        <div>Click "+ New Loan" to start your pipeline.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ NEW / EDIT LOAN MODAL ═══════ -->
+<div class="ln-overlay" id="modal-loan">
+  <div class="ln-modal">
+    <div class="ln-modal-header">
+      <h2 id="modal-loan-title">New Loan</h2>
+      <button class="ln-modal-close" onclick="closeModal('modal-loan')">&times;</button>
+    </div>
+    <div class="ln-modal-body">
+      <input type="hidden" id="l-id" />
+      <div class="ln-form-grid">
+        <div>
+          <label class="ln-label">Loan Number *</label>
+          <input class="ln-input" id="l-number" placeholder="e.g. LN-2026-001" />
+        </div>
+        <div>
+          <label class="ln-label">Loan Type *</label>
+          <select class="ln-input" id="l-type">
+            <option value="hard_money">Hard Money</option>
+            <option value="bridge">Bridge</option>
+            <option value="fix_and_flip">Fix & Flip</option>
+            <option value="rental_long_term">Rental (Long-Term)</option>
+            <option value="construction">Construction</option>
+            <option value="commercial">Commercial</option>
+            <option value="conventional">Conventional</option>
+            <option value="fha">FHA</option>
+            <option value="va">VA</option>
+            <option value="usda">USDA</option>
+            <option value="jumbo">Jumbo</option>
+            <option value="heloc">HELOC</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="ln-label">Borrower Name *</label>
+          <input class="ln-input" id="l-borrower" placeholder="Borrower / entity name" />
+        </div>
+        <div>
+          <label class="ln-label">Borrower Email</label>
+          <input class="ln-input" id="l-borrower-email" type="email" placeholder="email@example.com" />
+        </div>
+        <div>
+          <label class="ln-label">Borrower Phone</label>
+          <input class="ln-input" id="l-borrower-phone" placeholder="(555) 123-4567" />
+        </div>
+        <div>
+          <label class="ln-label">Status</label>
+          <select class="ln-input" id="l-status">
+            <option value="lead">Lead</option>
+            <option value="application">Application</option>
+            <option value="processing">Processing</option>
+            <option value="underwriting">Underwriting</option>
+            <option value="conditional_approval">Conditional Approval</option>
+            <option value="clear_to_close">Clear to Close</option>
+            <option value="closing">Closing</option>
+            <option value="funded">Funded</option>
+            <option value="servicing">Servicing</option>
+          </select>
+        </div>
+        <div class="ln-form-full">
+          <label class="ln-label">Property Address</label>
+          <input class="ln-input" id="l-address" placeholder="123 Main St, City, State ZIP" />
+        </div>
+        <div>
+          <label class="ln-label">Property Type</label>
+          <select class="ln-input" id="l-prop-type">
+            <option value="">—</option>
+            <option value="SFR">Single Family (SFR)</option>
+            <option value="Multi-Family">Multi-Family</option>
+            <option value="Condo">Condo</option>
+            <option value="Townhouse">Townhouse</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Mixed-Use">Mixed-Use</option>
+            <option value="Land">Land</option>
+            <option value="Industrial">Industrial</option>
+          </select>
+        </div>
+        <div>
+          <label class="ln-label">Property Value ($)</label>
+          <input class="ln-input" id="l-value" type="number" step="0.01" placeholder="Appraised value" />
+        </div>
+        <div>
+          <label class="ln-label">Purchase Price ($)</label>
+          <input class="ln-input" id="l-price" type="number" step="0.01" placeholder="Purchase price" />
+        </div>
+        <div>
+          <label class="ln-label">Loan Amount ($) *</label>
+          <input class="ln-input" id="l-amount" type="number" step="0.01" placeholder="Loan amount" oninput="calcLTV()" />
+        </div>
+        <div>
+          <label class="ln-label">LTV (%)</label>
+          <input class="ln-input" id="l-ltv" type="number" step="0.01" placeholder="Auto-calculated" readonly style="background:#f8fafc;" />
+        </div>
+        <div>
+          <label class="ln-label">Interest Rate (%)</label>
+          <input class="ln-input" id="l-rate" type="number" step="0.001" placeholder="e.g. 12.000" />
+        </div>
+        <div>
+          <label class="ln-label">Term (months)</label>
+          <input class="ln-input" id="l-term" type="number" placeholder="e.g. 12" />
+        </div>
+        <div>
+          <label class="ln-label">Points</label>
+          <input class="ln-input" id="l-points" type="number" step="0.01" placeholder="e.g. 2.00" />
+        </div>
+        <div>
+          <label class="ln-label">Credit Score</label>
+          <input class="ln-input" id="l-credit" type="number" placeholder="e.g. 720" />
+        </div>
+        <div>
+          <label class="ln-label">Closing Date</label>
+          <input class="ln-input" id="l-closing" type="date" />
+        </div>
+        <div>
+          <label class="ln-label">Source</label>
+          <input class="ln-input" id="l-source" placeholder="Referral, website, broker..." />
+        </div>
+        <div>
+          <label class="ln-label">Assigned To</label>
+          <input class="ln-input" id="l-assigned" placeholder="Loan officer name" />
+        </div>
+        <div>
+          <label class="ln-label">Monthly Payment ($)</label>
+          <input class="ln-input" id="l-payment" type="number" step="0.01" placeholder="Monthly P&I" />
+        </div>
+        <div class="ln-form-full">
+          <label class="ln-label">Notes</label>
+          <textarea class="ln-textarea" id="l-notes" placeholder="Internal notes..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="ln-modal-footer">
+      <button class="ln-btn ln-btn-outline" onclick="closeModal('modal-loan')">Cancel</button>
+      <button class="ln-btn ln-btn-primary" onclick="saveLoan()">Save Loan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ LOAN DETAIL MODAL ═══════ -->
+<div class="ln-overlay" id="modal-detail">
+  <div class="ln-modal" style="max-width:800px;">
+    <div class="ln-modal-header">
+      <h2 id="detail-title">Loan Details</h2>
+      <button class="ln-modal-close" onclick="closeModal('modal-detail')">&times;</button>
+    </div>
+    <div class="ln-modal-body">
+      <div class="det-tabs">
+        <div class="det-tab active" data-tab="info" onclick="showDetailTab('info')">Info</div>
+        <div class="det-tab" data-tab="docs" onclick="showDetailTab('docs')">Documents</div>
+        <div class="det-tab" data-tab="notes" onclick="showDetailTab('notes')">Notes</div>
+      </div>
+      <div class="det-panel show" id="det-info"></div>
+      <div class="det-panel" id="det-docs"></div>
+      <div class="det-panel" id="det-notes"></div>
+    </div>
+    <div class="ln-modal-footer">
+      <button class="ln-btn ln-btn-outline" onclick="editLoan(currentLoanId)">Edit Loan</button>
+      <button class="ln-btn ln-btn-danger ln-btn-sm" onclick="deleteLoan(currentLoanId)">Delete</button>
+      <button class="ln-btn ln-btn-outline" onclick="closeModal('modal-detail')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script src="workspace.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════════
+// Loan Pipeline — Lending Vertical
+// ════════════════════════════════════════════════════════════════════
+
+var allLoans = [];
+var allDocs = [];
+var currentLoanId = null;
+var currentView = 'pipeline';
+
+var LOAN_TYPES = {
+  hard_money: 'Hard Money', bridge: 'Bridge', fix_and_flip: 'Fix & Flip',
+  rental_long_term: 'Rental (Long-Term)', construction: 'Construction',
+  commercial: 'Commercial', conventional: 'Conventional', fha: 'FHA',
+  va: 'VA', usda: 'USDA', jumbo: 'Jumbo', heloc: 'HELOC', other: 'Other'
+};
+
+var STATUSES = {
+  lead: 'Lead', application: 'Application', processing: 'Processing',
+  underwriting: 'Underwriting', conditional_approval: 'Cond. Approval',
+  clear_to_close: 'Clear to Close', closing: 'Closing', funded: 'Funded',
+  servicing: 'Servicing', default: 'Default', closed: 'Closed'
+};
+
+var PIPELINE_STAGES = ['lead','application','processing','underwriting','conditional_approval','clear_to_close','closing','funded'];
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadAll();
+  renderAll();
+});
+
+async function loadAll() {
+  allLoans = await RVData.getLoans();
+  allDocs = await RVData.getLoanDocuments();
+  updateStats();
+}
+
+function updateStats() {
+  var active = allLoans.filter(function(l) { return !['funded','servicing','default','closed'].includes(l.status); });
+  var volume = active.reduce(function(s, l) { return s + (parseFloat(l.loan_amount) || 0); }, 0);
+  var thisMonth = new Date().toISOString().slice(0, 7);
+  var funded = allLoans.filter(function(l) { return l.status === 'funded' && (l.updated_at || '').startsWith(thisMonth); });
+  var ltvs = allLoans.filter(function(l) { return l.ltv > 0; }).map(function(l) { return parseFloat(l.ltv); });
+  var avgLtv = ltvs.length > 0 ? (ltvs.reduce(function(a, b) { return a + b; }, 0) / ltvs.length) : 0;
+
+  document.getElementById('stat-active').textContent = active.length;
+  document.getElementById('stat-volume').textContent = '$' + (volume >= 1000000 ? (volume / 1000000).toFixed(1) + 'M' : volume.toLocaleString('en-US', {maximumFractionDigits: 0}));
+  document.getElementById('stat-funded').textContent = funded.length;
+  document.getElementById('stat-avg-ltv').textContent = avgLtv.toFixed(1) + '%';
+}
+
+function renderAll() {
+  if (currentView === 'pipeline') renderPipeline();
+  else renderList();
+  renderSummary();
+}
+
+// ── Summary ──
+function renderSummary() {
+  var counts = {};
+  allLoans.forEach(function(l) { counts[l.status] = (counts[l.status] || 0) + 1; });
+  var html = '';
+  PIPELINE_STAGES.forEach(function(s) {
+    if (counts[s]) html += '<div class="ln-sum-card"><div class="num">' + counts[s] + '</div><div class="lbl">' + STATUSES[s] + '</div></div>';
+  });
+  if (!html) html = '<div class="ln-sum-card"><div class="num">0</div><div class="lbl">Total Loans</div></div>';
+  document.getElementById('summary-cards').innerHTML = html;
+}
+
+// ── View Switching ──
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.ln-view-tab').forEach(function(t) { t.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('view-pipeline').style.display = view === 'pipeline' ? 'block' : 'none';
+  document.getElementById('view-list').style.display = view === 'list' ? 'block' : 'none';
+  renderAll();
+}
+
+// ── Pipeline View ──
+function renderPipeline() {
+  var search = (document.getElementById('search').value || '').toLowerCase();
+  var typeFilter = document.getElementById('filter-type').value;
+  var filtered = filterLoans(search, typeFilter);
+
+  var html = '';
+  PIPELINE_STAGES.forEach(function(stage) {
+    var stageLoans = filtered.filter(function(l) { return l.status === stage; });
+    html += '<div class="pipeline-col">';
+    html += '<div class="pipeline-col-header" style="color:' + getStageColor(stage) + ';">';
+    html += STATUSES[stage];
+    html += '<span class="count">' + stageLoans.length + '</span>';
+    html += '</div>';
+    stageLoans.forEach(function(l) {
+      html += '<div class="pipeline-card" onclick="openDetail(\'' + l.id + '\')" style="border-left-color:' + getStageColor(stage) + ';">';
+      html += '<div class="pc-title">' + esc(l.loan_number) + '</div>';
+      html += '<div class="pc-borrower">' + esc(l.borrower_name) + '</div>';
+      if (l.property_address) html += '<div class="pc-borrower" style="font-size:.7rem;">' + esc(l.property_address.substring(0, 40)) + '</div>';
+      html += '<div class="pc-amount">$' + fmtMoney(l.loan_amount) + '</div>';
+      html += '<div class="pc-type">' + (LOAN_TYPES[l.loan_type] || l.loan_type) + (l.ltv ? ' · ' + parseFloat(l.ltv).toFixed(0) + '% LTV' : '') + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('pipeline').innerHTML = html;
+}
+
+function getStageColor(stage) {
+  var colors = { lead:'#6b7280', application:'#2563eb', processing:'#7c3aed', underwriting:'#92400e',
+    conditional_approval:'#be185d', clear_to_close:'#065f46', closing:'#0e7490', funded:'#059669' };
+  return colors[stage] || '#6b7280';
+}
+
+// ── List View ──
+function renderList() {
+  var search = (document.getElementById('search').value || '').toLowerCase();
+  var typeFilter = document.getElementById('filter-type').value;
+  var filtered = filterLoans(search, typeFilter);
+  var tbody = document.getElementById('loans-body');
+  var empty = document.getElementById('loans-empty');
+
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(function(l) {
+    return '<tr>' +
+      '<td><span class="loan-link" onclick="openDetail(\'' + l.id + '\')">' + esc(l.loan_number) + '</span></td>' +
+      '<td><div style="font-weight:600;">' + esc(l.borrower_name) + '</div><div style="font-size:.75rem;color:#64748b;">' + esc(l.property_address || '') + '</div></td>' +
+      '<td>' + (LOAN_TYPES[l.loan_type] || l.loan_type) + '</td>' +
+      '<td style="font-weight:700;">$' + fmtMoney(l.loan_amount) + '</td>' +
+      '<td>' + (l.ltv ? parseFloat(l.ltv).toFixed(1) + '%' : '—') + '</td>' +
+      '<td>' + (l.interest_rate ? parseFloat(l.interest_rate).toFixed(3) + '%' : '—') + '</td>' +
+      '<td><span class="status-pill status-' + l.status + '">' + (STATUSES[l.status] || l.status) + '</span></td>' +
+      '<td style="font-size:.82rem;color:#64748b;">' + (l.closing_date ? formatDate(l.closing_date) : '—') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function filterLoans(search, typeFilter) {
+  var filtered = allLoans;
+  if (search) filtered = filtered.filter(function(l) {
+    return (l.loan_number || '').toLowerCase().includes(search) ||
+      (l.borrower_name || '').toLowerCase().includes(search) ||
+      (l.property_address || '').toLowerCase().includes(search);
+  });
+  if (typeFilter) filtered = filtered.filter(function(l) { return l.loan_type === typeFilter; });
+  return filtered;
+}
+
+// ── New Loan ──
+function openNewLoan() {
+  document.getElementById('modal-loan-title').textContent = 'New Loan';
+  document.getElementById('l-id').value = '';
+  document.getElementById('l-number').value = generateLoanNumber();
+  document.getElementById('l-type').value = 'hard_money';
+  document.getElementById('l-borrower').value = '';
+  document.getElementById('l-borrower-email').value = '';
+  document.getElementById('l-borrower-phone').value = '';
+  document.getElementById('l-status').value = 'lead';
+  document.getElementById('l-address').value = '';
+  document.getElementById('l-prop-type').value = '';
+  document.getElementById('l-value').value = '';
+  document.getElementById('l-price').value = '';
+  document.getElementById('l-amount').value = '';
+  document.getElementById('l-ltv').value = '';
+  document.getElementById('l-rate').value = '';
+  document.getElementById('l-term').value = '';
+  document.getElementById('l-points').value = '';
+  document.getElementById('l-credit').value = '';
+  document.getElementById('l-closing').value = '';
+  document.getElementById('l-source').value = '';
+  document.getElementById('l-assigned').value = '';
+  document.getElementById('l-payment').value = '';
+  document.getElementById('l-notes').value = '';
+  openModal('modal-loan');
+}
+
+function generateLoanNumber() {
+  var year = new Date().getFullYear();
+  var count = allLoans.filter(function(l) { return (l.loan_number || '').includes(year + '-'); }).length;
+  return 'LN-' + year + '-' + String(count + 1).padStart(3, '0');
+}
+
+function editLoan(id) {
+  var l = allLoans.find(function(x) { return x.id === id; });
+  if (!l) return;
+  closeModal('modal-detail');
+  document.getElementById('modal-loan-title').textContent = 'Edit Loan';
+  document.getElementById('l-id').value = l.id;
+  document.getElementById('l-number').value = l.loan_number || '';
+  document.getElementById('l-type').value = l.loan_type || 'other';
+  document.getElementById('l-borrower').value = l.borrower_name || '';
+  document.getElementById('l-borrower-email').value = l.borrower_email || '';
+  document.getElementById('l-borrower-phone').value = l.borrower_phone || '';
+  document.getElementById('l-status').value = l.status || 'lead';
+  document.getElementById('l-address').value = l.property_address || '';
+  document.getElementById('l-prop-type').value = l.property_type || '';
+  document.getElementById('l-value').value = l.property_value || '';
+  document.getElementById('l-price').value = l.purchase_price || '';
+  document.getElementById('l-amount').value = l.loan_amount || '';
+  document.getElementById('l-ltv').value = l.ltv || '';
+  document.getElementById('l-rate').value = l.interest_rate || '';
+  document.getElementById('l-term').value = l.term_months || '';
+  document.getElementById('l-points').value = l.points || '';
+  document.getElementById('l-credit').value = l.credit_score || '';
+  document.getElementById('l-closing').value = l.closing_date || '';
+  document.getElementById('l-source').value = l.source || '';
+  document.getElementById('l-assigned').value = l.assigned_to || '';
+  document.getElementById('l-payment').value = l.monthly_payment || '';
+  document.getElementById('l-notes').value = l.notes || '';
+  openModal('modal-loan');
+}
+
+function calcLTV() {
+  var amount = parseFloat(document.getElementById('l-amount').value) || 0;
+  var value = parseFloat(document.getElementById('l-value').value) || parseFloat(document.getElementById('l-price').value) || 0;
+  if (amount && value) {
+    document.getElementById('l-ltv').value = ((amount / value) * 100).toFixed(2);
+  }
+}
+
+async function saveLoan() {
+  var id = document.getElementById('l-id').value;
+  var isNew = !id;
+  var loan = {
+    loan_number: document.getElementById('l-number').value.trim(),
+    loan_type: document.getElementById('l-type').value,
+    borrower_name: document.getElementById('l-borrower').value.trim(),
+    borrower_email: document.getElementById('l-borrower-email').value.trim(),
+    borrower_phone: document.getElementById('l-borrower-phone').value.trim(),
+    status: document.getElementById('l-status').value,
+    property_address: document.getElementById('l-address').value.trim(),
+    property_type: document.getElementById('l-prop-type').value,
+    property_value: parseFloat(document.getElementById('l-value').value) || null,
+    purchase_price: parseFloat(document.getElementById('l-price').value) || null,
+    loan_amount: parseFloat(document.getElementById('l-amount').value) || null,
+    ltv: parseFloat(document.getElementById('l-ltv').value) || null,
+    interest_rate: parseFloat(document.getElementById('l-rate').value) || null,
+    term_months: parseInt(document.getElementById('l-term').value) || null,
+    points: parseFloat(document.getElementById('l-points').value) || null,
+    credit_score: parseInt(document.getElementById('l-credit').value) || null,
+    closing_date: document.getElementById('l-closing').value || null,
+    source: document.getElementById('l-source').value.trim(),
+    assigned_to: document.getElementById('l-assigned').value.trim(),
+    monthly_payment: parseFloat(document.getElementById('l-payment').value) || null,
+    notes: document.getElementById('l-notes').value.trim()
+  };
+  if (!loan.loan_number || !loan.borrower_name) {
+    alert('Please fill in Loan Number and Borrower Name.');
+    return;
+  }
+  if (id) loan.id = id;
+
+  var result = await RVData.saveLoan(loan);
+  if (result.error) { alert('Error: ' + (result.error.message || JSON.stringify(result.error))); return; }
+
+  // Seed document checklist for new loans
+  if (isNew && result.data && result.data.id) {
+    var checklist = RVData.seedLoanDocChecklist(result.data.id, loan.loan_type);
+    for (var i = 0; i < checklist.length; i++) {
+      await RVData.saveLoanDocument(checklist[i]);
+    }
+  }
+
+  closeModal('modal-loan');
+  await loadAll();
+  renderAll();
+}
+
+async function deleteLoan(id) {
+  if (!confirm('Delete this loan and all its documents? This cannot be undone.')) return;
+  await RVData.deleteLoan(id);
+  closeModal('modal-detail');
+  await loadAll();
+  renderAll();
+}
+
+// ── Loan Detail ──
+async function openDetail(id) {
+  currentLoanId = id;
+  var l = allLoans.find(function(x) { return x.id === id; });
+  if (!l) return;
+
+  document.getElementById('detail-title').textContent = l.loan_number + ' — ' + l.borrower_name;
+  showDetailTab('info');
+
+  // Info panel
+  var ltvColor = (l.ltv || 0) > 80 ? '#dc2626' : (l.ltv || 0) > 65 ? '#f59e0b' : '#10b981';
+  var info = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">' +
+    infoRow('Borrower', l.borrower_name) +
+    infoRow('Email', l.borrower_email || '—') +
+    infoRow('Phone', l.borrower_phone || '—') +
+    infoRow('Loan Type', LOAN_TYPES[l.loan_type] || l.loan_type) +
+    infoRow('Status', '<span class="status-pill status-' + l.status + '">' + (STATUSES[l.status] || l.status) + '</span>') +
+    infoRow('Property', l.property_address || '—') +
+    infoRow('Property Type', l.property_type || '—') +
+    infoRow('Property Value', l.property_value ? '$' + fmtMoney(l.property_value) : '—') +
+    infoRow('Purchase Price', l.purchase_price ? '$' + fmtMoney(l.purchase_price) : '—') +
+    infoRow('Loan Amount', '<span style="font-size:1.1rem;color:#059669;">$' + fmtMoney(l.loan_amount) + '</span>') +
+    infoRow('LTV', l.ltv ? '<span style="color:' + ltvColor + ';font-weight:800;">' + parseFloat(l.ltv).toFixed(1) + '%</span>' : '—') +
+    infoRow('Interest Rate', l.interest_rate ? parseFloat(l.interest_rate).toFixed(3) + '%' : '—') +
+    infoRow('Term', l.term_months ? l.term_months + ' months' : '—') +
+    infoRow('Points', l.points ? parseFloat(l.points).toFixed(2) : '—') +
+    infoRow('Monthly Payment', l.monthly_payment ? '$' + fmtMoney(l.monthly_payment) : '—') +
+    infoRow('Credit Score', l.credit_score || '—') +
+    infoRow('Closing Date', l.closing_date ? formatDate(l.closing_date) : '—') +
+    infoRow('Source', l.source || '—') +
+    infoRow('Assigned To', l.assigned_to || '—') +
+  '</div>';
+  document.getElementById('det-info').innerHTML = info;
+
+  // Documents panel
+  var loanDocs = allDocs.filter(function(d) { return d.loan_id === id; });
+  var received = loanDocs.filter(function(d) { return d.status === 'received' || d.status === 'approved'; }).length;
+  var docsHtml = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
+    '<h3 style="margin:0;font-size:.95rem;">Document Checklist (' + received + '/' + loanDocs.length + ' received)</h3>' +
+    '</div>';
+  if (loanDocs.length === 0) {
+    docsHtml += '<div style="color:#94a3b8;text-align:center;padding:1rem;">No document checklist for this loan.</div>';
+  } else {
+    // Progress bar
+    var pct = loanDocs.length > 0 ? Math.round((received / loanDocs.length) * 100) : 0;
+    docsHtml += '<div style="margin-bottom:1rem;"><div class="ltv-bar"><div class="ltv-fill" style="width:' + pct + '%;background:#059669;"></div></div>' +
+      '<div style="font-size:.72rem;color:#64748b;margin-top:.25rem;">' + pct + '% complete</div></div>';
+    loanDocs.forEach(function(d) {
+      docsHtml += '<div class="doc-item">' +
+        '<div class="doc-status-dot ' + d.status + '"></div>' +
+        '<div style="flex:1;"><div style="font-weight:600;font-size:.85rem;">' + esc(d.doc_name) + '</div>' +
+        '<div style="font-size:.72rem;color:#64748b;">' + d.doc_category + '</div></div>' +
+        '<select style="font-size:.78rem;padding:.2rem .4rem;border:1px solid #d1d5db;border-radius:6px;" onchange="updateDocStatus(\'' + d.id + '\', this.value)">' +
+        '<option value="missing"' + (d.status === 'missing' ? ' selected' : '') + '>Missing</option>' +
+        '<option value="requested"' + (d.status === 'requested' ? ' selected' : '') + '>Requested</option>' +
+        '<option value="received"' + (d.status === 'received' ? ' selected' : '') + '>Received</option>' +
+        '<option value="approved"' + (d.status === 'approved' ? ' selected' : '') + '>Approved</option>' +
+        '<option value="waived"' + (d.status === 'waived' ? ' selected' : '') + '>Waived</option>' +
+        '</select></div>';
+    });
+  }
+  document.getElementById('det-docs').innerHTML = docsHtml;
+
+  // Notes panel
+  document.getElementById('det-notes').innerHTML =
+    '<div style="white-space:pre-wrap;color:#374151;font-size:.9rem;min-height:100px;padding:1rem;background:#f8fafc;border-radius:10px;">' +
+    esc(l.notes || 'No notes.') + '</div>';
+
+  openModal('modal-detail');
+}
+
+async function updateDocStatus(docId, newStatus) {
+  var doc = allDocs.find(function(d) { return d.id === docId; });
+  if (!doc) return;
+  doc.status = newStatus;
+  if (newStatus === 'received' || newStatus === 'approved') doc.received_date = new Date().toISOString().split('T')[0];
+  await RVData.saveLoanDocument(doc);
+  await loadAll();
+  // Refresh the docs panel
+  if (currentLoanId) openDetail(currentLoanId);
+}
+
+function showDetailTab(tab) {
+  document.querySelectorAll('.det-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.det-panel').forEach(function(p) { p.classList.remove('show'); });
+  var tabs = document.querySelectorAll('.det-tab');
+  var tabMap = { info: 0, docs: 1, notes: 2 };
+  if (tabs[tabMap[tab]]) tabs[tabMap[tab]].classList.add('active');
+  document.getElementById('det-' + tab).classList.add('show');
+}
+
+function infoRow(label, value) {
+  return '<div style="margin-bottom:.75rem;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.15rem;">' +
+    label + '</div><div style="font-weight:600;color:#1e293b;">' + (value || '—') + '</div></div>';
+}
+
+// ── Modal Helpers ──
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ── Utilities ──
+function esc(s) {
+  if (!s) return '';
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  var date = new Date(d);
+  if (isNaN(date)) return d;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function fmtMoney(n) {
+  var val = parseFloat(n) || 0;
+  return val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+</script>
+<script src="share-widget.js" data-share-title="Loan Pipeline" data-share-text="Manage your loan pipeline on RentVerified"></script>
+</body>
+</html>

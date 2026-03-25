@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Control – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root { --ac-navy:#0f172a; --ac-navy-light:#1e293b; --ac-blue:#3b82f6; --ac-green:#10b981; --ac-red:#ef4444; --ac-amber:#f59e0b; --ac-border:#e2e8f0; --ac-text:#1e293b; --ac-muted:#64748b; --ac-bg:#f1f5f9; }
+    body { background:var(--ac-bg); margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:var(--ac-text); }
+    /* Navbar */
+    .ac-nav { background:var(--ac-navy); color:#fff; padding:0 1.5rem; display:flex; align-items:center; height:56px; position:sticky; top:0; z-index:50; }
+    .ac-nav .logo { font-weight:800; font-size:1.05rem; display:flex; align-items:center; gap:.5rem; }
+    .ac-nav .logo span { background:var(--ac-blue); padding:.15rem .5rem; border-radius:5px; font-size:.75rem; font-weight:700; }
+    .ac-nav-links { display:flex; gap:0; margin-left:2rem; }
+    .ac-nav-links a { color:#94a3b8; text-decoration:none; padding:.85rem 1rem; font-size:.85rem; font-weight:500; border-bottom:2px solid transparent; transition:all .15s; }
+    .ac-nav-links a:hover { color:#cbd5e1; }
+    .ac-nav-links a.active { color:#fff; border-bottom-color:var(--ac-blue); }
+    /* Page Header */
+    .ac-header { background:var(--ac-navy-light); color:#fff; padding:2rem 1.5rem 1.5rem; }
+    .ac-header-inner { max-width:1100px; margin:0 auto; }
+    .ac-header h1 { font-size:1.5rem; margin:0 0 .35rem; display:flex; align-items:center; gap:.5rem; }
+    .ac-header p { color:#94a3b8; font-size:.9rem; margin:0; }
+    /* Container */
+    .ac-container { max-width:1100px; margin:0 auto; padding:1.5rem; }
+    /* Tabs */
+    .ac-tabs { display:flex; gap:0; background:#fff; border-radius:10px 10px 0 0; border-bottom:1px solid var(--ac-border); overflow-x:auto; }
+    .ac-tab { padding:.8rem 1.25rem; border:none; background:none; cursor:pointer; font-size:.88rem; font-weight:600; color:var(--ac-muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; }
+    .ac-tab:hover { color:var(--ac-text); }
+    .ac-tab.active { color:var(--ac-blue); border-bottom-color:var(--ac-blue); }
+    .ac-panel { display:none; }
+    .ac-panel.active { display:block; }
+    /* Grant Card */
+    .grant-card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); padding:1.5rem; margin-bottom:1rem; border:1px solid var(--ac-border); position:relative; }
+    .grant-card.revoked { opacity:.65; }
+    .grant-card .grant-top { display:flex; align-items:flex-start; gap:1rem; margin-bottom:1rem; }
+    .grant-avatar { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:700; flex-shrink:0; }
+    .grant-avatar.active { background:#dbeafe; color:#1d4ed8; }
+    .grant-avatar.revoked { background:#f1f5f9; color:#94a3b8; }
+    .grant-info { flex:1; }
+    .grant-name { font-weight:700; font-size:1rem; display:flex; align-items:center; gap:.5rem; }
+    .grant-company { font-size:.82rem; color:var(--ac-muted); }
+    .grant-template { font-size:.82rem; color:var(--ac-blue); font-weight:600; margin-top:.25rem; }
+    .grant-status { position:absolute; top:1.25rem; right:1.25rem; }
+    .badge { display:inline-flex; align-items:center; gap:.3rem; padding:.25rem .7rem; border-radius:20px; font-size:.72rem; font-weight:700; text-transform:uppercase; }
+    .badge-active { background:#d1fae5; color:#065f46; }
+    .badge-revoked { background:#fee2e2; color:#991b1b; }
+    .role-badge { background:#eff6ff; color:#1d4ed8; padding:.15rem .5rem; border-radius:4px; font-size:.7rem; font-weight:700; }
+    /* Data shared pills */
+    .data-pills { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.75rem; }
+    .data-pill { background:#f1f5f9; color:#475569; padding:.2rem .55rem; border-radius:5px; font-size:.72rem; display:flex; align-items:center; gap:.25rem; }
+    .data-pill::before { content:'&#128274;'; font-size:.65rem; }
+    /* Grant meta */
+    .grant-meta { display:flex; gap:1.5rem; margin-top:.75rem; font-size:.78rem; color:var(--ac-muted); flex-wrap:wrap; }
+    .grant-meta span { display:flex; align-items:center; gap:.3rem; }
+    /* Buttons */
+    .btn { padding:.5rem 1rem; border-radius:8px; border:none; cursor:pointer; font-size:.85rem; font-weight:600; transition:all .15s; }
+    .btn-revoke { background:#fef2f2; color:var(--ac-red); border:1px solid #fecaca; }
+    .btn-revoke:hover { background:var(--ac-red); color:#fff; }
+    .btn-regrant { background:#f0fdf4; color:var(--ac-green); border:1px solid #bbf7d0; }
+    .btn-regrant:hover { background:var(--ac-green); color:#fff; }
+    .btn-sm { padding:.35rem .7rem; font-size:.78rem; }
+    .grant-actions { margin-top:1rem; display:flex; gap:.5rem; }
+    /* Audit Timeline */
+    .audit-timeline { position:relative; padding-left:2rem; }
+    .audit-timeline::before { content:''; position:absolute; left:.65rem; top:0; bottom:0; width:2px; background:#e2e8f0; }
+    .audit-entry { position:relative; padding-bottom:1.5rem; }
+    .audit-entry:last-child { padding-bottom:0; }
+    .audit-dot { position:absolute; left:-1.35rem; top:.35rem; width:12px; height:12px; border-radius:50%; border:2px solid #fff; }
+    .audit-dot.granted { background:var(--ac-green); }
+    .audit-dot.revoked { background:var(--ac-red); }
+    .audit-dot.data_accessed { background:var(--ac-blue); }
+    .audit-card { background:#fff; border-radius:10px; padding:1rem 1.25rem; border:1px solid var(--ac-border); box-shadow:0 1px 3px rgba(0,0,0,.04); }
+    .audit-card .audit-action { font-weight:700; font-size:.85rem; text-transform:capitalize; }
+    .audit-card .audit-action.granted { color:var(--ac-green); }
+    .audit-card .audit-action.revoked { color:var(--ac-red); }
+    .audit-card .audit-action.data_accessed { color:var(--ac-blue); }
+    .audit-card .audit-provider { font-size:.85rem; font-weight:600; margin-top:.2rem; }
+    .audit-card .audit-detail { font-size:.82rem; color:var(--ac-muted); margin-top:.15rem; }
+    .audit-card .audit-time { font-size:.72rem; color:#94a3b8; margin-top:.35rem; }
+    /* Summary bar */
+    .summary-bar { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+    .summary-card { background:#fff; border-radius:10px; padding:1rem 1.25rem; border:1px solid var(--ac-border); display:flex; align-items:center; gap:.75rem; }
+    .summary-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+    .summary-icon.green { background:#d1fae5; }
+    .summary-icon.red { background:#fee2e2; }
+    .summary-icon.blue { background:#dbeafe; }
+    .summary-num { font-size:1.4rem; font-weight:800; }
+    .summary-label { font-size:.75rem; color:var(--ac-muted); }
+    /* Confirm dialog */
+    .confirm-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:200; align-items:center; justify-content:center; }
+    .confirm-overlay.show { display:flex; }
+    .confirm-box { background:#fff; border-radius:14px; padding:2rem; max-width:420px; width:90%; text-align:center; }
+    .confirm-box h3 { margin:0 0 .5rem; font-size:1.1rem; }
+    .confirm-box p { color:var(--ac-muted); font-size:.88rem; margin:0 0 1.5rem; }
+    .confirm-actions { display:flex; gap:.5rem; justify-content:center; }
+    .btn-cancel { background:#f1f5f9; color:#475569; border:none; }
+    .btn-danger { background:var(--ac-red); color:#fff; border:none; }
+    .btn-danger:hover { background:#dc2626; }
+    /* Toast */
+    .toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px); background:var(--ac-navy); color:#fff; padding:.75rem 1.5rem; border-radius:10px; font-size:.88rem; z-index:300; transition:transform .3s; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    /* Responsive */
+    @media(max-width:768px) {
+      .ac-nav-links { display:none; }
+      .summary-bar { grid-template-columns:1fr; }
+      .grant-card .grant-top { flex-direction:column; }
+      .grant-status { position:static; margin-top:.5rem; }
+      .grant-meta { flex-direction:column; gap:.35rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Navbar ─── -->
+<nav class="ac-nav">
+  <div class="logo">RentVerified <span>PRO</span></div>
+  <div class="ac-nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="admin.html">Settings</a>
+    <a href="access-control.html" class="active">Access Control</a>
+  </div>
+</nav>
+
+<!-- ─── Page Header ─── -->
+<div class="ac-header">
+  <div class="ac-header-inner">
+    <h1>&#128274; Access Control</h1>
+    <p>Manage who can see your business data and review the audit trail</p>
+  </div>
+</div>
+
+<!-- ─── Main Content ─── -->
+<div class="ac-container">
+  <div class="summary-bar" id="summaryBar"></div>
+
+  <div class="ac-tabs">
+    <button class="ac-tab active" onclick="switchTab('active')">Active Grants</button>
+    <button class="ac-tab" onclick="switchTab('revoked')">Revoked</button>
+    <button class="ac-tab" onclick="switchTab('audit')">Audit Log</button>
+  </div>
+
+  <div class="ac-panel active" id="panel-active" style="padding-top:1rem;"></div>
+  <div class="ac-panel" id="panel-revoked" style="padding-top:1rem;"></div>
+  <div class="ac-panel" id="panel-audit" style="padding-top:1rem;"></div>
+</div>
+
+<!-- Confirm Revoke Dialog -->
+<div class="confirm-overlay" id="confirmRevoke">
+  <div class="confirm-box">
+    <h3>&#9888;&#65039; Revoke Access?</h3>
+    <p>This will immediately remove <strong id="revokeWho"></strong>'s access to your data. You can re-grant later.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmRevokeBtn">Revoke Access</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="share-widget.js" data-share-title="Access Control" data-share-text="Manage data access on RentVerified"></script>
+<script>
+if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
+
+/* ── Seed Data ── */
+var SEED_GRANTS_DISPLAY = [
+  { id:'ag_1', professional_name:'Michael Torres', professional_role:'Loan Officer', company:'Mountain West Capital', template_name:'Standard SBA Loan Package', granted_at:'2026-03-20T10:00:00Z', status:'active', data_shared:['12-month Revenue & Expenses','Cash Flow Analysis','Owner Statements','Property Portfolio','Business License Status'] },
+  { id:'ag_2', professional_name:'Sarah Mitchell, CPA', professional_role:'Accountant', company:'Mitchell & Associates', template_name:'Full Bookkeeping Access', granted_at:'2026-03-15T14:00:00Z', status:'active', data_shared:['All Accounting Entries','Payment Records','Owner Statements','Documents','Property Details'] },
+  { id:'ag_3', professional_name:'Rachel Adams', professional_role:'Insurance Agent', company:'Shield Insurance Group', template_name:'Basic P&C Insurance Quote', granted_at:'2026-03-10T09:00:00Z', status:'revoked', revoked_at:'2026-03-18T11:00:00Z', data_shared:['Business Profile','Properties & Assets','Revenue Range'] }
+];
+
+var SEED_AUDIT = [
+  { timestamp:'2026-03-22T08:00:00Z', action:'data_accessed', provider:'Michael Torres', detail:'Viewed 12-month revenue data' },
+  { timestamp:'2026-03-21T14:30:00Z', action:'data_accessed', provider:'Sarah Mitchell, CPA', detail:'Downloaded accounting entries export' },
+  { timestamp:'2026-03-20T10:00:00Z', action:'granted', provider:'Michael Torres', detail:'Access granted: Standard SBA Loan Package' },
+  { timestamp:'2026-03-18T11:00:00Z', action:'revoked', provider:'Rachel Adams', detail:'Access revoked by business owner' },
+  { timestamp:'2026-03-15T14:00:00Z', action:'granted', provider:'Sarah Mitchell, CPA', detail:'Access granted: Full Bookkeeping Access' },
+  { timestamp:'2026-03-10T09:00:00Z', action:'granted', provider:'Rachel Adams', detail:'Access granted: Basic P&C Insurance Quote' }
+];
+
+/* Persist to localStorage for audit log */
+if (!localStorage.getItem('rv_audit_log')) {
+  localStorage.setItem('rv_audit_log', JSON.stringify(SEED_AUDIT));
+}
+
+/* Try to load from RVData, fall back to seed */
+var grants = SEED_GRANTS_DISPLAY;
+var auditLog = JSON.parse(localStorage.getItem('rv_audit_log') || '[]');
+
+function init() {
+  if (typeof RVData !== 'undefined' && RVData.getAccessGrants) {
+    try {
+      RVData.getAccessGrants({ status:'active' }).then(function(data) {
+        if (data && data.length) grants = data;
+        renderAll();
+      }).catch(function() { renderAll(); });
+    } catch(e) { renderAll(); }
+  } else {
+    renderAll();
+  }
+}
+
+function renderAll() {
+  renderSummary();
+  renderActiveGrants();
+  renderRevokedGrants();
+  renderAuditLog();
+}
+
+/* ── Summary ── */
+function renderSummary() {
+  var active = grants.filter(function(g){return g.status==='active';}).length;
+  var revoked = grants.filter(function(g){return g.status==='revoked';}).length;
+  var accesses = auditLog.filter(function(a){return a.action==='data_accessed';}).length;
+  document.getElementById('summaryBar').innerHTML =
+    '<div class="summary-card"><div class="summary-icon green">&#9989;</div><div><div class="summary-num">' + active + '</div><div class="summary-label">Active Grants</div></div></div>' +
+    '<div class="summary-card"><div class="summary-icon red">&#128683;</div><div><div class="summary-num">' + revoked + '</div><div class="summary-label">Revoked</div></div></div>' +
+    '<div class="summary-card"><div class="summary-icon blue">&#128065;</div><div><div class="summary-num">' + accesses + '</div><div class="summary-label">Data Accesses</div></div></div>';
+}
+
+/* ── Tabs ── */
+function switchTab(tab) {
+  document.querySelectorAll('.ac-panel').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.ac-tab').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('panel-' + tab).classList.add('active');
+  var btns = document.querySelectorAll('.ac-tab');
+  var tabs = ['active','revoked','audit'];
+  var idx = tabs.indexOf(tab);
+  if (idx >= 0 && btns[idx]) btns[idx].classList.add('active');
+}
+
+/* ── Active Grants ── */
+function renderActiveGrants() {
+  var el = document.getElementById('panel-active');
+  var active = grants.filter(function(g){return g.status==='active';});
+  if (!active.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--ac-muted);">No active access grants</div>'; return; }
+  el.innerHTML = active.map(function(g) { return buildGrantCard(g, false); }).join('');
+}
+
+/* ── Revoked Grants ── */
+function renderRevokedGrants() {
+  var el = document.getElementById('panel-revoked');
+  var revoked = grants.filter(function(g){return g.status==='revoked';});
+  if (!revoked.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--ac-muted);">No revoked grants</div>'; return; }
+  el.innerHTML = revoked.map(function(g) { return buildGrantCard(g, true); }).join('');
+}
+
+function buildGrantCard(g, isRevoked) {
+  var initials = g.professional_name.split(' ').map(function(n){return n[0];}).join('').substring(0,2);
+  var avatarCls = isRevoked ? 'revoked' : 'active';
+  var pills = (g.data_shared||[]).map(function(d){ return '<span class="data-pill">' + d + '</span>'; }).join('');
+  var meta = '<span>&#128197; Granted ' + formatDate(g.granted_at) + '</span>';
+  if (isRevoked && g.revoked_at) { meta += '<span>&#128683; Revoked ' + formatDate(g.revoked_at) + '</span>'; }
+  var actions = '';
+  if (!isRevoked) {
+    actions = '<div class="grant-actions"><button class="btn btn-revoke btn-sm" onclick="confirmRevoke(\'' + g.id + '\',\'' + escHtml(g.professional_name) + '\')">&#128274; Revoke Access</button></div>';
+  } else {
+    actions = '<div class="grant-actions"><button class="btn btn-regrant btn-sm" onclick="regrant(\'' + g.id + '\')">&#9989; Re-grant Access</button></div>';
+  }
+  return '<div class="grant-card ' + (isRevoked?'revoked':'') + '">' +
+    '<div class="grant-top">' +
+      '<div class="grant-avatar ' + avatarCls + '">' + initials + '</div>' +
+      '<div class="grant-info">' +
+        '<div class="grant-name">' + escHtml(g.professional_name) + ' <span class="role-badge">' + escHtml(g.professional_role) + '</span></div>' +
+        '<div class="grant-company">' + escHtml(g.company) + '</div>' +
+        '<div class="grant-template">&#128196; ' + escHtml(g.template_name) + '</div>' +
+      '</div>' +
+      '<div class="grant-status"><span class="badge ' + (isRevoked?'badge-revoked':'badge-active') + '">' + (isRevoked?'&#128683; Revoked':'&#9989; Active') + '</span></div>' +
+    '</div>' +
+    '<div style="font-size:.78rem;font-weight:600;color:var(--ac-muted);margin-bottom:.35rem;">Data Shared:</div>' +
+    '<div class="data-pills">' + pills + '</div>' +
+    '<div class="grant-meta">' + meta + '</div>' +
+    actions +
+  '</div>';
+}
+
+/* ── Audit Log ── */
+function renderAuditLog() {
+  var el = document.getElementById('panel-audit');
+  if (!auditLog.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--ac-muted);">No audit entries yet</div>'; return; }
+  var html = '<div class="audit-timeline">';
+  html += auditLog.map(function(a) {
+    return '<div class="audit-entry">' +
+      '<div class="audit-dot ' + a.action + '"></div>' +
+      '<div class="audit-card">' +
+        '<div class="audit-action ' + a.action + '">' + formatAction(a.action) + '</div>' +
+        '<div class="audit-provider">' + escHtml(a.provider) + '</div>' +
+        '<div class="audit-detail">' + escHtml(a.detail) + '</div>' +
+        '<div class="audit-time">' + formatDateTime(a.timestamp) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+/* ── Actions ── */
+var pendingRevokeId = null;
+
+function confirmRevoke(id, name) {
+  pendingRevokeId = id;
+  document.getElementById('revokeWho').textContent = name;
+  document.getElementById('confirmRevoke').classList.add('show');
+  document.getElementById('confirmRevokeBtn').onclick = function() { executeRevoke(); };
+}
+
+function closeConfirm() {
+  document.getElementById('confirmRevoke').classList.remove('show');
+  pendingRevokeId = null;
+}
+
+function executeRevoke() {
+  if (!pendingRevokeId) return;
+  grants.forEach(function(g) {
+    if (g.id === pendingRevokeId) {
+      g.status = 'revoked';
+      g.revoked_at = new Date().toISOString();
+    }
+  });
+  var grant = grants.find(function(g){return g.id===pendingRevokeId;});
+  auditLog.unshift({
+    timestamp: new Date().toISOString(),
+    action: 'revoked',
+    provider: grant ? grant.professional_name : 'Unknown',
+    detail: 'Access revoked by business owner'
+  });
+  localStorage.setItem('rv_audit_log', JSON.stringify(auditLog));
+  closeConfirm();
+  renderAll();
+  toast('Access revoked successfully');
+}
+
+function regrant(id) {
+  grants.forEach(function(g) {
+    if (g.id === id) {
+      g.status = 'active';
+      delete g.revoked_at;
+    }
+  });
+  var grant = grants.find(function(g){return g.id===id;});
+  auditLog.unshift({
+    timestamp: new Date().toISOString(),
+    action: 'granted',
+    provider: grant ? grant.professional_name : 'Unknown',
+    detail: 'Access re-granted by business owner'
+  });
+  localStorage.setItem('rv_audit_log', JSON.stringify(auditLog));
+  renderAll();
+  toast('Access re-granted successfully');
+}
+
+/* ── Helpers ── */
+function formatDate(d) {
+  var dt = new Date(d);
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function formatDateTime(d) {
+  var dt = new Date(d);
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' at ' + dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+
+function formatAction(a) {
+  var map = { granted:'Access Granted', revoked:'Access Revoked', data_accessed:'Data Accessed' };
+  return map[a] || a;
+}
+
+function escHtml(s) {
+  var div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+}
+
+/* Click outside confirm to close */
+document.getElementById('confirmRevoke').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+
+/* Init */
+init();
+</script>
+</body>
+</html>

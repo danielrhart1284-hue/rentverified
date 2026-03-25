@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Network – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .comm-layout { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+    .comm-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .comm-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+    .comm-header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-comm { padding: 0.55rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-comm.primary { background: #4F46E5; color: white; }
+    .btn-comm.primary:hover { background: #4338ca; }
+    .btn-comm.secondary { background: #7c3aed; color: white; }
+    .btn-comm.secondary:hover { background: #6d28d9; }
+    .btn-comm.outline { background: white; color: #4F46E5; border: 2px solid #4F46E5; }
+    .btn-comm.outline:hover { background: #ede9fe; }
+    .btn-comm.sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+    .btn-comm.success { background: #059669; color: white; }
+    .btn-comm.success:hover { background: #047857; }
+
+    .comm-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .comm-stat { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1rem; text-align: center; }
+    .comm-stat .val { font-size: 1.5rem; font-weight: 900; color: #1e1b4b; }
+    .comm-stat .lbl { font-size: 0.72rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 4px; }
+
+    .comm-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; }
+    .comm-tab { padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 700; color: #6b7280; cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; }
+    .comm-tab.active { color: #4F46E5; border-bottom-color: #4F46E5; }
+    .comm-tab:hover { color: #4338ca; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Group Cards */
+    .group-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .group-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; cursor: pointer; transition: box-shadow 0.2s, transform 0.1s; }
+    .group-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .group-card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .group-avatar { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
+    .group-name { font-weight: 800; color: #1e1b4b; font-size: 0.95rem; }
+    .group-type { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; margin-left: 0.5rem; }
+    .group-type.industry { background: #ede9fe; color: #5b21b6; }
+    .group-type.location { background: #d1fae5; color: #065f46; }
+    .group-type.topic { background: #fef3c7; color: #92400e; }
+    .group-desc { font-size: 0.82rem; color: #6b7280; margin-bottom: 0.5rem; line-height: 1.4; }
+    .group-meta { font-size: 0.75rem; color: #9ca3af; display: flex; align-items: center; gap: 0.5rem; }
+    .group-meta svg { width: 14px; height: 14px; }
+    .group-latest { font-size: 0.78rem; color: #374151; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #f3f4f6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Group Feed View */
+    .group-feed { display: none; }
+    .group-feed.active { display: block; }
+    .feed-back { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: #4F46E5; cursor: pointer; margin-bottom: 1rem; border: none; background: none; }
+    .feed-back:hover { color: #4338ca; }
+    .feed-header { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 1rem; }
+    .feed-header h2 { font-size: 1.25rem; font-weight: 800; color: #1e1b4b; margin-bottom: 0.25rem; }
+    .feed-header p { font-size: 0.85rem; color: #6b7280; }
+    .feed-header .feed-member-count { font-size: 0.78rem; color: #9ca3af; margin-top: 0.5rem; }
+
+    .new-post-form { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1rem; margin-bottom: 1rem; }
+    .new-post-form textarea { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; resize: vertical; min-height: 60px; margin-bottom: 0.5rem; box-sizing: border-box; }
+
+    .post-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 0.75rem; }
+    .post-author { font-weight: 700; color: #1e1b4b; font-size: 0.88rem; }
+    .post-time { font-size: 0.72rem; color: #9ca3af; }
+    .post-content { font-size: 0.88rem; color: #374151; line-height: 1.5; margin: 0.5rem 0; }
+    .post-actions { display: flex; gap: 1rem; align-items: center; }
+    .like-btn { display: flex; align-items: center; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; color: #6b7280; cursor: pointer; border: none; background: none; padding: 4px 8px; border-radius: 6px; transition: 0.2s; }
+    .like-btn:hover { background: #ede9fe; color: #4F46E5; }
+    .like-btn.liked { color: #4F46E5; }
+
+    /* Recommendations */
+    .rec-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 1rem; border-left: 3px solid #7c3aed; }
+    .rec-from { font-weight: 700; color: #1e1b4b; font-size: 0.92rem; }
+    .rec-text { font-size: 0.88rem; color: #374151; line-height: 1.5; margin: 0.5rem 0; font-style: italic; }
+    .rec-date { font-size: 0.72rem; color: #9ca3af; }
+    .rec-section-title { font-size: 1rem; font-weight: 800; color: #1e1b4b; margin: 1.5rem 0 1rem; }
+
+    /* Activity Feed */
+    .activity-item { display: flex; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+    .activity-dot.post { background: #4F46E5; }
+    .activity-dot.join { background: #059669; }
+    .activity-dot.rec { background: #7c3aed; }
+    .activity-text { font-size: 0.85rem; color: #374151; }
+    .activity-text strong { color: #1e1b4b; }
+    .activity-time { font-size: 0.72rem; color: #9ca3af; display: block; margin-top: 2px; }
+
+    /* Discover AI suggestion */
+    .ai-suggestion { background: linear-gradient(135deg, #ede9fe, #dbeafe); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; border: 1px solid #c4b5fd; }
+    .ai-suggestion .ai-label { font-size: 0.72rem; font-weight: 700; color: #5b21b6; text-transform: uppercase; margin-bottom: 0.25rem; }
+    .ai-suggestion .ai-text { font-size: 0.88rem; color: #374151; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 2rem; width: 90%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 1.25rem; color: #1e1b4b; }
+    .modal label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; margin-bottom: 0.75rem; box-sizing: border-box; }
+    .modal textarea { height: 100px; resize: vertical; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #065f46; color: white; padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; z-index: 2000; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .toast.show { display: block; animation: toastIn 0.3s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 640px) {
+      .comm-stats { grid-template-columns: 1fr 1fr; }
+      .comm-header { flex-direction: column; align-items: flex-start; }
+      .group-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">RentVerified</span> <span style="font-weight:500;opacity:0.9;">Community</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="community.html" style="color:#4F46E5;font-weight:700;">Community</a>
+    <a href="tenant-portal.html">Messages</a>
+    <a href="crm.html">CRM</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Home</a>
+  </div>
+</nav>
+
+<div class="comm-layout">
+  <!-- Header -->
+  <div class="comm-header">
+    <h1>Business Network</h1>
+    <div class="comm-header-actions">
+      <button class="btn-comm primary" onclick="openCreateGroupModal()">+ Create Group</button>
+      <button class="btn-comm secondary" onclick="openRecModal()">Write Recommendation</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="comm-stats" id="commStats"></div>
+
+  <!-- Tabs -->
+  <div class="comm-tabs" id="mainTabs">
+    <button class="comm-tab active" data-tab="groups" onclick="switchTab('groups')">My Groups</button>
+    <button class="comm-tab" data-tab="discover" onclick="switchTab('discover')">Discover</button>
+    <button class="comm-tab" data-tab="recs" onclick="switchTab('recs')">Recommendations</button>
+    <button class="comm-tab" data-tab="activity" onclick="switchTab('activity')">Activity Feed</button>
+  </div>
+
+  <!-- Tab Panels -->
+  <div id="panel-groups" class="tab-panel active"></div>
+  <div id="panel-discover" class="tab-panel"></div>
+  <div id="panel-recs" class="tab-panel"></div>
+  <div id="panel-activity" class="tab-panel"></div>
+
+  <!-- Group Feed (shown when clicking a group) -->
+  <div class="group-feed" id="groupFeed"></div>
+</div>
+
+<!-- Create Group Modal -->
+<div class="modal-overlay" id="createGroupModal">
+  <div class="modal">
+    <h2>Create a Group</h2>
+    <label>Group Name *</label>
+    <input type="text" id="grpName" placeholder="e.g. Denver Landlords" />
+    <label>Description</label>
+    <textarea id="grpDesc" placeholder="What is this group about?"></textarea>
+    <label>Type</label>
+    <select id="grpType">
+      <option value="industry">Industry</option>
+      <option value="location">Location</option>
+      <option value="topic">Topic</option>
+    </select>
+    <label>Visibility</label>
+    <select id="grpPublic">
+      <option value="true">Public</option>
+      <option value="false">Private (invite only)</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-comm primary" onclick="createGroup()">Create Group</button>
+      <button class="btn-comm outline" onclick="closeModal('createGroupModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Write Recommendation Modal -->
+<div class="modal-overlay" id="recModal">
+  <div class="modal">
+    <h2>Write a Recommendation</h2>
+    <label>Business Name *</label>
+    <input type="text" id="recBusiness" placeholder="e.g. Summit Construction" />
+    <label>Your Recommendation *</label>
+    <textarea id="recText" placeholder="Share your experience working with this business..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-comm secondary" onclick="submitRecommendation()">Submit Recommendation</button>
+      <button class="btn-comm outline" onclick="closeModal('recModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="share-widget.js" data-share-title="Business Network" data-share-text="Join the RentVerified community"></script>
+<script>
+// Monkey-patch: force localStorage mode
+if (typeof RVData !== 'undefined') { RVData._useSupabase = function() { return false; }; }
+
+// ─── Seed Data ────────────────────────────────────────────────────────
+var SEED_GROUPS = [
+  { id:'grp_1', name:'Utah Property Managers', description:'Connect with fellow PM professionals in Utah', type:'industry', avatar_color:'#4F46E5', member_count:148, is_public:true },
+  { id:'grp_2', name:'Salt Lake Business Network', description:'Local business networking and referrals', type:'location', avatar_color:'#059669', member_count:312, is_public:true },
+  { id:'grp_3', name:'Real Estate Investors Club', description:'Investment strategies, deal analysis, market trends', type:'topic', avatar_color:'#dc2626', member_count:89, is_public:true },
+  { id:'grp_4', name:'Landlord Tech & Tools', description:'Software, apps, and automation for landlords', type:'topic', avatar_color:'#f59e0b', member_count:67, is_public:true },
+  { id:'grp_5', name:'Construction Pros Utah', description:'GCs, subs, and suppliers in the Beehive State', type:'industry', avatar_color:'#0891b2', member_count:203, is_public:true }
+];
+var SEED_POSTS = [
+  { id:'gp_1', group_id:'grp_1', business_id:'demo_biz', author:'Daniel Hart', content:'Just launched our new tenant screening integration. Anyone else using AI-powered screening? Would love to compare notes.', likes:12, created_at:'2026-03-22T09:00:00Z' },
+  { id:'gp_2', group_id:'grp_1', business_id:'biz_2', author:'Sarah Mitchell', content:'Heads up - new Utah eviction law changes take effect April 1. Make sure your leases are updated. Happy to review if anyone needs help.', likes:24, created_at:'2026-03-21T14:00:00Z' },
+  { id:'gp_3', group_id:'grp_2', business_id:'biz_3', author:'Mike Torres', content:'Looking for a reliable plumber in the SLC area. My usual guy is booked for 3 weeks. Any recommendations?', likes:5, created_at:'2026-03-22T11:00:00Z' }
+];
+var SEED_RECS = [
+  { id:'rec_1', from_business_id:'biz_2', from_name:'Sarah Mitchell, CPA', to_business_id:'demo_biz', text:'Daniel and his team at Sanders PM are exceptional property managers. Their attention to detail and responsiveness is unmatched. Highly recommend for any property management needs.', is_published:true, created_at:'2026-03-10T10:00:00Z' },
+  { id:'rec_2', from_business_id:'biz_3', from_name:'Mike Torres, Summit Construction', to_business_id:'demo_biz', text:'We have worked with Sanders PM on multiple renovation projects. Professional, organized, and always on budget. A+ partner.', is_published:true, created_at:'2026-02-28T15:00:00Z' }
+];
+
+var LS_GROUPS = 'rv_community_groups';
+var LS_POSTS = 'rv_community_posts';
+var LS_RECS = 'rv_community_recs';
+var LS_JOINED = 'rv_community_joined';
+var LS_LIKES = 'rv_community_likes';
+var currentTab = 'groups';
+var currentGroupId = null;
+
+// ─── Data Methods ─────────────────────────────────────────────────────
+function getGroups() {
+  var stored = localStorage.getItem(LS_GROUPS);
+  if (stored) return JSON.parse(stored);
+  localStorage.setItem(LS_GROUPS, JSON.stringify(SEED_GROUPS));
+  return JSON.parse(JSON.stringify(SEED_GROUPS));
+}
+
+function saveGroup(group) {
+  var groups = getGroups();
+  var idx = groups.findIndex(function(g) { return g.id === group.id; });
+  if (idx >= 0) { groups[idx] = group; }
+  else { groups.unshift(group); }
+  localStorage.setItem(LS_GROUPS, JSON.stringify(groups));
+  return groups;
+}
+
+function getGroupPosts(groupId) {
+  var stored = localStorage.getItem(LS_POSTS);
+  var posts = stored ? JSON.parse(stored) : (function() { localStorage.setItem(LS_POSTS, JSON.stringify(SEED_POSTS)); return JSON.parse(JSON.stringify(SEED_POSTS)); })();
+  if (groupId) return posts.filter(function(p) { return p.group_id === groupId; });
+  return posts;
+}
+
+function saveGroupPost(post) {
+  var posts = getGroupPosts();
+  var idx = posts.findIndex(function(p) { return p.id === post.id; });
+  if (idx >= 0) { posts[idx] = post; }
+  else { posts.unshift(post); }
+  localStorage.setItem(LS_POSTS, JSON.stringify(posts));
+  return posts;
+}
+
+function getRecommendations() {
+  var stored = localStorage.getItem(LS_RECS);
+  if (stored) return JSON.parse(stored);
+  localStorage.setItem(LS_RECS, JSON.stringify(SEED_RECS));
+  return JSON.parse(JSON.stringify(SEED_RECS));
+}
+
+function saveRecommendation(rec) {
+  var recs = getRecommendations();
+  var idx = recs.findIndex(function(r) { return r.id === rec.id; });
+  if (idx >= 0) { recs[idx] = rec; }
+  else { recs.unshift(rec); }
+  localStorage.setItem(LS_RECS, JSON.stringify(recs));
+  return recs;
+}
+
+function getJoinedGroups() {
+  var stored = localStorage.getItem(LS_JOINED);
+  if (stored) return JSON.parse(stored);
+  var defaults = ['grp_1', 'grp_2'];
+  localStorage.setItem(LS_JOINED, JSON.stringify(defaults));
+  return defaults;
+}
+
+function toggleJoinGroup(groupId) {
+  var joined = getJoinedGroups();
+  var idx = joined.indexOf(groupId);
+  if (idx >= 0) { joined.splice(idx, 1); }
+  else { joined.push(groupId); }
+  localStorage.setItem(LS_JOINED, JSON.stringify(joined));
+  return joined;
+}
+
+function getLikedPosts() {
+  var stored = localStorage.getItem(LS_LIKES);
+  return stored ? JSON.parse(stored) : [];
+}
+
+function toggleLike(postId) {
+  var liked = getLikedPosts();
+  var idx = liked.indexOf(postId);
+  if (idx >= 0) { liked.splice(idx, 1); }
+  else { liked.push(postId); }
+  localStorage.setItem(LS_LIKES, JSON.stringify(liked));
+  return liked;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────
+function escHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function formatDate(iso) {
+  var d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function timeAgo(iso) {
+  var diff = Date.now() - new Date(iso).getTime();
+  var mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins + 'm ago';
+  var hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  var days = Math.floor(hrs / 24);
+  return days + 'd ago';
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+function groupInitials(name) {
+  return name.split(' ').map(function(w) { return w[0]; }).slice(0, 2).join('').toUpperCase();
+}
+
+function typeBadge(type) {
+  return '<span class="group-type ' + type + '">' + type.charAt(0).toUpperCase() + type.slice(1) + '</span>';
+}
+
+// ─── Rendering ────────────────────────────────────────────────────────
+function renderStats() {
+  var joined = getJoinedGroups();
+  var recs = getRecommendations();
+  var received = recs.filter(function(r) { return r.to_business_id === 'demo_biz'; }).length;
+  var given = recs.filter(function(r) { return r.from_business_id === 'demo_biz'; }).length;
+
+  document.getElementById('commStats').innerHTML =
+    '<div class="comm-stat"><div class="val">' + joined.length + '</div><div class="lbl">Groups Joined</div></div>' +
+    '<div class="comm-stat"><div class="val">' + (joined.length * 47 + 23) + '</div><div class="lbl">Connections</div></div>' +
+    '<div class="comm-stat"><div class="val">' + received + '</div><div class="lbl">Recs Received</div></div>' +
+    '<div class="comm-stat"><div class="val">' + given + '</div><div class="lbl">Recs Given</div></div>';
+}
+
+function renderMyGroups() {
+  var joined = getJoinedGroups();
+  var groups = getGroups().filter(function(g) { return joined.indexOf(g.id) >= 0; });
+  var posts = getGroupPosts();
+
+  if (groups.length === 0) {
+    document.getElementById('panel-groups').innerHTML = '<p style="color:#9ca3af;text-align:center;padding:2rem;">You have not joined any groups yet. Check the Discover tab!</p>';
+    return;
+  }
+
+  var html = '<div class="group-grid">';
+  groups.forEach(function(g) {
+    var latestPost = posts.filter(function(p) { return p.group_id === g.id; }).sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); })[0];
+    var latestPreview = latestPost ? '<div class="group-latest">' + escHtml(latestPost.author) + ': ' + escHtml(latestPost.content.substring(0, 80)) + (latestPost.content.length > 80 ? '...' : '') + '</div>' : '';
+
+    html += '<div class="group-card" onclick="openGroupFeed(\'' + g.id + '\')">' +
+      '<div class="group-card-header">' +
+        '<div class="group-avatar" style="background:' + g.avatar_color + ';">' + groupInitials(g.name) + '</div>' +
+        '<div><div class="group-name">' + escHtml(g.name) + ' ' + typeBadge(g.type) + '</div></div>' +
+      '</div>' +
+      '<div class="group-desc">' + escHtml(g.description) + '</div>' +
+      '<div class="group-meta"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg> ' + g.member_count + ' members</div>' +
+      latestPreview +
+    '</div>';
+  });
+  html += '</div>';
+  document.getElementById('panel-groups').innerHTML = html;
+}
+
+function renderDiscover() {
+  var joined = getJoinedGroups();
+  var groups = getGroups();
+
+  var html = '<div class="ai-suggestion"><div class="ai-label">AI Recommended</div><div class="ai-text">Based on your business type and location, we suggest joining groups related to property management, real estate investing, and local business networking.</div></div>';
+
+  html += '<div class="group-grid">';
+  groups.forEach(function(g) {
+    var isJoined = joined.indexOf(g.id) >= 0;
+    html += '<div class="group-card" style="cursor:default;">' +
+      '<div class="group-card-header">' +
+        '<div class="group-avatar" style="background:' + g.avatar_color + ';">' + groupInitials(g.name) + '</div>' +
+        '<div><div class="group-name">' + escHtml(g.name) + ' ' + typeBadge(g.type) + '</div></div>' +
+      '</div>' +
+      '<div class="group-desc">' + escHtml(g.description) + '</div>' +
+      '<div class="group-meta"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg> ' + g.member_count + ' members</div>' +
+      '<div style="margin-top:0.75rem;">' +
+        (isJoined ?
+          '<button class="btn-comm outline sm" onclick="event.stopPropagation();joinLeaveGroup(\'' + g.id + '\')">Leave Group</button>' :
+          '<button class="btn-comm success sm" onclick="event.stopPropagation();joinLeaveGroup(\'' + g.id + '\')">Join Group</button>') +
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  document.getElementById('panel-discover').innerHTML = html;
+}
+
+function renderRecommendations() {
+  var recs = getRecommendations();
+  var received = recs.filter(function(r) { return r.to_business_id === 'demo_biz'; });
+  var given = recs.filter(function(r) { return r.from_business_id === 'demo_biz'; });
+
+  var html = '<div class="rec-section-title">Recommendations Received (' + received.length + ')</div>';
+  if (received.length === 0) {
+    html += '<p style="color:#9ca3af;">No recommendations received yet.</p>';
+  } else {
+    received.forEach(function(r) {
+      html += '<div class="rec-card">' +
+        '<div class="rec-from">' + escHtml(r.from_name) + '</div>' +
+        '<div class="rec-text">"' + escHtml(r.text) + '"</div>' +
+        '<div class="rec-date">' + formatDate(r.created_at) + '</div>' +
+      '</div>';
+    });
+  }
+
+  html += '<div class="rec-section-title">Recommendations Given (' + given.length + ')</div>';
+  if (given.length === 0) {
+    html += '<p style="color:#9ca3af;">You have not given any recommendations yet. Use the "Write Recommendation" button above!</p>';
+  } else {
+    given.forEach(function(r) {
+      html += '<div class="rec-card" style="border-left-color:#059669;">' +
+        '<div class="rec-from">To: ' + escHtml(r.to_name || 'Business') + '</div>' +
+        '<div class="rec-text">"' + escHtml(r.text) + '"</div>' +
+        '<div class="rec-date">' + formatDate(r.created_at) + '</div>' +
+      '</div>';
+    });
+  }
+
+  document.getElementById('panel-recs').innerHTML = html;
+}
+
+function renderActivityFeed() {
+  var posts = getGroupPosts().sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+  var recs = getRecommendations().sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+  var groups = getGroups();
+
+  var activities = [];
+  posts.forEach(function(p) {
+    var g = groups.find(function(gr) { return gr.id === p.group_id; });
+    activities.push({ type: 'post', text: '<strong>' + escHtml(p.author) + '</strong> posted in <strong>' + escHtml(g ? g.name : 'a group') + '</strong>', time: p.created_at });
+  });
+  recs.forEach(function(r) {
+    activities.push({ type: 'rec', text: '<strong>' + escHtml(r.from_name) + '</strong> wrote a recommendation', time: r.created_at });
+  });
+  activities.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
+
+  var html = '<div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:1.25rem;">';
+  if (activities.length === 0) {
+    html += '<p style="color:#9ca3af;text-align:center;">No recent activity.</p>';
+  } else {
+    activities.slice(0, 20).forEach(function(a) {
+      var dotClass = a.type === 'post' ? 'post' : (a.type === 'join' ? 'join' : 'rec');
+      html += '<div class="activity-item"><div class="activity-dot ' + dotClass + '"></div><div><div class="activity-text">' + a.text + '</div><span class="activity-time">' + timeAgo(a.time) + '</span></div></div>';
+    });
+  }
+  html += '</div>';
+  document.getElementById('panel-activity').innerHTML = html;
+}
+
+// ─── Group Feed ───────────────────────────────────────────────────────
+function openGroupFeed(groupId) {
+  currentGroupId = groupId;
+  var groups = getGroups();
+  var g = groups.find(function(gr) { return gr.id === groupId; });
+  if (!g) return;
+
+  var posts = getGroupPosts(groupId).sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+  var liked = getLikedPosts();
+
+  var html = '<button class="feed-back" onclick="closeGroupFeed()">&larr; Back to Groups</button>';
+  html += '<div class="feed-header"><h2>' + escHtml(g.name) + ' ' + typeBadge(g.type) + '</h2><p>' + escHtml(g.description) + '</p><div class="feed-member-count">' + g.member_count + ' members</div></div>';
+
+  html += '<div class="new-post-form"><textarea id="newPostText" placeholder="Share something with the group..."></textarea><button class="btn-comm primary sm" onclick="addPost(\'' + groupId + '\')">Post</button></div>';
+
+  posts.forEach(function(p) {
+    var isLiked = liked.indexOf(p.id) >= 0;
+    html += '<div class="post-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<span class="post-author">' + escHtml(p.author) + '</span>' +
+        '<span class="post-time">' + timeAgo(p.created_at) + '</span>' +
+      '</div>' +
+      '<p class="post-content">' + escHtml(p.content) + '</p>' +
+      '<div class="post-actions">' +
+        '<button class="like-btn ' + (isLiked ? 'liked' : '') + '" onclick="likePost(\'' + p.id + '\')">' +
+          '<svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/></svg> ' +
+          p.likes +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  });
+
+  if (posts.length === 0) {
+    html += '<p style="color:#9ca3af;text-align:center;padding:2rem;">No posts yet. Be the first to share something!</p>';
+  }
+
+  document.getElementById('groupFeed').innerHTML = html;
+
+  // Hide tabs/panels, show feed
+  document.getElementById('mainTabs').style.display = 'none';
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.style.display = 'none'; });
+  document.getElementById('groupFeed').classList.add('active');
+}
+
+function closeGroupFeed() {
+  currentGroupId = null;
+  document.getElementById('groupFeed').classList.remove('active');
+  document.getElementById('groupFeed').innerHTML = '';
+  document.getElementById('mainTabs').style.display = 'flex';
+  switchTab(currentTab);
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.comm-tab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('data-tab') === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'panel-' + tab);
+  });
+  if (tab === 'groups') renderMyGroups();
+  else if (tab === 'discover') renderDiscover();
+  else if (tab === 'recs') renderRecommendations();
+  else if (tab === 'activity') renderActivityFeed();
+}
+
+function joinLeaveGroup(groupId) {
+  var joined = toggleJoinGroup(groupId);
+  var isNowJoined = joined.indexOf(groupId) >= 0;
+  var g = getGroups().find(function(gr) { return gr.id === groupId; });
+  if (g) {
+    g.member_count += isNowJoined ? 1 : -1;
+    saveGroup(g);
+  }
+  renderStats();
+  renderDiscover();
+  renderMyGroups();
+  showToast(isNowJoined ? 'Joined group!' : 'Left group.');
+}
+
+function addPost(groupId) {
+  var textarea = document.getElementById('newPostText');
+  var content = textarea ? textarea.value.trim() : '';
+  if (!content) { showToast('Please write something first.'); return; }
+
+  var post = {
+    id: 'gp_' + Date.now(),
+    group_id: groupId,
+    business_id: 'demo_biz',
+    author: 'Daniel Hart',
+    content: content,
+    likes: 0,
+    created_at: new Date().toISOString()
+  };
+  saveGroupPost(post);
+  openGroupFeed(groupId);
+  showToast('Post published!');
+}
+
+function likePost(postId) {
+  toggleLike(postId);
+  var posts = getGroupPosts();
+  var p = posts.find(function(po) { return po.id === postId; });
+  if (p) {
+    var liked = getLikedPosts();
+    var isLiked = liked.indexOf(postId) >= 0;
+    p.likes = Math.max(0, p.likes + (isLiked ? 1 : -1));
+    saveGroupPost(p);
+  }
+  if (currentGroupId) openGroupFeed(currentGroupId);
+}
+
+function openCreateGroupModal() {
+  document.getElementById('createGroupModal').classList.add('show');
+}
+
+function openRecModal() {
+  document.getElementById('recModal').classList.add('show');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function createGroup() {
+  var name = document.getElementById('grpName').value.trim();
+  if (!name) { showToast('Group name is required.'); return; }
+
+  var colors = ['#4F46E5', '#059669', '#dc2626', '#f59e0b', '#0891b2', '#7c3aed', '#db2777'];
+  var group = {
+    id: 'grp_' + Date.now(),
+    name: name,
+    description: document.getElementById('grpDesc').value.trim(),
+    type: document.getElementById('grpType').value,
+    avatar_color: colors[Math.floor(Math.random() * colors.length)],
+    member_count: 1,
+    is_public: document.getElementById('grpPublic').value === 'true'
+  };
+  saveGroup(group);
+
+  // Auto-join the group
+  var joined = getJoinedGroups();
+  if (joined.indexOf(group.id) < 0) {
+    joined.push(group.id);
+    localStorage.setItem(LS_JOINED, JSON.stringify(joined));
+  }
+
+  // Reset form
+  document.getElementById('grpName').value = '';
+  document.getElementById('grpDesc').value = '';
+  closeModal('createGroupModal');
+  renderStats();
+  renderMyGroups();
+  renderDiscover();
+  showToast('Group "' + name + '" created!');
+}
+
+function submitRecommendation() {
+  var business = document.getElementById('recBusiness').value.trim();
+  var text = document.getElementById('recText').value.trim();
+  if (!business || !text) { showToast('Business name and recommendation text are required.'); return; }
+
+  var rec = {
+    id: 'rec_' + Date.now(),
+    from_business_id: 'demo_biz',
+    from_name: 'Daniel Hart, Sanders PM',
+    to_business_id: 'biz_' + Date.now(),
+    to_name: business,
+    text: text,
+    is_published: true,
+    created_at: new Date().toISOString()
+  };
+  saveRecommendation(rec);
+
+  document.getElementById('recBusiness').value = '';
+  document.getElementById('recText').value = '';
+  closeModal('recModal');
+  renderStats();
+  renderRecommendations();
+  showToast('Recommendation submitted!');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  renderStats();
+  renderMyGroups();
+});
+</script>
+</body>
+</html>

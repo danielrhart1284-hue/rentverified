@@ -211,13 +211,13 @@ const RVStorage = {
 
 const STRIPE_CONFIG = {
   publishableKey: 'pk_test_51TBxc1EkuwiyM4jcw0Fu7v6cPkFgJsvhlB5CNX1snQGo2tVq3mmYM1RsnCReEfsFF5FDjqlTrFlAthyY3q1ojTWe007bMAxW3j',
-  // Stripe's processing fees (paid by tenant or landlord based on fee policy)
+  // Card fee percentage charged to tenant
   cardFeePercent: 0.029,
   cardFeeFixed: 0.30,
+  // ACH fee
   achFee: 0.80,
-  // RentVerified takes NO platform fee on transactions
-  // Revenue comes from subscriptions, affiliate commissions, and funding referrals
-  platformFeePercent: 0,
+  // Platform fee percentage (what RentVerified keeps)
+  platformFeePercent: 0.02,
 };
 
 // ============================================================================

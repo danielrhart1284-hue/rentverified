@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messages – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Layout ── */
+    .msg-app { display: flex; flex-direction: column; min-height: 100vh; }
+    .msg-body { flex: 1; display: flex; max-width: 1280px; width: 100%; margin: 0 auto; }
+
+    /* ── Navbar ── */
+    .msg-nav { background: #0f172a; color: white; display: flex; align-items: center; padding: 0 1.5rem; height: 56px; gap: 2rem; }
+    .msg-nav .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; font-weight: 800; font-size: 1rem; white-space: nowrap; }
+    .msg-nav .logo .sep { opacity: 0.4; margin: 0 2px; }
+    .msg-nav .logo .sub { font-weight: 500; opacity: 0.85; }
+    .msg-nav-links { display: flex; gap: 0.25rem; margin-left: auto; }
+    .msg-nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.82rem; font-weight: 600; padding: 6px 14px; border-radius: 6px; transition: 0.15s; }
+    .msg-nav-links a:hover { color: white; background: rgba(255,255,255,0.08); }
+    .msg-nav-links a.active { color: white; background: rgba(255,255,255,0.14); }
+
+    /* ── Tab Bar ── */
+    .msg-tabs { background: #0f172a; border-bottom: 1px solid #1e293b; display: flex; padding: 0 1.5rem; gap: 0; }
+    .msg-tab { display: flex; align-items: center; gap: 6px; padding: 10px 20px; font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.55); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.15s; user-select: none; white-space: nowrap; }
+    .msg-tab:hover { color: rgba(255,255,255,0.85); }
+    .msg-tab.active { color: white; border-bottom-color: #3b82f6; }
+    .msg-tab .badge-count { background: #ef4444; color: white; font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; min-width: 18px; text-align: center; line-height: 1.4; }
+
+    /* ── Sidebar (message list) ── */
+    .msg-sidebar { width: 340px; min-width: 340px; border-right: 1px solid #e5e7eb; background: #f9fafb; display: flex; flex-direction: column; overflow: hidden; }
+    .msg-search { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    .msg-search input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.82rem; outline: none; }
+    .msg-search input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .msg-sort { padding: 6px 12px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 6px; }
+    .msg-sort label { font-size: 0.7rem; font-weight: 600; color: #6b7280; text-transform: uppercase; }
+    .msg-sort select { font-size: 0.78rem; border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 6px; background: white; }
+    .msg-list { flex: 1; overflow-y: auto; }
+
+    .msg-row { display: flex; gap: 10px; padding: 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: 0.1s; position: relative; align-items: flex-start; }
+    .msg-row:hover { background: #eff6ff; }
+    .msg-row.selected { background: #dbeafe; }
+    .msg-row.unread .msg-sender, .msg-row.unread .msg-subject { font-weight: 700; }
+    .msg-unread-dot { width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+    .msg-unread-dot.hidden { visibility: hidden; }
+    .msg-avatar { width: 36px; height: 36px; border-radius: 50%; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: #4F46E5; flex-shrink: 0; }
+    .msg-avatar.system { background: #dbeafe; color: #1d4ed8; }
+    .msg-avatar.promo { background: #fef3c7; color: #92400e; }
+    .msg-row-content { flex: 1; min-width: 0; }
+    .msg-sender { font-size: 0.82rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-subject { font-size: 0.78rem; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .msg-preview { font-size: 0.72rem; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .msg-time { font-size: 0.68rem; color: #9ca3af; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── Detail Panel ── */
+    .msg-detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: white; }
+    .msg-detail-empty { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; color: #9ca3af; }
+    .msg-detail-empty p { max-width: 320px; font-size: 0.92rem; line-height: 1.6; }
+    .msg-detail-empty a { color: #4F46E5; text-decoration: none; font-weight: 600; }
+
+    .msg-detail-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb; }
+    .msg-detail-meta { font-size: 0.78rem; color: #6b7280; line-height: 1.8; }
+    .msg-detail-meta strong { color: #1e293b; font-weight: 600; }
+    .msg-detail-subject { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-top: 8px; }
+
+    .msg-detail-body { flex: 1; padding: 1.5rem; overflow-y: auto; font-size: 0.9rem; color: #374151; line-height: 1.7; white-space: pre-wrap; }
+
+    /* AI Suggestion */
+    .ai-suggestion { background: #f5f3ff; border: 1px solid #c4b5fd; border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 1.5rem 0; }
+    .ai-suggestion-label { font-size: 0.72rem; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .ai-suggestion-text { font-size: 0.85rem; color: #4c1d95; line-height: 1.6; margin-bottom: 10px; background: white; border-radius: 6px; padding: 10px 12px; border: 1px solid #ede9fe; }
+    .ai-suggestion .btn-send-ai { background: #7c3aed; color: white; border: none; padding: 7px 18px; border-radius: 7px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .ai-suggestion .btn-send-ai:hover { background: #6d28d9; }
+
+    /* Action Bar */
+    .msg-actions { display: flex; gap: 8px; padding: 12px 1.5rem; border-top: 1px solid #e5e7eb; flex-wrap: wrap; }
+    .msg-actions .btn-act { padding: 7px 16px; font-size: 0.8rem; font-weight: 600; border-radius: 7px; cursor: pointer; border: 1px solid #d1d5db; background: white; color: #374151; transition: 0.15s; }
+    .msg-actions .btn-act:hover { background: #f3f4f6; }
+    .msg-actions .btn-act.primary { background: #4F46E5; color: white; border-color: #4F46E5; }
+    .msg-actions .btn-act.primary:hover { background: #4338ca; }
+    .msg-actions .btn-act.danger { color: #dc2626; border-color: #fca5a5; }
+    .msg-actions .btn-act.danger:hover { background: #fef2f2; }
+
+    /* Reply Form */
+    .msg-reply { padding: 0 1.5rem 1rem; display: none; }
+    .msg-reply.show { display: block; }
+    .msg-reply textarea { width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; }
+    .msg-reply textarea:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .msg-reply-btns { display: flex; gap: 8px; margin-top: 8px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 10px 24px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; z-index: 9999; transition: transform 0.3s; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Footer */
+    .msg-footer { background: #111827; color: #9CA3AF; text-align: center; padding: 2rem; font-size: 0.8rem; }
+    .msg-footer a { color: #60a5fa; text-decoration: none; }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .msg-nav { padding: 0 1rem; gap: 1rem; }
+      .msg-nav-links a { padding: 6px 8px; font-size: 0.75rem; }
+      .msg-body { flex-direction: column; }
+      .msg-sidebar { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid #e5e7eb; max-height: none; }
+      .msg-sidebar.hidden-mobile { display: none; }
+      .msg-detail.hidden-mobile { display: none; }
+      .msg-back-btn { display: inline-flex !important; }
+      .msg-tabs { overflow-x: auto; padding: 0 0.75rem; }
+      .msg-tab { padding: 10px 14px; font-size: 0.8rem; }
+    }
+    @media (min-width: 769px) {
+      .msg-back-btn { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="msg-app">
+
+  <!-- Navbar -->
+  <nav class="msg-nav">
+    <a href="index.html" class="logo">
+      Sanders PM <span class="sep">|</span> <span class="sub">RentVerified</span>
+    </a>
+    <div class="msg-nav-links">
+      <a href="index.html">Dashboard</a>
+      <a href="messages.html" class="active">Messages</a>
+      <a href="crm.html">CRM</a>
+      <a href="admin.html">Settings</a>
+    </div>
+  </nav>
+
+  <!-- Tab Bar -->
+  <div class="msg-tabs">
+    <div class="msg-tab active" data-tab="internal" onclick="switchTab('internal')">
+      <span>&#128229; Internal</span>
+      <span class="badge-count" id="badge-internal">0</span>
+    </div>
+    <div class="msg-tab" data-tab="network" onclick="switchTab('network')">
+      <span>&#129309; Network</span>
+      <span class="badge-count" id="badge-network">0</span>
+    </div>
+    <div class="msg-tab" data-tab="deals" onclick="switchTab('deals')">
+      <span>&#127991;&#65039; Deals</span>
+      <span class="badge-count" id="badge-deals">0</span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="msg-body">
+
+    <!-- Left Sidebar: Message List -->
+    <div class="msg-sidebar" id="msgSidebar">
+      <div class="msg-search">
+        <input type="text" id="msgSearch" placeholder="Search messages..." oninput="renderList()" />
+      </div>
+      <div class="msg-sort">
+        <label>Sort:</label>
+        <select id="msgSort" onchange="renderList()">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="unread">Unread first</option>
+        </select>
+      </div>
+      <div class="msg-list" id="msgList"></div>
+    </div>
+
+    <!-- Right Panel: Message Detail -->
+    <div class="msg-detail" id="msgDetail">
+      <div class="msg-detail-empty" id="msgEmpty">
+        <div>
+          <div style="font-size:2.5rem;margin-bottom:12px;">&#128172;</div>
+          <p id="emptyText">Select a message to read it here.</p>
+        </div>
+      </div>
+      <div id="msgContent" style="display:none;flex:1;display:none;flex-direction:column;">
+        <div class="msg-detail-header">
+          <div class="msg-detail-subject" id="detailSubject"></div>
+          <div class="msg-detail-meta">
+            <div><strong>From:</strong> <span id="detailFrom"></span></div>
+            <div><strong>To:</strong> <span id="detailTo"></span></div>
+            <div><strong>Date:</strong> <span id="detailDate"></span></div>
+          </div>
+        </div>
+        <div id="aiSuggestionSlot"></div>
+        <div class="msg-detail-body" id="detailBody"></div>
+        <div class="msg-reply" id="replyForm">
+          <textarea id="replyText" placeholder="Write your reply..."></textarea>
+          <div class="msg-reply-btns">
+            <button class="btn-act primary" onclick="sendReply()">Send Reply</button>
+            <button class="btn-act" onclick="toggleReply(false)">Cancel</button>
+          </div>
+        </div>
+        <div class="msg-actions">
+          <button class="btn-act msg-back-btn" onclick="goBackMobile()">&#8592; Back</button>
+          <button class="btn-act primary" onclick="toggleReply(true)">Reply</button>
+          <button class="btn-act" onclick="markUnread()">Mark Unread</button>
+          <button class="btn-act danger" onclick="deleteMessage()">Delete</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="msg-footer">
+    &copy; 2026 Sanders Property Management. Powered by <a href="index.html">RentVerified</a>.
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>
+if (typeof RVData !== 'undefined') { RVData._useSupabase = function() { return false; }; }
+</script>
+<script>
+/* ================================================================
+   Messages Inbox — RentVerified
+   ================================================================ */
+
+var SEED_MESSAGES = [
+  { id:'msg_1', from_id:'system', to_id:'demo_biz', message_type:'internal', subject:'Welcome to RentVerified!', body:'Your business account is set up and ready to go. Here are some things you can do first:\n\n1. Complete your business profile\n2. Add your first property or project\n3. Connect with a professional (accountant, attorney, loan officer)\n4. Set up your Business Advisor deadlines\n\nNeed help? Visit our Help Center or message support.', read:false, created_at:'2026-03-22T08:00:00Z' },
+  { id:'msg_2', from_id:'system', to_id:'demo_biz', message_type:'internal', subject:'Business Health Score: 65/100', body:'Your daily health check found 2 items needing attention:\n\n\u26A0\uFE0F No license/insurance deadlines tracked\n\u26A0\uFE0F No invoices sent yet\n\nOpen your Business Advisor to see the full action list.', read:false, created_at:'2026-03-22T09:00:00Z' },
+  { id:'msg_3', from_id:'lo_1', to_id:'demo_biz', message_type:'professional', subject:'Loan Package Received', body:'Hi there,\n\nI received your loan package and will begin reviewing it today. Your financials look solid \u2014 I have a few questions:\n\n1. What is the primary use of funds?\n2. Do you have any existing business debt?\n3. Can you provide last 2 years of tax returns?\n\nI will update your status to Under Review shortly.\n\nBest,\nMichael Torres\nMountain West Capital', read:false, created_at:'2026-03-22T10:30:00Z', related_id:'lp_demo_1', related_type:'loan_package' },
+  { id:'msg_4', from_id:'system', to_id:'demo_biz', message_type:'professional', subject:'Loan Update: Under Review', body:'Your loan package status has been updated to Under Review. Michael Torres at Mountain West Capital is reviewing your application.', read:true, created_at:'2026-03-20T10:00:00Z', related_id:'lp_demo_1', related_type:'loan_package' },
+  { id:'msg_5', from_id:'system', to_id:'demo_biz', message_type:'promotional', subject:'\uD83C\uDFF7\uFE0F Save 15% on Business Insurance', body:'Our partner Shield Insurance Group is offering RentVerified members an exclusive 15% discount on commercial property and general liability insurance.\n\nGet a free quote in under 5 minutes \u2014 your business data is pre-filled.\n\n[Get Quote \u2192]', read:true, created_at:'2026-03-21T12:00:00Z' },
+  { id:'msg_6', from_id:'system', to_id:'demo_biz', message_type:'promotional', subject:'\uD83D\uDCE6 Free Materials Price Check', body:'Northern Tool is offering RentVerified contractors free shipping on orders over $99 this month.\n\nCheck our Materials Price Lookup for the latest deals.\n\n[Browse Deals \u2192]', read:true, created_at:'2026-03-20T14:00:00Z' },
+  { id:'msg_7', from_id:'ac_1', to_id:'demo_biz', message_type:'professional', subject:'Tax Season Reminder', body:'Hi,\n\nJust a friendly reminder that the April 15 filing deadline is approaching. Based on the accounting entries I have access to, your estimated tax liability is around $8,400.\n\nWould you like me to prepare your return? I can have it ready within 5 business days.\n\nBest,\nSarah Mitchell, CPA', read:true, created_at:'2026-03-19T11:00:00Z' }
+];
+
+var SENDER_MAP = {
+  'system': { name: 'RentVerified System', avatar: 'RV', cls: 'system' },
+  'lo_1':   { name: 'Michael Torres', avatar: 'MT', cls: '' },
+  'ac_1':   { name: 'Sarah Mitchell, CPA', avatar: 'SM', cls: '' },
+  'demo_biz': { name: 'You', avatar: 'Y', cls: '' }
+};
+
+var TAB_MAP = {
+  'internal':     'internal',
+  'professional':  'network',
+  'promotional':   'deals'
+};
+
+var STORAGE_KEY = 'rv_messages';
+var activeTab = 'internal';
+var selectedId = null;
+
+function getMessages() {
+  var raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_MESSAGES));
+  return JSON.parse(JSON.stringify(SEED_MESSAGES));
+}
+
+function saveMessages(msgs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+}
+
+function tabForType(type) {
+  return TAB_MAP[type] || 'internal';
+}
+
+function senderInfo(id) {
+  return SENDER_MAP[id] || { name: id, avatar: id.charAt(0).toUpperCase(), cls: '' };
+}
+
+function fmtDate(iso) {
+  var d = new Date(iso);
+  var now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function fmtFullDate(iso) {
+  var d = new Date(iso);
+  return d.toLocaleDateString([], { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/* ── Tabs & Badges ── */
+function updateBadges() {
+  var msgs = getMessages();
+  var counts = { internal: 0, network: 0, deals: 0 };
+  msgs.forEach(function(m) {
+    if (!m.read) {
+      var t = tabForType(m.message_type);
+      counts[t] = (counts[t] || 0) + 1;
+    }
+  });
+  ['internal','network','deals'].forEach(function(t) {
+    var el = document.getElementById('badge-' + t);
+    if (el) {
+      el.textContent = counts[t];
+      el.style.display = counts[t] > 0 ? '' : 'none';
+    }
+  });
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  selectedId = null;
+  document.querySelectorAll('.msg-tab').forEach(function(el) {
+    el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+  });
+  renderList();
+  showEmpty();
+}
+
+/* ── List Rendering ── */
+function filteredMessages() {
+  var msgs = getMessages();
+  var search = (document.getElementById('msgSearch').value || '').toLowerCase();
+  var sort = document.getElementById('msgSort').value;
+
+  var filtered = msgs.filter(function(m) {
+    if (tabForType(m.message_type) !== activeTab) return false;
+    if (search) {
+      var s = senderInfo(m.from_id);
+      var hay = (m.subject + ' ' + m.body + ' ' + s.name).toLowerCase();
+      if (hay.indexOf(search) === -1) return false;
+    }
+    return true;
+  });
+
+  if (sort === 'newest') {
+    filtered.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+  } else if (sort === 'oldest') {
+    filtered.sort(function(a, b) { return new Date(a.created_at) - new Date(b.created_at); });
+  } else if (sort === 'unread') {
+    filtered.sort(function(a, b) {
+      if (a.read === b.read) return new Date(b.created_at) - new Date(a.created_at);
+      return a.read ? 1 : -1;
+    });
+  }
+  return filtered;
+}
+
+function renderList() {
+  var list = document.getElementById('msgList');
+  var msgs = filteredMessages();
+
+  if (msgs.length === 0) {
+    var emptyMap = {
+      internal: 'No internal messages. System alerts and team communication will appear here.',
+      network: 'No network messages. Connect with a professional to start receiving updates. <a href="professional-marketplace.html">Find a Pro \u2192</a>',
+      deals: 'No deals yet. Check back for special offers from our partners.'
+    };
+    list.innerHTML = '<div style="padding:2rem;text-align:center;color:#9ca3af;font-size:0.88rem;line-height:1.6;">' + (emptyMap[activeTab] || '') + '</div>';
+    updateBadges();
+    return;
+  }
+
+  var html = '';
+  msgs.forEach(function(m) {
+    var s = senderInfo(m.from_id);
+    var isPromo = m.message_type === 'promotional';
+    var avatarCls = s.cls || (isPromo ? 'promo' : '');
+    var preview = m.body.split('\n')[0].substring(0, 60);
+    html += '<div class="msg-row' + (!m.read ? ' unread' : '') + (selectedId === m.id ? ' selected' : '') + '" onclick="openMessage(\'' + m.id + '\')">'
+      + '<div class="msg-unread-dot' + (m.read ? ' hidden' : '') + '"></div>'
+      + '<div class="msg-avatar ' + avatarCls + '">' + s.avatar + '</div>'
+      + '<div class="msg-row-content">'
+      +   '<div class="msg-sender">' + escHtml(s.name) + '</div>'
+      +   '<div class="msg-subject">' + escHtml(m.subject) + '</div>'
+      +   '<div class="msg-preview">' + escHtml(preview) + '</div>'
+      + '</div>'
+      + '<div class="msg-time">' + fmtDate(m.created_at) + '</div>'
+      + '</div>';
+  });
+  list.innerHTML = html;
+  updateBadges();
+}
+
+/* ── Detail ── */
+function showEmpty() {
+  document.getElementById('msgEmpty').style.display = 'flex';
+  document.getElementById('msgContent').style.display = 'none';
+  document.getElementById('aiSuggestionSlot').innerHTML = '';
+  document.getElementById('replyForm').classList.remove('show');
+}
+
+function openMessage(id) {
+  var msgs = getMessages();
+  var msg = null;
+  msgs.forEach(function(m) { if (m.id === id) msg = m; });
+  if (!msg) return;
+
+  // Mark read
+  if (!msg.read) {
+    msg.read = true;
+    saveMessages(msgs);
+  }
+
+  selectedId = id;
+  var s = senderInfo(msg.from_id);
+
+  document.getElementById('detailSubject').textContent = msg.subject;
+  document.getElementById('detailFrom').textContent = s.name;
+  document.getElementById('detailTo').textContent = 'Sanders Property Management';
+  document.getElementById('detailDate').textContent = fmtFullDate(msg.created_at);
+  document.getElementById('detailBody').textContent = msg.body;
+
+  // AI Suggestion
+  var aiSlot = document.getElementById('aiSuggestionSlot');
+  aiSlot.innerHTML = '';
+  if (msg.message_type === 'professional') {
+    var suggestion = generateAISuggestion(msg);
+    if (suggestion) {
+      aiSlot.innerHTML = '<div class="ai-suggestion">'
+        + '<div class="ai-suggestion-label">\u2728 AI Suggestion</div>'
+        + '<div class="ai-suggestion-text">' + escHtml(suggestion) + '</div>'
+        + '<button class="btn-send-ai" onclick="sendAIReply()">Send Reply</button>'
+        + '</div>';
+    }
+  }
+
+  document.getElementById('msgEmpty').style.display = 'none';
+  document.getElementById('msgContent').style.display = 'flex';
+  document.getElementById('replyForm').classList.remove('show');
+
+  renderList();
+
+  // Mobile: hide sidebar, show detail
+  if (window.innerWidth <= 768) {
+    document.getElementById('msgSidebar').classList.add('hidden-mobile');
+    document.getElementById('msgDetail').classList.remove('hidden-mobile');
+  }
+}
+
+function generateAISuggestion(msg) {
+  var body = msg.body.toLowerCase();
+  if (msg.related_type === 'loan_package') {
+    if (body.indexOf('use of funds') !== -1 || body.indexOf('primary use') !== -1) {
+      return 'Hi Michael,\n\nThank you for reviewing our package. Here are the answers:\n\n1. Primary use of funds: Property acquisition and renovation\n2. No existing business debt\n3. Tax returns will be uploaded to the secure document portal today.\n\nPlease let me know if you need anything else.\n\nBest regards';
+    }
+    return 'Based on your loan package data, a pre-drafted reply is available. Click Send Reply to respond.';
+  }
+  if (body.indexOf('revenue') !== -1) {
+    return 'Based on your accounting data, your 12-month revenue is $240,000.';
+  }
+  if (body.indexOf('expense') !== -1) {
+    return 'Based on your accounting data, your 12-month expenses total $156,000.';
+  }
+  if (body.indexOf('cash flow') !== -1) {
+    return 'Your net cash flow over the past 12 months is $84,000.';
+  }
+  if (body.indexOf('tax') !== -1) {
+    return 'Hi Sarah,\n\nYes, please go ahead and prepare the return. All accounting entries are up to date in the system. Let me know if you need any additional documentation.\n\nThank you';
+  }
+  if (body.indexOf('properties') !== -1 || body.indexOf('property') !== -1) {
+    return 'You currently manage 12 properties across 3 portfolios.';
+  }
+  return null;
+}
+
+/* ── Actions ── */
+function toggleReply(show) {
+  var form = document.getElementById('replyForm');
+  if (show) {
+    form.classList.add('show');
+    document.getElementById('replyText').focus();
+  } else {
+    form.classList.remove('show');
+    document.getElementById('replyText').value = '';
+  }
+}
+
+function sendReply() {
+  var text = document.getElementById('replyText').value.trim();
+  if (!text) return;
+  var msgs = getMessages();
+  var orig = null;
+  msgs.forEach(function(m) { if (m.id === selectedId) orig = m; });
+  if (!orig) return;
+
+  var reply = {
+    id: 'msg_' + Date.now(),
+    from_id: 'demo_biz',
+    to_id: orig.from_id,
+    message_type: orig.message_type,
+    subject: 'Re: ' + orig.subject,
+    body: text,
+    read: true,
+    created_at: new Date().toISOString()
+  };
+  if (orig.related_id) { reply.related_id = orig.related_id; reply.related_type = orig.related_type; }
+  msgs.push(reply);
+  saveMessages(msgs);
+  toggleReply(false);
+  renderList();
+  showToast('Reply sent');
+}
+
+function sendAIReply() {
+  var aiText = document.querySelector('.ai-suggestion-text');
+  if (!aiText) return;
+  var text = aiText.textContent;
+  var msgs = getMessages();
+  var orig = null;
+  msgs.forEach(function(m) { if (m.id === selectedId) orig = m; });
+  if (!orig) return;
+
+  var reply = {
+    id: 'msg_' + Date.now(),
+    from_id: 'demo_biz',
+    to_id: orig.from_id,
+    message_type: orig.message_type,
+    subject: 'Re: ' + orig.subject,
+    body: text,
+    read: true,
+    created_at: new Date().toISOString()
+  };
+  if (orig.related_id) { reply.related_id = orig.related_id; reply.related_type = orig.related_type; }
+  msgs.push(reply);
+  saveMessages(msgs);
+  renderList();
+  showToast('AI-suggested reply sent');
+}
+
+function markUnread() {
+  if (!selectedId) return;
+  var msgs = getMessages();
+  msgs.forEach(function(m) { if (m.id === selectedId) m.read = false; });
+  saveMessages(msgs);
+  renderList();
+  showToast('Marked as unread');
+}
+
+function deleteMessage() {
+  if (!selectedId) return;
+  if (!confirm('Delete this message?')) return;
+  var msgs = getMessages().filter(function(m) { return m.id !== selectedId; });
+  saveMessages(msgs);
+  selectedId = null;
+  showEmpty();
+  renderList();
+  showToast('Message deleted');
+}
+
+function goBackMobile() {
+  document.getElementById('msgSidebar').classList.remove('hidden-mobile');
+  document.getElementById('msgDetail').classList.add('hidden-mobile');
+  selectedId = null;
+  renderList();
+}
+
+/* ── Utilities ── */
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2400);
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function() {
+  updateBadges();
+  renderList();
+});
+</script>
+<script src="share-widget.js" data-share-title="Messages" data-share-text="RentVerified messaging inbox"></script>
+</body>
+</html>

@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Document Sharing Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style id="dh-styles">
+  /* ── Header ── */
+  .dh-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #7c3aed 100%);
+    color: white; padding: 3.5rem 2rem 0;
+  }
+  .dh-header-inner { max-width: 1280px; margin: 0 auto; }
+  .dh-breadcrumb { font-size: 0.82rem; opacity: 0.8; margin-bottom: 0.75rem; }
+  .dh-breadcrumb a { color: rgba(255,255,255,0.8); text-decoration: none; }
+  .dh-breadcrumb a:hover { color: white; }
+  .dh-title-row {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+  }
+  .dh-title-left { display: flex; align-items: center; gap: 1rem; }
+  .dh-icon {
+    width: 56px; height: 56px; background: rgba(255,255,255,0.2);
+    border-radius: 14px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.8rem; flex-shrink: 0;
+  }
+  .dh-title { font-size: 1.7rem; font-weight: 900; line-height: 1.2; }
+  .dh-subtitle { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+  .dh-header-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .dh-btn-primary {
+    background: white; color: #4f46e5; border: none;
+    padding: 0.55rem 1.25rem; border-radius: 8px;
+    font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  }
+  .dh-btn-primary:hover { background: #ede9fe; }
+  .dh-btn-secondary {
+    background: rgba(255,255,255,0.18); color: white;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    padding: 0.55rem 1.25rem; border-radius: 8px;
+    font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  }
+  .dh-btn-secondary:hover { background: rgba(255,255,255,0.28); }
+  .dh-stats-strip {
+    display: flex; align-items: center; gap: 0;
+    background: rgba(255,255,255,0.12); border-radius: 12px 12px 0 0;
+    padding: 0.9rem 1.5rem; margin-top: 0.5rem;
+  }
+  .dh-stat { display: flex; flex-direction: column; gap: 2px; padding: 0 1.5rem; }
+  .dh-stat:first-child { padding-left: 0; }
+  .dh-stat-val { font-size: 1.5rem; font-weight: 800; }
+  .dh-stat-lbl { font-size: 0.72rem; opacity: 0.8; font-weight: 600; }
+  .dh-stat-div { width: 1px; height: 36px; background: rgba(255,255,255,0.3); }
+
+  /* ── Tabs ── */
+  .dh-tabs-bar {
+    background: white; border-bottom: 2px solid #e5e7eb;
+    position: sticky; top: 60px; z-index: 100;
+  }
+  .dh-tabs-inner {
+    max-width: 1280px; margin: 0 auto; padding: 0 2rem;
+    display: flex; gap: 0; overflow-x: auto;
+  }
+  .dh-tab {
+    padding: 0.9rem 1.4rem; border: none; background: none;
+    font-size: 0.88rem; font-weight: 600; color: #6b7280;
+    cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .dh-tab:hover { color: #374151; }
+  .dh-tab.active { color: #4f46e5; border-bottom-color: #4f46e5; }
+  .tab-badge {
+    background: #ede9fe; color: #6d28d9;
+    border-radius: 999px; font-size: 0.7rem; font-weight: 800;
+    min-width: 18px; height: 18px; padding: 0 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Body ── */
+  .dh-body { max-width: 1280px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+  .dh-panel { display: none; }
+  .dh-panel.active { display: block; }
+
+  /* ── Vault Layout ── */
+  .vault-layout { display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; }
+  .vault-sidebar {
+    background: white; border: 1px solid #e5e7eb;
+    border-radius: 12px; padding: 1rem; align-self: start;
+    position: sticky; top: 120px;
+  }
+  .vault-sidebar-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .vault-sidebar-title { font-size: 0.78rem; font-weight: 800; color: #374151; text-transform: uppercase; letter-spacing: 0.05em; }
+  .vault-sidebar-subtitle { font-size: 0.72rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; margin: 1rem 0 0.5rem; }
+  .vault-sidebar-section { margin-top: 0.75rem; border-top: 1px solid #f3f4f6; padding-top: 0.75rem; }
+  .icon-btn {
+    background: #f3f4f6; border: none; width: 24px; height: 24px;
+    border-radius: 6px; font-size: 1rem; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: #4f46e5; font-weight: 700;
+  }
+  .icon-btn:hover { background: #ede9fe; }
+  .folder-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 0.6rem; border-radius: 8px;
+    font-size: 0.84rem; font-weight: 600; color: #374151;
+    cursor: pointer; transition: all 0.12s; margin-bottom: 2px;
+  }
+  .folder-item:hover { background: #f5f3ff; color: #4f46e5; }
+  .folder-item.active { background: #ede9fe; color: #4f46e5; }
+  .folder-item .folder-count {
+    margin-left: auto; background: #e5e7eb; color: #6b7280;
+    border-radius: 999px; font-size: 0.68rem; font-weight: 700;
+    min-width: 18px; height: 18px; padding: 0 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .folder-item.active .folder-count { background: #c4b5fd; color: #6d28d9; }
+  .type-filter-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.5rem; border-radius: 6px;
+    font-size: 0.8rem; color: #6b7280; cursor: pointer;
+    transition: all 0.12s;
+  }
+  .type-filter-item:hover { background: #f5f3ff; color: #4f46e5; }
+  .type-filter-item.active { color: #4f46e5; font-weight: 700; }
+
+  /* ── Toolbar ── */
+  .vault-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  .vault-toolbar-left { display: flex; align-items: center; gap: 0.75rem; }
+  .vault-toolbar-right { display: flex; align-items: center; gap: 0.75rem; }
+  .search-wrap {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: white; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; padding: 0.4rem 0.75rem;
+    transition: border-color 0.12s;
+  }
+  .search-wrap:focus-within { border-color: #6366f1; }
+  .search-icon { font-size: 0.9rem; }
+  .search-wrap input { border: none; outline: none; font-size: 0.88rem; color: #374151; min-width: 180px; background: transparent; }
+  .view-toggle { display: flex; background: #f3f4f6; border-radius: 8px; padding: 2px; }
+  .view-btn {
+    background: none; border: none; padding: 0.3rem 0.5rem;
+    border-radius: 6px; cursor: pointer; font-size: 1rem; color: #6b7280;
+    transition: all 0.12s;
+  }
+  .view-btn.active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .sort-select {
+    border: 1.5px solid #e5e7eb; border-radius: 8px;
+    padding: 0.4rem 0.75rem; font-size: 0.82rem; color: #374151;
+    background: white; cursor: pointer; outline: none;
+  }
+
+  /* ── Drop Zone ── */
+  .drop-zone {
+    border: 2.5px dashed #c4b5fd; border-radius: 14px;
+    padding: 2.5rem 2rem; text-align: center;
+    background: #faf5ff; margin-bottom: 1.25rem;
+    transition: all 0.2s; display: none;
+  }
+  .drop-zone.visible { display: block; }
+  .drop-zone.drag-over { border-color: #6366f1; background: #ede9fe; }
+  .drop-zone-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+  .drop-zone-title { font-size: 1.05rem; font-weight: 700; color: #374151; }
+  .drop-zone-sub { font-size: 0.88rem; color: #6b7280; margin-top: 0.35rem; }
+  .drop-zone-types { font-size: 0.78rem; color: #9ca3af; margin-top: 0.5rem; }
+  .link-btn { background: none; border: none; color: #4f46e5; font-weight: 700; cursor: pointer; font-size: inherit; }
+  .link-btn:hover { text-decoration: underline; }
+
+  /* ── Document Grid ── */
+  .doc-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .doc-grid.list-view { display: flex; flex-direction: column; gap: 0.5rem; }
+  .doc-card {
+    background: white; border: 1px solid #e5e7eb; border-radius: 12px;
+    overflow: hidden; cursor: pointer; transition: all 0.15s;
+    display: flex; flex-direction: column;
+  }
+  .doc-card:hover { box-shadow: 0 4px 16px rgba(99,102,241,0.12); border-color: #a5b4fc; transform: translateY(-2px); }
+  .doc-card-thumb {
+    height: 100px; display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; border-bottom: 1px solid #f3f4f6;
+    background: linear-gradient(135deg, #f8f7ff 0%, #f0eeff 100%);
+  }
+  .doc-card-body { padding: 0.75rem; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .doc-card-name { font-size: 0.84rem; font-weight: 700; color: #111827; word-break: break-word; line-height: 1.3; }
+  .doc-card-meta { font-size: 0.72rem; color: #9ca3af; }
+  .doc-card-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+  .doc-tag {
+    background: #ede9fe; color: #6d28d9; font-size: 0.68rem;
+    font-weight: 700; padding: 1px 6px; border-radius: 999px;
+  }
+  .doc-card-footer {
+    padding: 0.5rem 0.75rem; border-top: 1px solid #f3f4f6;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .doc-shared-badge {
+    font-size: 0.68rem; font-weight: 700; color: #059669;
+    background: #d1fae5; padding: 1px 6px; border-radius: 999px;
+  }
+  .doc-actions { display: flex; gap: 3px; }
+  .doc-action-btn {
+    background: none; border: none; font-size: 0.9rem; cursor: pointer;
+    padding: 2px 4px; border-radius: 4px; color: #9ca3af; transition: all 0.12s;
+  }
+  .doc-action-btn:hover { background: #f3f4f6; color: #4f46e5; }
+
+  /* List view card */
+  .doc-grid.list-view .doc-card { flex-direction: row; align-items: center; }
+  .doc-grid.list-view .doc-card-thumb {
+    width: 56px; height: 56px; flex-shrink: 0; border-bottom: none;
+    border-right: 1px solid #f3f4f6; font-size: 1.5rem; border-radius: 0;
+  }
+  .doc-grid.list-view .doc-card-body { flex-direction: row; align-items: center; gap: 1rem; }
+  .doc-grid.list-view .doc-card-footer { border-top: none; border-left: 1px solid #f3f4f6; }
+
+  /* ── Shared views ── */
+  .shared-header { margin-bottom: 1.25rem; }
+  .shared-filter-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .filter-pill {
+    padding: 0.4rem 1rem; border-radius: 999px;
+    border: 1.5px solid #e5e7eb; background: white;
+    font-size: 0.82rem; font-weight: 600; color: #6b7280; cursor: pointer;
+    transition: all 0.12s;
+  }
+  .filter-pill:hover { border-color: #6366f1; color: #4f46e5; }
+  .filter-pill.active { background: #ede9fe; border-color: #6366f1; color: #4f46e5; }
+
+  /* ── Shares list ── */
+  .shares-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .share-row {
+    background: white; border: 1px solid #e5e7eb; border-radius: 10px;
+    padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem;
+    transition: border-color 0.12s;
+  }
+  .share-row:hover { border-color: #a5b4fc; }
+  .share-doc-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .share-doc-info { flex: 1; }
+  .share-doc-name { font-size: 0.9rem; font-weight: 700; color: #111827; }
+  .share-doc-meta { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+  .share-perm-badge {
+    font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 999px;
+  }
+  .perm-view { background: #e0f2fe; color: #0369a1; }
+  .perm-download { background: #dcfce7; color: #15803d; }
+  .perm-edit { background: #fef3c7; color: #92400e; }
+  .perm-revoked { background: #fee2e2; color: #991b1b; }
+  .revoke-btn {
+    background: none; border: 1px solid #e5e7eb; border-radius: 6px;
+    padding: 4px 10px; font-size: 0.76rem; font-weight: 600;
+    color: #6b7280; cursor: pointer; transition: all 0.12s;
+  }
+  .revoke-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+
+  /* ── Requests ── */
+  .req-toolbar {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+  }
+  .section-heading { font-size: 1.1rem; font-weight: 800; color: #111827; margin: 0 0 4px; }
+  .section-sub { font-size: 0.84rem; color: #6b7280; margin: 0; }
+  .requests-list { display: flex; flex-direction: column; gap: 1rem; }
+  .req-card {
+    background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;
+  }
+  .req-card-header {
+    padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .req-card-title { font-size: 0.95rem; font-weight: 700; color: #111827; }
+  .req-card-meta { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+  .req-status-badge {
+    font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; flex-shrink: 0;
+  }
+  .req-status-pending { background: #fef3c7; color: #92400e; }
+  .req-status-partial { background: #e0f2fe; color: #0369a1; }
+  .req-status-complete { background: #dcfce7; color: #15803d; }
+  .req-card-body { padding: 1rem 1.25rem; }
+  .req-progress-bar {
+    height: 6px; background: #f3f4f6; border-radius: 999px; margin-bottom: 0.75rem; overflow: hidden;
+  }
+  .req-progress-fill { height: 100%; border-radius: 999px; background: #6366f1; transition: width 0.4s ease; }
+  .req-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;
+  }
+  .req-item:last-child { border-bottom: none; }
+  .req-item-icon { font-size: 1rem; flex-shrink: 0; }
+  .req-item-label { flex: 1; font-size: 0.85rem; color: #374151; }
+  .req-item.done .req-item-label { text-decoration: line-through; color: #9ca3af; }
+  .req-item-status { font-size: 0.75rem; font-weight: 700; }
+  .req-card-footer {
+    padding: 0.75rem 1.25rem; border-top: 1px solid #e5e7eb; background: #f9fafb;
+    display: flex; gap: 0.5rem; align-items: center;
+  }
+  .req-action-btn {
+    background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 5px 12px; font-size: 0.8rem; font-weight: 600;
+    color: #374151; cursor: pointer; transition: all 0.12s;
+  }
+  .req-action-btn:hover { border-color: #6366f1; color: #4f46e5; }
+  .req-items-list { margin-bottom: 0.75rem; }
+  .req-item-entry {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 0.5rem; border-radius: 6px;
+    font-size: 0.85rem; color: #374151; border-bottom: 1px solid #f3f4f6;
+  }
+  .req-item-entry:hover { background: #f9fafb; }
+  .req-item-entry button { background: none; border: none; color: #d1d5db; cursor: pointer; font-size: 1rem; }
+  .req-item-entry button:hover { color: #ef4444; }
+  .req-add-row { display: flex; gap: 0.5rem; }
+  .req-add-row input {
+    flex: 1; padding: 0.5rem 0.75rem; border: 1.5px dashed #d1d5db;
+    border-radius: 8px; font-size: 0.85rem; outline: none; color: #374151;
+  }
+  .req-add-row input:focus { border-color: #6366f1; border-style: solid; }
+  .req-templates { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .req-tmpl-btn {
+    padding: 0.35rem 0.85rem; background: #f5f3ff; border: 1px solid #c4b5fd;
+    border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: #5b21b6;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .req-tmpl-btn:hover { background: #ede9fe; }
+
+  /* ── Activity Log ── */
+  .activity-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .activity-log { display: flex; flex-direction: column; gap: 0; }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 0.85rem 1rem; background: white; border: 1px solid #e5e7eb;
+    border-radius: 10px; margin-bottom: 0.5rem; transition: border-color 0.12s;
+  }
+  .activity-item:hover { border-color: #a5b4fc; }
+  .activity-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .activity-icon.upload { background: #ede9fe; }
+  .activity-icon.view { background: #e0f2fe; }
+  .activity-icon.download { background: #dcfce7; }
+  .activity-icon.share { background: #fef3c7; }
+  .activity-icon.request { background: #fce7f3; }
+  .activity-info { flex: 1; }
+  .activity-text { font-size: 0.88rem; color: #374151; font-weight: 500; }
+  .activity-text strong { color: #111827; font-weight: 700; }
+  .activity-time { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
+  .activity-doc-ref {
+    font-size: 0.78rem; background: #f5f3ff; color: #6d28d9;
+    padding: 2px 8px; border-radius: 6px; font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ── Modals ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: white; border-radius: 16px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+  }
+  .modal-title { font-size: 1.05rem; font-weight: 800; color: #111827; }
+  .modal-close {
+    background: #f3f4f6; border: none; width: 28px; height: 28px;
+    border-radius: 50%; font-size: 1.1rem; cursor: pointer; color: #6b7280;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #fee2e2; color: #dc2626; }
+  .modal-body { padding: 1.5rem; }
+  .modal-footer {
+    padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb;
+    display: flex; gap: 0.75rem; justify-content: flex-end;
+  }
+  .form-group { margin-bottom: 1.1rem; }
+  .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.4rem; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.55rem 0.85rem; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; font-size: 0.88rem; color: #374151; outline: none;
+    transition: border-color 0.15s; box-sizing: border-box; background: white; font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #6366f1; }
+  .form-select { width: 100%; padding: 0.55rem 0.85rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.88rem; color: #374151; outline: none; }
+  .btn-ghost {
+    padding: 0.55rem 1.25rem; background: transparent; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; font-size: 0.88rem; font-weight: 700; color: #374151; cursor: pointer;
+  }
+  .btn-ghost:hover { background: #f3f4f6; }
+  .btn-add-ci {
+    padding: 0.5rem 1rem; background: #4f46e5; color: white;
+    border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+  }
+  .btn-add-ci:hover { background: #4338ca; }
+  .upload-modal-zone {
+    border: 2px dashed #c4b5fd; border-radius: 10px; padding: 1.5rem;
+    text-align: center; cursor: pointer; background: #faf5ff;
+    margin-bottom: 1rem; transition: all 0.15s; font-size: 2rem;
+  }
+  .upload-modal-zone:hover { border-color: #6366f1; background: #ede9fe; }
+
+  /* ── Perm options ── */
+  .perm-options { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .perm-opt {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 1rem; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+    color: #374151; transition: all 0.12s;
+  }
+  .perm-opt:has(input:checked) { border-color: #6366f1; background: #ede9fe; color: #4f46e5; }
+  .perm-opt input { display: none; }
+
+  /* ── Share link ── */
+  .share-link-row { display: flex; gap: 0.5rem; }
+  .share-link-row input { flex: 1; }
+  .btn-copy {
+    padding: 0.5rem 1rem; background: #4f46e5; color: white;
+    border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-copy:hover { background: #4338ca; }
+  .contact-results {
+    border: 1.5px solid #e5e7eb; border-radius: 8px; max-height: 160px;
+    overflow-y: auto; margin-top: 4px; background: white;
+  }
+  .contact-result-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.5rem 0.75rem; cursor: pointer; transition: background 0.1s;
+    font-size: 0.85rem; color: #374151;
+  }
+  .contact-result-item:hover { background: #f5f3ff; }
+  .contact-av {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 800; color: white; flex-shrink: 0;
+  }
+  .selected-contacts { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .selected-contact-chip {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: #ede9fe; border: 1px solid #c4b5fd;
+    border-radius: 999px; padding: 3px 8px 3px 4px;
+    font-size: 0.78rem; font-weight: 600; color: #4f46e5;
+  }
+  .selected-contact-chip button {
+    background: none; border: none; color: #a78bfa; cursor: pointer;
+    font-size: 0.85rem; padding: 0; line-height: 1;
+  }
+  .selected-contact-chip button:hover { color: #7c3aed; }
+
+  /* ── Preview modal ── */
+  .preview-info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;
+  }
+  .preview-info-item { background: #f9fafb; border-radius: 8px; padding: 0.75rem; }
+  .preview-info-lbl { font-size: 0.72rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; }
+  .preview-info-val { font-size: 0.9rem; font-weight: 700; color: #111827; margin-top: 2px; }
+  .preview-doc-icon { text-align: center; font-size: 4rem; padding: 1.5rem; background: #f5f3ff; border-radius: 12px; margin-bottom: 1rem; }
+  .preview-activity { border-top: 1px solid #e5e7eb; padding-top: 1rem; margin-top: 1rem; }
+  .preview-activity-title { font-size: 0.8rem; font-weight: 800; color: #374151; text-transform: uppercase; margin-bottom: 0.5rem; }
+
+  /* ── Empty states ── */
+  .empty-state {
+    text-align: center; padding: 3rem 2rem; color: #9ca3af;
+    grid-column: 1 / -1;
+  }
+  .empty-state-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+  .empty-state-title { font-size: 1rem; font-weight: 700; color: #6b7280; margin-bottom: 0.4rem; }
+  .empty-state-sub { font-size: 0.85rem; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1f2937; color: white; padding: 0.75rem 1.5rem;
+    border-radius: 10px; font-size: 0.88rem; font-weight: 600;
+    opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { background: #059669; }
+  .toast.error { background: #dc2626; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .dh-header { padding: 2rem 1.25rem 0; }
+    .dh-title { font-size: 1.3rem; }
+    .dh-stats-strip { flex-wrap: wrap; gap: 0.75rem; }
+    .dh-stat-div { display: none; }
+    .dh-tabs-inner { padding: 0 0.75rem; }
+    .dh-body { padding: 1rem 1rem 3rem; }
+    .vault-layout { grid-template-columns: 1fr; }
+    .vault-sidebar { position: static; }
+    .doc-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .dh-header-actions { gap: 0.5rem; }
+    .kanban-board { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top Nav ── -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="index.html" class="topnav-logo">RentVerified</a>
+    <div class="topnav-links" id="topnavLinks">
+      <a href="teams.html">Teams</a>
+      <a href="collab-workspace.html">Workspaces</a>
+      <a href="messages.html">Messages</a>
+      <a href="network.html">Network</a>
+      <a href="doc-hub.html" class="active">Documents</a>
+    </div>
+    <button class="topnav-hamburger" id="hamburgerBtn" onclick="toggleNav()" aria-label="Menu">&#9776;</button>
+  </div>
+</nav>
+
+<!-- ── Page Header ── -->
+<div class="dh-header">
+  <div class="dh-header-inner">
+    <div class="dh-breadcrumb">
+      <a href="index.html">Home</a> &rsaquo; Document Hub
+    </div>
+    <div class="dh-title-row">
+      <div class="dh-title-left">
+        <div class="dh-icon">📁</div>
+        <div>
+          <div class="dh-title">Document Sharing Hub</div>
+          <div class="dh-subtitle">Upload, organize, and securely share documents with your network</div>
+        </div>
+      </div>
+      <div class="dh-header-actions">
+        <button class="dh-btn-secondary" onclick="openModal('requestModal')">📋 Request Docs</button>
+        <button class="dh-btn-primary" onclick="openUploadModal()">⬆ Upload</button>
+      </div>
+    </div>
+    <!-- Stats strip -->
+    <div class="dh-stats-strip">
+      <div class="dh-stat"><span class="dh-stat-val" id="statMyDocs">0</span><span class="dh-stat-lbl">My Documents</span></div>
+      <div class="dh-stat-div"></div>
+      <div class="dh-stat"><span class="dh-stat-val" id="statSharedWithMe">0</span><span class="dh-stat-lbl">Shared With Me</span></div>
+      <div class="dh-stat-div"></div>
+      <div class="dh-stat"><span class="dh-stat-val" id="statPendingReqs">0</span><span class="dh-stat-lbl">Pending Requests</span></div>
+      <div class="dh-stat-div"></div>
+      <div class="dh-stat"><span class="dh-stat-val" id="statStorage">0 MB</span><span class="dh-stat-lbl">Storage Used</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Tabs ── -->
+<div class="dh-tabs-bar">
+  <div class="dh-tabs-inner">
+    <button class="dh-tab active" onclick="switchTab('vault',this)">My Vault</button>
+    <button class="dh-tab" onclick="switchTab('shared-with-me',this)">Shared With Me <span class="tab-badge" id="badgeSharedWithMe">0</span></button>
+    <button class="dh-tab" onclick="switchTab('shared-by-me',this)">Shared By Me</button>
+    <button class="dh-tab" onclick="switchTab('requests',this)">Requests <span class="tab-badge" id="badgeRequests">0</span></button>
+    <button class="dh-tab" onclick="switchTab('activity',this)">Activity Log</button>
+  </div>
+</div>
+
+<!-- ── Content ── -->
+<div class="dh-body">
+
+  <!-- MY VAULT -->
+  <div class="dh-panel active" id="panel-vault">
+    <div class="vault-layout">
+      <!-- Sidebar: Folders -->
+      <aside class="vault-sidebar">
+        <div class="vault-sidebar-header">
+          <span class="vault-sidebar-title">Folders</span>
+          <button class="icon-btn" onclick="openNewFolderModal()" title="New Folder">+</button>
+        </div>
+        <div class="folder-list" id="folderList"></div>
+        <div class="vault-sidebar-section">
+          <div class="vault-sidebar-subtitle">Filter by Type</div>
+          <div class="type-filter-list" id="typeFilterList"></div>
+        </div>
+      </aside>
+      <!-- Main area -->
+      <div class="vault-main">
+        <div class="vault-toolbar">
+          <div class="vault-toolbar-left">
+            <div class="search-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="docSearch" placeholder="Search documents…" oninput="filterDocs()" />
+            </div>
+            <div class="view-toggle">
+              <button class="view-btn active" id="viewGrid" onclick="setView('grid',this)" title="Grid">⊞</button>
+              <button class="view-btn" id="viewList" onclick="setView('list',this)" title="List">☰</button>
+            </div>
+          </div>
+          <div class="vault-toolbar-right">
+            <select id="sortSelect" onchange="filterDocs()" class="sort-select">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="name-asc">A–Z</option>
+              <option value="size-desc">Largest First</option>
+            </select>
+          </div>
+        </div>
+        <!-- Upload drop zone (shown when empty) -->
+        <div class="drop-zone" id="dropZone" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+          <div class="drop-zone-icon">📄</div>
+          <div class="drop-zone-title">Drop files here to upload</div>
+          <div class="drop-zone-sub">or <button class="link-btn" onclick="triggerFilePicker()">browse files</button></div>
+          <div class="drop-zone-types">PDF, DOCX, XLSX, JPG, PNG, and more</div>
+          <input type="file" id="fileInput" multiple onchange="handleFileSelect(event)" style="display:none" />
+        </div>
+        <!-- Document grid/list -->
+        <div id="docContainer" class="doc-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARED WITH ME -->
+  <div class="dh-panel" id="panel-shared-with-me">
+    <div class="shared-header">
+      <div class="shared-filter-bar">
+        <button class="filter-pill active" onclick="filterSharedWithMe('all',this)">All</button>
+        <button class="filter-pill" onclick="filterSharedWithMe('view',this)">View Only</button>
+        <button class="filter-pill" onclick="filterSharedWithMe('download',this)">Download</button>
+        <button class="filter-pill" onclick="filterSharedWithMe('edit',this)">Edit</button>
+      </div>
+    </div>
+    <div id="sharedWithMeGrid" class="doc-grid"></div>
+  </div>
+
+  <!-- SHARED BY ME -->
+  <div class="dh-panel" id="panel-shared-by-me">
+    <div class="shared-header">
+      <div class="shared-filter-bar">
+        <button class="filter-pill active" onclick="filterSharedByMe('all',this)">All</button>
+        <button class="filter-pill" onclick="filterSharedByMe('active',this)">Active</button>
+        <button class="filter-pill" onclick="filterSharedByMe('revoked',this)">Revoked</button>
+      </div>
+    </div>
+    <div id="sharedByMeList" class="shares-list"></div>
+  </div>
+
+  <!-- REQUESTS -->
+  <div class="dh-panel" id="panel-requests">
+    <div class="req-toolbar">
+      <div class="req-toolbar-left">
+        <h2 class="section-heading">Document Requests</h2>
+        <p class="section-sub">Create a checklist of needed documents and send to a client via email or link.</p>
+      </div>
+      <button class="dh-btn-primary" onclick="openModal('requestModal')">+ New Request</button>
+    </div>
+    <div id="requestsList" class="requests-list"></div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="dh-panel" id="panel-activity">
+    <div class="activity-toolbar">
+      <h2 class="section-heading">Activity Log</h2>
+      <select id="activityFilter" onchange="renderActivity()" class="sort-select">
+        <option value="all">All Activity</option>
+        <option value="upload">Uploads</option>
+        <option value="view">Views</option>
+        <option value="download">Downloads</option>
+        <option value="share">Shares</option>
+        <option value="request">Requests</option>
+      </select>
+    </div>
+    <div id="activityLog" class="activity-log"></div>
+  </div>
+
+</div><!-- /dh-body -->
+
+<!-- ── Upload Modal ── -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">Upload Document</div>
+      <button class="modal-close" onclick="closeModal('uploadModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="upload-modal-zone" id="uploadModalZone" onclick="triggerFilePicker()">
+        <div>📄</div>
+        <div style="font-weight:700;margin:0.5rem 0">Drop files or click to browse</div>
+        <div id="uploadSelectedFiles" style="font-size:0.82rem;color:#6b7280;margin-top:0.25rem"></div>
+      </div>
+      <div class="form-group">
+        <label>Folder</label>
+        <select id="uploadFolder" class="form-select"></select>
+      </div>
+      <div class="form-group">
+        <label>Tags <span style="color:#9ca3af;font-weight:400">(comma-separated)</span></label>
+        <input type="text" id="uploadTags" placeholder="e.g., tax 2024, signed, confidential" />
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="uploadNotes" rows="2" placeholder="Optional description…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('uploadModal')">Cancel</button>
+      <button class="dh-btn-primary" onclick="confirmUpload()">Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Share Modal ── -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title">Share Document</div>
+      <button class="modal-close" onclick="closeModal('shareModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="shareDocName" style="font-size:0.88rem;font-weight:700;color:#374151;margin-bottom:1rem;padding:0.75rem;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;"></div>
+      <div class="form-group">
+        <label>Share with</label>
+        <input type="text" id="shareSearch" placeholder="Search your network…" oninput="searchShareContacts()" />
+        <div id="shareSearchResults" class="contact-results"></div>
+        <div id="shareSelectedContacts" class="selected-contacts"></div>
+      </div>
+      <div class="form-group">
+        <label>Permission Level</label>
+        <div class="perm-options">
+          <label class="perm-opt"><input type="radio" name="sharePermission" value="view" checked /> <span>👁 View Only</span></label>
+          <label class="perm-opt"><input type="radio" name="sharePermission" value="download" /> <span>⬇ Download</span></label>
+          <label class="perm-opt"><input type="radio" name="sharePermission" value="edit" /> <span>✏️ Edit</span></label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Or copy share link</label>
+        <div class="share-link-row">
+          <input type="text" id="shareLinkInput" readonly />
+          <button class="btn-copy" onclick="copyShareLink()">Copy</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('shareModal')">Cancel</button>
+      <button class="dh-btn-primary" onclick="confirmShare()">Share</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Document Request Modal ── -->
+<div class="modal-overlay" id="requestModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title">Create Document Request</div>
+      <button class="modal-close" onclick="closeModal('requestModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Request Title *</label>
+        <input type="text" id="reqTitle" placeholder="e.g., Smith Home Purchase — Documents Needed" />
+      </div>
+      <div class="form-group">
+        <label>Send to (email or name)</label>
+        <input type="text" id="reqRecipient" placeholder="client@email.com or search network…" />
+      </div>
+      <div class="form-group">
+        <label>Documents Needed</label>
+        <div id="reqItemsList" class="req-items-list"></div>
+        <div class="req-add-row">
+          <input type="text" id="reqNewItem" placeholder="e.g., Last 2 years tax returns…" onkeydown="if(event.key==='Enter')addReqItem()" />
+          <button class="btn-add-ci" onclick="addReqItem()">+ Add</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Quick Templates</label>
+        <div class="req-templates">
+          <button class="req-tmpl-btn" onclick="loadReqTemplate('home_purchase')">🏠 Home Purchase</button>
+          <button class="req-tmpl-btn" onclick="loadReqTemplate('rental_app')">🔑 Rental App</button>
+          <button class="req-tmpl-btn" onclick="loadReqTemplate('business_loan')">💼 Business Loan</button>
+          <button class="req-tmpl-btn" onclick="loadReqTemplate('tax_prep')">📊 Tax Prep</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('requestModal')">Cancel</button>
+      <button class="dh-btn-secondary" onclick="copyRequestLink()">📋 Copy Link</button>
+      <button class="dh-btn-primary" onclick="sendDocRequest()">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Doc Preview Modal ── -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title" id="previewDocTitle">Document Preview</div>
+      <button class="modal-close" onclick="closeModal('previewModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="previewModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('previewModal')">Close</button>
+      <button class="dh-btn-secondary" onclick="shareCurrentDoc()">Share</button>
+      <button class="dh-btn-primary" onclick="downloadCurrentDoc()">Download</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script src="data-layer.js"></script>
+<script id="dh-script">
+// ── Constants ──
+const FOLDERS = [
+  { id:'all',      icon:'📁', label:'All Documents' },
+  { id:'financial',icon:'💰', label:'Financial' },
+  { id:'legal',    icon:'⚖️', label:'Legal' },
+  { id:'insurance',icon:'🛡️', label:'Insurance' },
+  { id:'tax',      icon:'📊', label:'Tax' },
+  { id:'contracts',icon:'📝', label:'Contracts' },
+  { id:'personal_id',icon:'🪪', label:'Personal ID' },
+  { id:'property', icon:'🏠', label:'Property' },
+  { id:'other',    icon:'📂', label:'Other' },
+];
+const FILE_TYPES = [
+  { ext:['pdf'],               icon:'📄', color:'#dc2626', label:'PDF' },
+  { ext:['doc','docx'],        icon:'📝', color:'#2563eb', label:'Word' },
+  { ext:['xls','xlsx','csv'],  icon:'📊', color:'#059669', label:'Spreadsheet' },
+  { ext:['jpg','jpeg','png','gif','webp'], icon:'🖼️', color:'#7c3aed', label:'Image' },
+  { ext:['zip','rar'],         icon:'🗜️', color:'#6b7280', label:'Archive' },
+  { ext:['txt','md'],          icon:'📃', color:'#374151', label:'Text' },
+];
+const DOC_REQUEST_TEMPLATES = {
+  home_purchase: {
+    title:'Home Purchase — Documents Needed',
+    items:['Last 2 years federal tax returns','Last 2 months pay stubs','Last 2 months bank statements','Photo ID (front & back)','Proof of homeowners insurance','Signed purchase agreement','Gift letter (if applicable)']
+  },
+  rental_app: {
+    title:'Rental Application — Documents Needed',
+    items:['Government-issued photo ID','Last 2 pay stubs or proof of income','Last 2 months bank statements','Previous landlord contact / reference','Rental history (last 3 years)','Social Security number (for screening)']
+  },
+  business_loan: {
+    title:'Business Loan — Documents Needed',
+    items:['Last 2 years business tax returns','Last 2 years personal tax returns','YTD profit & loss statement','Business bank statements (6 months)','Business license & registration','Owner's photo ID','Voided business check']
+  },
+  tax_prep: {
+    title:'Tax Preparation — Documents Needed',
+    items:['W-2s for all employers','1099s (self-employment, freelance)','Prior year tax return','Social Security numbers (self + dependents)','Mortgage interest statements (1098)','Charitable donation receipts','Medical expense records','Business expense receipts']
+  }
+};
+const CONTACTS = [
+  { id:'c1', name:'Sarah Johnson', role:'Loan Officer', color:'#059669', initials:'SJ' },
+  { id:'c2', name:'Marcus Lee', role:'Real Estate Agent', color:'#2563eb', initials:'ML' },
+  { id:'c3', name:'Patricia Chen', role:'CPA / Tax Advisor', color:'#7c3aed', initials:'PC' },
+  { id:'c4', name:'David Williams', role:'Attorney', color:'#dc2626', initials:'DW' },
+  { id:'c5', name:'Emma Rodriguez', role:'Insurance Agent', color:'#d97706', initials:'ER' },
+  { id:'c6', name:'James Kim', role:'Property Manager', color:'#0891b2', initials:'JK' },
+];
+
+// ── State ──
+let currentFolder = 'all';
+let currentTypeFilter = '';
+let currentView = 'grid';
+let activeShareDocId = null;
+let selectedShareContacts = [];
+let reqItems = [];
+
+// ── localStorage helpers ──
+const LS = {
+  get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+// ── Demo seed ──
+function seedDemoData() {
+  if (LS.get('rv_dh_seeded')) return;
+  const now = Date.now();
+  const docs = [
+    { id:'d1', name:'2023_Tax_Return.pdf', folder:'tax', size:2100000, tags:['tax 2023','signed'], notes:'Filed April 2024', uploaded: now - 86400000*15, sharedWith:['c1','c2'] },
+    { id:'d2', name:'Lease_Agreement_Unit4B.pdf', folder:'legal', size:890000, tags:['lease','signed'], notes:'Signed by both parties', uploaded: now - 86400000*8, sharedWith:['c4'] },
+    { id:'d3', name:'Home_Insurance_Policy.pdf', folder:'insurance', size:1450000, tags:['insurance','2024'], notes:'Policy #HO-448821', uploaded: now - 86400000*5, sharedWith:['c1'] },
+    { id:'d4', name:'Bank_Statement_Jan2024.pdf', folder:'financial', size:340000, tags:['bank','2024'], notes:'Chase checking', uploaded: now - 86400000*3, sharedWith:[] },
+    { id:'d5', name:'Photo_ID_Front.jpg', folder:'personal_id', size:520000, tags:['ID'], notes:'Drivers license', uploaded: now - 86400000*2, sharedWith:['c1','c2','c3'] },
+    { id:'d6', name:'Property_Deed_123Main.pdf', folder:'property', size:710000, tags:['deed','property'], notes:'123 Main St, SLC', uploaded: now - 86400000*1, sharedWith:['c4','c5'] },
+    { id:'d7', name:'Purchase_Agreement_Signed.pdf', folder:'contracts', size:950000, tags:['contract','signed'], notes:'Accepted offer', uploaded: now - 3600000*5, sharedWith:['c1','c2','c4'] },
+    { id:'d8', name:'Pay_Stub_Feb2024.pdf', folder:'financial', size:210000, tags:['income','2024'], notes:'Employer: Acme Corp', uploaded: now - 3600000*2, sharedWith:['c1'] },
+  ];
+  const shares = [
+    { id:'sh1', docId:'d1', docName:'2023_Tax_Return.pdf', sharedBy:'Patricia Chen (PC)', sharedWith:'me', permission:'view', date: now - 86400000*10, status:'active' },
+    { id:'sh2', docId:'d2', docName:'Insurance_Quote_Smith.pdf', sharedBy:'Emma Rodriguez (ER)', sharedWith:'me', permission:'download', date: now - 86400000*3, status:'active' },
+    { id:'sh3', docId:'d3', docName:'Loan_Pre-Approval_Letter.pdf', sharedBy:'Sarah Johnson (SJ)', sharedWith:'me', permission:'view', date: now - 86400000*1, status:'active' },
+  ];
+  const requests = [
+    { id:'r1', title:'Smith Home Purchase — Documents Needed', recipient:'john.smith@email.com', items:['Last 2 years tax returns','Pay stubs (2 months)','Bank statements (2 months)','Photo ID'], uploaded:['Last 2 years tax returns'], date: now - 86400000*2, status:'partial' },
+    { id:'r2', title:'Johnson Rental Application', recipient:'amy.johnson@email.com', items:['Photo ID','Proof of income','Bank statements'], uploaded:[], date: now - 86400000*5, status:'pending' },
+    { id:'r3', title:'Q1 Tax Prep — Martinez Business', recipient:'carlos.martinez@biz.com', items:['Business tax returns','P&L statement','Bank statements 6mo','Business license'], uploaded:['Business tax returns','P&L statement','Bank statements 6mo','Business license'], date: now - 86400000*9, status:'complete' },
+  ];
+  const activity = [
+    { id:'a1', type:'upload', text:'You uploaded', doc:'2023_Tax_Return.pdf', time: now - 86400000*15 },
+    { id:'a2', type:'share', text:'You shared', doc:'2023_Tax_Return.pdf', with:'Sarah Johnson', time: now - 86400000*14 },
+    { id:'a3', type:'view', text:'Sarah Johnson viewed', doc:'2023_Tax_Return.pdf', time: now - 86400000*13 },
+    { id:'a4', type:'upload', text:'You uploaded', doc:'Lease_Agreement_Unit4B.pdf', time: now - 86400000*8 },
+    { id:'a5', type:'share', text:'You shared', doc:'Lease_Agreement_Unit4B.pdf', with:'David Williams', time: now - 86400000*7 },
+    { id:'a6', type:'download', text:'David Williams downloaded', doc:'Lease_Agreement_Unit4B.pdf', time: now - 86400000*6 },
+    { id:'a7', type:'request', text:'You sent a document request to', doc:'john.smith@email.com', time: now - 86400000*2 },
+    { id:'a8', type:'upload', text:'You uploaded', doc:'Photo_ID_Front.jpg', time: now - 86400000*2 },
+    { id:'a9', type:'view', text:'Marcus Lee viewed', doc:'Purchase_Agreement_Signed.pdf', time: now - 3600000*3 },
+  ];
+  LS.set('rv_documents', docs);
+  LS.set('rv_doc_shares', shares);
+  LS.set('rv_doc_requests', requests);
+  LS.set('rv_doc_activity', activity);
+  LS.set('rv_dh_seeded', true);
+}
+
+// ── Data accessors ──
+const getDocs = () => LS.get('rv_documents', []);
+const getShares = () => LS.get('rv_doc_shares', []);
+const getRequests = () => LS.get('rv_doc_requests', []);
+const getActivity = () => LS.get('rv_doc_activity', []);
+
+function saveDocs(docs) { LS.set('rv_documents', docs); }
+function saveShares(s) { LS.set('rv_doc_shares', s); }
+function saveRequests(r) { LS.set('rv_doc_requests', r); }
+function saveActivity(a) { LS.set('rv_doc_activity', a); }
+
+// ── File type helper ──
+function getFileInfo(name) {
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  for (const t of FILE_TYPES) if (t.ext.includes(ext)) return t;
+  return { icon:'📎', color:'#6b7280', label:'File' };
+}
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'Just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  if (s < 604800) return Math.floor(s/86400) + 'd ago';
+  return new Date(ts).toLocaleDateString();
+}
+
+// ── Nav ──
+function toggleNav() {
+  document.getElementById('topnavLinks').classList.toggle('open');
+}
+
+// ── Tab switching ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.dh-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.dh-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'vault') renderVault();
+  if (id === 'shared-with-me') renderSharedWithMe('all');
+  if (id === 'shared-by-me') renderSharedByMe('all');
+  if (id === 'requests') renderRequests();
+  if (id === 'activity') renderActivity();
+}
+
+// ── Folder sidebar ──
+function renderFolders() {
+  const docs = getDocs();
+  const list = document.getElementById('folderList');
+  list.innerHTML = FOLDERS.map(f => {
+    const count = f.id === 'all' ? docs.length : docs.filter(d => d.folder === f.id).length;
+    return `<div class="folder-item${currentFolder === f.id ? ' active' : ''}" onclick="selectFolder('${f.id}')">
+      <span>${f.icon}</span><span>${f.label}</span>
+      <span class="folder-count">${count}</span>
+    </div>`;
+  }).join('');
+
+  // Type filters
+  const typeList = document.getElementById('typeFilterList');
+  typeList.innerHTML = FILE_TYPES.map(t => {
+    const count = docs.filter(d => {
+      const ext = (d.name.split('.').pop() || '').toLowerCase();
+      return t.ext.includes(ext);
+    }).length;
+    if (!count) return '';
+    return `<div class="type-filter-item${currentTypeFilter === t.label ? ' active' : ''}" onclick="selectTypeFilter('${t.label}')">
+      <span>${t.icon}</span><span>${t.label}</span>
+      <span style="margin-left:auto;font-size:0.7rem;color:#9ca3af">${count}</span>
+    </div>`;
+  }).join('');
+}
+
+function selectFolder(id) {
+  currentFolder = id;
+  currentTypeFilter = '';
+  renderFolders();
+  renderVault();
+}
+function selectTypeFilter(label) {
+  currentTypeFilter = currentTypeFilter === label ? '' : label;
+  currentFolder = 'all';
+  renderFolders();
+  renderVault();
+}
+
+// ── Stats ──
+function updateStats() {
+  const docs = getDocs();
+  const shares = getShares();
+  const requests = getRequests();
+  document.getElementById('statMyDocs').textContent = docs.length;
+  const swm = shares.filter(s => s.status === 'active').length;
+  document.getElementById('statSharedWithMe').textContent = swm;
+  const pending = requests.filter(r => r.status !== 'complete').length;
+  document.getElementById('statPendingReqs').textContent = pending;
+  const totalBytes = docs.reduce((s, d) => s + (d.size || 0), 0);
+  document.getElementById('statStorage').textContent = formatSize(totalBytes);
+  document.getElementById('badgeSharedWithMe').textContent = swm;
+  document.getElementById('badgeRequests').textContent = pending;
+}
+
+// ── Vault render ──
+function renderVault() {
+  renderFolders();
+  filterDocs();
+}
+
+function filterDocs() {
+  const docs = getDocs();
+  const q = (document.getElementById('docSearch')?.value || '').toLowerCase();
+  const sort = document.getElementById('sortSelect')?.value || 'date-desc';
+  let filtered = docs.filter(d => {
+    if (currentFolder !== 'all' && d.folder !== currentFolder) return false;
+    if (currentTypeFilter) {
+      const ft = FILE_TYPES.find(t => t.label === currentTypeFilter);
+      if (ft) {
+        const ext = (d.name.split('.').pop() || '').toLowerCase();
+        if (!ft.ext.includes(ext)) return false;
+      }
+    }
+    if (q && !d.name.toLowerCase().includes(q) && !(d.tags||[]).some(t => t.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  filtered.sort((a, b) => {
+    if (sort === 'date-desc') return b.uploaded - a.uploaded;
+    if (sort === 'date-asc') return a.uploaded - b.uploaded;
+    if (sort === 'name-asc') return a.name.localeCompare(b.name);
+    if (sort === 'size-desc') return (b.size||0) - (a.size||0);
+    return 0;
+  });
+
+  const container = document.getElementById('docContainer');
+  const dropZone = document.getElementById('dropZone');
+  if (!container) return;
+
+  if (filtered.length === 0 && docs.length === 0) {
+    dropZone.classList.add('visible');
+    container.innerHTML = '';
+    return;
+  }
+  dropZone.classList.remove('visible');
+  container.className = currentView === 'grid' ? 'doc-grid' : 'doc-grid list-view';
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-title">No documents found</div><div class="empty-state-sub">Try a different search or folder</div></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(doc => {
+    const fi = getFileInfo(doc.name);
+    const shared = (doc.sharedWith||[]).length > 0;
+    const folder = FOLDERS.find(f => f.id === doc.folder) || FOLDERS[FOLDERS.length-1];
+    const tagsHtml = (doc.tags||[]).slice(0,3).map(t => `<span class="doc-tag">${t}</span>`).join('');
+    return `<div class="doc-card" onclick="previewDoc('${doc.id}')">
+      <div class="doc-card-thumb" style="background:linear-gradient(135deg,${fi.color}18 0%,${fi.color}28 100%)">${fi.icon}</div>
+      <div class="doc-card-body">
+        <div class="doc-card-name">${doc.name}</div>
+        <div class="doc-card-meta">${folder.icon} ${folder.label} · ${formatSize(doc.size||0)}</div>
+        <div class="doc-card-meta">${timeAgo(doc.uploaded)}</div>
+        ${tagsHtml ? `<div class="doc-card-tags">${tagsHtml}</div>` : ''}
+      </div>
+      <div class="doc-card-footer">
+        ${shared ? `<span class="doc-shared-badge">Shared (${doc.sharedWith.length})</span>` : '<span></span>'}
+        <div class="doc-actions">
+          <button class="doc-action-btn" onclick="event.stopPropagation();openShareModal('${doc.id}')" title="Share">🔗</button>
+          <button class="doc-action-btn" onclick="event.stopPropagation();downloadDoc('${doc.id}')" title="Download">⬇</button>
+          <button class="doc-action-btn" onclick="event.stopPropagation();deleteDoc('${doc.id}')" title="Delete">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterDocs();
+}
+
+// ── Upload ──
+function openUploadModal() { openModal('uploadModal'); populateUploadFolder(); }
+function populateUploadFolder() {
+  const sel = document.getElementById('uploadFolder');
+  if (!sel) return;
+  sel.innerHTML = FOLDERS.filter(f => f.id !== 'all').map(f => `<option value="${f.id}">${f.icon} ${f.label}</option>`).join('');
+}
+function triggerFilePicker() { document.getElementById('fileInput').click(); }
+let pendingFiles = [];
+function handleFileSelect(e) {
+  pendingFiles = Array.from(e.target.files);
+  document.getElementById('uploadSelectedFiles').textContent = pendingFiles.map(f => f.name).join(', ');
+  if (!document.getElementById('uploadModal').classList.contains('active')) openUploadModal();
+}
+function handleDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function handleDragLeave() { document.getElementById('dropZone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  pendingFiles = Array.from(e.dataTransfer.files);
+  document.getElementById('uploadSelectedFiles').textContent = pendingFiles.map(f => f.name).join(', ');
+  openUploadModal();
+}
+function confirmUpload() {
+  const folder = document.getElementById('uploadFolder')?.value || 'other';
+  const tags = (document.getElementById('uploadTags')?.value || '').split(',').map(t => t.trim()).filter(Boolean);
+  const notes = document.getElementById('uploadNotes')?.value || '';
+  const docs = getDocs();
+  const activity = getActivity();
+  const filesToAdd = pendingFiles.length > 0 ? pendingFiles : [{ name:'Sample_Document.pdf', size:512000 }];
+  filesToAdd.forEach(f => {
+    const doc = {
+      id: 'd' + Date.now() + Math.random().toString(36).slice(2,6),
+      name: f.name,
+      folder,
+      size: f.size || 512000,
+      tags,
+      notes,
+      uploaded: Date.now(),
+      sharedWith: []
+    };
+    docs.unshift(doc);
+    activity.unshift({ id:'a'+Date.now(), type:'upload', text:'You uploaded', doc:f.name, time:Date.now() });
+  });
+  saveDocs(docs);
+  saveActivity(activity);
+  pendingFiles = [];
+  closeModal('uploadModal');
+  updateStats();
+  renderVault();
+  showToast(`${filesToAdd.length} file(s) uploaded successfully`, 'success');
+}
+
+// ── Share ──
+function openShareModal(docId) {
+  activeShareDocId = docId;
+  selectedShareContacts = [];
+  const docs = getDocs();
+  const doc = docs.find(d => d.id === docId);
+  document.getElementById('shareDocName').textContent = doc ? `📄 ${doc.name}` : '';
+  document.getElementById('shareSearch').value = '';
+  document.getElementById('shareSearchResults').innerHTML = '';
+  document.getElementById('shareSelectedContacts').innerHTML = '';
+  document.getElementById('shareLinkInput').value = `https://rentverified.com/share/${docId}?token=${Math.random().toString(36).slice(2)}`;
+  openModal('shareModal');
+}
+function searchShareContacts() {
+  const q = document.getElementById('shareSearch').value.toLowerCase();
+  const results = q ? CONTACTS.filter(c => c.name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q)).slice(0,5) : CONTACTS.slice(0,5);
+  document.getElementById('shareSearchResults').innerHTML = results.map(c => `
+    <div class="contact-result-item" onclick="addShareContact('${c.id}')">
+      <div class="contact-av" style="background:${c.color}">${c.initials}</div>
+      <div><div style="font-weight:700">${c.name}</div><div style="font-size:0.75rem;color:#9ca3af">${c.role}</div></div>
+    </div>`).join('');
+}
+function addShareContact(id) {
+  if (selectedShareContacts.includes(id)) return;
+  selectedShareContacts.push(id);
+  renderSelectedShareContacts();
+  document.getElementById('shareSearch').value = '';
+  document.getElementById('shareSearchResults').innerHTML = '';
+}
+function removeShareContact(id) {
+  selectedShareContacts = selectedShareContacts.filter(c => c !== id);
+  renderSelectedShareContacts();
+}
+function renderSelectedShareContacts() {
+  document.getElementById('shareSelectedContacts').innerHTML = selectedShareContacts.map(id => {
+    const c = CONTACTS.find(x => x.id === id);
+    if (!c) return '';
+    return `<div class="selected-contact-chip">
+      <div class="contact-av" style="background:${c.color};width:20px;height:20px;font-size:0.55rem">${c.initials}</div>
+      ${c.name}<button onclick="removeShareContact('${id}')">&times;</button>
+    </div>`;
+  }).join('');
+}
+function confirmShare() {
+  if (!selectedShareContacts.length && !activeShareDocId) { showToast('Select at least one contact', 'error'); return; }
+  const perm = document.querySelector('input[name="sharePermission"]:checked')?.value || 'view';
+  const docs = getDocs(); const activity = getActivity(); const shares = getShares();
+  const doc = docs.find(d => d.id === activeShareDocId);
+  selectedShareContacts.forEach(cid => {
+    const c = CONTACTS.find(x => x.id === cid);
+    if (!doc.sharedWith.includes(cid)) doc.sharedWith.push(cid);
+    activity.unshift({ id:'a'+Date.now(), type:'share', text:'You shared', doc:doc.name, with:c?.name, time:Date.now() });
+  });
+  saveDocs(docs); saveActivity(activity); saveShares(shares);
+  closeModal('shareModal');
+  updateStats(); renderVault();
+  showToast(`Shared with ${selectedShareContacts.length} contact(s)`, 'success');
+}
+function copyShareLink() {
+  const val = document.getElementById('shareLinkInput').value;
+  navigator.clipboard?.writeText(val).then(() => showToast('Link copied!', 'success')).catch(() => showToast('Link copied!', 'success'));
+}
+function shareCurrentDoc() { closeModal('previewModal'); if (activeShareDocId) openShareModal(activeShareDocId); }
+
+// ── Download / Delete ──
+function downloadDoc(id) {
+  const docs = getDocs(); const doc = docs.find(d => d.id === id);
+  const activity = getActivity();
+  activity.unshift({ id:'a'+Date.now(), type:'download', text:'You downloaded', doc:doc?.name||'', time:Date.now() });
+  saveActivity(activity);
+  showToast(`Downloading ${doc?.name||'document'}…`, 'success');
+}
+function downloadCurrentDoc() { if (activeShareDocId) downloadDoc(activeShareDocId); closeModal('previewModal'); }
+function deleteDoc(id) {
+  if (!confirm('Delete this document?')) return;
+  const docs = getDocs().filter(d => d.id !== id);
+  saveDocs(docs); updateStats(); renderVault();
+  showToast('Document deleted', '');
+}
+
+// ── Preview ──
+function previewDoc(id) {
+  activeShareDocId = id;
+  const docs = getDocs();
+  const doc = docs.find(d => d.id === id);
+  if (!doc) return;
+  const fi = getFileInfo(doc.name);
+  const folder = FOLDERS.find(f => f.id === doc.folder) || FOLDERS[FOLDERS.length-1];
+  const sharedNames = (doc.sharedWith||[]).map(cid => CONTACTS.find(c => c.id === cid)?.name||cid).join(', ') || 'Nobody';
+  const docActivity = getActivity().filter(a => a.doc === doc.name).slice(0,5);
+  document.getElementById('previewDocTitle').textContent = doc.name;
+  document.getElementById('previewModalBody').innerHTML = `
+    <div class="preview-doc-icon">${fi.icon}</div>
+    <div class="preview-info-grid">
+      <div class="preview-info-item"><div class="preview-info-lbl">Folder</div><div class="preview-info-val">${folder.icon} ${folder.label}</div></div>
+      <div class="preview-info-item"><div class="preview-info-lbl">Size</div><div class="preview-info-val">${formatSize(doc.size||0)}</div></div>
+      <div class="preview-info-item"><div class="preview-info-lbl">Uploaded</div><div class="preview-info-val">${new Date(doc.uploaded).toLocaleDateString()}</div></div>
+      <div class="preview-info-item"><div class="preview-info-lbl">Shared With</div><div class="preview-info-val">${sharedNames}</div></div>
+    </div>
+    ${doc.notes ? `<div style="background:#f9fafb;border-radius:8px;padding:0.75rem;margin-bottom:1rem;font-size:0.85rem;color:#374151"><strong>Notes:</strong> ${doc.notes}</div>` : ''}
+    ${doc.tags?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem">${doc.tags.map(t=>`<span class="doc-tag">${t}</span>`).join('')}</div>` : ''}
+    <div class="preview-activity">
+      <div class="preview-activity-title">Recent Activity</div>
+      ${docActivity.length ? docActivity.map(a => `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid #f3f4f6;font-size:0.82rem;color:#374151">
+        <span>${a.type==='upload'?'⬆':a.type==='view'?'👁':a.type==='download'?'⬇':'🔗'}</span>
+        <span>${a.text}${a.with?' with '+a.with:''}</span>
+        <span style="margin-left:auto;color:#9ca3af">${timeAgo(a.time)}</span>
+      </div>`).join('') : '<div style="color:#9ca3af;font-size:0.82rem">No activity yet</div>'}
+    </div>`;
+  openModal('previewModal');
+}
+
+// ── Shared With Me ──
+function renderSharedWithMe(filter) {
+  const shares = getShares().filter(s => s.status === 'active');
+  let filtered = filter === 'all' ? shares : shares.filter(s => s.permission === filter);
+  const grid = document.getElementById('sharedWithMeGrid');
+  if (!grid) return;
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">No documents shared with you yet</div><div class="empty-state-sub">When someone shares a document, it'll appear here</div></div>`;
+    return;
+  }
+  grid.className = 'doc-grid';
+  grid.innerHTML = filtered.map(s => {
+    const fi = getFileInfo(s.docName);
+    const permBadge = `<span class="share-perm-badge perm-${s.permission}">${s.permission==='view'?'👁 View':s.permission==='download'?'⬇ Download':'✏️ Edit'}</span>`;
+    return `<div class="doc-card" onclick="">
+      <div class="doc-card-thumb" style="background:linear-gradient(135deg,${fi.color}18 0%,${fi.color}28 100%)">${fi.icon}</div>
+      <div class="doc-card-body">
+        <div class="doc-card-name">${s.docName}</div>
+        <div class="doc-card-meta">From: <strong>${s.sharedBy}</strong></div>
+        <div class="doc-card-meta">${timeAgo(s.date)}</div>
+        <div style="margin-top:4px">${permBadge}</div>
+      </div>
+      <div class="doc-card-footer">
+        <span></span>
+        <div class="doc-actions">
+          ${s.permission!=='view'?`<button class="doc-action-btn" onclick="downloadDoc('${s.docId}')" title="Download">⬇</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterSharedWithMe(f, btn) {
+  document.querySelectorAll('#panel-shared-with-me .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSharedWithMe(f);
+}
+
+// ── Shared By Me ──
+function renderSharedByMe(filter) {
+  const docs = getDocs();
+  const activity = getActivity();
+  const list = document.getElementById('sharedByMeList');
+  if (!list) return;
+  const shareRows = [];
+  docs.forEach(doc => {
+    (doc.sharedWith||[]).forEach(cid => {
+      const c = CONTACTS.find(x => x.id === cid);
+      if (!c) return;
+      shareRows.push({ docId:doc.id, docName:doc.name, contactId:cid, contactName:c.name, contactRole:c.role, status:'active' });
+    });
+  });
+  let filtered = filter === 'all' ? shareRows : shareRows.filter(r => r.status === filter);
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📤</div><div class="empty-state-title">No documents shared yet</div><div class="empty-state-sub">Share a document from My Vault</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(r => {
+    const fi = getFileInfo(r.docName);
+    return `<div class="share-row">
+      <div class="share-doc-icon">${fi.icon}</div>
+      <div class="share-doc-info">
+        <div class="share-doc-name">${r.docName}</div>
+        <div class="share-doc-meta">Shared with <strong>${r.contactName}</strong> · ${r.contactRole}</div>
+      </div>
+      <span class="share-perm-badge perm-view">👁 View</span>
+      <button class="revoke-btn" onclick="revokeShare('${r.docId}','${r.contactId}')">Revoke</button>
+    </div>`;
+  }).join('');
+}
+function filterSharedByMe(f, btn) {
+  document.querySelectorAll('#panel-shared-by-me .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSharedByMe(f);
+}
+function revokeShare(docId, contactId) {
+  const docs = getDocs();
+  const doc = docs.find(d => d.id === docId);
+  if (doc) doc.sharedWith = (doc.sharedWith||[]).filter(c => c !== contactId);
+  saveDocs(docs);
+  renderSharedByMe('all');
+  updateStats();
+  showToast('Access revoked', '');
+}
+
+// ── Requests ──
+function renderRequests() {
+  const reqs = getRequests();
+  const list = document.getElementById('requestsList');
+  if (!list) return;
+  if (!reqs.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No document requests yet</div><div class="empty-state-sub">Create a request checklist and send to a client</div></div>`;
+    return;
+  }
+  list.innerHTML = reqs.map(req => {
+    const total = req.items.length;
+    const done = (req.uploaded||[]).length;
+    const pct = total ? Math.round(done/total*100) : 0;
+    const statusCls = req.status === 'complete' ? 'req-status-complete' : req.status === 'partial' ? 'req-status-partial' : 'req-status-pending';
+    const statusLabel = req.status === 'complete' ? '✅ Complete' : req.status === 'partial' ? '🔵 In Progress' : '⏳ Pending';
+    return `<div class="req-card">
+      <div class="req-card-header">
+        <div>
+          <div class="req-card-title">${req.title}</div>
+          <div class="req-card-meta">Sent to: ${req.recipient} · ${timeAgo(req.date)}</div>
+        </div>
+        <span class="req-status-badge ${statusCls}">${statusLabel}</span>
+      </div>
+      <div class="req-card-body">
+        <div class="req-progress-bar"><div class="req-progress-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:0.78rem;color:#6b7280;margin-bottom:0.75rem">${done} of ${total} documents received</div>
+        ${req.items.map(item => {
+          const uploaded = (req.uploaded||[]).includes(item);
+          return `<div class="req-item${uploaded?' done':''}">
+            <span class="req-item-icon">${uploaded?'✅':'⬜'}</span>
+            <span class="req-item-label">${item}</span>
+            ${uploaded?'<span class="req-item-status" style="color:#059669">Uploaded</span>':'<span class="req-item-status" style="color:#9ca3af">Waiting</span>'}
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="req-card-footer">
+        <button class="req-action-btn" onclick="copyReqLink('${req.id}')">📋 Copy Link</button>
+        <button class="req-action-btn" onclick="resendRequest('${req.id}')">📧 Resend</button>
+        <button class="req-action-btn" style="margin-left:auto;color:#dc2626;border-color:#fca5a5" onclick="deleteRequest('${req.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Request Modal ──
+function addReqItem() {
+  const input = document.getElementById('reqNewItem');
+  const val = input.value.trim();
+  if (!val) return;
+  reqItems.push(val);
+  input.value = '';
+  renderReqItems();
+}
+function removeReqItem(idx) {
+  reqItems.splice(idx, 1);
+  renderReqItems();
+}
+function renderReqItems() {
+  const list = document.getElementById('reqItemsList');
+  if (!list) return;
+  list.innerHTML = reqItems.map((item, i) => `
+    <div class="req-item-entry">
+      <span>•</span><span style="flex:1">${item}</span>
+      <button onclick="removeReqItem(${i})">✕</button>
+    </div>`).join('');
+}
+function loadReqTemplate(key) {
+  const tmpl = DOC_REQUEST_TEMPLATES[key];
+  if (!tmpl) return;
+  document.getElementById('reqTitle').value = tmpl.title;
+  reqItems = [...tmpl.items];
+  renderReqItems();
+}
+function sendDocRequest() {
+  const title = document.getElementById('reqTitle')?.value.trim();
+  const recipient = document.getElementById('reqRecipient')?.value.trim();
+  if (!title) { showToast('Enter a request title', 'error'); return; }
+  if (!reqItems.length) { showToast('Add at least one document item', 'error'); return; }
+  const reqs = getRequests();
+  reqs.unshift({ id:'r'+Date.now(), title, recipient:recipient||'(no recipient)', items:[...reqItems], uploaded:[], date:Date.now(), status:'pending' });
+  saveRequests(reqs);
+  const activity = getActivity();
+  activity.unshift({ id:'a'+Date.now(), type:'request', text:'You sent a document request to', doc:recipient||title, time:Date.now() });
+  saveActivity(activity);
+  closeModal('requestModal');
+  reqItems = [];
+  switchTab('requests', document.querySelectorAll('.dh-tab')[3]);
+  updateStats();
+  showToast('Document request sent!', 'success');
+}
+function copyRequestLink() {
+  navigator.clipboard?.writeText('https://rentverified.com/client-upload?req=' + Date.now()).then(() => showToast('Link copied!', 'success')).catch(() => showToast('Link copied!', 'success'));
+}
+function copyReqLink(id) {
+  navigator.clipboard?.writeText(`https://rentverified.com/client-upload?req=${id}`).then(() => showToast('Upload link copied!', 'success')).catch(() => showToast('Link copied!', 'success'));
+}
+function resendRequest(id) { showToast('Request resent!', 'success'); }
+function deleteRequest(id) {
+  if (!confirm('Delete this request?')) return;
+  saveRequests(getRequests().filter(r => r.id !== id));
+  updateStats(); renderRequests();
+  showToast('Request deleted', '');
+}
+
+// ── Activity Log ──
+function renderActivity() {
+  const filter = document.getElementById('activityFilter')?.value || 'all';
+  let items = getActivity();
+  if (filter !== 'all') items = items.filter(a => a.type === filter);
+  const log = document.getElementById('activityLog');
+  if (!log) return;
+  if (!items.length) {
+    log.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📜</div><div class="empty-state-title">No activity yet</div></div>`;
+    return;
+  }
+  const typeConfig = { upload:{icon:'⬆',cls:'upload',label:'Uploaded'}, view:{icon:'👁',cls:'view',label:'Viewed'}, download:{icon:'⬇',cls:'download',label:'Downloaded'}, share:{icon:'🔗',cls:'share',label:'Shared'}, request:{icon:'📋',cls:'request',label:'Request'} };
+  log.innerHTML = items.slice(0,50).map(a => {
+    const tc = typeConfig[a.type] || typeConfig.view;
+    return `<div class="activity-item">
+      <div class="activity-icon ${tc.cls}">${tc.icon}</div>
+      <div class="activity-info">
+        <div class="activity-text">${a.text}${a.with?' with <strong>'+a.with+'</strong>':''}</div>
+        <div class="activity-time">${timeAgo(a.time)}</div>
+      </div>
+      <span class="activity-doc-ref">${a.doc}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Modal helpers ──
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+  if (id === 'requestModal') { reqItems = []; renderReqItems(); document.getElementById('reqTitle').value = ''; document.getElementById('reqRecipient').value = ''; }
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+});
+
+// ── Toast ──
+let _toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  clearTimeout(_toastTimer);
+  t.classList.add('show');
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  seedDemoData();
+  updateStats();
+  renderVault();
+});
+</script>
+</body>
+</html>

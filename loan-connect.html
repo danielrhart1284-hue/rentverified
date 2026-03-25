@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Connect — RentVerified</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;}
+
+  /* NAV */
+  .lc-nav{background:#0f172a;padding:.75rem 1.5rem;display:flex;align-items:center;gap:2rem;position:sticky;top:0;z-index:100;}
+  .lc-nav .logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:white;font-weight:700;font-size:1.1rem;}
+  .lc-nav .logo span{color:#3b82f6;}
+  .lc-nav .links{display:flex;gap:.25rem;margin-left:auto;}
+  .lc-nav .links a{color:#94a3b8;text-decoration:none;font-size:.875rem;padding:.4rem .75rem;border-radius:6px;transition:.15s;}
+  .lc-nav .links a:hover{color:white;background:rgba(255,255,255,.07);}
+  .lc-nav .links a.active{color:white;background:rgba(59,130,246,.15);}
+
+  /* HERO */
+  .lc-hero{background:linear-gradient(135deg,#1a56db 0%,#0f172a 100%);color:white;padding:3.5rem 2rem 3rem;text-align:center;}
+  .lc-hero h1{font-size:2.4rem;font-weight:900;margin-bottom:.6rem;}
+  .lc-hero p{font-size:1.05rem;opacity:.85;max-width:560px;margin:0 auto 2rem;}
+  .stat-bar{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;}
+  .stat-bar .stat{text-align:center;}
+  .stat-bar .stat .num{font-size:1.6rem;font-weight:800;}
+  .stat-bar .stat .lbl{font-size:.75rem;opacity:.7;margin-top:.15rem;}
+
+  /* LAYOUT */
+  .lc-layout{display:grid;grid-template-columns:65% 35%;gap:2rem;max-width:1200px;margin:2rem auto;padding:0 2rem;}
+
+  /* STEP INDICATOR */
+  .step-indicator{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:2rem;}
+  .step-dot{width:36px;height:36px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;position:relative;z-index:1;transition:.3s;}
+  .step-dot.active{background:#1a56db;color:white;}
+  .step-dot.done{background:#059669;color:white;}
+  .step-line{width:60px;height:3px;background:#e2e8f0;transition:.3s;}
+  .step-line.done{background:#059669;}
+  .step-labels{display:flex;justify-content:space-between;margin:-0.5rem 0 2rem;padding:0 .5rem;}
+  .step-labels span{font-size:.7rem;color:#64748b;text-align:center;flex:1;}
+
+  /* CARDS */
+  .card{background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:1.5rem;}
+  .card-header{padding:1rem 1.25rem;border-bottom:1px solid #f1f5f9;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:space-between;}
+  .card-body{padding:1.25rem;}
+
+  /* FILTER BAR */
+  .filter-bar{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+  .filter-bar input,.filter-bar select{padding:.5rem .75rem;border:1px solid #d1d5db;border-radius:8px;font-size:.85rem;background:white;}
+  .filter-bar input{flex:1;min-width:180px;}
+  .filter-bar select{min-width:160px;}
+
+  /* OFFICER GRID */
+  .officer-grid{display:grid;gap:1rem;}
+  .officer-card{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:1.25rem;display:flex;gap:1rem;align-items:flex-start;transition:.2s;cursor:pointer;}
+  .officer-card:hover{border-color:#3b82f6;box-shadow:0 2px 12px rgba(26,86,219,.1);}
+  .officer-card.selected{border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.15);}
+  .avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.95rem;flex-shrink:0;}
+  .officer-info{flex:1;min-width:0;}
+  .officer-info h4{font-weight:700;font-size:.95rem;margin-bottom:.15rem;display:flex;align-items:center;gap:.4rem;}
+  .verified-badge{font-size:.7rem;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:4px;font-weight:600;}
+  .officer-info .company{font-size:.8rem;color:#64748b;margin-bottom:.4rem;}
+  .officer-info .rating{font-size:.8rem;color:#f59e0b;margin-bottom:.5rem;}
+  .officer-info .rating span{color:#64748b;margin-left:.25rem;}
+  .specialties{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.6rem;}
+  .specialties .tag{font-size:.7rem;background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:4px;font-weight:500;}
+  .officer-meta{font-size:.75rem;color:#94a3b8;display:flex;gap:1rem;}
+  .btn-select{padding:.45rem 1rem;background:#1a56db;color:white;border:none;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;align-self:center;}
+  .btn-select:hover{background:#1e40af;}
+
+  /* PERMISSIONS STEP */
+  .perm-screen{display:none;}
+  .perm-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #f1f5f9;}
+  .perm-header .avatar{width:56px;height:56px;font-size:1.1rem;}
+  .perm-header h3{font-weight:700;font-size:1.1rem;}
+  .perm-header p{font-size:.85rem;color:#64748b;}
+  .perm-list{list-style:none;padding:0;margin-bottom:1.5rem;}
+  .perm-list li{padding:.65rem 0;border-bottom:1px solid #f8fafc;font-size:.9rem;display:flex;align-items:center;gap:.5rem;}
+  .perm-list li::before{content:'\1F4CB';font-size:.85rem;}
+  .perm-note{font-size:.8rem;color:#64748b;margin-bottom:1.25rem;font-style:italic;}
+  .btn-share{display:block;width:100%;padding:.85rem;background:#059669;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;}
+  .btn-share:hover{background:#047857;}
+  .btn-cancel{display:block;text-align:center;margin-top:.75rem;color:#64748b;font-size:.85rem;cursor:pointer;text-decoration:underline;background:none;border:none;}
+
+  /* PACKAGE GENERATION */
+  .pkg-screen{display:none;}
+  .progress-line{margin-bottom:1.5rem;}
+  .progress-item{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;font-size:.9rem;color:#94a3b8;transition:.3s;}
+  .progress-item.done{color:#1e293b;}
+  .progress-item .check{width:24px;height:24px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;transition:.3s;}
+  .progress-item.done .check{background:#dcfce7;color:#15803d;}
+  .pkg-summary{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;display:none;}
+  .pkg-summary h4{font-weight:700;margin-bottom:1rem;font-size:.95rem;}
+  .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+  .metric{padding:.6rem .75rem;background:white;border-radius:8px;border:1px solid #e2e8f0;}
+  .metric .label{font-size:.7rem;color:#64748b;text-transform:uppercase;font-weight:600;letter-spacing:.04em;}
+  .metric .value{font-size:1.15rem;font-weight:800;color:#0f172a;margin-top:.15rem;}
+  .metric .value.green{color:#059669;}
+  .btn-submit-pkg{display:block;width:100%;padding:.85rem;background:#1a56db;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;display:none;}
+  .btn-submit-pkg:hover{background:#1e40af;}
+
+  /* TRACKING STEP */
+  .track-screen{display:none;}
+  .timeline-v{padding-left:1.5rem;border-left:3px solid #e2e8f0;margin-bottom:1.5rem;}
+  .tl-item{position:relative;padding:.75rem 0 .75rem 1.5rem;}
+  .tl-item::before{content:'';position:absolute;left:-1.7rem;top:1rem;width:14px;height:14px;border-radius:50%;background:#cbd5e1;border:3px solid #f8fafc;}
+  .tl-item.active::before{background:#1a56db;box-shadow:0 0 0 4px rgba(26,86,219,.2);}
+  .tl-item.done::before{background:#059669;}
+  .tl-item h5{font-weight:700;font-size:.9rem;color:#334155;}
+  .tl-item.active h5{color:#1a56db;}
+  .tl-item p{font-size:.78rem;color:#94a3b8;margin-top:.15rem;}
+
+  /* RIGHT COLUMN */
+  .pkg-list-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid #f1f5f9;cursor:pointer;}
+  .pkg-list-item:last-child{border-bottom:none;}
+  .pkg-list-item:hover{background:#f8fafc;margin:0 -.5rem;padding-left:.5rem;padding-right:.5rem;border-radius:6px;}
+  .pkg-list-item .pkg-name{font-weight:600;font-size:.85rem;}
+  .pkg-list-item .pkg-date{font-size:.72rem;color:#94a3b8;}
+  .status-badge{font-size:.68rem;padding:2px 8px;border-radius:4px;font-weight:600;text-transform:capitalize;}
+  .status-badge.draft{background:#f1f5f9;color:#64748b;}
+  .status-badge.submitted{background:#dbeafe;color:#1d4ed8;}
+  .status-badge.under_review{background:#fef3c7;color:#92400e;}
+  .status-badge.pre_approved{background:#dcfce7;color:#15803d;}
+  .status-badge.funded{background:#d1fae5;color:#065f46;}
+  .status-badge.declined{background:#fee2e2;color:#991b1b;}
+
+  .qs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-top:.5rem;}
+  .qs-item{text-align:center;padding:.75rem .5rem;background:#f8fafc;border-radius:8px;}
+  .qs-item .qs-num{font-size:1.3rem;font-weight:800;color:#1a56db;}
+  .qs-item .qs-lbl{font-size:.68rem;color:#64748b;margin-top:.15rem;}
+
+  /* TOAST */
+  .toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;}
+  .toast{padding:.75rem 1.25rem;border-radius:8px;color:white;font-size:.85rem;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:slideIn .3s ease;max-width:360px;}
+  .toast.success{background:#059669;}
+  .toast.info{background:#1a56db;}
+  .toast.error{background:#dc2626;}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+  /* FOOTER */
+  .lc-footer{background:#0f172a;color:#64748b;text-align:center;padding:2rem;font-size:.8rem;margin-top:3rem;}
+
+  /* MOBILE */
+  @media(max-width:768px){
+    .lc-layout{grid-template-columns:1fr;padding:0 1rem;}
+    .lc-hero h1{font-size:1.75rem;}
+    .stat-bar{gap:1.5rem;}
+    .lc-nav .links{gap:0;}
+    .lc-nav .links a{font-size:.78rem;padding:.35rem .5rem;}
+    .officer-card{flex-direction:column;align-items:stretch;}
+    .btn-select{align-self:stretch;text-align:center;}
+    .metric-grid{grid-template-columns:1fr;}
+    .qs-grid{grid-template-columns:1fr 1fr 1fr;}
+    .step-line{width:30px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="lc-nav">
+  <a href="index.html" class="logo">Sanders PM &middot; <span>RentVerified</span></a>
+  <div class="links">
+    <a href="index.html">Dashboard</a>
+    <a href="funding.html">Funding</a>
+    <a href="financial-hub.html">Financial Hub</a>
+    <a href="loan-connect.html" class="active">Loan Connect</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="lc-hero">
+  <h1>&#127974; Loan Connect</h1>
+  <p>Get funded faster. Our AI packages your financials and connects you with verified loan officers.</p>
+  <div class="stat-bar">
+    <div class="stat"><div class="num" id="stat-officers">4</div><div class="lbl">Loan Officers Available</div></div>
+    <div class="stat"><div class="num" id="stat-packages">0</div><div class="lbl">Packages Submitted</div></div>
+    <div class="stat"><div class="num" id="stat-time">~7 days</div><div class="lbl">Avg Funding Time</div></div>
+  </div>
+</section>
+
+<!-- MAIN LAYOUT -->
+<div class="lc-layout">
+
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+
+    <!-- STEP INDICATOR -->
+    <div class="step-indicator" id="stepIndicator">
+      <div class="step-dot active" data-step="1">1</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" data-step="2">2</div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" data-step="3">3</div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot" data-step="4">4</div>
+    </div>
+    <div class="step-labels">
+      <span>Select Officer</span>
+      <span>Review Permissions</span>
+      <span>Generate Package</span>
+      <span>Track Status</span>
+    </div>
+
+    <!-- STEP 1: SELECT OFFICER -->
+    <div id="step1" class="card">
+      <div class="card-header">Select a Loan Officer</div>
+      <div class="card-body">
+        <div class="filter-bar">
+          <input type="text" id="searchOfficers" placeholder="Search by name or company...">
+          <select id="filterType">
+            <option value="">All Loan Types</option>
+            <option value="SBA">SBA Loans</option>
+            <option value="Business Line">Business Line of Credit</option>
+            <option value="Commercial Real Estate">Commercial Real Estate</option>
+            <option value="Bridge">Bridge Loans</option>
+            <option value="Equipment">Equipment Financing</option>
+            <option value="Working Capital">Working Capital</option>
+            <option value="Microloan">Microloans</option>
+            <option value="Revenue-Based">Revenue-Based Financing</option>
+          </select>
+        </div>
+        <div class="officer-grid" id="officerGrid"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: REVIEW PERMISSIONS -->
+    <div id="step2" class="perm-screen">
+      <div class="card">
+        <div class="card-header">Review Permissions</div>
+        <div class="card-body">
+          <div class="perm-header" id="permHeader"></div>
+          <p style="font-weight:700;margin-bottom:.75rem;">&#128274; Data that will be shared:</p>
+          <ul class="perm-list">
+            <li>12-month revenue &amp; income summary</li>
+            <li>12-month expense breakdown</li>
+            <li>Cash flow analysis (monthly average)</li>
+            <li>Owner statements (all periods)</li>
+            <li>Property portfolio details</li>
+            <li>Business license &amp; verification status</li>
+          </ul>
+          <p class="perm-note">You can revoke access anytime from your Loan Packages panel.</p>
+          <button class="btn-share" id="btnShare" onclick="shareAndConnect()">&#128274; Share &amp; Connect</button>
+          <button class="btn-cancel" onclick="goToStep(1)">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: PACKAGE GENERATION -->
+    <div id="step3" class="pkg-screen">
+      <div class="card">
+        <div class="card-header">Package Generation</div>
+        <div class="card-body">
+          <p style="font-weight:600;margin-bottom:1rem;">AI is packaging your financials...</p>
+          <div class="progress-line" id="progressLine">
+            <div class="progress-item" id="prog-revenue"><div class="check">&bull;</div>Revenue analysis</div>
+            <div class="progress-item" id="prog-expense"><div class="check">&bull;</div>Expense summary</div>
+            <div class="progress-item" id="prog-cashflow"><div class="check">&bull;</div>Cash flow calculation</div>
+            <div class="progress-item" id="prog-statements"><div class="check">&bull;</div>Owner statements compiled</div>
+            <div class="progress-item" id="prog-license"><div class="check">&bull;</div>License verification</div>
+          </div>
+          <div class="pkg-summary" id="pkgSummary">
+            <h4>Financial Summary</h4>
+            <div class="metric-grid">
+              <div class="metric"><div class="label">12-Mo Revenue</div><div class="value" id="mRevenue">$0</div></div>
+              <div class="metric"><div class="label">12-Mo Expenses</div><div class="value" id="mExpense">$0</div></div>
+              <div class="metric"><div class="label">Avg Monthly Cash Flow</div><div class="value green" id="mCashflow">$0</div></div>
+              <div class="metric"><div class="label">License Status</div><div class="value" id="mLicense">--</div></div>
+            </div>
+          </div>
+          <button class="btn-submit-pkg" id="btnSubmitPkg" onclick="submitPackage()">Submit to Loan Officer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: TRACK STATUS -->
+    <div id="step4" class="track-screen">
+      <div class="card">
+        <div class="card-header">Track Status</div>
+        <div class="card-body">
+          <div class="timeline-v" id="statusTimeline"></div>
+          <button class="btn-select" style="margin-top:.5rem;" onclick="startNew()">Start New Package</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left-col -->
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
+
+    <div class="card">
+      <div class="card-header">Your Loan Packages</div>
+      <div class="card-body" id="pkgListBody">
+        <p style="color:#94a3b8;font-size:.85rem;">No packages yet. Select a loan officer to get started.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Quick Stats</div>
+      <div class="card-body">
+        <div class="qs-grid">
+          <div class="qs-item"><div class="qs-num" id="qsTotal">0</div><div class="qs-lbl">Total Packages</div></div>
+          <div class="qs-item"><div class="qs-num" id="qsActive">0</div><div class="qs-lbl">Active Reviews</div></div>
+          <div class="qs-item"><div class="qs-num" id="qsPreApproved">$0</div><div class="qs-lbl">Pre-Approved</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /right-col -->
+
+</div><!-- /layout -->
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- FOOTER -->
+<footer class="lc-footer">&copy; 2026 Sanders Property Management &middot; RentVerified</footer>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}</script>
+<script src="share-widget.js" data-share-title="Loan Connect" data-share-text="Get funded faster with RentVerified Loan Connect"></script>
+<script src="business-advisor.js" data-industry="lending"></script>
+<script src="recommended-supplies.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════════
+// Loan Connect — RentVerified
+// ════════════════════════════════════════════════════════════════════
+
+var LOAN_OFFICERS = [
+  { id:'lo_1', name:'Michael Torres', company:'Mountain West Capital', verified:true, rating:4.9, reviews:47, initials:'MT', color:'#1a56db', funded:'$12.4M', specialties:['SBA 7(a)','Business Line of Credit','Equipment Financing'], minLoan:'$25,000', maxLoan:'$5,000,000' },
+  { id:'lo_2', name:'Jennifer Park', company:'Valley Business Lending', verified:true, rating:4.7, reviews:31, initials:'JP', color:'#7c3aed', funded:'$8.7M', specialties:['Commercial Real Estate','Bridge Loans','Startup Funding'], minLoan:'$50,000', maxLoan:'$10,000,000' },
+  { id:'lo_3', name:'Robert Chen', company:'Western Business Finance', verified:true, rating:4.8, reviews:56, initials:'RC', color:'#059669', funded:'$22.1M', specialties:['SBA 504','Working Capital','Franchise Financing'], minLoan:'$100,000', maxLoan:'$20,000,000' },
+  { id:'lo_4', name:'Amanda Wright', company:'Peak Lending Solutions', verified:false, rating:4.5, reviews:18, initials:'AW', color:'#f59e0b', funded:'$3.2M', specialties:['Microloans','Revenue-Based Financing','Invoice Factoring'], minLoan:'$5,000', maxLoan:'$500,000' }
+];
+
+var selectedOfficer = null;
+var currentStep = 1;
+var computedData = {};
+
+// ─── Init ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  renderOfficers(LOAN_OFFICERS);
+  loadPackages();
+  document.getElementById('searchOfficers').addEventListener('input', filterOfficers);
+  document.getElementById('filterType').addEventListener('change', filterOfficers);
+});
+
+// ─── Toast ────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  type = type || 'info';
+  var el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(function() { el.remove(); }, 4000);
+}
+
+// ─── Step Navigation ──────────────────────────────────────────────
+function goToStep(step) {
+  currentStep = step;
+  var steps = ['step1','step2','step3','step4'];
+  document.getElementById('step1').style.display = step === 1 ? 'block' : 'none';
+  document.getElementById('step2').style.display = step === 2 ? 'block' : 'none';
+  document.getElementById('step3').style.display = step === 3 ? 'block' : 'none';
+  document.getElementById('step4').style.display = step === 4 ? 'block' : 'none';
+
+  // Update dots
+  var dots = document.querySelectorAll('.step-dot');
+  var lines = [document.getElementById('line1'), document.getElementById('line2'), document.getElementById('line3')];
+  dots.forEach(function(dot, i) {
+    dot.className = 'step-dot';
+    if (i + 1 < step) { dot.className = 'step-dot done'; dot.textContent = '\u2713'; }
+    else if (i + 1 === step) { dot.className = 'step-dot active'; dot.textContent = String(i + 1); }
+    else { dot.textContent = String(i + 1); }
+  });
+  lines.forEach(function(line, i) {
+    line.className = i + 1 < step ? 'step-line done' : 'step-line';
+  });
+}
+
+// ─── Filter Officers ──────────────────────────────────────────────
+function filterOfficers() {
+  var q = document.getElementById('searchOfficers').value.toLowerCase();
+  var type = document.getElementById('filterType').value;
+  var filtered = LOAN_OFFICERS.filter(function(o) {
+    var matchesSearch = !q || o.name.toLowerCase().indexOf(q) !== -1 || o.company.toLowerCase().indexOf(q) !== -1;
+    var matchesType = !type || o.specialties.some(function(s) { return s.indexOf(type) !== -1; });
+    return matchesSearch && matchesType;
+  });
+  renderOfficers(filtered);
+}
+
+// ─── Render Officers ──────────────────────────────────────────────
+function renderOfficers(officers) {
+  var grid = document.getElementById('officerGrid');
+  if (!officers.length) { grid.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">No matching loan officers found.</p>'; return; }
+  grid.innerHTML = officers.map(function(o) {
+    var stars = '';
+    for (var i = 0; i < 5; i++) { stars += i < Math.round(o.rating) ? '\u2605' : '\u2606'; }
+    var tags = o.specialties.map(function(s) { return '<span class="tag">' + s + '</span>'; }).join('');
+    return '<div class="officer-card" id="card_' + o.id + '">' +
+      '<div class="avatar" style="background:' + o.color + '">' + o.initials + '</div>' +
+      '<div class="officer-info">' +
+        '<h4>' + o.name + (o.verified ? ' <span class="verified-badge">\u2705 Verified</span>' : '') + '</h4>' +
+        '<div class="company">' + o.company + '</div>' +
+        '<div class="rating">' + stars + ' ' + o.rating + '<span>(' + o.reviews + ' reviews)</span></div>' +
+        '<div class="specialties">' + tags + '</div>' +
+        '<div class="officer-meta"><span>Funded: ' + o.funded + '</span><span>Range: ' + o.minLoan + ' - ' + o.maxLoan + '</span></div>' +
+      '</div>' +
+      '<button class="btn-select" onclick="selectOfficer(\'' + o.id + '\')">Select</button>' +
+    '</div>';
+  }).join('');
+}
+
+// ─── Select Officer ───────────────────────────────────────────────
+function selectOfficer(id) {
+  selectedOfficer = LOAN_OFFICERS.find(function(o) { return o.id === id; });
+  if (!selectedOfficer) return;
+
+  // Show permissions
+  var ph = document.getElementById('permHeader');
+  ph.innerHTML = '<div class="avatar" style="background:' + selectedOfficer.color + '">' + selectedOfficer.initials + '</div>' +
+    '<div><h3>' + selectedOfficer.name + '</h3><p>' + selectedOfficer.company + '</p></div>';
+
+  goToStep(2);
+  showToast('Selected ' + selectedOfficer.name, 'info');
+}
+
+// ─── Share & Connect ──────────────────────────────────────────────
+function shareAndConnect() {
+  goToStep(3);
+  generatePackage();
+}
+
+// ─── Compute Financials ───────────────────────────────────────────
+function computeFinancials() {
+  var revenue = 0, expenses = 0;
+  var hasData = false;
+
+  try {
+    var txRaw = localStorage.getItem('rv_transactions');
+    if (txRaw) {
+      var txns = JSON.parse(txRaw);
+      var cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - 12);
+      txns.forEach(function(t) {
+        var d = new Date(t.date || t.entry_date || t.created_at);
+        if (d >= cutoff) {
+          var amt = parseFloat(t.amount) || 0;
+          if (t.type === 'income' || t.type === 'revenue') { revenue += amt; hasData = true; }
+          else if (t.type === 'expense') { expenses += Math.abs(amt); hasData = true; }
+        }
+      });
+    }
+  } catch (e) { /* ignore */ }
+
+  if (!hasData) {
+    revenue = 240000;
+    expenses = 168000;
+  }
+
+  var cashflow = (revenue - expenses) / 12;
+
+  // License check
+  var licenseVerified = false;
+  try {
+    var deadlines = JSON.parse(localStorage.getItem('rv_business_deadlines') || '[]');
+    licenseVerified = deadlines.some(function(d) {
+      return d.status !== 'overdue';
+    });
+    if (!deadlines.length) licenseVerified = true; // demo mode
+  } catch (e) { licenseVerified = true; }
+
+  computedData = {
+    revenue_12mo: revenue,
+    expense_12mo: expenses,
+    cashflow_avg: cashflow,
+    license_verified: licenseVerified
+  };
+
+  return computedData;
+}
+
+// ─── Generate Package Animation ───────────────────────────────────
+function generatePackage() {
+  var data = computeFinancials();
+  var items = ['prog-revenue','prog-expense','prog-cashflow','prog-statements','prog-license'];
+  var delay = 600;
+
+  // Reset
+  items.forEach(function(id) {
+    var el = document.getElementById(id);
+    el.className = 'progress-item';
+    el.querySelector('.check').textContent = '\u2022';
+  });
+  document.getElementById('pkgSummary').style.display = 'none';
+  document.getElementById('btnSubmitPkg').style.display = 'none';
+
+  items.forEach(function(id, i) {
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      el.className = 'progress-item done';
+      el.querySelector('.check').textContent = '\u2713';
+
+      // After last item
+      if (i === items.length - 1) {
+        setTimeout(function() {
+          document.getElementById('mRevenue').textContent = '$' + data.revenue_12mo.toLocaleString();
+          document.getElementById('mExpense').textContent = '$' + data.expense_12mo.toLocaleString();
+          document.getElementById('mCashflow').textContent = '$' + Math.round(data.cashflow_avg).toLocaleString() + '/mo';
+          document.getElementById('mLicense').textContent = data.license_verified ? '\u2705 Verified' : '\u274C Not Verified';
+          document.getElementById('mLicense').style.color = data.license_verified ? '#059669' : '#dc2626';
+          document.getElementById('pkgSummary').style.display = 'block';
+          document.getElementById('btnSubmitPkg').style.display = 'block';
+          showToast('Package ready for review', 'success');
+        }, 400);
+      }
+    }, delay * (i + 1));
+  });
+}
+
+// ─── Submit Package ───────────────────────────────────────────────
+async function submitPackage() {
+  if (!selectedOfficer || !computedData.revenue_12mo) return;
+
+  var pkg = {
+    business_id: 'demo_biz',
+    loan_officer_id: selectedOfficer.id,
+    loan_officer_name: selectedOfficer.name,
+    loan_officer_company: selectedOfficer.company,
+    status: 'submitted',
+    shared_at: new Date().toISOString(),
+    revenue_12mo: computedData.revenue_12mo,
+    expense_12mo: computedData.expense_12mo,
+    cashflow_avg: computedData.cashflow_avg,
+    license_verified: computedData.license_verified,
+    package_url: '#generated',
+    status_history: [
+      { status: 'submitted', date: new Date().toISOString(), note: 'Package submitted to ' + selectedOfficer.name }
+    ]
+  };
+
+  try {
+    await RVData.saveLoanPackage(pkg);
+    await RVData.saveMessage({
+      to_id: 'demo_biz', from_id: 'system', message_type: 'professional',
+      subject: 'Loan Package Submitted',
+      body: 'Your loan package has been submitted to ' + selectedOfficer.name + ' at ' + selectedOfficer.company + '. Revenue: $' + computedData.revenue_12mo.toLocaleString() + ', Expenses: $' + computedData.expense_12mo.toLocaleString() + ', Cash Flow: $' + Math.round(computedData.cashflow_avg).toLocaleString() + '/mo.'
+    });
+  } catch (e) { /* continue */ }
+
+  showToast('Package submitted to ' + selectedOfficer.name + '!', 'success');
+  loadPackages();
+  showTracking('submitted');
+  goToStep(4);
+}
+
+// ─── Show Tracking Timeline ───────────────────────────────────────
+function showTracking(currentStatus) {
+  var statuses = [
+    { key:'submitted', label:'Submitted', desc:'Package sent to loan officer' },
+    { key:'under_review', label:'Under Review', desc:'Financials being reviewed' },
+    { key:'pre_approved', label:'Pre-Approved', desc:'Pending final verification' },
+    { key:'funded', label:'Funded', desc:'Loan disbursed' }
+  ];
+
+  var reached = false;
+  var html = '';
+  statuses.forEach(function(s) {
+    var cls = '';
+    if (s.key === currentStatus) { cls = 'active'; reached = true; }
+    else if (!reached) { cls = 'done'; }
+    html += '<div class="tl-item ' + cls + '">' +
+      '<h5>' + s.label + '</h5>' +
+      '<p>' + s.desc + (cls === 'active' || cls === 'done' ? ' &middot; ' + new Date().toLocaleDateString() : '') + '</p>' +
+    '</div>';
+  });
+  document.getElementById('statusTimeline').innerHTML = html;
+}
+
+// ─── Load Packages (right column) ─────────────────────────────────
+function loadPackages() {
+  var items = JSON.parse(localStorage.getItem('rv_loan_packages') || '[]');
+  var body = document.getElementById('pkgListBody');
+
+  if (!items.length) {
+    body.innerHTML = '<p style="color:#94a3b8;font-size:.85rem;">No packages yet. Select a loan officer to get started.</p>';
+    document.getElementById('qsTotal').textContent = '0';
+    document.getElementById('qsActive').textContent = '0';
+    document.getElementById('qsPreApproved').textContent = '$0';
+    document.getElementById('stat-packages').textContent = '0';
+    return;
+  }
+
+  body.innerHTML = items.map(function(p) {
+    var name = p.loan_officer_name || 'Loan Officer';
+    var date = p.shared_at ? new Date(p.shared_at).toLocaleDateString() : '';
+    var statusLabel = (p.status || 'draft').replace(/_/g, ' ');
+    return '<div class="pkg-list-item" onclick="viewPackage(\'' + p.id + '\')">' +
+      '<div><div class="pkg-name">' + name + '</div><div class="pkg-date">' + date + '</div></div>' +
+      '<span class="status-badge ' + (p.status || 'draft') + '">' + statusLabel + '</span>' +
+    '</div>';
+  }).join('');
+
+  // Quick stats
+  var total = items.length;
+  var active = items.filter(function(p) { return p.status === 'under_review' || p.status === 'submitted'; }).length;
+  var preApproved = items.filter(function(p) { return p.status === 'pre_approved'; }).reduce(function(sum, p) { return sum + (p.revenue_12mo || 0); }, 0);
+
+  document.getElementById('qsTotal').textContent = total;
+  document.getElementById('qsActive').textContent = active;
+  document.getElementById('qsPreApproved').textContent = preApproved ? '$' + preApproved.toLocaleString() : '$0';
+  document.getElementById('stat-packages').textContent = items.filter(function(p) { return p.status === 'submitted' || p.status === 'under_review' || p.status === 'pre_approved' || p.status === 'funded'; }).length;
+}
+
+// ─── View Package ─────────────────────────────────────────────────
+function viewPackage(id) {
+  var items = JSON.parse(localStorage.getItem('rv_loan_packages') || '[]');
+  var pkg = items.find(function(p) { return p.id === id; });
+  if (!pkg) return;
+
+  // Find the officer
+  var officer = LOAN_OFFICERS.find(function(o) { return o.id === pkg.loan_officer_id; });
+  if (officer) selectedOfficer = officer;
+
+  computedData = {
+    revenue_12mo: pkg.revenue_12mo || 0,
+    expense_12mo: pkg.expense_12mo || 0,
+    cashflow_avg: pkg.cashflow_avg || 0,
+    license_verified: pkg.license_verified || false
+  };
+
+  showTracking(pkg.status || 'submitted');
+  goToStep(4);
+}
+
+// ─── Start New ────────────────────────────────────────────────────
+function startNew() {
+  selectedOfficer = null;
+  computedData = {};
+  goToStep(1);
+}
+</script>
+</body>
+</html>

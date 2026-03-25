@@ -282,9 +282,24 @@
     }
     #toast.show { opacity: 1; transform: translateY(0); }
     /* ── Responsive ─────────────────────────────────────── */
+    /* Mobile hamburger */
+    .acc-hamburger {
+      display: none; width: 36px; height: 36px; border: none; background: #f1f5f9;
+      border-radius: 8px; font-size: 1.2rem; cursor: pointer; color: #374151;
+      align-items: center; justify-content: center;
+    }
+    .acc-sidebar-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 998;
+    }
+    .acc-sidebar-backdrop.open { display: block; }
     @media (max-width: 768px) {
       .acc-wrapper { grid-template-columns: 1fr; }
-      .acc-sidebar { display: none; }
+      .acc-sidebar {
+        display: none; position: fixed; top: 0; left: 0; bottom: 0; width: 260px;
+        z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.15); overflow-y: auto;
+      }
+      .acc-sidebar.open { display: block; }
+      .acc-hamburger { display: flex; }
       .report-grid { grid-template-columns: 1fr; }
     }
   /* ── Advanced Accounting Sections ──────────────────── */
@@ -317,6 +332,16 @@
   @media(max-width:700px) {
     .recon-grid,.tax-summary-grid,.owner-form-grid { grid-template-columns:1fr; }
   }
+    /* Mobile-friendly modals */
+    @media (max-width: 768px) {
+      .modal, [class*="modal"] { max-height: 95vh !important; width: 95% !important; max-width: none !important; margin: 0.5rem !important; border-radius: 12px !important; }
+      .modal-overlay, [class*="overlay"] { padding: 0.5rem !important; align-items: flex-end !important; }
+    }
+    /* Mobile-scrollable tables */
+    @media (max-width: 768px) {
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      th, td { white-space: nowrap; }
+    }
   </style>
 </head>
 <body>
@@ -324,44 +349,53 @@
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-brand">
+    <button class="acc-hamburger" onclick="toggleAccSidebar()">☰</button>
     <span class="nav-logo">✓</span>
     <span>RentVerified</span>
   </div>
   <div class="nav-links">
-    <a href="landlord-signup.html">← Dashboard</a>
+    <a href="index.html">← Dashboard</a>
     <a href="listings.html">Listings</a>
     <a href="index.html">Home</a>
   </div>
 </nav>
+<div class="acc-sidebar-backdrop" id="accBackdrop" onclick="toggleAccSidebar()"></div>
 
 <div class="acc-wrapper">
 
   <!-- SIDEBAR -->
   <aside class="acc-sidebar">
     <h3>Accounting</h3>
-    <a href="#dashboard" class="active" onclick="showSection('dashboard',this)">📊 Overview</a>
-    <a href="#add" onclick="showSection('add',this)">➕ Add Transaction</a>
-    <a href="#transactions" onclick="showSection('transactions',this)">📋 All Transactions</a>
-    <a href="#reports" onclick="showSection('reports',this)">📈 Reports</a>
+    <a href="#dashboard" class="active" onclick="showSection('dashboard',this); return false;">📊 Overview</a>
+    <a href="#add" onclick="showSection('add',this); return false;">➕ Add Transaction</a>
+    <a href="#transactions" onclick="showSection('transactions',this); return false;">📋 All Transactions</a>
+    <a href="#reports" onclick="showSection('reports',this); return false;">📈 Reports</a>
+
+    <h3>Bookkeeping</h3>
+    <a href="#chartofaccounts" onclick="showSection('chartofaccounts',this); return false;">📒 Chart of Accounts</a>
+    <a href="#reconcile" onclick="showSection('reconcile',this); return false;">🏦 Bank Reconciliation</a>
+    <a href="#exports" onclick="showSection('exports',this); return false;">📤 Financial Exports</a>
 
     <h3>Advanced</h3>
-    <a href="#reconcile" onclick="showSection('reconcile',this)">🏦 Bank Reconciliation</a>
-    <a href="#disbursements" onclick="showSection('disbursements',this)">💸 Owner Disbursements</a>
-    <a href="#tax1099" onclick="showSection('tax1099',this)">📋 1099s &amp; Tax</a>
+    <a href="#disbursements" onclick="showSection('disbursements',this); return false;">💸 Owner Disbursements</a>
+    <a href="#tax1099" onclick="showSection('tax1099',this); return false;">📋 1099s &amp; Tax</a>
 
-    <h3>Owner Statements</h3>
-    <a href="owner-statements.html" style="color:#fbbf24;border-left-color:#fbbf24;">💸 Owner Statements</a>
+    <h3 id="clientsSidebarHeader" style="display:none;">Client Management</h3>
+    <a href="#myclients" id="clientsSidebarLink" onclick="showSection('myclients',this); return false;" style="display:none;">👥 My Clients</a>
 
-    <h3>Manage</h3>
-    <a href="landlord-signup.html">🏠 My Properties</a>
-    <a href="ad-builder.html">📣 Ad Builder</a>
-    <a href="eviction.html">⚖️ Legal Center</a>
-    <a href="tenant-portal.html">👤 Tenant Portal</a>
-    <a href="financial-hub.html">💼 Financial Hub</a>
-    <a href="insurance-agents.html">🛡️ Insurance Agents</a>
+    <h3>Navigation</h3>
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="owner-statements.html">💸 Owner Statements</a>
+    <a href="documents.html">📁 Documents</a>
+    <a href="invoice-builder.html">📃 Invoices</a>
+    <a href="doc-generator.html" style="background:#1a56db;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;display:inline-block;text-align:center;margin-bottom:.25rem;">📄 Doc Generator</a>
+    <a href="crm.html">📇 CRM</a>
     <a href="referral.html">🎁 Refer &amp; Earn</a>
-    <a href="compliance.html">📋 Compliance</a>
-    <a href="str-manager.html">🏖️ STR Manager</a>
+
+    <h3>Services</h3>
+    <a href="#" onclick="RVServiceConnect.open();return false;">⚡ Service Connect</a>
+    <a href="loan-connect.html">🏦 Loan Connect</a>
+    <a href="messages.html">💬 Messages</a>
   </aside>
 
   <!-- MAIN -->
@@ -429,7 +463,7 @@
           <h2>Income by Property</h2>
         </div>
         <div class="panel-body" id="propBreakdown">
-          <div class="empty-state"><div class="icon">🏠</div><p>No transactions yet.</p></div>
+          <div class="empty-state"><div class="icon">📊</div><p>Record your first transaction to see income broken down by property. Start by logging this month's rent payments.</p><button class="btn btn-primary" style="margin-top:.75rem;" onclick="showSection('add', document.querySelector('.acc-sidebar a[href=&quot;#add&quot;]'))">Record a Payment</button></div>
         </div>
       </div>
 
@@ -445,7 +479,7 @@
               <th>Date</th><th>Description</th><th>Category</th><th>Property</th><th>Type</th><th>Amount</th>
             </tr></thead>
             <tbody id="recentTbody">
-              <tr><td colspan="6"><div class="empty-state"><div class="icon">💰</div><p>No transactions yet. Add your first one!</p></div></td></tr>
+              <tr><td colspan="6"><div class="empty-state"><div class="icon">💰</div><p>No transactions yet. Start by logging this month's rent payments.</p><button class="btn btn-primary" style="margin-top:.75rem;" onclick="showSection('add', document.querySelector('.acc-sidebar a[href=&quot;#add&quot;]'))">Record a Payment</button></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -823,6 +857,152 @@
       </div>
     </div>
 
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: CHART OF ACCOUNTS                         -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-chartofaccounts" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>📒 Chart of Accounts</h1>
+          <p>Manage your account structure for double-entry bookkeeping.</p>
+        </div>
+        <button class="btn btn-primary" onclick="toggleAddAccount()">➕ Add Account</button>
+      </div>
+
+      <!-- Add account form -->
+      <div id="addAccountForm" class="panel" style="display:none;margin-bottom:1.5rem;">
+        <div class="panel-header"><h2>New Account</h2></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Account Code *</label>
+              <input type="text" id="coaCode" placeholder="e.g. 1050">
+            </div>
+            <div class="form-group">
+              <label>Account Name *</label>
+              <input type="text" id="coaName" placeholder="e.g. Business Savings">
+            </div>
+            <div class="form-group">
+              <label>Account Type *</label>
+              <select id="coaType">
+                <option value="asset">Asset</option>
+                <option value="liability">Liability</option>
+                <option value="equity">Equity</option>
+                <option value="revenue">Revenue</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Trust Account (IOLTA)?</label>
+              <select id="coaTrust">
+                <option value="false">No</option>
+                <option value="true">Yes — Client Trust</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:.75rem;margin-top:1rem;">
+            <button class="btn btn-primary" onclick="saveAccount()">💾 Save Account</button>
+            <button class="btn btn-outline" onclick="toggleAddAccount()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust account warning -->
+      <div id="trustWarning" style="display:none;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.87rem;color:#92400e;">
+        <strong>⚠️ Trust Accounts (IOLTA):</strong> These accounts hold client funds. Do not commingle with operating funds. Trust accounts are shown separately below and flagged in all reports.
+      </div>
+
+      <!-- Accounts grouped by type -->
+      <div id="coaContainer"></div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: FINANCIAL EXPORTS                         -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-exports" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>📤 Financial Exports</h1>
+          <p>Generate standard financial reports for tax filing and analysis.</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+        <!-- P&L Export -->
+        <div class="panel">
+          <div class="panel-header"><h2>📊 Profit & Loss (P&L)</h2></div>
+          <div class="panel-body">
+            <p style="font-size:.88rem;color:#64748b;margin-bottom:1rem;">Revenue minus expenses for a date range. Required for tax prep.</p>
+            <div class="form-grid" style="margin-bottom:1rem;">
+              <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" id="plStart">
+              </div>
+              <div class="form-group">
+                <label>End Date</label>
+                <input type="date" id="plEnd">
+              </div>
+            </div>
+            <div style="display:flex;gap:.75rem;">
+              <button class="btn btn-export" onclick="exportPL()">⬇ Export P&L CSV</button>
+              <button class="btn btn-outline" onclick="previewPL()">👁 Preview</button>
+            </div>
+            <div id="plPreview" style="display:none;margin-top:1rem;background:#f8fafc;border-radius:10px;padding:1rem;border:1px solid #e2e8f0;font-size:.88rem;"></div>
+          </div>
+        </div>
+
+        <!-- Trial Balance Export -->
+        <div class="panel">
+          <div class="panel-header"><h2>📋 Trial Balance</h2></div>
+          <div class="panel-body">
+            <p style="font-size:.88rem;color:#64748b;margin-bottom:1rem;">All account balances at a point in time. Verifies debits = credits.</p>
+            <div class="form-grid" style="margin-bottom:1rem;">
+              <div class="form-group">
+                <label>As of Date</label>
+                <input type="date" id="tbDate">
+              </div>
+            </div>
+            <div style="display:flex;gap:.75rem;">
+              <button class="btn btn-export" onclick="exportTrialBalance()">⬇ Export Trial Balance CSV</button>
+              <button class="btn btn-outline" onclick="previewTrialBalance()">👁 Preview</button>
+            </div>
+            <div id="tbPreview" style="display:none;margin-top:1rem;background:#f8fafc;border-radius:10px;padding:1rem;border:1px solid #e2e8f0;font-size:.88rem;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick export buttons -->
+      <div class="panel" style="margin-top:1.25rem;">
+        <div class="panel-header"><h2>⚡ Quick Exports</h2></div>
+        <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:.75rem;">
+          <button class="btn btn-outline" onclick="exportQuick('ytd-pl')">📊 YTD Profit & Loss</button>
+          <button class="btn btn-outline" onclick="exportQuick('ytd-tb')">📋 YTD Trial Balance</button>
+          <button class="btn btn-outline" onclick="exportQuick('last-year-pl')">📊 Last Year P&L</button>
+          <button class="btn btn-outline" onclick="exportCSV()">📥 All Transactions CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────── -->
+    <!--  SECTION: MY CLIENTS (Accountant vertical only)     -->
+    <!-- ─────────────────────────────────────────────────── -->
+    <div id="section-myclients" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h1>👥 My Clients</h1>
+          <p>Workspaces where you have contractor/accountant access. Click a client to view their books.</p>
+        </div>
+      </div>
+
+      <div id="clientsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+        <div style="text-align:center;padding:3rem;color:#94a3b8;grid-column:1/-1;">
+          <div style="font-size:2.5rem;margin-bottom:.75rem;">👥</div>
+          <p style="font-size:.9rem;">No clients yet. When a business invites you as their accountant/contractor, they'll appear here.</p>
+          <p style="font-size:.82rem;color:#b0b8c4;margin-top:.5rem;">Share your invite link or have clients add you from their Team settings.</p>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -958,13 +1138,30 @@ function populateFilterDropdowns() {
 // ─────────────────────────────────────────────────────────
 //  SECTION NAVIGATION
 // ─────────────────────────────────────────────────────────
+/* ── Mobile sidebar toggle ── */
+function toggleAccSidebar() {
+  var sidebar = document.querySelector('.acc-sidebar');
+  var backdrop = document.getElementById('accBackdrop');
+  if (!sidebar) return;
+  sidebar.classList.toggle('open');
+  if (backdrop) backdrop.classList.toggle('open');
+}
+
 function showSection(name, el) {
-  ['dashboard','add','transactions','reports'].forEach(s => {
-    document.getElementById('section-'+s).style.display = (s===name)?'block':'none';
+  ['dashboard','add','transactions','reports','reconcile','disbursements','tax1099','chartofaccounts','exports','myclients'].forEach(s => {
+    var sec = document.getElementById('section-'+s);
+    if (sec) sec.style.display = (s===name)?'block':'none';
   });
   document.querySelectorAll('.acc-sidebar a').forEach(a => a.classList.remove('active'));
   if(el) el.classList.add('active');
+  // Close mobile sidebar after selection
+  var sidebar = document.querySelector('.acc-sidebar');
+  var backdrop = document.getElementById('accBackdrop');
+  if (sidebar) sidebar.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
   window.scrollTo(0,0);
+  // Render COA on visit
+  if (name === 'chartofaccounts') renderCOA();
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1128,7 +1325,7 @@ function renderBarChart(year) {
 function renderPropertyBreakdown(yearTx) {
   const props = [...new Set(yearTx.map(t=>t.property))];
   const el = document.getElementById('propBreakdown');
-  if(!props.length) { el.innerHTML='<div class="empty-state"><div class="icon">🏠</div><p>No transactions yet.</p></div>'; return; }
+  if(!props.length) { el.innerHTML='<div class="empty-state"><div class="icon">📊</div><p>Record your first transaction to see income broken down by property.</p><button class="btn btn-primary" style="margin-top:.75rem;" onclick="showSection(\'add\', document.querySelector(\'.acc-sidebar a[href=\\\"#add\\\"]\'))">Record a Payment</button></div>'; return; }
   const totals = props.map(p => ({
     prop: p,
     income:  yearTx.filter(t=>t.property===p&&t.type==='income').reduce((s,t)=>s+t.amount,0),
@@ -1148,7 +1345,7 @@ function renderPropertyBreakdown(yearTx) {
 function renderRecentTable(txs) {
   const tbody = document.getElementById('recentTbody');
   if(!txs.length) {
-    tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="icon">💰</div><p>No transactions yet.</p></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="icon">💰</div><p>No transactions yet. Start by logging this month\'s rent payments.</p><button class="btn btn-primary" style="margin-top:.75rem;" onclick="showSection(\'add\', document.querySelector(\'.acc-sidebar a[href=\\\"#add\\\"]\'))">Record a Payment</button></div></td></tr>';
     return;
   }
   tbody.innerHTML = txs.map(t => txRow(t, false)).join('');
@@ -1501,12 +1698,8 @@ function printStatement(ownerId, monthVal) {
   const w = window.open('','_blank','width=700,height=900');
   w.document.write(`<!DOCTYPE html><html><head><title>Owner Statement – ${owner.name}</title>
     <style>body{font-family:system-ui,sans-serif;padding:2rem;color:#1e293b;} @media print{body{padding:.5rem;}}</style></head>
-<!-- Supabase Backend -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="data-layer.js"></script>
-
-    <body>${html}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+    <body>${html}<script>window.onload=function(){window.print();}<\/script><script src="rv-guide.js"></script>
+</body></html>`);
   w.document.close();
 }
 
@@ -1690,6 +1883,450 @@ function toast(msg) {
   el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), 3000);
 }
+
+// ─────────────────────────────────────────────────────────
+//  CHART OF ACCOUNTS
+// ─────────────────────────────────────────────────────────
+const DEFAULT_COA = [
+  // Assets
+  { code:'1000', name:'Cash - Operating',          type:'asset' },
+  { code:'1010', name:'Cash - Petty Cash',          type:'asset' },
+  { code:'1100', name:'Accounts Receivable',        type:'asset' },
+  { code:'1200', name:'Prepaid Expenses',           type:'asset' },
+  { code:'1300', name:'Equipment',                  type:'asset' },
+  { code:'1400', name:'Security Deposits Held',     type:'asset' },
+  // Liabilities
+  { code:'2000', name:'Accounts Payable',           type:'liability' },
+  { code:'2100', name:'Credit Card Payable',        type:'liability' },
+  { code:'2200', name:'Mortgage / Loans Payable',   type:'liability' },
+  { code:'2300', name:'Accrued Expenses',           type:'liability' },
+  { code:'2400', name:'Security Deposits Liability',type:'liability' },
+  { code:'2500', name:'Sales Tax Payable',          type:'liability' },
+  // Equity
+  { code:'3000', name:'Owner Equity',               type:'equity' },
+  { code:'3100', name:'Retained Earnings',          type:'equity' },
+  { code:'3200', name:'Owner Draws',                type:'equity' },
+  // Revenue
+  { code:'4000', name:'Service Revenue',            type:'revenue' },
+  { code:'4010', name:'Rent Income',                type:'revenue' },
+  { code:'4020', name:'Consulting Revenue',         type:'revenue' },
+  { code:'4030', name:'Late Fees',                  type:'revenue' },
+  { code:'4040', name:'Other Income',               type:'revenue' },
+  // Expenses
+  { code:'5000', name:'Cost of Goods Sold',         type:'expense' },
+  { code:'5100', name:'Subcontractor Expense',      type:'expense' },
+  { code:'5200', name:'Materials & Supplies',       type:'expense' },
+  { code:'6000', name:'Rent Expense',               type:'expense' },
+  { code:'6010', name:'Utilities',                  type:'expense' },
+  { code:'6020', name:'Insurance',                  type:'expense' },
+  { code:'6030', name:'Repairs & Maintenance',      type:'expense' },
+  { code:'6040', name:'Office Supplies',            type:'expense' },
+  { code:'6050', name:'Advertising & Marketing',    type:'expense' },
+  { code:'6060', name:'Professional Fees',          type:'expense' },
+  { code:'6070', name:'Travel & Transportation',    type:'expense' },
+  { code:'6080', name:'Payroll / Wages',            type:'expense' },
+  { code:'6090', name:'Depreciation',               type:'expense' },
+  { code:'6100', name:'Bank Fees & Interest',       type:'expense' },
+  { code:'6999', name:'Miscellaneous Expense',      type:'expense' }
+];
+
+let chartOfAccounts = [];
+
+function loadCOA() {
+  try {
+    chartOfAccounts = JSON.parse(localStorage.getItem('rv_chart_of_accounts') || '[]');
+  } catch(e) { chartOfAccounts = []; }
+  if (chartOfAccounts.length === 0) {
+    // Seed defaults
+    chartOfAccounts = DEFAULT_COA.map(function(a) {
+      return { id: uid(), code: a.code, name: a.name, type: a.type, is_active: true, is_trust: false };
+    });
+    saveCOA();
+  }
+}
+
+function saveCOA() {
+  localStorage.setItem('rv_chart_of_accounts', JSON.stringify(chartOfAccounts));
+}
+
+function toggleAddAccount() {
+  var form = document.getElementById('addAccountForm');
+  form.style.display = form.style.display === 'none' ? '' : 'none';
+}
+
+function saveAccount() {
+  var code = document.getElementById('coaCode').value.trim();
+  var name = document.getElementById('coaName').value.trim();
+  var type = document.getElementById('coaType').value;
+  var trust = document.getElementById('coaTrust').value === 'true';
+  if (!code || !name) { toast('⚠️ Code and name are required'); return; }
+  if (chartOfAccounts.find(function(a) { return a.code === code; })) {
+    toast('⚠️ Account code already exists'); return;
+  }
+  chartOfAccounts.push({ id: uid(), code: code, name: name, type: type, is_active: true, is_trust: trust });
+  chartOfAccounts.sort(function(a, b) { return a.code.localeCompare(b.code); });
+  saveCOA();
+  renderCOA();
+  toggleAddAccount();
+  document.getElementById('coaCode').value = '';
+  document.getElementById('coaName').value = '';
+  toast('✅ Account added');
+}
+
+function toggleAccountActive(code) {
+  var acct = chartOfAccounts.find(function(a) { return a.code === code; });
+  if (acct) { acct.is_active = !acct.is_active; saveCOA(); renderCOA(); }
+}
+
+function renderCOA() {
+  var container = document.getElementById('coaContainer');
+  if (!container) return;
+
+  var hasTrust = chartOfAccounts.some(function(a) { return a.is_trust; });
+  document.getElementById('trustWarning').style.display = hasTrust ? '' : 'none';
+
+  var typeOrder = ['asset','liability','equity','revenue','expense'];
+  var typeLabels = { asset:'Assets', liability:'Liabilities', equity:'Equity', revenue:'Revenue', expense:'Expenses' };
+  var typeColors = { asset:'#3b82f6', liability:'#ef4444', equity:'#8b5cf6', revenue:'#10b981', expense:'#f59e0b' };
+
+  var html = '';
+
+  // Trust accounts first if any
+  if (hasTrust) {
+    var trustAccts = chartOfAccounts.filter(function(a) { return a.is_trust; });
+    html += '<div class="panel" style="margin-bottom:1.25rem;border-left:4px solid #f59e0b;">' +
+      '<div class="panel-header" style="background:#fffbeb;"><h2 style="color:#92400e;">⚠️ Client Trust (IOLTA)</h2></div>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+      '<th>Code</th><th>Account Name</th><th>Type</th><th>Status</th><th></th>' +
+      '</tr></thead><tbody>';
+    trustAccts.forEach(function(a) {
+      html += '<tr><td><strong>' + a.code + '</strong></td><td>' + a.name + '</td>' +
+        '<td>' + a.type + '</td><td>' + (a.is_active ? '<span class="badge-income">Active</span>' : '<span style="color:#9ca3af;">Inactive</span>') + '</td>' +
+        '<td><button class="btn btn-outline" style="font-size:.75rem;padding:.2rem .5rem;" onclick="toggleAccountActive(\'' + a.code + '\')">' + (a.is_active ? 'Deactivate' : 'Activate') + '</button></td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  }
+
+  // Regular accounts by type
+  typeOrder.forEach(function(type) {
+    var accts = chartOfAccounts.filter(function(a) { return a.type === type && !a.is_trust; });
+    if (accts.length === 0) return;
+    html += '<div class="panel" style="margin-bottom:1.25rem;border-left:4px solid ' + typeColors[type] + ';">' +
+      '<div class="panel-header"><h2>' + typeLabels[type] + ' <span style="font-size:.82rem;font-weight:400;color:#64748b;">(' + accts.length + ' accounts)</span></h2></div>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+      '<th>Code</th><th>Account Name</th><th>Status</th><th></th>' +
+      '</tr></thead><tbody>';
+    accts.forEach(function(a) {
+      html += '<tr style="' + (!a.is_active ? 'opacity:0.5;' : '') + '">' +
+        '<td><strong>' + a.code + '</strong></td><td>' + a.name + '</td>' +
+        '<td>' + (a.is_active ? '<span class="badge-income">Active</span>' : '<span style="color:#9ca3af;">Inactive</span>') + '</td>' +
+        '<td><button class="btn btn-outline" style="font-size:.75rem;padding:.2rem .5rem;" onclick="toggleAccountActive(\'' + a.code + '\')">' + (a.is_active ? 'Deactivate' : 'Activate') + '</button></td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  });
+
+  container.innerHTML = html;
+
+  // Also update the category dropdown in Add Transaction to use COA
+  updateCategoryDropdownFromCOA();
+}
+
+function updateCategoryDropdownFromCOA() {
+  // If COA is loaded, add account codes as category options
+  var catSelect = document.getElementById('txCategory');
+  if (!catSelect) return;
+  // Keep existing categories but add COA header
+  var existingOptions = catSelect.innerHTML;
+  if (existingOptions.indexOf('— Chart of Accounts —') >= 0) return; // already added
+
+  var coaGroup = '<optgroup label="— Chart of Accounts —">';
+  chartOfAccounts.filter(function(a) { return a.is_active; }).forEach(function(a) {
+    coaGroup += '<option value="COA:' + a.code + '">' + a.code + ' — ' + a.name + '</option>';
+  });
+  coaGroup += '</optgroup>';
+  catSelect.innerHTML += coaGroup;
+}
+
+// ─────────────────────────────────────────────────────────
+//  FINANCIAL EXPORTS
+// ─────────────────────────────────────────────────────────
+function getDateDefaults() {
+  var now = new Date();
+  var yearStart = now.getFullYear() + '-01-01';
+  var today = now.toISOString().slice(0, 10);
+  return { start: yearStart, end: today };
+}
+
+function buildPLData(startDate, endDate) {
+  var filtered = transactions.filter(function(t) {
+    return t.date >= startDate && t.date <= endDate;
+  });
+
+  var revenue = {};
+  var expenses = {};
+  var totalRevenue = 0;
+  var totalExpenses = 0;
+
+  filtered.forEach(function(t) {
+    var cat = t.category || 'Uncategorized';
+    if (t.type === 'income') {
+      revenue[cat] = (revenue[cat] || 0) + (parseFloat(t.amount) || 0);
+      totalRevenue += parseFloat(t.amount) || 0;
+    } else {
+      expenses[cat] = (expenses[cat] || 0) + (parseFloat(t.amount) || 0);
+      totalExpenses += parseFloat(t.amount) || 0;
+    }
+  });
+
+  return { revenue: revenue, expenses: expenses, totalRevenue: totalRevenue, totalExpenses: totalExpenses, netIncome: totalRevenue - totalExpenses };
+}
+
+function exportPL() {
+  var start = document.getElementById('plStart').value || getDateDefaults().start;
+  var end = document.getElementById('plEnd').value || getDateDefaults().end;
+  var data = buildPLData(start, end);
+
+  var csv = 'Profit & Loss Statement\nPeriod: ' + start + ' to ' + end + '\n\n';
+  csv += 'Category,Amount\n';
+  csv += '--- REVENUE ---,\n';
+  Object.keys(data.revenue).forEach(function(k) { csv += '"' + k + '",' + data.revenue[k].toFixed(2) + '\n'; });
+  csv += 'TOTAL REVENUE,' + data.totalRevenue.toFixed(2) + '\n\n';
+  csv += '--- EXPENSES ---,\n';
+  Object.keys(data.expenses).forEach(function(k) { csv += '"' + k + '",' + data.expenses[k].toFixed(2) + '\n'; });
+  csv += 'TOTAL EXPENSES,' + data.totalExpenses.toFixed(2) + '\n\n';
+  csv += 'NET INCOME,' + data.netIncome.toFixed(2) + '\n';
+
+  downloadCSV(csv, 'profit-loss-' + start + '-to-' + end + '.csv');
+  toast('📊 P&L exported');
+}
+
+function previewPL() {
+  var start = document.getElementById('plStart').value || getDateDefaults().start;
+  var end = document.getElementById('plEnd').value || getDateDefaults().end;
+  var data = buildPLData(start, end);
+  var el = document.getElementById('plPreview');
+
+  var html = '<h3 style="margin:0 0 .75rem;font-size:.95rem;">P&L: ' + start + ' to ' + end + '</h3>';
+  html += '<div style="margin-bottom:.75rem;"><strong style="color:#10b981;">Revenue</strong>';
+  Object.keys(data.revenue).forEach(function(k) {
+    html += '<div class="report-row"><span class="cat">' + k + '</span><span class="amt amount-income">' + fmt(data.revenue[k]) + '</span></div>';
+  });
+  html += '<div class="report-total"><span>Total Revenue</span><span class="amount-income">' + fmt(data.totalRevenue) + '</span></div></div>';
+
+  html += '<div style="margin-bottom:.75rem;"><strong style="color:#ef4444;">Expenses</strong>';
+  Object.keys(data.expenses).forEach(function(k) {
+    html += '<div class="report-row"><span class="cat">' + k + '</span><span class="amt amount-expense">' + fmt(data.expenses[k]) + '</span></div>';
+  });
+  html += '<div class="report-total"><span>Total Expenses</span><span class="amount-expense">' + fmt(data.totalExpenses) + '</span></div></div>';
+
+  html += '<div class="report-total" style="font-size:1.1rem;border-top:3px solid #1e293b;padding-top:1rem;"><span>Net Income</span><span style="color:' + (data.netIncome >= 0 ? '#059669' : '#dc2626') + ';">' + fmt(data.netIncome) + '</span></div>';
+
+  el.innerHTML = html;
+  el.style.display = '';
+}
+
+function buildTrialBalanceData(asOfDate) {
+  var filtered = transactions.filter(function(t) { return t.date <= asOfDate; });
+  var balances = {};
+
+  // Initialize from COA
+  chartOfAccounts.filter(function(a) { return a.is_active; }).forEach(function(a) {
+    balances[a.code] = { code: a.code, name: a.name, type: a.type, debit: 0, credit: 0 };
+  });
+
+  // Map transactions to accounts
+  filtered.forEach(function(t) {
+    var cat = t.category || '';
+    var amt = parseFloat(t.amount) || 0;
+    // Check if category is a COA reference
+    if (cat.startsWith('COA:')) {
+      var code = cat.replace('COA:', '');
+      if (balances[code]) {
+        if (t.type === 'income') balances[code].credit += amt;
+        else balances[code].debit += amt;
+        return;
+      }
+    }
+    // Default mapping: income → 4000, expense → 6999
+    if (t.type === 'income') {
+      if (!balances['4000']) balances['4000'] = { code:'4000', name:'Service Revenue', type:'revenue', debit:0, credit:0 };
+      balances['4000'].credit += amt;
+    } else {
+      if (!balances['6999']) balances['6999'] = { code:'6999', name:'Miscellaneous Expense', type:'expense', debit:0, credit:0 };
+      balances['6999'].debit += amt;
+    }
+  });
+
+  return Object.values(balances).filter(function(b) { return b.debit > 0 || b.credit > 0; })
+    .sort(function(a, b) { return a.code.localeCompare(b.code); });
+}
+
+function exportTrialBalance() {
+  var asOf = document.getElementById('tbDate').value || getDateDefaults().end;
+  var data = buildTrialBalanceData(asOf);
+  var totalDebit = 0, totalCredit = 0;
+
+  var csv = 'Trial Balance\nAs of: ' + asOf + '\n\n';
+  csv += 'Code,Account Name,Type,Debit,Credit\n';
+  data.forEach(function(b) {
+    csv += b.code + ',"' + b.name + '",' + b.type + ',' + b.debit.toFixed(2) + ',' + b.credit.toFixed(2) + '\n';
+    totalDebit += b.debit;
+    totalCredit += b.credit;
+  });
+  csv += '\nTOTAL,,,' + totalDebit.toFixed(2) + ',' + totalCredit.toFixed(2) + '\n';
+
+  downloadCSV(csv, 'trial-balance-' + asOf + '.csv');
+  toast('📋 Trial Balance exported');
+}
+
+function previewTrialBalance() {
+  var asOf = document.getElementById('tbDate').value || getDateDefaults().end;
+  var data = buildTrialBalanceData(asOf);
+  var el = document.getElementById('tbPreview');
+  var totalDebit = 0, totalCredit = 0;
+
+  var html = '<h3 style="margin:0 0 .75rem;font-size:.95rem;">Trial Balance as of ' + asOf + '</h3>';
+  html += '<table style="width:100%;font-size:.85rem;border-collapse:collapse;">';
+  html += '<tr style="border-bottom:2px solid #e2e8f0;"><th style="text-align:left;padding:.4rem;">Code</th><th style="text-align:left;">Account</th><th style="text-align:right;padding:.4rem;">Debit</th><th style="text-align:right;padding:.4rem;">Credit</th></tr>';
+  data.forEach(function(b) {
+    totalDebit += b.debit;
+    totalCredit += b.credit;
+    html += '<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.4rem;font-weight:600;">' + b.code + '</td><td>' + b.name + '</td>' +
+      '<td style="text-align:right;padding:.4rem;">' + (b.debit ? fmt(b.debit) : '') + '</td>' +
+      '<td style="text-align:right;padding:.4rem;">' + (b.credit ? fmt(b.credit) : '') + '</td></tr>';
+  });
+  html += '<tr style="border-top:2px solid #1e293b;font-weight:700;"><td style="padding:.5rem;" colspan="2">TOTAL</td>' +
+    '<td style="text-align:right;padding:.5rem;">' + fmt(totalDebit) + '</td><td style="text-align:right;padding:.5rem;">' + fmt(totalCredit) + '</td></tr>';
+  html += '</table>';
+
+  var diff = Math.abs(totalDebit - totalCredit);
+  if (diff < 0.01) {
+    html += '<div style="background:#d1fae5;color:#065f46;padding:.5rem;border-radius:6px;margin-top:.75rem;font-weight:600;text-align:center;">✅ Balanced — Debits equal Credits</div>';
+  } else {
+    html += '<div style="background:#fee2e2;color:#991b1b;padding:.5rem;border-radius:6px;margin-top:.75rem;font-weight:600;text-align:center;">⚠️ Out of balance by ' + fmt(diff) + '</div>';
+  }
+
+  el.innerHTML = html;
+  el.style.display = '';
+}
+
+function exportQuick(type) {
+  var now = new Date();
+  var y = now.getFullYear();
+  if (type === 'ytd-pl') {
+    document.getElementById('plStart').value = y + '-01-01';
+    document.getElementById('plEnd').value = now.toISOString().slice(0,10);
+    exportPL();
+  } else if (type === 'ytd-tb') {
+    document.getElementById('tbDate').value = now.toISOString().slice(0,10);
+    exportTrialBalance();
+  } else if (type === 'last-year-pl') {
+    document.getElementById('plStart').value = (y-1) + '-01-01';
+    document.getElementById('plEnd').value = (y-1) + '-12-31';
+    exportPL();
+  }
+}
+
+function downloadCSV(csvContent, filename) {
+  var blob = new Blob([csvContent], { type: 'text/csv' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ─────────────────────────────────────────────────────────
+//  MY CLIENTS (Accountant vertical)
+// ─────────────────────────────────────────────────────────
+function detectAccountantMode() {
+  try {
+    var config = JSON.parse(localStorage.getItem('rv_workspace_config') || '{}');
+    if (config.industry === 'accountant' || config.industry === 'cpa') {
+      // Show clients sidebar
+      var header = document.getElementById('clientsSidebarHeader');
+      var link = document.getElementById('clientsSidebarLink');
+      if (header) header.style.display = '';
+      if (link) link.style.display = '';
+      loadClients();
+    }
+  } catch(e) {}
+}
+
+function loadClients() {
+  // In localStorage mode: look for client workspaces
+  // In Supabase mode: query workspace_members where user is contractor
+  var clients = JSON.parse(localStorage.getItem('rv_accountant_clients') || '[]');
+
+  // Demo data if none exist in accountant mode
+  if (clients.length === 0) {
+    var config = JSON.parse(localStorage.getItem('rv_workspace_config') || '{}');
+    if (config.industry === 'accountant' || config.industry === 'cpa') {
+      clients = [
+        { id: 'demo_c1', name: 'Smith Property Management', industry: 'property_management', status: 'active', last_activity: '2026-03-18' },
+        { id: 'demo_c2', name: 'Hart Construction LLC', industry: 'construction_trades', status: 'active', last_activity: '2026-03-15' },
+        { id: 'demo_c3', name: 'Garcia Consulting', industry: 'general', status: 'active', last_activity: '2026-03-10' }
+      ];
+    }
+  }
+
+  renderClients(clients);
+}
+
+function renderClients(clients) {
+  var grid = document.getElementById('clientsGrid');
+  if (!grid || clients.length === 0) return;
+
+  var industryIcons = {
+    property_management: '🏠', construction_trades: '🏗️', contractor: '🔧',
+    accountant: '📊', attorney: '⚖️', general: '💼', insurance: '🛡️'
+  };
+
+  grid.innerHTML = clients.map(function(c) {
+    var icon = industryIcons[c.industry] || '💼';
+    return '<div class="panel" style="cursor:pointer;" onclick="switchToClient(\'' + c.id + '\')">' +
+      '<div class="panel-body" style="display:flex;align-items:center;gap:1rem;">' +
+        '<div style="width:48px;height:48px;background:#eff6ff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">' + icon + '</div>' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:700;color:#1e293b;">' + c.name + '</div>' +
+          '<div style="font-size:.82rem;color:#64748b;">' + (c.industry || '').replace(/_/g, ' ') + '</div>' +
+          '<div style="font-size:.75rem;color:#94a3b8;margin-top:2px;">Last active: ' + c.last_activity + '</div>' +
+        '</div>' +
+        '<div style="color:#3b82f6;font-weight:600;font-size:.88rem;">View →</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function switchToClient(clientId) {
+  // In full Supabase mode this would call Workspace.switchTo(clientId)
+  // For now, show a toast explaining the concept
+  toast('🔄 Switching to client workspace… (requires Supabase)');
+}
+
+// ─────────────────────────────────────────────────────────
+//  INIT EXTENSIONS
+// ─────────────────────────────────────────────────────────
+(function initExtensions() {
+  loadCOA();
+  renderCOA();
+  detectAccountantMode();
+
+  // Set default dates for exports
+  var defaults = getDateDefaults();
+  var plStart = document.getElementById('plStart');
+  var plEnd = document.getElementById('plEnd');
+  var tbDate = document.getElementById('tbDate');
+  if (plStart) plStart.value = defaults.start;
+  if (plEnd) plEnd.value = defaults.end;
+  if (tbDate) tbDate.value = defaults.end;
+})();
 </script>
+<script src="recommended-supplies.js" data-industry="accounting"></script>
+<script src="business-advisor.js" data-industry="accounting"></script>
+<script src="service-connect.js"></script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
 </body>
 </html>

@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jobs &amp; Projects – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Jobs Page ── */
+    .jobs-hero {
+      background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .jobs-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .jobs-hero p { font-size: 1rem; opacity: 0.8; max-width: 520px; margin: 0 auto 1.25rem; }
+    .jobs-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .jobs-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #fbbf24; }
+    .jobs-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .jobs-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    /* ── Toolbar ── */
+    .jobs-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; padding: 1.25rem 0;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .jobs-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .jobs-search:focus { outline: none; border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.12); }
+    .jobs-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; color: #374151; min-width: 120px;
+    }
+    .jobs-btn {
+      padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700;
+      font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s;
+    }
+    .jobs-btn-primary { background: #d97706; color: white; }
+    .jobs-btn-primary:hover { background: #b45309; }
+    .jobs-btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; }
+    .jobs-btn-outline:hover { border-color: #d97706; color: #92400e; }
+    .jobs-btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+    .jobs-btn-danger { background: #fee2e2; color: #dc2626; }
+    .jobs-btn-danger:hover { background: #fecaca; }
+
+    /* ── Status Pills ── */
+    .status-pill {
+      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 99px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .status-draft      { background: #f3f4f6; color: #6b7280; }
+    .status-quoted     { background: #ede9fe; color: #7c3aed; }
+    .status-approved   { background: #dbeafe; color: #2563eb; }
+    .status-in_progress { background: #fef3c7; color: #92400e; }
+    .status-on_hold    { background: #fee2e2; color: #dc2626; }
+    .status-completed  { background: #d1fae5; color: #065f46; }
+    .status-cancelled  { background: #f3f4f6; color: #9ca3af; }
+
+    /* ── Pipeline / Kanban Tabs ── */
+    .jobs-view-tabs {
+      display: flex; gap: 0.5rem; margin-bottom: 1.25rem;
+    }
+    .jobs-view-tab {
+      padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb;
+      background: white; color: #6b7280; transition: 0.15s;
+    }
+    .jobs-view-tab:hover { border-color: #d97706; color: #92400e; }
+    .jobs-view-tab.active { background: #92400e; color: white; border-color: #92400e; }
+
+    /* ── Summary Cards ── */
+    .jobs-summary {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem; margin-bottom: 1.75rem;
+    }
+    .jobs-sum-card {
+      background: white; border-radius: 14px; padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #f3f4f6;
+      text-align: center;
+    }
+    .jobs-sum-card .val { font-size: 1.6rem; font-weight: 900; color: #1f2937; }
+    .jobs-sum-card .lbl { font-size: 0.72rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.15rem; }
+
+    /* ── List View ── */
+    .jobs-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+    .job-card {
+      background: white; border-radius: 14px; padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #f3f4f6;
+      display: flex; align-items: center; gap: 1.25rem; cursor: pointer;
+      transition: 0.15s;
+    }
+    .job-card:hover { border-color: #d97706; box-shadow: 0 2px 8px rgba(217,119,6,0.1); }
+    .job-icon {
+      width: 48px; height: 48px; border-radius: 12px; display: flex;
+      align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+    }
+    .job-info { flex: 1; min-width: 0; }
+    .job-name { font-weight: 700; font-size: 1rem; color: #1f2937; margin-bottom: 0.15rem; }
+    .job-meta { font-size: 0.8rem; color: #6b7280; display: flex; gap: 1rem; flex-wrap: wrap; }
+    .job-right { text-align: right; flex-shrink: 0; }
+    .job-amount { font-weight: 800; font-size: 1.05rem; color: #1f2937; }
+    .job-date { font-size: 0.75rem; color: #9ca3af; margin-top: 0.2rem; }
+
+    /* ── Kanban View ── */
+    .kanban-board {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .kanban-col {
+      background: #f9fafb; border-radius: 12px; padding: 0.75rem; min-height: 200px;
+    }
+    .kanban-col-header {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; padding: 0.4rem 0.6rem; margin-bottom: 0.75rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .kanban-col-count {
+      background: white; border-radius: 99px; padding: 0.1rem 0.55rem;
+      font-size: 0.7rem; font-weight: 700; color: #6b7280;
+    }
+    .kanban-card {
+      background: white; border-radius: 10px; padding: 0.85rem; margin-bottom: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+      cursor: pointer; transition: 0.15s;
+    }
+    .kanban-card:hover { border-color: #d97706; }
+    .kanban-card-name { font-weight: 700; font-size: 0.85rem; color: #1f2937; margin-bottom: 0.25rem; }
+    .kanban-card-meta { font-size: 0.72rem; color: #6b7280; }
+    .kanban-card-amount { font-weight: 700; font-size: 0.82rem; color: #92400e; margin-top: 0.3rem; }
+
+    /* ── Modal ── */
+    .jobs-modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 9000; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .jobs-modal-overlay.open { display: flex; }
+    .jobs-modal {
+      background: white; border-radius: 18px; width: 100%; max-width: 600px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .jobs-modal-header {
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid #f3f4f6;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .jobs-modal-header h2 { font-size: 1.15rem; font-weight: 800; }
+    .jobs-modal-close {
+      width: 32px; height: 32px; border-radius: 50%; border: none; background: #f3f4f6;
+      font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .jobs-modal-body { padding: 1.5rem; }
+    .jobs-modal-footer {
+      padding: 1rem 1.5rem; border-top: 1px solid #f3f4f6;
+      display: flex; gap: 0.75rem; justify-content: flex-end;
+    }
+
+    /* ── Form ── */
+    .jf-group { margin-bottom: 1rem; }
+    .jf-label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.3rem; }
+    .jf-input, .jf-select, .jf-textarea {
+      width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.88rem; font-family: inherit;
+    }
+    .jf-textarea { min-height: 70px; resize: vertical; }
+    .jf-input:focus, .jf-select:focus, .jf-textarea:focus {
+      outline: none; border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.1);
+    }
+    .jf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    /* ── Detail Panel ── */
+    .job-detail-section { margin-bottom: 1.75rem; }
+    .job-detail-section h3 { font-size: 0.9rem; font-weight: 700; color: #374151; margin-bottom: 0.75rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.4rem; }
+    .job-detail-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1.5rem;
+    }
+    .job-detail-item .dlbl { font-size: 0.72rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; }
+    .job-detail-item .dval { font-size: 0.9rem; font-weight: 600; color: #1f2937; }
+
+    /* ── Tasks within detail ── */
+    .task-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .task-item {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem;
+      background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;
+    }
+    .task-check { width: 18px; height: 18px; border-radius: 4px; cursor: pointer; accent-color: #059669; }
+    .task-title { flex: 1; font-size: 0.85rem; font-weight: 600; }
+    .task-title.done { text-decoration: line-through; color: #9ca3af; }
+    .task-hours { font-size: 0.75rem; color: #6b7280; }
+
+    .add-task-row {
+      display: flex; gap: 0.5rem; margin-top: 0.5rem;
+    }
+    .add-task-input {
+      flex: 1; padding: 0.45rem 0.65rem; border: 1px dashed #d1d5db;
+      border-radius: 8px; font-size: 0.82rem; background: white;
+    }
+    .add-task-input:focus { outline: none; border-color: #d97706; }
+
+    /* ── Empty State ── */
+    .jobs-empty {
+      text-align: center; padding: 4rem 2rem; color: #9ca3af;
+    }
+    .jobs-empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .jobs-empty h3 { font-size: 1.1rem; font-weight: 700; color: #6b7280; margin-bottom: 0.4rem; }
+    .jobs-empty p { font-size: 0.88rem; max-width: 360px; margin: 0 auto 1.25rem; }
+
+    /* ── Timer Widget (floating) ── */
+    .timer-widget {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 8000;
+      background: white; border-radius: 16px; padding: 1rem 1.25rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 2px solid #d97706;
+      display: none; min-width: 240px;
+    }
+    .timer-widget.active { display: block; }
+    .timer-widget-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .timer-widget-proj { font-weight: 700; font-size: 0.85rem; color: #1f2937; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .timer-widget-badge { padding: 0.15rem 0.5rem; border-radius: 99px; background: #fef3c7; color: #92400e; font-size: 0.68rem; font-weight: 700; }
+    .timer-display { font-size: 1.8rem; font-weight: 900; color: #d97706; text-align: center; font-variant-numeric: tabular-nums; margin-bottom: 0.5rem; }
+    .timer-actions { display: flex; gap: 0.5rem; justify-content: center; }
+
+    /* ── Schedule View ── */
+    .schedule-wrap { margin-bottom: 2rem; }
+    .schedule-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+    }
+    .schedule-nav { display: flex; align-items: center; gap: 0.75rem; }
+    .schedule-nav-btn {
+      width: 32px; height: 32px; border-radius: 50%; border: 1px solid #d1d5db;
+      background: white; cursor: pointer; font-size: 1rem; display: flex;
+      align-items: center; justify-content: center; transition: 0.15s;
+    }
+    .schedule-nav-btn:hover { border-color: #d97706; color: #92400e; }
+    .schedule-week-label { font-weight: 700; font-size: 0.95rem; color: #374151; }
+    .schedule-today-btn {
+      padding: 0.3rem 0.8rem; border-radius: 8px; border: 1px solid #d1d5db;
+      background: white; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    }
+    .schedule-today-btn:hover { border-color: #d97706; color: #92400e; }
+
+    .schedule-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px;
+      background: #e5e7eb; border-radius: 12px; overflow: hidden;
+    }
+    .schedule-day {
+      background: white; min-height: 120px; padding: 0.5rem;
+    }
+    .schedule-day.today { background: #fffbeb; }
+    .schedule-day-header {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #9ca3af;
+      margin-bottom: 0.35rem; display: flex; justify-content: space-between;
+    }
+    .schedule-day-header .day-num { font-size: 0.85rem; color: #374151; }
+    .schedule-day.today .schedule-day-header .day-num { color: #d97706; font-weight: 900; }
+    .schedule-event {
+      padding: 0.25rem 0.4rem; border-radius: 6px; font-size: 0.7rem;
+      font-weight: 600; margin-bottom: 0.25rem; cursor: pointer;
+      border-left: 3px solid; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ── Time Entries in Detail ── */
+    .time-entry-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .time-entry-item {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.7rem;
+      background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;
+      font-size: 0.82rem;
+    }
+    .time-entry-item .te-date { font-weight: 600; color: #374151; min-width: 90px; }
+    .time-entry-item .te-dur { font-weight: 700; color: #059669; min-width: 60px; }
+    .time-entry-item .te-note { flex: 1; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .clock-row {
+      display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; flex-wrap: wrap;
+    }
+    .clock-note-input {
+      flex: 1; min-width: 120px; padding: 0.4rem 0.65rem; border: 1px dashed #bbf7d0;
+      border-radius: 8px; font-size: 0.82rem; background: white;
+    }
+    .clock-note-input:focus { outline: none; border-color: #059669; }
+
+    /* ── Quote Builder ── */
+    .quote-line-items { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .quote-line {
+      display: grid; grid-template-columns: 1fr 70px 90px 80px 32px; gap: 0.5rem; align-items: center;
+    }
+    .quote-line input { padding: 0.4rem 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.82rem; font-family: inherit; }
+    .quote-line input:focus { outline: none; border-color: #d97706; }
+    .quote-line .ql-total { font-weight: 700; font-size: 0.85rem; color: #374151; text-align: right; }
+    .quote-line .ql-del { width: 28px; height: 28px; border-radius: 50%; border: none; background: #fee2e2; color: #dc2626; cursor: pointer; font-size: 0.85rem; }
+    .quote-line-header { font-size: 0.7rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; }
+    .quote-totals {
+      border-top: 2px solid #e5e7eb; padding-top: 0.75rem; margin-top: 0.75rem;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;
+    }
+    .quote-totals .qt-row { display: flex; gap: 1rem; font-size: 0.88rem; }
+    .quote-totals .qt-label { color: #6b7280; min-width: 80px; text-align: right; }
+    .quote-totals .qt-val { font-weight: 700; color: #1f2937; min-width: 90px; text-align: right; }
+    .quote-totals .qt-grand .qt-label { font-weight: 700; color: #374151; font-size: 1rem; }
+    .quote-totals .qt-grand .qt-val { font-size: 1.1rem; color: #92400e; }
+
+    /* Quote cards in list */
+    .quote-card {
+      background: white; border-radius: 12px; padding: 1rem 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #f3f4f6;
+      display: flex; align-items: center; gap: 1rem; cursor: pointer; transition: 0.15s;
+    }
+    .quote-card:hover { border-color: #7c3aed; box-shadow: 0 2px 8px rgba(124,58,237,0.1); }
+    .quote-card-icon {
+      width: 44px; height: 44px; border-radius: 10px; display: flex;
+      align-items: center; justify-content: center; font-size: 1.3rem;
+      background: #ede9fe; color: #7c3aed; flex-shrink: 0;
+    }
+    .quote-card-info { flex: 1; min-width: 0; }
+    .quote-card-name { font-weight: 700; font-size: 0.92rem; color: #1f2937; }
+    .quote-card-meta { font-size: 0.78rem; color: #6b7280; }
+    .quote-card-right { text-align: right; flex-shrink: 0; }
+    .quote-card-amount { font-weight: 800; font-size: 1rem; color: #7c3aed; }
+    .quote-card-status { font-size: 0.72rem; margin-top: 0.15rem; }
+
+    .quote-status-pill { padding: 0.15rem 0.55rem; border-radius: 99px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
+    .qs-draft    { background: #f3f4f6; color: #6b7280; }
+    .qs-sent     { background: #dbeafe; color: #2563eb; }
+    .qs-accepted { background: #d1fae5; color: #059669; }
+    .qs-declined { background: #fee2e2; color: #dc2626; }
+    .qs-invoiced { background: #ede9fe; color: #7c3aed; }
+
+    /* Print styles for quote preview */
+    @media print {
+      body * { visibility: hidden; }
+      .quote-print-area, .quote-print-area * { visibility: visible; }
+      .quote-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .jobs-hero h1 { font-size: 1.6rem; }
+      .job-card { flex-direction: column; align-items: flex-start; }
+      .job-right { text-align: left; }
+      .jf-row { grid-template-columns: 1fr; }
+      .kanban-board { grid-template-columns: 1fr; }
+      .schedule-grid { grid-template-columns: 1fr; }
+      .timer-widget { bottom: 0.75rem; right: 0.75rem; left: 0.75rem; min-width: auto; }
+      .quote-line { grid-template-columns: 1fr 60px 80px 70px 28px; }
+    }
+
+    /* ── Toast Notifications ── */
+    .rv-toast-container {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      z-index: 99999; display: flex; flex-direction: column-reverse; gap: 0.5rem;
+      pointer-events: none; max-width: 420px; width: 90%;
+    }
+    .rv-toast {
+      pointer-events: auto; padding: 0.75rem 1.25rem; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 600; color: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18); display: flex; align-items: center; gap: 0.5rem;
+      animation: rvToastIn 0.3s ease-out;
+    }
+    .rv-toast.success { background: #059669; }
+    .rv-toast.error   { background: #dc2626; }
+    .rv-toast.info    { background: #2563eb; }
+    .rv-toast.warning { background: #d97706; }
+    .rv-toast.fade-out { animation: rvToastOut 0.25s ease-in forwards; }
+    @keyframes rvToastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes rvToastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(12px); } }
+
+    /* ── Activity Log Sidebar ── */
+    .activity-log-toggle {
+      position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+      background: #92400e; color: white; border: none; border-radius: 8px 0 0 8px;
+      padding: 0.6rem 0.4rem; font-size: 0.75rem; cursor: pointer; writing-mode: vertical-rl;
+      z-index: 900; letter-spacing: 0.04em; font-weight: 700;
+    }
+    .activity-log-toggle:hover { background: #78350f; }
+    .activity-log-panel {
+      position: fixed; top: 0; right: -340px; width: 340px; height: 100vh;
+      background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1); z-index: 999;
+      transition: right 0.25s ease; overflow-y: auto; padding: 1.5rem;
+    }
+    .activity-log-panel.open { right: 0; }
+    .activity-log-panel h3 { font-size: 1rem; margin-bottom: 1rem; color: #92400e; }
+    .activity-entry {
+      padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem; color: #374151;
+    }
+    .activity-entry .ae-time { font-size: 0.7rem; color: #9ca3af; margin-top: 0.15rem; }
+    .activity-entry .ae-icon { margin-right: 0.35rem; }
+  </style>
+</head>
+<body>
+  <!-- ── Navbar ── -->
+  <nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:56px;display:flex;align-items:center;gap:1.5rem;font-size:.88rem;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.1rem;font-weight:800;color:#92400e;text-decoration:none;">
+      <img src="images/logo.svg" alt="" style="height:28px;" onerror="this.style.display='none'">RentVerified
+    </a>
+    <a href="materials.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Materials</a>
+    <a href="crm.html" style="color:#4b5563;text-decoration:none;font-weight:500;">CRM</a>
+    <a href="time-tracking.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Time</a>
+    <a href="invoice-builder.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Invoices</a>
+    <a href="documents.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Docs</a>
+    <a href="accounting.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Accounting</a>
+    <a href="vendor-portal.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Vendor Portal</a>
+    <a href="loan-connect.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Loan Connect</a>
+    <a href="messages.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Messages</a>
+    <a href="#" onclick="RVServiceConnect.open();return false;" style="color:#4b5563;text-decoration:none;font-weight:500;">Service Connect</a>
+    <a href="index.html" style="margin-left:auto;background:#d97706;color:white;padding:0.35rem 1rem;border-radius:8px;font-weight:700;font-size:0.82rem;text-decoration:none;">Dashboard</a>
+  </nav>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section class="jobs-hero">
+    <h1>&#128679; Jobs &amp; Projects</h1>
+    <p>Track every job from quote to completion. Manage tasks, crews, and budgets in one place.</p>
+    <div class="jobs-hero-stats">
+      <div class="jobs-hero-stat"><div class="num" id="stat-active">0</div><div class="lbl">Active Jobs</div></div>
+      <div class="jobs-hero-stat"><div class="num" id="stat-revenue">$0</div><div class="lbl">Total Revenue</div></div>
+      <div class="jobs-hero-stat"><div class="num" id="stat-completed">0</div><div class="lbl">Completed</div></div>
+      <div class="jobs-hero-stat"><div class="num" id="stat-pending">0</div><div class="lbl">Pending Quotes</div></div>
+    </div>
+  </section>
+
+  <div class="jobs-wrap">
+    <!-- ═══════════════════════ TOOLBAR ═══════════════════════ -->
+    <div class="jobs-toolbar">
+      <input type="text" class="jobs-search" id="jobSearch" placeholder="Search jobs..." oninput="filterJobs()" />
+      <select class="jobs-select" id="filterTrade" onchange="filterJobs()">
+        <option value="">All Trades</option>
+        <option value="general">General</option>
+        <option value="hvac">HVAC</option>
+        <option value="plumbing">Plumbing</option>
+        <option value="electrical">Electrical</option>
+        <option value="roofing">Roofing</option>
+        <option value="painting">Painting</option>
+        <option value="carpentry">Carpentry</option>
+        <option value="concrete">Concrete</option>
+        <option value="landscaping">Landscaping</option>
+        <option value="handyman">Handyman</option>
+        <option value="other">Other</option>
+      </select>
+      <select class="jobs-select" id="filterStatus" onchange="filterJobs()">
+        <option value="">All Status</option>
+        <option value="draft">Draft</option>
+        <option value="quoted">Quoted</option>
+        <option value="approved">Approved</option>
+        <option value="in_progress">In Progress</option>
+        <option value="on_hold">On Hold</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button class="jobs-btn jobs-btn-outline jobs-btn-sm" onclick="exportJobsCSV()" title="Export jobs to CSV">&#128196; Export</button>
+      <a href="doc-generator.html?template=con-invoice" style="background:#1a56db;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;">📄 Generate Invoice</a>
+      <button class="jobs-btn jobs-btn-primary" onclick="openNewJob()" data-permission="projects_create">+ New Job</button>
+    </div>
+
+    <!-- ═══════════════════════ SUMMARY CARDS ═══════════════════════ -->
+    <div class="jobs-summary" id="jobsSummary"></div>
+
+    <!-- ═══════════════════════ VIEW TOGGLE ═══════════════════════ -->
+    <div class="jobs-view-tabs">
+      <div class="jobs-view-tab active" data-view="list" onclick="switchView('list')">&#128203; List</div>
+      <div class="jobs-view-tab" data-view="kanban" onclick="switchView('kanban')">&#128202; Board</div>
+      <div class="jobs-view-tab" data-view="schedule" onclick="switchView('schedule')" data-permission="schedule_view">&#128197; Schedule</div>
+      <div class="jobs-view-tab" data-view="timesheet" onclick="switchView('timesheet')" data-permission="time_tracking">&#9201; Timesheet</div>
+      <div class="jobs-view-tab" data-view="quotes" onclick="switchView('quotes')" data-permission="quotes_view">&#128221; Quotes</div>
+    </div>
+
+    <!-- ═══════════════════════ LIST VIEW ═══════════════════════ -->
+    <div id="listView" class="jobs-list"></div>
+
+    <!-- ═══════════════════════ KANBAN VIEW ═══════════════════════ -->
+    <div id="kanbanView" class="kanban-board" style="display:none;"></div>
+
+    <!-- ═══════════════════════ SCHEDULE VIEW ═══════════════════════ -->
+    <div id="scheduleView" class="schedule-wrap" style="display:none;"></div>
+
+    <!-- ═══════════════════════ TIMESHEET VIEW ═══════════════════════ -->
+    <div id="timesheetView" style="display:none;"></div>
+
+    <!-- ═══════════════════════ QUOTES VIEW ═══════════════════════ -->
+    <div id="quotesView" style="display:none;"></div>
+  </div>
+
+  <!-- ═══════════════════════ FLOATING TIMER WIDGET ═══════════════════════ -->
+  <div class="timer-widget" id="timerWidget">
+    <div class="timer-widget-header">
+      <span class="timer-widget-proj" id="timerProjName">—</span>
+      <span class="timer-widget-badge">&#9201; TRACKING</span>
+    </div>
+    <div class="timer-display" id="timerDisplay">00:00:00</div>
+    <div class="timer-actions">
+      <button class="jobs-btn jobs-btn-danger jobs-btn-sm" onclick="stopTimer()">&#9632; Stop</button>
+      <button class="jobs-btn jobs-btn-outline jobs-btn-sm" onclick="openTimerProject()">View Job</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ QUOTE BUILDER MODAL ═══════════════════════ -->
+  <div class="jobs-modal-overlay" id="quoteModal">
+    <div class="jobs-modal" style="max-width:680px;">
+      <div class="jobs-modal-header">
+        <h2 id="quoteModalTitle">&#128221; New Quote</h2>
+        <button class="jobs-modal-close" onclick="closeQuoteModal()">&times;</button>
+      </div>
+      <div class="jobs-modal-body">
+        <input type="hidden" id="qf-id" />
+        <input type="hidden" id="qf-project-id" />
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Quote Number</label>
+            <input class="jf-input" id="qf-num" placeholder="QT-001" />
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Status</label>
+            <select class="jf-select" id="qf-status">
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="accepted">Accepted</option>
+              <option value="declined">Declined</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Client Name</label>
+            <input class="jf-input" id="qf-client" />
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Client Email</label>
+            <input class="jf-input" id="qf-email" type="email" />
+          </div>
+        </div>
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Valid Until</label>
+            <input class="jf-input" id="qf-valid" type="date" />
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Job Site</label>
+            <input class="jf-input" id="qf-site" />
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <label class="jf-label" style="margin-bottom:0.5rem;">Line Items</label>
+          <div class="quote-line quote-line-header">
+            <span>Description</span><span>Qty</span><span>Rate ($)</span><span>Total</span><span></span>
+          </div>
+          <div class="quote-line-items" id="quoteLineItems"></div>
+          <button class="jobs-btn jobs-btn-outline jobs-btn-sm" onclick="addQuoteLine()">+ Add Line Item</button>
+        </div>
+
+        <div class="quote-totals" id="quoteTotals"></div>
+
+        <div class="jf-group" style="margin-top:1rem;">
+          <label class="jf-label">Notes / Terms</label>
+          <textarea class="jf-textarea" id="qf-notes" placeholder="Payment terms, warranty info, scope exclusions…"></textarea>
+        </div>
+      </div>
+      <div class="jobs-modal-footer">
+        <button class="jobs-btn jobs-btn-outline" onclick="closeQuoteModal()">Cancel</button>
+        <button class="jobs-btn jobs-btn-outline" onclick="previewQuote()">&#128065; Preview</button>
+        <button class="jobs-btn jobs-btn-primary" onclick="saveQuote()" data-permission="quotes_create">Save Quote</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ QUOTE PREVIEW MODAL ═══════════════════════ -->
+  <div class="jobs-modal-overlay" id="quotePreviewModal">
+    <div class="jobs-modal" style="max-width:700px;">
+      <div class="jobs-modal-header">
+        <h2>Quote Preview</h2>
+        <button class="jobs-modal-close" onclick="document.getElementById('quotePreviewModal').classList.remove('open')">&times;</button>
+      </div>
+      <div class="jobs-modal-body quote-print-area" id="quotePreviewBody"></div>
+      <div class="jobs-modal-footer">
+        <button class="jobs-btn jobs-btn-outline" onclick="document.getElementById('quotePreviewModal').classList.remove('open')">Close</button>
+        <button class="jobs-btn jobs-btn-outline" onclick="window.print()">&#128424; Print</button>
+        <button class="jobs-btn jobs-btn-primary" id="convertToInvoiceBtn" onclick="convertQuoteToInvoice()" data-permission="quotes_convert">&#10132; Convert to Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ NEW / EDIT JOB MODAL ═══════════════════════ -->
+  <div class="jobs-modal-overlay" id="jobModal">
+    <div class="jobs-modal">
+      <div class="jobs-modal-header">
+        <h2 id="jobModalTitle">New Job</h2>
+        <button class="jobs-modal-close" onclick="closeJobModal()">&times;</button>
+      </div>
+      <div class="jobs-modal-body">
+        <input type="hidden" id="jf-id" />
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Job Name *</label>
+            <input class="jf-input" id="jf-name" placeholder="e.g. Smith Kitchen Remodel" />
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Trade</label>
+            <select class="jf-select" id="jf-trade">
+              <option value="">Select…</option>
+              <option value="general">General</option>
+              <option value="hvac">HVAC</option>
+              <option value="plumbing">Plumbing</option>
+              <option value="electrical">Electrical</option>
+              <option value="roofing">Roofing</option>
+              <option value="painting">Painting</option>
+              <option value="carpentry">Carpentry</option>
+              <option value="concrete">Concrete</option>
+              <option value="landscaping">Landscaping</option>
+              <option value="handyman">Handyman</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="jf-group">
+          <label class="jf-label">Description</label>
+          <textarea class="jf-textarea" id="jf-desc" placeholder="Scope of work, notes…"></textarea>
+        </div>
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Status</label>
+            <select class="jf-select" id="jf-status">
+              <option value="draft">Draft</option>
+              <option value="quoted">Quoted</option>
+              <option value="approved">Approved</option>
+              <option value="in_progress">In Progress</option>
+              <option value="on_hold">On Hold</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Quoted Amount ($)</label>
+            <input class="jf-input" id="jf-quoted" type="number" step="0.01" placeholder="0.00" />
+          </div>
+        </div>
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Client Name</label>
+            <input class="jf-input" id="jf-client-name" placeholder="John Smith" />
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Client Phone</label>
+            <input class="jf-input" id="jf-client-phone" placeholder="(555) 123-4567" />
+          </div>
+        </div>
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Client Email</label>
+            <input class="jf-input" id="jf-client-email" type="email" placeholder="john@example.com" />
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Job Site Address</label>
+            <input class="jf-input" id="jf-jobsite" placeholder="123 Main St" />
+          </div>
+        </div>
+
+        <div class="jf-row">
+          <div class="jf-group">
+            <label class="jf-label">Start Date</label>
+            <input class="jf-input" id="jf-start" type="date" />
+          </div>
+          <div class="jf-group">
+            <label class="jf-label">Due Date</label>
+            <input class="jf-input" id="jf-due" type="date" />
+          </div>
+        </div>
+
+        <div class="jf-group">
+          <label class="jf-label">Tags (comma separated)</label>
+          <input class="jf-input" id="jf-tags" placeholder="residential, permit-required" />
+        </div>
+
+        <div class="jf-group">
+          <label class="jf-label">Notes</label>
+          <textarea class="jf-textarea" id="jf-notes" placeholder="Internal notes…"></textarea>
+        </div>
+      </div>
+      <div class="jobs-modal-footer">
+        <button class="jobs-btn jobs-btn-outline" onclick="closeJobModal()">Cancel</button>
+        <button class="jobs-btn jobs-btn-primary" onclick="saveJob()">Save Job</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ JOB DETAIL MODAL ═══════════════════════ -->
+  <div class="jobs-modal-overlay" id="jobDetailModal">
+    <div class="jobs-modal" style="max-width:650px;">
+      <div class="jobs-modal-header">
+        <h2 id="detailTitle">Job Details</h2>
+        <button class="jobs-modal-close" onclick="closeDetailModal()">&times;</button>
+      </div>
+      <div class="jobs-modal-body" id="detailBody"></div>
+      <div class="jobs-modal-footer">
+        <button class="jobs-btn jobs-btn-danger jobs-btn-sm" id="detailDeleteBtn" onclick="deleteCurrentJob()" data-permission="projects_delete">Delete</button>
+        <button class="jobs-btn jobs-btn-outline jobs-btn-sm" onclick="editCurrentJob()" data-permission="projects_edit">Edit</button>
+        <button class="jobs-btn jobs-btn-outline jobs-btn-sm" style="background:#ede9fe;color:#7c3aed;border-color:#c4b5fd;" onclick="generateQuoteFromJob()" data-permission="quotes_create">&#128221; Quote</button>
+        <button class="jobs-btn jobs-btn-outline" onclick="closeDetailModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="rv-toast-container" id="toastContainer"></div>
+
+  <!-- Activity Log -->
+  <button class="activity-log-toggle" onclick="toggleActivityLog()">Activity</button>
+  <div class="activity-log-panel" id="activityLogPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+      <h3 style="margin:0;">Activity Log</h3>
+      <button style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#9ca3af;" onclick="toggleActivityLog()">&times;</button>
+    </div>
+    <div id="activityLogEntries"><div class="activity-entry" style="color:#9ca3af;text-align:center;padding:2rem 0;">No activity yet</div></div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="data-layer.js"></script>
+  <script src="auth.js"></script>
+  <script src="contractor-permissions.js"></script>
+  <script>
+  /* ═══════════════════════════════════════════════════════════════════════
+     JOBS PAGE — Full CRUD with list + kanban views
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  var allProjects = [];
+  var filteredProjects = [];
+  var currentView = 'list';
+  var currentDetailId = null;
+
+  // ── Permission Safety Guard ─────────────────────────────────────────────
+  /** Returns true if the user has the permission (sync check, defaults to allowed) */
+  function _hasPerm(permission) {
+    if (typeof ContractorAccess !== 'undefined' && ContractorAccess.canSync) {
+      return ContractorAccess.canSync(permission);
+    }
+    return true; // default allow if module not loaded
+  }
+
+  // ── Event Bus — Automation Hooks ──────────────────────────────────────
+  // Future AI agents, webhooks, and integrations can subscribe to these events.
+  // Usage: RVEvents.on('job:created', function(data) { ... })
+  // All events also fire as DOM CustomEvents on document for cross-module use.
+
+  var RVEvents = (function() {
+    var listeners = {};
+
+    function on(event, callback) {
+      if (!listeners[event]) listeners[event] = [];
+      listeners[event].push(callback);
+      return function() { off(event, callback); }; // returns unsubscribe fn
+    }
+
+    function off(event, callback) {
+      if (!listeners[event]) return;
+      listeners[event] = listeners[event].filter(function(cb) { return cb !== callback; });
+    }
+
+    function emit(event, data) {
+      var payload = { event: event, data: data, timestamp: new Date().toISOString() };
+      // Internal listeners
+      (listeners[event] || []).forEach(function(cb) { try { cb(payload); } catch(e) { console.error('RVEvents listener error:', e); } });
+      // Wildcard listeners (listen to everything)
+      (listeners['*'] || []).forEach(function(cb) { try { cb(payload); } catch(e) {} });
+      // DOM CustomEvent for cross-module use
+      document.dispatchEvent(new CustomEvent('rv:' + event, { detail: payload }));
+      // Log to activity log
+      _logActivity(event, data);
+    }
+
+    return { on: on, off: off, emit: emit };
+  })();
+
+  window.RVEvents = RVEvents;
+
+  // ── Toast Notifications ─────────────────────────────────────────────────
+
+  function showToast(message, type) {
+    type = type || 'success';
+    var container = document.getElementById('toastContainer');
+    if (!container) return;
+    var toast = document.createElement('div');
+    toast.className = 'rv-toast ' + type;
+    var icons = { success: '\u2705', error: '\u274c', info: '\u2139\ufe0f', warning: '\u26a0\ufe0f' };
+    toast.innerHTML = '<span>' + (icons[type] || '') + '</span><span>' + message + '</span>';
+    container.appendChild(toast);
+    setTimeout(function() {
+      toast.classList.add('fade-out');
+      setTimeout(function() { toast.remove(); }, 300);
+    }, 3200);
+  }
+
+  // ── Activity Log ────────────────────────────────────────────────────────
+
+  var _activityLog = [];
+  var MAX_ACTIVITY = 50;
+
+  function _logActivity(event, data) {
+    var icons = {
+      'job:created': '\ud83d\udee0\ufe0f', 'job:updated': '\u270f\ufe0f', 'job:deleted': '\ud83d\uddd1\ufe0f',
+      'task:added': '\u2795', 'task:completed': '\u2705', 'task:deleted': '\u274c',
+      'timer:started': '\u25b6\ufe0f', 'timer:stopped': '\u23f9\ufe0f',
+      'quote:created': '\ud83d\udcdd', 'quote:updated': '\ud83d\udcdd', 'quote:invoiced': '\ud83d\udcb0',
+      'export:csv': '\ud83d\udcc4'
+    };
+    var labels = {
+      'job:created': 'Job created', 'job:updated': 'Job updated', 'job:deleted': 'Job deleted',
+      'task:added': 'Task added', 'task:completed': 'Task completed', 'task:deleted': 'Task deleted',
+      'timer:started': 'Timer started', 'timer:stopped': 'Timer stopped',
+      'quote:created': 'Quote created', 'quote:updated': 'Quote updated', 'quote:invoiced': 'Quote converted to invoice',
+      'export:csv': 'Data exported'
+    };
+
+    var entry = {
+      event: event,
+      icon: icons[event] || '\ud83d\udce1',
+      label: labels[event] || event,
+      detail: data?.name || data?.title || data?.num || '',
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    _activityLog.unshift(entry);
+    if (_activityLog.length > MAX_ACTIVITY) _activityLog.pop();
+    _renderActivityLog();
+  }
+
+  function _renderActivityLog() {
+    var el = document.getElementById('activityLogEntries');
+    if (!el) return;
+    if (_activityLog.length === 0) {
+      el.innerHTML = '<div class="activity-entry" style="color:#9ca3af;text-align:center;padding:2rem 0;">No activity yet</div>';
+      return;
+    }
+    el.innerHTML = _activityLog.map(function(a) {
+      return '<div class="activity-entry"><span class="ae-icon">' + a.icon + '</span>' +
+        a.label + (a.detail ? ' — <strong>' + esc(a.detail) + '</strong>' : '') +
+        '<div class="ae-time">' + a.time + '</div></div>';
+    }).join('');
+  }
+
+  function toggleActivityLog() {
+    document.getElementById('activityLogPanel').classList.toggle('open');
+  }
+
+  // ── CSV Export ───────────────────────────────────────────────────────────
+
+  function exportJobsCSV() {
+    var rows = [['Name','Trade','Status','Client','Job Site','Quoted','Approved','Start','Due','Tags']];
+    allProjects.forEach(function(p) {
+      rows.push([
+        p.name || '', p.trade || '', p.status || '', p.client_name || '', p.job_site || '',
+        p.quoted_amount || '', p.approved_amount || '', p.start_date || '', p.due_date || '',
+        (p.tags || []).join('; ')
+      ]);
+    });
+    _downloadCSV(rows, 'rv-jobs-export.csv');
+    RVEvents.emit('export:csv', { type: 'jobs', count: allProjects.length });
+    showToast('Jobs exported to CSV', 'success');
+  }
+
+  function exportTimesheetCSV() {
+    var entries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]');
+    var rows = [['Project','Clock In','Clock Out','Duration (min)','Note','Billable','Rate']];
+    entries.forEach(function(e) {
+      var proj = allProjects.find(function(p) { return p.id === e.project_id; });
+      rows.push([
+        proj ? proj.name : e.project_id, e.clock_in || '', e.clock_out || '',
+        e.duration_min || '', e.note || '', e.billable ? 'Yes' : 'No', e.hourly_rate || ''
+      ]);
+    });
+    _downloadCSV(rows, 'rv-timesheet-export.csv');
+    RVEvents.emit('export:csv', { type: 'timesheet', count: entries.length });
+    showToast('Timesheet exported to CSV', 'success');
+  }
+
+  function _downloadCSV(rows, filename) {
+    var csv = rows.map(function(r) {
+      return r.map(function(cell) {
+        var s = String(cell).replace(/"/g, '""');
+        return '"' + s + '"';
+      }).join(',');
+    }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  // ── Keyboard Shortcuts ──────────────────────────────────────────────────
+
+  document.addEventListener('keydown', function(e) {
+    // Don't trigger when typing in inputs
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+    // N = New Job
+    if (e.key === 'n' && !e.ctrlKey && !e.metaKey) { openNewJob(); return; }
+    // 1-5 = Switch views
+    if (e.key === '1') { switchView('list'); return; }
+    if (e.key === '2') { switchView('kanban'); return; }
+    if (e.key === '3') { switchView('schedule'); return; }
+    if (e.key === '4') { switchView('timesheet'); return; }
+    if (e.key === '5') { switchView('quotes'); return; }
+    // Escape = close any open modal
+    if (e.key === 'Escape') {
+      closeJobModal(); closeDetailModal();
+      document.getElementById('quoteModal').classList.remove('open');
+      document.getElementById('quotePreviewModal').classList.remove('open');
+      document.getElementById('activityLogPanel').classList.remove('open');
+      return;
+    }
+    // ? = show shortcuts
+    if (e.key === '?') {
+      showToast('Shortcuts: N=New Job, 1-5=Views, Esc=Close, ?=Help', 'info');
+      return;
+    }
+  });
+
+  var TRADE_ICONS = {
+    general: '&#128679;', hvac: '&#10052;', plumbing: '&#128688;', electrical: '&#9889;',
+    roofing: '&#127968;', painting: '&#127912;', carpentry: '&#129683;', concrete: '&#129521;',
+    landscaping: '&#127793;', handyman: '&#128295;', other: '&#128736;'
+  };
+
+  var TRADE_COLORS = {
+    general: { bg: '#fef3c7', color: '#92400e' },
+    hvac: { bg: '#dbeafe', color: '#1e40af' },
+    plumbing: { bg: '#ede9fe', color: '#5b21b6' },
+    electrical: { bg: '#fef9c3', color: '#854d0e' },
+    roofing: { bg: '#fee2e2', color: '#991b1b' },
+    painting: { bg: '#fce7f3', color: '#9d174d' },
+    carpentry: { bg: '#fef3c7', color: '#78350f' },
+    concrete: { bg: '#f3f4f6', color: '#374151' },
+    landscaping: { bg: '#d1fae5', color: '#065f46' },
+    handyman: { bg: '#fef3c7', color: '#d97706' },
+    other: { bg: '#f3f4f6', color: '#6b7280' }
+  };
+
+  var KANBAN_COLUMNS = [
+    { key: 'draft',       label: 'Draft',       color: '#6b7280' },
+    { key: 'quoted',      label: 'Quoted',      color: '#7c3aed' },
+    { key: 'approved',    label: 'Approved',     color: '#2563eb' },
+    { key: 'in_progress', label: 'In Progress',  color: '#d97706' },
+    { key: 'completed',   label: 'Completed',    color: '#059669' }
+  ];
+
+  // ── Load ──────────────────────────────────────────────────────────────
+
+  async function loadProjects() {
+    try {
+      allProjects = await RVData.getProjects();
+    } catch(e) {
+      allProjects = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+    }
+    renderStats();
+    filterJobs();
+  }
+
+  function renderStats() {
+    var active = allProjects.filter(function(p) { return p.status === 'in_progress' || p.status === 'approved'; }).length;
+    var completed = allProjects.filter(function(p) { return p.status === 'completed'; }).length;
+    var pending = allProjects.filter(function(p) { return p.status === 'draft' || p.status === 'quoted'; }).length;
+    var revenue = allProjects.reduce(function(sum, p) {
+      if (p.status === 'completed') return sum + parseFloat(p.approved_amount || p.quoted_amount || 0);
+      return sum;
+    }, 0);
+
+    document.getElementById('stat-active').textContent = active;
+    document.getElementById('stat-completed').textContent = completed;
+    document.getElementById('stat-pending').textContent = pending;
+    document.getElementById('stat-revenue').textContent = '$' + revenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+    // Summary cards
+    var inProg = allProjects.filter(function(p) { return p.status === 'in_progress'; }).length;
+    var totalQuoted = allProjects.reduce(function(s, p) { return s + parseFloat(p.quoted_amount || 0); }, 0);
+    var thisMonth = allProjects.filter(function(p) {
+      if (!p.created_at) return false;
+      var d = new Date(p.created_at);
+      var now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+
+    document.getElementById('jobsSummary').innerHTML =
+      '<div class="jobs-sum-card"><div class="val">' + allProjects.length + '</div><div class="lbl">Total Jobs</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">' + inProg + '</div><div class="lbl">In Progress</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">$' + totalQuoted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + '</div><div class="lbl">Total Quoted</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">' + thisMonth + '</div><div class="lbl">This Month</div></div>';
+  }
+
+  // ── Filter ─────────────────────────────────────────────────────────────
+
+  function filterJobs() {
+    var search = (document.getElementById('jobSearch').value || '').toLowerCase();
+    var trade = document.getElementById('filterTrade').value;
+    var status = document.getElementById('filterStatus').value;
+
+    filteredProjects = allProjects.filter(function(p) {
+      if (trade && p.trade !== trade) return false;
+      if (status && p.status !== status) return false;
+      if (search) {
+        var hay = ((p.name || '') + ' ' + (p.client_name || '') + ' ' + (p.job_site || '') + ' ' + (p.trade || '') + ' ' + (p.description || '')).toLowerCase();
+        if (hay.indexOf(search) === -1) return false;
+      }
+      return true;
+    });
+
+    if (currentView === 'list') renderList();
+    else renderKanban();
+  }
+
+  // ── List View ─────────────────────────────────────────────────────────
+
+  function renderList() {
+    var container = document.getElementById('listView');
+    if (filteredProjects.length === 0) {
+      container.innerHTML = '<div class="jobs-empty"><div class="jobs-empty-icon">&#127959;</div><h3>No Jobs Yet</h3><p>Create your first job to start tracking time, materials, and crew. Most contractors get set up in under 2 minutes.</p><button class="jobs-btn jobs-btn-primary" onclick="openNewJob()">+ Create First Job</button></div>';
+      return;
+    }
+    container.innerHTML = filteredProjects.map(function(p) {
+      var tc = TRADE_COLORS[p.trade] || TRADE_COLORS.other;
+      var icon = TRADE_ICONS[p.trade] || TRADE_ICONS.other;
+      var amount = p.approved_amount || p.quoted_amount;
+      var amountStr = amount ? '$' + parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—';
+      var dateStr = p.due_date ? 'Due ' + formatDate(p.due_date) : (p.start_date ? 'Starts ' + formatDate(p.start_date) : '');
+      var statusLabel = (p.status || 'draft').replace('_', ' ');
+
+      return '<div class="job-card" onclick="openDetail(\'' + p.id + '\')">' +
+        '<div class="job-icon" style="background:' + tc.bg + ';color:' + tc.color + ';">' + icon + '</div>' +
+        '<div class="job-info">' +
+          '<div class="job-name">' + esc(p.name) + '</div>' +
+          '<div class="job-meta">' +
+            '<span class="status-pill status-' + p.status + '">' + statusLabel + '</span>' +
+            (p.trade ? '<span>' + capitalize(p.trade) + '</span>' : '') +
+            (p.client_name ? '<span>' + esc(p.client_name) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="job-right">' +
+          '<div class="job-amount">' + amountStr + '</div>' +
+          '<div class="job-date">' + dateStr + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Kanban View ────────────────────────────────────────────────────────
+
+  function renderKanban() {
+    var container = document.getElementById('kanbanView');
+    container.innerHTML = KANBAN_COLUMNS.map(function(col) {
+      var items = filteredProjects.filter(function(p) { return p.status === col.key; });
+      var cards = items.map(function(p) {
+        var amount = p.approved_amount || p.quoted_amount;
+        var amountStr = amount ? '$' + parseFloat(amount).toLocaleString('en-US') : '';
+        return '<div class="kanban-card" onclick="openDetail(\'' + p.id + '\')">' +
+          '<div class="kanban-card-name">' + esc(p.name) + '</div>' +
+          '<div class="kanban-card-meta">' + (p.client_name ? esc(p.client_name) : '') + (p.trade ? ' &middot; ' + capitalize(p.trade) : '') + '</div>' +
+          (amountStr ? '<div class="kanban-card-amount">' + amountStr + '</div>' : '') +
+        '</div>';
+      }).join('');
+
+      return '<div class="kanban-col">' +
+        '<div class="kanban-col-header" style="color:' + col.color + ';">' +
+          col.label +
+          '<span class="kanban-col-count">' + items.length + '</span>' +
+        '</div>' +
+        cards +
+      '</div>';
+    }).join('');
+  }
+
+  function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.jobs-view-tab').forEach(function(tab) {
+      tab.classList.toggle('active', tab.getAttribute('data-view') === view);
+    });
+    document.getElementById('listView').style.display = view === 'list' ? 'flex' : 'none';
+    document.getElementById('kanbanView').style.display = view === 'kanban' ? 'grid' : 'none';
+    document.getElementById('scheduleView').style.display = view === 'schedule' ? 'block' : 'none';
+    document.getElementById('timesheetView').style.display = view === 'timesheet' ? 'block' : 'none';
+    document.getElementById('quotesView').style.display = view === 'quotes' ? 'block' : 'none';
+
+    if (view === 'schedule') renderSchedule();
+    else if (view === 'timesheet') renderTimesheet();
+    else if (view === 'quotes') renderQuotesView();
+    else filterJobs();
+  }
+
+  // ── New / Edit Modal ──────────────────────────────────────────────────
+
+  function openNewJob() {
+    if (!_hasPerm('projects_create')) { showToast('You do not have permission to create jobs.', 'error'); return; }
+    document.getElementById('jobModalTitle').textContent = 'New Job';
+    clearJobForm();
+    document.getElementById('jobModal').classList.add('open');
+  }
+
+  function openEditJob(id) {
+    var proj = allProjects.find(function(p) { return p.id === id; });
+    if (!proj) return;
+    document.getElementById('jobModalTitle').textContent = 'Edit Job';
+    document.getElementById('jf-id').value = proj.id;
+    document.getElementById('jf-name').value = proj.name || '';
+    document.getElementById('jf-trade').value = proj.trade || '';
+    document.getElementById('jf-desc').value = proj.description || '';
+    document.getElementById('jf-status').value = proj.status || 'draft';
+    document.getElementById('jf-quoted').value = proj.quoted_amount || '';
+    document.getElementById('jf-client-name').value = proj.client_name || '';
+    document.getElementById('jf-client-phone').value = proj.client_phone || '';
+    document.getElementById('jf-client-email').value = proj.client_email || '';
+    document.getElementById('jf-jobsite').value = proj.job_site || '';
+    document.getElementById('jf-start').value = proj.start_date || '';
+    document.getElementById('jf-due').value = proj.due_date || '';
+    document.getElementById('jf-tags').value = (proj.tags || []).join(', ');
+    document.getElementById('jf-notes').value = proj.notes || '';
+    document.getElementById('jobModal').classList.add('open');
+  }
+
+  function closeJobModal() {
+    document.getElementById('jobModal').classList.remove('open');
+    clearJobForm();
+  }
+
+  function clearJobForm() {
+    ['jf-id','jf-name','jf-desc','jf-quoted','jf-client-name','jf-client-phone','jf-client-email','jf-jobsite','jf-start','jf-due','jf-tags','jf-notes'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('jf-trade').value = '';
+    document.getElementById('jf-status').value = 'draft';
+  }
+
+  async function saveJob() {
+    // Editing requires projects_edit; creating requires projects_create
+    var isEditing = !!document.getElementById('jf-id').value;
+    if (isEditing && !_hasPerm('projects_edit')) { showToast('You do not have permission to edit jobs.', 'error'); return; }
+    if (!isEditing && !_hasPerm('projects_create')) { showToast('You do not have permission to create jobs.', 'error'); return; }
+
+    var name = document.getElementById('jf-name').value.trim();
+    if (!name) { alert('Job name is required.'); return; }
+
+    var tags = document.getElementById('jf-tags').value.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+
+    var project = {
+      name: name,
+      trade: document.getElementById('jf-trade').value || null,
+      description: document.getElementById('jf-desc').value.trim() || null,
+      status: document.getElementById('jf-status').value,
+      quoted_amount: parseFloat(document.getElementById('jf-quoted').value) || null,
+      client_name: document.getElementById('jf-client-name').value.trim() || null,
+      client_phone: document.getElementById('jf-client-phone').value.trim() || null,
+      client_email: document.getElementById('jf-client-email').value.trim() || null,
+      job_site: document.getElementById('jf-jobsite').value.trim() || null,
+      start_date: document.getElementById('jf-start').value || null,
+      due_date: document.getElementById('jf-due').value || null,
+      tags: tags,
+      notes: document.getElementById('jf-notes').value.trim() || null
+    };
+
+    var existingId = document.getElementById('jf-id').value;
+    if (existingId) project.id = existingId;
+
+    // If status changed to completed, stamp completed_at
+    if (project.status === 'completed' && !project.completed_at) {
+      project.completed_at = new Date().toISOString();
+    }
+    // If approved and has quoted but no approved_amount, copy quoted
+    if (project.status === 'approved' && project.quoted_amount && !project.approved_amount) {
+      project.approved_amount = project.quoted_amount;
+    }
+
+    try {
+      await RVData.saveProject(project);
+      RVEvents.emit(isEditing ? 'job:updated' : 'job:created', project);
+      showToast(isEditing ? 'Job updated' : 'Job created', 'success');
+    } catch(e) {
+      console.error('Save failed', e);
+      showToast('Failed to save job', 'error');
+    }
+
+    closeJobModal();
+    await loadProjects();
+
+    // If we were viewing detail, refresh it
+    if (currentDetailId === existingId) {
+      openDetail(existingId);
+    }
+  }
+
+  // ── Detail Modal ──────────────────────────────────────────────────────
+
+  async function openDetail(id) {
+    currentDetailId = id;
+    var proj = allProjects.find(function(p) { return p.id === id; });
+    if (!proj) return;
+
+    document.getElementById('detailTitle').textContent = proj.name;
+
+    // Load tasks
+    var tasks = [];
+    try { tasks = await RVData.getProjectTasks(id); } catch(e) {
+      tasks = JSON.parse(localStorage.getItem('rv_project_tasks') || '[]').filter(function(t) { return t.project_id === id; });
+    }
+
+    var statusLabel = (proj.status || 'draft').replace('_', ' ');
+    var amount = proj.approved_amount || proj.quoted_amount;
+
+    var html = '';
+
+    // Info section
+    html += '<div class="job-detail-section"><h3>Job Information</h3><div class="job-detail-grid">';
+    html += '<div class="job-detail-item"><div class="dlbl">Status</div><div class="dval"><span class="status-pill status-' + proj.status + '">' + statusLabel + '</span></div></div>';
+    html += '<div class="job-detail-item"><div class="dlbl">Trade</div><div class="dval">' + capitalize(proj.trade || 'Not set') + '</div></div>';
+    html += '<div class="job-detail-item"><div class="dlbl">Quoted</div><div class="dval">' + (proj.quoted_amount ? '$' + parseFloat(proj.quoted_amount).toLocaleString() : '—') + '</div></div>';
+    html += '<div class="job-detail-item"><div class="dlbl">Approved</div><div class="dval">' + (proj.approved_amount ? '$' + parseFloat(proj.approved_amount).toLocaleString() : '—') + '</div></div>';
+    html += '<div class="job-detail-item"><div class="dlbl">Start Date</div><div class="dval">' + (proj.start_date ? formatDate(proj.start_date) : '—') + '</div></div>';
+    html += '<div class="job-detail-item"><div class="dlbl">Due Date</div><div class="dval">' + (proj.due_date ? formatDate(proj.due_date) : '—') + '</div></div>';
+    html += '</div></div>';
+
+    // Client section
+    if (proj.client_name || proj.client_email || proj.client_phone || proj.job_site) {
+      html += '<div class="job-detail-section"><h3>Client &amp; Location</h3><div class="job-detail-grid">';
+      html += '<div class="job-detail-item"><div class="dlbl">Client</div><div class="dval">' + esc(proj.client_name || '—') + '</div></div>';
+      html += '<div class="job-detail-item"><div class="dlbl">Phone</div><div class="dval">' + esc(proj.client_phone || '—') + '</div></div>';
+      html += '<div class="job-detail-item"><div class="dlbl">Email</div><div class="dval">' + esc(proj.client_email || '—') + '</div></div>';
+      html += '<div class="job-detail-item"><div class="dlbl">Job Site</div><div class="dval">' + esc(proj.job_site || '—') + '</div></div>';
+      html += '</div></div>';
+    }
+
+    // Description
+    if (proj.description) {
+      html += '<div class="job-detail-section"><h3>Description</h3><p style="font-size:0.88rem;color:#374151;line-height:1.6;">' + esc(proj.description) + '</p></div>';
+    }
+
+    // Tasks section
+    html += '<div class="job-detail-section"><h3>Tasks (' + tasks.length + ')</h3>';
+    html += '<div class="task-list">';
+    tasks.forEach(function(t) {
+      var done = t.status === 'completed';
+      html += '<div class="task-item">' +
+        '<input type="checkbox" class="task-check" ' + (done ? 'checked' : '') + ' onchange="toggleTask(\'' + t.id + '\', this.checked)" />' +
+        '<div class="task-title ' + (done ? 'done' : '') + '">' + esc(t.title) + '</div>' +
+        (t.estimated_hours ? '<div class="task-hours">' + t.estimated_hours + 'h est</div>' : '') +
+        (t.actual_hours ? '<div class="task-hours">' + t.actual_hours + 'h actual</div>' : '') +
+        '<button class="jobs-btn jobs-btn-danger jobs-btn-sm" style="padding:0.2rem 0.5rem;font-size:0.7rem;" onclick="deleteTask(\'' + t.id + '\')">&times;</button>' +
+      '</div>';
+    });
+    html += '</div>';
+    html += '<div class="add-task-row">' +
+      '<input class="add-task-input" id="newTaskTitle" placeholder="Add a task…" onkeydown="if(event.key===\'Enter\')addTask()" />' +
+      '<button class="jobs-btn jobs-btn-primary jobs-btn-sm" onclick="addTask()">Add</button>' +
+    '</div>';
+    html += '</div>';
+
+    // Time tracking section
+    var timeEntries = [];
+    try { timeEntries = await RVData.getTimeEntries(id); } catch(e) {
+      timeEntries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]').filter(function(e) { return e.project_id === id; });
+    }
+
+    var totalMins = timeEntries.reduce(function(s, e) { return s + parseFloat(e.duration_min || 0); }, 0);
+    var isRunning = timeEntries.some(function(e) { return !e.clock_out; });
+
+    html += '<div class="job-detail-section"><h3>&#9201; Time Tracking (' + timeEntries.length + ' entries &middot; ' + formatDuration(totalMins) + ' total)</h3>';
+
+    if (isRunning) {
+      html += '<div style="padding:0.5rem 0.75rem;background:#fef3c7;border-radius:8px;border:1px solid #fbbf24;margin-bottom:0.5rem;font-size:0.82rem;font-weight:600;color:#92400e;">&#9201; Timer running — see floating widget to stop</div>';
+    } else {
+      html += '<div class="clock-row">' +
+        '<input class="clock-note-input" id="clockNote" placeholder="What are you working on?" />' +
+        '<button class="jobs-btn jobs-btn-primary jobs-btn-sm" onclick="startTimer(\'' + id + '\')">&#9654; Clock In</button>' +
+      '</div>';
+    }
+
+    if (timeEntries.length > 0) {
+      html += '<div class="time-entry-list" style="margin-top:0.75rem;">';
+      timeEntries.slice(0, 10).forEach(function(e) {
+        var dateStr = e.clock_in ? new Date(e.clock_in).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+        var dur = e.duration_min ? formatDuration(e.duration_min) : (e.clock_out ? formatDuration((new Date(e.clock_out) - new Date(e.clock_in)) / 60000) : 'running…');
+        html += '<div class="time-entry-item">' +
+          '<span class="te-date">' + dateStr + '</span>' +
+          '<span class="te-dur">' + dur + '</span>' +
+          '<span class="te-note">' + esc(e.note || '') + '</span>' +
+          '<button class="jobs-btn jobs-btn-danger jobs-btn-sm" style="padding:0.15rem 0.4rem;font-size:0.65rem;" onclick="deleteTimeEntry(\'' + e.id + '\')">&times;</button>' +
+        '</div>';
+      });
+      if (timeEntries.length > 10) {
+        html += '<div style="font-size:0.75rem;color:#9ca3af;text-align:center;padding:0.5rem;">+ ' + (timeEntries.length - 10) + ' more entries</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // Tags
+    if (proj.tags && proj.tags.length) {
+      html += '<div class="job-detail-section"><h3>Tags</h3><div style="display:flex;gap:0.4rem;flex-wrap:wrap;">';
+      proj.tags.forEach(function(tag) {
+        html += '<span style="padding:0.2rem 0.6rem;border-radius:99px;background:#f3f4f6;font-size:0.75rem;font-weight:600;color:#6b7280;">' + esc(tag) + '</span>';
+      });
+      html += '</div></div>';
+    }
+
+    // Notes
+    if (proj.notes) {
+      html += '<div class="job-detail-section"><h3>Notes</h3><p style="font-size:0.85rem;color:#6b7280;line-height:1.5;font-style:italic;">' + esc(proj.notes) + '</p></div>';
+    }
+
+    document.getElementById('detailBody').innerHTML = html;
+    document.getElementById('jobDetailModal').classList.add('open');
+  }
+
+  function closeDetailModal() {
+    document.getElementById('jobDetailModal').classList.remove('open');
+    currentDetailId = null;
+  }
+
+  function editCurrentJob() {
+    if (!currentDetailId) return;
+    if (!_hasPerm('projects_edit')) { showToast('You do not have permission to edit jobs.', 'error'); return; }
+    closeDetailModal();
+    openEditJob(currentDetailId);
+  }
+
+  async function deleteCurrentJob() {
+    if (!currentDetailId) return;
+    if (!_hasPerm('projects_delete')) { showToast('You do not have permission to delete jobs.', 'error'); return; }
+    if (!confirm('Delete this job and all its tasks? This cannot be undone.')) return;
+    var proj = allProjects.find(function(p) { return p.id === currentDetailId; });
+    try { await RVData.deleteProject(currentDetailId); } catch(e) {}
+    RVEvents.emit('job:deleted', { id: currentDetailId, name: proj ? proj.name : '' });
+    showToast('Job deleted', 'warning');
+    closeDetailModal();
+    await loadProjects();
+  }
+
+  // ── Task CRUD ──────────────────────────────────────────────────────────
+
+  async function addTask() {
+    var input = document.getElementById('newTaskTitle');
+    var title = (input.value || '').trim();
+    if (!title || !currentDetailId) return;
+
+    var tasks = [];
+    try { tasks = await RVData.getProjectTasks(currentDetailId); } catch(e) {}
+
+    var task = {
+      project_id: currentDetailId,
+      title: title,
+      status: 'pending',
+      sort_order: tasks.length
+    };
+
+    try { await RVData.saveProjectTask(task); } catch(e) {}
+    RVEvents.emit('task:added', task);
+    input.value = '';
+    openDetail(currentDetailId);
+  }
+
+  async function toggleTask(taskId, checked) {
+    var tasks = [];
+    try { tasks = await RVData.getProjectTasks(currentDetailId); } catch(e) {
+      tasks = JSON.parse(localStorage.getItem('rv_project_tasks') || '[]');
+    }
+    var task = tasks.find(function(t) { return t.id === taskId; });
+    if (!task) return;
+
+    task.status = checked ? 'completed' : 'pending';
+    task.completed_at = checked ? new Date().toISOString() : null;
+
+    try { await RVData.saveProjectTask(task); } catch(e) {}
+    if (checked) RVEvents.emit('task:completed', task);
+    openDetail(currentDetailId);
+  }
+
+  async function deleteTask(taskId) {
+    try { await RVData.deleteProjectTask(taskId); } catch(e) {}
+    RVEvents.emit('task:deleted', { id: taskId });
+    openDetail(currentDetailId);
+  }
+
+  // ── Schedule View ──────────────────────────────────────────────────────
+
+  var scheduleWeekStart = getMonday(new Date());
+
+  function getMonday(d) {
+    var day = d.getDay();
+    var diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.getFullYear(), d.getMonth(), diff);
+  }
+
+  function renderSchedule() {
+    var container = document.getElementById('scheduleView');
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(scheduleWeekStart);
+      d.setDate(d.getDate() + i);
+      days.push(d);
+    }
+
+    var today = new Date();
+    today.setHours(0,0,0,0);
+
+    var weekEnd = new Date(days[6]);
+    weekEnd.setHours(23,59,59);
+    var weekLabel = days[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' — ' + days[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    var html = '<div class="schedule-header">' +
+      '<div class="schedule-nav">' +
+        '<button class="schedule-nav-btn" onclick="navSchedule(-1)">&larr;</button>' +
+        '<span class="schedule-week-label">' + weekLabel + '</span>' +
+        '<button class="schedule-nav-btn" onclick="navSchedule(1)">&rarr;</button>' +
+      '</div>' +
+      '<button class="schedule-today-btn" onclick="navScheduleToday()">Today</button>' +
+    '</div>';
+
+    var dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+    html += '<div class="schedule-grid">';
+    days.forEach(function(day, idx) {
+      var isToday = day.getTime() === today.getTime();
+      var dayStr = day.toISOString().slice(0, 10);
+
+      // Find projects that span this day
+      var dayProjects = allProjects.filter(function(p) {
+        if (!p.start_date && !p.due_date) return false;
+        var start = p.start_date ? new Date(p.start_date + 'T00:00:00') : null;
+        var end = p.due_date ? new Date(p.due_date + 'T23:59:59') : start;
+        if (!start) start = end;
+        return day >= start && day <= end;
+      });
+
+      html += '<div class="schedule-day' + (isToday ? ' today' : '') + '">';
+      html += '<div class="schedule-day-header"><span>' + dayNames[idx] + '</span><span class="day-num">' + day.getDate() + '</span></div>';
+      dayProjects.forEach(function(p) {
+        var tc = TRADE_COLORS[p.trade] || TRADE_COLORS.other;
+        html += '<div class="schedule-event" style="background:' + tc.bg + ';border-color:' + tc.color + ';color:' + tc.color + ';" onclick="openDetail(\'' + p.id + '\')">' + esc(p.name) + '</div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  function navSchedule(direction) {
+    scheduleWeekStart.setDate(scheduleWeekStart.getDate() + (direction * 7));
+    renderSchedule();
+  }
+
+  function navScheduleToday() {
+    scheduleWeekStart = getMonday(new Date());
+    renderSchedule();
+  }
+
+  // ── Timesheet View ────────────────────────────────────────────────────
+
+  async function renderTimesheet() {
+    var container = document.getElementById('timesheetView');
+    var entries = [];
+    try { entries = await RVData.getTimeEntries(); } catch(e) {
+      entries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]');
+    }
+
+    // Group entries by date
+    var byDate = {};
+    entries.forEach(function(e) {
+      var dateKey = e.clock_in ? new Date(e.clock_in).toISOString().slice(0, 10) : 'unknown';
+      if (!byDate[dateKey]) byDate[dateKey] = [];
+      byDate[dateKey].push(e);
+    });
+
+    var totalMins = entries.reduce(function(s, e) { return s + parseFloat(e.duration_min || 0); }, 0);
+    var totalBillable = entries.filter(function(e) { return e.billable !== false; }).reduce(function(s, e) { return s + parseFloat(e.duration_min || 0); }, 0);
+    var totalCost = entries.reduce(function(s, e) {
+      if (!e.hourly_rate || !e.duration_min) return s;
+      return s + (parseFloat(e.hourly_rate) * parseFloat(e.duration_min) / 60);
+    }, 0);
+
+    var html = '';
+
+    // Summary row
+    html += '<div class="jobs-summary" style="margin-bottom:1.5rem;">' +
+      '<div class="jobs-sum-card"><div class="val">' + entries.length + '</div><div class="lbl">Total Entries</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">' + formatDuration(totalMins) + '</div><div class="lbl">Total Hours</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">' + formatDuration(totalBillable) + '</div><div class="lbl">Billable Hours</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">$' + totalCost.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + '</div><div class="lbl">Labor Cost</div></div>' +
+    '</div>';
+
+    // Manual entry form
+    html += '<div style="background:white;border-radius:12px;padding:1rem 1.25rem;border:1px solid #e5e7eb;margin-bottom:1.5rem;">' +
+      '<h3 style="font-size:0.85rem;font-weight:700;margin-bottom:0.75rem;">&#10010; Add Manual Time Entry</h3>' +
+      '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end;">' +
+        '<div class="jf-group" style="margin-bottom:0;flex:1;min-width:140px;"><label class="jf-label">Project</label><select class="jf-select" id="ts-project" style="width:100%;">' +
+          '<option value="">Select job…</option>' +
+          allProjects.map(function(p) { return '<option value="' + p.id + '">' + esc(p.name) + '</option>'; }).join('') +
+        '</select></div>' +
+        '<div class="jf-group" style="margin-bottom:0;"><label class="jf-label">Date</label><input class="jf-input" id="ts-date" type="date" value="' + new Date().toISOString().slice(0,10) + '" style="width:130px;" /></div>' +
+        '<div class="jf-group" style="margin-bottom:0;"><label class="jf-label">Hours</label><input class="jf-input" id="ts-hours" type="number" step="0.25" placeholder="2.5" style="width:80px;" /></div>' +
+        '<div class="jf-group" style="margin-bottom:0;flex:1;min-width:120px;"><label class="jf-label">Note</label><input class="jf-input" id="ts-note" placeholder="What did you do?" /></div>' +
+        '<button class="jobs-btn jobs-btn-primary jobs-btn-sm" onclick="addManualEntry()" style="margin-bottom:0;">Add</button>' +
+      '</div>' +
+    '</div>';
+
+    // Grouped entries
+    var sortedDates = Object.keys(byDate).sort().reverse();
+
+    if (sortedDates.length === 0) {
+      html += '<div class="jobs-empty"><div class="jobs-empty-icon">&#9201;</div><h3>No Time Entries</h3><p>Clock in on a job or add manual entries to track your time.</p></div>';
+    } else {
+      sortedDates.forEach(function(dateKey) {
+        var dayEntries = byDate[dateKey];
+        var dayMins = dayEntries.reduce(function(s, e) { return s + parseFloat(e.duration_min || 0); }, 0);
+        var dateLabel = dateKey === 'unknown' ? 'Unknown' : new Date(dateKey + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+        html += '<div style="margin-bottom:1rem;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">' +
+            '<span style="font-weight:700;font-size:0.88rem;color:#374151;">' + dateLabel + '</span>' +
+            '<span style="font-size:0.78rem;font-weight:600;color:#059669;">' + formatDuration(dayMins) + '</span>' +
+          '</div>';
+
+        html += '<div class="time-entry-list">';
+        dayEntries.forEach(function(e) {
+          var proj = allProjects.find(function(p) { return p.id === e.project_id; });
+          var projName = proj ? proj.name : 'Unknown Job';
+          var dur = e.duration_min ? formatDuration(e.duration_min) : 'running…';
+          var timeStr = e.clock_in ? new Date(e.clock_in).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+          if (e.clock_out) timeStr += ' — ' + new Date(e.clock_out).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+          html += '<div class="time-entry-item">' +
+            '<span class="te-date" style="min-width:120px;">' + esc(projName) + '</span>' +
+            '<span class="te-dur">' + dur + '</span>' +
+            '<span style="font-size:0.72rem;color:#9ca3af;min-width:90px;">' + timeStr + '</span>' +
+            '<span class="te-note">' + esc(e.note || '') + '</span>' +
+            '<button class="jobs-btn jobs-btn-danger jobs-btn-sm" style="padding:0.15rem 0.4rem;font-size:0.65rem;" onclick="deleteTimeEntryFromSheet(\'' + e.id + '\')">&times;</button>' +
+          '</div>';
+        });
+        html += '</div></div>';
+      });
+    }
+
+    container.innerHTML = html;
+  }
+
+  async function addManualEntry() {
+    var projectId = document.getElementById('ts-project').value;
+    var date = document.getElementById('ts-date').value;
+    var hours = parseFloat(document.getElementById('ts-hours').value);
+    var note = document.getElementById('ts-note').value.trim();
+
+    if (!projectId) { alert('Please select a job.'); return; }
+    if (!hours || hours <= 0) { alert('Please enter hours.'); return; }
+
+    var clockIn = new Date(date + 'T08:00:00');
+    var durationMin = hours * 60;
+    var clockOut = new Date(clockIn.getTime() + durationMin * 60000);
+
+    var entry = {
+      project_id: projectId,
+      clock_in: clockIn.toISOString(),
+      clock_out: clockOut.toISOString(),
+      duration_min: durationMin,
+      note: note || null,
+      billable: true,
+      user_id: 'local'
+    };
+
+    try { await RVData.saveTimeEntry(entry); } catch(e) {}
+    document.getElementById('ts-hours').value = '';
+    document.getElementById('ts-note').value = '';
+    renderTimesheet();
+  }
+
+  async function deleteTimeEntryFromSheet(id) {
+    try { await RVData.deleteTimeEntry(id); } catch(e) {}
+    renderTimesheet();
+  }
+
+  async function deleteTimeEntry(id) {
+    try { await RVData.deleteTimeEntry(id); } catch(e) {}
+    if (currentDetailId) openDetail(currentDetailId);
+  }
+
+  // ── Timer (Clock In / Clock Out) ──────────────────────────────────────
+
+  var timerInterval = null;
+  var activeTimerEntry = null;
+
+  async function startTimer(projectId) {
+    if (!_hasPerm('time_tracking')) { showToast('You do not have permission to log time.', 'error'); return; }
+    var note = '';
+    var noteEl = document.getElementById('clockNote');
+    if (noteEl) note = noteEl.value.trim();
+
+    var entry = {
+      project_id: projectId,
+      clock_in: new Date().toISOString(),
+      clock_out: null,
+      duration_min: null,
+      note: note || null,
+      billable: true,
+      user_id: 'local'
+    };
+
+    try {
+      var result = await RVData.saveTimeEntry(entry);
+      activeTimerEntry = result.data || entry;
+    } catch(e) {
+      activeTimerEntry = entry;
+    }
+
+    var proj = allProjects.find(function(p) { return p.id === projectId; });
+    document.getElementById('timerProjName').textContent = proj ? proj.name : 'Job';
+    document.getElementById('timerWidget').classList.add('active');
+    startTimerTick();
+    RVEvents.emit('timer:started', { project_id: projectId, name: proj ? proj.name : '' });
+    showToast('Timer started', 'info');
+
+    // Refresh detail if open
+    if (currentDetailId === projectId) openDetail(projectId);
+  }
+
+  function startTimerTick() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(function() {
+      if (!activeTimerEntry || !activeTimerEntry.clock_in) return;
+      var elapsed = Date.now() - new Date(activeTimerEntry.clock_in).getTime();
+      document.getElementById('timerDisplay').textContent = msToHMS(elapsed);
+    }, 1000);
+    // Immediate tick
+    if (activeTimerEntry && activeTimerEntry.clock_in) {
+      var elapsed = Date.now() - new Date(activeTimerEntry.clock_in).getTime();
+      document.getElementById('timerDisplay').textContent = msToHMS(elapsed);
+    }
+  }
+
+  async function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+    if (activeTimerEntry) {
+      activeTimerEntry.clock_out = new Date().toISOString();
+      activeTimerEntry.duration_min = (new Date(activeTimerEntry.clock_out) - new Date(activeTimerEntry.clock_in)) / 60000;
+      try { await RVData.saveTimeEntry(activeTimerEntry); } catch(e) {}
+      RVEvents.emit('timer:stopped', { project_id: activeTimerEntry.project_id, duration_min: activeTimerEntry.duration_min });
+      showToast('Timer stopped — ' + formatDuration(activeTimerEntry.duration_min) + ' logged', 'success');
+    }
+
+    document.getElementById('timerWidget').classList.remove('active');
+
+    var projId = activeTimerEntry ? activeTimerEntry.project_id : null;
+    activeTimerEntry = null;
+
+    // Refresh views
+    if (currentDetailId === projId) openDetail(projId);
+    if (currentView === 'timesheet') renderTimesheet();
+    loadProjects(); // Refresh stats
+  }
+
+  function openTimerProject() {
+    if (activeTimerEntry && activeTimerEntry.project_id) {
+      openDetail(activeTimerEntry.project_id);
+    }
+  }
+
+  /** Restore timer from localStorage on page load */
+  async function restoreTimer() {
+    var entries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]');
+    var running = entries.find(function(e) { return !e.clock_out; });
+    if (!running) return;
+
+    activeTimerEntry = running;
+    var proj = allProjects.find(function(p) { return p.id === running.project_id; });
+    document.getElementById('timerProjName').textContent = proj ? proj.name : 'Job';
+    document.getElementById('timerWidget').classList.add('active');
+    startTimerTick();
+  }
+
+  function msToHMS(ms) {
+    var s = Math.floor(ms / 1000);
+    var h = Math.floor(s / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    var sec = s % 60;
+    return pad(h) + ':' + pad(m) + ':' + pad(sec);
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  // ── Quotes System ──────────────────────────────────────────────────────
+
+  var quoteLineCount = 0;
+  var currentPreviewQuote = null;
+
+  function getQuotes() {
+    return JSON.parse(localStorage.getItem('rv_quotes') || '[]');
+  }
+
+  function saveQuotes(quotes) {
+    localStorage.setItem('rv_quotes', JSON.stringify(quotes));
+  }
+
+  function nextQuoteNum() {
+    var quotes = getQuotes();
+    var max = 0;
+    quotes.forEach(function(q) {
+      var m = (q.num || '').match(/QT-(\d+)/);
+      if (m) max = Math.max(max, parseInt(m[1]));
+    });
+    return 'QT-' + String(max + 1).padStart(3, '0');
+  }
+
+  function openQuoteModal(quote) {
+    quoteLineCount = 0;
+    document.getElementById('quoteLineItems').innerHTML = '';
+
+    if (quote) {
+      document.getElementById('quoteModalTitle').textContent = '&#128221; Edit Quote';
+      document.getElementById('qf-id').value = quote.id || '';
+      document.getElementById('qf-project-id').value = quote.project_id || '';
+      document.getElementById('qf-num').value = quote.num || '';
+      document.getElementById('qf-status').value = quote.status || 'draft';
+      document.getElementById('qf-client').value = quote.client || '';
+      document.getElementById('qf-email').value = quote.email || '';
+      document.getElementById('qf-valid').value = quote.valid_until || '';
+      document.getElementById('qf-site').value = quote.job_site || '';
+      document.getElementById('qf-notes').value = quote.notes || '';
+      (quote.items || []).forEach(function(item) {
+        addQuoteLine(item.desc, item.qty, item.rate);
+      });
+    } else {
+      document.getElementById('quoteModalTitle').textContent = '&#128221; New Quote';
+      document.getElementById('qf-id').value = '';
+      document.getElementById('qf-project-id').value = '';
+      document.getElementById('qf-num').value = nextQuoteNum();
+      document.getElementById('qf-status').value = 'draft';
+      document.getElementById('qf-client').value = '';
+      document.getElementById('qf-email').value = '';
+      var validDate = new Date(); validDate.setDate(validDate.getDate() + 30);
+      document.getElementById('qf-valid').value = validDate.toISOString().slice(0, 10);
+      document.getElementById('qf-site').value = '';
+      document.getElementById('qf-notes').value = 'Quote valid for 30 days. 50% deposit required to begin work.';
+      addQuoteLine('', 1, '');
+    }
+
+    updateQuoteTotals();
+    document.getElementById('quoteModal').classList.add('open');
+  }
+
+  function closeQuoteModal() {
+    document.getElementById('quoteModal').classList.remove('open');
+  }
+
+  function addQuoteLine(desc, qty, rate) {
+    quoteLineCount++;
+    var idx = quoteLineCount;
+    var container = document.getElementById('quoteLineItems');
+    var div = document.createElement('div');
+    div.className = 'quote-line';
+    div.id = 'ql-' + idx;
+    div.innerHTML =
+      '<input type="text" placeholder="Labor, materials, etc." value="' + esc(desc || '') + '" oninput="updateQuoteTotals()" />' +
+      '<input type="number" min="0" step="1" value="' + (qty || 1) + '" oninput="updateQuoteTotals()" style="text-align:center;" />' +
+      '<input type="number" min="0" step="0.01" placeholder="0.00" value="' + (rate || '') + '" oninput="updateQuoteTotals()" />' +
+      '<span class="ql-total">$0</span>' +
+      '<button class="ql-del" onclick="removeQuoteLine(' + idx + ')">&times;</button>';
+    container.appendChild(div);
+    updateQuoteTotals();
+  }
+
+  function removeQuoteLine(idx) {
+    var el = document.getElementById('ql-' + idx);
+    if (el) el.remove();
+    updateQuoteTotals();
+  }
+
+  function updateQuoteTotals() {
+    var lines = document.querySelectorAll('.quote-line-items .quote-line');
+    var subtotal = 0;
+    lines.forEach(function(line) {
+      var inputs = line.querySelectorAll('input');
+      var qty = parseFloat(inputs[1].value) || 0;
+      var rate = parseFloat(inputs[2].value) || 0;
+      var lineTotal = qty * rate;
+      subtotal += lineTotal;
+      line.querySelector('.ql-total').textContent = '$' + lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    });
+
+    var tax = subtotal * 0; // Tax rate = 0 by default (user can add as line item)
+    var grand = subtotal + tax;
+
+    document.getElementById('quoteTotals').innerHTML =
+      '<div class="qt-row"><span class="qt-label">Subtotal</span><span class="qt-val">$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>' +
+      '<div class="qt-row qt-grand"><span class="qt-label">Total</span><span class="qt-val">$' + grand.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>';
+  }
+
+  function getQuoteLineItems() {
+    var lines = document.querySelectorAll('.quote-line-items .quote-line');
+    var items = [];
+    lines.forEach(function(line) {
+      var inputs = line.querySelectorAll('input');
+      var desc = inputs[0].value.trim();
+      var qty = parseFloat(inputs[1].value) || 0;
+      var rate = parseFloat(inputs[2].value) || 0;
+      if (desc && qty > 0) {
+        items.push({ desc: desc, qty: qty, rate: rate });
+      }
+    });
+    return items;
+  }
+
+  function saveQuote() {
+    if (!_hasPerm('quotes_create')) { showToast('You do not have permission to create or edit quotes.', 'error'); return; }
+    var items = getQuoteLineItems();
+    if (items.length === 0) { alert('Add at least one line item.'); return; }
+
+    var total = items.reduce(function(s, i) { return s + (i.qty * i.rate); }, 0);
+
+    var quote = {
+      num: document.getElementById('qf-num').value.trim() || nextQuoteNum(),
+      project_id: document.getElementById('qf-project-id').value || null,
+      status: document.getElementById('qf-status').value,
+      client: document.getElementById('qf-client').value.trim(),
+      email: document.getElementById('qf-email').value.trim(),
+      valid_until: document.getElementById('qf-valid').value || null,
+      job_site: document.getElementById('qf-site').value.trim(),
+      items: items,
+      notes: document.getElementById('qf-notes').value.trim(),
+      total: total,
+      created_at: new Date().toISOString()
+    };
+
+    var existingId = document.getElementById('qf-id').value;
+    var quotes = getQuotes();
+
+    if (existingId) {
+      quote.id = existingId;
+      var idx = quotes.findIndex(function(q) { return q.id === existingId; });
+      if (idx >= 0) quotes[idx] = quote; else quotes.push(quote);
+    } else {
+      quote.id = 'qt_' + Date.now();
+      quotes.push(quote);
+    }
+
+    saveQuotes(quotes);
+
+    // If linked to a project, update project's quoted_amount
+    if (quote.project_id) {
+      var projects = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+      var proj = projects.find(function(p) { return p.id === quote.project_id; });
+      if (proj) {
+        proj.quoted_amount = total;
+        if (proj.status === 'draft') proj.status = 'quoted';
+        proj.updated_at = new Date().toISOString();
+        var pi = projects.findIndex(function(p) { return p.id === proj.id; });
+        projects[pi] = proj;
+        localStorage.setItem('rv_projects', JSON.stringify(projects));
+      }
+    }
+
+    RVEvents.emit(existingId ? 'quote:updated' : 'quote:created', quote);
+    showToast(existingId ? 'Quote updated' : 'Quote created', 'success');
+    closeQuoteModal();
+    loadProjects();
+    if (currentView === 'quotes') renderQuotesView();
+  }
+
+  /** Generate a quote pre-filled from a job's data */
+  function generateQuoteFromJob() {
+    if (!currentDetailId) return;
+    if (!_hasPerm('quotes_create')) { showToast('You do not have permission to create quotes.', 'error'); return; }
+    var proj = allProjects.find(function(p) { return p.id === currentDetailId; });
+    if (!proj) return;
+
+    closeDetailModal();
+
+    // Check if quote already exists for this project
+    var existing = getQuotes().find(function(q) { return q.project_id === currentDetailId; });
+    if (existing) {
+      openQuoteModal(existing);
+      return;
+    }
+
+    // Build line items from project tasks
+    var tasks = JSON.parse(localStorage.getItem('rv_project_tasks') || '[]')
+      .filter(function(t) { return t.project_id === currentDetailId; });
+
+    var quote = {
+      project_id: proj.id,
+      num: nextQuoteNum(),
+      status: 'draft',
+      client: proj.client_name || '',
+      email: proj.client_email || '',
+      job_site: proj.job_site || '',
+      notes: 'Quote valid for 30 days. 50% deposit required to begin work.',
+      items: []
+    };
+
+    if (tasks.length > 0) {
+      // Generate line items from tasks
+      tasks.forEach(function(t) {
+        var rate = t.estimated_cost ? (t.estimated_cost / (t.estimated_hours || 1)) : 75;
+        quote.items.push({
+          desc: t.title,
+          qty: t.estimated_hours || 1,
+          rate: Math.round(rate * 100) / 100
+        });
+      });
+    } else if (proj.quoted_amount) {
+      // Single line item from project amount
+      quote.items.push({
+        desc: proj.name + ' — ' + capitalize(proj.trade || 'General'),
+        qty: 1,
+        rate: parseFloat(proj.quoted_amount)
+      });
+    } else {
+      // Empty starter
+      quote.items.push({ desc: '', qty: 1, rate: '' });
+    }
+
+    openQuoteModal(quote);
+  }
+
+  /** Preview a quote as a printable document */
+  function previewQuote() {
+    var items = getQuoteLineItems();
+    var total = items.reduce(function(s, i) { return s + (i.qty * i.rate); }, 0);
+
+    currentPreviewQuote = {
+      id: document.getElementById('qf-id').value,
+      num: document.getElementById('qf-num').value,
+      project_id: document.getElementById('qf-project-id').value,
+      client: document.getElementById('qf-client').value,
+      email: document.getElementById('qf-email').value,
+      valid_until: document.getElementById('qf-valid').value,
+      job_site: document.getElementById('qf-site').value,
+      items: items,
+      notes: document.getElementById('qf-notes').value,
+      total: total,
+      status: document.getElementById('qf-status').value
+    };
+
+    var html = '<div style="font-family:inherit;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;">';
+    html += '<div><h2 style="font-size:1.5rem;font-weight:900;color:#92400e;margin:0;">QUOTE</h2><p style="color:#6b7280;font-size:0.85rem;margin:0.25rem 0 0;">' + esc(currentPreviewQuote.num) + '</p></div>';
+    html += '<div style="text-align:right;"><strong style="font-size:1.1rem;">RentVerified</strong><br><span style="font-size:0.82rem;color:#6b7280;">Construction &amp; Trades</span></div>';
+    html += '</div>';
+
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">';
+    html += '<div><div style="font-size:0.72rem;color:#9ca3af;text-transform:uppercase;font-weight:600;">Bill To</div><div style="font-weight:700;">' + esc(currentPreviewQuote.client || '—') + '</div>';
+    if (currentPreviewQuote.email) html += '<div style="font-size:0.85rem;color:#6b7280;">' + esc(currentPreviewQuote.email) + '</div>';
+    if (currentPreviewQuote.job_site) html += '<div style="font-size:0.85rem;color:#6b7280;">' + esc(currentPreviewQuote.job_site) + '</div>';
+    html += '</div>';
+    html += '<div style="text-align:right;"><div style="font-size:0.72rem;color:#9ca3af;text-transform:uppercase;font-weight:600;">Details</div>';
+    html += '<div style="font-size:0.85rem;">Date: ' + new Date().toLocaleDateString('en-US') + '</div>';
+    if (currentPreviewQuote.valid_until) html += '<div style="font-size:0.85rem;">Valid Until: ' + formatDate(currentPreviewQuote.valid_until) + '</div>';
+    html += '</div></div>';
+
+    // Line items table
+    html += '<table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">';
+    html += '<thead><tr style="border-bottom:2px solid #e5e7eb;">' +
+      '<th style="text-align:left;padding:0.5rem;font-size:0.75rem;color:#6b7280;text-transform:uppercase;">Description</th>' +
+      '<th style="text-align:center;padding:0.5rem;font-size:0.75rem;color:#6b7280;text-transform:uppercase;">Qty</th>' +
+      '<th style="text-align:right;padding:0.5rem;font-size:0.75rem;color:#6b7280;text-transform:uppercase;">Rate</th>' +
+      '<th style="text-align:right;padding:0.5rem;font-size:0.75rem;color:#6b7280;text-transform:uppercase;">Amount</th>' +
+    '</tr></thead><tbody>';
+    items.forEach(function(item) {
+      var amt = item.qty * item.rate;
+      html += '<tr style="border-bottom:1px solid #f3f4f6;">' +
+        '<td style="padding:0.6rem 0.5rem;font-size:0.88rem;">' + esc(item.desc) + '</td>' +
+        '<td style="padding:0.6rem 0.5rem;text-align:center;font-size:0.88rem;">' + item.qty + '</td>' +
+        '<td style="padding:0.6rem 0.5rem;text-align:right;font-size:0.88rem;">$' + item.rate.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>' +
+        '<td style="padding:0.6rem 0.5rem;text-align:right;font-size:0.88rem;font-weight:600;">$' + amt.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+
+    html += '<div style="display:flex;justify-content:flex-end;margin-bottom:1.5rem;"><div style="min-width:200px;">';
+    html += '<div style="display:flex;justify-content:space-between;padding:0.35rem 0;font-size:0.9rem;"><span>Subtotal</span><span>$' + total.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>';
+    html += '<div style="display:flex;justify-content:space-between;padding:0.5rem 0;font-size:1.1rem;font-weight:900;border-top:2px solid #1f2937;"><span>Total</span><span style="color:#92400e;">$' + total.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>';
+    html += '</div></div>';
+
+    if (currentPreviewQuote.notes) {
+      html += '<div style="background:#f9fafb;border-radius:8px;padding:0.75rem 1rem;font-size:0.82rem;color:#6b7280;"><strong style="color:#374151;">Notes:</strong> ' + esc(currentPreviewQuote.notes) + '</div>';
+    }
+
+    html += '</div>';
+
+    document.getElementById('quotePreviewBody').innerHTML = html;
+    document.getElementById('convertToInvoiceBtn').style.display = currentPreviewQuote.status === 'accepted' || currentPreviewQuote.id ? 'inline-block' : 'inline-block';
+    document.getElementById('quotePreviewModal').classList.add('open');
+  }
+
+  /** Convert the currently previewed quote into an invoice in rv_invoices */
+  function convertQuoteToInvoice() {
+    if (!currentPreviewQuote) return;
+    if (!_hasPerm('quotes_convert')) { showToast('You do not have permission to convert quotes to invoices.', 'error'); return; }
+    if (!confirm('Convert this quote to an invoice? This will create a new invoice in the Invoice Builder.')) return;
+
+    var invoices = JSON.parse(localStorage.getItem('rv_invoices') || '[]');
+
+    // Generate invoice number
+    var maxInv = 0;
+    invoices.forEach(function(inv) {
+      var m = (inv.num || '').match(/INV-(\d+)/);
+      if (m) maxInv = Math.max(maxInv, parseInt(m[1]));
+    });
+    var invNum = 'INV-' + String(maxInv + 1).padStart(3, '0');
+
+    var dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 30);
+
+    var invoice = {
+      num: invNum,
+      client: currentPreviewQuote.client || '',
+      email: currentPreviewQuote.email || '',
+      address: currentPreviewQuote.job_site || '',
+      date: new Date().toISOString().slice(0, 10),
+      due: dueDate.toISOString().slice(0, 10),
+      status: 'draft',
+      items: currentPreviewQuote.items.map(function(i) {
+        return { desc: i.desc, qty: i.qty, rate: i.rate };
+      }),
+      notes: currentPreviewQuote.notes || '',
+      total: currentPreviewQuote.total || 0,
+      source_quote: currentPreviewQuote.num || null
+    };
+
+    invoices.push(invoice);
+    localStorage.setItem('rv_invoices', JSON.stringify(invoices));
+
+    // Mark quote as invoiced
+    if (currentPreviewQuote.id) {
+      var quotes = getQuotes();
+      var qi = quotes.findIndex(function(q) { return q.id === currentPreviewQuote.id; });
+      if (qi >= 0) {
+        quotes[qi].status = 'invoiced';
+        saveQuotes(quotes);
+      }
+    }
+
+    // Update project status
+    if (currentPreviewQuote.project_id) {
+      var projects = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+      var proj = projects.find(function(p) { return p.id === currentPreviewQuote.project_id; });
+      if (proj && proj.status === 'quoted') {
+        proj.approved_amount = currentPreviewQuote.total;
+        proj.status = 'approved';
+        proj.updated_at = new Date().toISOString();
+        var pi = projects.findIndex(function(p) { return p.id === proj.id; });
+        projects[pi] = proj;
+        localStorage.setItem('rv_projects', JSON.stringify(projects));
+      }
+    }
+
+    RVEvents.emit('quote:invoiced', { quote_num: currentPreviewQuote.num, invoice_num: invNum });
+    document.getElementById('quotePreviewModal').classList.remove('open');
+    closeQuoteModal();
+    showToast('Invoice ' + invNum + ' created! Go to Invoice Builder to view it.', 'success');
+    loadProjects();
+    if (currentView === 'quotes') renderQuotesView();
+  }
+
+  /** Render the quotes list view */
+  function renderQuotesView() {
+    var container = document.getElementById('quotesView');
+    var quotes = getQuotes();
+
+    var html = '';
+
+    // Summary
+    var totalQuoted = quotes.reduce(function(s, q) { return s + (q.total || 0); }, 0);
+    var accepted = quotes.filter(function(q) { return q.status === 'accepted'; }).length;
+    var pending = quotes.filter(function(q) { return q.status === 'draft' || q.status === 'sent'; }).length;
+
+    html += '<div class="jobs-summary" style="margin-bottom:1.5rem;">' +
+      '<div class="jobs-sum-card"><div class="val">' + quotes.length + '</div><div class="lbl">Total Quotes</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">$' + totalQuoted.toLocaleString('en-US', { minimumFractionDigits: 0 }) + '</div><div class="lbl">Total Value</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">' + accepted + '</div><div class="lbl">Accepted</div></div>' +
+      '<div class="jobs-sum-card"><div class="val">' + pending + '</div><div class="lbl">Pending</div></div>' +
+    '</div>';
+
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
+      '<h3 style="font-size:1rem;font-weight:700;">All Quotes</h3>' +
+      '<button class="jobs-btn jobs-btn-primary jobs-btn-sm" onclick="openQuoteModal()">+ New Quote</button>' +
+    '</div>';
+
+    if (quotes.length === 0) {
+      html += '<div class="jobs-empty"><div class="jobs-empty-icon">&#128221;</div><h3>No Quotes Yet</h3><p>Create a quote from a job detail or start a new one here.</p><button class="jobs-btn jobs-btn-primary" onclick="openQuoteModal()">+ Create First Quote</button></div>';
+    } else {
+      html += '<div style="display:flex;flex-direction:column;gap:0.75rem;">';
+      quotes.sort(function(a, b) { return new Date(b.created_at || 0) - new Date(a.created_at || 0); }).forEach(function(q) {
+        var proj = q.project_id ? allProjects.find(function(p) { return p.id === q.project_id; }) : null;
+        var projName = proj ? proj.name : '';
+
+        html += '<div class="quote-card" onclick="openQuoteModal(getQuotes().find(function(x){return x.id===\'' + q.id + '\'}))">' +
+          '<div class="quote-card-icon">&#128221;</div>' +
+          '<div class="quote-card-info">' +
+            '<div class="quote-card-name">' + esc(q.num) + (q.client ? ' — ' + esc(q.client) : '') + '</div>' +
+            '<div class="quote-card-meta">' +
+              (projName ? esc(projName) + ' &middot; ' : '') +
+              (q.valid_until ? 'Valid until ' + formatDate(q.valid_until) : '') +
+              ' &middot; ' + q.items.length + ' items' +
+            '</div>' +
+          '</div>' +
+          '<div class="quote-card-right">' +
+            '<div class="quote-card-amount">$' + (q.total || 0).toLocaleString('en-US', { minimumFractionDigits: 0 }) + '</div>' +
+            '<div class="quote-card-status"><span class="quote-status-pill qs-' + q.status + '">' + (q.status || 'draft') + '</span></div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    container.innerHTML = html;
+  }
+
+  function deleteQuote(id) {
+    var quotes = getQuotes().filter(function(q) { return q.id !== id; });
+    saveQuotes(quotes);
+    renderQuotesView();
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+
+  function formatDuration(mins) {
+    if (!mins || mins <= 0) return '0h';
+    var h = Math.floor(mins / 60);
+    var m = Math.round(mins % 60);
+    if (h === 0) return m + 'm';
+    if (m === 0) return h + 'h';
+    return h + 'h ' + m + 'm';
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ');
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // ── Seed Demo Data ─────────────────────────────────────────────────────
+
+  function seedDemoProjects() {
+    var existing = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+    if (existing.length > 0) return; // Only seed if empty
+
+    var demos = [
+      {
+        id: 'proj_demo_1', name: 'Smith Kitchen Remodel', trade: 'general', status: 'in_progress',
+        client_name: 'John Smith', client_phone: '(555) 234-5678', client_email: 'john@smith.com',
+        job_site: '456 Oak Avenue', quoted_amount: 28500, approved_amount: 27000,
+        start_date: '2026-03-10', due_date: '2026-04-15',
+        tags: ['residential', 'permit-required'], description: 'Full kitchen remodel including cabinets, countertops, backsplash, and new appliances.',
+        notes: 'Client wants quartz countertops. Permit #2026-KR-0412.',
+        created_at: '2026-03-08T10:00:00Z', updated_at: '2026-03-15T14:30:00Z'
+      },
+      {
+        id: 'proj_demo_2', name: 'Warehouse HVAC Install', trade: 'hvac', status: 'quoted',
+        client_name: 'ABC Logistics', client_phone: '(555) 987-6543', client_email: 'ops@abclogistics.com',
+        job_site: '1200 Industrial Blvd', quoted_amount: 45000,
+        start_date: '2026-04-01', due_date: '2026-05-15',
+        tags: ['commercial', 'new-install'], description: '3-zone commercial HVAC system for 12,000 sqft warehouse.',
+        created_at: '2026-03-12T09:00:00Z', updated_at: '2026-03-12T09:00:00Z'
+      },
+      {
+        id: 'proj_demo_3', name: 'Johnson Bathroom Plumbing', trade: 'plumbing', status: 'completed',
+        client_name: 'Mary Johnson', client_phone: '(555) 345-6789',
+        job_site: '789 Elm Street', quoted_amount: 4200, approved_amount: 4200,
+        start_date: '2026-02-20', due_date: '2026-03-01', completed_at: '2026-02-28T16:00:00Z',
+        tags: ['residential'], description: 'Master bathroom re-pipe and fixture replacement.',
+        created_at: '2026-02-18T11:00:00Z', updated_at: '2026-02-28T16:00:00Z'
+      },
+      {
+        id: 'proj_demo_4', name: 'Office Electrical Upgrade', trade: 'electrical', status: 'approved',
+        client_name: 'TechStart Inc.', client_phone: '(555) 456-7890', client_email: 'facilities@techstart.io',
+        job_site: '321 Main Street, Suite 200', quoted_amount: 12800, approved_amount: 12800,
+        start_date: '2026-03-25', due_date: '2026-04-10',
+        tags: ['commercial', 'permit-required'], description: 'Panel upgrade to 400A, add 20 new circuits for server room and open office.',
+        created_at: '2026-03-14T08:00:00Z', updated_at: '2026-03-18T10:00:00Z'
+      },
+      {
+        id: 'proj_demo_5', name: 'Garcia Fence & Deck', trade: 'carpentry', status: 'draft',
+        client_name: 'Roberto Garcia', client_phone: '(555) 567-8901',
+        job_site: '555 Pine Road', quoted_amount: 8500,
+        tags: ['residential'], description: 'Cedar privacy fence (120 LF) and 12x16 composite deck.',
+        created_at: '2026-03-18T14:00:00Z', updated_at: '2026-03-18T14:00:00Z'
+      }
+    ];
+
+    localStorage.setItem('rv_projects', JSON.stringify(demos));
+
+    // Seed tasks for the in-progress kitchen remodel
+    var demoTasks = [
+      { id: 'ptask_demo_1', project_id: 'proj_demo_1', title: 'Demo old cabinets & countertops', status: 'completed', sort_order: 0, estimated_hours: 8, actual_hours: 7, completed_at: '2026-03-11T16:00:00Z', created_at: '2026-03-08T10:00:00Z', updated_at: '2026-03-11T16:00:00Z' },
+      { id: 'ptask_demo_2', project_id: 'proj_demo_1', title: 'Rough-in plumbing changes', status: 'completed', sort_order: 1, estimated_hours: 6, actual_hours: 5, completed_at: '2026-03-13T12:00:00Z', created_at: '2026-03-08T10:00:00Z', updated_at: '2026-03-13T12:00:00Z' },
+      { id: 'ptask_demo_3', project_id: 'proj_demo_1', title: 'Electrical — add under-cabinet lighting', status: 'in_progress', sort_order: 2, estimated_hours: 4, created_at: '2026-03-08T10:00:00Z', updated_at: '2026-03-15T09:00:00Z' },
+      { id: 'ptask_demo_4', project_id: 'proj_demo_1', title: 'Install cabinets', status: 'pending', sort_order: 3, estimated_hours: 12, created_at: '2026-03-08T10:00:00Z', updated_at: '2026-03-08T10:00:00Z' },
+      { id: 'ptask_demo_5', project_id: 'proj_demo_1', title: 'Install countertops & backsplash', status: 'pending', sort_order: 4, estimated_hours: 8, created_at: '2026-03-08T10:00:00Z', updated_at: '2026-03-08T10:00:00Z' },
+      { id: 'ptask_demo_6', project_id: 'proj_demo_1', title: 'Final plumbing hookups & appliances', status: 'pending', sort_order: 5, estimated_hours: 6, created_at: '2026-03-08T10:00:00Z', updated_at: '2026-03-08T10:00:00Z' }
+    ];
+
+    localStorage.setItem('rv_project_tasks', JSON.stringify(demoTasks));
+  }
+
+  // ── Init ────────────────────────────────────────────────────────────────
+
+  document.addEventListener('DOMContentLoaded', async function() {
+    seedDemoProjects();
+    seedDemoTimeEntries();
+    seedDemoQuotes();
+    await loadProjects();
+
+    // Enforce permission-based UI visibility
+    if (typeof ContractorAccess !== 'undefined') {
+      await ContractorAccess.enforceUI();
+    }
+
+    // Restore running timer if any
+    restoreTimer();
+
+    // Handle hash navigation
+    var hash = window.location.hash;
+    if (hash === '#scheduling') {
+      switchView('schedule');
+    } else if (hash === '#quotes') {
+      switchView('quotes');
+    } else if (hash === '#timesheet' || hash === '#time') {
+      switchView('timesheet');
+    }
+  });
+
+  // Seed demo time entries
+  function seedDemoTimeEntries() {
+    var existing = JSON.parse(localStorage.getItem('rv_time_entries') || '[]');
+    if (existing.length > 0) return;
+
+    var demos = [
+      {
+        id: 'time_demo_1', project_id: 'proj_demo_1', user_id: 'local',
+        clock_in: '2026-03-10T07:30:00Z', clock_out: '2026-03-10T15:45:00Z',
+        duration_min: 495, note: 'Demo day — removed old cabinets and countertops',
+        billable: true, hourly_rate: 65, created_at: '2026-03-10T07:30:00Z'
+      },
+      {
+        id: 'time_demo_2', project_id: 'proj_demo_1', user_id: 'local',
+        clock_in: '2026-03-11T08:00:00Z', clock_out: '2026-03-11T12:30:00Z',
+        duration_min: 270, note: 'Hauled debris, prepped walls for plumbing rough-in',
+        billable: true, hourly_rate: 65, created_at: '2026-03-11T08:00:00Z'
+      },
+      {
+        id: 'time_demo_3', project_id: 'proj_demo_1', user_id: 'local',
+        clock_in: '2026-03-12T07:00:00Z', clock_out: '2026-03-12T14:00:00Z',
+        duration_min: 420, note: 'Plumbing rough-in — relocated sink and dishwasher lines',
+        billable: true, hourly_rate: 85, created_at: '2026-03-12T07:00:00Z'
+      },
+      {
+        id: 'time_demo_4', project_id: 'proj_demo_1', user_id: 'local',
+        clock_in: '2026-03-15T08:00:00Z', clock_out: '2026-03-15T13:00:00Z',
+        duration_min: 300, note: 'Electrical — started under-cabinet lighting circuit',
+        billable: true, hourly_rate: 75, created_at: '2026-03-15T08:00:00Z'
+      },
+      {
+        id: 'time_demo_5', project_id: 'proj_demo_3', user_id: 'local',
+        clock_in: '2026-02-25T08:00:00Z', clock_out: '2026-02-25T16:30:00Z',
+        duration_min: 510, note: 'Master bath re-pipe — copper to PEX conversion',
+        billable: true, hourly_rate: 85, created_at: '2026-02-25T08:00:00Z'
+      }
+    ];
+
+    localStorage.setItem('rv_time_entries', JSON.stringify(demos));
+  }
+
+  // Seed demo quotes
+  function seedDemoQuotes() {
+    var existing = JSON.parse(localStorage.getItem('rv_quotes') || '[]');
+    if (existing.length > 0) return;
+
+    var demos = [
+      {
+        id: 'qt_demo_1', num: 'QT-001', project_id: 'proj_demo_2', status: 'sent',
+        client: 'ABC Logistics', email: 'ops@abclogistics.com', job_site: '1200 Industrial Blvd',
+        valid_until: '2026-04-15',
+        items: [
+          { desc: '3-zone HVAC unit procurement', qty: 1, rate: 18000 },
+          { desc: 'Ductwork installation', qty: 1, rate: 12000 },
+          { desc: 'Electrical hookup & controls', qty: 1, rate: 8000 },
+          { desc: 'Labor — install & commissioning', qty: 120, rate: 58.33 }
+        ],
+        notes: 'Quote valid for 30 days. 50% deposit required. Equipment warranty: 5 years parts, 1 year labor.',
+        total: 45000, created_at: '2026-03-12T09:00:00Z'
+      },
+      {
+        id: 'qt_demo_2', num: 'QT-002', project_id: 'proj_demo_5', status: 'draft',
+        client: 'Roberto Garcia', email: '', job_site: '555 Pine Road',
+        valid_until: '2026-04-20',
+        items: [
+          { desc: 'Cedar privacy fence — 120 LF', qty: 120, rate: 35 },
+          { desc: 'Composite deck — 12x16', qty: 192, rate: 22.92 }
+        ],
+        notes: 'Quote valid for 30 days. Includes materials and labor. Permit fees not included.',
+        total: 8600.64, created_at: '2026-03-18T14:00:00Z'
+      }
+    ];
+
+    localStorage.setItem('rv_quotes', JSON.stringify(demos));
+  }
+  </script>
+<script src="share-widget.js" data-share-title="Jobs Dashboard" data-share-text="Manage construction jobs on RentVerified"></script>
+<script src="recommended-supplies.js" data-industry="construction"></script>
+<script src="business-advisor.js" data-industry="construction"></script>
+<script src="service-connect.js"></script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
+</body>
+</html>

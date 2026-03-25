@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Referral Network</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style id="page-styles">
+    /* ── Hero ── */
+    .ref-hero {
+      background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 60%, #7c3aed 100%);
+      color: white;
+      padding: 3.5rem 2rem 2.5rem;
+    }
+    .ref-hero-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1.5rem; flex-wrap: wrap;
+    }
+    .ref-hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: 0.35rem; }
+    .ref-hero p { font-size: 1rem; opacity: 0.88; margin: 0; max-width: 520px; }
+    .ref-hero-stats { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .ref-stat-pill {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 0.4rem 1rem; border-radius: 999px;
+      font-size: 0.85rem; font-weight: 700;
+    }
+
+    /* ── Tabs ── */
+    .ref-tabs {
+      background: white; border-bottom: 2px solid #e5e7eb;
+      position: sticky; top: 60px; z-index: 100;
+    }
+    .ref-tabs-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 2rem;
+      display: flex; gap: 0; overflow-x: auto;
+    }
+    .ref-tab {
+      padding: 1rem 1.5rem; border: none; background: none;
+      font-size: 0.92rem; font-weight: 600; color: #6b7280;
+      cursor: pointer; border-bottom: 3px solid transparent;
+      transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+    }
+    .ref-tab:hover { color: #374151; }
+    .ref-tab.active { color: #7c3aed; border-bottom-color: #7c3aed; }
+    .ref-tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #e5e7eb; color: #374151;
+      font-size: 0.7rem; font-weight: 700;
+      min-width: 18px; height: 18px; border-radius: 999px;
+      padding: 0 5px; margin-left: 6px;
+    }
+    .ref-tab.active .ref-tab-badge { background: #ede9fe; color: #7c3aed; }
+
+    /* ── Panels ── */
+    .ref-panel { display: none; }
+    .ref-panel.active { display: block; }
+    .ref-body { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+
+    /* ── Send Referral card ── */
+    .send-ref-card {
+      background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+      border: 1.5px solid #c4b5fd;
+      border-radius: 14px; padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .send-ref-card h3 { font-size: 1rem; font-weight: 800; color: #4c1d95; margin-bottom: 0.25rem; }
+    .send-ref-card p { font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem; }
+    .send-ref-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end; }
+    .send-ref-field label { display: block; font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .send-ref-field input, .send-ref-field select {
+      width: 100%; padding: 0.55rem 0.85rem;
+      border: 1.5px solid #c4b5fd; border-radius: 8px;
+      font-size: 0.88rem; outline: none;
+      transition: border-color 0.15s; box-sizing: border-box; background: white;
+    }
+    .send-ref-field input:focus, .send-ref-field select:focus { border-color: #7c3aed; }
+    .btn-send-ref {
+      padding: 0.55rem 1.25rem; background: #7c3aed; border: none;
+      border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+      color: white; cursor: pointer; transition: background 0.15s; white-space: nowrap;
+    }
+    .btn-send-ref:hover { background: #6d28d9; }
+
+    /* ── Status filters ── */
+    .status-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .status-pill {
+      padding: 0.35rem 0.9rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      border: 1.5px solid #e5e7eb; background: white; color: #4b5563;
+      transition: all 0.12s;
+    }
+    .status-pill:hover { border-color: #7c3aed; color: #7c3aed; }
+    .status-pill.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+
+    /* ── Referral cards ── */
+    .ref-card {
+      background: white; border: 1.5px solid #e5e7eb;
+      border-radius: 14px; padding: 1.25rem;
+      display: flex; align-items: center; gap: 1rem;
+      flex-wrap: wrap; transition: box-shadow 0.15s; margin-bottom: 0.75rem;
+    }
+    .ref-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+    .ref-dir-badge {
+      font-size: 0.75rem; font-weight: 800; padding: 3px 10px;
+      border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+    }
+    .ref-dir-sent { background: #ede9fe; color: #6d28d9; }
+    .ref-dir-received { background: #d1fae5; color: #065f46; }
+    .ref-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800; color: white; flex-shrink: 0;
+    }
+    .ref-info { flex: 1; min-width: 160px; }
+    .ref-client-name { font-size: 0.95rem; font-weight: 800; color: #111827; }
+    .ref-meta { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+    .ref-note { font-size: 0.8rem; color: #374151; margin-top: 4px; font-style: italic; }
+    .ref-status-badge {
+      font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; white-space: nowrap;
+    }
+    .status-sent { background: #e0f2fe; color: #0369a1; }
+    .status-accepted { background: #d1fae5; color: #065f46; }
+    .status-inprogress { background: #fef3c7; color: #92400e; }
+    .status-completed { background: #ede9fe; color: #6d28d9; }
+    .status-lost { background: #fee2e2; color: #991b1b; }
+    .ref-date { font-size: 0.75rem; color: #9ca3af; white-space: nowrap; }
+    .ref-actions { display: flex; gap: 0.4rem; }
+    .btn-ref-update {
+      padding: 0.35rem 0.75rem; border-radius: 7px;
+      border: 1.5px solid #e5e7eb; background: white;
+      font-size: 0.78rem; font-weight: 700; color: #374151; cursor: pointer;
+      transition: all 0.12s;
+    }
+    .btn-ref-update:hover { border-color: #7c3aed; color: #7c3aed; }
+
+    /* ── Partners ── */
+    .partners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .partner-card {
+      background: white; border: 1.5px solid #e5e7eb;
+      border-radius: 14px; padding: 1.25rem;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .partner-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); border-color: #c4b5fd; }
+    .partner-card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem; }
+    .partner-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800; color: white;
+    }
+    .partner-name { font-size: 0.95rem; font-weight: 800; color: #111827; }
+    .partner-title { font-size: 0.78rem; color: #6b7280; }
+    .partner-stats { display: flex; gap: 0.75rem; margin-bottom: 0.85rem; }
+    .partner-stat { text-align: center; flex: 1; background: #f9fafb; border-radius: 8px; padding: 0.45rem; }
+    .partner-stat-val { font-size: 1rem; font-weight: 800; color: #111827; }
+    .partner-stat-lbl { font-size: 0.68rem; color: #9ca3af; }
+    .partner-agreement {
+      font-size: 0.78rem; color: #6b7280; padding: 0.5rem 0.75rem;
+      background: #f9fafb; border-radius: 8px; margin-bottom: 0.75rem;
+      border-left: 3px solid #c4b5fd;
+    }
+    .btn-refer-now {
+      width: 100%; padding: 0.55rem; background: #7c3aed; border: none;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+      color: white; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-refer-now:hover { background: #6d28d9; }
+
+    /* ── Leaderboard ── */
+    .leaderboard-table { width: 100%; border-collapse: collapse; }
+    .leaderboard-table th {
+      text-align: left; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em; color: #9ca3af;
+      padding: 0.6rem 1rem; border-bottom: 2px solid #e5e7eb;
+    }
+    .leaderboard-table td {
+      padding: 0.85rem 1rem; border-bottom: 1px solid #f3f4f6;
+      font-size: 0.88rem;
+    }
+    .leaderboard-table tr:hover td { background: #f9fafb; }
+    .rank-badge {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 900;
+    }
+    .rank-1 { background: #fef3c7; color: #92400e; }
+    .rank-2 { background: #f3f4f6; color: #374151; }
+    .rank-3 { background: #fde8d8; color: #9a3412; }
+    .rank-other { background: #f3f4f6; color: #6b7280; }
+    .lb-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; font-weight: 800; color: white;
+      vertical-align: middle; margin-right: 0.5rem;
+    }
+    .trust-score-bar {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .trust-bar-bg {
+      flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;
+    }
+    .trust-bar-fill { height: 100%; border-radius: 3px; background: #7c3aed; }
+
+    /* ── Analytics ── */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .analytics-card {
+      background: white; border: 1.5px solid #e5e7eb;
+      border-radius: 14px; padding: 1.25rem;
+    }
+    .analytics-val { font-size: 2rem; font-weight: 900; color: #111827; }
+    .analytics-lbl { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
+    .analytics-change { font-size: 0.78rem; font-weight: 700; margin-top: 4px; }
+    .analytics-change.up { color: #059669; }
+    .analytics-change.down { color: #dc2626; }
+
+    /* ── Agreement modal ── */
+    .agreement-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 9000;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .agreement-overlay.open { display: flex; }
+    .agreement-modal {
+      background: white; border-radius: 18px;
+      width: 100%; max-width: 520px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2); overflow: hidden;
+    }
+    .agreement-modal-header {
+      background: linear-gradient(135deg, #4c1d95, #6d28d9);
+      color: white; padding: 1.5rem;
+    }
+    .agreement-modal-header h3 { font-size: 1.1rem; font-weight: 800; margin: 0 0 0.25rem; }
+    .agreement-modal-header p { font-size: 0.85rem; opacity: 0.85; margin: 0; }
+    .agreement-modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .agreement-field label { display: block; font-size: 0.84rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .agreement-field input, .agreement-field select, .agreement-field textarea {
+      width: 100%; padding: 0.55rem 0.85rem;
+      border: 1.5px solid #e5e7eb; border-radius: 8px;
+      font-size: 0.88rem; outline: none;
+      transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
+    }
+    .agreement-field input:focus, .agreement-field select:focus, .agreement-field textarea:focus { border-color: #7c3aed; }
+    .agreement-field textarea { resize: vertical; min-height: 80px; }
+    .agreement-modal-footer {
+      padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb;
+      display: flex; justify-content: flex-end; gap: 0.75rem;
+    }
+
+    /* ── Update status modal ── */
+    .update-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 9000;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .update-overlay.open { display: flex; }
+    .update-modal {
+      background: white; border-radius: 14px; padding: 1.5rem;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+    }
+    .update-modal h3 { font-size: 1rem; font-weight: 800; color: #111827; margin-bottom: 1rem; }
+    .status-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .status-option-btn {
+      padding: 0.6rem 1rem; border-radius: 8px;
+      border: 1.5px solid #e5e7eb; background: white;
+      font-size: 0.88rem; font-weight: 600; color: #374151;
+      cursor: pointer; text-align: left; transition: all 0.12s;
+    }
+    .status-option-btn:hover { border-color: #7c3aed; color: #7c3aed; background: #faf5ff; }
+
+    /* ── Toast ── */
+    .ref-toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: #111827; color: white;
+      padding: 0.75rem 1.25rem; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      transform: translateY(60px); opacity: 0;
+      transition: transform 0.25s, opacity 0.25s; z-index: 99999;
+    }
+    .ref-toast.show { transform: translateY(0); opacity: 1; }
+    .ref-toast.success { background: #059669; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .ref-hero { padding: 3rem 1rem 2rem; }
+      .ref-body { padding: 1rem 1rem 3rem; }
+      .send-ref-grid { grid-template-columns: 1fr; }
+      .ref-card { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="network.html">Pro Network</a>
+    <a href="directory.html">Directory</a>
+    <a href="referrals.html" style="color:var(--primary);font-weight:700;">Referrals</a>
+    <a href="community.html">Community</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="ref-hero">
+  <div class="ref-hero-inner">
+    <div>
+      <h1>Referral Network</h1>
+      <p>Send trusted referrals to your partners, track every outcome, and build your reputation in the network.</p>
+      <div class="ref-hero-stats">
+        <div class="ref-stat-pill" id="heroSent">0 Sent</div>
+        <div class="ref-stat-pill" id="heroReceived">0 Received</div>
+        <div class="ref-stat-pill" id="heroCompleted">0 Completed</div>
+        <div class="ref-stat-pill" id="heroTrustScore">Trust Score: 0</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-self:center;">
+      <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);" onclick="openAgreementModal()">+ New Agreement</button>
+      <button class="btn" style="background:white;color:#6d28d9;font-weight:700;" onclick="switchTab('send',document.querySelector('[data-tab=send]'))">+ Send Referral</button>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="ref-tabs">
+  <div class="ref-tabs-inner">
+    <button class="ref-tab active" data-tab="send" onclick="switchTab('send',this)">
+      My Referrals <span class="ref-tab-badge" id="badgeSent">0</span>
+    </button>
+    <button class="ref-tab" data-tab="received" onclick="switchTab('received',this)">
+      Received <span class="ref-tab-badge" id="badgeReceived">0</span>
+    </button>
+    <button class="ref-tab" data-tab="partners" onclick="switchTab('partners',this)">
+      My Partners <span class="ref-tab-badge" id="badgePartners">0</span>
+    </button>
+    <button class="ref-tab" data-tab="leaderboard" onclick="switchTab('leaderboard',this)">
+      Leaderboard
+    </button>
+    <button class="ref-tab" data-tab="analytics" onclick="switchTab('analytics',this)">
+      Analytics
+    </button>
+  </div>
+</div>
+
+<!-- PANEL: MY REFERRALS (SENT) -->
+<div class="ref-panel active" id="panel-send">
+  <div class="ref-body">
+    <div class="send-ref-card">
+      <h3>Send a Referral</h3>
+      <p>Refer a client to a trusted partner in your network. They'll receive a notification and can track it here.</p>
+      <div class="send-ref-grid">
+        <div class="send-ref-field">
+          <label>Client Name</label>
+          <input type="text" id="refClientName" placeholder="e.g. John Smith" />
+        </div>
+        <div class="send-ref-field">
+          <label>Referring To</label>
+          <select id="refToPartner">
+            <option value="">Select partner…</option>
+          </select>
+        </div>
+        <div class="send-ref-field">
+          <label>Need / Service</label>
+          <input type="text" id="refNeed" placeholder="e.g. Home loan, tax prep…" />
+        </div>
+        <div>
+          <button class="btn-send-ref" onclick="sendReferral()">Send →</button>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem;">
+        <label style="font-size:0.8rem;font-weight:700;color:#374151;">Notes (optional)</label>
+        <input type="text" id="refNotes" placeholder="Any extra context for your partner…" style="width:100%;padding:0.5rem 0.85rem;border:1.5px solid #c4b5fd;border-radius:8px;font-size:0.88rem;margin-top:0.3rem;outline:none;box-sizing:border-box;background:white;" />
+      </div>
+    </div>
+
+    <div class="status-pills" id="sentStatusPills">
+      <button class="status-pill active" onclick="filterSent('All',this)">All</button>
+      <button class="status-pill" onclick="filterSent('Sent',this)">Sent</button>
+      <button class="status-pill" onclick="filterSent('Accepted',this)">Accepted</button>
+      <button class="status-pill" onclick="filterSent('In Progress',this)">In Progress</button>
+      <button class="status-pill" onclick="filterSent('Completed',this)">Completed</button>
+      <button class="status-pill" onclick="filterSent('Lost',this)">Lost</button>
+    </div>
+
+    <div id="sentList"></div>
+  </div>
+</div>
+
+<!-- PANEL: RECEIVED -->
+<div class="ref-panel" id="panel-received">
+  <div class="ref-body">
+    <div class="status-pills">
+      <button class="status-pill active" onclick="filterReceived('All',this)">All</button>
+      <button class="status-pill" onclick="filterReceived('Sent',this)">New</button>
+      <button class="status-pill" onclick="filterReceived('Accepted',this)">Accepted</button>
+      <button class="status-pill" onclick="filterReceived('In Progress',this)">In Progress</button>
+      <button class="status-pill" onclick="filterReceived('Completed',this)">Completed</button>
+    </div>
+    <div id="receivedList"></div>
+  </div>
+</div>
+
+<!-- PANEL: PARTNERS -->
+<div class="ref-panel" id="panel-partners">
+  <div class="ref-body">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <h2 style="font-size:1.1rem;font-weight:800;color:#111827;margin:0;">My Referral Partners</h2>
+        <p style="font-size:0.84rem;color:#6b7280;margin:4px 0 0;">Professionals you regularly refer clients to and from.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAgreementModal()">+ New Agreement</button>
+    </div>
+    <div class="partners-grid" id="partnersList"></div>
+  </div>
+</div>
+
+<!-- PANEL: LEADERBOARD -->
+<div class="ref-panel" id="panel-leaderboard">
+  <div class="ref-body">
+    <div style="background:linear-gradient(135deg,#fef3c7,#fffbeb);border:1.5px solid #fde68a;border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="font-size:0.8rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#92400e;margin-bottom:0.5rem;">🏆 Top Referrers This Month</div>
+      <p style="font-size:0.84rem;color:#78350f;margin:0;">Professionals who generate the most referrals build the strongest reputations. Leaderboard resets monthly.</p>
+    </div>
+    <div style="background:white;border:1.5px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+      <table class="leaderboard-table" id="leaderboardTable"></table>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: ANALYTICS -->
+<div class="ref-panel" id="panel-analytics">
+  <div class="ref-body">
+    <div class="analytics-grid" id="analyticsGrid"></div>
+
+    <div style="background:white;border:1.5px solid #e5e7eb;border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;">
+      <h3 style="font-size:0.95rem;font-weight:800;color:#111827;margin-bottom:1rem;">Trust Score Breakdown</h3>
+      <div id="trustBreakdown"></div>
+    </div>
+
+    <div style="background:white;border:1.5px solid #e5e7eb;border-radius:14px;padding:1.25rem;">
+      <h3 style="font-size:0.95rem;font-weight:800;color:#111827;margin-bottom:1rem;">Referral Pipeline</h3>
+      <div id="refPipeline"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AGREEMENT MODAL -->
+<div class="agreement-overlay" id="agreementOverlay" onclick="closeAgreementOnBackdrop(event)">
+  <div class="agreement-modal">
+    <div class="agreement-modal-header">
+      <h3>Create Referral Agreement</h3>
+      <p>Set terms between you and a trusted partner for referrals.</p>
+    </div>
+    <div class="agreement-modal-body">
+      <div class="agreement-field">
+        <label>Partner Name</label>
+        <input type="text" id="agPartner" placeholder="Partner's name or business" />
+      </div>
+      <div class="agreement-field">
+        <label>Agreement Type</label>
+        <select id="agType">
+          <option>Mutual — no fee, just reciprocal referrals</option>
+          <option>I pay per closed referral (flat fee)</option>
+          <option>I pay % of first invoice</option>
+          <option>Partner pays me per closed referral</option>
+          <option>Custom terms</option>
+        </select>
+      </div>
+      <div class="agreement-field">
+        <label>Fee / Rate (optional)</label>
+        <input type="text" id="agFee" placeholder="e.g. $500 per closed deal, or 10%" />
+      </div>
+      <div class="agreement-field">
+        <label>Notes / Terms</label>
+        <textarea id="agNotes" placeholder="Any specific terms or conditions…"></textarea>
+      </div>
+    </div>
+    <div class="agreement-modal-footer">
+      <button class="btn btn-outline" onclick="closeAgreement()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAgreement()">Save Agreement</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE STATUS MODAL -->
+<div class="update-overlay" id="updateOverlay" onclick="closeUpdateOnBackdrop(event)">
+  <div class="update-modal">
+    <h3>Update Referral Status</h3>
+    <div class="status-options" id="statusOptions"></div>
+    <button class="btn btn-outline" style="width:100%;margin-top:0.75rem;" onclick="closeUpdate()">Cancel</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="ref-toast" id="refToast"></div>
+
+<script src="data-layer.js"></script>
+<script>
+/* ── Constants ── */
+const COLORS = ['#1d4ed8','#7c3aed','#059669','#dc2626','#d97706','#0891b2','#be185d'];
+const STATUSES = ['Sent','Accepted','In Progress','Completed','Lost'];
+
+/* ── Demo data seed ── */
+function seedDemoData() {
+  if (localStorage.getItem('rv_ref_seeded')) return;
+
+  const sent = [
+    { id:1, clientName:'John & Maria Davis', toName:'Marcus Johnson CPA', toId:'p1', need:'Tax preparation — rental property', notes:'They own 3 rentals, need full schedule E', status:'Completed', sent:'2026-03-01T10:00:00Z', dir:'sent' },
+    { id:2, clientName:'Brandon Lee', toName:'Sarah Mitchell Esq.', toId:'p2', need:'Eviction filing — Unit 4B', notes:'Non-payment, 3 months overdue', status:'In Progress', sent:'2026-03-10T14:00:00Z', dir:'sent' },
+    { id:3, clientName:'Teresa Ruiz', toName:'Elena Vasquez Insurance', toId:'p3', need:'Landlord insurance renewal', notes:'Policy expires April 15', status:'Accepted', sent:'2026-03-18T09:00:00Z', dir:'sent' },
+    { id:4, clientName:'Apex Holdings LLC', toName:'Torres Construction', toId:'p4', need:'Roof replacement — 8-unit building', notes:'Hail damage, needs estimate ASAP', status:'Sent', sent:'2026-03-22T11:00:00Z', dir:'sent' },
+  ];
+  const received = [
+    { id:5, clientName:'Chris Hampton', fromName:'Sarah Mitchell Esq.', fromId:'p2', need:'Property management services', notes:'Purchased 2 rentals, needs a PM', status:'Accepted', sent:'2026-03-05T08:00:00Z', dir:'received' },
+    { id:6, clientName:'Sunridge Properties', fromName:'Marcus Johnson CPA', fromId:'p1', need:'Tenant screening & lease management', notes:'5 units needing full management', status:'In Progress', sent:'2026-03-12T16:00:00Z', dir:'received' },
+    { id:7, clientName:'Patricia Wong', fromName:'Elena Vasquez Insurance', fromId:'p3', need:'Property management for duplex', notes:'First-time landlord, needs help', status:'Sent', sent:'2026-03-21T13:00:00Z', dir:'received' },
+  ];
+  const partners = [
+    { id:'p1', name:'Marcus Johnson', title:'CPA & Tax Advisor', initials:'MJ', color:'#059669', sent:8, received:5, completed:6, agreement:'Mutual — no fee, reciprocal referrals' },
+    { id:'p2', name:'Sarah Mitchell Esq.', title:'Real Estate Attorney', initials:'SM', color:'#1d4ed8', sent:5, received:3, completed:4, agreement:'I pay $200 per eviction case closed' },
+    { id:'p3', name:'Elena Vasquez', title:'Insurance Broker', initials:'EV', color:'#7c3aed', sent:3, received:2, completed:3, agreement:'Mutual — no fee, reciprocal referrals' },
+    { id:'p4', name:'Torres Construction', title:'General Contractor', initials:'TC', color:'#d97706', sent:2, received:4, completed:2, agreement:'10% of first invoice on referrals I send' },
+  ];
+  localStorage.setItem('rv_referrals_sent', JSON.stringify(sent));
+  localStorage.setItem('rv_referrals_received', JSON.stringify(received));
+  localStorage.setItem('rv_ref_partners', JSON.stringify(partners));
+  localStorage.setItem('rv_ref_seeded', '1');
+}
+
+/* ── Helpers ── */
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
+function lsSet(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
+
+function statusClass(s) {
+  return { Sent:'status-sent', Accepted:'status-accepted', 'In Progress':'status-inprogress', Completed:'status-completed', Lost:'status-lost' }[s] || 'status-sent';
+}
+
+/* ── Tab switching ── */
+function switchTab(tab, btn) {
+  document.querySelectorAll('.ref-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ref-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab==='partners') renderPartners();
+  if (tab==='leaderboard') renderLeaderboard();
+  if (tab==='analytics') renderAnalytics();
+}
+
+/* ── Update hero stats ── */
+function updateHero() {
+  const sent = lsGet('rv_referrals_sent') || [];
+  const received = lsGet('rv_referrals_received') || [];
+  const completed = sent.filter(r=>r.status==='Completed').length + received.filter(r=>r.status==='Completed').length;
+  document.getElementById('heroSent').textContent = `${sent.length} Sent`;
+  document.getElementById('heroReceived').textContent = `${received.length} Received`;
+  document.getElementById('heroCompleted').textContent = `${completed} Completed`;
+  document.getElementById('badgeSent').textContent = sent.length;
+  document.getElementById('badgeReceived').textContent = received.length;
+  document.getElementById('badgePartners').textContent = (lsGet('rv_ref_partners') || []).length;
+  const trust = calcTrustScore();
+  document.getElementById('heroTrustScore').textContent = `Trust Score: ${trust}`;
+}
+
+function calcTrustScore() {
+  const sent = lsGet('rv_referrals_sent') || [];
+  const received = lsGet('rv_referrals_received') || [];
+  const completed = sent.filter(r=>r.status==='Completed').length;
+  const total = sent.length;
+  const baseScore = 60;
+  const completionBonus = total > 0 ? Math.round((completed/total)*20) : 0;
+  const volumeBonus = Math.min(sent.length * 2, 15);
+  const receivedBonus = Math.min(received.length, 5);
+  return Math.min(baseScore + completionBonus + volumeBonus + receivedBonus, 100);
+}
+
+/* ── Populate partner select ── */
+function populatePartnerSelect() {
+  const partners = lsGet('rv_ref_partners') || [];
+  const sel = document.getElementById('refToPartner');
+  sel.innerHTML = '<option value="">Select partner…</option>' +
+    partners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+/* ── Send referral ── */
+let sentFilter = 'All';
+function sendReferral() {
+  const clientName = document.getElementById('refClientName').value.trim();
+  const partnerId = document.getElementById('refToPartner').value;
+  const need = document.getElementById('refNeed').value.trim();
+  const notes = document.getElementById('refNotes').value.trim();
+  if (!clientName || !partnerId || !need) { showToast('Please fill in client name, partner, and need'); return; }
+  const partners = lsGet('rv_ref_partners') || [];
+  const partner = partners.find(p => p.id === partnerId);
+  const sent = lsGet('rv_referrals_sent') || [];
+  const newRef = { id: Date.now(), clientName, toName: partner.name, toId: partnerId, need, notes, status:'Sent', sent: new Date().toISOString(), dir:'sent' };
+  sent.unshift(newRef);
+  lsSet('rv_referrals_sent', sent);
+  document.getElementById('refClientName').value = '';
+  document.getElementById('refNeed').value = '';
+  document.getElementById('refNotes').value = '';
+  document.getElementById('refToPartner').value = '';
+  renderSent();
+  updateHero();
+  showToast(`✅ Referral sent to ${partner.name}!`, 'success');
+}
+
+/* ── Render sent ── */
+function filterSent(status, btn) {
+  sentFilter = status;
+  document.querySelectorAll('#sentStatusPills .status-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSent();
+}
+
+function renderSent() {
+  const all = lsGet('rv_referrals_sent') || [];
+  const filtered = sentFilter === 'All' ? all : all.filter(r => r.status === sentFilter);
+  const el = document.getElementById('sentList');
+  if (!filtered.length) {
+    el.innerHTML = `<div style="text-align:center;padding:3rem;color:#9ca3af;"><div style="font-size:2rem;margin-bottom:0.75rem;">📤</div><h4 style="font-size:0.95rem;font-weight:700;color:#4b5563;margin-bottom:0.35rem;">No referrals ${sentFilter!=='All'?'with status "'+sentFilter+'"':''}</h4><p style="font-size:0.82rem;">Send your first referral using the form above.</p></div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(r => renderRefCard(r, 'sent')).join('');
+}
+
+/* ── Render received ── */
+let receivedFilter = 'All';
+function filterReceived(status, btn) {
+  receivedFilter = status;
+  document.querySelectorAll('#panel-received .status-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReceived();
+}
+
+function renderReceived() {
+  const all = lsGet('rv_referrals_received') || [];
+  const filtered = receivedFilter === 'All' ? all : all.filter(r => r.status === receivedFilter);
+  const el = document.getElementById('receivedList');
+  if (!filtered.length) {
+    el.innerHTML = `<div style="text-align:center;padding:3rem;color:#9ca3af;"><div style="font-size:2rem;margin-bottom:0.75rem;">📥</div><h4 style="font-size:0.95rem;font-weight:700;color:#4b5563;margin-bottom:0.35rem;">No referrals received ${receivedFilter!=='All'?'with status "'+receivedFilter+'"':''}</h4><p style="font-size:0.82rem;">Referrals from your partners will appear here.</p></div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(r => renderRefCard(r, 'received')).join('');
+}
+
+function renderRefCard(r, dir) {
+  const isReceived = dir === 'received';
+  const name = isReceived ? r.fromName : r.toName;
+  const initials = name.split(' ').map(n=>n[0]).join('').slice(0,2);
+  const color = COLORS[name.length % COLORS.length];
+  return `<div class="ref-card">
+    <span class="ref-dir-badge ${isReceived?'ref-dir-received':'ref-dir-sent'}">${isReceived?'↓ Received':'↑ Sent'}</span>
+    <div class="ref-avatar" style="background:${color}">${initials}</div>
+    <div class="ref-info">
+      <div class="ref-client-name">${r.clientName}</div>
+      <div class="ref-meta">${isReceived?'From':'To'}: <strong>${name}</strong> · ${r.need}</div>
+      ${r.notes ? `<div class="ref-note">"${r.notes}"</div>` : ''}
+    </div>
+    <span class="ref-status-badge ${statusClass(r.status)}">${r.status}</span>
+    <div class="ref-date">${timeAgo(r.sent)}</div>
+    <div class="ref-actions">
+      <button class="btn-ref-update" onclick="openUpdateStatus(${r.id},'${dir}')">Update Status</button>
+    </div>
+  </div>`;
+}
+
+/* ── Partners ── */
+function renderPartners() {
+  const partners = lsGet('rv_ref_partners') || [];
+  const el = document.getElementById('partnersList');
+  if (!partners.length) {
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af;"><div style="font-size:2rem;margin-bottom:0.75rem;">🤝</div><h4 style="color:#4b5563;">No partners yet</h4><p style="font-size:0.82rem;">Create a referral agreement to add a partner.</p></div>`;
+    return;
+  }
+  el.innerHTML = partners.map(p => {
+    const convRate = p.sent > 0 ? Math.round((p.completed/p.sent)*100) : 0;
+    return `<div class="partner-card">
+      <div class="partner-card-header">
+        <div class="partner-avatar" style="background:${p.color}">${p.initials}</div>
+        <div>
+          <div class="partner-name">${p.name}</div>
+          <div class="partner-title">${p.title}</div>
+        </div>
+      </div>
+      <div class="partner-stats">
+        <div class="partner-stat"><div class="partner-stat-val">${p.sent}</div><div class="partner-stat-lbl">Sent</div></div>
+        <div class="partner-stat"><div class="partner-stat-val">${p.received}</div><div class="partner-stat-lbl">Received</div></div>
+        <div class="partner-stat"><div class="partner-stat-val">${convRate}%</div><div class="partner-stat-lbl">Close Rate</div></div>
+      </div>
+      <div class="partner-agreement">📋 ${p.agreement}</div>
+      <button class="btn-refer-now" onclick="prefillPartner('${p.id}')">Refer a Client to ${p.name.split(' ')[0]}</button>
+    </div>`;
+  }).join('');
+}
+
+function prefillPartner(id) {
+  switchTab('send', document.querySelector('[data-tab=send]'));
+  document.getElementById('refToPartner').value = id;
+  document.getElementById('refClientName').focus();
+}
+
+/* ── Leaderboard ── */
+function renderLeaderboard() {
+  const leaderData = [
+    { name:'Sarah Mitchell Esq.', title:'Attorney', initials:'SM', color:'#1d4ed8', sent:22, received:18, completed:19, trust:94 },
+    { name:'Marcus Johnson CPA', title:'Accountant', initials:'MJ', color:'#059669', sent:19, received:15, completed:17, trust:91 },
+    { name:'Elena Vasquez', title:'Insurance Broker', initials:'EV', color:'#7c3aed', sent:17, received:12, completed:14, trust:89 },
+    { name:'Daniel Hart (You)', title:'Property Manager', initials:'DH', color:'#d97706', sent:11, received:7, completed:9, trust:82 },
+    { name:'Ryan Park Digital', title:'Marketing', initials:'RP', color:'#0891b2', sent:9, received:11, completed:8, trust:79 },
+    { name:'Torres Construction', title:'Contractor', initials:'TC', color:'#be185d', sent:8, received:9, completed:7, trust:76 },
+    { name:'NovaTech Solutions', title:'IT Support', initials:'NS', color:'#374151', sent:6, received:4, completed:5, trust:72 },
+    { name:'FastFix Plumbing', title:'Plumber', initials:'FP', color:'#dc2626', sent:5, received:6, completed:4, trust:68 },
+  ];
+  const table = document.getElementById('leaderboardTable');
+  table.innerHTML = `<thead><tr>
+    <th>Rank</th><th>Professional</th><th>Sent</th><th>Received</th><th>Completed</th><th>Trust Score</th>
+  </tr></thead><tbody>${leaderData.map((p,i) => {
+    const rankClass = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other';
+    const rankLabel = i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+    const isYou = p.name.includes('You');
+    return `<tr style="${isYou?'background:#faf5ff;font-weight:700;':''}">
+      <td><span class="rank-badge ${rankClass}">${rankLabel}</span></td>
+      <td><span class="lb-avatar" style="background:${p.color}">${p.initials}</span>${p.name}</td>
+      <td>${p.sent}</td><td>${p.received}</td><td>${p.completed}</td>
+      <td><div class="trust-score-bar">
+        <span style="font-size:0.82rem;font-weight:800;color:#7c3aed;min-width:32px;">${p.trust}</span>
+        <div class="trust-bar-bg"><div class="trust-bar-fill" style="width:${p.trust}%"></div></div>
+      </div></td>
+    </tr>`;
+  }).join('')}</tbody>`;
+}
+
+/* ── Analytics ── */
+function renderAnalytics() {
+  const sent = lsGet('rv_referrals_sent') || [];
+  const received = lsGet('rv_referrals_received') || [];
+  const completed = sent.filter(r=>r.status==='Completed').length;
+  const convRate = sent.length > 0 ? Math.round((completed/sent.length)*100) : 0;
+  const trust = calcTrustScore();
+  document.getElementById('analyticsGrid').innerHTML = [
+    { val: sent.length, lbl: 'Referrals Sent', change: '+3 this month', up: true },
+    { val: received.length, lbl: 'Referrals Received', change: '+2 this month', up: true },
+    { val: completed, lbl: 'Completed', change: '+1 this month', up: true },
+    { val: convRate + '%', lbl: 'Conversion Rate', change: '+5% vs last month', up: true },
+    { val: trust, lbl: 'Trust Score', change: '+4 this month', up: true },
+    { val: (lsGet('rv_ref_partners') || []).length, lbl: 'Active Partners', change: 'Stable', up: null },
+  ].map(s => `<div class="analytics-card">
+    <div class="analytics-val">${s.val}</div>
+    <div class="analytics-lbl">${s.lbl}</div>
+    <div class="analytics-change ${s.up===true?'up':s.up===false?'down':''}">${s.change}</div>
+  </div>`).join('');
+
+  const trustFactors = [
+    { label: 'Star ratings from reviews', weight: 30, score: 26 },
+    { label: 'Referral volume received', weight: 20, score: 16 },
+    { label: 'Response time', weight: 15, score: 14 },
+    { label: 'Deal completion rate', weight: 15, score: 12 },
+    { label: 'Profile completeness', weight: 10, score: 8 },
+    { label: 'Verified credentials', weight: 10, score: 6 },
+  ];
+  document.getElementById('trustBreakdown').innerHTML = trustFactors.map(f => `
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.85rem;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:0.84rem;font-weight:600;color:#374151;">${f.label}</span>
+          <span style="font-size:0.82rem;font-weight:700;color:#7c3aed;">${f.score}/${f.weight}</span>
+        </div>
+        <div class="trust-bar-bg" style="height:8px;">
+          <div class="trust-bar-fill" style="width:${(f.score/f.weight)*100}%;height:100%;background:${f.score/f.weight>0.8?'#059669':f.score/f.weight>0.6?'#7c3aed':'#f59e0b'}"></div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const statuses = ['Sent','Accepted','In Progress','Completed','Lost'];
+  const statusColors = { Sent:'#3b82f6', Accepted:'#10b981', 'In Progress':'#f59e0b', Completed:'#7c3aed', Lost:'#ef4444' };
+  const counts = {};
+  statuses.forEach(s => { counts[s] = sent.filter(r=>r.status===s).length; });
+  document.getElementById('refPipeline').innerHTML = statuses.map(s => {
+    const pct = sent.length > 0 ? Math.round((counts[s]/sent.length)*100) : 0;
+    return `<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
+      <div style="width:100px;font-size:0.84rem;font-weight:600;color:#374151;flex-shrink:0;">${s}</div>
+      <div class="trust-bar-bg" style="height:20px;border-radius:6px;">
+        <div style="height:100%;border-radius:6px;background:${statusColors[s]};width:${Math.max(pct,counts[s]>0?5:0)}%;transition:width .4s;"></div>
+      </div>
+      <div style="width:32px;font-size:0.82rem;font-weight:700;color:#374151;flex-shrink:0;">${counts[s]}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Update status modal ── */
+let updateRefId = null, updateRefDir = null;
+function openUpdateStatus(id, dir) {
+  updateRefId = id; updateRefDir = dir;
+  document.getElementById('statusOptions').innerHTML = STATUSES.map(s =>
+    `<button class="status-option-btn" onclick="applyStatus('${s}')">${s}</button>`
+  ).join('');
+  document.getElementById('updateOverlay').classList.add('open');
+}
+function closeUpdate() { document.getElementById('updateOverlay').classList.remove('open'); }
+function closeUpdateOnBackdrop(e) { if (e.target===document.getElementById('updateOverlay')) closeUpdate(); }
+function applyStatus(status) {
+  const key = updateRefDir==='sent' ? 'rv_referrals_sent' : 'rv_referrals_received';
+  const refs = lsGet(key) || [];
+  const ref = refs.find(r => r.id === updateRefId);
+  if (ref) { ref.status = status; lsSet(key, refs); }
+  closeUpdate();
+  if (updateRefDir==='sent') renderSent(); else renderReceived();
+  updateHero();
+  showToast(`Status updated to "${status}"`, 'success');
+}
+
+/* ── Agreement modal ── */
+function openAgreementModal() { document.getElementById('agreementOverlay').classList.add('open'); }
+function closeAgreement() { document.getElementById('agreementOverlay').classList.remove('open'); }
+function closeAgreementOnBackdrop(e) { if (e.target===document.getElementById('agreementOverlay')) closeAgreement(); }
+function saveAgreement() {
+  const name = document.getElementById('agPartner').value.trim();
+  if (!name) { showToast('Please enter a partner name'); return; }
+  const partners = lsGet('rv_ref_partners') || [];
+  const initials = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const color = COLORS[partners.length % COLORS.length];
+  partners.push({
+    id: 'p' + Date.now(), name, title: 'Partner',
+    initials, color, sent: 0, received: 0, completed: 0,
+    agreement: document.getElementById('agType').value + (document.getElementById('agFee').value ? ' · ' + document.getElementById('agFee').value : '')
+  });
+  lsSet('rv_ref_partners', partners);
+  populatePartnerSelect();
+  closeAgreement();
+  updateHero();
+  renderPartners();
+  showToast(`✅ Agreement saved with ${name}`, 'success');
+}
+
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('refToast');
+  t.textContent = msg; t.className = `ref-toast ${type}`;
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => {
+    t.classList.add('show');
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  });
+}
+
+/* ── Init ── */
+seedDemoData();
+populatePartnerSelect();
+renderSent();
+updateHero();
+</script>
+</body>
+</html>

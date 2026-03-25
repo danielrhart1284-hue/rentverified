@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice Builder – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .inv-layout { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    .inv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .inv-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+    .inv-tabs { display: inline-flex; background: #e5e7eb; border-radius: 8px; padding: 3px; margin-bottom: 1.5rem; }
+    .inv-tab { padding: 0.45rem 1.25rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #6b7280; border: none; background: none; }
+    .inv-tab.active { background: #4F46E5; color: white; }
+
+    .inv-panel { display: none; }
+    .inv-panel.active { display: block; }
+
+    .inv-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .inv-card h3 { font-size: 1rem; font-weight: 800; color: #1e1b4b; margin-bottom: 1rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+    .form-full { margin-bottom: 0.75rem; }
+    label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+
+    .line-items { margin-bottom: 1rem; }
+    .line-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+    .line-item input { padding: 0.45rem 0.6rem; font-size: 0.82rem; }
+    .line-item .li-total { font-weight: 700; font-size: 0.85rem; color: #1e1b4b; text-align: right; min-width: 70px; }
+    .btn-remove { background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; padding: 0.4rem 0.6rem; cursor: pointer; font-size: 0.75rem; font-weight: 700; }
+    .btn-add-line { background: none; border: 2px dashed #d1d5db; border-radius: 8px; padding: 0.5rem; width: 100%; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #6b7280; }
+    .btn-add-line:hover { border-color: #4F46E5; color: #4F46E5; }
+
+    .inv-totals { text-align: right; padding: 1rem 0; border-top: 2px solid #e5e7eb; }
+    .inv-totals .total-row { display: flex; justify-content: flex-end; gap: 2rem; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .inv-totals .total-row.grand { font-size: 1.15rem; font-weight: 900; color: #1e1b4b; border-top: 2px solid #1e1b4b; padding-top: 0.5rem; }
+
+    .btn-inv { padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-inv.primary { background: #4F46E5; color: white; }
+    .btn-inv.primary:hover { background: #4338ca; }
+    .btn-inv.green { background: #059669; color: white; }
+    .btn-inv.green:hover { background: #047857; }
+    .btn-inv.outline { background: white; color: #4F46E5; border: 2px solid #4F46E5; }
+
+    /* Invoice List */
+    .inv-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .inv-table th { text-align: left; padding: 0.65rem 0.75rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .inv-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
+    .inv-table tr:hover td { background: #f9fafb; }
+    .badge-status { padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
+    .badge-status.draft { background: #f3f4f6; color: #6b7280; }
+    .badge-status.sent { background: #dbeafe; color: #1e40af; }
+    .badge-status.paid { background: #d1fae5; color: #065f46; }
+    .badge-status.overdue { background: #fee2e2; color: #991b1b; }
+
+    /* Print-friendly invoice preview */
+    .inv-preview { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 2.5rem; }
+    .inv-preview .inv-preview-header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+    .inv-preview .inv-preview-header h2 { font-size: 2rem; font-weight: 900; color: #1e1b4b; }
+    .inv-preview .inv-label { font-size: 0.72rem; font-weight: 700; color: #6b7280; text-transform: uppercase; margin-bottom: 2px; }
+    .inv-preview .inv-val { font-size: 0.88rem; color: #374151; margin-bottom: 0.5rem; }
+
+    @media (max-width: 640px) {
+      .form-row { grid-template-columns: 1fr; }
+      .line-item { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">RentVerified</span> <span style="font-weight:500;opacity:0.9;">Invoices</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="crm.html">CRM</a>
+    <a href="invoice-builder.html" style="color:#1a56db;font-weight:700;">Invoices</a>
+    <a href="accounting.html">Accounting</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<div class="inv-layout">
+  <div class="inv-header">
+    <h1>Invoice Builder</h1>
+    <button class="btn-inv primary" onclick="switchInvTab('create')">+ New Invoice</button>
+  </div>
+
+  <div class="inv-tabs">
+    <button class="inv-tab active" onclick="switchInvTab('list')">All Invoices</button>
+    <button class="inv-tab" onclick="switchInvTab('create')">Create Invoice</button>
+  </div>
+
+  <!-- LIST PANEL -->
+  <div class="inv-panel active" id="panel-list">
+    <div class="inv-card">
+      <div style="overflow-x:auto;">
+        <table class="inv-table">
+          <thead><tr><th>Invoice #</th><th>Client</th><th>Date</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="invBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE PANEL -->
+  <div class="inv-panel" id="panel-create">
+    <div class="inv-card">
+      <h3>Invoice Details</h3>
+      <div class="form-row">
+        <div><label>Invoice #</label><input type="text" id="invNum" /></div>
+        <div><label>Date</label><input type="date" id="invDate" /></div>
+      </div>
+      <div class="form-row">
+        <div><label>Due Date</label><input type="date" id="invDue" /></div>
+        <div><label>Status</label>
+          <select id="invStatus"><option value="draft">Draft</option><option value="sent">Sent</option><option value="paid">Paid</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <h3>Bill To</h3>
+      <div class="form-row">
+        <div><label>Client Name</label><input type="text" id="invClient" /></div>
+        <div><label>Email</label><input type="email" id="invClientEmail" /></div>
+      </div>
+      <div class="form-full"><label>Address</label><input type="text" id="invClientAddr" /></div>
+    </div>
+
+    <div class="inv-card">
+      <h3>Line Items</h3>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:0.5rem;margin-bottom:0.5rem;font-size:0.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;">
+        <span>Description</span><span>Qty</span><span>Rate</span><span>Amount</span><span></span>
+      </div>
+      <div class="line-items" id="lineItems"></div>
+      <button class="btn-add-line" onclick="addLineItem()">+ Add Line Item</button>
+
+      <div class="inv-totals" id="invTotals"></div>
+    </div>
+
+    <div class="inv-card">
+      <h3>Notes / Terms</h3>
+      <textarea id="invNotes" rows="3" placeholder="Payment terms, thank you message, etc."></textarea>
+    </div>
+
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+      <button class="btn-inv primary" onclick="saveInvoice()">Save Invoice</button>
+      <button class="btn-inv green" onclick="saveAndSendInvoice()">Save & Send</button>
+      <button class="btn-inv outline" onclick="previewInvoice()">Preview</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const INV_KEY = 'rv_invoices';
+var lineItemCount = 0;
+
+function getInvoices() {
+  var inv = JSON.parse(localStorage.getItem(INV_KEY) || '[]');
+  if (!inv.length) {
+    inv = [
+      { num: 'INV-001', client: 'Sanders PM', email: 'admin@sanderspm.com', address: '123 Main St, SLC UT', date: '2025-03-01', due: '2025-03-31', status: 'paid', items: [{ desc: 'Property management software - March', qty: 1, rate: 199 }], notes: 'Thank you for your business!', total: 199 },
+      { num: 'INV-002', client: 'Maple Realty', email: 'info@maplerealty.com', address: '456 Oak Ave, Provo UT', date: '2025-03-15', due: '2025-04-14', status: 'sent', items: [{ desc: 'Platform subscription - Pro', qty: 1, rate: 99 }, { desc: 'Tenant screening credits (10)', qty: 10, rate: 15 }], notes: 'Net 30', total: 249 },
+      { num: 'INV-003', client: 'Urban Nest LLC', email: 'ops@urbannest.io', address: '789 Pine Rd, Ogden UT', date: '2025-03-18', due: '2025-04-17', status: 'draft', items: [{ desc: 'Enterprise plan - Monthly', qty: 1, rate: 499 }], notes: '', total: 499 },
+    ];
+    localStorage.setItem(INV_KEY, JSON.stringify(inv));
+  }
+  return inv;
+}
+
+function renderInvoiceList() {
+  var invoices = getInvoices();
+  var body = document.getElementById('invBody');
+  if (!invoices.length) {
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:2rem;">No invoices yet. Create your first one!</td></tr>';
+    return;
+  }
+  body.innerHTML = invoices.map(function(inv, i) {
+    return '<tr>' +
+      '<td><strong>' + inv.num + '</strong></td>' +
+      '<td>' + inv.client + '</td>' +
+      '<td>' + inv.date + '</td>' +
+      '<td>' + inv.due + '</td>' +
+      '<td>$' + (inv.total || 0).toLocaleString() + '</td>' +
+      '<td><span class="badge-status ' + inv.status + '">' + inv.status.toUpperCase() + '</span></td>' +
+      '<td><button class="btn-inv outline" style="padding:3px 10px;font-size:0.72rem;" onclick="editInvoice(' + i + ')">Edit</button> <button class="btn-inv outline" style="padding:3px 10px;font-size:0.72rem;color:#dc2626;border-color:#dc2626;" onclick="deleteInvoice(' + i + ')">Del</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function switchInvTab(tab) {
+  document.querySelectorAll('.inv-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.inv-panel').forEach(function(p) { p.classList.remove('active'); });
+  if (tab === 'create') {
+    document.querySelectorAll('.inv-tab')[1].classList.add('active');
+    document.getElementById('panel-create').classList.add('active');
+  } else {
+    document.querySelectorAll('.inv-tab')[0].classList.add('active');
+    document.getElementById('panel-list').classList.add('active');
+    renderInvoiceList();
+  }
+}
+
+function addLineItem(desc, qty, rate) {
+  lineItemCount++;
+  var container = document.getElementById('lineItems');
+  var div = document.createElement('div');
+  div.className = 'line-item';
+  div.id = 'li-' + lineItemCount;
+  var n = lineItemCount;
+  div.innerHTML =
+    '<input type="text" placeholder="Description" id="lid-' + n + '" value="' + (desc || '') + '" />' +
+    '<input type="number" placeholder="Qty" id="liq-' + n + '" value="' + (qty || 1) + '" min="1" oninput="calcTotals()" />' +
+    '<input type="number" placeholder="Rate" id="lir-' + n + '" value="' + (rate || '') + '" step="0.01" oninput="calcTotals()" />' +
+    '<div class="li-total" id="lit-' + n + '">$0</div>' +
+    '<button class="btn-remove" onclick="removeLine(' + n + ')">X</button>';
+  container.appendChild(div);
+  calcTotals();
+}
+
+function removeLine(n) {
+  var el = document.getElementById('li-' + n);
+  if (el) el.remove();
+  calcTotals();
+}
+
+function calcTotals() {
+  var items = document.getElementById('lineItems').querySelectorAll('.line-item');
+  var subtotal = 0;
+  items.forEach(function(item) {
+    var id = item.id.replace('li-', '');
+    var qty = parseFloat(document.getElementById('liq-' + id)?.value) || 0;
+    var rate = parseFloat(document.getElementById('lir-' + id)?.value) || 0;
+    var total = qty * rate;
+    subtotal += total;
+    var el = document.getElementById('lit-' + id);
+    if (el) el.textContent = '$' + total.toFixed(2);
+  });
+  document.getElementById('invTotals').innerHTML =
+    '<div class="total-row"><span>Subtotal:</span><span>$' + subtotal.toFixed(2) + '</span></div>' +
+    '<div class="total-row grand"><span>Total:</span><span>$' + subtotal.toFixed(2) + '</span></div>';
+}
+
+function getLineItemData() {
+  var items = [];
+  document.getElementById('lineItems').querySelectorAll('.line-item').forEach(function(item) {
+    var id = item.id.replace('li-', '');
+    items.push({
+      desc: document.getElementById('lid-' + id)?.value || '',
+      qty: parseFloat(document.getElementById('liq-' + id)?.value) || 0,
+      rate: parseFloat(document.getElementById('lir-' + id)?.value) || 0,
+    });
+  });
+  return items;
+}
+
+function saveInvoice() {
+  var items = getLineItemData();
+  var total = items.reduce(function(s, i) { return s + (i.qty * i.rate); }, 0);
+  var inv = {
+    num: document.getElementById('invNum').value || 'INV-' + String(getInvoices().length + 1).padStart(3, '0'),
+    client: document.getElementById('invClient').value,
+    email: document.getElementById('invClientEmail').value,
+    address: document.getElementById('invClientAddr').value,
+    date: document.getElementById('invDate').value,
+    due: document.getElementById('invDue').value,
+    status: document.getElementById('invStatus').value,
+    items: items,
+    notes: document.getElementById('invNotes').value,
+    total: total,
+  };
+  var invoices = getInvoices();
+  var existingIdx = invoices.findIndex(function(x) { return x.num === inv.num; });
+  if (existingIdx >= 0) invoices[existingIdx] = inv;
+  else invoices.push(inv);
+  localStorage.setItem(INV_KEY, JSON.stringify(invoices));
+  alert('Invoice saved!');
+  switchInvTab('list');
+}
+
+function saveAndSendInvoice() {
+  document.getElementById('invStatus').value = 'sent';
+  saveInvoice();
+}
+
+function editInvoice(idx) {
+  var inv = getInvoices()[idx];
+  if (!inv) return;
+  switchInvTab('create');
+  document.getElementById('invNum').value = inv.num;
+  document.getElementById('invClient').value = inv.client || '';
+  document.getElementById('invClientEmail').value = inv.email || '';
+  document.getElementById('invClientAddr').value = inv.address || '';
+  document.getElementById('invDate').value = inv.date || '';
+  document.getElementById('invDue').value = inv.due || '';
+  document.getElementById('invStatus').value = inv.status || 'draft';
+  document.getElementById('invNotes').value = inv.notes || '';
+  document.getElementById('lineItems').innerHTML = '';
+  lineItemCount = 0;
+  (inv.items || []).forEach(function(li) { addLineItem(li.desc, li.qty, li.rate); });
+}
+
+function deleteInvoice(idx) {
+  if (!confirm('Delete this invoice?')) return;
+  var invoices = getInvoices();
+  invoices.splice(idx, 1);
+  localStorage.setItem(INV_KEY, JSON.stringify(invoices));
+  renderInvoiceList();
+}
+
+function previewInvoice() {
+  alert('Invoice preview: Print this page or use your browser\'s Print function (Ctrl+P) to generate a PDF.');
+}
+
+function resetCreateForm() {
+  var invoices = getInvoices();
+  document.getElementById('invNum').value = 'INV-' + String(invoices.length + 1).padStart(3, '0');
+  document.getElementById('invClient').value = '';
+  document.getElementById('invClientEmail').value = '';
+  document.getElementById('invClientAddr').value = '';
+  document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('invDue').value = '';
+  document.getElementById('invStatus').value = 'draft';
+  document.getElementById('invNotes').value = '';
+  document.getElementById('lineItems').innerHTML = '';
+  lineItemCount = 0;
+  addLineItem();
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+  renderInvoiceList();
+  resetCreateForm();
+});
+</script>
+</body>
+</html>

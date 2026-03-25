@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proposals – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Proposals Page ── */
+    .prop-hero {
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #f97316 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .prop-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .prop-hero p { font-size: 1rem; opacity: 0.8; max-width: 520px; margin: 0 auto 1.25rem; }
+    .prop-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .prop-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #fed7aa; }
+    .prop-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .prop-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    .prop-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; padding: 1.25rem 0;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .prop-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .prop-search:focus { outline: none; border-color: #ea580c; box-shadow: 0 0 0 3px rgba(234,88,12,0.12); }
+    .prop-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; color: #374151; min-width: 120px;
+    }
+    .prop-btn {
+      padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700;
+      font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s;
+    }
+    .prop-btn-primary { background: #ea580c; color: white; }
+    .prop-btn-primary:hover { background: #c2410c; }
+    .prop-btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; }
+    .prop-btn-outline:hover { border-color: #ea580c; color: #c2410c; }
+    .prop-btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+    .prop-btn-danger { background: #fee2e2; color: #dc2626; }
+    .prop-btn-danger:hover { background: #fecaca; }
+
+    /* ── Status Pills ── */
+    .status-pill { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 99px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+    .status-draft { background: #f3f4f6; color: #6b7280; }
+    .status-sent { background: #dbeafe; color: #2563eb; }
+    .status-viewed { background: #ede9fe; color: #7c3aed; }
+    .status-accepted { background: #d1fae5; color: #065f46; }
+    .status-declined { background: #fee2e2; color: #dc2626; }
+    .status-expired { background: #f3f4f6; color: #9ca3af; }
+    .status-revised { background: #fef3c7; color: #92400e; }
+
+    /* ── Summary ── */
+    .prop-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .prop-sum-card { background: white; border-radius: 14px; padding: 1.1rem 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid #f1f5f9; }
+    .prop-sum-card .num { font-size: 1.5rem; font-weight: 900; color: #1e293b; }
+    .prop-sum-card .lbl { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ── Cards Grid ── */
+    .prop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+    .prop-card {
+      background: white; border-radius: 14px; padding: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid #f1f5f9;
+      cursor: pointer; transition: 0.15s; border-left: 4px solid #ea580c;
+    }
+    .prop-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); transform: translateY(-2px); }
+    .prop-card .pc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+    .prop-card .pc-number { font-weight: 800; font-size: 0.88rem; color: #ea580c; }
+    .prop-card .pc-title { font-weight: 700; font-size: 1rem; color: #1e293b; margin-bottom: 0.25rem; }
+    .prop-card .pc-client { font-size: 0.82rem; color: #64748b; margin-bottom: 0.5rem; }
+    .prop-card .pc-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; }
+    .prop-card .pc-amount { font-weight: 900; font-size: 1.1rem; color: #1e293b; }
+    .prop-card .pc-type { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; }
+    .prop-card.accepted { border-left-color: #059669; }
+    .prop-card.declined { border-left-color: #dc2626; }
+    .prop-card.sent { border-left-color: #2563eb; }
+
+    .prop-empty { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+    .prop-empty .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+
+    /* ── Modal ── */
+    .prop-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9999; justify-content: center; align-items: flex-start; padding: 2rem 1rem; overflow-y: auto; }
+    .prop-overlay.show { display: flex; }
+    .prop-modal { background: white; border-radius: 18px; width: 100%; max-width: 680px; box-shadow: 0 24px 48px rgba(0,0,0,.15); animation: slideUp .25s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .prop-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb; }
+    .prop-modal-header h2 { font-size: 1.2rem; color: #1e293b; }
+    .prop-modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+    .prop-modal-close:hover { color: #ef4444; }
+    .prop-modal-body { padding: 1.5rem; }
+    .prop-modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb; }
+
+    /* ── Form ── */
+    .prop-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .prop-form-full { grid-column: 1 / -1; }
+    .prop-label { display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .prop-input, .prop-textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+    .prop-input:focus, .prop-textarea:focus { outline: none; border-color: #ea580c; box-shadow: 0 0 0 3px rgba(234,88,12,0.1); }
+    .prop-textarea { resize: vertical; min-height: 80px; }
+
+    /* ── Win Rate Bar ── */
+    .win-bar { background: #e5e7eb; border-radius: 99px; height: 8px; overflow: hidden; margin-top: 0.5rem; }
+    .win-fill { height: 100%; border-radius: 99px; background: #059669; }
+
+    @media (max-width: 640px) {
+      .prop-form-grid { grid-template-columns: 1fr; }
+      .prop-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:68px;display:flex;align-items:center;justify-content:space-between;">
+  <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:800;color:#ea580c;text-decoration:none;">
+    <span style="font-size:1.5rem;">📣</span> RentVerified <span style="font-size:.7rem;color:#94a3b8;margin-left:4px;">Consulting</span>
+  </a>
+  <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+    <a href="crm.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">CRM</a>
+    <a href="time-tracking.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Time</a>
+    <a href="invoice-builder.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Invoices</a>
+    <a href="documents.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Docs</a>
+    <a href="e-signature.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">E-Sign</a>
+    <a href="accounting.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Accounting</a>
+    <a href="index.html" style="color:#ea580c;font-weight:600;text-decoration:none;font-size:.88rem;">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="prop-hero">
+  <h1>Proposals</h1>
+  <p>Create, send, and track proposals. Convert accepted deals into projects and invoices.</p>
+  <div class="prop-hero-stats">
+    <div class="prop-hero-stat"><div class="num" id="stat-total">0</div><div class="lbl">Total Proposals</div></div>
+    <div class="prop-hero-stat"><div class="num" id="stat-pending">0</div><div class="lbl">Pending</div></div>
+    <div class="prop-hero-stat"><div class="num" id="stat-value">$0</div><div class="lbl">Pipeline Value</div></div>
+    <div class="prop-hero-stat"><div class="num" id="stat-win">0%</div><div class="lbl">Win Rate</div></div>
+  </div>
+</section>
+
+<div class="prop-wrap">
+  <!-- ── Toolbar ── -->
+  <div class="prop-toolbar">
+    <input class="prop-search" type="text" id="search" placeholder="Search proposals, clients..." oninput="renderProposals()" />
+    <select class="prop-select" id="filter-status" onchange="renderProposals()">
+      <option value="">All Statuses</option>
+      <option value="draft">Draft</option>
+      <option value="sent">Sent</option>
+      <option value="viewed">Viewed</option>
+      <option value="accepted">Accepted</option>
+      <option value="declined">Declined</option>
+      <option value="expired">Expired</option>
+      <option value="revised">Revised</option>
+    </select>
+    <select class="prop-select" id="filter-type" onchange="renderProposals()">
+      <option value="">All Types</option>
+      <option value="project">Project</option>
+      <option value="retainer">Retainer</option>
+      <option value="hourly">Hourly</option>
+      <option value="fixed">Fixed Price</option>
+      <option value="milestone">Milestone</option>
+    </select>
+    <button class="prop-btn prop-btn-primary" onclick="openNewProposal()">+ New Proposal</button>
+  </div>
+
+  <!-- ── Summary ── -->
+  <div class="prop-summary" id="summary-cards"></div>
+
+  <!-- ── Proposals Grid ── -->
+  <div class="prop-grid" id="proposals-grid"></div>
+  <div class="prop-empty" id="proposals-empty" style="display:none;">
+    <div class="icon">📣</div>
+    <div style="font-weight:700;font-size:1.1rem;margin-bottom:.25rem;">No proposals yet</div>
+    <div>Click "+ New Proposal" to create your first one.</div>
+  </div>
+</div>
+
+<!-- ═══════ NEW / EDIT PROPOSAL MODAL ═══════ -->
+<div class="prop-overlay" id="modal-proposal">
+  <div class="prop-modal">
+    <div class="prop-modal-header">
+      <h2 id="modal-title">New Proposal</h2>
+      <button class="prop-modal-close" onclick="closeModal('modal-proposal')">&times;</button>
+    </div>
+    <div class="prop-modal-body">
+      <input type="hidden" id="p-id" />
+      <div class="prop-form-grid">
+        <div>
+          <label class="prop-label">Proposal # *</label>
+          <input class="prop-input" id="p-number" placeholder="e.g. PROP-2026-001" />
+        </div>
+        <div>
+          <label class="prop-label">Type *</label>
+          <select class="prop-input" id="p-type">
+            <option value="project">Project (One-Time)</option>
+            <option value="retainer">Retainer (Recurring)</option>
+            <option value="hourly">Hourly</option>
+            <option value="fixed">Fixed Price</option>
+            <option value="milestone">Milestone</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="prop-form-full">
+          <label class="prop-label">Title *</label>
+          <input class="prop-input" id="p-title" placeholder="e.g. Q2 Social Media Campaign" />
+        </div>
+        <div>
+          <label class="prop-label">Client Name *</label>
+          <input class="prop-input" id="p-client" placeholder="Client / company name" />
+        </div>
+        <div>
+          <label class="prop-label">Client Email</label>
+          <input class="prop-input" id="p-email" type="email" placeholder="client@email.com" />
+        </div>
+        <div>
+          <label class="prop-label">Status</label>
+          <select class="prop-input" id="p-status">
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="viewed">Viewed</option>
+            <option value="accepted">Accepted</option>
+            <option value="declined">Declined</option>
+            <option value="expired">Expired</option>
+            <option value="revised">Revised</option>
+          </select>
+        </div>
+        <div>
+          <label class="prop-label">Amount ($)</label>
+          <input class="prop-input" id="p-amount" type="number" step="0.01" placeholder="Total project value" />
+        </div>
+        <div>
+          <label class="prop-label">Recurring Amount ($/mo)</label>
+          <input class="prop-input" id="p-recurring" type="number" step="0.01" placeholder="For retainers" />
+        </div>
+        <div>
+          <label class="prop-label">Valid Until</label>
+          <input class="prop-input" id="p-valid" type="date" />
+        </div>
+        <div class="prop-form-full">
+          <label class="prop-label">Scope of Work</label>
+          <textarea class="prop-textarea" id="p-scope" placeholder="Describe what's included..."></textarea>
+        </div>
+        <div class="prop-form-full">
+          <label class="prop-label">Deliverables</label>
+          <textarea class="prop-textarea" id="p-deliverables" placeholder="List deliverables (one per line)..."></textarea>
+        </div>
+        <div class="prop-form-full">
+          <label class="prop-label">Payment Terms</label>
+          <textarea class="prop-textarea" id="p-terms" placeholder="e.g. 50% upfront, 50% on completion..." style="min-height:50px;"></textarea>
+        </div>
+        <div class="prop-form-full">
+          <label class="prop-label">Notes</label>
+          <textarea class="prop-textarea" id="p-notes" placeholder="Internal notes..." style="min-height:50px;"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="prop-modal-footer">
+      <button class="prop-btn prop-btn-outline" onclick="closeModal('modal-proposal')">Cancel</button>
+      <button class="prop-btn prop-btn-primary" onclick="saveProposal()">Save Proposal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DETAIL MODAL ═══════ -->
+<div class="prop-overlay" id="modal-detail">
+  <div class="prop-modal" style="max-width:700px;">
+    <div class="prop-modal-header">
+      <h2 id="detail-title">Proposal Details</h2>
+      <button class="prop-modal-close" onclick="closeModal('modal-detail')">&times;</button>
+    </div>
+    <div class="prop-modal-body" id="detail-body"></div>
+    <div class="prop-modal-footer" id="detail-footer"></div>
+  </div>
+</div>
+
+<!-- ── Scripts ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script src="workspace.js"></script>
+<script>
+var allProposals = [];
+var currentProposalId = null;
+
+var TYPES = { project:'Project', retainer:'Retainer', hourly:'Hourly', fixed:'Fixed Price', milestone:'Milestone', other:'Other' };
+var STATUSES = { draft:'Draft', sent:'Sent', viewed:'Viewed', accepted:'Accepted', declined:'Declined', expired:'Expired', revised:'Revised' };
+
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadAll();
+  renderProposals();
+});
+
+async function loadAll() {
+  allProposals = await RVData.getProposals();
+  updateStats();
+}
+
+function updateStats() {
+  var pending = allProposals.filter(function(p) { return ['sent','viewed'].includes(p.status); });
+  var accepted = allProposals.filter(function(p) { return p.status === 'accepted'; });
+  var decided = allProposals.filter(function(p) { return ['accepted','declined'].includes(p.status); });
+  var pipelineValue = pending.reduce(function(s, p) { return s + (parseFloat(p.amount) || 0); }, 0);
+  var winRate = decided.length > 0 ? Math.round((accepted.length / decided.length) * 100) : 0;
+
+  document.getElementById('stat-total').textContent = allProposals.length;
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-value').textContent = '$' + pipelineValue.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  document.getElementById('stat-win').textContent = winRate + '%';
+
+  // Summary cards
+  var counts = {};
+  allProposals.forEach(function(p) { counts[p.status] = (counts[p.status] || 0) + 1; });
+  var html = '';
+  ['draft','sent','viewed','accepted','declined'].forEach(function(s) {
+    if (counts[s]) html += '<div class="prop-sum-card"><div class="num">' + counts[s] + '</div><div class="lbl">' + STATUSES[s] + '</div></div>';
+  });
+  // Win rate bar
+  html += '<div class="prop-sum-card"><div class="num">' + winRate + '%</div><div class="lbl">Win Rate</div><div class="win-bar"><div class="win-fill" style="width:' + winRate + '%;"></div></div></div>';
+  document.getElementById('summary-cards').innerHTML = html;
+}
+
+function renderProposals() {
+  var search = (document.getElementById('search').value || '').toLowerCase();
+  var status = document.getElementById('filter-status').value;
+  var type = document.getElementById('filter-type').value;
+
+  var filtered = allProposals;
+  if (search) filtered = filtered.filter(function(p) {
+    return (p.title || '').toLowerCase().includes(search) ||
+      (p.client_name || '').toLowerCase().includes(search) ||
+      (p.proposal_number || '').toLowerCase().includes(search);
+  });
+  if (status) filtered = filtered.filter(function(p) { return p.status === status; });
+  if (type) filtered = filtered.filter(function(p) { return p.proposal_type === type; });
+
+  var grid = document.getElementById('proposals-grid');
+  var empty = document.getElementById('proposals-empty');
+
+  if (filtered.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(function(p) {
+    var statusClass = p.status === 'accepted' ? ' accepted' : p.status === 'declined' ? ' declined' : p.status === 'sent' || p.status === 'viewed' ? ' sent' : '';
+    var amt = parseFloat(p.amount) || 0;
+    var recurring = parseFloat(p.recurring_amount) || 0;
+    return '<div class="prop-card' + statusClass + '" onclick="openDetail(\'' + p.id + '\')">' +
+      '<div class="pc-header"><span class="pc-number">' + esc(p.proposal_number) + '</span>' +
+      '<span class="status-pill status-' + p.status + '">' + (STATUSES[p.status] || p.status) + '</span></div>' +
+      '<div class="pc-title">' + esc(p.title) + '</div>' +
+      '<div class="pc-client">' + esc(p.client_name) + (p.client_company ? ' · ' + esc(p.client_company) : '') + '</div>' +
+      '<div class="pc-footer">' +
+        '<span class="pc-amount">$' + amt.toLocaleString('en-US', {maximumFractionDigits:0}) +
+          (recurring ? '<span style="font-size:.72rem;color:#64748b;font-weight:400;"> + $' + recurring.toLocaleString('en-US',{maximumFractionDigits:0}) + '/mo</span>' : '') +
+        '</span>' +
+        '<span class="pc-type">' + (TYPES[p.proposal_type] || p.proposal_type) + '</span>' +
+      '</div></div>';
+  }).join('');
+}
+
+function openNewProposal() {
+  document.getElementById('modal-title').textContent = 'New Proposal';
+  document.getElementById('p-id').value = '';
+  document.getElementById('p-number').value = genNumber();
+  document.getElementById('p-type').value = 'project';
+  document.getElementById('p-title').value = '';
+  document.getElementById('p-client').value = '';
+  document.getElementById('p-email').value = '';
+  document.getElementById('p-status').value = 'draft';
+  document.getElementById('p-amount').value = '';
+  document.getElementById('p-recurring').value = '';
+  document.getElementById('p-valid').value = defaultValidDate();
+  document.getElementById('p-scope').value = '';
+  document.getElementById('p-deliverables').value = '';
+  document.getElementById('p-terms').value = '';
+  document.getElementById('p-notes').value = '';
+  openModal('modal-proposal');
+}
+
+function genNumber() {
+  var y = new Date().getFullYear();
+  var c = allProposals.filter(function(p) { return (p.proposal_number || '').includes(y + '-'); }).length;
+  return 'PROP-' + y + '-' + String(c + 1).padStart(3, '0');
+}
+
+function defaultValidDate() {
+  var d = new Date(); d.setDate(d.getDate() + 30);
+  return d.toISOString().split('T')[0];
+}
+
+function editProposal(id) {
+  var p = allProposals.find(function(x) { return x.id === id; });
+  if (!p) return;
+  closeModal('modal-detail');
+  document.getElementById('modal-title').textContent = 'Edit Proposal';
+  document.getElementById('p-id').value = p.id;
+  document.getElementById('p-number').value = p.proposal_number || '';
+  document.getElementById('p-type').value = p.proposal_type || 'project';
+  document.getElementById('p-title').value = p.title || '';
+  document.getElementById('p-client').value = p.client_name || '';
+  document.getElementById('p-email').value = p.client_email || '';
+  document.getElementById('p-status').value = p.status || 'draft';
+  document.getElementById('p-amount').value = p.amount || '';
+  document.getElementById('p-recurring').value = p.recurring_amount || '';
+  document.getElementById('p-valid').value = p.valid_until || '';
+  document.getElementById('p-scope').value = p.scope_summary || '';
+  document.getElementById('p-deliverables').value = p.deliverables || '';
+  document.getElementById('p-terms').value = p.terms || '';
+  document.getElementById('p-notes').value = p.notes || '';
+  openModal('modal-proposal');
+}
+
+async function saveProposal() {
+  var id = document.getElementById('p-id').value;
+  var proposal = {
+    proposal_number: document.getElementById('p-number').value.trim(),
+    proposal_type: document.getElementById('p-type').value,
+    title: document.getElementById('p-title').value.trim(),
+    client_name: document.getElementById('p-client').value.trim(),
+    client_email: document.getElementById('p-email').value.trim(),
+    status: document.getElementById('p-status').value,
+    amount: parseFloat(document.getElementById('p-amount').value) || null,
+    recurring_amount: parseFloat(document.getElementById('p-recurring').value) || null,
+    valid_until: document.getElementById('p-valid').value || null,
+    scope_summary: document.getElementById('p-scope').value.trim(),
+    deliverables: document.getElementById('p-deliverables').value.trim(),
+    terms: document.getElementById('p-terms').value.trim(),
+    notes: document.getElementById('p-notes').value.trim()
+  };
+  if (!proposal.proposal_number || !proposal.title || !proposal.client_name) {
+    alert('Please fill in Proposal #, Title, and Client Name.'); return;
+  }
+  if (proposal.status === 'sent' && !proposal.sent_at) proposal.sent_at = new Date().toISOString();
+  if (proposal.status === 'accepted') proposal.accepted_at = new Date().toISOString();
+  if (proposal.status === 'declined') proposal.declined_at = new Date().toISOString();
+  if (id) proposal.id = id;
+
+  var result = await RVData.saveProposal(proposal);
+  if (result.error) { alert('Error: ' + (result.error.message || JSON.stringify(result.error))); return; }
+  closeModal('modal-proposal');
+  await loadAll();
+  renderProposals();
+}
+
+async function deleteProposal(id) {
+  if (!confirm('Delete this proposal?')) return;
+  await RVData.deleteProposal(id);
+  closeModal('modal-detail');
+  await loadAll();
+  renderProposals();
+}
+
+function openDetail(id) {
+  currentProposalId = id;
+  var p = allProposals.find(function(x) { return x.id === id; });
+  if (!p) return;
+
+  document.getElementById('detail-title').textContent = p.proposal_number + ' — ' + p.title;
+  var amt = parseFloat(p.amount) || 0;
+  var rec = parseFloat(p.recurring_amount) || 0;
+
+  var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">' +
+    infoRow('Client', p.client_name) +
+    infoRow('Email', p.client_email || '—') +
+    infoRow('Type', TYPES[p.proposal_type] || p.proposal_type) +
+    infoRow('Status', '<span class="status-pill status-' + p.status + '">' + (STATUSES[p.status] || p.status) + '</span>') +
+    infoRow('Amount', '<span style="font-size:1.1rem;color:#ea580c;font-weight:900;">$' + amt.toLocaleString('en-US',{maximumFractionDigits:0}) + '</span>') +
+    infoRow('Recurring', rec ? '$' + rec.toLocaleString('en-US',{maximumFractionDigits:0}) + '/mo' : '—') +
+    infoRow('Valid Until', p.valid_until ? formatDate(p.valid_until) : '—') +
+    infoRow('Created', formatDate(p.created_at)) +
+  '</div>';
+  if (p.scope_summary) html += '<div style="margin-top:1rem;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;">Scope of Work</div><div style="background:#f8fafc;border-radius:10px;padding:1rem;font-size:.88rem;white-space:pre-wrap;">' + esc(p.scope_summary) + '</div></div>';
+  if (p.deliverables) html += '<div style="margin-top:1rem;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;">Deliverables</div><div style="background:#f8fafc;border-radius:10px;padding:1rem;font-size:.88rem;white-space:pre-wrap;">' + esc(p.deliverables) + '</div></div>';
+  if (p.terms) html += '<div style="margin-top:1rem;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;">Payment Terms</div><div style="background:#f8fafc;border-radius:10px;padding:1rem;font-size:.88rem;white-space:pre-wrap;">' + esc(p.terms) + '</div></div>';
+
+  document.getElementById('detail-body').innerHTML = html;
+  document.getElementById('detail-footer').innerHTML =
+    '<button class="prop-btn prop-btn-outline" onclick="editProposal(\'' + id + '\')">Edit</button>' +
+    '<button class="prop-btn prop-btn-danger prop-btn-sm" onclick="deleteProposal(\'' + id + '\')">Delete</button>' +
+    (p.status === 'draft' ? '<button class="prop-btn prop-btn-primary" onclick="markSent(\'' + id + '\')">Mark as Sent</button>' : '') +
+    (p.status === 'sent' || p.status === 'viewed' ? '<button class="prop-btn" style="background:#059669;color:white;" onclick="markAccepted(\'' + id + '\')">Accept</button><button class="prop-btn prop-btn-danger" onclick="markDeclined(\'' + id + '\')">Decline</button>' : '') +
+    '<button class="prop-btn prop-btn-outline" onclick="closeModal(\'modal-detail\')">Close</button>';
+
+  openModal('modal-detail');
+}
+
+async function markSent(id) {
+  var p = allProposals.find(function(x) { return x.id === id; });
+  if (!p) return;
+  p.status = 'sent'; p.sent_at = new Date().toISOString();
+  await RVData.saveProposal(p);
+  await loadAll(); renderProposals(); openDetail(id);
+}
+
+async function markAccepted(id) {
+  var p = allProposals.find(function(x) { return x.id === id; });
+  if (!p) return;
+  p.status = 'accepted'; p.accepted_at = new Date().toISOString();
+  await RVData.saveProposal(p);
+  await loadAll(); renderProposals(); openDetail(id);
+}
+
+async function markDeclined(id) {
+  var p = allProposals.find(function(x) { return x.id === id; });
+  if (!p) return;
+  p.status = 'declined'; p.declined_at = new Date().toISOString();
+  await RVData.saveProposal(p);
+  await loadAll(); renderProposals(); openDetail(id);
+}
+
+function infoRow(label, value) {
+  return '<div style="margin-bottom:.75rem;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.15rem;">' +
+    label + '</div><div style="font-weight:600;color:#1e293b;">' + (value || '—') + '</div></div>';
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function formatDate(d) { if (!d) return '—'; var dt = new Date(d); if (isNaN(dt)) return d; return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+</script>
+<script src="share-widget.js" data-share-title="Proposals" data-share-text="Manage client proposals on RentVerified"></script>
+</body>
+</html>

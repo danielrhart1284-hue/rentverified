@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal – RentVerified</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root { --cp-blue:#2563eb; --cp-blue-light:#eff6ff; --cp-blue-dark:#1d4ed8; --cp-gray:#f8fafc; --cp-border:#e2e8f0; --cp-text:#1e293b; --cp-muted:#64748b; --cp-green:#10b981; --cp-red:#ef4444; --cp-amber:#f59e0b; }
+    body { background:var(--cp-gray); margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:var(--cp-text); }
+    /* Login Screen */
+    .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); }
+    .login-card { background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,.08); padding:2.5rem; width:100%; max-width:400px; text-align:center; }
+    .login-card .logo-area { width:64px; height:64px; border-radius:14px; background:var(--cp-blue); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:1.6rem; color:#fff; }
+    .login-card h1 { font-size:1.3rem; margin:0 0 .25rem; }
+    .login-card p { color:var(--cp-muted); font-size:.88rem; margin:0 0 1.5rem; }
+    .login-card .fg { display:flex; flex-direction:column; gap:.35rem; text-align:left; margin-bottom:1rem; }
+    .login-card .fg label { font-size:.82rem; font-weight:600; color:#374151; }
+    .login-card .fg input { border:1.5px solid var(--cp-border); border-radius:8px; padding:.65rem .9rem; font-size:.95rem; outline:none; transition:border .15s; }
+    .login-card .fg input:focus { border-color:var(--cp-blue); }
+    .login-card .btn-login { width:100%; padding:.75rem; background:var(--cp-blue); color:#fff; border:none; border-radius:8px; font-size:1rem; font-weight:600; cursor:pointer; transition:background .15s; }
+    .login-card .btn-login:hover { background:var(--cp-blue-dark); }
+    .login-error { color:var(--cp-red); font-size:.82rem; margin-top:.5rem; display:none; }
+    /* Portal Layout */
+    .portal { display:none; }
+    .portal-header { background:#fff; border-bottom:1px solid var(--cp-border); padding:1rem 1.5rem; display:flex; align-items:center; gap:1rem; position:sticky; top:0; z-index:50; }
+    .portal-header .biz-logo { width:40px; height:40px; border-radius:10px; background:var(--cp-blue); display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:#fff; flex-shrink:0; }
+    .portal-header .biz-name { font-weight:700; font-size:1rem; }
+    .portal-header .portal-label { font-size:.75rem; color:var(--cp-muted); text-transform:uppercase; letter-spacing:.05em; }
+    .portal-header .user-info { margin-left:auto; display:flex; align-items:center; gap:.75rem; }
+    .portal-header .user-avatar { width:34px; height:34px; border-radius:50%; background:#dbeafe; display:flex; align-items:center; justify-content:center; font-size:.85rem; font-weight:700; color:var(--cp-blue); }
+    .portal-header .logout-btn { background:none; border:1px solid var(--cp-border); border-radius:6px; padding:.3rem .7rem; font-size:.78rem; cursor:pointer; color:var(--cp-muted); }
+    .portal-header .logout-btn:hover { background:#fef2f2; color:var(--cp-red); border-color:var(--cp-red); }
+    /* Tabs */
+    .tab-bar { display:flex; gap:0; background:#fff; border-bottom:1px solid var(--cp-border); padding:0 1.5rem; overflow-x:auto; }
+    .tab-btn { padding:.85rem 1.25rem; border:none; background:none; cursor:pointer; font-size:.9rem; font-weight:600; color:var(--cp-muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; }
+    .tab-btn:hover { color:var(--cp-text); }
+    .tab-btn.active { color:var(--cp-blue); border-bottom-color:var(--cp-blue); }
+    .tab-content { display:none; padding:1.5rem; max-width:900px; margin:0 auto; }
+    .tab-content.active { display:block; }
+    /* Cards */
+    .card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); padding:1.25rem; margin-bottom:1rem; border:1px solid var(--cp-border); }
+    .card h3 { font-size:1rem; margin:0 0 .75rem; }
+    /* Stats row */
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card { background:#fff; border-radius:12px; padding:1.25rem; text-align:center; border:1px solid var(--cp-border); box-shadow:0 1px 3px rgba(0,0,0,.04); }
+    .stat-num { font-size:1.8rem; font-weight:800; color:var(--cp-blue); }
+    .stat-label { font-size:.78rem; color:var(--cp-muted); margin-top:.2rem; }
+    /* Badge */
+    .badge { display:inline-block; padding:.2rem .6rem; border-radius:20px; font-size:.72rem; font-weight:700; text-transform:uppercase; }
+    .badge-green { background:#d1fae5; color:#065f46; }
+    .badge-gray { background:#f1f5f9; color:#475569; }
+    .badge-blue { background:#dbeafe; color:#1e40af; }
+    .badge-red { background:#fee2e2; color:#991b1b; }
+    .badge-amber { background:#fef3c7; color:#92400e; }
+    /* Appointment list */
+    .appt-item { display:flex; align-items:center; gap:1rem; padding:.85rem 0; border-bottom:1px solid #f1f5f9; }
+    .appt-item:last-child { border-bottom:none; }
+    .appt-icon { width:40px; height:40px; border-radius:10px; background:var(--cp-blue-light); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .appt-details { flex:1; }
+    .appt-details .appt-title { font-weight:600; font-size:.92rem; }
+    .appt-details .appt-meta { font-size:.78rem; color:var(--cp-muted); margin-top:.15rem; }
+    /* Invoice list */
+    .inv-item { display:flex; align-items:center; gap:1rem; padding:.85rem 0; border-bottom:1px solid #f1f5f9; }
+    .inv-item:last-child { border-bottom:none; }
+    .inv-amount { font-weight:700; font-size:1rem; min-width:80px; }
+    .inv-details { flex:1; }
+    .inv-details .inv-num { font-weight:600; font-size:.88rem; }
+    .inv-details .inv-desc { font-size:.78rem; color:var(--cp-muted); }
+    .btn { padding:.5rem 1rem; border-radius:8px; border:none; cursor:pointer; font-size:.85rem; font-weight:600; transition:all .15s; }
+    .btn-primary { background:var(--cp-blue); color:#fff; }
+    .btn-primary:hover { background:var(--cp-blue-dark); }
+    .btn-sm { padding:.35rem .7rem; font-size:.78rem; }
+    .btn-outline { background:transparent; border:1.5px solid var(--cp-border); color:#374151; }
+    .btn-outline:hover { background:#f8fafc; }
+    /* Messages */
+    .msg-list { display:flex; flex-direction:column; gap:.75rem; max-height:400px; overflow-y:auto; padding:.5rem 0; }
+    .msg-bubble { max-width:75%; padding:.75rem 1rem; border-radius:12px; font-size:.9rem; line-height:1.45; }
+    .msg-business { background:var(--cp-blue-light); align-self:flex-start; border-bottom-left-radius:4px; }
+    .msg-client { background:#e2e8f0; align-self:flex-end; border-bottom-right-radius:4px; }
+    .msg-time { font-size:.68rem; color:var(--cp-muted); margin-top:.25rem; }
+    .msg-form { display:flex; gap:.5rem; margin-top:1rem; }
+    .msg-form input { flex:1; border:1.5px solid var(--cp-border); border-radius:8px; padding:.65rem .9rem; font-size:.9rem; outline:none; }
+    .msg-form input:focus { border-color:var(--cp-blue); }
+    /* Activity feed */
+    .activity-item { display:flex; gap:.75rem; padding:.6rem 0; border-bottom:1px solid #f8fafc; font-size:.85rem; }
+    .activity-dot { width:8px; height:8px; border-radius:50%; background:var(--cp-blue); margin-top:.4rem; flex-shrink:0; }
+    .activity-time { font-size:.72rem; color:var(--cp-muted); }
+    /* Next appt card */
+    .next-appt { background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
+    .next-appt h3 { color:#fff; margin:0 0 .5rem; font-size:.85rem; text-transform:uppercase; letter-spacing:.05em; opacity:.85; }
+    .next-appt .appt-big { font-size:1.15rem; font-weight:700; margin-bottom:.35rem; }
+    .next-appt .appt-when { font-size:.9rem; opacity:.9; }
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.4); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal { background:#fff; border-radius:14px; padding:2rem; max-width:480px; width:90%; max-height:85vh; overflow-y:auto; }
+    .modal h2 { font-size:1.15rem; margin:0 0 1rem; }
+    .modal .fg { display:flex; flex-direction:column; gap:.35rem; margin-bottom:1rem; }
+    .modal .fg label { font-size:.82rem; font-weight:600; }
+    .modal .fg input, .modal .fg select { border:1.5px solid var(--cp-border); border-radius:8px; padding:.55rem .8rem; font-size:.9rem; outline:none; }
+    .modal .fg input:focus, .modal .fg select:focus { border-color:var(--cp-blue); }
+    .modal-actions { display:flex; gap:.5rem; justify-content:flex-end; margin-top:1.25rem; }
+    /* Toast */
+    .toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px); background:#1e293b; color:#fff; padding:.75rem 1.5rem; border-radius:10px; font-size:.88rem; z-index:300; transition:transform .3s; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    /* Responsive */
+    @media(max-width:600px) {
+      .stats-row { grid-template-columns:1fr 1fr; }
+      .tab-btn { padding:.7rem .9rem; font-size:.82rem; }
+      .portal-header .biz-name { font-size:.88rem; }
+      .msg-bubble { max-width:88%; }
+      .appt-item, .inv-item { flex-wrap:wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Login Screen ─── -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="logo-area">RV</div>
+    <h1>Alpine Property Management</h1>
+    <p>Client Portal &mdash; Sign in to view your account</p>
+    <div class="fg">
+      <label>Email Address</label>
+      <input type="email" id="loginEmail" placeholder="you@email.com">
+    </div>
+    <div class="fg">
+      <label>Access Code</label>
+      <input type="text" id="loginCode" placeholder="Enter your access code" maxlength="10">
+    </div>
+    <button class="btn-login" onclick="handleLogin()">Sign In</button>
+    <div class="login-error" id="loginError">Invalid access code. Please try again.</div>
+    <p style="font-size:.75rem;color:#94a3b8;margin-top:1rem;">Demo: any email + code <strong>1234</strong></p>
+  </div>
+</div>
+
+<!-- ─── Portal ─── -->
+<div class="portal" id="portal">
+  <header class="portal-header">
+    <div class="biz-logo">AP</div>
+    <div>
+      <div class="biz-name">Alpine Property Management</div>
+      <div class="portal-label">Client Portal</div>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar" id="userInitials">JM</div>
+      <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('appointments')">Appointments</button>
+    <button class="tab-btn" onclick="switchTab('invoices')">Invoices</button>
+    <button class="tab-btn" onclick="switchTab('messages')">Messages</button>
+  </div>
+
+  <!-- Dashboard Tab -->
+  <div class="tab-content active" id="tab-dashboard">
+    <h2 style="font-size:1.2rem;margin-bottom:.25rem;">Welcome back, <span id="clientName">John</span></h2>
+    <p style="color:var(--cp-muted);font-size:.88rem;margin-bottom:1.25rem;">Here is what is happening with your account.</p>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="statAppts">2</div>
+        <div class="stat-label">Upcoming Appointments</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statInvoices">1</div>
+        <div class="stat-label">Open Invoices</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statMessages">3</div>
+        <div class="stat-label">Messages</div>
+      </div>
+    </div>
+
+    <div class="next-appt" id="nextApptCard">
+      <h3>Next Appointment</h3>
+      <div class="appt-big" id="nextApptTitle">Property Inspection</div>
+      <div class="appt-when" id="nextApptWhen">March 22, 2026 at 10:00 AM</div>
+    </div>
+
+    <div class="card">
+      <h3>Recent Activity</h3>
+      <div id="activityFeed"></div>
+    </div>
+  </div>
+
+  <!-- Appointments Tab -->
+  <div class="tab-content" id="tab-appointments">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <h2 style="font-size:1.2rem;margin:0;">Appointments</h2>
+      <button class="btn btn-primary" onclick="showNewApptModal()">Request New Appointment</button>
+    </div>
+    <div class="card" id="apptList"></div>
+  </div>
+
+  <!-- Invoices Tab -->
+  <div class="tab-content" id="tab-invoices">
+    <h2 style="font-size:1.2rem;margin-bottom:1.25rem;">Invoices</h2>
+    <div class="card" id="invoiceList"></div>
+  </div>
+
+  <!-- Messages Tab -->
+  <div class="tab-content" id="tab-messages">
+    <h2 style="font-size:1.2rem;margin-bottom:1.25rem;">Messages</h2>
+    <div class="card">
+      <div class="msg-list" id="msgList"></div>
+      <div class="msg-form">
+        <input type="text" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Appointment Modal -->
+<div class="modal-overlay" id="apptModal">
+  <div class="modal">
+    <h2>Request New Appointment</h2>
+    <div class="fg">
+      <label>Service</label>
+      <select id="apptService">
+        <option>Property Inspection</option>
+        <option>Lease Signing</option>
+        <option>Maintenance Assessment</option>
+        <option>Move-In Walkthrough</option>
+        <option>Move-Out Inspection</option>
+        <option>Consultation</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Preferred Date &amp; Time</label>
+      <input type="datetime-local" id="apptDate">
+    </div>
+    <div class="fg">
+      <label>Notes (optional)</label>
+      <input type="text" id="apptNotes" placeholder="Any special requests...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('apptModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitApptRequest()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pay Invoice Modal -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <h2>Pay Invoice <span id="payInvNum"></span></h2>
+    <p style="color:var(--cp-muted);font-size:.88rem;margin-bottom:1.25rem;">Amount due: <strong id="payInvAmount"></strong></p>
+    <div class="fg">
+      <label>Payment Method</label>
+      <select id="payMethod">
+        <option>Visa ending in 4242</option>
+        <option>Bank Account (ACH)</option>
+        <option>Apple Pay</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('payModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="processPayment()">Pay Now</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="share-widget.js" data-share-title="Client Portal" data-share-text="View your account on RentVerified"></script>
+<script>
+if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
+
+/* ── Seed Data ── */
+var CLIENT_DATA = {
+  name: 'John Martinez',
+  email: 'john@alpinepm.com',
+  appointments: [
+    { service:'Property Inspection', date:'2026-03-22T10:00:00', status:'confirmed' },
+    { service:'Lease Signing', date:'2026-03-25T14:00:00', status:'requested' },
+    { service:'Maintenance Assessment', date:'2026-03-18T11:00:00', status:'completed' }
+  ],
+  invoices: [
+    { number:'INV-2026-001', date:'2026-03-01', amount:1200, status:'paid', desc:'March Rent' },
+    { number:'INV-2026-002', date:'2026-03-15', amount:150, status:'unpaid', desc:'Property Inspection' },
+    { number:'INV-2026-003', date:'2026-02-01', amount:1200, status:'paid', desc:'February Rent' }
+  ],
+  messages: [
+    { from:'business', text:'Hi John, your inspection is confirmed for March 22 at 10am.', time:'2026-03-21T09:00:00Z' },
+    { from:'client', text:'Thanks! Should I be present or can you do it with just the tenant?', time:'2026-03-21T09:15:00Z' },
+    { from:'business', text:'Either works. We will send you the report afterwards.', time:'2026-03-21T09:30:00Z' }
+  ]
+};
+
+/* ── Login ── */
+function handleLogin() {
+  var code = document.getElementById('loginCode').value.trim();
+  if (code === '1234') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('portal').style.display = 'block';
+    document.getElementById('loginError').style.display = 'none';
+    renderAll();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function handleLogout() {
+  document.getElementById('portal').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginCode').value = '';
+  document.getElementById('loginEmail').value = '';
+}
+
+/* ── Tabs ── */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  var btns = document.querySelectorAll('.tab-btn');
+  var tabs = ['dashboard','appointments','invoices','messages'];
+  var idx = tabs.indexOf(tab);
+  if (idx >= 0 && btns[idx]) btns[idx].classList.add('active');
+}
+
+/* ── Render ── */
+function renderAll() {
+  document.getElementById('clientName').textContent = CLIENT_DATA.name.split(' ')[0];
+  document.getElementById('userInitials').textContent = CLIENT_DATA.name.split(' ').map(function(n){return n[0];}).join('');
+
+  /* Stats */
+  var upcoming = CLIENT_DATA.appointments.filter(function(a){return a.status!=='completed';});
+  var openInv = CLIENT_DATA.invoices.filter(function(i){return i.status==='unpaid'||i.status==='overdue';});
+  document.getElementById('statAppts').textContent = upcoming.length;
+  document.getElementById('statInvoices').textContent = openInv.length;
+  document.getElementById('statMessages').textContent = CLIENT_DATA.messages.length;
+
+  /* Next appointment */
+  var next = upcoming.sort(function(a,b){return new Date(a.date)-new Date(b.date);})[0];
+  if (next) {
+    document.getElementById('nextApptTitle').textContent = next.service;
+    document.getElementById('nextApptWhen').textContent = formatDate(next.date);
+  }
+
+  renderActivity();
+  renderAppointments();
+  renderInvoices();
+  renderMessages();
+}
+
+function renderActivity() {
+  var feed = document.getElementById('activityFeed');
+  var items = [
+    { text:'Inspection confirmed for March 22', time:'2 hours ago' },
+    { text:'Invoice INV-2026-001 marked as paid', time:'1 day ago' },
+    { text:'Lease signing requested for March 25', time:'2 days ago' },
+    { text:'Message received from property manager', time:'3 days ago' }
+  ];
+  feed.innerHTML = items.map(function(it) {
+    return '<div class="activity-item"><div class="activity-dot"></div><div><div>' + it.text + '</div><div class="activity-time">' + it.time + '</div></div></div>';
+  }).join('');
+}
+
+function renderAppointments() {
+  var el = document.getElementById('apptList');
+  var statusMap = { confirmed:'badge-green', completed:'badge-gray', requested:'badge-blue' };
+  var iconMap = { confirmed:'&#128197;', completed:'&#9989;', requested:'&#128338;' };
+  el.innerHTML = CLIENT_DATA.appointments.map(function(a) {
+    return '<div class="appt-item">' +
+      '<div class="appt-icon">' + (iconMap[a.status]||'&#128197;') + '</div>' +
+      '<div class="appt-details"><div class="appt-title">' + a.service + '</div><div class="appt-meta">' + formatDate(a.date) + '</div></div>' +
+      '<span class="badge ' + (statusMap[a.status]||'badge-gray') + '">' + a.status + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function renderInvoices() {
+  var el = document.getElementById('invoiceList');
+  var statusMap = { paid:'badge-green', unpaid:'badge-amber', overdue:'badge-red' };
+  el.innerHTML = CLIENT_DATA.invoices.map(function(inv) {
+    var payBtn = (inv.status === 'unpaid' || inv.status === 'overdue') ?
+      ' <button class="btn btn-primary btn-sm" onclick="showPayModal(\'' + inv.number + '\',' + inv.amount + ')">Pay Now</button>' : '';
+    return '<div class="inv-item">' +
+      '<div class="inv-amount">$' + inv.amount.toLocaleString() + '</div>' +
+      '<div class="inv-details"><div class="inv-num">' + inv.number + ' &mdash; ' + inv.desc + '</div><div class="inv-desc">Issued ' + inv.date + '</div></div>' +
+      '<span class="badge ' + (statusMap[inv.status]||'badge-gray') + '">' + inv.status + '</span>' +
+      payBtn +
+      '</div>';
+  }).join('');
+}
+
+function renderMessages() {
+  var el = document.getElementById('msgList');
+  el.innerHTML = CLIENT_DATA.messages.map(function(m) {
+    var cls = m.from === 'business' ? 'msg-business' : 'msg-client';
+    var label = m.from === 'business' ? 'Alpine PM' : CLIENT_DATA.name.split(' ')[0];
+    return '<div class="msg-bubble ' + cls + '">' +
+      '<div style="font-size:.72rem;font-weight:700;color:var(--cp-muted);margin-bottom:.25rem;">' + label + '</div>' +
+      '<div>' + m.text + '</div>' +
+      '<div class="msg-time">' + formatTime(m.time) + '</div>' +
+      '</div>';
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+/* ── Actions ── */
+function sendMessage() {
+  var input = document.getElementById('msgInput');
+  var text = input.value.trim();
+  if (!text) return;
+  var msg = { from:'client', text:text, time:new Date().toISOString() };
+  CLIENT_DATA.messages.push(msg);
+  input.value = '';
+  renderMessages();
+  document.getElementById('statMessages').textContent = CLIENT_DATA.messages.length;
+  /* Save via RVData if available */
+  if (typeof RVData !== 'undefined' && RVData.saveMessage) {
+    try { RVData.saveMessage({ type:'professional', from:'client', text:text, timestamp:msg.time }); } catch(e){}
+  }
+  toast('Message sent');
+}
+
+function showNewApptModal() {
+  document.getElementById('apptModal').classList.add('show');
+}
+
+function showPayModal(num, amount) {
+  document.getElementById('payInvNum').textContent = num;
+  document.getElementById('payInvAmount').textContent = '$' + amount.toLocaleString();
+  document.getElementById('payModal').dataset.inv = num;
+  document.getElementById('payModal').classList.add('show');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function submitApptRequest() {
+  var service = document.getElementById('apptService').value;
+  var date = document.getElementById('apptDate').value;
+  if (!date) { toast('Please select a date'); return; }
+  CLIENT_DATA.appointments.push({ service:service, date:date, status:'requested' });
+  renderAppointments();
+  var upcoming = CLIENT_DATA.appointments.filter(function(a){return a.status!=='completed';});
+  document.getElementById('statAppts').textContent = upcoming.length;
+  closeModal('apptModal');
+  toast('Appointment requested');
+}
+
+function processPayment() {
+  var num = document.getElementById('payModal').dataset.inv;
+  CLIENT_DATA.invoices.forEach(function(inv) {
+    if (inv.number === num) inv.status = 'paid';
+  });
+  renderInvoices();
+  var openInv = CLIENT_DATA.invoices.filter(function(i){return i.status==='unpaid'||i.status==='overdue';});
+  document.getElementById('statInvoices').textContent = openInv.length;
+  closeModal('payModal');
+  toast('Payment processed successfully');
+}
+
+/* ── Helpers ── */
+function formatDate(d) {
+  var dt = new Date(d);
+  return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) + ' at ' + dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+
+function formatTime(d) {
+  var dt = new Date(d);
+  return dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + ' &middot; ' + dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+}
+
+/* Click outside modal to close */
+document.querySelectorAll('.modal-overlay').forEach(function(m) {
+  m.addEventListener('click', function(e) {
+    if (e.target === m) m.classList.remove('show');
+  });
+});
+</script>
+</body>
+</html>

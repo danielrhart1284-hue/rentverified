@@ -3,59 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commercial Property Management – RentVerified</title>
+  <title>Commercial Property Management | RentVerified</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* Commercial-specific branding: dark navy instead of blue */
-    :root {
-      --commercial-primary: #0F172A;
-      --commercial-light: #1e293b;
-      --commercial-accent: #475569;
-    }
-
-    .signup-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: calc(100vh - 68px);
-    }
-    .signup-left {
-      background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%);
-      color: white;
-      padding: 4rem 3rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .signup-right {
-      background: var(--gray-100);
-      padding: 3rem 2.5rem;
-      overflow-y: auto;
-    }
-    .benefit-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 1.5rem;
-    }
-    .benefit-icon {
-      width: 40px; height: 40px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      font-size: 1.2rem;
-    }
-    .benefit-text h4 { font-weight: 700; margin-bottom: 2px; }
-    .benefit-text p { opacity: 0.8; font-size: 0.875rem; }
-
-    /* Dashboard */
+    /* Dashboard layout */
     .dashboard-layout {
       display: grid;
       grid-template-columns: 220px 1fr;
       min-height: calc(100vh - 68px);
     }
     .dash-sidebar {
-      background: #0F172A;
+      background: #0f172a;
       padding: 1.5rem 0;
     }
     .dash-link {
@@ -63,7 +21,7 @@
       padding: 0.65rem 1rem;
       margin: 0 0.75rem;
       border-radius: 8px;
-      color: var(--gray-400);
+      color: #9ca3af;
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
@@ -71,2270 +29,1817 @@
       text-decoration: none;
     }
     .dash-link:hover { background: rgba(255,255,255,0.07); color: white; text-decoration: none; }
-    .dash-link.active { background: #0F172A; color: #93c5fd; border-left: 3px solid #0F172A; }
+    .dash-link.active { background: #1a56db; color: white; }
     .dash-link svg { width: 17px; height: 17px; flex-shrink: 0; }
-    .dash-main { background: var(--gray-100); padding: 2rem; overflow-y: auto; }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    .kpi-card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border-left: 4px solid #0F172A;
-    }
-    .kpi-label {
-      font-size: 0.8rem;
-      color: var(--gray-600);
-      font-weight: 600;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.05em;
-    }
-    .kpi-value {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #0F172A;
-      line-height: 1;
-      margin-bottom: 0.5rem;
-    }
-    .kpi-subtext {
-      font-size: 0.8rem;
-      color: var(--gray-500);
-    }
-
-    .property-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-    .property-card {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      transition: all 0.2s;
-    }
-    .property-card:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.12); }
-    .property-card-header {
-      background: linear-gradient(135deg, #0F172A, #1e293b);
-      color: white;
-      padding: 1.25rem;
-    }
-    .property-card-body {
-      padding: 1.25rem;
-    }
-    .property-name { font-weight: 700; font-size: 1.05rem; margin-bottom: 0.5rem; }
-    .property-addr { font-size: 0.85rem; color: rgba(255,255,255,0.8); }
-    .property-detail {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 0;
-      font-size: 0.85rem;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .property-detail:last-child { border-bottom: none; }
-    .property-detail-label { color: var(--gray-600); font-weight: 600; }
-    .property-detail-value { font-weight: 700; color: #0F172A; }
-
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
-
-    .form-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #374151;
-      font-size: 0.9rem;
-    }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 0.65rem 0.9rem;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      box-sizing: border-box;
-    }
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #0F172A;
-      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
-    }
-    .form-group textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .btn {
-      padding: 0.65rem 1.25rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-size: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .btn-primary {
-      background: #0F172A;
-      color: white;
-    }
-    .btn-primary:hover { background: #1e293b; }
-    .btn-outline {
-      border: 1.5px solid #d1d5db;
-      background: white;
-      color: #374151;
-    }
-    .btn-outline:hover { border-color: #0F172A; color: #0F172A; }
-    .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .modal.open { display: flex; }
-    .modal-content {
-      background: white;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 2rem;
-      box-shadow: 0 20px 25px rgba(0,0,0,0.15);
-    }
-    .modal-header {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-      color: #0F172A;
-    }
-    .modal-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--gray-400);
-    }
-
-    .table-responsive {
-      overflow-x: auto;
-      margin-bottom: 1.5rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    thead {
-      background: #0F172A;
-      color: white;
-    }
-    th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 700;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    td {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 0.9rem;
-    }
-    tbody tr:hover { background: #f9fafb; }
-
-    .badge {
-      display: inline-block;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .badge-nnn { background: #dbeafe; color: #1e40af; }
-    .badge-nn { background: #e0e7ff; color: #3730a3; }
-    .badge-gross { background: #fef3c7; color: #92400e; }
-    .badge-occupied { background: #dcfce7; color: #15803d; }
-    .badge-vacant { background: #fee2e2; color: #991b1b; }
-
-    .lease-type-hint {
-      font-size: 0.8rem;
-      color: #0F172A;
-      background: #e0e7ff;
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      margin-top: 0.5rem;
-      display: none;
-    }
-    .lease-type-hint.show { display: block; }
-
-    .score-result {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-top: 1.5rem;
-      border-left: 4px solid #0F172A;
-    }
-    .score-circle {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: white;
-      margin-bottom: 1rem;
-    }
-    .score-circle.approve { background: #10b981; }
-    .score-circle.review { background: #f59e0b; }
-    .score-circle.decline { background: #ef4444; }
-
-    .calc-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 0.75rem;
-      padding: 0.75rem;
-      background: #f9fafb;
-      border-radius: 8px;
-    }
-    .calc-row label {
-      flex: 0 0 150px;
-      font-weight: 600;
-      color: #374151;
-    }
-    .calc-row input {
-      flex: 1;
-      padding: 0.5rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-    }
-    .calc-result {
-      font-weight: 700;
-      color: #0F172A;
-      min-width: 120px;
-      text-align: right;
-    }
-
-    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #D1D5DB; border-radius: 24px; transition: 0.2s; }
-    .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
-    .toggle-switch input:checked + .toggle-slider { background: #0F172A; }
-    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
-
-    .mgmt-toggle-row {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 1rem; background: var(--gray-100); border-radius: 8px; margin-bottom: 0.75rem;
-    }
-    .mgmt-toggle-info { flex: 1; }
-    .mgmt-toggle-info h4 { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
-    .mgmt-toggle-info p { font-size: 0.8rem; color: var(--gray-600); margin-bottom: 4px; }
-    .mgmt-commission { font-size: 0.75rem; color: #059669; font-weight: 600; }
+    .dash-main { background: #f8fafc; padding: 2rem; overflow-y: auto; }
 
     .plan-chip {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #e0e7ff;
-      color: #0F172A;
-      border: 1px solid #c7d2fe;
+      background: #dbeafe;
+      color: #1a56db;
+      border: 1px solid #bfdbfe;
       border-radius: 999px;
       padding: 4px 14px;
       font-size: 0.8rem;
       font-weight: 700;
     }
 
+    /* Tab content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+    .stat-card .stat-label {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .stat-card .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .stat-card .stat-sub {
+      font-size: 0.78rem;
+      color: #10b981;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* Management Profile styles */
+    .mgmt-section { margin-bottom: 2rem; }
+    .mgmt-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .mgmt-toggle-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+      transition: border-color 0.2s;
+    }
+    .mgmt-toggle-row:hover { border-color: #1a56db; }
+    .mgmt-toggle-row .toggle-info { flex: 1; }
+    .mgmt-toggle-row .toggle-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+    .mgmt-toggle-row .toggle-desc { font-size: 0.82rem; color: #64748b; line-height: 1.4; }
+    .mgmt-toggle-row .toggle-commission { font-size: 0.82rem; color: #059669; font-weight: 600; margin-top: 4px; }
+    .mgmt-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .mgmt-toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .mgmt-toggle-switch .slider {
+      position: absolute;
+      inset: 0;
+      background: #d1d5db;
+      border-radius: 999px;
+      transition: background 0.2s;
+    }
+    .mgmt-toggle-switch input:checked + .slider { background: #10b981; }
+    .mgmt-toggle-switch .slider::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .mgmt-toggle-switch input:checked + .slider::after { transform: translateX(22px); }
+
+    /* Education cards */
+    .edu-card-toggle {
+      font-size: 0.82rem;
+      color: #1a56db;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .edu-card-toggle:hover { text-decoration: underline; }
+    .edu-card {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 1.25rem;
+      background: #EFF6FF;
+      border-left: 3px solid #3B82F6;
+      border-radius: 8px;
+    }
+    .edu-card.open { display: block; }
+    .edu-card h4 {
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+    }
+    .edu-card .edu-section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-top: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+    .edu-card p { font-size: 0.85rem; color: #334155; line-height: 1.5; margin-bottom: 0.5rem; }
+    .edu-card .edu-qa { margin-top: 0.5rem; padding: 0.75rem; background: white; border-radius: 6px; border: 1px solid #DBEAFE; }
+    .edu-card .edu-qa .q { font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
+    .edu-card .edu-qa .a { font-size: 0.82rem; color: #475569; line-height: 1.4; }
+    .edu-card .edu-enable-btn {
+      margin-top: 0.75rem;
+      padding: 0.45rem 1rem;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .edu-card .edu-enable-btn:hover { background: #059669; }
+
+    /* Partner cards (funding tab) */
+    .partner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .partner-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .partner-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+      transform: translateY(-2px);
+    }
+    .partner-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .partner-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .partner-card-top h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .partner-card-top p {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .partner-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 0.75rem;
+    }
+    .partner-tags span {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .partner-details {
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .partner-details strong { color: #1e293b; }
+    .partner-card .btn-apply {
+      display: inline-block;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: white;
+      background: #1a56db;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+    .partner-card .btn-apply:hover { background: #1e429f; }
+
+    /* Funding summary card */
+    .funding-summary {
+      background: linear-gradient(135deg, #1e3a5f, #1e40af);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+    .funding-summary h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .funding-summary p { font-size: 0.9rem; opacity: 0.88; line-height: 1.5; }
+
+    /* Applications table */
+    .apps-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .apps-table th {
+      background: #f8fafc;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .apps-table td {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .apps-table tr:last-child td { border-bottom: none; }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.approved { background: #d1fae5; color: #065f46; }
+    .status-badge.funded { background: #dbeafe; color: #1e40af; }
+    .status-badge.declined { background: #fee2e2; color: #991b1b; }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: 1.5rem;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.25rem;
+    }
+    .page-header p {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    /* Card */
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .card-body { padding: 1.5rem; }
+
+    /* Collapsible sidebar groups */
+    .sidebar-group { margin-bottom: 0.25rem; }
+    .sidebar-group-label {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.55rem 1rem; margin: 0;
+      color: #9ca3af; font-size: 0.8rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      cursor: pointer; border-radius: 8px;
+      transition: all 0.15s; user-select: none;
+    }
+    .sidebar-group-label:hover { background: rgba(255,255,255,0.05); color: white; }
+    .sidebar-group-label .chevron { transition: transform 0.2s; flex-shrink: 0; }
+    .sidebar-group.collapsed .sidebar-group-label .chevron { transform: rotate(-90deg); }
+    .sidebar-group-items { padding-left: 0.5rem; }
+    .sidebar-group.collapsed .sidebar-group-items { display: none; }
+
+    /* Commercial onboarding overlay */
+    .comm-ob-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+    }
+    .comm-ob-card {
+      background: white; border-radius: 16px; max-width: 520px; width: 95%;
+      padding: 2.5rem; max-height: 90vh; overflow-y: auto;
+    }
+    .comm-ob-product {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 1rem; background: #f8fafc;
+      border-radius: 8px; margin-bottom: 0.5rem;
+    }
+    .comm-ob-product .comm-toggle {
+      position: relative; display: inline-block; width: 44px; height: 24px;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .comm-ob-product .comm-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .comm-ob-product .comm-toggle .slider {
+      position: absolute; inset: 0; background: #d1d5db; border-radius: 999px; transition: background 0.2s;
+    }
+    .comm-ob-product .comm-toggle input:checked + .slider { background: #10b981; }
+    .comm-ob-product .comm-toggle .slider::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 20px; height: 20px; background: white; border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s;
+    }
+    .comm-ob-product .comm-toggle input:checked + .slider::after { transform: translateX(20px); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .partner-grid { grid-template-columns: 1fr; }
+    }
     @media (max-width: 768px) {
-      .signup-layout { grid-template-columns: 1fr; }
-      .signup-left { display: none; }
       .dashboard-layout { grid-template-columns: 1fr; }
-      .dash-sidebar { display: none; }
-      .form-grid-2 { grid-template-columns: 1fr; }
-      .kpi-grid { grid-template-columns: 1fr; }
-      .property-grid { grid-template-columns: 1fr; }
+      .dash-sidebar {
+        display: flex;
+        overflow-x: auto;
+        padding: 0.75rem;
+        gap: 0.25rem;
+      }
+      .dash-sidebar > div:first-child { display: none; }
+      .dash-sidebar > div:nth-child(2) { display: flex; gap: 0.25rem; flex-wrap: nowrap; }
+      .dash-link { white-space: nowrap; margin: 0; padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+      .dash-link svg { display: none; }
+      .dash-main { padding: 1.25rem; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .mgmt-toggle-row { flex-direction: column; }
+    }
+
+    /* ── Deal Pipeline ── */
+    .deal-pipeline { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; min-height: 400px; }
+    .deal-column { min-width: 220px; flex: 1; background: #f1f5f9; border-radius: 12px; padding: 0.75rem; }
+    .deal-col-header { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+    .deal-col-count { background: #e2e8f0; padding: 1px 8px; border-radius: 99px; font-size: 0.7rem; }
+    .deal-card { background: white; border-radius: 10px; padding: 0.85rem; margin-bottom: 0.6rem; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.15s; }
+    .deal-card:hover { border-color: #1a56db; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .deal-card-name { font-weight: 700; font-size: 0.88rem; color: #0f172a; margin-bottom: 4px; }
+    .deal-card-meta { font-size: 0.75rem; color: #64748b; margin-bottom: 4px; }
+    .deal-card-value { font-size: 0.82rem; font-weight: 700; color: #1a56db; }
+    .deal-card-type { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: #dbeafe; color: #1a56db; text-transform: uppercase; }
+    .deal-toolbar { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .deal-search { flex: 1; min-width: 180px; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.88rem; }
+    .deal-search:focus { outline: none; border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26,86,219,0.12); }
+    .deal-filter { padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.85rem; background: white; min-width: 130px; }
+    .deal-view-toggle { display: flex; gap: 2px; background: #e2e8f0; border-radius: 8px; padding: 2px; }
+    .deal-view-btn { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; background: transparent; color: #64748b; }
+    .deal-view-btn.active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .deal-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .deal-sum-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; text-align: center; }
+    .deal-sum-card .num { font-size: 1.4rem; font-weight: 900; color: #0f172a; }
+    .deal-sum-card .lbl { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em; }
+    .deal-list-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .deal-list-table th { background: #f1f5f9; text-align: left; padding: 0.7rem 1rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; }
+    .deal-list-table td { padding: 0.7rem 1rem; font-size: 0.85rem; border-top: 1px solid #f1f5f9; }
+    .deal-list-table tr:hover td { background: #f8fafc; }
+    .deal-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 999; }
+    .deal-modal-overlay.open { display: flex; }
+    .deal-modal { background: white; border-radius: 16px; padding: 2rem; width: 100%; max-width: 620px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
+    .deal-modal h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; }
+    .deal-modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .deal-modal-field { margin-bottom: 1rem; }
+    .deal-modal-field label { display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 4px; color: #374151; }
+    .deal-modal-field input, .deal-modal-field select, .deal-modal-field textarea { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.88rem; font-family: inherit; }
+    .deal-modal-field input:focus, .deal-modal-field select:focus { outline: none; border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26,86,219,0.12); }
+    .deal-modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+    .deal-modal-actions button { padding: 0.6rem 1.5rem; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; }
+    @media (max-width: 768px) { .deal-pipeline { flex-direction: column; } .deal-summary { grid-template-columns: repeat(2, 1fr); } .deal-modal-row { grid-template-columns: 1fr; } }
+    /* Mobile-friendly modals */
+    @media (max-width: 768px) {
+      .modal, [class*="modal"] { max-height: 95vh !important; width: 95% !important; max-width: none !important; margin: 0.5rem !important; border-radius: 12px !important; }
+      .modal-overlay, [class*="overlay"] { padding: 0.5rem !important; align-items: flex-end !important; }
+    }
+    /* Mobile-scrollable tables */
+    @media (max-width: 768px) {
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      th, td { white-space: nowrap; }
     }
   </style>
 </head>
 <body>
 
-<!-- Sanders PM live banner -->
+<!-- RentVerified banner -->
 <div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
-  🏢 RentVerified Commercial · <a href="index.html" style="color:#93c5fd;">Home</a> · <a href="tenant-portal.html" style="color:#93c5fd;">Tenant Portal</a>
+  RentVerified &middot; Commercial &middot; <a href="index.html" style="color:#93c5fd;">Home</a> &middot; <a href="tenant-portal.html" style="color:#93c5fd;">Tenant Portal</a>
 </div>
 
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
-    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#0F172A"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
-    RentVerified <span style="opacity:0.85;">· Commercial</span>
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    RentVerified
   </a>
   <div class="nav-links">
-    <a href="index.html">← Back to Home</a>
+    <a href="index.html">&larr; Back to Home</a>
   </div>
   <div class="nav-cta">
-    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Tenant Portal</a>
-    <button class="btn btn-primary btn-sm" onclick="showLogin()" style="margin-left:.5rem;">Log In</button>
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login / Sign Up</a>
   </div>
 </nav>
 
-<!-- SIGNUP FORM (shown by default) -->
-<div id="signup-screen">
-  <div class="signup-layout">
-
-    <!-- LEFT: Benefits -->
-    <div class="signup-left">
-      <div style="margin-bottom:2.5rem;">
-        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.7;margin-bottom:0.75rem;">For Commercial PMs</div>
-        <h1 style="font-size:2.2rem;font-weight:900;line-height:1.2;margin-bottom:1rem;">Manage NNN Leases & CAM Charges with One Platform</h1>
-        <p style="opacity:0.85;font-size:1rem;line-height:1.6;">Professional commercial property management software purpose-built for office, retail, and industrial properties. CAM calculations, lease tracking, and business entity screening.</p>
-      </div>
-
-      <div>
-        <div class="benefit-item">
-          <div class="benefit-icon">📊</div>
-          <div class="benefit-text">
-            <h4>CAM Charge Calculator</h4>
-            <p>Automatic pro-rata calculations for NNN/NN leases. Monthly invoices, year-end reconciliation, and CSV exports built-in.</p>
-          </div>
-        </div>
-        <div class="benefit-item">
-          <div class="benefit-icon">📋</div>
-          <div class="benefit-text">
-            <h4>Commercial Lease Builder</h4>
-            <p>NNN, Double Net, Gross, MOD, Percentage, and Full Service leases. Rent escalation, TI allowances, renewal options, and personal guarantees.</p>
-          </div>
-        </div>
-        <div class="benefit-item">
-          <div class="benefit-icon">🏢</div>
-          <div class="benefit-text">
-            <h4>Business Entity Screening</h4>
-            <p>AI scoring for commercial tenants. Credit score, revenue, years in business, trade references, and personal guarantor verification.</p>
-          </div>
-        </div>
-        <div class="benefit-item">
-          <div class="benefit-icon">💰</div>
-          <div class="benefit-text">
-            <h4>Financials & Reporting</h4>
-            <p>NOI, cap rate, occupancy metrics, and rent roll reporting. Property value tracking and real-time KPI dashboards.</p>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:2rem;padding:1rem;background:rgba(255,255,255,0.1);border-radius:var(--radius);font-size:0.875rem;">
-        ✅ 14-day free trial · No credit card required · Cancel anytime
-      </div>
-    </div>
-
-    <!-- RIGHT: Form -->
-    <div class="signup-right">
-      <div style="max-width:480px;margin:0 auto;">
-
-        <!-- LOGIN PANEL -->
-        <div id="login-panel">
-          <div style="text-align:center;margin-bottom:1.75rem;">
-            <div style="font-size:2.5rem;margin-bottom:.5rem;">🏢</div>
-            <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.35rem;">Sign In to RentVerified</h2>
-            <p style="color:var(--gray-600);font-size:.9rem;">Commercial Property Management</p>
-          </div>
-          <div class="form-group" style="margin-bottom:1rem;">
-            <label style="font-weight:600;font-size:.88rem;">Email Address</label>
-            <input type="email" id="loginEmail" placeholder="you@company.com"
-              style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
-          </div>
-          <div class="form-group" style="margin-bottom:.5rem;">
-            <label style="font-weight:600;font-size:.88rem;">Password</label>
-            <div style="position:relative;">
-              <input type="password" id="loginPw" placeholder="••••••••"
-                style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
-              <span onclick="togglePw()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);cursor:pointer;font-size:.85rem;color:#94a3b8;">👁</span>
-            </div>
-          </div>
-          <div id="loginErr" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:.75rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;"></div>
-          <button onclick="doLogin()"
-            style="width:100%;padding:.75rem;background:#0F172A;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.75rem;transition:background .15s;"
-            onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='#0F172A'">
-            Sign In →
-          </button>
-          <p style="text-align:center;margin-top:1.25rem;font-size:.85rem;color:var(--gray-600);">
-            Don't have an account? <a href="#" onclick="showSignupForm()" style="color:#0F172A;font-weight:600;">Create one free →</a>
-          </p>
-        </div>
-
-        <!-- SIGNUP PANEL (hidden by default) -->
-        <div id="signup-panel" style="display:none;">
-          <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:0.4rem;">Create Your Account</h2>
-          <p style="color:var(--gray-600);margin-bottom:1rem;font-size:0.9rem;">Takes about 2 minutes. Already have an account? <a href="#" onclick="showLoginForm()" style="color:#0F172A;font-weight:600;">Sign in →</a></p>
-
-          <div id="step-indicator" style="display:flex;gap:0.5rem;margin-bottom:2rem;">
-            <div id="si-1" style="flex:1;height:4px;border-radius:2px;background:#0F172A;"></div>
-            <div id="si-2" style="flex:1;height:4px;border-radius:2px;background:var(--gray-200);"></div>
-          </div>
-
-          <!-- Form Step 1: Account -->
-          <div id="form-step-1">
-            <h3 style="font-weight:700;margin-bottom:1.5rem;font-size:1rem;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Step 1 of 2 · Account Info</h3>
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>First Name</label>
-                <input type="text" placeholder="John" />
-              </div>
-              <div class="form-group">
-                <label>Last Name</label>
-                <input type="text" placeholder="Smith" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Company Name</label>
-              <input type="text" placeholder="ABC Commercial Management" />
-            </div>
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" placeholder="john@company.com" />
-            </div>
-            <div class="form-group">
-              <label>Phone Number</label>
-              <input type="tel" placeholder="(555) 000-0000" />
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" placeholder="At least 8 characters" />
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="formNext(2)">Continue →</button>
-            <p style="text-align:center;margin-top:1rem;font-size:.875rem;color:var(--gray-500);">Already have an account? <a href="#" onclick="showLogin();return false;" style="color:#0F172A;font-weight:600;">Sign In</a></p>
-          </div>
-
-          <!-- Form Step 2: Verification -->
-          <div id="form-step-2" style="display:none;">
-            <h3 style="font-weight:700;margin-bottom:1.5rem;font-size:1rem;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Step 2 of 2 · Verify Your Plan</h3>
-
-            <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:13px 16px;margin-bottom:18px;font-size:.85rem;color:#92400e;">
-              <strong>🔒 Verification required.</strong> RentVerified verifies all commercial managers to protect tenants.
-            </div>
-
-            <div class="form-group">
-              <label>Government-Issued ID</label>
-              <p style="font-size:.8rem;color:var(--gray-600);margin-bottom:.5rem;">Driver's license or passport.</p>
-              <input type="file" accept=".pdf,.jpg,.jpeg,.png" />
-              <div id="id-file-name" style="font-size:.78rem;color:#10b981;margin-top:5px;"></div>
-            </div>
-
-            <div class="form-group">
-              <label>Choose Your Plan</label>
-              <div style="display:flex;flex-direction:column;gap:0.75rem;">
-                <div class="pay-method selected" onclick="selectPlan('commercial_starter')" style="text-align:left;display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border:2px solid #0F172A;border-radius:8px;cursor:pointer;background:#e0e7ff;">
-                  <div>
-                    <div style="font-weight:700;color:#0F172A;">Commercial Starter – $149/month</div>
-                    <div style="font-size:0.8rem;color:#334155;">Up to 5 properties · CAM calculator · Business screening</div>
-                  </div>
-                  <div id="check-starter" style="margin-left:auto;color:#0F172A;font-size:1.2rem;">✓</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="ll-certify" style="margin-right:0.5rem;" />
-                <span style="font-size:.875rem;">I agree to the Terms of Service and Privacy Policy.</span>
-              </label>
-            </div>
-
-            <div style="display:flex;gap:1rem;margin-top:1rem;">
-              <button class="btn btn-outline" onclick="formNext(1)">← Back</button>
-              <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="submitSignup()">🎉 Create Account</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- LOGIN SCREEN -->
-<div id="login-screen" style="display:none;min-height:100vh;background:var(--gray-100);">
-  <div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 68px);padding:2rem;">
-    <div style="background:white;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);width:100%;max-width:440px;padding:2.5rem;">
-      <div style="text-align:center;margin-bottom:2rem;">
-        <div style="font-size:2rem;margin-bottom:.5rem;">🏢</div>
-        <h2 style="font-weight:800;font-size:1.5rem;margin-bottom:.25rem;">Welcome Back</h2>
-        <p style="color:var(--gray-500);font-size:.9rem;">Sign in to your commercial dashboard</p>
-      </div>
-      <div id="login-error" style="display:none;background:#FEF2F2;border:1px solid #EF4444;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.875rem;color:#B91C1C;"></div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="login-email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()" />
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <div style="position:relative;">
-          <input type="password" id="login-password" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:2.5rem;" />
-          <button onclick="togglePwVis()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);padding:0;font-size:.85rem;">👁</button>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()">Sign In →</button>
-      <div style="text-align:center;margin-top:1.25rem;font-size:.875rem;color:var(--gray-500);">
-        New to RentVerified? <a href="#" onclick="showSignup();return false;" style="color:#0F172A;font-weight:600;">Create Account</a>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- DASHBOARD -->
-<div id="dashboard-screen" style="display:none;">
-  <div class="dashboard-layout">
+<div class="dashboard-layout">
 
-    <!-- SIDEBAR -->
-    <div class="dash-sidebar">
-      <div style="padding:0 1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:1rem;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:#0F172A;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.8rem;">CP</div>
-          <div>
-            <div style="color:white;font-weight:600;font-size:0.875rem;" id="sidebar-company">Commercial PM</div>
-            <div style="margin-top:3px;"><span class="plan-chip">Commercial</span></div>
-          </div>
+  <!-- SIDEBAR -->
+  <div class="dash-sidebar">
+    <div style="padding:0 1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:#1a56db;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">SP</div>
+        <div>
+          <div style="color:white;font-weight:600;font-size:0.875rem;">Sanders PM</div>
+          <div style="margin-top:3px;"><span class="plan-chip">Commercial</span></div>
         </div>
-      </div>
-
-      <div style="padding:0 0.75rem;">
-        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-600);padding:0.5rem 0.25rem;margin-bottom:0.25rem;">Manage</div>
-        <div class="dash-link active" onclick="dashTab('overview')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Overview
-        </div>
-        <div class="dash-link" onclick="dashTab('properties')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h12a1 1 0 001-1v-10"/></svg>
-          My Properties
-        </div>
-        <div class="dash-link" onclick="dashTab('tenants')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 12H9m6 8H9m6-4H9"/></svg>
-          Tenants/Lessees
-        </div>
-        <div class="dash-link" onclick="dashTab('leases')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6M9 8h6M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          Leases
-        </div>
-        <div class="dash-link" onclick="dashTab('cam')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          CAM Charges
-        </div>
-        <div class="dash-link" onclick="dashTab('financials')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Financials
-        </div>
-        <div class="dash-link" onclick="dashTab('screening')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          Screening
-        </div>
-        <div class="dash-link" onclick="dashTab('documents')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-          Documents
-        </div>
-        <div class="dash-link" onclick="dashTab('maintenance')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
-          Maintenance
-        </div>
-        <div class="dash-link" onclick="dashTab('settings')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
-          Settings
-        </div>
-      </div>
-
-      <div style="padding:0 0.75rem;margin-top:2rem;border-top:1px solid rgba(255,255,255,0.08);padding-top:1rem;">
-        <button onclick="doLogout()" style="width:100%;padding:.65rem;background:rgba(255,255,255,0.08);color:white;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;">
-          Log Out
-        </button>
       </div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="dash-main">
+    <div style="padding:0 0.5rem;">
+      <!-- Dashboard (standalone) -->
+      <div class="dash-link active" onclick="dashTab('overview')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
 
-      <!-- OVERVIEW TAB -->
-      <div id="dtab-overview" class="tab-content active">
-        <h1 style="font-size:2rem;font-weight:800;margin-bottom:2rem;color:#0F172A;">Dashboard Overview</h1>
-
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Total Properties</div>
-            <div class="kpi-value" id="kpi-properties">0</div>
-            <div class="kpi-subtext">managed by your company</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Total Sqft</div>
-            <div class="kpi-value" id="kpi-sqft">0</div>
-            <div class="kpi-subtext">across all buildings</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Occupied Units</div>
-            <div class="kpi-value" id="kpi-occupied">0</div>
-            <div class="kpi-subtext">tenants leased</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Occupancy Rate</div>
-            <div class="kpi-value" id="kpi-occupancy">0%</div>
-            <div class="kpi-subtext">of total sqft rented</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Pending Leases</div>
-            <div class="kpi-value" id="kpi-pending">0</div>
-            <div class="kpi-subtext">awaiting signature</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Monthly CAM Budget</div>
-            <div class="kpi-value" id="kpi-cam">$0</div>
-            <div class="kpi-subtext">operational expenses</div>
-          </div>
+      <!-- PROPERTIES -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Properties</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
-
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-top:2rem;">
-          <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1rem;">Quick Start</h2>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
-            <button onclick="dashTab('properties');openAddPropertyForm();" class="btn btn-primary" style="justify-content:center;">+ Add Property</button>
-            <button onclick="dashTab('cam');" class="btn btn-outline" style="justify-content:center;">Set Up CAM Charges</button>
-            <button onclick="dashTab('leases');" class="btn btn-outline" style="justify-content:center;">Create Lease</button>
-            <button onclick="dashTab('screening');" class="btn btn-outline" style="justify-content:center;">Screen Tenant</button>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('properties')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Properties
+          </div>
+          <a href="listings.html" class="dash-link" style="color:#9ca3af;text-decoration:none;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            Listings
+          </a>
+          <div class="dash-link" onclick="dashTab('deals')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            Deal Pipeline
           </div>
         </div>
       </div>
 
-      <!-- PROPERTIES TAB -->
-      <div id="dtab-properties" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-          <h1 style="font-size:2rem;font-weight:800;color:#0F172A;">My Properties</h1>
-          <button onclick="openAddPropertyForm()" class="btn btn-primary">+ Add Property</button>
+      <!-- TENANTS -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Tenants</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
-
-        <div class="property-grid" id="properties-list-container"></div>
-
-        <!-- Add/Edit Property Modal -->
-        <div id="property-modal" class="modal">
-          <div class="modal-content" style="position:relative;">
-            <button class="modal-close" onclick="closePropertyModal()">×</button>
-            <div class="modal-header">Add Commercial Property</div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Property Name</label>
-                <input type="text" id="prop-name" placeholder="Main Office Building" />
-              </div>
-              <div class="form-group">
-                <label>Property Type</label>
-                <select id="prop-type">
-                  <option value="">Select type...</option>
-                  <option value="office">Office</option>
-                  <option value="retail">Retail</option>
-                  <option value="industrial">Industrial</option>
-                  <option value="mixeduse">Mixed-Use</option>
-                  <option value="medical">Medical Office</option>
-                  <option value="restaurant">Restaurant</option>
-                  <option value="storage">Self-Storage</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Address</label>
-                <input type="text" id="prop-address" placeholder="123 Main St" />
-              </div>
-              <div class="form-group">
-                <label>City</label>
-                <input type="text" id="prop-city" placeholder="Salt Lake City" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>State</label>
-                <input type="text" id="prop-state" placeholder="UT" />
-              </div>
-              <div class="form-group">
-                <label>ZIP Code</label>
-                <input type="text" id="prop-zip" placeholder="84101" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Total Sqft</label>
-                <input type="number" id="prop-sqft" placeholder="25000" />
-              </div>
-              <div class="form-group">
-                <label>Available Sqft</label>
-                <input type="number" id="prop-avail-sqft" placeholder="5000" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Number of Units/Suites</label>
-                <input type="number" id="prop-units" placeholder="8" />
-              </div>
-              <div class="form-group">
-                <label>Year Built</label>
-                <input type="number" id="prop-year" placeholder="2015" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Zoning Classification</label>
-                <input type="text" id="prop-zoning" placeholder="C-1, C-2, I-1, etc." />
-              </div>
-              <div class="form-group">
-                <label>Parking Spaces</label>
-                <input type="number" id="prop-parking" placeholder="40" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>HVAC Type</label>
-                <input type="text" id="prop-hvac" placeholder="CAV, VAV, Rooftop, etc." />
-              </div>
-              <div class="form-group">
-                <label>Asking Rent ($/sqft/year)</label>
-                <input type="number" id="prop-rent" placeholder="15.50" step="0.01" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Lease Type</label>
-                <select id="prop-lease-type">
-                  <option value="">Select type...</option>
-                  <option value="nnn">NNN (Triple Net)</option>
-                  <option value="nn">NN (Double Net)</option>
-                  <option value="n">N (Single Net)</option>
-                  <option value="gross">Gross Lease</option>
-                  <option value="mod">MOD (Modified Gross)</option>
-                  <option value="pct">PCT (Percentage)</option>
-                  <option value="fs">FS (Full Service)</option>
-                </select>
-                <div class="lease-type-hint" id="lease-hint-nnn">Tenant pays operating expenses. Use CAM calculator for charges.</div>
-                <div class="lease-type-hint" id="lease-hint-nn">Tenant pays taxes and insurance. Use CAM calculator for charges.</div>
-              </div>
-              <div class="form-group">
-                <label>Fiber/Internet?</label>
-                <select id="prop-fiber">
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>ADA Compliant?</label>
-                <select id="prop-ada">
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Loading Docks?</label>
-                <select id="prop-docks">
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Description</label>
-              <textarea id="prop-description" placeholder="Property details, features, etc."></textarea>
-            </div>
-
-            <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-              <button class="btn btn-outline" onclick="closePropertyModal()">Cancel</button>
-              <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveProperty()">Save Property</button>
-            </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('tenants')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            Tenants
+          </div>
+          <div class="dash-link" onclick="dashTab('leases')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Leases
+          </div>
+          <div class="dash-link" onclick="dashTab('screening')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Screening
           </div>
         </div>
       </div>
 
-      <!-- TENANTS TAB -->
-      <div id="dtab-tenants" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-          <h1 style="font-size:2rem;font-weight:800;color:#0F172A;">Tenants & Lessees</h1>
-          <button onclick="openAddTenantForm()" class="btn btn-primary">+ Add Tenant</button>
+      <!-- ACCOUNTING -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Accounting</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Business Name</th>
-                <th>Property</th>
-                <th>Suite/Unit</th>
-                <th>Sqft</th>
-                <th>Rent/Year</th>
-                <th>Lease End</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="tenants-tbody">
-              <tr style="text-align:center;padding:2rem;">
-                <td colspan="7" style="padding:2rem;color:var(--gray-500);">No tenants yet. <a href="#" onclick="openAddTenantForm();return false;" style="color:#0F172A;font-weight:600;">Add one →</a></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Add Tenant Modal -->
-        <div id="tenant-modal" class="modal">
-          <div class="modal-content" style="position:relative;">
-            <button class="modal-close" onclick="closeTenantModal()">×</button>
-            <div class="modal-header">Add Tenant/Lessee</div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Business Name</label>
-                <input type="text" id="tenant-name" placeholder="ABC Corp" />
-              </div>
-              <div class="form-group">
-                <label>Entity Type</label>
-                <select id="tenant-entity">
-                  <option value="">Select...</option>
-                  <option value="llc">LLC</option>
-                  <option value="corp">Corporation</option>
-                  <option value="sole">Sole Proprietor</option>
-                  <option value="part">Partnership</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Contact Name</label>
-                <input type="text" id="tenant-contact" placeholder="John Smith" />
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="tenant-email" placeholder="john@company.com" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Phone</label>
-                <input type="tel" id="tenant-phone" placeholder="(555) 000-0000" />
-              </div>
-              <div class="form-group">
-                <label>Property</label>
-                <select id="tenant-property"></select>
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Suite/Unit</label>
-                <input type="text" id="tenant-suite" placeholder="101" />
-              </div>
-              <div class="form-group">
-                <label>Leased Sqft</label>
-                <input type="number" id="tenant-sqft" placeholder="5000" />
-              </div>
-            </div>
-
-            <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-              <button class="btn btn-outline" onclick="closeTenantModal()">Cancel</button>
-              <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveTenant()">Save Tenant</button>
-            </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('payments')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            Payments <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
+          </div>
+          <div class="dash-link" onclick="dashTab('funding')" style="color:#fbbf24;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Funding
+          </div>
+          <div class="dash-link" onclick="dashTab('reports')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Financial Reports <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
           </div>
         </div>
       </div>
 
-      <!-- LEASES TAB -->
-      <div id="dtab-leases" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-          <h1 style="font-size:2rem;font-weight:800;color:#0F172A;">Commercial Leases</h1>
-          <button onclick="openAddLeaseForm()" class="btn btn-primary">+ Create Lease</button>
+      <!-- OPERATIONS -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Operations</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Tenant</th>
-                <th>Property</th>
-                <th>Lease Type</th>
-                <th>Base Rent (Annual)</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="leases-tbody">
-              <tr style="text-align:center;padding:2rem;">
-                <td colspan="7" style="padding:2rem;color:var(--gray-500);">No leases yet. <a href="#" onclick="openAddLeaseForm();return false;" style="color:#0F172A;font-weight:600;">Create one →</a></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Add Lease Modal -->
-        <div id="lease-modal" class="modal">
-          <div class="modal-content" style="position:relative;max-width:700px;">
-            <button class="modal-close" onclick="closeLeaseModal()">×</button>
-            <div class="modal-header">Create Commercial Lease</div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Property</label>
-                <select id="lease-property"></select>
-              </div>
-              <div class="form-group">
-                <label>Tenant/Lessee</label>
-                <select id="lease-tenant"></select>
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Lease Type</label>
-                <select id="lease-type">
-                  <option value="">Select...</option>
-                  <option value="nnn">NNN (Triple Net)</option>
-                  <option value="nn">NN (Double Net)</option>
-                  <option value="n">N (Single Net)</option>
-                  <option value="gross">Gross Lease</option>
-                  <option value="mod">MOD (Modified Gross)</option>
-                  <option value="pct">PCT (Percentage)</option>
-                  <option value="fs">FS (Full Service)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Base Rent ($/sqft/year)</label>
-                <input type="number" id="lease-rent" placeholder="15.50" step="0.01" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Annual Rent Escalation (%)</label>
-                <input type="number" id="lease-escalation" placeholder="3" step="0.1" />
-              </div>
-              <div class="form-group">
-                <label>Free Rent Period (months)</label>
-                <input type="number" id="lease-free-months" placeholder="0" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Lease Start Date</label>
-                <input type="date" id="lease-start" />
-              </div>
-              <div class="form-group">
-                <label>Lease End Date</label>
-                <input type="date" id="lease-end" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Tenant Improvement Allowance ($)</label>
-                <input type="number" id="lease-ti" placeholder="0" />
-              </div>
-              <div class="form-group">
-                <label>Personal Guarantor?</label>
-                <select id="lease-guarantor">
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Notes</label>
-              <textarea id="lease-notes" placeholder="Special terms, renewal options, etc."></textarea>
-            </div>
-
-            <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-              <button class="btn btn-outline" onclick="closeLeaseModal()">Cancel</button>
-              <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveLease()">Save Lease</button>
-            </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('documents')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
+            Documents
+          </div>
+          <div class="dash-link" onclick="dashTab('maintenance')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+            Maintenance <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
+          </div>
+          <div class="dash-link" onclick="dashTab('compliance')" style="opacity:0.5;cursor:default;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Compliance <span style="font-size:0.65rem;color:#64748b;margin-left:4px;">Soon</span>
           </div>
         </div>
       </div>
 
-      <!-- CAM CHARGES TAB -->
-      <div id="dtab-cam" class="tab-content">
-        <h1 style="font-size:2rem;font-weight:800;margin-bottom:2rem;color:#0F172A;">CAM Charge Calculator</h1>
-
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-bottom:2rem;">
-          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Annual Operating Expenses</h2>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Select Property</label>
-              <select id="cam-property" onchange="loadPropertyForCAM()">
-                <option value="">-- Select property --</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Total Building Sqft</label>
-              <input type="number" id="cam-total-sqft" readonly style="background:#f9fafb;" />
-            </div>
-          </div>
-
-          <div style="border-top:1px solid #e5e7eb;padding-top:1rem;margin-top:1rem;">
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Property Taxes ($)</label>
-                <input type="number" id="cam-taxes" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-              <div class="form-group">
-                <label>Building Insurance ($)</label>
-                <input type="number" id="cam-insurance" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Common Area Maintenance ($)</label>
-                <input type="number" id="cam-maintenance" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-              <div class="form-group">
-                <label>Property Management Fee ($)</label>
-                <input type="number" id="cam-pm-fee" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Utilities - Common Areas ($)</label>
-                <input type="number" id="cam-utilities" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-              <div class="form-group">
-                <label>Repairs & Maintenance ($)</label>
-                <input type="number" id="cam-repairs" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Security ($)</label>
-                <input type="number" id="cam-security" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-              <div class="form-group">
-                <label>Other ($)</label>
-                <input type="number" id="cam-other" placeholder="0" onchange="calcCAMTotal()" />
-              </div>
-            </div>
-
-            <div style="background:#f0f9ff;border:1.5px solid #3b82f6;border-radius:10px;padding:1.25rem;margin-top:1rem;">
-              <div style="font-size:0.9rem;color:#0369a1;margin-bottom:0.5rem;font-weight:600;">Total Annual CAM Budget</div>
-              <div style="font-size:2.5rem;font-weight:800;color:#0F172A;">$<span id="cam-total">0</span></div>
-              <div style="font-size:0.85rem;color:#0369a1;margin-top:0.5rem;">Per tenant calculations below</div>
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="calcCAMPerTenant()" style="margin-top:1.5rem;">Calculate Per-Tenant CAM</button>
+      <!-- SERVICES -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Services</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
-
-        <!-- CAM Per-Tenant Results -->
-        <div id="cam-results" style="display:none;">
-          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Tenant CAM Obligations</h2>
-          <div class="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>Tenant Name</th>
-                  <th>Leased Sqft</th>
-                  <th>Pro-Rata Share %</th>
-                  <th>Annual CAM</th>
-                  <th>Monthly CAM</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="cam-tenants-tbody"></tbody>
-            </table>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="RVServiceConnect.open()" style="cursor:pointer;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Service Connect
           </div>
-
-          <div style="display:flex;gap:1rem;margin-top:2rem;">
-            <button class="btn btn-primary" onclick="downloadCAMCSV()">📥 Download CSV</button>
-            <button class="btn btn-outline" onclick="printCAMInvoice()">🖨 Print Invoices</button>
-          </div>
+          <a href="loan-connect.html" class="dash-link" style="color:#9ca3af;text-decoration:none;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Loan Connect
+          </a>
+          <a href="messages.html" class="dash-link" style="color:#9ca3af;text-decoration:none;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            Messages
+          </a>
         </div>
       </div>
 
-      <!-- FINANCIALS TAB -->
-      <div id="dtab-financials" class="tab-content">
-        <h1 style="font-size:2rem;font-weight:800;margin-bottom:2rem;color:#0F172A;">Financial Dashboard</h1>
-
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Gross Potential Rent</div>
-            <div class="kpi-value" id="fin-gpr">$0</div>
-            <div class="kpi-subtext">annual</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Effective Gross Income</div>
-            <div class="kpi-value" id="fin-egi">$0</div>
-            <div class="kpi-subtext">rent + CAM recovery</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Operating Expenses</div>
-            <div class="kpi-value" id="fin-opex">$0</div>
-            <div class="kpi-subtext">annual CAM</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Net Operating Income</div>
-            <div class="kpi-value" id="fin-noi">$0</div>
-            <div class="kpi-subtext">NOI = EGI - OpEx</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Occupancy Rate</div>
-            <div class="kpi-value" id="fin-occupancy">0%</div>
-            <div class="kpi-subtext">occupied sqft</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Cap Rate</div>
-            <div class="kpi-value" id="fin-caprate">0%</div>
-            <div class="kpi-subtext">NOI / property value</div>
-          </div>
+      <!-- SETTINGS -->
+      <div class="sidebar-group">
+        <div class="sidebar-group-label" onclick="toggleSidebarGroup(this)">
+          <span>Settings</span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
-
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-top:2rem;margin-bottom:2rem;">
-          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;">Property Valuation</h2>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Estimated Property Value ($)</label>
-              <input type="number" id="fin-property-value" placeholder="5000000" onchange="calcCapRate()" />
-            </div>
-            <div class="form-group">
-              <label>Price Per Sqft</label>
-              <input type="number" id="fin-price-sqft" readonly style="background:#f9fafb;" />
-            </div>
+        <div class="sidebar-group-items">
+          <div class="dash-link" onclick="dashTab('ai')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            AI Settings
           </div>
-          <button class="btn btn-primary" onclick="savePropertyValue()">Save Valuation</button>
-        </div>
-
-        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;">Rent Roll</h2>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Tenant</th>
-                <th>Sqft</th>
-                <th>Lease Type</th>
-                <th>Annual Rent</th>
-                <th>Monthly Rent</th>
-                <th>Lease End</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="fin-rentroll"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- SCREENING TAB -->
-      <div id="dtab-screening" class="tab-content">
-        <h1 style="font-size:2rem;font-weight:800;margin-bottom:2rem;color:#0F172A;">Business Entity Screening</h1>
-
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-bottom:2rem;">
-          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Tenant Screening Form</h2>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Business Name</label>
-              <input type="text" id="screen-name" placeholder="ABC Corporation" />
-            </div>
-            <div class="form-group">
-              <label>Entity Type</label>
-              <select id="screen-entity">
-                <option value="">Select...</option>
-                <option value="llc">LLC</option>
-                <option value="corp">Corporation</option>
-                <option value="sole">Sole Proprietor</option>
-                <option value="part">Partnership</option>
-              </select>
-            </div>
+          <div class="dash-link" onclick="dashTab('mgmt-profile')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+            Management Profile
           </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>State of Formation</label>
-              <input type="text" id="screen-state" placeholder="Utah" />
-            </div>
-            <div class="form-group">
-              <label>Years in Business</label>
-              <input type="number" id="screen-years" placeholder="5" />
-            </div>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Annual Revenue (self-reported)</label>
-              <input type="number" id="screen-revenue" placeholder="500000" />
-            </div>
-            <div class="form-group">
-              <label>Number of Employees</label>
-              <input type="number" id="screen-employees" placeholder="10" />
-            </div>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Business Credit Score (self-reported)</label>
-              <input type="number" id="screen-credit" placeholder="650" />
-            </div>
-            <div class="form-group">
-              <label>Bank Reference (name + years)</label>
-              <input type="text" id="screen-bank" placeholder="Wells Fargo, 3 years" />
-            </div>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Trade References (comma-separated)</label>
-              <input type="text" id="screen-trades" placeholder="Acme Supply, XYZ Services" />
-            </div>
-            <div class="form-group">
-              <label>Personal Guarantor?</label>
-              <select id="screen-guarantor">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>D&B Number (optional)</label>
-              <input type="text" id="screen-dbn" placeholder="XX-XXX-XXXX" />
-            </div>
-            <div class="form-group">
-              <label>Annual Rent Required ($)</label>
-              <input type="number" id="screen-rent" placeholder="50000" />
-            </div>
-          </div>
-
-          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1.5rem;" onclick="submitScreening()">Score Tenant</button>
-        </div>
-
-        <!-- Screening Result -->
-        <div id="screening-result" style="display:none;">
-          <div class="score-result">
-            <div style="display:flex;align-items:center;gap:2rem;">
-              <div>
-                <div class="score-circle" id="score-circle">75</div>
-              </div>
-              <div>
-                <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.5rem;color:#0F172A;" id="score-rec">Recommend Review</h3>
-                <p style="color:var(--gray-600);margin-bottom:1rem;" id="score-detail">This business meets some qualifying criteria.</p>
-                <div style="display:flex;gap:1rem;">
-                  <button class="btn btn-primary" onclick="approveScreening()">✓ Approve</button>
-                  <button class="btn btn-outline" onclick="declineScreening()">✗ Decline</button>
-                </div>
-              </div>
-            </div>
-
-            <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid #e5e7eb;">
-              <h4 style="font-weight:700;margin-bottom:1rem;">Scoring Breakdown</h4>
-              <div id="score-breakdown"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Partner Card -->
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-top:2rem;border-left:4px solid #f59e0b;">
-          <h3 style="font-weight:700;margin-bottom:0.5rem;">🤝 Verified Business Screening</h3>
-          <p style="color:var(--gray-600);font-size:0.9rem;margin-bottom:1rem;">For verified credit reports and D&B lookups, we recommend:</p>
-          <div style="display:flex;flex-direction:column;gap:0.75rem;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div>
-                <strong>First Advantage</strong>
-                <div style="font-size:0.8rem;color:var(--gray-500);">Background & business verification</div>
-              </div>
-              <div style="font-size:0.8rem;color:#059669;font-weight:600;">$15–25/report</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div>
-                <strong>Experian Business</strong>
-                <div style="font-size:0.8rem;color:var(--gray-500);">Business credit reports</div>
-              </div>
-              <div style="font-size:0.8rem;color:#059669;font-weight:600;">$20–30/report</div>
-            </div>
+          <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="window.location.href='landlord-signup.html';">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Sign Out
           </div>
         </div>
       </div>
-
-      <!-- DOCUMENTS TAB -->
-      <div id="dtab-documents" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-          <h1 style="font-size:2rem;font-weight:800;color:#0F172A;">Documents</h1>
-          <button onclick="alert('Document upload coming soon')" class="btn btn-primary">+ Upload Document</button>
-        </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Document Name</th>
-                <th>Type</th>
-                <th>Uploaded</th>
-                <th>Property</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="documents-tbody">
-              <tr style="text-align:center;">
-                <td colspan="5" style="padding:2rem;color:var(--gray-500);">No documents yet.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- MAINTENANCE TAB -->
-      <div id="dtab-maintenance" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-          <h1 style="font-size:2rem;font-weight:800;color:#0F172A;">Maintenance Requests</h1>
-          <button onclick="openAddMaintenanceForm()" class="btn btn-primary">+ New Request</button>
-        </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Property</th>
-                <th>Issue</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="maintenance-tbody">
-              <tr style="text-align:center;">
-                <td colspan="6" style="padding:2rem;color:var(--gray-500);">No requests yet.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Add Maintenance Modal -->
-        <div id="maintenance-modal" class="modal">
-          <div class="modal-content" style="position:relative;">
-            <button class="modal-close" onclick="closeMaintenanceModal()">×</button>
-            <div class="modal-header">New Maintenance Request</div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Property</label>
-                <select id="maint-property"></select>
-              </div>
-              <div class="form-group">
-                <label>Priority</label>
-                <select id="maint-priority">
-                  <option value="low">Low</option>
-                  <option value="medium" selected>Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Issue Description</label>
-              <textarea id="maint-issue" placeholder="Describe the maintenance issue..."></textarea>
-            </div>
-
-            <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-              <button class="btn btn-outline" onclick="closeMaintenanceModal()">Cancel</button>
-              <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveMaintenance()">Submit Request</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SETTINGS TAB -->
-      <div id="dtab-settings" class="tab-content">
-        <h1 style="font-size:2rem;font-weight:800;margin-bottom:2rem;color:#0F172A;">Settings</h1>
-
-        <!-- Company Profile -->
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-bottom:2rem;">
-          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Company Profile</h2>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Company Name</label>
-              <input type="text" id="settings-company" placeholder="ABC Commercial Management" />
-            </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" id="settings-email" readonly style="background:#f9fafb;" />
-            </div>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Phone</label>
-              <input type="tel" id="settings-phone" placeholder="(555) 000-0000" />
-            </div>
-            <div class="form-group">
-              <label>City/State</label>
-              <input type="text" id="settings-location" placeholder="Salt Lake City, UT" />
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="saveSettings()">Save Profile</button>
-        </div>
-
-        <!-- AI Settings -->
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-bottom:2rem;">
-          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Management Services</h2>
-
-          <div class="mgmt-toggle-row">
-            <div class="mgmt-toggle-info">
-              <h4>Commercial Loans</h4>
-              <p>Enable leads for commercial real estate financing</p>
-              <div class="mgmt-commission">Commission: $500–2,000 per closed loan</div>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="setting-loans" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div class="mgmt-toggle-row">
-            <div class="mgmt-toggle-info">
-              <h4>SBA Loans</h4>
-              <p>Enable leads for Small Business Administration loans</p>
-              <div class="mgmt-commission">Commission: $300–1,000 per closed loan</div>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="setting-sba" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div class="mgmt-toggle-row">
-            <div class="mgmt-toggle-info">
-              <h4>Equipment Financing</h4>
-              <p>Enable leads for commercial equipment loans</p>
-              <div class="mgmt-commission">Commission: $200–800 per closed deal</div>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="setting-equipment" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div class="mgmt-toggle-row">
-            <div class="mgmt-toggle-info">
-              <h4>Commercial Mortgage</h4>
-              <p>Enable leads for commercial property mortgages</p>
-              <div class="mgmt-commission">Commission: $1,000–3,000 per closed mortgage</div>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="setting-mortgage" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <button class="btn btn-primary" onclick="saveSettings()">Save Preferences</button>
-        </div>
-
-        <!-- Account -->
-        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Account</h2>
-          <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.85rem;color:#92400e;">
-            📋 Plan: <strong>Commercial Starter – $149/month</strong><br/>
-            ✓ Up to 5 properties · CAM calculator · Business screening
-          </div>
-          <button class="btn btn-outline" onclick="doLogout()">Log Out</button>
-        </div>
-      </div>
-
     </div>
   </div>
-</div>
+
+  <!-- MAIN CONTENT -->
+  <div class="dash-main">
+
+    <!-- ═══ OVERVIEW TAB ═══ -->
+    <div id="dtab-overview" class="tab-content active">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <h1>Commercial Dashboard</h1>
+            <p>Sanders Property Management &middot; <span class="plan-chip">Commercial</span></p>
+          </div>
+          <button class="btn btn-primary" onclick="dashTab('properties')">+ Add Property</button>
+        </div>
+      </div>
+
+      <!-- Getting Started Checklist -->
+      <div style="background:linear-gradient(135deg,#1e3a5f 0%,#1a56db 100%);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;" id="comm-getting-started">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="font-size:1.05rem;font-weight:700;margin:0;">Getting Started</h3>
+          <button onclick="document.getElementById('comm-getting-started').style.display='none'" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8rem;">Dismiss</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+          <label style="display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.12);border-radius:8px;padding:.65rem .85rem;font-size:.88rem;cursor:default;">
+            <span style="font-size:1.1rem;">&#x2705;</span> Create workspace <span style="margin-left:auto;font-size:.72rem;opacity:.7;">Done</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.12);border-radius:8px;padding:.65rem .85rem;font-size:.88rem;cursor:pointer;" onclick="dashTab('properties')">
+            <span style="font-size:1.1rem;">&#x1F4DD;</span> Add your first property <span style="margin-left:auto;font-size:.72rem;opacity:.7;">&#8594;</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.12);border-radius:8px;padding:.65rem .85rem;font-size:.88rem;cursor:pointer;" onclick="dashTab('deals')">
+            <span style="font-size:1.1rem;">&#x1F91D;</span> Create a deal in the pipeline <span style="margin-left:auto;font-size:.72rem;opacity:.7;">&#8594;</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.12);border-radius:8px;padding:.65rem .85rem;font-size:.88rem;cursor:pointer;" onclick="dashTab('nnn')">
+            <span style="font-size:1.1rem;">&#x1F4CA;</span> Set up NNN/CAM tracking <span style="margin-left:auto;font-size:.72rem;opacity:.7;">&#8594;</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Properties</div>
+          <div class="stat-value">12</div>
+          <div class="stat-sub">+2 this quarter</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Leases</div>
+          <div class="stat-value">38</div>
+          <div class="stat-sub">3 expiring soon</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Monthly Revenue</div>
+          <div class="stat-value">$84,500</div>
+          <div class="stat-sub">+5.2% vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Occupancy Rate</div>
+          <div class="stat-value">92%</div>
+          <div class="stat-sub">3 vacant units</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Quick Actions</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+            <button class="btn btn-outline btn-sm" onclick="dashTab('tenants')">View Tenants</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('leases')">Manage Leases</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('screening')">Screen Applicant</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('funding')">Tenant Funding</button>
+            <button class="btn btn-outline btn-sm" onclick="dashTab('mgmt-profile')">Management Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROPERTIES TAB ═══ -->
+    <div id="dtab-properties" class="tab-content">
+      <div class="page-header"><h1>Properties</h1><p>Manage your commercial properties and units.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#127970;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Property Management</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Add and manage your commercial properties. Track units, square footage, and tenant assignments.</p>
+          <button class="btn btn-primary" style="margin-top:1.25rem;">+ Add Commercial Property</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TENANTS TAB ═══ -->
+    <div id="dtab-tenants" class="tab-content">
+      <div class="page-header"><h1>Tenants</h1><p>View and manage your commercial tenants.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128101;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Tenant Directory</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Manage business tenant accounts, contact info, and lease assignments.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LEASES TAB ═══ -->
+    <div id="dtab-leases" class="tab-content">
+      <div class="page-header"><h1>Leases</h1><p>Track commercial lease agreements, renewals, and expirations.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128196;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Lease Management</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Create, manage, and track commercial leases including NNN, gross, and modified gross terms.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREENING TAB ═══ -->
+    <div id="dtab-screening" class="tab-content">
+      <div class="page-header"><h1>Tenant Screening</h1><p>Screen potential commercial tenants with business credit and background checks.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128737;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Commercial Screening</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Run business credit reports, verify financials, and assess tenant viability for your commercial spaces.</p>
+          <button class="btn btn-primary" style="margin-top:1.25rem;">Start New Screening</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FUNDING TAB (C5) ═══ -->
+    <div id="dtab-funding" class="tab-content">
+      <div class="page-header"><h1>Tenant Funding</h1><p>Connect your commercial tenants with buildout and operations funding.</p></div>
+
+      <!-- Summary card -->
+      <div class="funding-summary">
+        <h3>&#128176; Support Your Commercial Tenants</h3>
+        <p>Connect your tenants with funding for their buildout and operations. Funded tenants complete buildouts, sign leases, and pay rent consistently.</p>
+      </div>
+
+      <!-- Partner cards -->
+      <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:0.25rem;">Funding Partners</h3>
+      <p style="color:#64748b;font-size:0.85rem;margin-bottom:0.5rem;">Pre-vetted lending partners for your commercial tenants.</p>
+
+      <div class="partner-grid">
+        <!-- GoKapital -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#1e40af;">GK</div>
+            <div>
+              <h4>GoKapital</h4>
+              <p>Business Lending Specialists</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Business Loans</span>
+            <span>Equipment Leasing</span>
+            <span>Commercial Mortgages</span>
+            <span>SBA Loans</span>
+            <span>Hard Money</span>
+          </div>
+          <div class="partner-details">
+            <strong>$10K &ndash; $5M</strong> &middot; 6 mo &ndash; 25 yr terms<br>
+            1+ year in business &middot; $200K+ annual revenue
+          </div>
+          <a href="funding.html" class="btn-apply" target="_blank">Apply Now</a> <!-- // AFFILIATE_LINK: gokapital -->
+        </div>
+
+        <!-- Clarify Capital -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#059669;">CC</div>
+            <div>
+              <h4>Clarify Capital</h4>
+              <p>Fast &amp; Flexible Financing</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Working Capital</span>
+            <span>Term Loans</span>
+            <span>Lines of Credit</span>
+          </div>
+          <div class="partner-details">
+            <strong>$5K &ndash; $500K</strong> &middot; 24-hour approval<br>
+            6+ months in business
+          </div>
+          <a href="funding.html" class="btn-apply" target="_blank">Apply Now</a> <!-- // AFFILIATE_LINK: clarify -->
+        </div>
+
+        <!-- SBA Loan Referrals -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#7c3aed;">SBA</div>
+            <div>
+              <h4>SBA Loan Referrals</h4>
+              <p>Government-Backed, Lowest Rates</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>SBA 7(a)</span>
+            <span>SBA 504</span>
+            <span>Microloans</span>
+          </div>
+          <div class="partner-details">
+            <strong>$25K &ndash; $5M</strong> &middot; Prime + 2.25%&ndash;4.75%<br>
+            7 &ndash; 25 year terms
+          </div>
+          <a href="funding.html" class="btn-apply" target="_blank">Apply Now</a> <!-- // AFFILIATE_LINK: sba -->
+        </div>
+
+        <!-- National Funding -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#dc2626;">NF</div>
+            <div>
+              <h4>National Funding</h4>
+              <p>Fast Working Capital</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Working Capital</span>
+            <span>Equipment Financing</span>
+            <span>Same-Day Possible</span>
+          </div>
+          <div class="partner-details">
+            <strong>$5K &ndash; $500K</strong> &middot; Same-day funding possible<br>
+            Fast approval process
+          </div>
+          <a href="funding.html" class="btn-apply" target="_blank">Apply Now</a> <!-- // AFFILIATE_LINK: nationalfunding -->
+        </div>
+
+        <!-- MCA -->
+        <div class="partner-card">
+          <div class="partner-card-top">
+            <div class="partner-logo" style="background:#d97706;">MCA</div>
+            <div>
+              <h4>Merchant Cash Advance</h4>
+              <p>Kapitus / Credibly</p>
+            </div>
+          </div>
+          <div class="partner-tags">
+            <span>Revenue-Based</span>
+            <span>Retail</span>
+            <span>Restaurants</span>
+            <span>Fast Approval</span>
+          </div>
+          <div class="partner-details">
+            <strong>$5K &ndash; $400K</strong> &middot; Advance on future sales<br>
+            Daily % repayment &middot; Best for retail &amp; restaurants
+          </div>
+          <a href="funding.html" class="btn-apply" target="_blank">Apply Now</a> <!-- // AFFILIATE_LINK: mca -->
+        </div>
+      </div>
+
+      <!-- Funding Applications Table -->
+      <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-top:2rem;margin-bottom:0.75rem;">Tenant Funding Applications</h3>
+      <div id="funding-apps-container">
+        <table class="apps-table">
+          <thead>
+            <tr>
+              <th>Business Name</th>
+              <th>Amount</th>
+              <th>Purpose</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="funding-apps-body">
+            <tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem;">No applications yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ DOCUMENTS TAB ═══ -->
+    <div id="dtab-documents" class="tab-content">
+      <div class="page-header"><h1>Documents</h1><p>Manage commercial lease documents, certificates, and tenant files.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#128193;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">Document Center</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Upload and manage lease agreements, COIs, buildout plans, and tenant correspondence.</p>
+          <button class="btn btn-primary" style="margin-top:1.25rem;">+ Upload Document</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DEALS TAB ═══ -->
+    <div id="dtab-deals" class="tab-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:2px;">Deal Pipeline</h2>
+          <p style="color:#64748b;font-size:0.88rem;">Track commercial deals from prospect to close</p>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <a href="doc-generator.html?template=cre-invoice" style="background:#1a56db;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;">📄 Invoice</a>
+          <a href="doc-generator.html?template=cre-loi" style="background:#1a56db;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;">✉️ LOI</a>
+          <button class="btn btn-primary" onclick="openDealModal()">+ New Deal</button>
+        </div>
+      </div>
+
+      <div class="deal-summary" id="deal-summary"></div>
+
+      <div class="deal-toolbar">
+        <input type="text" class="deal-search" id="deal-search" placeholder="Search deals..." oninput="renderDeals()" />
+        <select class="deal-filter" id="deal-type-filter" onchange="renderDeals()">
+          <option value="">All Types</option>
+          <option value="lease">Lease</option>
+          <option value="sale">Sale</option>
+          <option value="purchase">Purchase</option>
+          <option value="sublease">Sublease</option>
+          <option value="renewal">Renewal</option>
+          <option value="development">Development</option>
+        </select>
+        <div class="deal-view-toggle">
+          <button class="deal-view-btn active" onclick="setDealView('kanban',this)">Pipeline</button>
+          <button class="deal-view-btn" onclick="setDealView('list',this)">List</button>
+        </div>
+      </div>
+
+      <div id="deal-kanban"></div>
+      <div id="deal-list" style="display:none;"></div>
+    </div>
+
+    <!-- ═══ AI SETTINGS TAB ═══ -->
+    <div id="dtab-ai" class="tab-content">
+      <div class="page-header"><h1>AI Settings</h1><p>Configure your AI assistant for commercial property inquiries.</p></div>
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:3rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">&#129302;</div>
+          <h3 style="font-weight:700;margin-bottom:0.5rem;">AI Configuration</h3>
+          <p style="color:#64748b;font-size:0.9rem;max-width:400px;margin:0 auto;">Customize how your AI assistant handles commercial tenant inquiries, showing information, and lead qualification.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MANAGEMENT PROFILE TAB (A6) ═══ -->
+    <div id="dtab-mgmt-profile" class="tab-content">
+      <div class="page-header"><h1>Management Profile</h1><p>Control what payment methods and financial products your commercial tenants can access.</p></div>
+
+      <!-- PAYMENT METHODS SECTION -->
+      <div class="mgmt-section">
+        <div class="mgmt-section-title">Payment Methods You Accept</div>
+
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Cash App</div>
+            <div class="toggle-desc">Instant, zero-fee payments via Cash App</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-cashApp" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Zelle</div>
+            <div class="toggle-desc">Instant bank-to-bank transfers, zero fees</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-zelle" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Venmo</div>
+            <div class="toggle-desc">Popular mobile payment app</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-venmo" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Bank Transfer (ACH)</div>
+            <div class="toggle-desc">Direct bank transfer, 2-3 business days, zero fees</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-ach" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Credit / Debit Card</div>
+            <div class="toggle-desc">Visa, Mastercard, Amex (2.9% + $0.30 processing fee)</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-card" checked /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Check / Money Order</div>
+            <div class="toggle-desc">Traditional paper payment methods</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-check" /><span class="slider"></span></label>
+        </div>
+        <div class="mgmt-toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">PayPal</div>
+            <div class="toggle-desc">Online payments via PayPal account</div>
+          </div>
+          <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="pm-paypal" /><span class="slider"></span></label>
+        </div>
+
+        <!-- Card Fee Policy -->
+        <div style="margin-top:1rem;padding:1rem;background:white;border:1px solid #e2e8f0;border-radius:10px;">
+          <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.75rem;">Card Fee Policy</div>
+          <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem;">
+              <input type="radio" name="cardFeePolicy" value="tenant_pays" checked style="width:auto;" /> Tenant pays fee
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.875rem;">
+              <input type="radio" name="cardFeePolicy" value="landlord_absorbs" style="width:auto;" /> I absorb fees
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCIAL PRODUCTS SECTION -->
+      <div class="mgmt-section">
+        <div class="mgmt-section-title">Financial Products &amp; Services</div>
+
+        <!-- BUSINESS FUNDING -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Business Funding</div>
+
+        <!-- Business Loans & Working Capital -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Business Loans &amp; Working Capital</div>
+              <div class="toggle-desc">Connect your commercial tenants with funding for buildout, equipment, and operations.</div>
+              <div class="toggle-commission">✨ Benefit: Funded tenants complete buildouts and sign leases</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Business Loans &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>Working capital and term loans for your commercial tenants who need funding for buildout, equipment, inventory, or daily operations.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>A funded tenant is a tenant who can pay rent, complete their buildout, and succeed in your space. The #1 reason commercial tenants default is cash flow problems.</p>
+                <div class="edu-section-label">Why This Matters To You</div>
+                <p>A funded tenant is a tenant who can pay rent, complete their buildout, and succeed in your space. The #1 reason commercial tenants default is cash flow problems.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('businessLoans')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-businessLoans" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- SBA Loan Referrals -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">SBA Loan Referrals</div>
+              <div class="toggle-desc">Government-backed small business loans for qualified tenants.</div>
+              <div class="toggle-commission">✨ Benefit: Established tenants grow, renew, and pay consistently</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>SBA Loan Referrals &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>SBA loans are government-backed loans with the lowest interest rates and longest terms. Ideal for established businesses needing significant capital.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>SBA-funded tenants have long-term, affordable financing making them incredibly stable, long-term tenants.</p>
+                <div class="edu-section-label">Why This Matters To You</div>
+                <p>SBA-funded tenants have long-term, affordable financing making them incredibly stable, long-term tenants who invest heavily in their space.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('sbaLoans')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-sbaLoans" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Merchant Cash Advance -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Merchant Cash Advance Referral</div>
+              <div class="toggle-desc">Quick capital based on future revenue. Good for retail/restaurant tenants.</div>
+              <div class="toggle-commission">✨ Benefit: Quick capital keeps commercial tenants operational</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Merchant Cash Advance &mdash; How It Works</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>An advance on future credit card sales. The business receives a lump sum and repays as a small percentage of daily sales.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>MCAs provide fast capital for retail and restaurant tenants who need bridge funding. A tenant with working capital is a tenant who can pay rent.</p>
+                <div class="edu-section-label">Why This Matters To You</div>
+                <p>MCAs provide fast capital for retail and restaurant tenants who need bridge funding. A tenant with working capital is a tenant who can keep paying rent.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('merchantCashAdvance')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-merchantCashAdvance" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Equipment Financing (COMMERCIAL-SPECIFIC) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Equipment Financing</div>
+              <div class="toggle-desc">Help tenants finance commercial equipment, HVAC, kitchen buildouts, and specialty installations.</div>
+              <div class="toggle-commission">✨ Benefit: Properly equipped tenants are more productive and reliable</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Equipment Financing &mdash; How It Works</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>Equipment financing allows commercial tenants to purchase or lease equipment needed for their business without large upfront costs. This includes restaurant equipment, medical devices, HVAC systems, and more.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>Tenants with properly equipped spaces are more productive and profitable, leading to longer lease terms and more reliable rent payments. Equipment financing also often results in property improvements that add value to your space.</p>
+                <div class="edu-section-label">Why This Matters To You</div>
+                <p>Tenants with properly equipped spaces are more productive and profitable, leading to longer lease terms and more reliable rent payments. Equipment financing also often results in property improvements.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('equipmentFinancing')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-equipmentFinancing" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Commercial Mortgage Referrals (COMMERCIAL-SPECIFIC) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Commercial Mortgage Referrals</div>
+              <div class="toggle-desc">Connect tenants looking to purchase their own commercial space with mortgage lenders.</div>
+              <div class="toggle-commission">✨ Benefit: Maintain positive relationships as tenants grow</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Commercial Mortgage Referrals &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>When your tenants are ready to purchase their own commercial space, you can refer them to trusted mortgage lenders who specialize in commercial real estate financing.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>Even when a tenant moves on to their own space, you maintain a positive relationship. Many tenants who purchase also keep leasing additional space for growth.</p>
+                <div class="edu-section-label">Why This Matters To You</div>
+                <p>Growing tenants who purchase their own space maintain positive relationships with you and often keep leasing additional space for expansion.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('commercialMortgage')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-commercialMortgage" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- DEPOSIT ALTERNATIVES -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Deposit Alternatives</div>
+
+        <!-- Deposit Bonds -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Deposit Bonds (Jetty / Obligo)</div>
+              <div class="toggle-desc">Tenants pay a small monthly fee instead of a full deposit. You're still covered for the full deposit amount.</div>
+              <div class="toggle-commission">✨ Benefit: Fills vacancies faster — tenants love low move-in costs</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Deposit Bonds &mdash; How They Work</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>A deposit bond replaces the traditional upfront security deposit with a small monthly payment. A surety company guarantees the full deposit amount to you.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>You are covered for the same amount as a traditional deposit. If the tenant causes damage, the surety company pays you up to the bonded amount.</p>
+                <div class="edu-section-label">Note for Commercial</div>
+                <p>Commercial leases typically have larger deposits. Deposit bonds are less common in commercial but can reduce barriers for smaller tenants or startups entering your space.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('depositBonds')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-depositBonds" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- INSURANCE PRODUCTS -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Insurance Products</div>
+
+        <!-- Renters Insurance (OFF for commercial) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Renters Insurance (Jetty / Sure)</div>
+              <div class="toggle-desc">Personal renters insurance for residential tenants. Not typically applicable for commercial leases.</div>
+              <div class="toggle-commission">✨ Benefit: Protects your property from tenant-caused damage</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-rentersInsurance" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Rent Guarantee Insurance -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Rent Guarantee Insurance</div>
+              <div class="toggle-desc">If your tenant stops paying, the insurer covers missed rent (up to 6&ndash;12 months).</div>
+              <div class="toggle-commission">✨ Benefit: Never lose rent to non-paying tenants again</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-rentGuarantee" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- TENANT FINANCIAL TOOLS -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Tenant Financial Tools</div>
+
+        <!-- Credit Builder (OFF for commercial) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Credit Builder (Boom)</div>
+              <div class="toggle-desc">Report tenant's on-time rent payments to credit bureaus. Not relevant for business entities.</div>
+              <div class="toggle-commission">✨ Benefit: Tenants pay on time to build credit — reduces delinquency</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-creditBuilder" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Rent Flexibility -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Rent Flexibility (Flex)</div>
+              <div class="toggle-desc">Tenants split rent into 2 payments/month. You still get paid in full on the 1st.</div>
+              <div class="toggle-commission">✨ Benefit: You get paid in full on the 1st, every month</div>
+              <div class="edu-card-toggle" onclick="this.nextElementSibling.classList.toggle('open')">How does this work? &#9662;</div>
+              <div class="edu-card">
+                <h4>Rent Flexibility &mdash; How It Works</h4>
+                <div class="edu-section-label">What It Is</div>
+                <p>Flex lets tenants split their monthly rent into 2 payments. Flex pays you the full rent on the 1st &mdash; the tenant repays Flex in two installments.</p>
+                <div class="edu-section-label">How It Protects You</div>
+                <p>You get paid in full, on time, on the 1st. Flex takes on the risk. Useful for smaller commercial tenants with seasonal cash flow.</p>
+                <button class="edu-enable-btn" onclick="enableProduct('rentFlexibility')">Enable This Product</button>
+              </div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-rentFlexibility" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- MOVE-IN SERVICES -->
+        <div style="font-size:0.8rem;font-weight:700;color:#64748b;margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Move-In Services</div>
+
+        <!-- Utility Setup Concierge -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Utility Setup Concierge</div>
+              <div class="toggle-desc">Handle power, gas, and utility transfers for your new commercial tenant.</div>
+              <div class="toggle-commission">✨ Benefit: Smoother move-ins, happier tenants, fewer calls</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-utilitySetup" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Internet / Cable Setup -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Internet / Cable Setup (AT&amp;T, Xfinity)</div>
+              <div class="toggle-desc">Business internet installation referral at move-in.</div>
+              <div class="toggle-commission">✨ Benefit: Tenants get connected fast — reduces move-in friction</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-internetSetup" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Moving Services Referral (OFF for commercial) -->
+        <div class="mgmt-toggle-row" style="flex-direction:column;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;width:100%;">
+            <div class="toggle-info">
+              <div class="toggle-name">Moving Services Referral</div>
+              <div class="toggle-desc">Connect tenants with vetted commercial movers.</div>
+              <div class="toggle-commission">✨ Benefit: Professional moves mean less property damage</div>
+            </div>
+            <label class="mgmt-toggle-switch"><input type="checkbox" data-mgmt="fp-movingServices" /><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAVE BUTTON -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;background:white;border:1px solid #e2e8f0;border-radius:10px;margin-top:1rem;">
+        <span id="mgmt-save-status" style="font-size:0.85rem;color:#10b981;font-weight:600;opacity:0;transition:opacity 0.4s;">Profile saved successfully</span>
+        <button class="btn btn-primary" onclick="saveMgmtProfile()">Save Management Profile</button>
+      </div>
+    </div>
+
+  </div><!-- end dash-main -->
+</div><!-- end dashboard-layout -->
+
+<!-- Footer -->
+<footer style="background:#0f172a;color:#94a3b8;padding:2.5rem 2rem;text-align:center;font-size:0.82rem;">
+  <p>&copy; 2026 RentVerified. All rights reserved.</p>
+  <p style="margin-top:0.5rem;">
+    <a href="index.html" style="color:#93c5fd;text-decoration:none;">Home</a> &middot;
+    <a href="listings.html" style="color:#93c5fd;text-decoration:none;">Listings</a> &middot;
+    <a href="landlord-signup.html" style="color:#93c5fd;text-decoration:none;">Landlord Portal</a> &middot;
+    <a href="tenant-portal.html" style="color:#93c5fd;text-decoration:none;">Tenant Portal</a>
+  </p>
+</footer>
 
 <script>
-  // ─────────────────────────────────────────────────────────────────
-  // Commercial Property Management App
-  // ─────────────────────────────────────────────────────────────────
+/* ── Tab Switching ── */
+function dashTab(name) {
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.dash-link').forEach(function(l) { l.classList.remove('active'); });
+  var tab = document.getElementById('dtab-' + name);
+  if (tab) tab.classList.add('active');
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  if (name === 'funding') loadFundingApplications();
+  if (name === 'deals') loadDeals();
+  if (name === 'mgmt-profile') loadMgmtProfile();
+}
 
-  // Session & Auth
-  function getSessionData() {
-    try {
-      return JSON.parse(localStorage.getItem('rv_commercial_session') || 'null');
-    } catch(e) { return null; }
-  }
-  function setSessionData(data) {
-    localStorage.setItem('rv_commercial_session', JSON.stringify(data));
-  }
-  function getCompanyId() {
-    const session = getSessionData();
-    return session ? session.id : null;
-  }
+/* ── Funding Applications ── */
+function loadFundingApplications() {
+  var apps = [];
+  try { apps = JSON.parse(localStorage.getItem('rv_funding_applications') || '[]'); } catch(e) {}
 
-  // Auth Flow
-  function showLogin() {
-    document.getElementById('signup-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'block';
-    document.getElementById('dashboard-screen').style.display = 'none';
-  }
-  function showSignup() {
-    document.getElementById('signup-screen').style.display = 'block';
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard-screen').style.display = 'none';
-  }
-  function showSignupForm() {
-    document.getElementById('login-panel').style.display = 'none';
-    document.getElementById('signup-panel').style.display = 'block';
-  }
-  function showLoginForm() {
-    document.getElementById('login-panel').style.display = 'block';
-    document.getElementById('signup-panel').style.display = 'none';
-  }
-  function showDashboard() {
-    document.getElementById('signup-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard-screen').style.display = 'block';
-    loadDashboard();
+  var tbody = document.getElementById('funding-apps-body');
+  if (!tbody) return;
+
+  if (!apps.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem;">No applications yet.</td></tr>';
+    return;
   }
 
-  function togglePw() {
-    const el = document.getElementById('loginPw');
-    el.type = el.type === 'password' ? 'text' : 'password';
-  }
-  function togglePwVis() {
-    const el = document.getElementById('login-password');
-    el.type = el.type === 'password' ? 'text' : 'password';
-  }
-
-  function doLogin() {
-    const email = document.getElementById('loginEmail').value.trim() || document.getElementById('login-email').value.trim();
-    const pw = document.getElementById('loginPw').value || document.getElementById('login-password').value;
-    const errEl = document.getElementById('loginErr') || document.getElementById('login-error');
-
-    if (!email || !pw) {
-      if (errEl) errEl.textContent = 'Please enter email and password';
-      if (errEl) errEl.style.display = 'block';
-      return;
-    }
-
-    try {
-      const accounts = JSON.parse(localStorage.getItem('rv_commercial_accounts') || '[]');
-      const account = accounts.find(a => a.email === email && a.password === pw);
-      if (account) {
-        setSessionData({
-          id: account.id,
-          email: account.email,
-          companyName: account.companyName,
-          plan: account.plan || 'commercial_starter'
-        });
-        showDashboard();
-      } else {
-        if (errEl) errEl.textContent = 'Invalid email or password';
-        if (errEl) errEl.style.display = 'block';
-      }
-    } catch(e) {
-      if (errEl) errEl.textContent = 'Error logging in';
-      if (errEl) errEl.style.display = 'block';
-    }
-  }
-
-  function formNext(step) {
-    document.getElementById('form-step-1').style.display = step === 1 ? 'block' : 'none';
-    document.getElementById('form-step-2').style.display = step === 2 ? 'block' : 'none';
-    document.getElementById('si-1').style.background = step >= 1 ? '#0F172A' : 'var(--gray-200)';
-    document.getElementById('si-2').style.background = step >= 2 ? '#0F172A' : 'var(--gray-200)';
-  }
-
-  function selectPlan(plan) {
-    document.querySelectorAll('[id^="check-"]').forEach(el => el.style.display = 'none');
-    document.getElementById('check-' + plan).style.display = 'block';
-    document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
-    document.querySelector('[onclick="selectPlan(\'' + plan + '\')"]').classList.add('selected');
-  }
-
-  function submitSignup() {
-    const form1Inputs = document.getElementById('form-step-1').querySelectorAll('input, select');
-    const form2Inputs = document.getElementById('form-step-2').querySelectorAll('input, select');
-
-    const firstName = form1Inputs[0].value.trim();
-    const lastName = form1Inputs[1].value.trim();
-    const company = form1Inputs[2].value.trim();
-    const email = form1Inputs[3].value.trim();
-    const phone = form1Inputs[4].value.trim();
-    const password = form1Inputs[5].value.trim();
-    const certify = document.getElementById('ll-certify').checked;
-
-    if (!firstName || !lastName || !company || !email || !password || !certify) {
-      alert('Please fill all required fields and agree to terms');
-      return;
-    }
-
-    const id = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-    const account = {
-      id,
-      email,
-      password,
-      firstName,
-      lastName,
-      companyName: company,
-      phone,
-      plan: 'commercial_starter',
-      createdAt: new Date().toISOString()
-    };
-
-    try {
-      const accounts = JSON.parse(localStorage.getItem('rv_commercial_accounts') || '[]');
-      if (accounts.find(a => a.email === email)) {
-        alert('This email is already registered');
-        return;
-      }
-      accounts.push(account);
-      localStorage.setItem('rv_commercial_accounts', JSON.stringify(accounts));
-      setSessionData({
-        id,
-        email,
-        companyName: company,
-        plan: 'commercial_starter'
-      });
-      showDashboard();
-    } catch(e) {
-      alert('Error creating account: ' + e.message);
-    }
-  }
-
-  function doLogout() {
-    if (confirm('Log out?')) {
-      localStorage.removeItem('rv_commercial_session');
-      window.location.href = 'commercial.html';
-    }
-  }
-
-  // Dashboard initialization
-  function loadDashboard() {
-    const session = getSessionData();
-    if (!session) {
-      showLogin();
-      return;
-    }
-    document.getElementById('sidebar-company').textContent = session.companyName;
-    updateKPIs();
-    renderPropertiesList();
-    renderTenantsList();
-    renderLeasesList();
-    populateSelects();
-  }
-
-  function dashTab(name) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.getElementById('dtab-' + name).classList.add('active');
-    document.querySelectorAll('.dash-link').forEach(el => el.classList.remove('active'));
-    event.target.closest('.dash-link').classList.add('active');
-  }
-
-  // Properties
-  function openAddPropertyForm() {
-    document.getElementById('property-modal').classList.add('open');
-    document.getElementById('prop-name').value = '';
-    document.getElementById('prop-type').value = '';
-    document.getElementById('prop-address').value = '';
-    document.getElementById('prop-city').value = '';
-    document.getElementById('prop-state').value = '';
-    document.getElementById('prop-zip').value = '';
-    document.getElementById('prop-sqft').value = '';
-    document.getElementById('prop-avail-sqft').value = '';
-    document.getElementById('prop-units').value = '';
-    document.getElementById('prop-year').value = '';
-    document.getElementById('prop-zoning').value = '';
-    document.getElementById('prop-parking').value = '';
-    document.getElementById('prop-hvac').value = '';
-    document.getElementById('prop-rent').value = '';
-    document.getElementById('prop-lease-type').value = '';
-    document.getElementById('prop-fiber').value = 'no';
-    document.getElementById('prop-ada').value = 'no';
-    document.getElementById('prop-docks').value = 'no';
-    document.getElementById('prop-description').value = '';
-  }
-
-  function closePropertyModal() {
-    document.getElementById('property-modal').classList.remove('open');
-  }
-
-  function saveProperty() {
-    const companyId = getCompanyId();
-    const prop = {
-      id: Date.now().toString(),
-      name: document.getElementById('prop-name').value.trim(),
-      type: document.getElementById('prop-type').value,
-      address: document.getElementById('prop-address').value.trim(),
-      city: document.getElementById('prop-city').value.trim(),
-      state: document.getElementById('prop-state').value.trim(),
-      zip: document.getElementById('prop-zip').value.trim(),
-      totalSqft: parseInt(document.getElementById('prop-sqft').value) || 0,
-      availSqft: parseInt(document.getElementById('prop-avail-sqft').value) || 0,
-      units: parseInt(document.getElementById('prop-units').value) || 0,
-      yearBuilt: parseInt(document.getElementById('prop-year').value) || 0,
-      zoning: document.getElementById('prop-zoning').value.trim(),
-      parking: parseInt(document.getElementById('prop-parking').value) || 0,
-      hvac: document.getElementById('prop-hvac').value.trim(),
-      rent: parseFloat(document.getElementById('prop-rent').value) || 0,
-      leaseType: document.getElementById('prop-lease-type').value,
-      fiber: document.getElementById('prop-fiber').value === 'yes',
-      ada: document.getElementById('prop-ada').value === 'yes',
-      docks: document.getElementById('prop-docks').value === 'yes',
-      description: document.getElementById('prop-description').value.trim()
-    };
-
-    if (!prop.name || !prop.address) {
-      alert('Please enter property name and address');
-      return;
-    }
-
-    try {
-      const key = 'rv_commercial_listings_' + companyId;
-      const props = JSON.parse(localStorage.getItem(key) || '[]');
-      props.push(prop);
-      localStorage.setItem(key, JSON.stringify(props));
-      closePropertyModal();
-      renderPropertiesList();
-      populateSelects();
-      updateKPIs();
-    } catch(e) {
-      alert('Error saving property: ' + e.message);
-    }
-  }
-
-  function renderPropertiesList() {
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(key) || '[]');
-    const container = document.getElementById('properties-list-container');
-
-    if (props.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray-500);">No properties yet. <a href="#" onclick="openAddPropertyForm();return false;" style="color:#0F172A;font-weight:600;">Add one →</a></div>';
-      return;
-    }
-
-    container.innerHTML = props.map(p => `
-      <div class="property-card">
-        <div class="property-card-header">
-          <div class="property-name">${p.name || 'Unnamed'}</div>
-          <div class="property-addr">${p.address || ''}, ${p.city || ''} ${p.state || ''}</div>
-        </div>
-        <div class="property-card-body">
-          <div class="property-detail">
-            <span class="property-detail-label">Type:</span>
-            <span class="property-detail-value">${p.type || '—'}</span>
-          </div>
-          <div class="property-detail">
-            <span class="property-detail-label">Total Sqft:</span>
-            <span class="property-detail-value">${p.totalSqft.toLocaleString() || '—'}</span>
-          </div>
-          <div class="property-detail">
-            <span class="property-detail-label">Units:</span>
-            <span class="property-detail-value">${p.units || '—'}</span>
-          </div>
-          <div class="property-detail">
-            <span class="property-detail-label">Lease Type:</span>
-            <span class="badge badge-${p.leaseType}">${p.leaseType || '—'}</span>
-          </div>
-          <div class="property-detail">
-            <span class="property-detail-label">Rent ($/sqft/yr):</span>
-            <span class="property-detail-value">$${p.rent || 0}</span>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // Tenants
-  function openAddTenantForm() {
-    document.getElementById('tenant-modal').classList.add('open');
-    populateTenantPropertySelect();
-  }
-
-  function closeTenantModal() {
-    document.getElementById('tenant-modal').classList.remove('open');
-  }
-
-  function saveTenant() {
-    const companyId = getCompanyId();
-    const tenant = {
-      id: Date.now().toString(),
-      businessName: document.getElementById('tenant-name').value.trim(),
-      entityType: document.getElementById('tenant-entity').value,
-      contactName: document.getElementById('tenant-contact').value.trim(),
-      email: document.getElementById('tenant-email').value.trim(),
-      phone: document.getElementById('tenant-phone').value.trim(),
-      property: document.getElementById('tenant-property').value,
-      suite: document.getElementById('tenant-suite').value.trim(),
-      sqft: parseInt(document.getElementById('tenant-sqft').value) || 0
-    };
-
-    if (!tenant.businessName || !tenant.property) {
-      alert('Please enter business name and select property');
-      return;
-    }
-
-    try {
-      const key = 'rv_commercial_tenants_' + companyId;
-      const tenants = JSON.parse(localStorage.getItem(key) || '[]');
-      tenants.push(tenant);
-      localStorage.setItem(key, JSON.stringify(tenants));
-      closeTenantModal();
-      renderTenantsList();
-      populateSelects();
-      updateKPIs();
-    } catch(e) {
-      alert('Error saving tenant: ' + e.message);
-    }
-  }
-
-  function renderTenantsList() {
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_tenants_' + companyId;
-    const tenants = JSON.parse(localStorage.getItem(key) || '[]');
-    const propsKey = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(propsKey) || '[]');
-    const tbody = document.getElementById('tenants-tbody');
-
-    if (tenants.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--gray-500);">No tenants yet.</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = tenants.map(t => {
-      const prop = props.find(p => p.id === t.property);
-      return `
-        <tr>
-          <td><strong>${t.businessName}</strong></td>
-          <td>${prop ? prop.name : '—'}</td>
-          <td>${t.suite || '—'}</td>
-          <td>${t.sqft.toLocaleString()}</td>
-          <td>—</td>
-          <td>—</td>
-          <td><button class="btn btn-sm btn-outline">Edit</button></td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  // Leases
-  function openAddLeaseForm() {
-    document.getElementById('lease-modal').classList.add('open');
-    populateLeaseSelects();
-  }
-
-  function closeLeaseModal() {
-    document.getElementById('lease-modal').classList.remove('open');
-  }
-
-  function saveLease() {
-    const companyId = getCompanyId();
-    const lease = {
-      id: Date.now().toString(),
-      property: document.getElementById('lease-property').value,
-      tenant: document.getElementById('lease-tenant').value,
-      leaseType: document.getElementById('lease-type').value,
-      baseRent: parseFloat(document.getElementById('lease-rent').value) || 0,
-      escalation: parseFloat(document.getElementById('lease-escalation').value) || 0,
-      freeMonths: parseInt(document.getElementById('lease-free-months').value) || 0,
-      startDate: document.getElementById('lease-start').value,
-      endDate: document.getElementById('lease-end').value,
-      tiAllowance: parseFloat(document.getElementById('lease-ti').value) || 0,
-      guarantor: document.getElementById('lease-guarantor').value === 'yes',
-      notes: document.getElementById('lease-notes').value.trim(),
-      createdAt: new Date().toISOString()
-    };
-
-    if (!lease.property || !lease.tenant || !lease.leaseType) {
-      alert('Please fill all required fields');
-      return;
-    }
-
-    try {
-      const key = 'rv_commercial_leases_' + companyId;
-      const leases = JSON.parse(localStorage.getItem(key) || '[]');
-      leases.push(lease);
-      localStorage.setItem(key, JSON.stringify(leases));
-      closeLeaseModal();
-      renderLeasesList();
-      updateKPIs();
-    } catch(e) {
-      alert('Error saving lease: ' + e.message);
-    }
-  }
-
-  function renderLeasesList() {
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_leases_' + companyId;
-    const leases = JSON.parse(localStorage.getItem(key) || '[]');
-    const propsKey = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(propsKey) || '[]');
-    const tenantsKey = 'rv_commercial_tenants_' + companyId;
-    const tenants = JSON.parse(localStorage.getItem(tenantsKey) || '[]');
-    const tbody = document.getElementById('leases-tbody');
-
-    if (leases.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--gray-500);">No leases yet.</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = leases.map(l => {
-      const prop = props.find(p => p.id === l.property);
-      const tenant = tenants.find(t => t.id === l.tenant);
-      const annual = (l.baseRent || 0) * 12;
-      return `
-        <tr>
-          <td><strong>${tenant ? tenant.businessName : '—'}</strong></td>
-          <td>${prop ? prop.name : '—'}</td>
-          <td><span class="badge badge-${l.leaseType}">${l.leaseType}</span></td>
-          <td>$${annual.toLocaleString()}</td>
-          <td>${l.startDate || '—'}</td>
-          <td>${l.endDate || '—'}</td>
-          <td>Active</td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  // CAM Charges
-  function loadPropertyForCAM() {
-    const propId = document.getElementById('cam-property').value;
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(key) || '[]');
-    const prop = props.find(p => p.id === propId);
-    if (prop) {
-      document.getElementById('cam-total-sqft').value = prop.totalSqft;
-    }
-  }
-
-  function calcCAMTotal() {
-    const taxes = parseFloat(document.getElementById('cam-taxes').value) || 0;
-    const insurance = parseFloat(document.getElementById('cam-insurance').value) || 0;
-    const maint = parseFloat(document.getElementById('cam-maintenance').value) || 0;
-    const pmfee = parseFloat(document.getElementById('cam-pm-fee').value) || 0;
-    const util = parseFloat(document.getElementById('cam-utilities').value) || 0;
-    const repairs = parseFloat(document.getElementById('cam-repairs').value) || 0;
-    const security = parseFloat(document.getElementById('cam-security').value) || 0;
-    const other = parseFloat(document.getElementById('cam-other').value) || 0;
-    const total = taxes + insurance + maint + pmfee + util + repairs + security + other;
-    document.getElementById('cam-total').textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2 });
-  }
-
-  function calcCAMPerTenant() {
-    const propId = document.getElementById('cam-property').value;
-    const companyId = getCompanyId();
-    const total = parseFloat(document.getElementById('cam-total').textContent.replace(/,/g, '')) || 0;
-    const totalSqft = parseInt(document.getElementById('cam-total-sqft').value) || 1;
-
-    const tenantsKey = 'rv_commercial_tenants_' + companyId;
-    const tenants = JSON.parse(localStorage.getItem(tenantsKey) || '[]').filter(t => t.property === propId);
-
-    if (tenants.length === 0) {
-      alert('No tenants for this property');
-      return;
-    }
-
-    const tbody = document.getElementById('cam-tenants-tbody');
-    tbody.innerHTML = tenants.map(t => {
-      const prorata = ((t.sqft || 0) / totalSqft * 100).toFixed(2);
-      const annual = total * (prorata / 100);
-      const monthly = annual / 12;
-      return `
-        <tr>
-          <td><strong>${t.businessName}</strong></td>
-          <td>${t.sqft.toLocaleString()}</td>
-          <td>${prorata}%</td>
-          <td>$${annual.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-          <td>$${monthly.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-          <td><button class="btn btn-sm btn-outline">Invoice</button></td>
-        </tr>
-      `;
-    }).join('');
-
-    document.getElementById('cam-results').style.display = 'block';
-
-    try {
-      const camKey = 'rv_cam_' + companyId;
-      localStorage.setItem(camKey, JSON.stringify({
-        propertyId: propId,
-        totalBudget: total,
-        tenants: tenants.map(t => ({
-          tenantId: t.id,
-          businessName: t.businessName,
-          sqft: t.sqft,
-          prorata: (t.sqft / totalSqft * 100).toFixed(2),
-          annualObligation: (total * (t.sqft / totalSqft)).toFixed(2),
-          monthlyObligation: (total * (t.sqft / totalSqft) / 12).toFixed(2)
-        })),
-        createdAt: new Date().toISOString()
-      }));
-    } catch(e) {}
-  }
-
-  function downloadCAMCSV() {
-    const propId = document.getElementById('cam-property').value;
-    const companyId = getCompanyId();
-    const camKey = 'rv_cam_' + companyId;
-    const data = JSON.parse(localStorage.getItem(camKey) || '{}');
-
-    if (!data.tenants) { alert('No CAM data to download'); return; }
-
-    const rows = [
-      ['Business Name', 'Leased Sqft', 'Pro-Rata Share %', 'Annual CAM Obligation', 'Monthly CAM Estimate'],
-      ...data.tenants.map(t => [t.businessName, t.sqft, t.prorata, t.annualObligation, t.monthlyObligation])
-    ];
-
-    const csv = rows.map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'CAM_Summary_' + new Date().toISOString().slice(0,10) + '.csv';
-    a.click();
-  }
-
-  function printCAMInvoice() {
-    alert('Print functionality coming soon');
-  }
-
-  // Screening
-  function submitScreening() {
-    const name = document.getElementById('screen-name').value.trim();
-    const years = parseInt(document.getElementById('screen-years').value) || 0;
-    const revenue = parseInt(document.getElementById('screen-revenue').value) || 0;
-    const credit = parseInt(document.getElementById('screen-credit').value) || 0;
-    const bank = document.getElementById('screen-bank').value.trim();
-    const trades = document.getElementById('screen-trades').value.trim().split(',').length;
-    const guarantor = document.getElementById('screen-guarantor').value === 'yes';
-    const rent = parseInt(document.getElementById('screen-rent').value) || 1;
-
-    if (!name) { alert('Enter business name'); return; }
-
-    let score = 0;
-    const breakdown = [];
-
-    if (years >= 3) { score += 25; breakdown.push('Years ≥ 3: +25 pts'); }
-    if (revenue >= rent * 3) { score += 30; breakdown.push('Revenue ≥ 3x rent: +30 pts'); }
-    if (credit >= 600) { score += 20; breakdown.push('Credit ≥ 600: +20 pts'); }
-    if (bank) { score += 10; breakdown.push('Bank reference: +10 pts'); }
-    if (trades >= 2) { score += 10; breakdown.push('Trade references (2+): +10 pts'); }
-    if (guarantor) { score += 5; breakdown.push('Personal guarantor: +5 pts'); }
-
-    let rec = score >= 70 ? 'Approve' : score >= 50 ? 'Recommend Review' : 'Decline';
-    let circleClass = score >= 70 ? 'approve' : score >= 50 ? 'review' : 'decline';
-    let detail = score >= 70 ? 'Strong credit profile. Approve lease.' : score >= 50 ? 'This business meets some qualifying criteria.' : 'Below threshold. Consider additional documentation.';
-
-    document.getElementById('score-circle').textContent = score;
-    document.getElementById('score-circle').className = 'score-circle ' + circleClass;
-    document.getElementById('score-rec').textContent = rec;
-    document.getElementById('score-detail').textContent = detail;
-    document.getElementById('score-breakdown').innerHTML = breakdown.map(b => '<div style="padding:0.5rem 0;">' + b + '</div>').join('');
-    document.getElementById('screening-result').style.display = 'block';
-  }
-
-  function approveScreening() { alert('Lease approved for ' + document.getElementById('screen-name').value); }
-  function declineScreening() { alert('Application declined'); }
-
-  // Maintenance
-  function openAddMaintenanceForm() {
-    document.getElementById('maintenance-modal').classList.add('open');
-    populateMaintPropertySelect();
-  }
-
-  function closeMaintenanceModal() {
-    document.getElementById('maintenance-modal').classList.remove('open');
-  }
-
-  function saveMaintenance() {
-    const property = document.getElementById('maint-property').value;
-    const priority = document.getElementById('maint-priority').value;
-    const issue = document.getElementById('maint-issue').value.trim();
-
-    if (!property || !issue) { alert('Please select property and describe issue'); return; }
-
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_maintenance_' + companyId;
-    const items = JSON.parse(localStorage.getItem(key) || '[]');
-    items.push({
-      id: Date.now().toString(),
-      property,
-      priority,
-      issue,
-      status: 'open',
-      createdAt: new Date().toISOString()
-    });
-    localStorage.setItem(key, JSON.stringify(items));
-    closeMaintenanceModal();
-    alert('Request submitted');
-  }
-
-  // Settings
-  function saveSettings() {
-    const companyId = getCompanyId();
-    const settings = {
-      company: document.getElementById('settings-company').value.trim(),
-      phone: document.getElementById('settings-phone').value.trim(),
-      location: document.getElementById('settings-location').value.trim(),
-      loans: document.getElementById('setting-loans').checked,
-      sba: document.getElementById('setting-sba').checked,
-      equipment: document.getElementById('setting-equipment').checked,
-      mortgage: document.getElementById('setting-mortgage').checked
-    };
-
-    try {
-      localStorage.setItem('rv_commercial_settings_' + companyId, JSON.stringify(settings));
-      alert('Settings saved');
-    } catch(e) {
-      alert('Error saving settings');
-    }
-  }
-
-  function savePropertyValue() {
-    const companyId = getCompanyId();
-    const value = parseFloat(document.getElementById('fin-property-value').value) || 0;
-    if (value <= 0) { alert('Enter valid property value'); return; }
-    localStorage.setItem('rv_commercial_property_values_' + companyId, JSON.stringify({ value }));
-    alert('Property value saved');
-  }
-
-  function calcCapRate() {
-    const propVal = parseFloat(document.getElementById('fin-property-value').value) || 0;
-    const noi = parseFloat(document.getElementById('fin-noi').textContent.replace('$', '').replace(/,/g, '')) || 0;
-    const rate = propVal > 0 ? ((noi / propVal) * 100).toFixed(2) : 0;
-    document.getElementById('fin-caprate').textContent = rate + '%';
-  }
-
-  // Utility functions
-  function populateSelects() {
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(key) || '[]');
-    const tenantsKey = 'rv_commercial_tenants_' + companyId;
-    const tenants = JSON.parse(localStorage.getItem(tenantsKey) || '[]');
-
-    ['cam-property', 'lease-property', 'maint-property'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.innerHTML = '<option value="">-- Select property --</option>' + props.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-      }
-    });
-
-    const leasetenantSel = document.getElementById('lease-tenant');
-    if (leasetenantSel) {
-      leasetenantSel.innerHTML = '<option value="">-- Select tenant --</option>' + tenants.map(t => `<option value="${t.id}">${t.businessName}</option>`).join('');
-    }
-
-    const tenantPropSel = document.getElementById('tenant-property');
-    if (tenantPropSel) {
-      tenantPropSel.innerHTML = '<option value="">-- Select property --</option>' + props.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    }
-  }
-
-  function populateTenantPropertySelect() {
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(key) || '[]');
-    const el = document.getElementById('tenant-property');
-    el.innerHTML = '<option value="">-- Select property --</option>' + props.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  }
-
-  function populateLeaseSelects() {
-    populateSelects();
-  }
-
-  function populateMaintPropertySelect() {
-    const companyId = getCompanyId();
-    const key = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(key) || '[]');
-    const el = document.getElementById('maint-property');
-    el.innerHTML = '<option value="">-- Select property --</option>' + props.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  }
-
-  function updateKPIs() {
-    const companyId = getCompanyId();
-    const propsKey = 'rv_commercial_listings_' + companyId;
-    const props = JSON.parse(localStorage.getItem(propsKey) || '[]');
-    const tenantsKey = 'rv_commercial_tenants_' + companyId;
-    const tenants = JSON.parse(localStorage.getItem(tenantsKey) || '[]');
-    const leasesKey = 'rv_commercial_leases_' + companyId;
-    const leases = JSON.parse(localStorage.getItem(leasesKey) || '[]');
-
-    document.getElementById('kpi-properties').textContent = props.length;
-    const totalSqft = props.reduce((sum, p) => sum + (p.totalSqft || 0), 0);
-    document.getElementById('kpi-sqft').textContent = totalSqft.toLocaleString();
-    document.getElementById('kpi-occupied').textContent = tenants.length;
-    const occupancy = totalSqft > 0 ? (tenants.reduce((sum, t) => sum + (t.sqft || 0), 0) / totalSqft * 100).toFixed(1) : 0;
-    document.getElementById('kpi-occupancy').textContent = occupancy + '%';
-    document.getElementById('kpi-pending').textContent = leases.filter(l => !l.signed).length;
-
-    // Financials
-    const totalRent = leases.reduce((sum, l) => sum + (l.baseRent * 12 || 0), 0);
-    document.getElementById('fin-gpr').textContent = '$' + totalRent.toLocaleString();
-    document.getElementById('fin-egi').textContent = '$' + totalRent.toLocaleString();
-    document.getElementById('fin-occupancy').textContent = occupancy + '%';
-  }
-
-  // Initialize on load
-  document.addEventListener('DOMContentLoaded', function() {
-    const session = getSessionData();
-    if (session) {
-      showDashboard();
-    } else {
-      if (localStorage.getItem('rv_commercial_accounts')) {
-        showLogin();
-      } else {
-        showSignup();
-      }
-    }
+  tbody.innerHTML = apps.map(function(app) {
+    var bizName = app.business ? app.business.name : 'Unknown';
+    var amount = app.funding ? '$' + Number(app.funding.amountNeeded).toLocaleString() : 'N/A';
+    var purpose = app.funding ? app.funding.purpose : 'N/A';
+    var status = app.status || 'pending';
+    var date = app.timestamp ? new Date(app.timestamp).toLocaleDateString() : 'N/A';
+
+    return '<tr>' +
+      '<td>' + escHtml(bizName) + '</td>' +
+      '<td>' + escHtml(amount) + '</td>' +
+      '<td>' + escHtml(purpose) + '</td>' +
+      '<td><span class="status-badge ' + status + '">' + status.charAt(0).toUpperCase() + status.slice(1) + '</span></td>' +
+      '<td>' + escHtml(date) + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ── Management Profile (A6) ── */
+function getCompanyId() {
+  try {
+    var accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+    if (accts.length) return accts[0].company ? accts[0].company.replace(/\s+/g, '_').toLowerCase() : 'default';
+  } catch(e) {}
+  return 'default';
+}
+
+function getMgmtProfileKey() {
+  return 'rv_mgmt_profile_commercial_' + getCompanyId();
+}
+
+function getDefaultMgmtProfile() {
+  return {
+    paymentMethods: { cashApp: true, zelle: true, venmo: true, ach: true, card: true, check: false, paypal: false },
+    cardFeePolicy: 'tenant_pays',
+    financialProducts: {
+      businessLoans: true,
+      sbaLoans: true,
+      merchantCashAdvance: false,
+      equipmentFinancing: true,
+      commercialMortgage: true,
+      depositBonds: false,
+      rentersInsurance: false,
+      rentGuarantee: false,
+      creditBuilder: false,
+      rentFlexibility: true,
+      utilitySetup: true,
+      internetSetup: true,
+      movingServices: false
+    },
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function loadMgmtProfile() {
+  var profile;
+  try { profile = JSON.parse(localStorage.getItem(getMgmtProfileKey())); } catch(e) {}
+  if (!profile) profile = getDefaultMgmtProfile();
+
+  // Set payment method toggles
+  Object.keys(profile.paymentMethods).forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="pm-' + key + '"]');
+    if (el) el.checked = profile.paymentMethods[key];
   });
+
+  // Set card fee policy
+  var feeRadio = document.querySelector('input[name="cardFeePolicy"][value="' + profile.cardFeePolicy + '"]');
+  if (feeRadio) feeRadio.checked = true;
+
+  // Set financial product toggles
+  Object.keys(profile.financialProducts).forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="fp-' + key + '"]');
+    if (el) el.checked = profile.financialProducts[key];
+  });
+}
+
+function saveMgmtProfile() {
+  var profile = { paymentMethods: {}, cardFeePolicy: 'tenant_pays', financialProducts: {}, updatedAt: new Date().toISOString() };
+
+  // Read payment methods
+  ['cashApp','zelle','venmo','ach','card','check','paypal'].forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="pm-' + key + '"]');
+    profile.paymentMethods[key] = el ? el.checked : false;
+  });
+
+  // Read card fee policy
+  var feeRadio = document.querySelector('input[name="cardFeePolicy"]:checked');
+  profile.cardFeePolicy = feeRadio ? feeRadio.value : 'tenant_pays';
+
+  // Read financial products
+  ['businessLoans','sbaLoans','merchantCashAdvance','equipmentFinancing','commercialMortgage','depositBonds','rentersInsurance','rentGuarantee','creditBuilder','rentFlexibility','utilitySetup','internetSetup','movingServices'].forEach(function(key) {
+    var el = document.querySelector('[data-mgmt="fp-' + key + '"]');
+    profile.financialProducts[key] = el ? el.checked : false;
+  });
+
+  localStorage.setItem(getMgmtProfileKey(), JSON.stringify(profile));
+
+  var status = document.getElementById('mgmt-save-status');
+  if (status) { status.style.opacity = '1'; setTimeout(function() { status.style.opacity = '0'; }, 3000); }
+}
+
+function enableProduct(productKey) {
+  var el = document.querySelector('[data-mgmt="fp-' + productKey + '"]');
+  if (el) el.checked = true;
+}
+
+/* ── Collapsible sidebar groups ── */
+function toggleSidebarGroup(label) {
+  var group = label.parentElement;
+  group.classList.toggle('collapsed');
+  var collapsed = [];
+  document.querySelectorAll('.sidebar-group.collapsed').forEach(function(g) {
+    var span = g.querySelector('.sidebar-group-label span');
+    if (span) collapsed.push(span.textContent);
+  });
+  localStorage.setItem('rv_comm_sidebar_collapsed', JSON.stringify(collapsed));
+}
+
+// Restore collapsed state
+(function() {
+  try {
+    var collapsed = JSON.parse(localStorage.getItem('rv_comm_sidebar_collapsed') || '[]');
+    document.querySelectorAll('.sidebar-group-label span').forEach(function(span) {
+      if (collapsed.indexOf(span.textContent) !== -1) {
+        span.closest('.sidebar-group').classList.add('collapsed');
+      }
+    });
+  } catch(e) {}
+})();
+
+/* ── Commercial Onboarding ── */
+function showCommercialOnboarding() {
+  if (localStorage.getItem('rv_commercial_onboarding_done')) return;
+  var overlay = document.getElementById('comm-onboarding');
+  if (!overlay) return;
+
+  // Build products list
+  var products = [
+    { key:'businessLoans', icon:'🏦', name:'Business Loans', desc:'Access working capital for commercial property operations.', recommended:true },
+    { key:'sbaLoans', icon:'🏛️', name:'SBA Loans', desc:'Government-backed small business loans with favorable terms.', recommended:true },
+    { key:'equipmentFinancing', icon:'🔧', name:'Equipment Financing', desc:'Finance commercial equipment purchases with flexible terms.', recommended:true },
+    { key:'commercialMortgage', icon:'🏢', name:'Commercial Mortgage', desc:'Refinance or acquire commercial properties at competitive rates.', recommended:true },
+    { key:'utilitySetup', icon:'⚡', name:'Utility Setup', desc:'Streamline utility connections for your commercial tenants.', recommended:true },
+    { key:'internetSetup', icon:'🌐', name:'Internet Setup', desc:'Help tenants get business internet installed quickly.', recommended:true }
+  ];
+
+  var container = document.getElementById('cob-products');
+  if (container) {
+    container.innerHTML = products.map(function(p) {
+      return '<div class="comm-ob-product">' +
+        '<label class="comm-toggle"><input type="checkbox" id="cob-' + p.key + '"' + (p.recommended ? ' checked' : '') + ' /><span class="slider"></span></label>' +
+        '<div style="font-size:1.25rem;flex-shrink:0;">' + p.icon + '</div>' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:700;font-size:0.9rem;">' + p.name + (p.recommended ? ' <span style="font-size:0.7rem;color:#10b981;font-weight:600;">Recommended</span>' : '') + '</div>' +
+          '<div style="font-size:0.8rem;color:#64748b;line-height:1.3;">' + p.desc + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  overlay.style.display = 'flex';
+}
+
+function cobNext(step) {
+  document.getElementById('cob-step-1').style.display = step === 1 ? 'block' : 'none';
+  document.getElementById('cob-step-2').style.display = step === 2 ? 'block' : 'none';
+}
+
+function cobFinish() {
+  localStorage.setItem('rv_commercial_onboarding_done', 'true');
+  document.getElementById('comm-onboarding').style.display = 'none';
+}
+
+// Close onboarding on overlay click or Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var overlay = document.getElementById('comm-onboarding');
+    if (overlay && overlay.style.display === 'flex') cobFinish();
+  }
+});
+
+/* ══ DEAL PIPELINE ══ */
+var DEAL_STAGES = [
+  { key: 'prospect', label: 'Prospect', color: '#6b7280' },
+  { key: 'qualifying', label: 'Qualifying', color: '#8b5cf6' },
+  { key: 'proposal', label: 'Proposal', color: '#2563eb' },
+  { key: 'negotiation', label: 'Negotiation', color: '#d97706' },
+  { key: 'due_diligence', label: 'Due Diligence', color: '#0891b2' },
+  { key: 'closed_won', label: 'Closed Won', color: '#059669' },
+  { key: 'closed_lost', label: 'Closed Lost', color: '#dc2626' }
+];
+
+var allDeals = [];
+var dealView = 'kanban';
+
+// Force localStorage
+if (typeof RVData !== 'undefined' && RVData._useSupabase && RVData._useSupabase()) {
+  try { RVData._useSupabase = function() { return false; }; } catch(e) {}
+}
+
+async function loadDeals() {
+  try { allDeals = await RVData.getCommercialDeals({}); } catch(e) {
+    allDeals = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]');
+  }
+  renderDealSummary();
+  renderDeals();
+}
+
+function renderDealSummary() {
+  var active = allDeals.filter(function(d) { return d.status !== 'closed_won' && d.status !== 'closed_lost'; });
+  var won = allDeals.filter(function(d) { return d.status === 'closed_won'; });
+  var totalPipeline = active.reduce(function(s, d) { return s + (parseFloat(d.commission_amount) || 0); }, 0);
+  var totalWon = won.reduce(function(s, d) { return s + (parseFloat(d.commission_amount) || 0); }, 0);
+  var el = document.getElementById('deal-summary');
+  if (!el) return;
+  el.innerHTML =
+    '<div class="deal-sum-card"><div class="num">' + allDeals.length + '</div><div class="lbl">Total Deals</div></div>' +
+    '<div class="deal-sum-card"><div class="num">' + active.length + '</div><div class="lbl">Active</div></div>' +
+    '<div class="deal-sum-card"><div class="num" style="color:#1a56db;">$' + totalPipeline.toLocaleString('en-US',{maximumFractionDigits:0}) + '</div><div class="lbl">Pipeline Value</div></div>' +
+    '<div class="deal-sum-card"><div class="num" style="color:#059669;">$' + totalWon.toLocaleString('en-US',{maximumFractionDigits:0}) + '</div><div class="lbl">Won Commission</div></div>';
+}
+
+function renderDeals() {
+  var search = (document.getElementById('deal-search') || {}).value || '';
+  search = search.toLowerCase().trim();
+  var typeFilter = (document.getElementById('deal-type-filter') || {}).value || '';
+
+  var filtered = allDeals.filter(function(d) {
+    if (typeFilter && d.deal_type !== typeFilter) return false;
+    if (search && (d.deal_name || '').toLowerCase().indexOf(search) === -1 &&
+        (d.client_name || '').toLowerCase().indexOf(search) === -1 &&
+        (d.property_address || '').toLowerCase().indexOf(search) === -1) return false;
+    return true;
+  });
+
+  if (dealView === 'kanban') renderKanban(filtered);
+  else renderDealList(filtered);
+}
+
+function renderKanban(deals) {
+  var el = document.getElementById('deal-kanban');
+  if (!el) return;
+
+  el.innerHTML = '<div class="deal-pipeline">' + DEAL_STAGES.map(function(stage) {
+    var cards = deals.filter(function(d) { return d.status === stage.key; });
+    return '<div class="deal-column">' +
+      '<div class="deal-col-header"><span style="color:' + stage.color + ';">' + stage.label + '</span><span class="deal-col-count">' + cards.length + '</span></div>' +
+      (cards.length === 0 ? '<div style="text-align:center;color:#9ca3af;font-size:0.78rem;padding:1rem;">No deals yet<br><span style="cursor:pointer;color:#1a56db;" onclick="openDealModal()">+ Add deal</span></div>' :
+        cards.map(function(d) {
+          var val = d.deal_type === 'lease' ?
+            (d.lease_rate_sqft ? '$' + parseFloat(d.lease_rate_sqft).toFixed(2) + '/sqft' : '') :
+            (d.asking_price ? '$' + parseFloat(d.asking_price).toLocaleString('en-US',{maximumFractionDigits:0}) : '');
+          return '<div class="deal-card" onclick="editDeal(\'' + d.id + '\')">' +
+            '<div class="deal-card-name">' + escHtml(d.deal_name) + '</div>' +
+            '<div class="deal-card-meta">' + escHtml(d.client_name || 'No client') + '</div>' +
+            (d.property_address ? '<div class="deal-card-meta">' + escHtml(d.property_address) + '</div>' : '') +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">' +
+              '<span class="deal-card-type">' + (d.deal_type || 'other') + '</span>' +
+              (val ? '<span class="deal-card-value">' + val + '</span>' : '') +
+            '</div>' +
+            (d.commission_amount ? '<div style="font-size:0.72rem;color:#059669;font-weight:600;margin-top:4px;">Commission: $' + parseFloat(d.commission_amount).toLocaleString('en-US',{maximumFractionDigits:0}) + '</div>' : '') +
+          '</div>';
+        }).join('')) +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+function renderDealList(deals) {
+  var el = document.getElementById('deal-list');
+  if (!el) return;
+
+  if (deals.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:3rem;color:#9ca3af;"><div style="font-size:2.5rem;margin-bottom:0.5rem;">📊</div><p>Start by adding a commercial property or creating your first deal in the pipeline.</p><button class="btn btn-primary" style="margin-top:.75rem;" onclick="openDealModal()">+ Create First Deal</button></div>';
+    return;
+  }
+
+  el.innerHTML = '<table class="deal-list-table"><thead><tr>' +
+    '<th>Deal</th><th>Client</th><th>Type</th><th>Status</th><th>Value</th><th>Commission</th><th>Close Date</th>' +
+  '</tr></thead><tbody>' +
+  deals.map(function(d) {
+    var stg = DEAL_STAGES.find(function(s) { return s.key === d.status; }) || {};
+    var val = d.asking_price ? '$' + parseFloat(d.asking_price).toLocaleString('en-US',{maximumFractionDigits:0}) : (d.lease_rate_sqft ? '$' + d.lease_rate_sqft + '/sqft' : '—');
+    return '<tr style="cursor:pointer;" onclick="editDeal(\'' + d.id + '\')">' +
+      '<td style="font-weight:600;">' + escHtml(d.deal_name) + '</td>' +
+      '<td>' + escHtml(d.client_name || '—') + '</td>' +
+      '<td><span class="deal-card-type">' + (d.deal_type || 'other') + '</span></td>' +
+      '<td><span style="color:' + (stg.color || '#6b7280') + ';font-weight:600;font-size:0.82rem;">' + (stg.label || d.status) + '</span></td>' +
+      '<td>' + val + '</td>' +
+      '<td style="font-weight:700;color:#059669;">' + (d.commission_amount ? '$' + parseFloat(d.commission_amount).toLocaleString('en-US',{maximumFractionDigits:0}) : '—') + '</td>' +
+      '<td>' + (d.close_date || '—') + '</td>' +
+    '</tr>';
+  }).join('') +
+  '</tbody></table>';
+}
+
+function setDealView(view, btn) {
+  dealView = view;
+  document.querySelectorAll('.deal-view-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.getElementById('deal-kanban').style.display = view === 'kanban' ? '' : 'none';
+  document.getElementById('deal-list').style.display = view === 'list' ? '' : 'none';
+  renderDeals();
+}
+
+/* ── Deal Modal ── */
+function openDealModal(deal) {
+  var html = '<div class="deal-modal-overlay open" id="dealModal" onclick="if(event.target===this)closeDealModal()">' +
+    '<div class="deal-modal">' +
+    '<h3>' + (deal ? 'Edit Deal' : 'New Deal') + '</h3>' +
+    '<input type="hidden" id="deal-id" value="' + (deal ? deal.id : '') + '" />' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Deal Name *</label><input type="text" id="deal-name" value="' + escHtml(deal ? deal.deal_name : '') + '" placeholder="e.g. Office Lease - 500 Main St" /></div>' +
+      '<div class="deal-modal-field"><label>Deal Type</label><select id="deal-deal-type"><option value="lease">Lease</option><option value="sale">Sale</option><option value="purchase">Purchase</option><option value="sublease">Sublease</option><option value="renewal">Renewal</option><option value="development">Development</option><option value="other">Other</option></select></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Property Address</label><input type="text" id="deal-address" value="' + escHtml(deal ? deal.property_address : '') + '" placeholder="123 Main St, Suite 200" /></div>' +
+      '<div class="deal-modal-field"><label>Property Type</label><select id="deal-prop-type"><option value="">Select...</option><option value="office">Office</option><option value="retail">Retail</option><option value="industrial">Industrial</option><option value="multifamily">Multifamily</option><option value="mixed_use">Mixed Use</option><option value="hospitality">Hospitality</option><option value="medical">Medical</option><option value="land">Land</option><option value="warehouse">Warehouse</option><option value="flex">Flex</option><option value="other">Other</option></select></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Client Name</label><input type="text" id="deal-client" value="' + escHtml(deal ? deal.client_name : '') + '" /></div>' +
+      '<div class="deal-modal-field"><label>Client Company</label><input type="text" id="deal-company" value="' + escHtml(deal ? deal.client_company : '') + '" /></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Client Email</label><input type="email" id="deal-email" value="' + escHtml(deal ? deal.client_email : '') + '" /></div>' +
+      '<div class="deal-modal-field"><label>Client Phone</label><input type="tel" id="deal-phone" value="' + escHtml(deal ? deal.client_phone : '') + '" /></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Sq Ft</label><input type="number" id="deal-sqft" value="' + (deal ? deal.sqft || '' : '') + '" /></div>' +
+      '<div class="deal-modal-field"><label>Asking Price ($)</label><input type="number" id="deal-asking" step="0.01" value="' + (deal ? deal.asking_price || '' : '') + '" /></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Lease Rate ($/sqft/yr)</label><input type="number" id="deal-lease-rate" step="0.01" value="' + (deal ? deal.lease_rate_sqft || '' : '') + '" /></div>' +
+      '<div class="deal-modal-field"><label>Lease Term (months)</label><input type="number" id="deal-lease-term" value="' + (deal ? deal.lease_term_months || '' : '') + '" /></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>NNN/CAM ($/sqft)</label><input type="number" id="deal-nnn" step="0.01" value="' + (deal ? deal.nnn_cam || '' : '') + '" /></div>' +
+      '<div class="deal-modal-field"><label>Commission Rate (%)</label><input type="number" id="deal-comm-rate" step="0.01" value="' + (deal ? deal.commission_rate || '' : '') + '" /></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Stage</label><select id="deal-status">' + DEAL_STAGES.map(function(s) { return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('') + '</select></div>' +
+      '<div class="deal-modal-field"><label>Expected Close Date</label><input type="date" id="deal-close" value="' + (deal ? deal.close_date || '' : '') + '" /></div>' +
+    '</div>' +
+    '<div class="deal-modal-row">' +
+      '<div class="deal-modal-field"><label>Source</label><input type="text" id="deal-source" value="' + escHtml(deal ? deal.source : '') + '" placeholder="Referral, CoStar, Sign Call..." /></div>' +
+      '<div class="deal-modal-field"><label>Assigned To</label><input type="text" id="deal-assigned" value="' + escHtml(deal ? deal.assigned_to : '') + '" /></div>' +
+    '</div>' +
+    '<div class="deal-modal-field"><label>Notes</label><textarea id="deal-notes" rows="2">' + escHtml(deal ? deal.notes : '') + '</textarea></div>' +
+    '<div class="deal-modal-actions">' +
+      (deal ? '<button style="background:#fee2e2;color:#dc2626;border:none;margin-right:auto;" onclick="deleteDeal()">Delete</button>' : '') +
+      '<button style="background:white;border:1px solid #d1d5db;color:#374151;" onclick="closeDealModal()">Cancel</button>' +
+      '<button style="background:#1a56db;color:white;border:none;" onclick="saveDeal()">Save Deal</button>' +
+    '</div>' +
+    '</div></div>';
+
+  // Remove existing modal
+  var existing = document.getElementById('dealModal');
+  if (existing) existing.remove();
+
+  document.body.insertAdjacentHTML('beforeend', html);
+
+  // Set select values
+  if (deal) {
+    if (deal.deal_type) document.getElementById('deal-deal-type').value = deal.deal_type;
+    if (deal.property_type) document.getElementById('deal-prop-type').value = deal.property_type;
+    if (deal.status) document.getElementById('deal-status').value = deal.status;
+  }
+}
+
+function closeDealModal() {
+  var m = document.getElementById('dealModal');
+  if (m) m.remove();
+}
+
+function editDeal(id) {
+  var deal = allDeals.find(function(d) { return d.id === id; });
+  if (deal) openDealModal(deal);
+}
+
+async function saveDeal() {
+  var name = document.getElementById('deal-name').value.trim();
+  if (!name) { alert('Please enter a deal name.'); return; }
+
+  var deal = {
+    deal_name: name,
+    deal_type: document.getElementById('deal-deal-type').value,
+    property_address: document.getElementById('deal-address').value.trim() || null,
+    property_type: document.getElementById('deal-prop-type').value || null,
+    client_name: document.getElementById('deal-client').value.trim() || null,
+    client_company: document.getElementById('deal-company').value.trim() || null,
+    client_email: document.getElementById('deal-email').value.trim() || null,
+    client_phone: document.getElementById('deal-phone').value.trim() || null,
+    sqft: parseFloat(document.getElementById('deal-sqft').value) || null,
+    asking_price: parseFloat(document.getElementById('deal-asking').value) || null,
+    lease_rate_sqft: parseFloat(document.getElementById('deal-lease-rate').value) || null,
+    lease_term_months: parseInt(document.getElementById('deal-lease-term').value) || null,
+    nnn_cam: parseFloat(document.getElementById('deal-nnn').value) || null,
+    commission_rate: parseFloat(document.getElementById('deal-comm-rate').value) || null,
+    status: document.getElementById('deal-status').value,
+    close_date: document.getElementById('deal-close').value || null,
+    source: document.getElementById('deal-source').value.trim() || null,
+    assigned_to: document.getElementById('deal-assigned').value.trim() || null,
+    notes: document.getElementById('deal-notes').value.trim() || null
+  };
+
+  var id = document.getElementById('deal-id').value;
+  if (id) deal.id = id;
+
+  try { await RVData.saveCommercialDeal(deal); } catch(e) {
+    var rows = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]');
+    if (deal.id) {
+      if (deal.commission_rate && deal.asking_price) deal.commission_amount = parseFloat(((deal.asking_price * deal.commission_rate) / 100).toFixed(2));
+      rows = rows.map(function(r) { return r.id === deal.id ? Object.assign(r, deal) : r; });
+    } else {
+      deal.id = Date.now().toString();
+      if (deal.commission_rate && deal.asking_price) deal.commission_amount = parseFloat(((deal.asking_price * deal.commission_rate) / 100).toFixed(2));
+      deal.created_at = new Date().toISOString();
+      rows.unshift(deal);
+    }
+    localStorage.setItem('rv_commercial_deals', JSON.stringify(rows));
+  }
+
+  closeDealModal();
+  await loadDeals();
+}
+
+async function deleteDeal() {
+  var id = document.getElementById('deal-id').value;
+  if (!id || !confirm('Delete this deal?')) return;
+  try { await RVData.deleteCommercialDeal(id); } catch(e) {
+    var rows = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]');
+    rows = rows.filter(function(r) { return r.id !== id; });
+    localStorage.setItem('rv_commercial_deals', JSON.stringify(rows));
+  }
+  closeDealModal();
+  await loadDeals();
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function() {
+  loadFundingApplications();
+  showCommercialOnboarding();
+});
 </script>
 
+<!-- COMMERCIAL ONBOARDING OVERLAY -->
+<div id="comm-onboarding" class="comm-ob-overlay" style="display:none;" onclick="if(event.target===this)cobFinish()">
+  <div class="comm-ob-card" style="position:relative;">
+    <button onclick="cobFinish()" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;border:none;background:#f1f5f9;font-size:1.1rem;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center;">&times;</button>
+    <!-- Step 1: Welcome -->
+    <div id="cob-step-1">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:3rem;margin-bottom:0.75rem;">🏢</div>
+        <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">Welcome to the RentVerified Commercial Portal</h2>
+        <p style="color:#64748b;font-size:0.95rem;line-height:1.5;">Manage your commercial properties, tenants, and business funding all from one dashboard.</p>
+      </div>
+      <div style="background:#f8fafc;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+        <div style="font-size:0.82rem;color:#64748b;line-height:1.5;">As a RentVerified commercial partner, you help your tenants access the funding they need to succeed. Funded tenants complete buildouts, sign longer leases, and pay rent reliably. We handle everything from application to funding.</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;background:#1a56db;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="cobNext(2)">Continue</button>
+    </div>
+
+    <!-- Step 2: Products -->
+    <div id="cob-step-2" style="display:none;">
+      <div style="text-align:center;margin-bottom:1.25rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:0.3rem;">Recommended Products</h2>
+        <p style="color:#64748b;font-size:0.85rem;">These funding products are pre-selected based on commercial property best practices. Toggle any you don't need.</p>
+      </div>
+
+      <div id="cob-products"></div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;margin-top:1rem;background:#1a56db;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="cobFinish()">Go to Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Supabase Backend -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>
+// Force localStorage mode — Supabase placeholders aren't configured
+if (typeof RVData !== 'undefined' && RVData._useSupabase) {
+  RVData._useSupabase = function() { return false; };
+}
+</script>
+<script src="twilio-integration.js"></script>
+<script src="share-widget.js" data-share-title="Commercial Real Estate" data-share-text="Manage commercial properties on RentVerified"></script>
+<script src="recommended-supplies.js" data-industry="commercial"></script>
+<script src="business-advisor.js" data-industry="commercial"></script>
+<script src="service-connect.js"></script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
 </body>
 </html>

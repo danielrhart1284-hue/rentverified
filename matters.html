@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matters &amp; Cases – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Attorney Matters Page ── */
+    .mat-hero {
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .mat-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .mat-hero p { font-size: 1rem; opacity: 0.8; max-width: 520px; margin: 0 auto 1.25rem; }
+    .mat-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .mat-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #c4b5fd; }
+    .mat-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .mat-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    /* ── Toolbar ── */
+    .mat-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; padding: 1.25rem 0;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .mat-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .mat-search:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
+    .mat-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; color: #374151; min-width: 120px;
+    }
+    .mat-btn {
+      padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700;
+      font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s;
+    }
+    .mat-btn-primary { background: #7c3aed; color: white; }
+    .mat-btn-primary:hover { background: #6d28d9; }
+    .mat-btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; }
+    .mat-btn-outline:hover { border-color: #7c3aed; color: #5b21b6; }
+    .mat-btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+    .mat-btn-danger { background: #fee2e2; color: #dc2626; }
+    .mat-btn-danger:hover { background: #fecaca; }
+    .mat-btn-success { background: #d1fae5; color: #065f46; }
+
+    /* ── Status Pills ── */
+    .status-pill {
+      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 99px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .status-intake      { background: #f3f4f6; color: #6b7280; }
+    .status-open        { background: #dbeafe; color: #2563eb; }
+    .status-discovery   { background: #ede9fe; color: #7c3aed; }
+    .status-negotiation { background: #fef3c7; color: #92400e; }
+    .status-trial       { background: #fee2e2; color: #dc2626; }
+    .status-appeal      { background: #fce7f3; color: #be185d; }
+    .status-closed      { background: #d1fae5; color: #065f46; }
+    .status-archived    { background: #f3f4f6; color: #9ca3af; }
+
+    /* ── Summary Cards ── */
+    .mat-summary {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem; margin-bottom: 1.75rem;
+    }
+    .mat-sum-card {
+      background: white; border-radius: 14px; padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid #f1f5f9;
+    }
+    .mat-sum-card .num { font-size: 1.5rem; font-weight: 900; color: #1e293b; }
+    .mat-sum-card .lbl { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ── Tab Bar ── */
+    .mat-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .mat-tab {
+      padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb;
+      background: white; color: #6b7280; transition: 0.15s;
+    }
+    .mat-tab:hover { border-color: #7c3aed; color: #5b21b6; }
+    .mat-tab.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+
+    /* ── Table ── */
+    .mat-table { width: 100%; border-collapse: collapse; }
+    .mat-table th {
+      text-align: left; font-size: 0.72rem; color: #64748b; text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 0.6rem 0.75rem; border-bottom: 2px solid #e5e7eb;
+    }
+    .mat-table td {
+      padding: 0.75rem; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; color: #1e293b;
+    }
+    .mat-table tr:hover td { background: #f8f7ff; }
+    .mat-table .matter-link { color: #7c3aed; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .mat-table .matter-link:hover { text-decoration: underline; }
+    .mat-table .client { color: #64748b; font-size: 0.82rem; }
+    .mat-empty { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+    .mat-empty .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+
+    /* ── Deadlines sidebar ── */
+    .mat-deadlines-bar {
+      background: white; border-radius: 14px; padding: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid #f1f5f9;
+      margin-bottom: 1.5rem;
+    }
+    .mat-deadlines-bar h3 { font-size: 0.95rem; margin-bottom: 0.75rem; color: #1e293b; }
+    .dl-item { display: flex; align-items: center; gap: 10px; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
+    .dl-item:last-child { border-bottom: none; }
+    .dl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dl-dot.overdue { background: #dc2626; }
+    .dl-dot.soon { background: #f59e0b; }
+    .dl-dot.ok { background: #10b981; }
+    .dl-title { font-weight: 600; font-size: 0.85rem; color: #1e293b; }
+    .dl-meta { font-size: 0.75rem; color: #64748b; }
+
+    /* ── Modal Overlay ── */
+    .mat-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 9999; justify-content: center; align-items: flex-start;
+      padding: 2rem 1rem; overflow-y: auto;
+    }
+    .mat-overlay.show { display: flex; }
+    .mat-modal {
+      background: white; border-radius: 18px; width: 100%; max-width: 720px;
+      box-shadow: 0 24px 48px rgba(0,0,0,.15); animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .mat-modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+    }
+    .mat-modal-header h2 { font-size: 1.2rem; color: #1e293b; }
+    .mat-modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+    .mat-modal-close:hover { color: #ef4444; }
+    .mat-modal-body { padding: 1.5rem; }
+    .mat-modal-footer {
+      display: flex; justify-content: flex-end; gap: 0.75rem;
+      padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb;
+    }
+
+    /* ── Form ── */
+    .mat-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .mat-form-full { grid-column: 1 / -1; }
+    .mat-label { display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .mat-input, .mat-textarea {
+      width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;
+    }
+    .mat-input:focus, .mat-textarea:focus {
+      outline: none; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+    }
+    .mat-textarea { resize: vertical; min-height: 70px; }
+
+    /* ── Detail Tabs ── */
+    .det-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0; }
+    .det-tab {
+      padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: 0.15s;
+    }
+    .det-tab:hover { color: #5b21b6; }
+    .det-tab.active { color: #7c3aed; border-bottom-color: #7c3aed; }
+    .det-panel { display: none; }
+    .det-panel.show { display: block; }
+
+    /* ── Timer ── */
+    .timer-bar {
+      background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px;
+      padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .timer-display { font-size: 1.5rem; font-weight: 900; font-family: monospace; color: #7c3aed; }
+    .timer-matter { font-size: 0.82rem; color: #64748b; }
+
+    /* ── Conflict Warning ── */
+    .conflict-banner {
+      background: #fef3c7; border: 1px solid #fbbf24; border-radius: 10px;
+      padding: 0.75rem 1rem; margin-bottom: 1rem; display: none;
+    }
+    .conflict-banner.show { display: block; }
+    .conflict-banner h4 { color: #92400e; font-size: 0.88rem; margin-bottom: 0.3rem; }
+    .conflict-banner ul { margin: 0; padding-left: 1.25rem; }
+    .conflict-banner li { font-size: 0.82rem; color: #78350f; margin-bottom: 0.2rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .mat-form-grid { grid-template-columns: 1fr; }
+      .mat-hero h1 { font-size: 1.5rem; }
+      .mat-table th:nth-child(4), .mat-table td:nth-child(4),
+      .mat-table th:nth-child(5), .mat-table td:nth-child(5) { display: none; }
+    }
+    /* Mobile-friendly modals */
+    @media (max-width: 768px) {
+      .modal, [class*="modal"] { max-height: 95vh !important; width: 95% !important; max-width: none !important; margin: 0.5rem !important; border-radius: 12px !important; }
+      .modal-overlay, [class*="overlay"] { padding: 0.5rem !important; align-items: flex-end !important; }
+    }
+    /* Mobile-scrollable tables */
+    @media (max-width: 768px) {
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      th, td { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:68px;display:flex;align-items:center;justify-content:space-between;">
+  <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:800;color:#7c3aed;text-decoration:none;">
+    <span style="font-size:1.5rem;">⚖️</span> RentVerified <span style="font-size:.7rem;color:#94a3b8;margin-left:4px;">Attorney</span>
+  </a>
+  <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+    <a href="accounting.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Accounting</a>
+    <a href="time-tracking.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Time</a>
+    <a href="invoice-builder.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Invoices</a>
+    <a href="documents.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Docs</a>
+    <a href="eviction.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Litigation</a>
+    <a href="crm.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Clients</a>
+    <a href="loan-connect.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Loan Connect</a>
+    <a href="messages.html" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Messages</a>
+    <a href="#" onclick="RVServiceConnect.open();return false;" style="color:#4b5563;font-weight:500;text-decoration:none;font-size:.88rem;">Service Connect</a>
+    <a href="index.html" style="color:#7c3aed;font-weight:600;text-decoration:none;font-size:.88rem;">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="mat-hero">
+  <h1>Matters & Cases</h1>
+  <p>Manage your caseload, track deadlines, log billable hours, and run conflict checks.</p>
+  <div class="mat-hero-stats">
+    <div class="mat-hero-stat"><div class="num" id="stat-open">0</div><div class="lbl">Open Matters</div></div>
+    <div class="mat-hero-stat"><div class="num" id="stat-deadlines">0</div><div class="lbl">Upcoming Deadlines</div></div>
+    <div class="mat-hero-stat"><div class="num" id="stat-unbilled">$0</div><div class="lbl">Unbilled Hours</div></div>
+    <div class="mat-hero-stat"><div class="num" id="stat-billed">$0</div><div class="lbl">Billed This Month</div></div>
+  </div>
+</section>
+
+<!-- ── Active Timer Bar ── -->
+<div class="mat-wrap">
+  <div class="timer-bar" id="timer-bar" style="display:none;">
+    <span style="font-size:1.5rem;">⏱️</span>
+    <div>
+      <div class="timer-display" id="timer-display">00:00:00</div>
+      <div class="timer-matter" id="timer-matter-label">—</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:.5rem;">
+      <button class="mat-btn mat-btn-sm mat-btn-danger" onclick="stopTimer()">Stop</button>
+    </div>
+  </div>
+
+  <!-- ── Upcoming Deadlines Bar ── -->
+  <div class="mat-deadlines-bar" id="deadlines-bar">
+    <h3>📅 Upcoming Deadlines</h3>
+    <div id="deadlines-list"><span style="color:#94a3b8;font-size:.85rem;">No upcoming deadlines.</span></div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="mat-toolbar">
+    <input class="mat-search" type="text" id="search" placeholder="Search matters, clients, case numbers..." oninput="renderMatters()" />
+    <select class="mat-select" id="filter-status" onchange="renderMatters()">
+      <option value="">All Statuses</option>
+      <option value="intake">Intake</option>
+      <option value="open">Open</option>
+      <option value="discovery">Discovery</option>
+      <option value="negotiation">Negotiation</option>
+      <option value="trial">Trial</option>
+      <option value="appeal">Appeal</option>
+      <option value="closed">Closed</option>
+      <option value="archived">Archived</option>
+    </select>
+    <select class="mat-select" id="filter-type" onchange="renderMatters()">
+      <option value="">All Types</option>
+      <option value="eviction">Eviction</option>
+      <option value="landlord_tenant">Landlord/Tenant</option>
+      <option value="real_estate">Real Estate</option>
+      <option value="contract">Contract</option>
+      <option value="litigation">Litigation</option>
+      <option value="corporate">Corporate</option>
+      <option value="estate_planning">Estate Planning</option>
+      <option value="family">Family</option>
+      <option value="criminal">Criminal</option>
+      <option value="immigration">Immigration</option>
+      <option value="other">Other</option>
+    </select>
+    <a href="doc-generator.html?template=atty-invoice" style="background:#1a56db;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;">📄 Generate Invoice</a>
+    <button class="mat-btn mat-btn-primary" onclick="openNewMatter()">+ New Matter</button>
+  </div>
+
+  <!-- ── Summary Cards ── -->
+  <div class="mat-summary" id="summary-cards"></div>
+
+  <!-- ── Matters Table ── -->
+  <div style="background:white;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #f1f5f9;overflow-x:auto;">
+    <table class="mat-table">
+      <thead>
+        <tr>
+          <th>Matter #</th>
+          <th>Title / Client</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Opened</th>
+          <th>Billed</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="matters-body"></tbody>
+    </table>
+    <div class="mat-empty" id="matters-empty" style="display:none;">
+      <div class="icon">⚖️</div>
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:.25rem;">No matters yet</div>
+      <div>Click "+ New Matter" to open your first case.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ NEW / EDIT MATTER MODAL ═══════ -->
+<div class="mat-overlay" id="modal-matter">
+  <div class="mat-modal">
+    <div class="mat-modal-header">
+      <h2 id="modal-matter-title">New Matter</h2>
+      <button class="mat-modal-close" onclick="closeModal('modal-matter')">&times;</button>
+    </div>
+    <div class="mat-modal-body">
+      <!-- Conflict Warning -->
+      <div class="conflict-banner" id="conflict-banner">
+        <h4>⚠️ Possible Conflict Detected</h4>
+        <ul id="conflict-list"></ul>
+      </div>
+
+      <input type="hidden" id="m-id" />
+      <div class="mat-form-grid">
+        <div>
+          <label class="mat-label">Matter Number *</label>
+          <input class="mat-input" id="m-number" placeholder="e.g. 2026-001" />
+        </div>
+        <div>
+          <label class="mat-label">Matter Type *</label>
+          <select class="mat-input" id="m-type">
+            <option value="eviction">Eviction</option>
+            <option value="landlord_tenant">Landlord/Tenant</option>
+            <option value="real_estate">Real Estate</option>
+            <option value="contract">Contract</option>
+            <option value="litigation">Litigation</option>
+            <option value="corporate">Corporate</option>
+            <option value="estate_planning">Estate Planning</option>
+            <option value="family">Family</option>
+            <option value="criminal">Criminal</option>
+            <option value="immigration">Immigration</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="mat-form-full">
+          <label class="mat-label">Title / Description *</label>
+          <input class="mat-input" id="m-title" placeholder="e.g. Smith v. Johnson — Lease Breach" />
+        </div>
+        <div>
+          <label class="mat-label">Client Name *</label>
+          <input class="mat-input" id="m-client" placeholder="Client name" oninput="runConflictCheck()" />
+        </div>
+        <div>
+          <label class="mat-label">Client Email</label>
+          <input class="mat-input" id="m-client-email" type="email" placeholder="client@email.com" />
+        </div>
+        <div>
+          <label class="mat-label">Client Phone</label>
+          <input class="mat-input" id="m-client-phone" placeholder="(555) 123-4567" />
+        </div>
+        <div>
+          <label class="mat-label">Status</label>
+          <select class="mat-input" id="m-status">
+            <option value="intake">Intake</option>
+            <option value="open">Open</option>
+            <option value="discovery">Discovery</option>
+            <option value="negotiation">Negotiation</option>
+            <option value="trial">Trial</option>
+            <option value="appeal">Appeal</option>
+            <option value="closed">Closed</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <div>
+          <label class="mat-label">Hourly Rate ($)</label>
+          <input class="mat-input" id="m-rate" type="number" step="0.01" placeholder="e.g. 350.00" />
+        </div>
+        <div class="mat-form-full">
+          <label class="mat-label">Notes</label>
+          <textarea class="mat-textarea" id="m-notes" placeholder="Internal notes..."></textarea>
+        </div>
+      </div>
+
+      <details style="margin-top:1rem;">
+        <summary style="cursor:pointer;font-size:.9rem;font-weight:600;color:#6b7280;padding:.5rem 0;user-select:none;">Additional Details (Optional)</summary>
+        <div class="mat-form-grid" style="margin-top:.75rem;">
+          <div>
+            <label class="mat-label">Opposing Party</label>
+            <input class="mat-input" id="m-opposing" placeholder="Opposing party name" oninput="runConflictCheck()" />
+          </div>
+          <div>
+            <label class="mat-label">Opposing Counsel</label>
+            <input class="mat-input" id="m-opposing-counsel" placeholder="Attorney name / firm" />
+          </div>
+          <div>
+            <label class="mat-label">Court</label>
+            <input class="mat-input" id="m-court" placeholder="Court name" />
+          </div>
+          <div>
+            <label class="mat-label">Case Number</label>
+            <input class="mat-input" id="m-case-number" placeholder="Court case #" />
+          </div>
+          <div>
+            <label class="mat-label">Judge</label>
+            <input class="mat-input" id="m-judge" placeholder="Assigned judge" />
+          </div>
+          <div>
+            <label class="mat-label">Retainer ($)</label>
+            <input class="mat-input" id="m-retainer" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label class="mat-label">Statute of Limitations</label>
+            <input class="mat-input" id="m-sol" type="date" />
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;padding-top:1.5rem;">
+            <input type="checkbox" id="m-trust" />
+            <label for="m-trust" style="font-size:.85rem;color:#374151;">Paid from IOLTA Trust Account</label>
+          </div>
+        </div>
+      </details>
+      </div>
+    </div>
+    <div class="mat-modal-footer">
+      <button class="mat-btn mat-btn-outline" onclick="closeModal('modal-matter')">Cancel</button>
+      <button class="mat-btn mat-btn-primary" onclick="saveMatter()">Save Matter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MATTER DETAIL MODAL ═══════ -->
+<div class="mat-overlay" id="modal-detail">
+  <div class="mat-modal" style="max-width:800px;">
+    <div class="mat-modal-header">
+      <h2 id="detail-title">Matter Details</h2>
+      <button class="mat-modal-close" onclick="closeModal('modal-detail')">&times;</button>
+    </div>
+    <div class="mat-modal-body">
+      <!-- Detail Tabs -->
+      <div class="det-tabs">
+        <div class="det-tab active" data-tab="info" onclick="showDetailTab('info')">Info</div>
+        <div class="det-tab" data-tab="deadlines" onclick="showDetailTab('deadlines')">Deadlines</div>
+        <div class="det-tab" data-tab="time" onclick="showDetailTab('time')">Time & Billing</div>
+        <div class="det-tab" data-tab="notes" onclick="showDetailTab('notes')">Notes</div>
+      </div>
+
+      <!-- Info Panel -->
+      <div class="det-panel show" id="det-info"></div>
+
+      <!-- Deadlines Panel -->
+      <div class="det-panel" id="det-deadlines"></div>
+
+      <!-- Time Panel -->
+      <div class="det-panel" id="det-time"></div>
+
+      <!-- Notes Panel -->
+      <div class="det-panel" id="det-notes"></div>
+    </div>
+    <div class="mat-modal-footer">
+      <button class="mat-btn mat-btn-outline" onclick="editMatter(currentMatterId)">Edit Matter</button>
+      <button class="mat-btn mat-btn-danger mat-btn-sm" onclick="deleteMatter(currentMatterId)">Delete</button>
+      <button class="mat-btn mat-btn-outline" onclick="closeModal('modal-detail')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ADD DEADLINE MODAL ═══════ -->
+<div class="mat-overlay" id="modal-deadline">
+  <div class="mat-modal" style="max-width:480px;">
+    <div class="mat-modal-header">
+      <h2>Add Deadline</h2>
+      <button class="mat-modal-close" onclick="closeModal('modal-deadline')">&times;</button>
+    </div>
+    <div class="mat-modal-body">
+      <input type="hidden" id="dl-matter-id" />
+      <div style="margin-bottom:1rem;">
+        <label class="mat-label">Deadline Title *</label>
+        <input class="mat-input" id="dl-title" placeholder="e.g. Response to Motion Due" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label class="mat-label">Date *</label>
+          <input class="mat-input" id="dl-date" type="date" />
+        </div>
+        <div>
+          <label class="mat-label">Type</label>
+          <select class="mat-input" id="dl-type">
+            <option value="filing">Filing</option>
+            <option value="hearing">Hearing</option>
+            <option value="discovery">Discovery</option>
+            <option value="deposition">Deposition</option>
+            <option value="mediation">Mediation</option>
+            <option value="trial">Trial</option>
+            <option value="appeal">Appeal</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label class="mat-label">Alert Days Before</label>
+        <input class="mat-input" id="dl-alert" type="number" value="7" min="0" />
+      </div>
+      <div>
+        <label class="mat-label">Notes</label>
+        <textarea class="mat-textarea" id="dl-notes" placeholder="Optional notes..."></textarea>
+      </div>
+    </div>
+    <div class="mat-modal-footer">
+      <button class="mat-btn mat-btn-outline" onclick="closeModal('modal-deadline')">Cancel</button>
+      <button class="mat-btn mat-btn-primary" onclick="saveDeadline()">Save Deadline</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ADD TIME ENTRY MODAL ═══════ -->
+<div class="mat-overlay" id="modal-time">
+  <div class="mat-modal" style="max-width:480px;">
+    <div class="mat-modal-header">
+      <h2>Log Time Entry</h2>
+      <button class="mat-modal-close" onclick="closeModal('modal-time')">&times;</button>
+    </div>
+    <div class="mat-modal-body">
+      <input type="hidden" id="te-matter-id" />
+      <div style="margin-bottom:1rem;">
+        <label class="mat-label">Description *</label>
+        <input class="mat-input" id="te-desc" placeholder="e.g. Draft motion for summary judgment" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label class="mat-label">Date</label>
+          <input class="mat-input" id="te-date" type="date" />
+        </div>
+        <div>
+          <label class="mat-label">Hours *</label>
+          <input class="mat-input" id="te-hours" type="number" step="0.1" min="0.1" placeholder="e.g. 1.5" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label class="mat-label">Rate ($/hr)</label>
+          <input class="mat-input" id="te-rate" type="number" step="0.01" placeholder="From matter" />
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;padding-top:1.5rem;">
+          <input type="checkbox" id="te-billable" checked />
+          <label for="te-billable" style="font-size:.85rem;color:#374151;">Billable</label>
+        </div>
+      </div>
+    </div>
+    <div class="mat-modal-footer">
+      <button class="mat-btn mat-btn-outline" onclick="closeModal('modal-time')">Cancel</button>
+      <button class="mat-btn mat-btn-primary" onclick="saveTimeEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script src="workspace.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════════
+// Matters & Cases — Attorney Vertical
+// ════════════════════════════════════════════════════════════════════
+
+let allMatters = [];
+let allDeadlines = [];
+let allTimeEntries = [];
+let currentMatterId = null;
+let timerInterval = null;
+let activeTimer = null;
+
+const MATTER_TYPES = {
+  eviction: 'Eviction', landlord_tenant: 'Landlord/Tenant', real_estate: 'Real Estate',
+  contract: 'Contract', litigation: 'Litigation', corporate: 'Corporate',
+  estate_planning: 'Estate Planning', family: 'Family', criminal: 'Criminal',
+  immigration: 'Immigration', other: 'Other'
+};
+
+const STATUSES = {
+  intake: 'Intake', open: 'Open', discovery: 'Discovery', negotiation: 'Negotiation',
+  trial: 'Trial', appeal: 'Appeal', closed: 'Closed', archived: 'Archived'
+};
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadAll();
+  renderMatters();
+  renderDeadlines();
+  checkActiveTimer();
+});
+
+async function loadAll() {
+  allMatters = await RVData.getMatters();
+  allDeadlines = await RVData.getMatterDeadlines();
+  allTimeEntries = await RVData.getMatterTimeEntries();
+  updateStats();
+}
+
+function updateStats() {
+  const open = allMatters.filter(m => !['closed','archived'].includes(m.status));
+  const now = new Date();
+  const upcoming = allDeadlines.filter(d => !d.is_completed && new Date(d.deadline_date) >= now);
+  const unbilled = allTimeEntries.filter(e => e.is_billable && !e.is_billed);
+  const unbilledAmt = unbilled.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const billedThisMonth = allTimeEntries.filter(e => e.is_billed && (e.date || '').startsWith(thisMonth));
+  const billedAmt = billedThisMonth.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+
+  document.getElementById('stat-open').textContent = open.length;
+  document.getElementById('stat-deadlines').textContent = upcoming.length;
+  document.getElementById('stat-unbilled').textContent = '$' + unbilledAmt.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  document.getElementById('stat-billed').textContent = '$' + billedAmt.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  // Summary cards
+  const statusCounts = {};
+  allMatters.forEach(m => { statusCounts[m.status] = (statusCounts[m.status] || 0) + 1; });
+  let html = '';
+  Object.entries(STATUSES).forEach(function(entry) {
+    var k = entry[0], v = entry[1];
+    if (statusCounts[k]) {
+      html += '<div class="mat-sum-card"><div class="num">' + statusCounts[k] + '</div><div class="lbl">' + v + '</div></div>';
+    }
+  });
+  if (!html) html = '<div class="mat-sum-card"><div class="num">0</div><div class="lbl">Total Matters</div></div>';
+  document.getElementById('summary-cards').innerHTML = html;
+}
+
+// ── Render Matters ──
+function renderMatters() {
+  const search = (document.getElementById('search').value || '').toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const type = document.getElementById('filter-type').value;
+
+  let filtered = allMatters;
+  if (search) filtered = filtered.filter(m =>
+    (m.title || '').toLowerCase().includes(search) ||
+    (m.matter_number || '').toLowerCase().includes(search) ||
+    (m.client_name || '').toLowerCase().includes(search) ||
+    (m.opposing_party || '').toLowerCase().includes(search) ||
+    (m.case_number || '').toLowerCase().includes(search)
+  );
+  if (status) filtered = filtered.filter(m => m.status === status);
+  if (type) filtered = filtered.filter(m => m.matter_type === type);
+
+  const tbody = document.getElementById('matters-body');
+  const empty = document.getElementById('matters-empty');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(function(m) {
+    var billed = parseFloat(m.billed_total) || 0;
+    var entries = allTimeEntries.filter(function(e) { return e.matter_id === m.id; });
+    var totalAmt = entries.reduce(function(s, e) { return s + (parseFloat(e.amount) || 0); }, 0);
+    return '<tr>' +
+      '<td><span class="matter-link" onclick="openDetail(\'' + m.id + '\')">' + esc(m.matter_number) + '</span></td>' +
+      '<td><div style="font-weight:600;">' + esc(m.title) + '</div><div class="client">' + esc(m.client_name) + '</div></td>' +
+      '<td>' + (MATTER_TYPES[m.matter_type] || m.matter_type) + '</td>' +
+      '<td><span class="status-pill status-' + m.status + '">' + (STATUSES[m.status] || m.status) + '</span></td>' +
+      '<td style="font-size:.82rem;color:#64748b;">' + formatDate(m.date_opened || m.created_at) + '</td>' +
+      '<td style="font-weight:600;">$' + totalAmt.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) + '</td>' +
+      '<td><button class="mat-btn mat-btn-sm mat-btn-outline" onclick="startTimerForMatter(\'' + m.id + '\')">⏱</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ── Render Deadlines ──
+function renderDeadlines() {
+  const now = new Date();
+  const upcoming = allDeadlines.filter(function(d) { return !d.is_completed; })
+    .sort(function(a, b) { return new Date(a.deadline_date) - new Date(b.deadline_date); })
+    .slice(0, 8);
+
+  if (upcoming.length === 0) {
+    document.getElementById('deadlines-list').innerHTML = '<span style="color:#94a3b8;font-size:.85rem;">No upcoming deadlines.</span>';
+    return;
+  }
+
+  document.getElementById('deadlines-list').innerHTML = upcoming.map(function(d) {
+    var dDate = new Date(d.deadline_date + 'T00:00:00');
+    var daysUntil = Math.ceil((dDate - now) / 86400000);
+    var dotClass = daysUntil < 0 ? 'overdue' : daysUntil <= 7 ? 'soon' : 'ok';
+    var matter = allMatters.find(function(m) { return m.id === d.matter_id; });
+    var label = daysUntil < 0 ? (Math.abs(daysUntil) + 'd overdue') : daysUntil === 0 ? 'Today' : (daysUntil + 'd away');
+    return '<div class="dl-item">' +
+      '<div class="dl-dot ' + dotClass + '"></div>' +
+      '<div style="flex:1;">' +
+        '<div class="dl-title">' + esc(d.title) + '</div>' +
+        '<div class="dl-meta">' + (matter ? esc(matter.matter_number) + ' — ' : '') + formatDate(d.deadline_date) + ' · ' + label + '</div>' +
+      '</div>' +
+      '<button class="mat-btn mat-btn-sm mat-btn-success" onclick="completeDeadline(\'' + d.id + '\')" title="Mark complete">✓</button>' +
+    '</div>';
+  }).join('');
+}
+
+// ── New Matter ──
+function openNewMatter() {
+  document.getElementById('modal-matter-title').textContent = 'New Matter';
+  document.getElementById('m-id').value = '';
+  document.getElementById('m-number').value = generateMatterNumber();
+  document.getElementById('m-title').value = '';
+  document.getElementById('m-client').value = '';
+  document.getElementById('m-client-email').value = '';
+  document.getElementById('m-client-phone').value = '';
+  document.getElementById('m-type').value = 'eviction';
+  document.getElementById('m-status').value = 'intake';
+  document.getElementById('m-opposing').value = '';
+  document.getElementById('m-opposing-counsel').value = '';
+  document.getElementById('m-court').value = '';
+  document.getElementById('m-case-number').value = '';
+  document.getElementById('m-judge').value = '';
+  document.getElementById('m-rate').value = '';
+  document.getElementById('m-retainer').value = '';
+  document.getElementById('m-sol').value = '';
+  document.getElementById('m-trust').checked = false;
+  document.getElementById('m-notes').value = '';
+  document.getElementById('conflict-banner').classList.remove('show');
+  openModal('modal-matter');
+}
+
+function generateMatterNumber() {
+  var year = new Date().getFullYear();
+  var count = allMatters.filter(function(m) { return (m.matter_number || '').startsWith(year + '-'); }).length;
+  return year + '-' + String(count + 1).padStart(3, '0');
+}
+
+function editMatter(id) {
+  var m = allMatters.find(function(x) { return x.id === id; });
+  if (!m) return;
+  closeModal('modal-detail');
+  document.getElementById('modal-matter-title').textContent = 'Edit Matter';
+  document.getElementById('m-id').value = m.id;
+  document.getElementById('m-number').value = m.matter_number || '';
+  document.getElementById('m-title').value = m.title || '';
+  document.getElementById('m-client').value = m.client_name || '';
+  document.getElementById('m-client-email').value = m.client_email || '';
+  document.getElementById('m-client-phone').value = m.client_phone || '';
+  document.getElementById('m-type').value = m.matter_type || 'other';
+  document.getElementById('m-status').value = m.status || 'open';
+  document.getElementById('m-opposing').value = m.opposing_party || '';
+  document.getElementById('m-opposing-counsel').value = m.opposing_counsel || '';
+  document.getElementById('m-court').value = m.court_name || '';
+  document.getElementById('m-case-number').value = m.case_number || '';
+  document.getElementById('m-judge').value = m.judge || '';
+  document.getElementById('m-rate').value = m.hourly_rate || '';
+  document.getElementById('m-retainer').value = m.retainer_amount || '';
+  document.getElementById('m-sol').value = m.statute_of_limitations || '';
+  document.getElementById('m-trust').checked = !!m.is_trust_funded;
+  document.getElementById('m-notes').value = m.notes || '';
+  document.getElementById('conflict-banner').classList.remove('show');
+  openModal('modal-matter');
+}
+
+async function saveMatter() {
+  var id = document.getElementById('m-id').value;
+  var matter = {
+    matter_number: document.getElementById('m-number').value.trim(),
+    title: document.getElementById('m-title').value.trim(),
+    client_name: document.getElementById('m-client').value.trim(),
+    client_email: document.getElementById('m-client-email').value.trim(),
+    client_phone: document.getElementById('m-client-phone').value.trim(),
+    matter_type: document.getElementById('m-type').value,
+    status: document.getElementById('m-status').value,
+    opposing_party: document.getElementById('m-opposing').value.trim(),
+    opposing_counsel: document.getElementById('m-opposing-counsel').value.trim(),
+    court_name: document.getElementById('m-court').value.trim(),
+    case_number: document.getElementById('m-case-number').value.trim(),
+    judge: document.getElementById('m-judge').value.trim(),
+    hourly_rate: parseFloat(document.getElementById('m-rate').value) || null,
+    retainer_amount: parseFloat(document.getElementById('m-retainer').value) || 0,
+    statute_of_limitations: document.getElementById('m-sol').value || null,
+    is_trust_funded: document.getElementById('m-trust').checked,
+    notes: document.getElementById('m-notes').value.trim()
+  };
+  if (!matter.matter_number || !matter.title || !matter.client_name) {
+    alert('Please fill in Matter Number, Title, and Client Name.');
+    return;
+  }
+  if (id) matter.id = id;
+
+  var result = await RVData.saveMatter(matter);
+  if (result.error) { alert('Error: ' + (result.error.message || JSON.stringify(result.error))); return; }
+
+  closeModal('modal-matter');
+  await loadAll();
+  renderMatters();
+  renderDeadlines();
+}
+
+async function deleteMatter(id) {
+  if (!confirm('Delete this matter and all its deadlines & time entries? This cannot be undone.')) return;
+  await RVData.deleteMatter(id);
+  closeModal('modal-detail');
+  await loadAll();
+  renderMatters();
+  renderDeadlines();
+}
+
+// ── Conflict Check ──
+var conflictTimeout = null;
+function runConflictCheck() {
+  clearTimeout(conflictTimeout);
+  conflictTimeout = setTimeout(async function() {
+    var client = document.getElementById('m-client').value.trim();
+    var opposing = document.getElementById('m-opposing').value.trim();
+    var editingId = document.getElementById('m-id').value;
+    var conflicts = [];
+
+    if (client.length >= 3) {
+      var results = await RVData.checkConflict(client);
+      results.forEach(function(m) {
+        if (m.id !== editingId) conflicts.push(m);
+      });
+    }
+    if (opposing.length >= 3) {
+      var results2 = await RVData.checkConflict(opposing);
+      results2.forEach(function(m) {
+        if (m.id !== editingId && !conflicts.find(function(c) { return c.id === m.id; })) {
+          conflicts.push(m);
+        }
+      });
+    }
+
+    var banner = document.getElementById('conflict-banner');
+    if (conflicts.length > 0) {
+      document.getElementById('conflict-list').innerHTML = conflicts.map(function(m) {
+        return '<li><strong>' + esc(m.matter_number) + '</strong> — ' + esc(m.title) +
+          ' (Client: ' + esc(m.client_name) + (m.opposing_party ? ', Opposing: ' + esc(m.opposing_party) : '') + ')</li>';
+      }).join('');
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  }, 400);
+}
+
+// ── Matter Detail ──
+async function openDetail(id) {
+  currentMatterId = id;
+  var m = allMatters.find(function(x) { return x.id === id; });
+  if (!m) return;
+
+  document.getElementById('detail-title').textContent = m.matter_number + ' — ' + m.title;
+  showDetailTab('info');
+
+  // Info panel
+  var info = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">' +
+    infoRow('Client', m.client_name) +
+    infoRow('Email', m.client_email || '—') +
+    infoRow('Phone', m.client_phone || '—') +
+    infoRow('Type', MATTER_TYPES[m.matter_type] || m.matter_type) +
+    infoRow('Status', '<span class="status-pill status-' + m.status + '">' + (STATUSES[m.status] || m.status) + '</span>') +
+    infoRow('Opened', formatDate(m.date_opened || m.created_at)) +
+    infoRow('Opposing Party', m.opposing_party || '—') +
+    infoRow('Opposing Counsel', m.opposing_counsel || '—') +
+    infoRow('Court', m.court_name || '—') +
+    infoRow('Case #', m.case_number || '—') +
+    infoRow('Judge', m.judge || '—') +
+    infoRow('Hourly Rate', m.hourly_rate ? '$' + parseFloat(m.hourly_rate).toFixed(2) : '—') +
+    infoRow('Retainer', '$' + (parseFloat(m.retainer_amount) || 0).toFixed(2)) +
+    infoRow('Statute of Limitations', m.statute_of_limitations ? formatDate(m.statute_of_limitations) : '—') +
+    infoRow('IOLTA Trust', m.is_trust_funded ? '<span style="color:#7c3aed;font-weight:700;">Yes</span>' : 'No') +
+  '</div>';
+  document.getElementById('det-info').innerHTML = info;
+
+  // Deadlines
+  var deadlines = allDeadlines.filter(function(d) { return d.matter_id === id; });
+  var dlHtml = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
+    '<h3 style="margin:0;font-size:.95rem;">Deadlines (' + deadlines.length + ')</h3>' +
+    '<button class="mat-btn mat-btn-sm mat-btn-primary" onclick="openAddDeadline(\'' + id + '\')">+ Add</button></div>';
+  if (deadlines.length === 0) {
+    dlHtml += '<div style="color:#94a3b8;text-align:center;padding:1rem;">No deadlines for this matter.</div>';
+  } else {
+    dlHtml += deadlines.map(function(d) {
+      var dDate = new Date(d.deadline_date + 'T00:00:00');
+      var daysUntil = Math.ceil((dDate - new Date()) / 86400000);
+      var dotClass = d.is_completed ? 'ok' : daysUntil < 0 ? 'overdue' : daysUntil <= 7 ? 'soon' : 'ok';
+      return '<div class="dl-item">' +
+        '<div class="dl-dot ' + dotClass + '"></div>' +
+        '<div style="flex:1;">' +
+          '<div class="dl-title" style="' + (d.is_completed ? 'text-decoration:line-through;opacity:.5;' : '') + '">' + esc(d.title) + '</div>' +
+          '<div class="dl-meta">' + (d.deadline_type || 'other') + ' · ' + formatDate(d.deadline_date) +
+            (d.is_completed ? ' · ✅ Complete' : '') + '</div>' +
+        '</div>' +
+        (d.is_completed ? '' : '<button class="mat-btn mat-btn-sm mat-btn-success" onclick="completeDeadline(\'' + d.id + '\')">✓</button>') +
+        '<button class="mat-btn mat-btn-sm mat-btn-danger" onclick="deleteDeadline(\'' + d.id + '\')">×</button>' +
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('det-deadlines').innerHTML = dlHtml;
+
+  // Time entries
+  var entries = allTimeEntries.filter(function(e) { return e.matter_id === id; });
+  var totalHours = entries.reduce(function(s, e) { return s + (parseFloat(e.hours) || 0); }, 0);
+  var totalAmt = entries.reduce(function(s, e) { return s + (parseFloat(e.amount) || 0); }, 0);
+  var teHtml = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
+    '<h3 style="margin:0;font-size:.95rem;">Time Entries (' + entries.length + ' · ' + totalHours.toFixed(1) + 'h · $' + totalAmt.toLocaleString('en-US', {minimumFractionDigits:0}) + ')</h3>' +
+    '<div style="display:flex;gap:.5rem;">' +
+    '<button class="mat-btn mat-btn-sm mat-btn-outline" onclick="startTimerForMatter(\'' + id + '\')">⏱ Start Timer</button>' +
+    '<button class="mat-btn mat-btn-sm mat-btn-primary" onclick="openAddTimeEntry(\'' + id + '\')">+ Log Time</button>' +
+    '</div></div>';
+  if (entries.length === 0) {
+    teHtml += '<div style="color:#94a3b8;text-align:center;padding:1rem;">No time entries yet.</div>';
+  } else {
+    teHtml += '<table class="mat-table"><thead><tr><th>Date</th><th>Description</th><th>Hours</th><th>Rate</th><th>Amount</th><th></th></tr></thead><tbody>';
+    teHtml += entries.map(function(e) {
+      return '<tr>' +
+        '<td style="font-size:.82rem;">' + formatDate(e.date) + '</td>' +
+        '<td>' + esc(e.description) + (e.is_billable ? '' : ' <span style="color:#94a3b8;font-size:.75rem;">(non-billable)</span>') + '</td>' +
+        '<td style="font-weight:600;">' + (parseFloat(e.hours) || 0).toFixed(1) + '</td>' +
+        '<td style="color:#64748b;">$' + (parseFloat(e.rate) || 0).toFixed(0) + '</td>' +
+        '<td style="font-weight:700;">$' + (parseFloat(e.amount) || 0).toFixed(2) + '</td>' +
+        '<td><button class="mat-btn mat-btn-sm mat-btn-danger" onclick="deleteTimeEntry(\'' + e.id + '\')">×</button></td>' +
+      '</tr>';
+    }).join('');
+    teHtml += '</tbody></table>';
+  }
+  document.getElementById('det-time').innerHTML = teHtml;
+
+  // Notes
+  document.getElementById('det-notes').innerHTML =
+    '<div style="white-space:pre-wrap;color:#374151;font-size:.9rem;min-height:100px;padding:1rem;background:#f8fafc;border-radius:10px;">' +
+    esc(m.notes || 'No notes.') + '</div>';
+
+  openModal('modal-detail');
+}
+
+function showDetailTab(tab) {
+  document.querySelectorAll('.det-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.det-panel').forEach(function(p) { p.classList.remove('show'); });
+  // Find the tab button for this panel and activate it
+  var tabs = document.querySelectorAll('.det-tab');
+  var tabMap = { info: 0, deadlines: 1, time: 2, notes: 3 };
+  if (tabs[tabMap[tab]]) tabs[tabMap[tab]].classList.add('active');
+  document.getElementById('det-' + tab).classList.add('show');
+}
+
+function infoRow(label, value) {
+  return '<div style="margin-bottom:.75rem;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.15rem;">' +
+    label + '</div><div style="font-weight:600;color:#1e293b;">' + (value || '—') + '</div></div>';
+}
+
+// ── Deadlines ──
+function openAddDeadline(matterId) {
+  document.getElementById('dl-matter-id').value = matterId;
+  document.getElementById('dl-title').value = '';
+  document.getElementById('dl-date').value = '';
+  document.getElementById('dl-type').value = 'filing';
+  document.getElementById('dl-alert').value = '7';
+  document.getElementById('dl-notes').value = '';
+  openModal('modal-deadline');
+}
+
+async function saveDeadline() {
+  var deadline = {
+    matter_id: document.getElementById('dl-matter-id').value,
+    title: document.getElementById('dl-title').value.trim(),
+    deadline_date: document.getElementById('dl-date').value,
+    deadline_type: document.getElementById('dl-type').value,
+    alert_days_before: parseInt(document.getElementById('dl-alert').value) || 7,
+    notes: document.getElementById('dl-notes').value.trim()
+  };
+  if (!deadline.title || !deadline.deadline_date) { alert('Please fill in title and date.'); return; }
+
+  await RVData.saveMatterDeadline(deadline);
+  closeModal('modal-deadline');
+  await loadAll();
+  renderDeadlines();
+  if (currentMatterId) openDetail(currentMatterId);
+}
+
+async function completeDeadline(id) {
+  var d = allDeadlines.find(function(x) { return x.id === id; });
+  if (!d) return;
+  d.is_completed = true;
+  await RVData.saveMatterDeadline(d);
+  await loadAll();
+  renderDeadlines();
+  if (currentMatterId && document.getElementById('modal-detail').classList.contains('show')) {
+    openDetail(currentMatterId);
+  }
+}
+
+async function deleteDeadline(id) {
+  if (!confirm('Delete this deadline?')) return;
+  await RVData.deleteMatterDeadline(id);
+  await loadAll();
+  renderDeadlines();
+  if (currentMatterId) openDetail(currentMatterId);
+}
+
+// ── Time Entries ──
+function openAddTimeEntry(matterId) {
+  var matter = allMatters.find(function(m) { return m.id === matterId; });
+  document.getElementById('te-matter-id').value = matterId;
+  document.getElementById('te-desc').value = '';
+  document.getElementById('te-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('te-hours').value = '';
+  document.getElementById('te-rate').value = matter && matter.hourly_rate ? matter.hourly_rate : '';
+  document.getElementById('te-billable').checked = true;
+  openModal('modal-time');
+}
+
+async function saveTimeEntry() {
+  var matterId = document.getElementById('te-matter-id').value;
+  var entry = {
+    matter_id: matterId,
+    description: document.getElementById('te-desc').value.trim(),
+    date: document.getElementById('te-date').value,
+    hours: parseFloat(document.getElementById('te-hours').value) || 0,
+    rate: parseFloat(document.getElementById('te-rate').value) || 0,
+    is_billable: document.getElementById('te-billable').checked,
+    is_billed: false
+  };
+  if (!entry.description || !entry.hours) { alert('Please fill in description and hours.'); return; }
+  entry.amount = entry.hours * entry.rate;
+
+  await RVData.saveMatterTimeEntry(entry);
+
+  // Update matter's billed_total
+  var matter = allMatters.find(function(m) { return m.id === matterId; });
+  if (matter) {
+    var allForMatter = (await RVData.getMatterTimeEntries(matterId));
+    matter.billed_total = allForMatter.reduce(function(s, e) { return s + (parseFloat(e.amount) || 0); }, 0);
+    await RVData.saveMatter(matter);
+  }
+
+  closeModal('modal-time');
+  await loadAll();
+  renderMatters();
+  if (currentMatterId) openDetail(currentMatterId);
+}
+
+async function deleteTimeEntry(id) {
+  if (!confirm('Delete this time entry?')) return;
+  await RVData.deleteMatterTimeEntry(id);
+  await loadAll();
+  renderMatters();
+  if (currentMatterId) openDetail(currentMatterId);
+}
+
+// ── Timer ──
+function startTimerForMatter(matterId) {
+  var matter = allMatters.find(function(m) { return m.id === matterId; });
+  if (!matter) return;
+
+  if (activeTimer) {
+    if (!confirm('A timer is already running. Stop it and start a new one?')) return;
+    stopTimer(true);
+  }
+
+  activeTimer = {
+    matter_id: matterId,
+    description: 'Timer — ' + matter.matter_number,
+    date: new Date().toISOString().split('T')[0],
+    hours: 0,
+    rate: parseFloat(matter.hourly_rate) || 0,
+    is_billable: true,
+    is_billed: false,
+    timer_start: new Date().toISOString(),
+    timer_end: null
+  };
+
+  document.getElementById('timer-bar').style.display = 'flex';
+  document.getElementById('timer-matter-label').textContent = matter.matter_number + ' — ' + matter.title;
+
+  timerInterval = setInterval(updateTimerDisplay, 1000);
+  updateTimerDisplay();
+  localStorage.setItem('rv_active_matter_timer', JSON.stringify(activeTimer));
+}
+
+function updateTimerDisplay() {
+  if (!activeTimer || !activeTimer.timer_start) return;
+  var elapsed = Math.floor((Date.now() - new Date(activeTimer.timer_start).getTime()) / 1000);
+  var h = Math.floor(elapsed / 3600);
+  var m = Math.floor((elapsed % 3600) / 60);
+  var s = elapsed % 60;
+  document.getElementById('timer-display').textContent =
+    String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+async function stopTimer(silent) {
+  if (!activeTimer) return;
+  clearInterval(timerInterval);
+
+  var elapsed = (Date.now() - new Date(activeTimer.timer_start).getTime()) / 3600000; // hours
+  activeTimer.timer_end = new Date().toISOString();
+  activeTimer.hours = Math.round(elapsed * 10) / 10; // round to 0.1
+  if (activeTimer.hours < 0.1) activeTimer.hours = 0.1;
+  activeTimer.amount = activeTimer.hours * activeTimer.rate;
+
+  if (!silent) {
+    var desc = prompt('Time entry description:', activeTimer.description);
+    if (desc !== null) activeTimer.description = desc;
+  }
+
+  await RVData.saveMatterTimeEntry(activeTimer);
+
+  document.getElementById('timer-bar').style.display = 'none';
+  localStorage.removeItem('rv_active_matter_timer');
+  activeTimer = null;
+
+  await loadAll();
+  renderMatters();
+  if (currentMatterId && document.getElementById('modal-detail').classList.contains('show')) {
+    openDetail(currentMatterId);
+  }
+}
+
+function checkActiveTimer() {
+  var saved = localStorage.getItem('rv_active_matter_timer');
+  if (saved) {
+    try {
+      activeTimer = JSON.parse(saved);
+      if (activeTimer && activeTimer.timer_start && !activeTimer.timer_end) {
+        var matter = allMatters.find(function(m) { return m.id === activeTimer.matter_id; });
+        document.getElementById('timer-bar').style.display = 'flex';
+        document.getElementById('timer-matter-label').textContent = matter ?
+          (matter.matter_number + ' — ' + matter.title) : 'Unknown matter';
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+        updateTimerDisplay();
+      }
+    } catch (e) { localStorage.removeItem('rv_active_matter_timer'); }
+  }
+}
+
+// ── Modal Helpers ──
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ── Utilities ──
+function esc(s) {
+  if (!s) return '';
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  var date = new Date(d);
+  if (isNaN(date)) return d;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+</script>
+<script src="share-widget.js" data-share-title="Legal Matters" data-share-text="Manage legal matters on RentVerified"></script>
+<script src="recommended-supplies.js" data-industry="attorney"></script>
+<script src="business-advisor.js" data-industry="attorney"></script>
+<script src="service-connect.js"></script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
+</body>
+</html>

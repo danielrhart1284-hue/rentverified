@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wellness &amp; Spa – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Wellness Spa Page ── */
+    .spa-hero {
+      background: linear-gradient(135deg, #9d174d 0%, #be185d 50%, #ec4899 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .spa-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .spa-hero p { font-size: 1rem; opacity: 0.85; max-width: 540px; margin: 0 auto 1.25rem; }
+    .spa-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .spa-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #fbcfe8; }
+    .spa-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .spa-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    /* HIPAA Banner */
+    .hipaa-banner {
+      background: linear-gradient(90deg, #fef3c7, #fffbeb);
+      border: 1px solid #fde68a; border-radius: 12px;
+      padding: 0.6rem 1.25rem; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      font-size: 0.82rem; color: #78350f; font-weight: 600;
+    }
+
+    /* View tabs */
+    .spa-tabs {
+      display: flex; gap: 4px; background: #f1f5f9; border-radius: 10px;
+      padding: 3px; margin-bottom: 1.25rem; width: fit-content;
+    }
+    .spa-tab {
+      padding: 0.5rem 1.2rem; border: none; border-radius: 8px; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; background: transparent; color: #64748b;
+    }
+    .spa-tab.active { background: white; color: #9d174d; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    /* Toolbar */
+    .spa-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; padding: 1rem 0;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .spa-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .spa-search:focus { outline: none; border-color: #be185d; box-shadow: 0 0 0 3px rgba(190,24,93,0.12); }
+    .spa-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; color: #374151; min-width: 120px;
+    }
+    .spa-btn {
+      padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700;
+      font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s;
+    }
+    .spa-btn-primary { background: #be185d; color: white; }
+    .spa-btn-primary:hover { background: #9d174d; }
+    .spa-btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+    .spa-btn-danger { background: #fee2e2; color: #dc2626; border: none; padding: 0.35rem 0.9rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+    .spa-btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; padding: 0.35rem 0.9rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+    .spa-btn-outline:hover { border-color: #be185d; color: #9d174d; }
+
+    /* ── Today's Schedule ── */
+    .sched-card {
+      background: white; border-radius: 12px; border: 1px solid #e2e8f0;
+      padding: 0.85rem 1rem; margin-bottom: 0.5rem; display: flex;
+      align-items: center; gap: 1rem; cursor: pointer; transition: 0.15s;
+    }
+    .sched-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.08); border-color: #be185d; }
+    .sched-time {
+      font-size: 0.82rem; font-weight: 700; color: #9d174d;
+      min-width: 70px; text-align: center;
+    }
+    .sched-info { flex: 1; }
+    .sched-client { font-weight: 700; color: #1e293b; font-size: 0.92rem; }
+    .sched-service { font-size: 0.78rem; color: #64748b; }
+    .sched-right { text-align: right; }
+    .sched-staff { font-size: 0.75rem; color: #64748b; }
+    .sched-status {
+      display: inline-block; padding: 0.12rem 0.45rem; border-radius: 20px;
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    }
+    .st-scheduled { background: #dbeafe; color: #1e40af; }
+    .st-confirmed { background: #d1fae5; color: #065f46; }
+    .st-checked_in { background: #fef3c7; color: #92400e; }
+    .st-in_progress { background: #ede9fe; color: #6d28d9; }
+    .st-completed { background: #bbf7d0; color: #166534; }
+    .st-no_show { background: #fee2e2; color: #dc2626; }
+    .st-cancelled { background: #f1f5f9; color: #64748b; }
+
+    .sched-empty { text-align: center; padding: 2rem; color: #94a3b8; }
+    .sched-empty .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+    /* ── Inventory Table ── */
+    .inv-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .inv-table th {
+      text-align: left; padding: 0.6rem 0.75rem; font-weight: 700;
+      color: #64748b; font-size: 0.72rem; text-transform: uppercase;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .inv-table td { padding: 0.7rem 0.75rem; border-bottom: 1px solid #f1f5f9; }
+    .inv-table tr:hover td { background: #fdf2f8; }
+    .inv-low { color: #dc2626; font-weight: 700; }
+    .inv-ok { color: #16a34a; font-weight: 700; }
+    .inv-expiring { background: #fef3c7; }
+
+    /* ── Modals ── */
+    .spa-modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.45); align-items: center; justify-content: center;
+    }
+    .spa-modal.show { display: flex; }
+    .spa-modal-inner {
+      background: white; border-radius: 16px; width: 95%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto; padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .spa-modal-inner h2 { font-size: 1.2rem; color: #1e293b; margin-bottom: 1.25rem; }
+    .spa-modal-close {
+      float: right; background: none; border: none; font-size: 1.5rem;
+      cursor: pointer; color: #94a3b8; line-height: 1;
+    }
+    .spa-field { margin-bottom: 1rem; }
+    .spa-field label { display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .spa-field input, .spa-field select, .spa-field textarea {
+      width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 10px; font-size: 0.88rem; box-sizing: border-box;
+    }
+    .spa-field textarea { min-height: 60px; resize: vertical; }
+    .spa-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .spa-field-check { display: flex; align-items: center; gap: 0.5rem; }
+    .spa-field-check input { width: auto; }
+
+    /* ── Low stock alert ── */
+    .low-stock-bar {
+      background: linear-gradient(90deg, #fee2e2, #fff1f2);
+      border: 1px solid #fecaca; border-radius: 12px;
+      padding: 0.6rem 1.25rem; margin-bottom: 1rem;
+      display: none; align-items: center; gap: 0.75rem;
+      font-size: 0.82rem; color: #991b1b; font-weight: 600;
+    }
+    .low-stock-bar.show { display: flex; }
+
+    @media (max-width: 600px) {
+      .spa-hero-stats { gap: 1.25rem; }
+      .spa-field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:56px;display:flex;align-items:center;gap:1.5rem;font-size:.88rem;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.1rem;font-weight:800;color:#be185d;text-decoration:none;">
+      <img src="images/logo.svg" alt="" style="height:28px;" onerror="this.style.display='none'">RentVerified
+    </a>
+    <a href="crm.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Clients</a>
+    <a href="invoice-builder.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Invoices</a>
+    <a href="documents.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Docs</a>
+    <a href="e-signature.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Consent Forms</a>
+    <a href="accounting.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Accounting</a>
+    <a href="index.html" style="margin-left:auto;background:#be185d;color:white;padding:0.35rem 1rem;border-radius:8px;font-weight:700;font-size:0.82rem;text-decoration:none;">Dashboard</a>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <div class="spa-hero">
+    <h1>Wellness &amp; Spa</h1>
+    <p>Schedule appointments, track inventory, and manage your client relationships.</p>
+    <div class="spa-hero-stats">
+      <div class="spa-hero-stat"><div class="num" id="stat-today">0</div><div class="lbl">Today's Appts</div></div>
+      <div class="spa-hero-stat"><div class="num" id="stat-week">0</div><div class="lbl">This Week</div></div>
+      <div class="spa-hero-stat"><div class="num" id="stat-revenue">$0</div><div class="lbl">Week Revenue</div></div>
+      <div class="spa-hero-stat"><div class="num" id="stat-low-stock">0</div><div class="lbl">Low Stock Items</div></div>
+    </div>
+  </div>
+
+  <div class="spa-wrap">
+
+    <!-- HIPAA Banner -->
+    <div class="hipaa-banner">
+      🔒 HIPAA Compliance Mode — Client medical data is encrypted and access-logged. Ensure all staff have signed BAA.
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div class="low-stock-bar" id="low-stock-bar">
+      ⚠️ <span id="low-stock-text"></span>
+    </div>
+
+    <!-- Section Tabs -->
+    <div class="spa-tabs">
+      <button class="spa-tab active" onclick="showSection('appointments')">📅 Appointments</button>
+      <button class="spa-tab" onclick="showSection('inventory')">📦 Inventory</button>
+    </div>
+
+    <!-- ═══ APPOINTMENTS SECTION ═══ -->
+    <div id="sec-appointments">
+      <div class="spa-toolbar">
+        <input type="text" class="spa-search" id="appt-search" placeholder="Search clients, services..." oninput="loadAppointments()">
+        <input type="date" class="spa-select" id="appt-date" onchange="loadAppointments()">
+        <select class="spa-select" id="appt-status" onchange="loadAppointments()">
+          <option value="">All Statuses</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="checked_in">Checked In</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="no_show">No Show</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="spa-btn spa-btn-primary" onclick="openNewAppt()">+ New Appointment</button>
+      </div>
+      <div id="appt-list"></div>
+    </div>
+
+    <!-- ═══ INVENTORY SECTION ═══ -->
+    <div id="sec-inventory" style="display:none;">
+      <div class="spa-toolbar">
+        <input type="text" class="spa-search" id="inv-search" placeholder="Search items, SKUs..." oninput="loadInventory()">
+        <select class="spa-select" id="inv-category" onchange="loadInventory()">
+          <option value="">All Categories</option>
+          <option value="injectables">Injectables</option>
+          <option value="topicals">Topicals</option>
+          <option value="devices">Devices</option>
+          <option value="consumables">Consumables</option>
+          <option value="retail">Retail</option>
+          <option value="other">Other</option>
+        </select>
+        <label style="font-size:0.82rem;display:flex;align-items:center;gap:4px;color:#64748b;cursor:pointer;">
+          <input type="checkbox" id="inv-low-only" onchange="loadInventory()"> Low stock only
+        </label>
+        <button class="spa-btn spa-btn-primary" onclick="openNewInvItem()">+ Add Item</button>
+      </div>
+      <div class="inv-table-wrap" style="overflow-x:auto;">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Qty</th>
+              <th>Reorder At</th>
+              <th>Cost</th>
+              <th>Retail</th>
+              <th>Expires</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="inv-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Appointment Modal ── -->
+  <div class="spa-modal" id="modal-appt">
+    <div class="spa-modal-inner">
+      <button class="spa-modal-close" onclick="closeModal('modal-appt')">&times;</button>
+      <h2 id="appt-form-title">New Appointment</h2>
+      <input type="hidden" id="a-id">
+
+      <div class="spa-field">
+        <label>Client Name *</label>
+        <input id="a-client" placeholder="Client name">
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Email</label>
+          <input id="a-email" type="email" placeholder="client@email.com">
+        </div>
+        <div class="spa-field">
+          <label>Phone</label>
+          <input id="a-phone" placeholder="(555) 123-4567">
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Service *</label>
+          <input id="a-service" placeholder="e.g. Botox, Facial, Laser">
+        </div>
+        <div class="spa-field">
+          <label>Category</label>
+          <select id="a-category">
+            <option value="injectables">Injectables</option>
+            <option value="laser">Laser</option>
+            <option value="facial">Facial</option>
+            <option value="body">Body</option>
+            <option value="wellness">Wellness</option>
+            <option value="consultation">Consultation</option>
+            <option value="follow_up">Follow-Up</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Provider / Staff</label>
+          <input id="a-staff" placeholder="Staff name">
+        </div>
+        <div class="spa-field">
+          <label>Room</label>
+          <input id="a-room" placeholder="Room name or #">
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Date & Start Time *</label>
+          <input id="a-start" type="datetime-local">
+        </div>
+        <div class="spa-field">
+          <label>End Time *</label>
+          <input id="a-end" type="datetime-local">
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Amount ($)</label>
+          <input id="a-amount" type="number" step="0.01" placeholder="Service price">
+        </div>
+        <div class="spa-field">
+          <label>Status</label>
+          <select id="a-status">
+            <option value="scheduled">Scheduled</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="checked_in">Checked In</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="no_show">No Show</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="spa-field spa-field-check">
+        <input type="checkbox" id="a-consent">
+        <label style="margin-bottom:0;">Consent / intake form signed</label>
+      </div>
+      <div class="spa-field">
+        <label>Notes</label>
+        <textarea id="a-notes" placeholder="Provider notes, treatment details..."></textarea>
+      </div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;padding-top:0.5rem;">
+        <button class="spa-btn-outline" onclick="closeModal('modal-appt')">Cancel</button>
+        <button class="spa-btn spa-btn-primary" onclick="saveAppt()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Inventory Item Modal ── -->
+  <div class="spa-modal" id="modal-inv">
+    <div class="spa-modal-inner">
+      <button class="spa-modal-close" onclick="closeModal('modal-inv')">&times;</button>
+      <h2 id="inv-form-title">Add Inventory Item</h2>
+      <input type="hidden" id="i-id">
+
+      <div class="spa-field">
+        <label>Item Name *</label>
+        <input id="i-name" placeholder="e.g. Botox 100u vial">
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>SKU</label>
+          <input id="i-sku" placeholder="SKU or product code">
+        </div>
+        <div class="spa-field">
+          <label>Category</label>
+          <select id="i-category">
+            <option value="injectables">Injectables</option>
+            <option value="topicals">Topicals</option>
+            <option value="devices">Devices</option>
+            <option value="consumables">Consumables</option>
+            <option value="retail">Retail</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Quantity *</label>
+          <input id="i-qty" type="number" step="0.01" placeholder="Current stock">
+        </div>
+        <div class="spa-field">
+          <label>Unit</label>
+          <input id="i-unit" placeholder="units, ml, vials, boxes" value="units">
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Reorder Threshold</label>
+          <input id="i-reorder" type="number" step="0.01" placeholder="Alert when below" value="5">
+        </div>
+        <div class="spa-field">
+          <label>Lot Number</label>
+          <input id="i-lot" placeholder="For medical tracking">
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Cost per Unit ($)</label>
+          <input id="i-cost" type="number" step="0.01" placeholder="Your cost">
+        </div>
+        <div class="spa-field">
+          <label>Retail Price ($)</label>
+          <input id="i-retail" type="number" step="0.01" placeholder="Client price">
+        </div>
+      </div>
+      <div class="spa-field-row">
+        <div class="spa-field">
+          <label>Supplier</label>
+          <input id="i-supplier" placeholder="Supplier name">
+        </div>
+        <div class="spa-field">
+          <label>Expiration Date</label>
+          <input id="i-expires" type="date">
+        </div>
+      </div>
+      <div class="spa-field">
+        <label>Notes</label>
+        <textarea id="i-notes" placeholder="Storage notes, usage instructions..."></textarea>
+      </div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;padding-top:0.5rem;">
+        <button class="spa-btn-outline" onclick="closeModal('modal-inv')">Cancel</button>
+        <button class="spa-btn spa-btn-primary" onclick="saveInvItem()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Scripts ── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="data-layer.js"></script>
+  <script>
+    var allAppts = [];
+    var allInventory = [];
+    var STATUS_LABELS = {
+      scheduled:'Scheduled',confirmed:'Confirmed',checked_in:'Checked In',
+      in_progress:'In Progress',completed:'Completed',no_show:'No Show',cancelled:'Cancelled'
+    };
+    var CAT_LABELS = {
+      injectables:'Injectables',laser:'Laser',facial:'Facial',body:'Body',
+      wellness:'Wellness',consultation:'Consultation',follow_up:'Follow-Up',
+      topicals:'Topicals',devices:'Devices',consumables:'Consumables',retail:'Retail',other:'Other'
+    };
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', function() {
+      // Default date filter to today
+      document.getElementById('appt-date').value = new Date().toISOString().split('T')[0];
+      loadAppointments();
+      loadInventory();
+    });
+
+    // ── Section Toggle ──
+    function showSection(sec) {
+      document.getElementById('sec-appointments').style.display = sec === 'appointments' ? '' : 'none';
+      document.getElementById('sec-inventory').style.display = sec === 'inventory' ? '' : 'none';
+      document.querySelectorAll('.spa-tab').forEach(function(t) {
+        t.classList.toggle('active', t.textContent.toLowerCase().includes(sec.substring(0,4)));
+      });
+    }
+
+    // ── Load Appointments ──
+    async function loadAppointments() {
+      var filters = {};
+      var search = document.getElementById('appt-search').value.trim();
+      var status = document.getElementById('appt-status').value;
+      var date = document.getElementById('appt-date').value;
+      if (search) filters.search = search;
+      if (status) filters.status = status;
+      if (date) {
+        filters.date_from = date + 'T00:00:00';
+        filters.date_to = date + 'T23:59:59';
+      }
+      allAppts = await RVData.getSpaAppointments(filters);
+      renderAppointments();
+      updateStats();
+    }
+
+    function renderAppointments() {
+      var container = document.getElementById('appt-list');
+      if (allAppts.length === 0) {
+        container.innerHTML = '<div class="sched-empty"><div class="icon">📅</div><h4>No appointments</h4><p>No appointments found for this date. Click "+ New Appointment" to add one.</p></div>';
+        return;
+      }
+      container.innerHTML = allAppts.map(function(a) {
+        var start = new Date(a.start_time);
+        var end = new Date(a.end_time);
+        var timeStr = start.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'}) + ' – ' + end.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+        return '<div class="sched-card" onclick="openApptDetail(\'' + a.id + '\')">' +
+          '<div class="sched-time">' + timeStr + '</div>' +
+          '<div class="sched-info">' +
+            '<div class="sched-client">' + esc(a.client_name) + (a.consent_signed ? ' ✅' : '') + '</div>' +
+            '<div class="sched-service">' + esc(a.service) + (a.room ? ' · Room ' + esc(a.room) : '') + '</div>' +
+          '</div>' +
+          '<div class="sched-right">' +
+            '<div class="sched-staff">' + esc(a.staff_name || '') + '</div>' +
+            '<span class="sched-status st-' + a.status + '">' + STATUS_LABELS[a.status] + '</span>' +
+            (a.amount ? '<div style="font-size:0.78rem;font-weight:700;color:#9d174d;margin-top:2px;">$' + parseFloat(a.amount).toLocaleString() + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // ── Load Inventory ──
+    async function loadInventory() {
+      var filters = {};
+      var search = document.getElementById('inv-search').value.trim();
+      var cat = document.getElementById('inv-category').value;
+      var lowOnly = document.getElementById('inv-low-only').checked;
+      if (search) filters.search = search;
+      if (cat) filters.category = cat;
+      if (lowOnly) filters.low_stock = true;
+      allInventory = await RVData.getSpaInventory(filters);
+      renderInventory();
+      checkLowStock();
+    }
+
+    function renderInventory() {
+      var body = document.getElementById('inv-body');
+      if (allInventory.length === 0) {
+        body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem;">No inventory items. Click "+ Add Item" to start tracking.</td></tr>';
+        return;
+      }
+      body.innerHTML = allInventory.map(function(item) {
+        var isLow = parseFloat(item.quantity) <= parseFloat(item.reorder_threshold || 5);
+        var isExpiring = item.expiration_date && new Date(item.expiration_date) <= new Date(Date.now() + 30*24*60*60*1000);
+        return '<tr' + (isExpiring ? ' class="inv-expiring"' : '') + '>' +
+          '<td><strong>' + esc(item.item_name) + '</strong>' + (item.sku ? '<br><span style="font-size:0.72rem;color:#94a3b8;">' + esc(item.sku) + '</span>' : '') + '</td>' +
+          '<td>' + (CAT_LABELS[item.category] || item.category || '—') + '</td>' +
+          '<td class="' + (isLow ? 'inv-low' : 'inv-ok') + '">' + item.quantity + ' ' + (item.unit || '') + '</td>' +
+          '<td>' + (item.reorder_threshold || '—') + '</td>' +
+          '<td>' + (item.cost_per_unit ? '$' + parseFloat(item.cost_per_unit).toFixed(2) : '—') + '</td>' +
+          '<td>' + (item.retail_price ? '$' + parseFloat(item.retail_price).toFixed(2) : '—') + '</td>' +
+          '<td>' + (item.expiration_date ? new Date(item.expiration_date).toLocaleDateString() : '—') + '</td>' +
+          '<td><button class="spa-btn-outline" onclick="openEditInvItem(\'' + item.id + '\')">Edit</button> ' +
+          '<button class="spa-btn-danger" onclick="deleteInvItem(\'' + item.id + '\')">×</button></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function checkLowStock() {
+      var low = allInventory.filter(function(i) { return parseFloat(i.quantity) <= parseFloat(i.reorder_threshold || 5); });
+      var bar = document.getElementById('low-stock-bar');
+      document.getElementById('stat-low-stock').textContent = low.length;
+      if (low.length > 0) {
+        bar.classList.add('show');
+        document.getElementById('low-stock-text').textContent = low.length + ' item' + (low.length > 1 ? 's' : '') + ' below reorder level: ' + low.map(function(i) { return i.item_name; }).join(', ');
+      } else {
+        bar.classList.remove('show');
+      }
+    }
+
+    // ── Stats ──
+    async function updateStats() {
+      var today = new Date().toISOString().split('T')[0];
+      var allToday = await RVData.getSpaAppointments({ date_from: today + 'T00:00:00', date_to: today + 'T23:59:59' });
+      document.getElementById('stat-today').textContent = allToday.length;
+
+      var weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
+      var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6); weekEnd.setHours(23,59,59);
+      var allWeek = await RVData.getSpaAppointments({ date_from: weekStart.toISOString(), date_to: weekEnd.toISOString() });
+      document.getElementById('stat-week').textContent = allWeek.length;
+
+      var weekRev = allWeek.filter(function(a) { return a.status === 'completed'; })
+        .reduce(function(s, a) { return s + (parseFloat(a.amount) || 0); }, 0);
+      document.getElementById('stat-revenue').textContent = '$' + weekRev.toLocaleString('en-US', {minimumFractionDigits:0});
+    }
+
+    // ── New Appointment ──
+    function openNewAppt() {
+      document.getElementById('appt-form-title').textContent = 'New Appointment';
+      document.getElementById('a-id').value = '';
+      document.getElementById('a-client').value = '';
+      document.getElementById('a-email').value = '';
+      document.getElementById('a-phone').value = '';
+      document.getElementById('a-service').value = '';
+      document.getElementById('a-category').value = 'consultation';
+      document.getElementById('a-staff').value = '';
+      document.getElementById('a-room').value = '';
+      document.getElementById('a-start').value = '';
+      document.getElementById('a-end').value = '';
+      document.getElementById('a-amount').value = '';
+      document.getElementById('a-status').value = 'scheduled';
+      document.getElementById('a-consent').checked = false;
+      document.getElementById('a-notes').value = '';
+      showModal('modal-appt');
+    }
+
+    function openEditAppt(id) {
+      var a = allAppts.find(function(r) { return r.id === id; });
+      if (!a) return;
+      document.getElementById('appt-form-title').textContent = 'Edit Appointment';
+      document.getElementById('a-id').value = a.id;
+      document.getElementById('a-client').value = a.client_name || '';
+      document.getElementById('a-email').value = a.client_email || '';
+      document.getElementById('a-phone').value = a.client_phone || '';
+      document.getElementById('a-service').value = a.service || '';
+      document.getElementById('a-category').value = a.service_category || 'other';
+      document.getElementById('a-staff').value = a.staff_name || '';
+      document.getElementById('a-room').value = a.room || '';
+      document.getElementById('a-start').value = a.start_time ? a.start_time.substring(0,16) : '';
+      document.getElementById('a-end').value = a.end_time ? a.end_time.substring(0,16) : '';
+      document.getElementById('a-amount').value = a.amount || '';
+      document.getElementById('a-status').value = a.status || 'scheduled';
+      document.getElementById('a-consent').checked = !!a.consent_signed;
+      document.getElementById('a-notes').value = a.notes || '';
+      showModal('modal-appt');
+    }
+
+    async function saveAppt() {
+      var client = document.getElementById('a-client').value.trim();
+      var service = document.getElementById('a-service').value.trim();
+      var start = document.getElementById('a-start').value;
+      var end = document.getElementById('a-end').value;
+      if (!client || !service || !start || !end) { alert('Client, service, start and end times are required.'); return; }
+
+      var appt = {
+        client_name: client,
+        client_email: document.getElementById('a-email').value.trim(),
+        client_phone: document.getElementById('a-phone').value.trim(),
+        service: service,
+        service_category: document.getElementById('a-category').value,
+        staff_name: document.getElementById('a-staff').value.trim(),
+        room: document.getElementById('a-room').value.trim(),
+        start_time: start,
+        end_time: end,
+        amount: parseFloat(document.getElementById('a-amount').value) || null,
+        status: document.getElementById('a-status').value,
+        consent_signed: document.getElementById('a-consent').checked,
+        notes: document.getElementById('a-notes').value.trim()
+      };
+      var id = document.getElementById('a-id').value;
+      if (id) appt.id = id;
+
+      await RVData.saveSpaAppointment(appt);
+      closeModal('modal-appt');
+      loadAppointments();
+    }
+
+    // ── Appointment Detail (quick actions via edit) ──
+    function openApptDetail(id) {
+      openEditAppt(id);
+    }
+
+    async function deleteAppt(id) {
+      if (!confirm('Delete this appointment?')) return;
+      await RVData.deleteSpaAppointment(id);
+      loadAppointments();
+    }
+
+    // ── Inventory CRUD ──
+    function openNewInvItem() {
+      document.getElementById('inv-form-title').textContent = 'Add Inventory Item';
+      document.getElementById('i-id').value = '';
+      document.getElementById('i-name').value = '';
+      document.getElementById('i-sku').value = '';
+      document.getElementById('i-category').value = 'consumables';
+      document.getElementById('i-qty').value = '';
+      document.getElementById('i-unit').value = 'units';
+      document.getElementById('i-reorder').value = '5';
+      document.getElementById('i-lot').value = '';
+      document.getElementById('i-cost').value = '';
+      document.getElementById('i-retail').value = '';
+      document.getElementById('i-supplier').value = '';
+      document.getElementById('i-expires').value = '';
+      document.getElementById('i-notes').value = '';
+      showModal('modal-inv');
+    }
+
+    function openEditInvItem(id) {
+      var item = allInventory.find(function(r) { return r.id === id; });
+      if (!item) return;
+      document.getElementById('inv-form-title').textContent = 'Edit Item';
+      document.getElementById('i-id').value = item.id;
+      document.getElementById('i-name').value = item.item_name || '';
+      document.getElementById('i-sku').value = item.sku || '';
+      document.getElementById('i-category').value = item.category || 'other';
+      document.getElementById('i-qty').value = item.quantity || '';
+      document.getElementById('i-unit').value = item.unit || 'units';
+      document.getElementById('i-reorder').value = item.reorder_threshold || '5';
+      document.getElementById('i-lot').value = item.lot_number || '';
+      document.getElementById('i-cost').value = item.cost_per_unit || '';
+      document.getElementById('i-retail').value = item.retail_price || '';
+      document.getElementById('i-supplier').value = item.supplier || '';
+      document.getElementById('i-expires').value = item.expiration_date || '';
+      document.getElementById('i-notes').value = item.notes || '';
+      showModal('modal-inv');
+    }
+
+    async function saveInvItem() {
+      var name = document.getElementById('i-name').value.trim();
+      var qty = document.getElementById('i-qty').value;
+      if (!name || qty === '') { alert('Item name and quantity are required.'); return; }
+
+      var item = {
+        item_name: name,
+        sku: document.getElementById('i-sku').value.trim(),
+        category: document.getElementById('i-category').value,
+        quantity: parseFloat(qty) || 0,
+        unit: document.getElementById('i-unit').value.trim(),
+        reorder_threshold: parseFloat(document.getElementById('i-reorder').value) || 5,
+        lot_number: document.getElementById('i-lot').value.trim(),
+        cost_per_unit: parseFloat(document.getElementById('i-cost').value) || null,
+        retail_price: parseFloat(document.getElementById('i-retail').value) || null,
+        supplier: document.getElementById('i-supplier').value.trim(),
+        expiration_date: document.getElementById('i-expires').value || null,
+        notes: document.getElementById('i-notes').value.trim()
+      };
+      var id = document.getElementById('i-id').value;
+      if (id) item.id = id;
+
+      await RVData.saveSpaInventoryItem(item);
+      closeModal('modal-inv');
+      loadInventory();
+    }
+
+    async function deleteInvItem(id) {
+      if (!confirm('Delete this inventory item?')) return;
+      await RVData.deleteSpaInventoryItem(id);
+      loadInventory();
+    }
+
+    // ── Helpers ──
+    function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function showModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+  </script>
+<script src="share-widget.js" data-share-title="Wellness Dashboard" data-share-text="Manage your med spa on RentVerified"></script>
+</body>
+</html>

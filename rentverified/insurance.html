@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insurance Pipeline – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Insurance Page ── */
+    .ins-hero {
+      background: linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #06b6d4 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .ins-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .ins-hero p { font-size: 1rem; opacity: 0.8; max-width: 540px; margin: 0 auto 1.25rem; }
+    .ins-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .ins-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #a5f3fc; }
+    .ins-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .ins-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    /* Toolbar */
+    .ins-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; padding: 1.25rem 0;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .ins-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .ins-search:focus { outline: none; border-color: #0891b2; box-shadow: 0 0 0 3px rgba(8,145,178,0.12); }
+    .ins-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; color: #374151; min-width: 120px;
+    }
+    .ins-btn {
+      padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700;
+      font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s;
+    }
+    .ins-btn-primary { background: #0891b2; color: white; }
+    .ins-btn-primary:hover { background: #0e7490; }
+    .ins-btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+    .ins-btn-danger { background: #fee2e2; color: #dc2626; border: none; padding: 0.35rem 0.9rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+    .ins-btn-danger:hover { background: #fecaca; }
+    .ins-btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; padding: 0.35rem 0.9rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+    .ins-btn-outline:hover { border-color: #0891b2; color: #0e7490; }
+
+    /* View toggle */
+    .ins-views { display: flex; gap: 4px; background: #f1f5f9; border-radius: 10px; padding: 3px; }
+    .ins-view-btn {
+      padding: 0.4rem 1rem; border: none; border-radius: 8px; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; background: transparent; color: #64748b;
+    }
+    .ins-view-btn.active { background: white; color: #0e7490; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    /* ── Pipeline (Kanban) ── */
+    .ins-pipeline {
+      display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 1rem;
+      min-height: 400px;
+    }
+    .ins-col {
+      min-width: 200px; flex: 1; background: #f8fafc; border-radius: 12px;
+      padding: 0.75rem; display: flex; flex-direction: column;
+    }
+    .ins-col-header {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      color: #64748b; margin-bottom: 0.5rem; display: flex;
+      align-items: center; justify-content: space-between;
+    }
+    .ins-col-count {
+      background: #e2e8f0; color: #475569; font-size: 0.7rem;
+      padding: 0.1rem 0.5rem; border-radius: 10px;
+    }
+    .ins-col-cards { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .ins-card {
+      background: white; border-radius: 10px; padding: 0.75rem;
+      border: 1px solid #e2e8f0; cursor: pointer; transition: 0.15s;
+    }
+    .ins-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.08); border-color: #0891b2; }
+    .ins-card-name { font-weight: 700; font-size: 0.88rem; color: #1e293b; }
+    .ins-card-meta { font-size: 0.75rem; color: #64748b; margin-top: 0.15rem; }
+    .ins-card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+    .ins-card-premium { font-weight: 700; color: #0891b2; font-size: 0.85rem; }
+    .ins-card-type {
+      font-size: 0.65rem; background: #ecfeff; color: #0e7490;
+      padding: 0.15rem 0.4rem; border-radius: 6px; font-weight: 600; text-transform: uppercase;
+    }
+
+    /* ── List View ── */
+    .ins-table-wrap { overflow-x: auto; }
+    .ins-table {
+      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+    }
+    .ins-table th {
+      text-align: left; padding: 0.6rem 0.75rem; font-weight: 700;
+      color: #64748b; font-size: 0.72rem; text-transform: uppercase;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .ins-table td {
+      padding: 0.7rem 0.75rem; border-bottom: 1px solid #f1f5f9;
+    }
+    .ins-table tr { cursor: pointer; }
+    .ins-table tr:hover td { background: #f0fdfa; }
+
+    .status-badge {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    }
+    .status-lead { background: #e0f2fe; color: #0369a1; }
+    .status-quoting { background: #fef3c7; color: #92400e; }
+    .status-quoted { background: #fde68a; color: #78350f; }
+    .status-application { background: #e0e7ff; color: #4338ca; }
+    .status-underwriting { background: #ddd6fe; color: #6d28d9; }
+    .status-bound { background: #d1fae5; color: #065f46; }
+    .status-active { background: #bbf7d0; color: #166534; }
+    .status-renewal { background: #fce7f3; color: #9d174d; }
+    .status-lapsed { background: #fee2e2; color: #dc2626; }
+    .status-cancelled { background: #f1f5f9; color: #64748b; }
+
+    /* ── Renewal Alert Bar ── */
+    .ins-renewals {
+      background: linear-gradient(90deg, #fef3c7, #fffbeb);
+      border: 1px solid #fde68a; border-radius: 12px;
+      padding: 0.75rem 1.25rem; margin-bottom: 1.25rem;
+      display: none; align-items: center; gap: 0.75rem;
+    }
+    .ins-renewals.show { display: flex; }
+    .ins-renewals-icon { font-size: 1.3rem; }
+    .ins-renewals-text { font-size: 0.85rem; color: #78350f; font-weight: 600; }
+    .ins-renewals-list { font-size: 0.8rem; color: #92400e; }
+
+    /* ── Modals ── */
+    .ins-modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.45); align-items: center; justify-content: center;
+    }
+    .ins-modal.show { display: flex; }
+    .ins-modal-inner {
+      background: white; border-radius: 16px; width: 95%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto; padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .ins-modal-inner h2 { font-size: 1.2rem; color: #1e293b; margin-bottom: 1.25rem; }
+    .ins-modal-close {
+      float: right; background: none; border: none; font-size: 1.5rem;
+      cursor: pointer; color: #94a3b8; line-height: 1;
+    }
+    .ins-field { margin-bottom: 1rem; }
+    .ins-field label { display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .ins-field input, .ins-field select, .ins-field textarea {
+      width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 10px; font-size: 0.88rem; box-sizing: border-box;
+    }
+    .ins-field textarea { min-height: 60px; resize: vertical; }
+    .ins-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    /* Detail modal */
+    .ins-detail-inner {
+      background: white; border-radius: 16px; width: 95%; max-width: 640px;
+      max-height: 90vh; overflow-y: auto; padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .ins-detail-inner h2 { font-size: 1.15rem; color: #1e293b; margin-bottom: 1rem; }
+    .ins-detail-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;
+    }
+    .ins-detail-item label { display: block; font-size: 0.68rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; }
+    .ins-detail-item span { font-size: 0.92rem; color: #1e293b; font-weight: 600; }
+    .ins-detail-section { margin-bottom: 1rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9; }
+    .ins-detail-section h3 { font-size: 0.82rem; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; }
+    .ins-detail-footer { display: flex; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; flex-wrap: wrap; }
+
+    /* Commission mini-table */
+    .comm-table { width: 100%; font-size: 0.8rem; border-collapse: collapse; }
+    .comm-table th { text-align: left; font-size: 0.68rem; text-transform: uppercase; color: #94a3b8; padding: 0.4rem 0.5rem; }
+    .comm-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #f1f5f9; }
+
+    /* ── Quote Comparison View ── */
+    .cmp-group { margin-bottom: 2rem; }
+    .cmp-group-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .cmp-group-header h3 { font-size: 1.05rem; font-weight: 800; color: #1e293b; }
+    .cmp-group-meta { font-size: 0.78rem; color: #64748b; }
+    .cmp-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem; }
+    .cmp-card {
+      background: white; border-radius: 12px; border: 2px solid #e2e8f0;
+      padding: 1rem; position: relative; transition: 0.15s;
+    }
+    .cmp-card:hover { border-color: #0891b2; box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+    .cmp-card.best { border-color: #059669; }
+    .cmp-best-tag {
+      position: absolute; top: -1px; right: 12px;
+      background: #059669; color: white; font-size: 0.62rem; font-weight: 800;
+      padding: 0.2rem 0.6rem; border-radius: 0 0 6px 6px; text-transform: uppercase;
+    }
+    .cmp-carrier { font-weight: 800; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.15rem; }
+    .cmp-type { font-size: 0.72rem; color: #64748b; margin-bottom: 0.75rem; }
+    .cmp-premium { font-size: 1.5rem; font-weight: 900; color: #0891b2; margin-bottom: 0.15rem; }
+    .cmp-premium-label { font-size: 0.7rem; color: #94a3b8; margin-bottom: 0.75rem; }
+    .cmp-details { list-style: none; padding: 0; margin: 0 0 0.75rem; }
+    .cmp-details li {
+      font-size: 0.78rem; color: #475569; padding: 0.3rem 0;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex; justify-content: space-between;
+    }
+    .cmp-details li:last-child { border-bottom: none; }
+    .cmp-details li strong { color: #1e293b; }
+    .cmp-actions { display: flex; gap: 0.5rem; }
+    .cmp-actions button { flex: 1; }
+    .cmp-toolbar {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .cmp-empty { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+    .cmp-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    @media (max-width: 600px) {
+      .ins-hero-stats { gap: 1.25rem; }
+      .ins-pipeline { flex-direction: column; }
+      .ins-col { min-width: auto; }
+      .ins-field-row { grid-template-columns: 1fr; }
+      .ins-detail-grid { grid-template-columns: 1fr; }
+      .cmp-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:56px;display:flex;align-items:center;gap:1.5rem;font-size:.88rem;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.1rem;font-weight:800;color:#0891b2;text-decoration:none;">
+      <img src="images/logo.svg" alt="" style="height:28px;" onerror="this.style.display='none'">RentVerified
+    </a>
+    <a href="crm.html" style="color:#4b5563;text-decoration:none;font-weight:500;">CRM</a>
+    <a href="invoice-builder.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Invoices</a>
+    <a href="documents.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Docs</a>
+    <a href="e-signature.html" style="color:#4b5563;text-decoration:none;font-weight:500;">E-Sign</a>
+    <a href="accounting.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Accounting</a>
+    <a href="insurance-agents.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Marketplace</a>
+    <a href="#" onclick="RVServiceConnect.open();return false;" style="color:#4b5563;text-decoration:none;font-weight:500;">Service Connect</a>
+    <a href="loan-connect.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Loan Connect</a>
+    <a href="messages.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Messages</a>
+    <a href="index.html" style="margin-left:auto;background:#0891b2;color:white;padding:0.35rem 1rem;border-radius:8px;font-weight:700;font-size:0.82rem;text-decoration:none;">Dashboard</a>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <div class="ins-hero">
+    <h1>Insurance Pipeline</h1>
+    <p>Track policies from lead to bound. Manage renewals, commissions, and client relationships.</p>
+    <div class="ins-hero-stats">
+      <div class="ins-hero-stat"><div class="num" id="stat-active">0</div><div class="lbl">Active Policies</div></div>
+      <div class="ins-hero-stat"><div class="num" id="stat-pipeline">0</div><div class="lbl">In Pipeline</div></div>
+      <div class="ins-hero-stat"><div class="num" id="stat-premium">$0</div><div class="lbl">Total Premium</div></div>
+      <div class="ins-hero-stat"><div class="num" id="stat-commission">$0</div><div class="lbl">Est. Commission</div></div>
+    </div>
+  </div>
+
+  <div class="ins-wrap">
+
+    <!-- Renewal Alert Bar -->
+    <div class="ins-renewals" id="renewal-bar">
+      <span class="ins-renewals-icon">⚠️</span>
+      <div>
+        <div class="ins-renewals-text" id="renewal-text">0 policies expiring in the next 30 days</div>
+        <div class="ins-renewals-list" id="renewal-list"></div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="ins-toolbar">
+      <input type="text" class="ins-search" id="search" placeholder="Search clients, policies, carriers..." oninput="applyFilters()">
+      <select class="ins-select" id="filter-status" onchange="applyFilters()">
+        <option value="">All Statuses</option>
+        <option value="lead">Lead</option>
+        <option value="quoting">Quoting</option>
+        <option value="quoted">Quoted</option>
+        <option value="application">Application</option>
+        <option value="underwriting">Underwriting</option>
+        <option value="bound">Bound</option>
+        <option value="active">Active</option>
+        <option value="renewal">Renewal</option>
+        <option value="lapsed">Lapsed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select class="ins-select" id="filter-type" onchange="applyFilters()">
+        <option value="">All Types</option>
+        <option value="property">Property</option>
+        <option value="renters">Renters</option>
+        <option value="commercial">Commercial</option>
+        <option value="umbrella">Umbrella</option>
+        <option value="workers_comp">Workers Comp</option>
+        <option value="general_liability">General Liability</option>
+        <option value="auto">Auto</option>
+        <option value="life">Life</option>
+        <option value="health">Health</option>
+        <option value="bonds">Bonds</option>
+        <option value="other">Other</option>
+      </select>
+      <div class="ins-views">
+        <button class="ins-view-btn active" onclick="setView('pipeline')">Pipeline</button>
+        <button class="ins-view-btn" onclick="setView('list')">List</button>
+        <button class="ins-view-btn" onclick="setView('compare')">Compare</button>
+      </div>
+      <a href="doc-generator.html?template=ins-invoice" style="background:#1a56db;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;">📄 Invoice</a>
+      <button class="ins-btn ins-btn-primary" onclick="openNew()">+ New Policy</button>
+    </div>
+
+    <!-- Pipeline View -->
+    <div id="view-pipeline" class="ins-pipeline"></div>
+
+    <!-- List View -->
+    <div id="view-list" style="display:none;">
+      <div class="ins-table-wrap">
+        <table class="ins-table">
+          <thead>
+            <tr>
+              <th>Policy #</th>
+              <th>Client</th>
+              <th>Type</th>
+              <th>Carrier</th>
+              <th>Premium</th>
+              <th>Status</th>
+              <th>Expiration</th>
+            </tr>
+          </thead>
+          <tbody id="list-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Compare Quotes View -->
+    <div id="view-compare" style="display:none;">
+      <div class="cmp-toolbar">
+        <select class="ins-select" id="cmp-filter-type" onchange="renderCompare()">
+          <option value="">All Coverage Types</option>
+          <option value="property">Property</option>
+          <option value="renters">Renters</option>
+          <option value="commercial">Commercial</option>
+          <option value="umbrella">Umbrella</option>
+          <option value="general_liability">General Liability</option>
+          <option value="workers_comp">Workers Comp</option>
+          <option value="auto">Auto</option>
+        </select>
+        <button class="ins-btn ins-btn-primary" onclick="openQuoteRequest()">+ Request Quotes</button>
+      </div>
+      <div id="cmp-container"></div>
+    </div>
+
+  </div>
+
+  <!-- ── New/Edit Modal ── -->
+  <div class="ins-modal" id="modal-form">
+    <div class="ins-modal-inner">
+      <button class="ins-modal-close" onclick="closeModal('modal-form')">&times;</button>
+      <h2 id="form-title">New Policy</h2>
+      <input type="hidden" id="p-id">
+
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Policy # *</label>
+          <input id="p-number" placeholder="e.g. POL-2026-001">
+        </div>
+        <div class="ins-field">
+          <label>Type *</label>
+          <select id="p-type">
+            <option value="property">Property</option>
+            <option value="renters">Renters</option>
+            <option value="commercial">Commercial</option>
+            <option value="umbrella">Umbrella</option>
+            <option value="workers_comp">Workers Comp</option>
+            <option value="general_liability">General Liability</option>
+            <option value="auto">Auto</option>
+            <option value="life">Life</option>
+            <option value="health">Health</option>
+            <option value="bonds">Bonds</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ins-field">
+        <label>Client Name *</label>
+        <input id="p-client" placeholder="Client / company name">
+      </div>
+
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Client Email</label>
+          <input id="p-email" type="email" placeholder="client@email.com">
+        </div>
+        <div class="ins-field">
+          <label>Client Phone</label>
+          <input id="p-phone" placeholder="(555) 123-4567">
+        </div>
+      </div>
+
+      <div class="ins-field">
+        <label>Status</label>
+        <select id="p-status">
+          <option value="lead">Lead</option>
+          <option value="quoting">Quoting</option>
+          <option value="quoted">Quoted</option>
+          <option value="application">Application</option>
+          <option value="underwriting">Underwriting</option>
+          <option value="bound">Bound</option>
+          <option value="active">Active</option>
+          <option value="renewal">Renewal</option>
+          <option value="lapsed">Lapsed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div class="ins-field">
+        <label>Carrier</label>
+        <input id="p-carrier" placeholder="e.g. State Farm, Liberty Mutual">
+      </div>
+
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Annual Premium ($)</label>
+          <input id="p-premium" type="number" step="0.01" placeholder="Annual premium" oninput="calcCommission()">
+        </div>
+        <div class="ins-field">
+          <label>Commission Rate (%)</label>
+          <input id="p-comm-rate" type="number" step="0.01" placeholder="e.g. 15" oninput="calcCommission()">
+        </div>
+      </div>
+
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Est. Commission</label>
+          <input id="p-comm-amount" readonly style="background:#f8fafc;color:#0891b2;font-weight:700;">
+        </div>
+        <div class="ins-field">
+          <label>Coverage Amount ($)</label>
+          <input id="p-coverage" type="number" step="0.01" placeholder="Coverage limit">
+        </div>
+      </div>
+
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Effective Date</label>
+          <input id="p-effective" type="date">
+        </div>
+        <div class="ins-field">
+          <label>Expiration Date</label>
+          <input id="p-expiration" type="date">
+        </div>
+      </div>
+
+      <div class="ins-field">
+        <label>Property / Insured Address</label>
+        <input id="p-address" placeholder="Address (if applicable)">
+      </div>
+
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Source</label>
+          <input id="p-source" placeholder="Referral, website, cold call...">
+        </div>
+        <div class="ins-field">
+          <label>Assigned To</label>
+          <input id="p-assigned" placeholder="Agent name">
+        </div>
+      </div>
+
+      <div class="ins-field">
+        <label>Notes</label>
+        <textarea id="p-notes" placeholder="Internal notes..."></textarea>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;padding-top:0.5rem;">
+        <button class="ins-btn-outline" onclick="closeModal('modal-form')">Cancel</button>
+        <button class="ins-btn ins-btn-primary" onclick="savePolicy()">Save Policy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Detail Modal ── -->
+  <div class="ins-modal" id="modal-detail">
+    <div class="ins-detail-inner">
+      <button class="ins-modal-close" onclick="closeModal('modal-detail')">&times;</button>
+      <h2 id="detail-title"></h2>
+      <div class="ins-detail-grid" id="detail-grid"></div>
+
+      <div class="ins-detail-section" id="detail-commissions">
+        <h3>💰 Commissions</h3>
+        <table class="comm-table" id="comm-table">
+          <thead><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="comm-body"></tbody>
+        </table>
+      </div>
+
+      <div class="ins-detail-section" id="detail-notes-section" style="display:none;">
+        <h3>📝 Notes</h3>
+        <p id="detail-notes" style="font-size:0.88rem;color:#475569;white-space:pre-wrap;"></p>
+      </div>
+
+      <div class="ins-detail-footer" id="detail-footer"></div>
+    </div>
+  </div>
+
+  <!-- ── Quote Request Modal ── -->
+  <div class="ins-modal" id="modal-quote">
+    <div class="ins-modal-inner">
+      <button class="ins-modal-close" onclick="closeModal('modal-quote')">&times;</button>
+      <h2>Request Multi-Carrier Quotes</h2>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:1.25rem;">Get side-by-side quotes from multiple carriers. Fill in the property details and select carriers to compare.</p>
+
+      <div class="ins-field">
+        <label>Client Name *</label>
+        <input type="text" id="q-client" placeholder="Client or property owner name">
+      </div>
+      <div class="ins-field">
+        <label>Property Address *</label>
+        <input type="text" id="q-address" placeholder="123 Main St, City, ST 00000">
+      </div>
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Coverage Type *</label>
+          <select id="q-type">
+            <option value="property">Property / Landlord</option>
+            <option value="renters">Renters</option>
+            <option value="commercial">Commercial</option>
+            <option value="umbrella">Umbrella</option>
+            <option value="general_liability">General Liability</option>
+            <option value="workers_comp">Workers Comp</option>
+          </select>
+        </div>
+        <div class="ins-field">
+          <label>Coverage Amount *</label>
+          <input type="number" id="q-coverage" placeholder="e.g. 500000">
+        </div>
+      </div>
+      <div class="ins-field-row">
+        <div class="ins-field">
+          <label>Property Value</label>
+          <input type="number" id="q-value" placeholder="e.g. 350000">
+        </div>
+        <div class="ins-field">
+          <label>Deductible</label>
+          <select id="q-deductible">
+            <option value="500">$500</option>
+            <option value="1000" selected>$1,000</option>
+            <option value="2500">$2,500</option>
+            <option value="5000">$5,000</option>
+            <option value="10000">$10,000</option>
+          </select>
+        </div>
+      </div>
+      <div class="ins-field">
+        <label>Select Carriers (check all to compare)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="State Farm" checked> State Farm</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Allstate" checked> Allstate</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Liberty Mutual" checked> Liberty Mutual</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Travelers" checked> Travelers</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Nationwide" checked> Nationwide</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="USAA"> USAA</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Hartford"> Hartford</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Progressive"> Progressive</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Farmers"> Farmers</label>
+          <label style="font-size:0.82rem;display:flex;align-items:center;gap:6px;font-weight:400;"><input type="checkbox" class="q-carrier" value="Erie Insurance"> Erie Insurance</label>
+        </div>
+      </div>
+      <div class="ins-field">
+        <label>Notes</label>
+        <textarea id="q-notes" placeholder="Any special coverage needs or notes..."></textarea>
+      </div>
+      <button class="ins-btn ins-btn-primary" style="width:100%;padding:0.75rem;" onclick="submitQuoteRequest()">Generate Comparison</button>
+    </div>
+  </div>
+
+  <!-- ── Scripts ── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="data-layer.js"></script>
+  <script>
+    var allPolicies = [];
+    var currentView = 'pipeline';
+    var PIPELINE_STAGES = ['lead','quoting','quoted','application','underwriting','bound'];
+    var ALL_STATUSES = ['lead','quoting','quoted','application','underwriting','bound','active','renewal','lapsed','cancelled'];
+    var STATUS_LABELS = {
+      lead:'Lead',quoting:'Quoting',quoted:'Quoted',application:'Application',
+      underwriting:'Underwriting',bound:'Bound',active:'Active',
+      renewal:'Renewal',lapsed:'Lapsed',cancelled:'Cancelled'
+    };
+    var TYPE_LABELS = {
+      property:'Property',renters:'Renters',commercial:'Commercial',umbrella:'Umbrella',
+      workers_comp:'Workers Comp',general_liability:'Gen Liability',auto:'Auto',
+      life:'Life',health:'Health',bonds:'Bonds',other:'Other'
+    };
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', function() {
+      loadPolicies();
+    });
+
+    async function loadPolicies() {
+      var filters = {};
+      var search = document.getElementById('search').value.trim();
+      var status = document.getElementById('filter-status').value;
+      var type = document.getElementById('filter-type').value;
+      if (search) filters.search = search;
+      if (status) filters.status = status;
+      if (type) filters.policy_type = type;
+
+      allPolicies = await RVData.getInsurancePolicies(filters);
+      updateStats();
+      checkRenewals();
+      renderPipeline();
+      renderList();
+    }
+
+    function applyFilters() { loadPolicies(); }
+
+    // ── Stats ──
+    function updateStats() {
+      var active = allPolicies.filter(function(p) { return p.status === 'active' || p.status === 'bound'; });
+      var pipeline = allPolicies.filter(function(p) {
+        return ['lead','quoting','quoted','application','underwriting'].indexOf(p.status) >= 0;
+      });
+      var totalPremium = active.reduce(function(s, p) { return s + (parseFloat(p.premium) || 0); }, 0);
+      var totalComm = active.reduce(function(s, p) { return s + (parseFloat(p.commission_amount) || 0); }, 0);
+
+      document.getElementById('stat-active').textContent = active.length;
+      document.getElementById('stat-pipeline').textContent = pipeline.length;
+      document.getElementById('stat-premium').textContent = '$' + totalPremium.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+      document.getElementById('stat-commission').textContent = '$' + totalComm.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+    }
+
+    // ── Renewal Alerts ──
+    function checkRenewals() {
+      var now = new Date();
+      var thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      var expiring = allPolicies.filter(function(p) {
+        if (!p.expiration_date) return false;
+        var exp = new Date(p.expiration_date);
+        return exp >= now && exp <= thirtyDays && (p.status === 'active' || p.status === 'bound');
+      });
+      var bar = document.getElementById('renewal-bar');
+      if (expiring.length > 0) {
+        bar.classList.add('show');
+        document.getElementById('renewal-text').textContent = expiring.length + ' polic' + (expiring.length === 1 ? 'y' : 'ies') + ' expiring in the next 30 days';
+        document.getElementById('renewal-list').textContent = expiring.map(function(p) { return p.client_name; }).join(', ');
+      } else {
+        bar.classList.remove('show');
+      }
+    }
+
+    // ── Pipeline View ──
+    function renderPipeline() {
+      var container = document.getElementById('view-pipeline');
+      container.innerHTML = PIPELINE_STAGES.map(function(stage) {
+        var cards = allPolicies.filter(function(p) { return p.status === stage; });
+        return '<div class="ins-col">' +
+          '<div class="ins-col-header">' + STATUS_LABELS[stage] + '<span class="ins-col-count">' + cards.length + '</span></div>' +
+          '<div class="ins-col-cards">' +
+          cards.map(function(p) {
+            return '<div class="ins-card" onclick="openDetail(\'' + p.id + '\')">' +
+              '<div class="ins-card-name">' + esc(p.client_name) + '</div>' +
+              '<div class="ins-card-meta">' + esc(p.carrier || 'No carrier') + '</div>' +
+              '<div class="ins-card-bottom">' +
+                '<span class="ins-card-premium">' + (p.premium ? '$' + parseFloat(p.premium).toLocaleString() : '—') + '</span>' +
+                '<span class="ins-card-type">' + (TYPE_LABELS[p.policy_type] || p.policy_type) + '</span>' +
+              '</div>' +
+            '</div>';
+          }).join('') +
+          '</div></div>';
+      }).join('');
+    }
+
+    // ── List View ──
+    function renderList() {
+      var body = document.getElementById('list-body');
+      body.innerHTML = allPolicies.map(function(p) {
+        return '<tr onclick="openDetail(\'' + p.id + '\')">' +
+          '<td style="font-weight:700;color:#0891b2;">' + esc(p.policy_number) + '</td>' +
+          '<td>' + esc(p.client_name) + '</td>' +
+          '<td>' + (TYPE_LABELS[p.policy_type] || p.policy_type) + '</td>' +
+          '<td>' + esc(p.carrier || '—') + '</td>' +
+          '<td style="font-weight:700;">' + (p.premium ? '$' + parseFloat(p.premium).toLocaleString() : '—') + '</td>' +
+          '<td><span class="status-badge status-' + p.status + '">' + STATUS_LABELS[p.status] + '</span></td>' +
+          '<td>' + (p.expiration_date ? new Date(p.expiration_date).toLocaleDateString() : '—') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // ── View Toggle ──
+    function setView(v) {
+      currentView = v;
+      document.getElementById('view-pipeline').style.display = v === 'pipeline' ? 'flex' : 'none';
+      document.getElementById('view-list').style.display = v === 'list' ? '' : 'none';
+      document.getElementById('view-compare').style.display = v === 'compare' ? '' : 'none';
+      document.querySelectorAll('.ins-view-btn').forEach(function(b) {
+        b.classList.toggle('active', b.textContent.toLowerCase() === v);
+      });
+      if (v === 'compare') renderCompare();
+    }
+
+    // ── Auto number ──
+    function nextPolicyNumber() {
+      var year = new Date().getFullYear();
+      var existing = allPolicies.filter(function(p) {
+        return (p.policy_number || '').indexOf('POL-' + year) === 0;
+      });
+      var max = 0;
+      existing.forEach(function(p) {
+        var parts = p.policy_number.split('-');
+        var n = parseInt(parts[2]) || 0;
+        if (n > max) max = n;
+      });
+      return 'POL-' + year + '-' + String(max + 1).padStart(3, '0');
+    }
+
+    // ── Commission calc ──
+    function calcCommission() {
+      var prem = parseFloat(document.getElementById('p-premium').value) || 0;
+      var rate = parseFloat(document.getElementById('p-comm-rate').value) || 0;
+      var amt = (prem * rate / 100).toFixed(2);
+      document.getElementById('p-comm-amount').value = amt > 0 ? '$' + parseFloat(amt).toLocaleString() : '';
+    }
+
+    // ── New/Edit ──
+    function openNew() {
+      document.getElementById('form-title').textContent = 'New Policy';
+      document.getElementById('p-id').value = '';
+      document.getElementById('p-number').value = nextPolicyNumber();
+      document.getElementById('p-type').value = 'property';
+      document.getElementById('p-client').value = '';
+      document.getElementById('p-email').value = '';
+      document.getElementById('p-phone').value = '';
+      document.getElementById('p-status').value = 'lead';
+      document.getElementById('p-carrier').value = '';
+      document.getElementById('p-premium').value = '';
+      document.getElementById('p-comm-rate').value = '';
+      document.getElementById('p-comm-amount').value = '';
+      document.getElementById('p-coverage').value = '';
+      document.getElementById('p-effective').value = '';
+      document.getElementById('p-expiration').value = '';
+      document.getElementById('p-address').value = '';
+      document.getElementById('p-source').value = '';
+      document.getElementById('p-assigned').value = '';
+      document.getElementById('p-notes').value = '';
+      showModal('modal-form');
+    }
+
+    function openEdit(id) {
+      var p = allPolicies.find(function(r) { return r.id === id; });
+      if (!p) return;
+      document.getElementById('form-title').textContent = 'Edit Policy';
+      document.getElementById('p-id').value = p.id;
+      document.getElementById('p-number').value = p.policy_number || '';
+      document.getElementById('p-type').value = p.policy_type || 'property';
+      document.getElementById('p-client').value = p.client_name || '';
+      document.getElementById('p-email').value = p.client_email || '';
+      document.getElementById('p-phone').value = p.client_phone || '';
+      document.getElementById('p-status').value = p.status || 'lead';
+      document.getElementById('p-carrier').value = p.carrier || '';
+      document.getElementById('p-premium').value = p.premium || '';
+      document.getElementById('p-comm-rate').value = p.commission_rate || '';
+      document.getElementById('p-comm-amount').value = p.commission_amount ? '$' + parseFloat(p.commission_amount).toLocaleString() : '';
+      document.getElementById('p-coverage').value = p.coverage_amount || '';
+      document.getElementById('p-effective').value = p.effective_date || '';
+      document.getElementById('p-expiration').value = p.expiration_date || '';
+      document.getElementById('p-address').value = p.property_address || '';
+      document.getElementById('p-source').value = p.source || '';
+      document.getElementById('p-assigned').value = p.assigned_to || '';
+      document.getElementById('p-notes').value = p.notes || '';
+      closeModal('modal-detail');
+      showModal('modal-form');
+    }
+
+    async function savePolicy() {
+      var client = document.getElementById('p-client').value.trim();
+      var number = document.getElementById('p-number').value.trim();
+      if (!client || !number) { alert('Client name and policy number are required.'); return; }
+
+      var policy = {
+        policy_number: number,
+        policy_type: document.getElementById('p-type').value,
+        client_name: client,
+        client_email: document.getElementById('p-email').value.trim(),
+        client_phone: document.getElementById('p-phone').value.trim(),
+        status: document.getElementById('p-status').value,
+        carrier: document.getElementById('p-carrier').value.trim(),
+        premium: parseFloat(document.getElementById('p-premium').value) || null,
+        commission_rate: parseFloat(document.getElementById('p-comm-rate').value) || null,
+        coverage_amount: parseFloat(document.getElementById('p-coverage').value) || null,
+        effective_date: document.getElementById('p-effective').value || null,
+        expiration_date: document.getElementById('p-expiration').value || null,
+        property_address: document.getElementById('p-address').value.trim(),
+        source: document.getElementById('p-source').value.trim(),
+        assigned_to: document.getElementById('p-assigned').value.trim(),
+        notes: document.getElementById('p-notes').value.trim()
+      };
+
+      var id = document.getElementById('p-id').value;
+      if (id) policy.id = id;
+
+      await RVData.saveInsurancePolicy(policy);
+      closeModal('modal-form');
+      loadPolicies();
+    }
+
+    // ── Detail ──
+    async function openDetail(id) {
+      var p = allPolicies.find(function(r) { return r.id === id; });
+      if (!p) return;
+
+      document.getElementById('detail-title').textContent = (p.policy_number || '') + ' — ' + (p.client_name || '');
+
+      var grid = document.getElementById('detail-grid');
+      grid.innerHTML =
+        detailItem('Client', esc(p.client_name)) +
+        detailItem('Email', esc(p.client_email || '—')) +
+        detailItem('Phone', esc(p.client_phone || '—')) +
+        detailItem('Type', TYPE_LABELS[p.policy_type] || p.policy_type) +
+        detailItem('Status', '<span class="status-badge status-' + p.status + '">' + STATUS_LABELS[p.status] + '</span>') +
+        detailItem('Carrier', esc(p.carrier || '—')) +
+        detailItem('Premium', p.premium ? '<span style="color:#0891b2;font-weight:700;">$' + parseFloat(p.premium).toLocaleString() + '</span>' : '—') +
+        detailItem('Commission', p.commission_amount ? '$' + parseFloat(p.commission_amount).toLocaleString() + (p.commission_rate ? ' (' + p.commission_rate + '%)' : '') : '—') +
+        detailItem('Coverage', p.coverage_amount ? '$' + parseFloat(p.coverage_amount).toLocaleString() : '—') +
+        detailItem('Effective', p.effective_date ? new Date(p.effective_date).toLocaleDateString() : '—') +
+        detailItem('Expiration', p.expiration_date ? new Date(p.expiration_date).toLocaleDateString() : '—') +
+        detailItem('Source', esc(p.source || '—'));
+
+      // Load commissions
+      var comms = [];
+      try { comms = await RVData.getInsuranceCommissions(p.id); } catch(e) {}
+      var commBody = document.getElementById('comm-body');
+      if (comms.length > 0) {
+        commBody.innerHTML = comms.map(function(c) {
+          return '<tr>' +
+            '<td>' + (c.commission_type || '').replace(/_/g,' ') + '</td>' +
+            '<td style="font-weight:700;">$' + parseFloat(c.amount).toLocaleString() + '</td>' +
+            '<td><span class="status-badge status-' + (c.status === 'paid' ? 'active' : c.status === 'earned' ? 'bound' : 'lead') + '">' + (c.status || 'pending') + '</span></td>' +
+            '<td>' + (c.earned_date ? new Date(c.earned_date).toLocaleDateString() : '—') + '</td>' +
+          '</tr>';
+        }).join('');
+      } else {
+        commBody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;text-align:center;">No commissions recorded</td></tr>';
+      }
+
+      // Notes
+      var notesSec = document.getElementById('detail-notes-section');
+      if (p.notes) {
+        notesSec.style.display = '';
+        document.getElementById('detail-notes').textContent = p.notes;
+      } else {
+        notesSec.style.display = 'none';
+      }
+
+      // Footer buttons
+      var footer = document.getElementById('detail-footer');
+      var btns = '<button class="ins-btn-outline" onclick="openEdit(\'' + p.id + '\')">Edit</button>';
+      btns += '<button class="ins-btn-danger" onclick="deletePolicy(\'' + p.id + '\')">Delete</button>';
+
+      // Status workflow buttons
+      if (p.status === 'lead') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'quoting\')">Start Quoting</button>';
+      if (p.status === 'quoting') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'quoted\')">Mark Quoted</button>';
+      if (p.status === 'quoted') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'application\')">Submit Application</button>';
+      if (p.status === 'application') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'underwriting\')">Send to Underwriting</button>';
+      if (p.status === 'underwriting') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'bound\')">Bind Policy</button>';
+      if (p.status === 'bound') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'active\')">Activate</button>';
+      if (p.status === 'active') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'renewal\')">Mark for Renewal</button>';
+      if (p.status === 'renewal') btns += '<button class="ins-btn ins-btn-primary ins-btn-sm" onclick="moveStatus(\'' + p.id + '\',\'active\')">Renew → Active</button>';
+
+      btns += '<button class="ins-btn-outline" onclick="closeModal(\'modal-detail\')">Close</button>';
+      footer.innerHTML = btns;
+
+      showModal('modal-detail');
+    }
+
+    async function moveStatus(id, newStatus) {
+      var p = allPolicies.find(function(r) { return r.id === id; });
+      if (!p) return;
+      p.status = newStatus;
+      await RVData.saveInsurancePolicy({ id: p.id, status: newStatus });
+      closeModal('modal-detail');
+      loadPolicies();
+    }
+
+    async function deletePolicy(id) {
+      if (!confirm('Delete this policy and all its commissions?')) return;
+      await RVData.deleteInsurancePolicy(id);
+      closeModal('modal-detail');
+      loadPolicies();
+    }
+
+    // ── Helpers ──
+    function detailItem(label, value) {
+      return '<div class="ins-detail-item"><label>' + label + '</label><span>' + value + '</span></div>';
+    }
+    function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function showModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ── QUOTE COMPARISON ENGINE ──
+    // ═══════════════════════════════════════════════════════════════
+
+    function getQuoteRequests() {
+      return JSON.parse(localStorage.getItem('rv_insurance_quotes') || '[]');
+    }
+    function saveQuoteRequests(data) {
+      localStorage.setItem('rv_insurance_quotes', JSON.stringify(data));
+    }
+
+    function openQuoteRequest() {
+      document.getElementById('q-client').value = '';
+      document.getElementById('q-address').value = '';
+      document.getElementById('q-type').value = 'property';
+      document.getElementById('q-coverage').value = '';
+      document.getElementById('q-value').value = '';
+      document.getElementById('q-deductible').value = '1000';
+      document.getElementById('q-notes').value = '';
+      document.querySelectorAll('.q-carrier').forEach(function(c, i) { c.checked = i < 5; });
+      showModal('modal-quote');
+    }
+
+    function submitQuoteRequest() {
+      var client = document.getElementById('q-client').value.trim();
+      var address = document.getElementById('q-address').value.trim();
+      var coverage = parseFloat(document.getElementById('q-coverage').value) || 0;
+      if (!client || !address || !coverage) { alert('Please fill in client name, address, and coverage amount.'); return; }
+
+      var type = document.getElementById('q-type').value;
+      var propValue = parseFloat(document.getElementById('q-value').value) || 0;
+      var deductible = parseInt(document.getElementById('q-deductible').value) || 1000;
+      var carriers = [];
+      document.querySelectorAll('.q-carrier:checked').forEach(function(c) { carriers.push(c.value); });
+      if (carriers.length < 2) { alert('Please select at least 2 carriers to compare.'); return; }
+
+      // Generate simulated quotes from each carrier
+      var baseRate = type === 'commercial' ? 0.0045 : type === 'umbrella' ? 0.003 : type === 'renters' ? 0.008 : 0.004;
+      var quotes = carriers.map(function(carrier) {
+        var variance = 0.7 + Math.random() * 0.6; // 70%-130% of base
+        var premium = Math.round(coverage * baseRate * variance);
+        var commRate = 10 + Math.round(Math.random() * 8); // 10-18%
+        return {
+          carrier: carrier,
+          premium: premium,
+          monthly: Math.round(premium / 12),
+          deductible: deductible,
+          coverage: coverage,
+          liability: coverage,
+          personal_property: type === 'renters' ? Math.round(coverage * 0.4) : 0,
+          loss_of_rent: type !== 'renters' ? Math.round(coverage * 0.2) : 0,
+          commission_rate: commRate,
+          commission_amount: Math.round(premium * commRate / 100),
+          am_best_rating: ['A++','A+','A','A-','B++'][Math.floor(Math.random() * 5)],
+          claims_rating: (3.5 + Math.random() * 1.5).toFixed(1) + '/5',
+          response_time: ['Same day', '24 hours', '1-2 business days', '2-3 business days'][Math.floor(Math.random() * 4)]
+        };
+      });
+
+      // Sort by premium — lowest first
+      quotes.sort(function(a, b) { return a.premium - b.premium; });
+
+      var request = {
+        id: 'qr_' + Date.now(),
+        client_name: client,
+        property_address: address,
+        coverage_type: type,
+        coverage_amount: coverage,
+        property_value: propValue,
+        deductible: deductible,
+        notes: document.getElementById('q-notes').value.trim(),
+        quotes: quotes,
+        created_at: new Date().toISOString()
+      };
+
+      var all = getQuoteRequests();
+      all.unshift(request);
+      saveQuoteRequests(all);
+
+      closeModal('modal-quote');
+      setView('compare');
+    }
+
+    function renderCompare() {
+      var container = document.getElementById('cmp-container');
+      var requests = getQuoteRequests();
+      var filterType = document.getElementById('cmp-filter-type').value;
+
+      if (filterType) {
+        requests = requests.filter(function(r) { return r.coverage_type === filterType; });
+      }
+
+      if (requests.length === 0) {
+        container.innerHTML = '<div class="cmp-empty"><div class="cmp-empty-icon">📊</div><p>No quote comparisons yet.<br>Click "Request Quotes" to compare carriers side-by-side.</p></div>';
+        return;
+      }
+
+      container.innerHTML = requests.map(function(req) {
+        var best = req.quotes[0]; // Already sorted by premium (lowest first)
+        return '<div class="cmp-group">' +
+          '<div class="cmp-group-header">' +
+            '<div>' +
+              '<h3>' + esc(req.client_name) + '</h3>' +
+              '<div class="cmp-group-meta">' + esc(req.property_address) + ' · ' + (TYPE_LABELS[req.coverage_type] || req.coverage_type) +
+              ' · $' + req.coverage_amount.toLocaleString() + ' coverage · Requested ' + new Date(req.created_at).toLocaleDateString() + '</div>' +
+            '</div>' +
+            '<button class="ins-btn-danger" onclick="deleteQuoteRequest(\'' + req.id + '\')">Remove</button>' +
+          '</div>' +
+          '<div class="cmp-cards">' +
+            req.quotes.map(function(q, i) {
+              var isBest = i === 0;
+              return '<div class="cmp-card' + (isBest ? ' best' : '') + '">' +
+                (isBest ? '<div class="cmp-best-tag">Best Price</div>' : '') +
+                '<div class="cmp-carrier">' + esc(q.carrier) + '</div>' +
+                '<div class="cmp-type">AM Best: ' + q.am_best_rating + ' · Claims: ' + q.claims_rating + '</div>' +
+                '<div class="cmp-premium">$' + q.premium.toLocaleString() + '</div>' +
+                '<div class="cmp-premium-label">$' + q.monthly.toLocaleString() + '/mo · Annual Premium</div>' +
+                '<ul class="cmp-details">' +
+                  '<li>Coverage <strong>$' + q.coverage.toLocaleString() + '</strong></li>' +
+                  '<li>Deductible <strong>$' + q.deductible.toLocaleString() + '</strong></li>' +
+                  (q.loss_of_rent ? '<li>Loss of Rent <strong>$' + q.loss_of_rent.toLocaleString() + '</strong></li>' : '') +
+                  (q.personal_property ? '<li>Personal Property <strong>$' + q.personal_property.toLocaleString() + '</strong></li>' : '') +
+                  '<li>Commission <strong>$' + q.commission_amount.toLocaleString() + ' (' + q.commission_rate + '%)</strong></li>' +
+                  '<li>Response Time <strong>' + q.response_time + '</strong></li>' +
+                '</ul>' +
+                '<div class="cmp-actions">' +
+                  '<button class="ins-btn-outline" onclick="bindQuote(\'' + req.id + '\',\'' + esc(q.carrier) + '\')">Select & Bind</button>' +
+                '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function deleteQuoteRequest(id) {
+      if (!confirm('Remove this quote comparison?')) return;
+      var all = getQuoteRequests().filter(function(r) { return r.id !== id; });
+      saveQuoteRequests(all);
+      renderCompare();
+    }
+
+    function bindQuote(reqId, carrier) {
+      var reqs = getQuoteRequests();
+      var req = reqs.find(function(r) { return r.id === reqId; });
+      if (!req) return;
+      var quote = req.quotes.find(function(q) { return q.carrier === carrier; });
+      if (!quote) return;
+
+      // Create a new policy from the selected quote
+      var policy = {
+        policy_number: nextPolicyNumber(),
+        policy_type: req.coverage_type,
+        client_name: req.client_name,
+        carrier: carrier,
+        premium: quote.premium,
+        commission_rate: quote.commission_rate,
+        commission_amount: quote.commission_amount,
+        coverage_amount: quote.coverage,
+        property_address: req.property_address,
+        status: 'application',
+        notes: 'Created from quote comparison. Deductible: $' + quote.deductible.toLocaleString() +
+          '. AM Best: ' + quote.am_best_rating + '. Selected from ' + req.quotes.length + ' carrier quotes.'
+      };
+
+      RVData.saveInsurancePolicy(policy).then(function() {
+        alert('Policy created from ' + carrier + ' quote! Moved to Application stage in your pipeline.');
+        loadPolicies();
+      });
+    }
+  </script>
+<script src="share-widget.js" data-share-title="Insurance Pipeline" data-share-text="Manage your insurance agency on RentVerified"></script>
+<script src="recommended-supplies.js" data-industry="insurance"></script>
+<script src="business-advisor.js" data-industry="insurance"></script>
+<script src="service-connect.js"></script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reputation Manager – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .rev-layout { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+    .rev-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .rev-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+    .btn-rev { padding: 0.55rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-rev.primary { background: #f59e0b; color: #1e1b4b; }
+    .btn-rev.primary:hover { background: #d97706; }
+    .btn-rev.outline { background: white; color: #f59e0b; border: 2px solid #f59e0b; }
+    .btn-rev.outline:hover { background: #fffbeb; }
+    .btn-rev.sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+
+    .rev-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .rev-stat { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1rem; text-align: center; }
+    .rev-stat .val { font-size: 1.5rem; font-weight: 900; color: #1e1b4b; }
+    .rev-stat .lbl { font-size: 0.72rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 4px; }
+
+    .rev-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; }
+    .rev-tab { padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 700; color: #6b7280; cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; }
+    .rev-tab.active { color: #f59e0b; border-bottom-color: #f59e0b; }
+    .rev-tab:hover { color: #d97706; }
+
+    .rev-filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .rev-filters select { padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; }
+
+    .rev-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 1rem; transition: box-shadow 0.2s; }
+    .rev-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .rev-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem; }
+    .rev-reviewer { font-weight: 700; color: #1e1b4b; font-size: 0.95rem; }
+    .rev-date { font-size: 0.75rem; color: #9ca3af; }
+    .rev-stars { color: #f59e0b; font-size: 1.1rem; letter-spacing: 1px; }
+    .rev-stars .empty { color: #d1d5db; }
+    .rev-comment { color: #374151; font-size: 0.88rem; line-height: 1.5; margin: 0.5rem 0; }
+    .rev-source { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; background: #ede9fe; color: #5b21b6; }
+    .rev-source.google_link { background: #dbeafe; color: #1e40af; }
+    .rev-actions { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.75rem; flex-wrap: wrap; }
+    .rev-toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 600; color: #6b7280; cursor: pointer; }
+    .rev-toggle input[type="checkbox"] { accent-color: #f59e0b; width: 16px; height: 16px; }
+
+    .rev-response { background: #f9fafb; border-left: 3px solid #f59e0b; padding: 0.75rem 1rem; margin-top: 0.75rem; border-radius: 0 8px 8px 0; }
+    .rev-response .resp-label { font-size: 0.72rem; font-weight: 700; color: #f59e0b; text-transform: uppercase; margin-bottom: 4px; }
+    .rev-response .resp-text { font-size: 0.85rem; color: #374151; }
+    .rev-respond-form { margin-top: 0.75rem; display: flex; gap: 0.5rem; }
+    .rev-respond-form textarea { flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; resize: vertical; min-height: 40px; }
+
+    /* Star breakdown */
+    .star-breakdown { margin: 1rem 0; }
+    .star-bar-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 4px; font-size: 0.82rem; }
+    .star-bar-row .star-label { width: 48px; font-weight: 600; color: #374151; text-align: right; }
+    .star-bar-bg { flex: 1; height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; }
+    .star-bar-fill { height: 100%; background: #f59e0b; border-radius: 5px; transition: width 0.3s; }
+    .star-bar-row .star-count { width: 24px; font-size: 0.78rem; color: #9ca3af; }
+
+    /* Public preview */
+    .public-preview { background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; }
+    .public-preview h3 { font-size: 1.1rem; font-weight: 800; color: #92400e; margin-bottom: 1rem; }
+
+    /* Request history */
+    .req-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .req-table th { text-align: left; padding: 0.75rem 1rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .req-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .req-table tr:hover td { background: #f9fafb; }
+    .badge-sent { background: #d1fae5; color: #065f46; display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
+    .badge-pending { background: #fef3c7; color: #92400e; display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 2rem; width: 90%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 1.25rem; color: #1e1b4b; }
+    .modal label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; margin-bottom: 0.75rem; box-sizing: border-box; }
+    .modal textarea { height: 80px; resize: vertical; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+    .modal-preview { background: #f9fafb; border-radius: 8px; padding: 1rem; margin-top: 0.75rem; border: 1px solid #e5e7eb; }
+    .modal-preview h4 { font-size: 0.82rem; font-weight: 700; color: #6b7280; margin-bottom: 0.5rem; }
+    .modal-preview p { font-size: 0.85rem; color: #374151; line-height: 1.5; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #065f46; color: white; padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; z-index: 2000; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .toast.show { display: block; animation: toastIn 0.3s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    @media (max-width: 640px) {
+      .rev-stats { grid-template-columns: 1fr 1fr; }
+      .rev-header { flex-direction: column; align-items: flex-start; }
+      .rev-respond-form { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">RentVerified</span> <span style="font-weight:500;opacity:0.9;">Reviews</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="crm.html">CRM</a>
+    <a href="listings.html">Booking</a>
+    <a href="reviews.html" style="color:#f59e0b;font-weight:700;">Reviews</a>
+    <a href="tenant-portal.html">Messages</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Home</a>
+  </div>
+</nav>
+
+<div class="rev-layout">
+  <!-- Header -->
+  <div class="rev-header">
+    <h1>Reputation Manager</h1>
+    <button class="btn-rev primary" onclick="openRequestModal()">+ Request a Review</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="rev-stats" id="revStats"></div>
+
+  <!-- Tabs -->
+  <div class="rev-tabs">
+    <button class="rev-tab active" data-tab="all" onclick="switchTab('all')">All Reviews</button>
+    <button class="rev-tab" data-tab="published" onclick="switchTab('published')">Published</button>
+    <button class="rev-tab" data-tab="pending" onclick="switchTab('pending')">Pending</button>
+    <button class="rev-tab" data-tab="requests" onclick="switchTab('requests')">Request History</button>
+  </div>
+
+  <!-- Filters (for review tabs) -->
+  <div class="rev-filters" id="revFilters">
+    <select id="filterRating" onchange="renderReviews()">
+      <option value="all">All Ratings</option>
+      <option value="5">5 Stars</option>
+      <option value="4">4 Stars</option>
+      <option value="3">3 Stars</option>
+      <option value="2">2 Stars</option>
+      <option value="1">1 Star</option>
+    </select>
+    <select id="filterSource" onchange="renderReviews()">
+      <option value="all">All Sources</option>
+      <option value="direct">Direct</option>
+      <option value="google_link">Google Link</option>
+    </select>
+  </div>
+
+  <!-- Tab Panels -->
+  <div id="panel-all" class="tab-panel active"></div>
+  <div id="panel-published" class="tab-panel"></div>
+  <div id="panel-pending" class="tab-panel"></div>
+  <div id="panel-requests" class="tab-panel"></div>
+
+  <!-- Public Preview Section -->
+  <div class="public-preview" id="publicPreview">
+    <h3>Public Profile Preview</h3>
+    <div id="publicAvg" style="font-size:2rem;font-weight:900;color:#1e1b4b;"></div>
+    <div id="publicStars" class="rev-stars" style="font-size:1.5rem;margin-bottom:0.75rem;"></div>
+    <div id="starBreakdown" class="star-breakdown"></div>
+    <div id="publicReviews"></div>
+  </div>
+</div>
+
+<!-- Request Review Modal -->
+<div class="modal-overlay" id="requestModal">
+  <div class="modal">
+    <h2>Request a Review</h2>
+    <label>Customer Name *</label>
+    <input type="text" id="reqName" placeholder="e.g. Jane Doe" />
+    <label>Email or Phone *</label>
+    <input type="text" id="reqContact" placeholder="email@example.com or (555) 123-4567" />
+    <label>Service / Job (optional)</label>
+    <input type="text" id="reqService" placeholder="e.g. Plumbing repair at 123 Main St" />
+    <label>Message Template</label>
+    <textarea id="reqMessage">Hi {name}, thank you for choosing our services! We'd love to hear about your experience. Please take a moment to leave us a review — it really helps our business grow. Thank you!</textarea>
+    <div class="modal-preview">
+      <h4>Preview — What the customer will see</h4>
+      <p id="reqPreview"></p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-rev primary" onclick="sendReviewRequest()">Send Request</button>
+      <button class="btn-rev outline" onclick="closeRequestModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="share-widget.js" data-share-title="Reputation Manager" data-share-text="Manage reviews on RentVerified"></script>
+<script>
+// Monkey-patch: force localStorage mode
+if (typeof RVData !== 'undefined') { RVData._useSupabase = function() { return false; }; }
+
+// ─── Seed Data ────────────────────────────────────────────────────────
+var SEED_REVIEWS = [
+  { id:'rev_1', reviewer_name:'John Martinez', rating:5, comment:'Excellent property management. Very responsive and professional. Highly recommend!', source:'direct', is_published:true, created_at:'2026-03-15T10:00:00Z', response:'Thank you John! Great working with you.' },
+  { id:'rev_2', reviewer_name:'Sarah Chen', rating:4, comment:'Good service overall. Communication could be a bit faster but quality of work was great.', source:'direct', is_published:true, created_at:'2026-03-10T14:00:00Z' },
+  { id:'rev_3', reviewer_name:'Mike Thompson', rating:5, comment:'Best contractor coordination I have seen. Saved us 15% on our renovation project.', source:'google_link', is_published:true, created_at:'2026-03-05T09:00:00Z', response:'Thanks Mike! That renovation turned out amazing.' },
+  { id:'rev_4', reviewer_name:'Lisa Park', rating:3, comment:'Decent service but the scheduling was a bit chaotic. The actual inspection was thorough though.', source:'direct', is_published:false, created_at:'2026-03-01T11:00:00Z' },
+  { id:'rev_5', reviewer_name:'Amanda White', rating:5, comment:'Incredibly helpful with our commercial lease negotiation. Saved us thousands.', source:'direct', is_published:true, created_at:'2026-02-20T13:00:00Z' }
+];
+
+var LS_KEY = 'rv_reviews';
+var LS_REQ_KEY = 'rv_review_requests';
+var currentTab = 'all';
+
+// ─── Data Methods ─────────────────────────────────────────────────────
+function getReviews() {
+  var stored = localStorage.getItem(LS_KEY);
+  if (stored) return JSON.parse(stored);
+  localStorage.setItem(LS_KEY, JSON.stringify(SEED_REVIEWS));
+  return JSON.parse(JSON.stringify(SEED_REVIEWS));
+}
+
+function saveReview(review) {
+  var reviews = getReviews();
+  var idx = reviews.findIndex(function(r) { return r.id === review.id; });
+  if (idx >= 0) { reviews[idx] = review; }
+  else { reviews.unshift(review); }
+  localStorage.setItem(LS_KEY, JSON.stringify(reviews));
+  return reviews;
+}
+
+function deleteReview(id) {
+  var reviews = getReviews().filter(function(r) { return r.id !== id; });
+  localStorage.setItem(LS_KEY, JSON.stringify(reviews));
+  return reviews;
+}
+
+function getRequests() {
+  var stored = localStorage.getItem(LS_REQ_KEY);
+  return stored ? JSON.parse(stored) : [];
+}
+
+function saveRequest(req) {
+  var reqs = getRequests();
+  reqs.unshift(req);
+  localStorage.setItem(LS_REQ_KEY, JSON.stringify(reqs));
+  return reqs;
+}
+
+// ─── Rendering ────────────────────────────────────────────────────────
+function starsHtml(rating, large) {
+  var size = large ? 'font-size:1.3rem;' : '';
+  var html = '<span class="rev-stars" style="' + size + '">';
+  for (var i = 1; i <= 5; i++) {
+    html += i <= rating ? '\u2605' : '<span class="empty">\u2605</span>';
+  }
+  return html + '</span>';
+}
+
+function formatDate(iso) {
+  var d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function sourceLabel(src) {
+  if (src === 'google_link') return '<span class="rev-source google_link">Google</span>';
+  return '<span class="rev-source">Direct</span>';
+}
+
+function renderStats() {
+  var reviews = getReviews();
+  var total = reviews.length;
+  var published = reviews.filter(function(r) { return r.is_published; }).length;
+  var avgRating = total > 0 ? (reviews.reduce(function(s, r) { return s + r.rating; }, 0) / total).toFixed(1) : '0.0';
+  var withResponse = reviews.filter(function(r) { return r.response; }).length;
+  var responseRate = total > 0 ? Math.round((withResponse / total) * 100) : 0;
+
+  document.getElementById('revStats').innerHTML =
+    '<div class="rev-stat"><div class="val">' + starsHtml(Math.round(parseFloat(avgRating))) + ' ' + avgRating + '</div><div class="lbl">Average Rating</div></div>' +
+    '<div class="rev-stat"><div class="val">' + total + '</div><div class="lbl">Total Reviews</div></div>' +
+    '<div class="rev-stat"><div class="val">' + published + '</div><div class="lbl">Published</div></div>' +
+    '<div class="rev-stat"><div class="val">' + responseRate + '%</div><div class="lbl">Response Rate</div></div>';
+}
+
+function renderReviews() {
+  var reviews = getReviews();
+  var ratingFilter = document.getElementById('filterRating').value;
+  var sourceFilter = document.getElementById('filterSource').value;
+
+  var filtered = reviews;
+  if (ratingFilter !== 'all') filtered = filtered.filter(function(r) { return r.rating === parseInt(ratingFilter); });
+  if (sourceFilter !== 'all') filtered = filtered.filter(function(r) { return r.source === sourceFilter; });
+
+  var allHtml = buildReviewCards(filtered);
+  var pubHtml = buildReviewCards(filtered.filter(function(r) { return r.is_published; }));
+  var pendHtml = buildReviewCards(filtered.filter(function(r) { return !r.is_published; }));
+
+  document.getElementById('panel-all').innerHTML = allHtml || '<p style="color:#9ca3af;text-align:center;padding:2rem;">No reviews match your filters.</p>';
+  document.getElementById('panel-published').innerHTML = pubHtml || '<p style="color:#9ca3af;text-align:center;padding:2rem;">No published reviews match your filters.</p>';
+  document.getElementById('panel-pending').innerHTML = pendHtml || '<p style="color:#9ca3af;text-align:center;padding:2rem;">No pending reviews.</p>';
+
+  renderRequestHistory();
+  renderPublicPreview();
+}
+
+function buildReviewCards(reviews) {
+  return reviews.map(function(r) {
+    var responseBlock = '';
+    if (r.response) {
+      responseBlock = '<div class="rev-response"><div class="resp-label">Your Response</div><div class="resp-text">' + escHtml(r.response) + '</div></div>';
+    }
+    var respondForm = '<div class="rev-respond-form">' +
+      '<textarea id="resp_' + r.id + '" placeholder="Write a response...">' + (r.response || '') + '</textarea>' +
+      '<button class="btn-rev primary sm" onclick="respondToReview(\'' + r.id + '\')">Reply</button>' +
+      '</div>';
+
+    return '<div class="rev-card">' +
+      '<div class="rev-card-header">' +
+        '<div><span class="rev-reviewer">' + escHtml(r.reviewer_name) + '</span> ' + sourceLabel(r.source) + '</div>' +
+        '<span class="rev-date">' + formatDate(r.created_at) + '</span>' +
+      '</div>' +
+      starsHtml(r.rating) +
+      '<p class="rev-comment">' + escHtml(r.comment) + '</p>' +
+      responseBlock +
+      '<div class="rev-actions">' +
+        '<label class="rev-toggle"><input type="checkbox" ' + (r.is_published ? 'checked' : '') + ' onchange="togglePublish(\'' + r.id + '\', this.checked)" /> Published</label>' +
+        '<button class="btn-rev outline sm" onclick="deleteReviewById(\'' + r.id + '\')">Delete</button>' +
+      '</div>' +
+      respondForm +
+    '</div>';
+  }).join('');
+}
+
+function renderRequestHistory() {
+  var reqs = getRequests();
+  if (reqs.length === 0) {
+    document.getElementById('panel-requests').innerHTML = '<p style="color:#9ca3af;text-align:center;padding:2rem;">No review requests sent yet.</p>';
+    return;
+  }
+  var html = '<div class="rev-card" style="padding:0;overflow:hidden;"><table class="req-table"><thead><tr><th>Customer</th><th>Contact</th><th>Service</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+  reqs.forEach(function(req) {
+    html += '<tr><td>' + escHtml(req.name) + '</td><td>' + escHtml(req.contact) + '</td><td>' + escHtml(req.service || '-') + '</td><td><span class="badge-sent">Sent</span></td><td>' + formatDate(req.sent_at) + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('panel-requests').innerHTML = html;
+}
+
+function renderPublicPreview() {
+  var reviews = getReviews().filter(function(r) { return r.is_published; });
+  var total = reviews.length;
+  var avg = total > 0 ? (reviews.reduce(function(s, r) { return s + r.rating; }, 0) / total).toFixed(1) : '0.0';
+
+  document.getElementById('publicAvg').textContent = avg + ' out of 5';
+  document.getElementById('publicStars').innerHTML = starsHtml(Math.round(parseFloat(avg)), true).replace(/<\/?span[^>]*>/g, function(m) { return m; });
+
+  // Star breakdown bars
+  var breakdown = '';
+  for (var star = 5; star >= 1; star--) {
+    var count = reviews.filter(function(r) { return r.rating === star; }).length;
+    var pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    breakdown += '<div class="star-bar-row"><span class="star-label">' + star + ' star' + (star > 1 ? 's' : '') + '</span><div class="star-bar-bg"><div class="star-bar-fill" style="width:' + pct + '%;"></div></div><span class="star-count">' + count + '</span></div>';
+  }
+  document.getElementById('starBreakdown').innerHTML = breakdown;
+
+  // Published reviews with responses
+  var pubHtml = reviews.slice(0, 10).map(function(r) {
+    var resp = r.response ? '<div class="rev-response"><div class="resp-label">Business Response</div><div class="resp-text">' + escHtml(r.response) + '</div></div>' : '';
+    return '<div class="rev-card" style="border-left:3px solid #f59e0b;">' +
+      '<div class="rev-card-header"><span class="rev-reviewer">' + escHtml(r.reviewer_name) + '</span><span class="rev-date">' + formatDate(r.created_at) + '</span></div>' +
+      starsHtml(r.rating) +
+      '<p class="rev-comment">' + escHtml(r.comment) + '</p>' +
+      resp + '</div>';
+  }).join('');
+  document.getElementById('publicReviews').innerHTML = pubHtml;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.rev-tab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('data-tab') === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'panel-' + tab);
+  });
+  document.getElementById('revFilters').style.display = (tab === 'requests') ? 'none' : 'flex';
+}
+
+function togglePublish(id, isPublished) {
+  var reviews = getReviews();
+  var r = reviews.find(function(rv) { return rv.id === id; });
+  if (r) {
+    r.is_published = isPublished;
+    saveReview(r);
+    renderStats();
+    renderReviews();
+    showToast(isPublished ? 'Review published!' : 'Review unpublished.');
+  }
+}
+
+function respondToReview(id) {
+  var textarea = document.getElementById('resp_' + id);
+  var text = textarea ? textarea.value.trim() : '';
+  if (!text) { showToast('Please enter a response.'); return; }
+  var reviews = getReviews();
+  var r = reviews.find(function(rv) { return rv.id === id; });
+  if (r) {
+    r.response = text;
+    saveReview(r);
+    renderStats();
+    renderReviews();
+    showToast('Response saved!');
+  }
+}
+
+function deleteReviewById(id) {
+  if (!confirm('Delete this review? This cannot be undone.')) return;
+  deleteReview(id);
+  renderStats();
+  renderReviews();
+  showToast('Review deleted.');
+}
+
+// ─── Request Modal ────────────────────────────────────────────────────
+function openRequestModal() {
+  document.getElementById('requestModal').classList.add('show');
+  updatePreview();
+}
+
+function closeRequestModal() {
+  document.getElementById('requestModal').classList.remove('show');
+}
+
+function updatePreview() {
+  var name = document.getElementById('reqName').value || '{name}';
+  var msg = document.getElementById('reqMessage').value.replace('{name}', name);
+  document.getElementById('reqPreview').textContent = msg;
+}
+
+function sendReviewRequest() {
+  var name = document.getElementById('reqName').value.trim();
+  var contact = document.getElementById('reqContact').value.trim();
+  if (!name || !contact) { showToast('Name and contact are required.'); return; }
+
+  var req = {
+    id: 'rr_' + Date.now(),
+    name: name,
+    contact: contact,
+    service: document.getElementById('reqService').value.trim(),
+    message: document.getElementById('reqMessage').value,
+    sent_at: new Date().toISOString()
+  };
+  saveRequest(req);
+
+  // Reset form
+  document.getElementById('reqName').value = '';
+  document.getElementById('reqContact').value = '';
+  document.getElementById('reqService').value = '';
+  closeRequestModal();
+  renderReviews();
+  showToast('Review request sent to ' + name + '!');
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────
+function escHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ─── Event Listeners ──────────────────────────────────────────────────
+document.getElementById('reqName').addEventListener('input', updatePreview);
+document.getElementById('reqMessage').addEventListener('input', updatePreview);
+
+// ─── Init ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  renderStats();
+  renderReviews();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Dashboard Config</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style id="page-styles">
+    /* ── Layout ── */
+    .dc-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 68px);
+      background: #f9fafb;
+    }
+    .dc-sidebar {
+      background: white;
+      border-right: 1px solid #e5e7eb;
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 68px;
+      height: calc(100vh - 68px);
+      overflow-y: auto;
+    }
+    .dc-main {
+      padding: 2rem;
+      max-width: 1100px;
+    }
+
+    /* ── Sidebar sections ── */
+    .dc-sidebar-section { margin-bottom: 1.75rem; }
+    .dc-sidebar-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      padding: 0 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .dc-industry-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      width: 100%;
+      padding: 0.6rem 1.25rem;
+      border: none;
+      background: none;
+      text-align: left;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-left: 3px solid transparent;
+    }
+    .dc-industry-btn:hover { background: #f3f4f6; }
+    .dc-industry-btn.active { background: #eff6ff; color: #1d4ed8; border-left-color: #1d4ed8; }
+    .dc-industry-btn .btn-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+    /* ── Header ── */
+    .dc-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .dc-header h1 { font-size: 1.5rem; font-weight: 900; color: #111827; margin-bottom: 0.25rem; }
+    .dc-header p { font-size: 0.9rem; color: #6b7280; margin: 0; }
+    .dc-header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    /* ── Widget Library ── */
+    .widget-library {
+      background: white;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .widget-library-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .widget-library-header h3 { font-size: 0.95rem; font-weight: 800; color: #111827; margin: 0; }
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+    .widget-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.85rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+      background: white;
+      transition: all 0.12s;
+      user-select: none;
+    }
+    .widget-chip:hover { border-color: #3b82f6; color: #1d4ed8; }
+    .widget-chip.in-layout { border-color: #a7f3d0; background: #ecfdf5; color: #065f46; }
+    .widget-chip .wc-icon { font-size: 1rem; }
+
+    /* ── Active Layout ── */
+    .layout-area {
+      background: white;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 1.25rem;
+    }
+    .layout-area-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .layout-area-header h3 { font-size: 0.95rem; font-weight: 800; color: #111827; margin: 0; }
+    .layout-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .layout-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      transition: border-color 0.12s;
+    }
+    .layout-item:hover { border-color: #d1d5db; }
+    .layout-item-icon { font-size: 1.2rem; width: 28px; text-align: center; flex-shrink: 0; }
+    .layout-item-name { flex: 1; font-size: 0.9rem; font-weight: 700; color: #111827; }
+    .layout-item-desc { font-size: 0.78rem; color: #9ca3af; }
+    .layout-item-pos { font-size: 0.75rem; font-weight: 700; color: #6b7280; background: #e5e7eb; padding: 2px 8px; border-radius: 4px; }
+    .layout-move-btns { display: flex; flex-direction: column; gap: 2px; }
+    .layout-move-btn {
+      width: 24px; height: 20px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      background: white;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #6b7280;
+      transition: all 0.1s;
+    }
+    .layout-move-btn:hover { border-color: #6b7280; color: #111827; }
+    .layout-move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .layout-remove-btn {
+      width: 28px; height: 28px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #9ca3af;
+      transition: all 0.12s;
+      flex-shrink: 0;
+    }
+    .layout-remove-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+    /* ── Empty layout ── */
+    .layout-empty {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: #9ca3af;
+    }
+    .layout-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .layout-empty h4 { font-size: 0.95rem; font-weight: 700; color: #4b5563; margin-bottom: 0.35rem; }
+    .layout-empty p { font-size: 0.82rem; }
+
+    /* ── Saved configs ── */
+    .saved-configs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.75rem;
+    }
+    .saved-config-card {
+      background: white;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .saved-config-card:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .saved-config-card.active { border-color: #1d4ed8; background: #eff6ff; }
+    .saved-config-name { font-size: 0.9rem; font-weight: 800; color: #111827; margin-bottom: 3px; }
+    .saved-config-meta { font-size: 0.75rem; color: #6b7280; }
+    .saved-config-count { font-size: 0.78rem; font-weight: 700; color: #3b82f6; margin-top: 4px; }
+
+    /* ── Toast ── */
+    .dc-toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: #111827; color: white;
+      padding: 0.75rem 1.25rem; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      transform: translateY(60px); opacity: 0;
+      transition: transform 0.25s, opacity 0.25s;
+      z-index: 9999;
+    }
+    .dc-toast.show { transform: translateY(0); opacity: 1; }
+    .dc-toast.success { background: #059669; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .dc-layout { grid-template-columns: 1fr; }
+      .dc-sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid #e5e7eb; padding: 1rem 0; }
+      .dc-main { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="landlord-signup.html">Dashboard</a>
+    <a href="integrations.html">Integrations</a>
+    <a href="network.html">Pro Network</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login</a>
+  </div>
+</nav>
+
+<div class="dc-layout">
+
+  <!-- SIDEBAR -->
+  <div class="dc-sidebar">
+    <div class="dc-sidebar-section">
+      <div class="dc-sidebar-label">Industry Type</div>
+      <button class="dc-industry-btn active" onclick="setIndustry('landlord', this)">
+        <span class="btn-icon">🏠</span> Landlord / PM
+      </button>
+      <button class="dc-industry-btn" onclick="setIndustry('agent', this)">
+        <span class="btn-icon">🏡</span> Real Estate Agent
+      </button>
+      <button class="dc-industry-btn" onclick="setIndustry('attorney', this)">
+        <span class="btn-icon">⚖️</span> Attorney
+      </button>
+      <button class="dc-industry-btn" onclick="setIndustry('contractor', this)">
+        <span class="btn-icon">🔧</span> Contractor
+      </button>
+      <button class="dc-industry-btn" onclick="setIndustry('salon', this)">
+        <span class="btn-icon">💇</span> Salon / Service Biz
+      </button>
+      <button class="dc-industry-btn" onclick="setIndustry('nonprofit', this)">
+        <span class="btn-icon">🤝</span> Nonprofit
+      </button>
+      <button class="dc-industry-btn" onclick="setIndustry('cpa', this)">
+        <span class="btn-icon">📊</span> CPA / Bookkeeper
+      </button>
+      <button class="dc-industry-btn" onclick="setIndustry('accountant', this)">
+        <span class="btn-icon">💼</span> Accountant
+      </button>
+    </div>
+    <div class="dc-sidebar-section" style="padding: 0 1.25rem;">
+      <div class="dc-sidebar-label" style="padding:0;margin-bottom:0.5rem;">Saved Layouts</div>
+      <div id="savedConfigsList" style="display:flex;flex-direction:column;gap:0.4rem;"></div>
+      <button onclick="saveCurrentLayout()" class="btn btn-outline" style="width:100%;margin-top:0.75rem;font-size:0.82rem;padding:0.5rem;">+ Save Layout</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="dc-main">
+    <div class="dc-header">
+      <div>
+        <h1 id="industryTitle">Landlord / PM Dashboard</h1>
+        <p id="industryDesc">Customize which widgets appear on your dashboard and in what order.</p>
+      </div>
+      <div class="dc-header-actions">
+        <button class="btn btn-outline" onclick="resetToDefault()">Reset to Default</button>
+        <button class="btn btn-primary" onclick="applyLayout()">Apply Layout</button>
+      </div>
+    </div>
+
+    <!-- WIDGET LIBRARY -->
+    <div class="widget-library">
+      <div class="widget-library-header">
+        <h3>Widget Library</h3>
+        <span style="font-size:0.8rem;color:#6b7280;">Click a widget to add/remove it from your layout</span>
+      </div>
+      <div class="widget-grid" id="widgetLibrary"></div>
+    </div>
+
+    <!-- ACTIVE LAYOUT -->
+    <div class="layout-area">
+      <div class="layout-area-header">
+        <div>
+          <h3>Active Layout</h3>
+          <p style="font-size:0.8rem;color:#6b7280;margin:2px 0 0;">Use ↑↓ to reorder. Click ✕ to remove.</p>
+        </div>
+        <span id="widgetCount" style="font-size:0.82rem;font-weight:700;color:#3b82f6;"></span>
+      </div>
+      <div class="layout-list" id="layoutList"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="dc-toast" id="dcToast"></div>
+
+<script src="data-layer.js"></script>
+<script>
+/* ── Widget catalog ── */
+const ALL_WIDGETS = [
+  { id:'revenue',      icon:'💰', name:'Revenue Summary',       desc:'Monthly income, expenses, net profit' },
+  { id:'bookings',     icon:'📅', name:'Upcoming Bookings',     desc:'Next 7 days of appointments' },
+  { id:'deals',        icon:'🤝', name:'Active Deals / Projects', desc:'Team workspaces with status' },
+  { id:'messages',     icon:'💬', name:'Unread Messages',       desc:'Message count + preview' },
+  { id:'docrequests',  icon:'📋', name:'Document Requests',     desc:'Pending uploads from clients' },
+  { id:'tasks',        icon:'✅', name:'Task Board Summary',    desc:'Open tasks across all projects' },
+  { id:'tenants',      icon:'🏠', name:'Tenant Overview',       desc:'Occupancy, rent collected, maintenance' },
+  { id:'invoices',     icon:'💳', name:'Invoice Status',        desc:'Unpaid / overdue / paid this month' },
+  { id:'referrals',    icon:'🎁', name:'Referral Earnings',     desc:'Commissions earned this month' },
+  { id:'network',      icon:'🌐', name:'Network Activity',      desc:'Recent connections, reviews, RFPs' },
+  { id:'pipeline',     icon:'📈', name:'Client Pipeline',       desc:'Kanban summary: leads → active → closed' },
+  { id:'compliance',   icon:'🛡', name:'Compliance Alerts',     desc:'Expiring licenses, insurance renewals' },
+  { id:'bookkeeping',  icon:'📒', name:'Bookkeeping Snapshot',  desc:'Recent transactions, categories' },
+  { id:'integration',  icon:'🔌', name:'Integration Status',    desc:'Connected apps health and sync status' },
+];
+
+/* ── Industry defaults ── */
+const INDUSTRY_DEFAULTS = {
+  landlord:   ['tenants','revenue','tasks','compliance','invoices','messages'],
+  agent:      ['deals','pipeline','referrals','bookings','messages','network'],
+  attorney:   ['deals','docrequests','tasks','invoices','compliance','messages'],
+  contractor: ['deals','tasks','invoices','bookkeeping','messages','compliance'],
+  salon:      ['bookings','revenue','pipeline','network','messages','invoices'],
+  nonprofit:  ['revenue','compliance','network','tasks','messages','docrequests'],
+  cpa:        ['pipeline','docrequests','compliance','tasks','bookkeeping','invoices'],
+  accountant: ['pipeline','docrequests','bookkeeping','invoices','compliance','messages'],
+};
+
+const INDUSTRY_LABELS = {
+  landlord:'Landlord / PM Dashboard', agent:'Real Estate Agent Dashboard',
+  attorney:'Attorney Dashboard', contractor:'Contractor Dashboard',
+  salon:'Salon / Service Biz Dashboard', nonprofit:'Nonprofit Dashboard',
+  cpa:'CPA / Bookkeeper Dashboard', accountant:'Accountant Dashboard',
+};
+const INDUSTRY_DESCS = {
+  landlord:'Manage properties, tenants, payments, and compliance from one view.',
+  agent:'Track active deals, client pipeline, referrals, and bookings.',
+  attorney:'Handle active cases, document requests, billing, and deadlines.',
+  contractor:'Manage active jobs, tasks, invoices, and materials.',
+  salon:'Stay on top of bookings, revenue, clients, and reviews.',
+  nonprofit:'Track grants, compliance, community, and volunteer activity.',
+  cpa:'Manage client list, document requests, tax deadlines, and billing.',
+  accountant:'Monitor client accounts, requests, bookkeeping, and invoices.',
+};
+
+let currentIndustry = 'landlord';
+let activeLayout = [];     // array of widget ids in order
+
+/* ── Init ── */
+function init() {
+  const saved = lsGet('rv_dashcfg_industry') || 'landlord';
+  currentIndustry = saved;
+  const btn = document.querySelector(`.dc-industry-btn[onclick*="'${saved}'"]`);
+  if (btn) {
+    document.querySelectorAll('.dc-industry-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  activeLayout = lsGet('rv_dashcfg_layout_' + currentIndustry) || [...INDUSTRY_DEFAULTS[currentIndustry]];
+  renderAll();
+  renderSavedConfigs();
+}
+
+function setIndustry(ind, btn) {
+  currentIndustry = ind;
+  lsSet('rv_dashcfg_industry', ind);
+  document.querySelectorAll('.dc-industry-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeLayout = lsGet('rv_dashcfg_layout_' + ind) || [...INDUSTRY_DEFAULTS[ind]];
+  document.getElementById('industryTitle').textContent = INDUSTRY_LABELS[ind];
+  document.getElementById('industryDesc').textContent = INDUSTRY_DESCS[ind];
+  renderAll();
+}
+
+function renderAll() {
+  renderLibrary();
+  renderLayout();
+}
+
+function renderLibrary() {
+  const el = document.getElementById('widgetLibrary');
+  el.innerHTML = ALL_WIDGETS.map(w => {
+    const inLayout = activeLayout.includes(w.id);
+    return `<button class="widget-chip ${inLayout?'in-layout':''}" onclick="toggleWidget('${w.id}')">
+      <span class="wc-icon">${w.icon}</span>
+      <span>${w.name}</span>
+      ${inLayout ? '<span style="margin-left:auto;font-size:0.75rem;">✓</span>' : ''}
+    </button>`;
+  }).join('');
+}
+
+function renderLayout() {
+  const el = document.getElementById('layoutList');
+  document.getElementById('widgetCount').textContent = activeLayout.length + ' widgets active';
+  if (!activeLayout.length) {
+    el.innerHTML = `<div class="layout-empty">
+      <div class="layout-empty-icon">📐</div>
+      <h4>No widgets selected</h4>
+      <p>Click widgets in the library above to add them to your layout.</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = activeLayout.map((id, idx) => {
+    const w = ALL_WIDGETS.find(x => x.id === id);
+    if (!w) return '';
+    return `<div class="layout-item" id="li-${id}">
+      <span class="layout-item-icon">${w.icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="layout-item-name">${w.name}</div>
+        <div class="layout-item-desc">${w.desc}</div>
+      </div>
+      <span class="layout-item-pos">#${idx+1}</span>
+      <div class="layout-move-btns">
+        <button class="layout-move-btn" onclick="moveWidget('${id}',-1)" ${idx===0?'disabled':''} title="Move up">▲</button>
+        <button class="layout-move-btn" onclick="moveWidget('${id}',1)" ${idx===activeLayout.length-1?'disabled':''} title="Move down">▼</button>
+      </div>
+      <button class="layout-remove-btn" onclick="removeWidget('${id}')" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleWidget(id) {
+  const idx = activeLayout.indexOf(id);
+  if (idx === -1) {
+    activeLayout.push(id);
+    showToast(`✓ ${ALL_WIDGETS.find(w=>w.id===id).name} added`);
+  } else {
+    activeLayout.splice(idx, 1);
+    showToast(`Removed ${ALL_WIDGETS.find(w=>w.id===id).name}`);
+  }
+  renderAll();
+}
+
+function removeWidget(id) {
+  activeLayout = activeLayout.filter(x => x !== id);
+  renderAll();
+}
+
+function moveWidget(id, dir) {
+  const idx = activeLayout.indexOf(id);
+  if (idx === -1) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= activeLayout.length) return;
+  [activeLayout[idx], activeLayout[newIdx]] = [activeLayout[newIdx], activeLayout[idx]];
+  renderLayout();
+}
+
+function resetToDefault() {
+  if (!confirm('Reset to default layout for this industry type?')) return;
+  activeLayout = [...INDUSTRY_DEFAULTS[currentIndustry]];
+  lsSet('rv_dashcfg_layout_' + currentIndustry, activeLayout);
+  renderAll();
+  showToast('Layout reset to default', 'success');
+}
+
+function applyLayout() {
+  lsSet('rv_dashcfg_layout_' + currentIndustry, activeLayout);
+  showToast('✅ Layout applied and saved!', 'success');
+}
+
+function saveCurrentLayout() {
+  const name = prompt('Name this layout:', INDUSTRY_LABELS[currentIndustry] + ' Custom');
+  if (!name) return;
+  const configs = lsGet('rv_dashcfg_saved') || [];
+  configs.push({ id: Date.now(), name, industry: currentIndustry, layout: [...activeLayout], saved: new Date().toISOString() });
+  lsSet('rv_dashcfg_saved', configs);
+  renderSavedConfigs();
+  showToast('Layout saved: ' + name, 'success');
+}
+
+function loadSavedConfig(id) {
+  const configs = lsGet('rv_dashcfg_saved') || [];
+  const cfg = configs.find(c => c.id === id);
+  if (!cfg) return;
+  activeLayout = [...cfg.layout];
+  lsSet('rv_dashcfg_layout_' + currentIndustry, activeLayout);
+  renderAll();
+  showToast('Loaded: ' + cfg.name, 'success');
+}
+
+function deleteSavedConfig(id, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this saved layout?')) return;
+  let configs = lsGet('rv_dashcfg_saved') || [];
+  configs = configs.filter(c => c.id !== id);
+  lsSet('rv_dashcfg_saved', configs);
+  renderSavedConfigs();
+  showToast('Layout deleted');
+}
+
+function renderSavedConfigs() {
+  const configs = lsGet('rv_dashcfg_saved') || [];
+  const el = document.getElementById('savedConfigsList');
+  if (!configs.length) {
+    el.innerHTML = '<p style="font-size:0.78rem;color:#9ca3af;padding:0.25rem 0;">No saved layouts yet.</p>';
+    return;
+  }
+  el.innerHTML = configs.map(c => `<div style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid #e5e7eb;background:white;transition:all .1s;" onclick="loadSavedConfig(${c.id})" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e5e7eb'">
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:0.8rem;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+      <div style="font-size:0.7rem;color:#9ca3af;">${c.layout.length} widgets</div>
+    </div>
+    <button onclick="deleteSavedConfig(${c.id},event)" style="background:none;border:none;font-size:0.75rem;color:#9ca3af;cursor:pointer;padding:2px;" title="Delete">✕</button>
+  </div>`).join('');
+}
+
+/* ── localStorage helpers ── */
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
+function lsSet(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('dcToast');
+  t.textContent = msg; t.className = `dc-toast ${type}`;
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => {
+    t.classList.add('show');
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  });
+}
+
+init();
+</script>
+</body>
+</html>

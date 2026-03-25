@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Hub – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Business Hub Page ── */
+    .biz-hero {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .biz-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .biz-hero p { font-size: 1rem; opacity: 0.85; max-width: 540px; margin: 0 auto 1.25rem; }
+    .biz-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .biz-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #bfdbfe; }
+    .biz-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .biz-wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+
+    /* Quick Actions Grid */
+    .biz-section-title {
+      font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem;
+      padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;
+    }
+
+    .biz-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+
+    .biz-card {
+      background: white; border-radius: 14px; padding: 1.5rem;
+      border: 1px solid #e2e8f0; cursor: pointer;
+      transition: all 0.2s ease; position: relative; overflow: hidden;
+      text-decoration: none; color: inherit; display: block;
+    }
+    .biz-card:hover {
+      transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border-color: #3b82f6;
+    }
+    .biz-card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 0.75rem;
+    }
+    .biz-card h3 { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+    .biz-card p { font-size: 0.82rem; color: #64748b; margin: 0; line-height: 1.4; }
+    .biz-card-badge {
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 20px; background: #dbeafe; color: #1e40af;
+    }
+
+    /* icon backgrounds */
+    .biz-icon-blue   { background: #dbeafe; }
+    .biz-icon-green  { background: #d1fae5; }
+    .biz-icon-purple { background: #ede9fe; }
+    .biz-icon-orange { background: #ffedd5; }
+    .biz-icon-red    { background: #fee2e2; }
+    .biz-icon-teal   { background: #ccfbf1; }
+    .biz-icon-amber  { background: #fef3c7; }
+
+    /* Recent Activity */
+    .biz-activity {
+      background: white; border-radius: 14px; padding: 1.25rem 1.5rem;
+      border: 1px solid #e2e8f0;
+    }
+    .biz-activity-empty {
+      text-align: center; padding: 2rem; color: #94a3b8;
+    }
+    .biz-activity-empty .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .biz-activity-empty h4 { color: #64748b; margin-bottom: 0.25rem; }
+
+    /* Getting Started Checklist */
+    .biz-checklist {
+      background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      border: 1px solid #bfdbfe; margin-bottom: 2rem;
+    }
+    .biz-checklist h3 {
+      font-size: 1rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .biz-check-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0; border-bottom: 1px solid #dbeafe;
+      font-size: 0.88rem; color: #334155;
+    }
+    .biz-check-item:last-child { border-bottom: none; }
+    .biz-check-item .dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid #93c5fd; display: flex; align-items: center;
+      justify-content: center; font-size: 0.7rem; flex-shrink: 0;
+    }
+    .biz-check-item.done .dot {
+      background: #3b82f6; border-color: #3b82f6; color: white;
+    }
+    .biz-check-item.done span { text-decoration: line-through; color: #94a3b8; }
+    .biz-check-link {
+      margin-left: auto; font-size: 0.78rem; color: #3b82f6;
+      text-decoration: none; font-weight: 600;
+    }
+    .biz-check-link:hover { text-decoration: underline; }
+
+    /* Stats row in hero */
+    @media (max-width: 600px) {
+      .biz-hero-stats { gap: 1.25rem; }
+      .biz-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ── Navbar ── -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="index.html" class="nav-brand">
+        <img src="images/logo.svg" alt="RentVerified" onerror="this.style.display='none'" />
+        <span>RentVerified</span>
+      </a>
+      <a href="crm.html" class="nav-link">CRM</a>
+      <a href="time-tracking.html" class="nav-link">Time</a>
+      <a href="invoice-builder.html" class="nav-link">Invoices</a>
+      <a href="documents.html" class="nav-link">Docs</a>
+      <a href="e-signature.html" class="nav-link">E-Sign</a>
+      <a href="accounting.html" class="nav-link">Accounting</a>
+      <a href="index.html" class="nav-link" style="margin-left:auto;background:#3b82f6;color:white;padding:0.4rem 1rem;border-radius:8px;font-weight:700;font-size:0.82rem;">Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <div class="biz-hero">
+    <h1>Business Hub</h1>
+    <p>Your command center. Manage clients, track time, send invoices, and grow your business.</p>
+    <div class="biz-hero-stats">
+      <div class="biz-hero-stat"><div class="num" id="stat-contacts">0</div><div class="lbl">Contacts</div></div>
+      <div class="biz-hero-stat"><div class="num" id="stat-invoices">0</div><div class="lbl">Open Invoices</div></div>
+      <div class="biz-hero-stat"><div class="num" id="stat-hours">0h</div><div class="lbl">Hours This Week</div></div>
+      <div class="biz-hero-stat"><div class="num" id="stat-docs">0</div><div class="lbl">Documents</div></div>
+    </div>
+  </div>
+
+  <div class="biz-wrap">
+
+    <!-- ── Getting Started Checklist ── -->
+    <div class="biz-checklist" id="biz-checklist">
+      <h3>🚀 Getting Started</h3>
+      <div class="biz-check-item" id="check-crm">
+        <div class="dot">✓</div>
+        <span>Add your first client or contact</span>
+        <a href="crm.html" class="biz-check-link">Go →</a>
+      </div>
+      <div class="biz-check-item" id="check-invoice">
+        <div class="dot">✓</div>
+        <span>Create your first invoice</span>
+        <a href="invoice-builder.html" class="biz-check-link">Go →</a>
+      </div>
+      <div class="biz-check-item" id="check-doc">
+        <div class="dot">✓</div>
+        <span>Upload a document</span>
+        <a href="documents.html" class="biz-check-link">Go →</a>
+      </div>
+      <div class="biz-check-item" id="check-time">
+        <div class="dot">✓</div>
+        <span>Log your first time entry</span>
+        <a href="time-tracking.html" class="biz-check-link">Go →</a>
+      </div>
+    </div>
+
+    <!-- ── Quick Actions ── -->
+    <h2 class="biz-section-title">Your Tools</h2>
+    <div class="biz-grid">
+
+      <a href="crm.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-blue">👥</div>
+        <h3>CRM & Contacts</h3>
+        <p>Manage clients, leads, and contacts. Track communication and deals.</p>
+      </a>
+
+      <a href="invoice-builder.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-green">💰</div>
+        <h3>Invoices</h3>
+        <p>Create and send professional invoices. Track payments and overdue balances.</p>
+      </a>
+
+      <a href="time-tracking.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-purple">⏱️</div>
+        <h3>Time Tracking</h3>
+        <p>Log billable hours, run timers, and generate time reports.</p>
+      </a>
+
+      <a href="documents.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-orange">📁</div>
+        <h3>Documents</h3>
+        <p>Store, organize, and share contracts, receipts, and business files.</p>
+      </a>
+
+      <a href="e-signature.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-teal">✍️</div>
+        <h3>E-Signatures</h3>
+        <p>Send documents for electronic signature. Track signing status.</p>
+      </a>
+
+      <a href="accounting.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-amber">📊</div>
+        <h3>Accounting</h3>
+        <p>Track income, expenses, and run financial reports for your business.</p>
+      </a>
+
+      <a href="financial-hub.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-green">💳</div>
+        <h3>Payments & Billing</h3>
+        <p>Accept online payments, manage billing, and view transaction history.</p>
+      </a>
+
+      <a href="form-builder.html" class="biz-card">
+        <div class="biz-card-icon biz-icon-red">📝</div>
+        <h3>Forms & Templates</h3>
+        <p>Create custom forms, intake templates, and client questionnaires.</p>
+      </a>
+
+    </div>
+
+    <!-- ── Recent Activity ── -->
+    <h2 class="biz-section-title">Recent Activity</h2>
+    <div class="biz-activity" id="biz-activity">
+      <div class="biz-activity-empty">
+        <div class="icon">📋</div>
+        <h4>No activity yet</h4>
+        <p>Start by adding clients, creating invoices, or uploading documents — it'll all show up here.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="data-layer.js"></script>
+  <script>
+    // ── Load stats ──
+    (async function() {
+      try {
+        // CRM contacts count
+        if (typeof RVData.getContacts === 'function') {
+          var contacts = await RVData.getContacts();
+          document.getElementById('stat-contacts').textContent = contacts.length || 0;
+          if (contacts.length > 0) markDone('check-crm');
+        }
+      } catch(e) {}
+
+      try {
+        // Invoices count (open/unpaid)
+        if (typeof RVData.getInvoices === 'function') {
+          var invoices = await RVData.getInvoices();
+          var open = invoices.filter(function(i) {
+            return i.status === 'sent' || i.status === 'overdue' || i.status === 'partial';
+          });
+          document.getElementById('stat-invoices').textContent = open.length || 0;
+          if (invoices.length > 0) markDone('check-invoice');
+        }
+      } catch(e) {}
+
+      try {
+        // Time entries this week
+        if (typeof RVData.getTimeEntries === 'function') {
+          var entries = await RVData.getTimeEntries();
+          var now = new Date();
+          var weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - now.getDay());
+          weekStart.setHours(0,0,0,0);
+          var weekHours = entries.filter(function(e) {
+            return new Date(e.created_at || e.date) >= weekStart;
+          }).reduce(function(sum, e) { return sum + (parseFloat(e.hours) || 0); }, 0);
+          document.getElementById('stat-hours').textContent = weekHours.toFixed(1) + 'h';
+          if (entries.length > 0) markDone('check-time');
+        }
+      } catch(e) {}
+
+      try {
+        // Documents count
+        if (typeof RVData.getDocuments === 'function') {
+          var docs = await RVData.getDocuments();
+          document.getElementById('stat-docs').textContent = docs.length || 0;
+          if (docs.length > 0) markDone('check-doc');
+        }
+      } catch(e) {}
+
+      // Hide checklist if all done
+      var allDone = document.querySelectorAll('.biz-check-item.done').length;
+      if (allDone >= 4) {
+        document.getElementById('biz-checklist').style.display = 'none';
+      }
+    })();
+
+    function markDone(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.add('done');
+    }
+  </script>
+<script src="share-widget.js" data-share-title="Business Hub" data-share-text="Manage your business on RentVerified"></script>
+</body>
+</html>

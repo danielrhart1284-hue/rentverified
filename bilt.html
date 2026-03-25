@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bilt Alliance – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .bilt-hero {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 60%, #312e81 100%);
+      color: white; padding: 3rem 2rem 2.5rem; text-align: center;
+    }
+    .bilt-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .bilt-hero p { font-size: 1rem; opacity: 0.75; max-width: 560px; margin: 0 auto 1.5rem; }
+    .bilt-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .bilt-hero-stat .num { font-size: 1.8rem; font-weight: 900; color: #a78bfa; }
+    .bilt-hero-stat .lbl { font-size: 0.72rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .bilt-wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .bilt-section { margin-bottom: 2rem; }
+    .bilt-section h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem; }
+
+    .bilt-card {
+      background: white; border: 1px solid #e5e7eb; border-radius: 14px;
+      padding: 1.5rem; margin-bottom: 1rem;
+    }
+
+    /* How It Works */
+    .bilt-steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .bilt-step {
+      background: white; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 1.25rem; text-align: center;
+    }
+    .bilt-step-num {
+      width: 36px; height: 36px; border-radius: 50%; background: #1a1a2e; color: #a78bfa;
+      font-weight: 800; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.75rem; font-size: 0.9rem;
+    }
+    .bilt-step-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.25rem; }
+    .bilt-step-desc { font-size: 0.78rem; color: #6b7280; line-height: 1.5; }
+
+    /* Referral Table */
+    .bilt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .bilt-table th {
+      text-align: left; padding: 0.6rem 0.75rem; border-bottom: 2px solid #e5e7eb;
+      font-weight: 700; font-size: 0.78rem; text-transform: uppercase; color: #6b7280;
+      letter-spacing: 0.04em;
+    }
+    .bilt-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
+    .bilt-table tr:hover { background: #f9fafb; }
+
+    .bilt-status {
+      font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+      display: inline-block;
+    }
+    .bilt-status.clicked { background: #e5e7eb; color: #374151; }
+    .bilt-status.pending { background: #fef3c7; color: #92400e; }
+    .bilt-status.approved { background: #dbeafe; color: #1e40af; }
+    .bilt-status.paid { background: #d1fae5; color: #065f46; }
+    .bilt-status.declined { background: #fee2e2; color: #991b1b; }
+
+    .bilt-empty { text-align: center; padding: 2.5rem 1rem; color: #9ca3af; }
+    .bilt-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    .bilt-link-box {
+      display: flex; gap: 0.5rem; align-items: center; margin-top: 0.75rem;
+    }
+    .bilt-link-input {
+      flex: 1; padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 0.85rem; font-family: monospace; background: #f9fafb;
+    }
+    .bilt-copy-btn {
+      padding: 0.6rem 1rem; background: #1a1a2e; color: white; border: none;
+      border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    }
+    .bilt-copy-btn:hover { background: #312e81; }
+
+    /* Summary Cards */
+    .bilt-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .bilt-sum-card {
+      background: white; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 1rem 1.25rem; text-align: center;
+    }
+    .bilt-sum-value { font-size: 1.5rem; font-weight: 900; color: #111827; }
+    .bilt-sum-label { font-size: 0.72rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+    .bilt-footer {
+      background: #0a0a0a; color: #6b7280; text-align: center; padding: 2rem; font-size: 0.8rem; margin-top: 3rem;
+    }
+
+    .bilt-opt-in {
+      background: linear-gradient(135deg, #1a1a2e, #312e81); color: white;
+      border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+    }
+    .bilt-opt-in-toggle {
+      width: 52px; height: 28px; border-radius: 14px; background: #4b5563;
+      position: relative; cursor: pointer; flex-shrink: 0; transition: 0.2s;
+    }
+    .bilt-opt-in-toggle.active { background: #8b5cf6; }
+    .bilt-opt-in-toggle::after {
+      content: ''; position: absolute; width: 22px; height: 22px;
+      border-radius: 50%; background: white; top: 3px; left: 3px; transition: 0.2s;
+    }
+    .bilt-opt-in-toggle.active::after { left: 27px; }
+
+    @media (max-width: 640px) {
+      .bilt-hero h1 { font-size: 1.6rem; }
+      .bilt-hero-stats { gap: 1.5rem; }
+      .bilt-steps { grid-template-columns: 1fr; }
+      .bilt-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">Sanders PM</span> <span style="font-weight:500;opacity:0.9;">· RentVerified</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="landlord-signup.html">Properties</a>
+    <a href="tenant-portal.html">Tenants</a>
+    <a href="bilt.html" style="color:#8b5cf6;font-weight:700;">Bilt Alliance</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Back to Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="bilt-hero">
+  <div style="font-size:2.5rem;margin-bottom:0.75rem;">💳</div>
+  <h1>Bilt Alliance</h1>
+  <p>Earn $45 for every tenant who is approved for a Bilt Mastercard® through your referral link. No cost to you or your tenants.</p>
+  <div class="bilt-hero-stats">
+    <div class="bilt-hero-stat"><div class="num" id="hero-clicks">0</div><div class="lbl">Total Clicks</div></div>
+    <div class="bilt-hero-stat"><div class="num" id="hero-conversions">0</div><div class="lbl">Approvals</div></div>
+    <div class="bilt-hero-stat"><div class="num" id="hero-pending">$0</div><div class="lbl">Pending</div></div>
+    <div class="bilt-hero-stat"><div class="num" id="hero-earned">$0</div><div class="lbl">Total Earned</div></div>
+  </div>
+</section>
+
+<div class="bilt-wrap">
+
+  <!-- Opt-In Toggle -->
+  <div class="bilt-opt-in">
+    <div class="bilt-opt-in-toggle active" id="bilt-toggle" onclick="toggleBiltOptIn()"></div>
+    <div style="flex:1;min-width:200px;">
+      <div style="font-weight:700;font-size:0.95rem;">Bilt Alliance — Active</div>
+      <div style="font-size:0.82rem;opacity:0.75;margin-top:2px;">Your tenants see the Bilt card offer in their Financial Resources tab. Toggle off to hide it.</div>
+    </div>
+  </div>
+
+  <!-- Your Referral Link -->
+  <div class="bilt-section">
+    <h2>Your Referral Link</h2>
+    <div class="bilt-card">
+      <p style="font-size:0.85rem;color:#6b7280;margin-bottom:0.5rem;">Share this link with tenants or embed it in your welcome emails. Every approved card earns you $45.</p>
+      <div class="bilt-link-box">
+        <input type="text" class="bilt-link-input" id="bilt-link" value="https://bfrwd.com/YOUR_LINK" readonly />
+        <button class="bilt-copy-btn" onclick="copyBiltLink()">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="bilt-section">
+    <h2>How It Works</h2>
+    <div class="bilt-steps">
+      <div class="bilt-step">
+        <div class="bilt-step-num">1</div>
+        <div class="bilt-step-title">Opt In</div>
+        <div class="bilt-step-desc">Enable Bilt Alliance on your properties. The card offer appears in your tenants' portal.</div>
+      </div>
+      <div class="bilt-step">
+        <div class="bilt-step-num">2</div>
+        <div class="bilt-step-title">Tenant Applies</div>
+        <div class="bilt-step-desc">Tenants see the Bilt card in Financial Resources and click to apply. We track every click.</div>
+      </div>
+      <div class="bilt-step">
+        <div class="bilt-step-num">3</div>
+        <div class="bilt-step-title">Card Approved</div>
+        <div class="bilt-step-desc">When the tenant is approved for the Bilt Mastercard, the referral converts automatically.</div>
+      </div>
+      <div class="bilt-step">
+        <div class="bilt-step-num">4</div>
+        <div class="bilt-step-title">Get Paid</div>
+        <div class="bilt-step-desc">$45 commission per approval is credited to your RentVerified account. Payouts monthly.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="bilt-section">
+    <h2>Earnings Summary</h2>
+    <div class="bilt-summary">
+      <div class="bilt-sum-card">
+        <div class="bilt-sum-value" id="sum-clicks">0</div>
+        <div class="bilt-sum-label">Total Clicks</div>
+      </div>
+      <div class="bilt-sum-card">
+        <div class="bilt-sum-value" id="sum-conversions">0</div>
+        <div class="bilt-sum-label">Approvals</div>
+      </div>
+      <div class="bilt-sum-card">
+        <div class="bilt-sum-value" id="sum-rate">0%</div>
+        <div class="bilt-sum-label">Conversion Rate</div>
+      </div>
+      <div class="bilt-sum-card">
+        <div class="bilt-sum-value" id="sum-pending">$0</div>
+        <div class="bilt-sum-label">Pending Commission</div>
+      </div>
+      <div class="bilt-sum-card">
+        <div class="bilt-sum-value" id="sum-earned">$0</div>
+        <div class="bilt-sum-label">Total Earned</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Referral Log -->
+  <div class="bilt-section">
+    <h2>Referral Log</h2>
+    <div class="bilt-card" style="padding:0;overflow:hidden;">
+      <div id="bilt-referral-list"></div>
+    </div>
+  </div>
+
+  <!-- Simulate Section (demo) -->
+  <div class="bilt-section">
+    <h2>Test / Simulate</h2>
+    <div class="bilt-card" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+      <button onclick="simulateBiltClick()" style="padding:0.55rem 1rem;background:#1a1a2e;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Simulate Click</button>
+      <button onclick="simulateBiltApproval()" style="padding:0.55rem 1rem;background:#8b5cf6;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Simulate Approval</button>
+      <button onclick="simulateBiltPayout()" style="padding:0.55rem 1rem;background:#059669;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Simulate Payout</button>
+      <button onclick="clearBiltData()" style="padding:0.55rem 1rem;background:#ef4444;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Clear All Data</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="bilt-footer">
+  &copy; 2026 Sanders Property Management &middot; RentVerified &middot;
+  <a href="index.html" style="color:#a78bfa;">Home</a> &middot;
+  <a href="landlord-signup.html" style="color:#a78bfa;">Dashboard</a>
+</div>
+
+<script src="app.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script>
+  // Force localStorage for demo
+  if (typeof RVData !== 'undefined') RVData._useSupabase = function() { return false; };
+
+  // ── Load & Render ──
+  function loadBiltData() {
+    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    var clicks = refs.length;
+    var conversions = refs.filter(function(r) { return r.converted; }).length;
+    var approved = refs.filter(function(r) { return r.status === 'approved' || r.status === 'paid'; }).length;
+    var pending = refs.filter(function(r) { return r.converted && r.status !== 'paid' && r.status !== 'declined'; })
+      .reduce(function(s, r) { return s + parseFloat(r.commission_amount || 45); }, 0);
+    var earned = refs.filter(function(r) { return r.status === 'paid'; })
+      .reduce(function(s, r) { return s + parseFloat(r.commission_amount || 45); }, 0);
+    var rate = clicks > 0 ? ((conversions / clicks) * 100).toFixed(1) : '0';
+
+    // Hero
+    setText('hero-clicks', clicks);
+    setText('hero-conversions', conversions);
+    setText('hero-pending', '$' + pending.toFixed(0));
+    setText('hero-earned', '$' + earned.toFixed(0));
+
+    // Summary
+    setText('sum-clicks', clicks);
+    setText('sum-conversions', conversions);
+    setText('sum-rate', rate + '%');
+    setText('sum-pending', '$' + pending.toFixed(0));
+    setText('sum-earned', '$' + earned.toFixed(0));
+
+    // Table
+    renderReferralLog(refs);
+  }
+
+  function setText(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  function renderReferralLog(refs) {
+    var container = document.getElementById('bilt-referral-list');
+    if (!refs.length) {
+      container.innerHTML = '<div class="bilt-empty"><div class="bilt-empty-icon">💳</div><p>No referrals yet. Enable the Bilt card in your tenant portal to start earning.</p></div>';
+      return;
+    }
+
+    var html = '<table class="bilt-table"><thead><tr>' +
+      '<th>Date</th><th>Tenant</th><th>Status</th><th>Commission</th>' +
+      '</tr></thead><tbody>';
+
+    refs.sort(function(a, b) { return new Date(b.clicked_at) - new Date(a.clicked_at); });
+
+    refs.forEach(function(r) {
+      var date = new Date(r.clicked_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      var tenant = r.tenant_id || 'Anonymous';
+      var status = r.status || 'clicked';
+      var comm = r.converted ? '$' + parseFloat(r.commission_amount || 45).toFixed(2) : '—';
+
+      html += '<tr>' +
+        '<td>' + date + '</td>' +
+        '<td>' + tenant + '</td>' +
+        '<td><span class="bilt-status ' + status + '">' + status.charAt(0).toUpperCase() + status.slice(1) + '</span></td>' +
+        '<td style="font-weight:700;">' + comm + '</td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  // ── Copy Link ──
+  function copyBiltLink() {
+    var input = document.getElementById('bilt-link');
+    navigator.clipboard.writeText(input.value).then(function() {
+      var btn = input.nextElementSibling;
+      btn.textContent = 'Copied!';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    });
+  }
+
+  // ── Opt-In Toggle ──
+  function toggleBiltOptIn() {
+    var toggle = document.getElementById('bilt-toggle');
+    var active = toggle.classList.toggle('active');
+    localStorage.setItem('rv_bilt_opt_in', active ? '1' : '0');
+    // Update label
+    toggle.parentElement.querySelector('div > div:first-child').textContent =
+      'Bilt Alliance — ' + (active ? 'Active' : 'Paused');
+  }
+
+  // ── Simulate Functions (demo/testing) ──
+  function simulateBiltClick() {
+    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    refs.push({
+      id: 'bilt_' + Date.now(),
+      tenant_id: 'tenant_' + Math.floor(Math.random() * 999),
+      landlord_id: 'landlord_demo',
+      referral_link: 'https://bfrwd.com/YOUR_LINK',
+      status: 'clicked',
+      converted: false,
+      commission_amount: 45.00,
+      clicked_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+    localStorage.setItem('rv_bilt_referrals', JSON.stringify(refs));
+    loadBiltData();
+  }
+
+  function simulateBiltApproval() {
+    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    var pending = refs.filter(function(r) { return !r.converted && r.status === 'clicked'; });
+    if (!pending.length) { alert('No pending clicks to convert. Simulate a click first.'); return; }
+    var target = pending[pending.length - 1];
+    target.converted = true;
+    target.converted_at = new Date().toISOString();
+    target.status = 'approved';
+    target.updated_at = new Date().toISOString();
+
+    // Log commission payment
+    var payments = JSON.parse(localStorage.getItem('rv_payments') || '[]');
+    payments.push({
+      id: 'pay_bilt_' + Date.now(),
+      type: 'commission',
+      amount: 45.00,
+      description: 'Bilt Alliance — Tenant card approval commission',
+      status: 'pending',
+      source: 'bilt_referral',
+      referral_id: target.id,
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('rv_payments', JSON.stringify(payments));
+    localStorage.setItem('rv_bilt_referrals', JSON.stringify(refs));
+    loadBiltData();
+  }
+
+  function simulateBiltPayout() {
+    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    var approved = refs.filter(function(r) { return r.status === 'approved'; });
+    if (!approved.length) { alert('No approved referrals to pay out. Simulate an approval first.'); return; }
+    approved[approved.length - 1].status = 'paid';
+    approved[approved.length - 1].paid_at = new Date().toISOString();
+    approved[approved.length - 1].updated_at = new Date().toISOString();
+    localStorage.setItem('rv_bilt_referrals', JSON.stringify(refs));
+    loadBiltData();
+  }
+
+  function clearBiltData() {
+    if (!confirm('Clear all Bilt referral data?')) return;
+    localStorage.removeItem('rv_bilt_referrals');
+    loadBiltData();
+  }
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', function() {
+    // Restore opt-in state
+    var optIn = localStorage.getItem('rv_bilt_opt_in');
+    if (optIn === '0') {
+      var toggle = document.getElementById('bilt-toggle');
+      toggle.classList.remove('active');
+      toggle.parentElement.querySelector('div > div:first-child').textContent = 'Bilt Alliance — Paused';
+    }
+    loadBiltData();
+  });
+</script>
+<script src="share-widget.js" data-share-title="Bilt Alliance" data-share-text="Earn $45 per tenant card approval with Bilt Alliance on RentVerified"></script>
+</body>
+</html>

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Form Builder | RentVerified</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .fb-layout { display: grid; grid-template-columns: 380px 1fr; min-height: calc(100vh - 68px); }
+  .fb-sidebar { background: #0f172a; color: white; padding: 1.5rem; overflow-y: auto; }
+  .fb-main { background: #f8fafc; padding: 2rem; overflow-y: auto; }
+
+  /* Upload zone */
+  .fb-upload-zone {
+    border: 2px dashed rgba(255,255,255,0.25);
+    border-radius: 14px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 1.5rem;
+  }
+  .fb-upload-zone:hover, .fb-upload-zone.dragover {
+    border-color: #60a5fa;
+    background: rgba(96,165,250,0.08);
+  }
+  .fb-upload-zone .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .fb-upload-zone h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .fb-upload-zone p { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+
+  /* Preview image */
+  .fb-preview-img {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 1rem;
+  }
+
+  /* Field list in sidebar */
+  .fb-field-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: grab;
+    transition: background 0.15s;
+  }
+  .fb-field-item:hover { background: rgba(255,255,255,0.1); }
+  .fb-field-item .field-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .fb-field-item .field-type {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+  .fb-field-item .field-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .fb-field-item .field-actions button {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fb-field-item .field-actions button:hover { background: rgba(255,255,255,0.2); }
+  .fb-field-item .field-actions button.delete:hover { background: rgba(239,68,68,0.3); }
+
+  /* Form preview */
+  .fb-form-preview {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    max-width: 700px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .fb-form-header {
+    background: linear-gradient(135deg, #1e3a8a, #1a56db);
+    color: white;
+    padding: 1.5rem 2rem;
+  }
+  .fb-form-header h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.25rem; }
+  .fb-form-header p { font-size: 0.82rem; opacity: 0.8; }
+  .fb-form-body { padding: 2rem; }
+  .fb-form-field { margin-bottom: 1.25rem; }
+  .fb-form-field label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 4px;
+  }
+  .fb-form-field label .required { color: #dc2626; }
+  .fb-form-field input,
+  .fb-form-field select,
+  .fb-form-field textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+  .fb-form-field input:focus,
+  .fb-form-field select:focus,
+  .fb-form-field textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+  .fb-form-field .hint {
+    font-size: 0.72rem;
+    color: #9ca3af;
+    margin-top: 3px;
+  }
+
+  /* Section divider */
+  .fb-section-divider {
+    border: none;
+    border-top: 2px solid #e5e7eb;
+    margin: 1.75rem 0;
+  }
+  .fb-section-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1e1b4b;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dbeafe;
+  }
+
+  /* Checkbox / radio groups */
+  .fb-check-group { display: flex; flex-direction: column; gap: 6px; }
+  .fb-check-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  .fb-check-group input { width: 16px; height: 16px; accent-color: #2563eb; }
+
+  /* Signature area */
+  .fb-signature-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .fb-signature-area:hover { border-color: #2563eb; }
+
+  /* Status chip */
+  .fb-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .fb-status.analyzing { background: #fef3c7; color: #92400e; }
+  .fb-status.ready { background: #d1fae5; color: #065f46; }
+  .fb-status.error { background: #fee2e2; color: #991b1b; }
+
+  /* Toolbar */
+  .fb-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .fb-toolbar button {
+    padding: 0.5rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .fb-toolbar button:hover { border-color: #2563eb; color: #2563eb; }
+  .fb-toolbar button.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+  /* Add field panel */
+  .fb-add-panel {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  .fb-add-panel h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .fb-add-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .fb-add-btn {
+    padding: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    color: white;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-align: center;
+    transition: background 0.15s;
+  }
+  .fb-add-btn:hover { background: rgba(255,255,255,0.12); }
+
+  /* Saved forms list */
+  .fb-saved-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .fb-saved-item:hover { background: rgba(255,255,255,0.1); }
+  .fb-saved-item .name { font-size: 0.85rem; font-weight: 700; }
+  .fb-saved-item .meta { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+  /* Progress bar */
+  .fb-progress { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 99px; margin: 0.75rem 0; overflow: hidden; }
+  .fb-progress-bar { height: 100%; background: #60a5fa; border-radius: 99px; transition: width 0.5s; }
+
+  /* Field edit inline */
+  .fb-edit-row { display: flex; gap: 6px; margin-top: 0.5rem; }
+  .fb-edit-row input, .fb-edit-row select {
+    flex: 1;
+    padding: 4px 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 768px) {
+    .fb-layout { grid-template-columns: 1fr; }
+    .fb-sidebar { max-height: 50vh; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="landlord-signup.html" class="nav-logo">RentVerified</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Dashboard</a>
+      <a href="form-builder.html" class="nav-link active">Form Builder</a>
+    </div>
+  </div>
+</nav>
+
+<div class="fb-layout">
+
+  <!-- SIDEBAR -->
+  <div class="fb-sidebar">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h2 style="font-size:1.1rem;font-weight:800;">AI Form Builder</h2>
+      <span id="fbStatus" class="fb-status ready" style="display:none;"></span>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="fb-upload-zone" id="fbUploadZone"
+      onclick="document.getElementById('fbFileInput').click()"
+      ondragover="event.preventDefault();this.classList.add('dragover')"
+      ondragleave="this.classList.remove('dragover')"
+      ondrop="handleFormDrop(event)">
+      <div class="icon">📸</div>
+      <h3>Upload Form Image</h3>
+      <p>Drop a photo, scan, or PDF of any paper form. AI will replicate it as a fillable digital form.</p>
+      <input type="file" id="fbFileInput" style="display:none;" accept="image/*,.pdf" onchange="handleFormUpload(this.files[0])" />
+    </div>
+
+    <!-- Preview Image -->
+    <div id="fbPreview" style="display:none;">
+      <img id="fbPreviewImg" class="fb-preview-img" src="" alt="Uploaded form" />
+      <div class="fb-progress" id="fbProgress" style="display:none;">
+        <div class="fb-progress-bar" id="fbProgressBar" style="width:0%"></div>
+      </div>
+      <p id="fbAnalysisMsg" style="font-size:0.78rem;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:1rem;"></p>
+    </div>
+
+    <!-- Form Settings -->
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:4px;">Form Title</label>
+      <input type="text" id="fbFormTitle" value="Untitled Form" oninput="updateFormPreview()"
+        style="width:100%;padding:0.5rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:white;font-size:0.88rem;font-weight:700;" />
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:4px;">Description</label>
+      <textarea id="fbFormDesc" rows="2" oninput="updateFormPreview()" placeholder="Optional form description..."
+        style="width:100%;padding:0.5rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:white;font-size:0.82rem;resize:vertical;font-family:inherit;"></textarea>
+    </div>
+
+    <!-- Add Field Panel -->
+    <div class="fb-add-panel">
+      <h4>+ Add Field</h4>
+      <div class="fb-add-grid">
+        <div class="fb-add-btn" onclick="addField('text')">Aa Text</div>
+        <div class="fb-add-btn" onclick="addField('email')">@ Email</div>
+        <div class="fb-add-btn" onclick="addField('phone')">📱 Phone</div>
+        <div class="fb-add-btn" onclick="addField('number')">123 Number</div>
+        <div class="fb-add-btn" onclick="addField('date')">📅 Date</div>
+        <div class="fb-add-btn" onclick="addField('select')">▼ Dropdown</div>
+        <div class="fb-add-btn" onclick="addField('textarea')">📝 Long Text</div>
+        <div class="fb-add-btn" onclick="addField('checkbox')">☑ Checkbox</div>
+        <div class="fb-add-btn" onclick="addField('radio')">◉ Radio</div>
+        <div class="fb-add-btn" onclick="addField('signature')">✍ Signature</div>
+        <div class="fb-add-btn" onclick="addField('section')">── Section</div>
+        <div class="fb-add-btn" onclick="addField('address')">📍 Address</div>
+      </div>
+    </div>
+
+    <!-- Field List -->
+    <div style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+        <h4 style="font-size:0.82rem;font-weight:700;">Fields (<span id="fbFieldCount">0</span>)</h4>
+        <button onclick="clearAllFields()" style="background:rgba(239,68,68,0.15);border:none;color:#f87171;padding:3px 10px;border-radius:6px;font-size:0.72rem;cursor:pointer;font-weight:600;">Clear All</button>
+      </div>
+      <div id="fbFieldList"></div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:auto;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.1);">
+      <button onclick="saveForm()" style="width:100%;padding:0.65rem;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.88rem;cursor:pointer;">Save Form</button>
+      <button onclick="exportFormHTML()" style="width:100%;padding:0.65rem;background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-weight:600;font-size:0.82rem;cursor:pointer;">Export as HTML</button>
+    </div>
+
+    <!-- Saved Forms -->
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.1);">
+      <h4 style="font-size:0.82rem;font-weight:700;margin-bottom:0.5rem;">Saved Forms</h4>
+      <div id="fbSavedList"></div>
+    </div>
+  </div>
+
+  <!-- MAIN: Live Form Preview -->
+  <div class="fb-main">
+    <div class="fb-toolbar">
+      <button class="active" onclick="setPreviewMode('edit', this)">&#9998; Edit Mode</button>
+      <button onclick="setPreviewMode('preview', this)">&#128065; Preview</button>
+      <button onclick="setPreviewMode('fill', this)">&#128221; Fill &amp; Submit</button>
+      <div style="flex:1;"></div>
+      <button onclick="duplicateForm()">&#128203; Duplicate</button>
+      <button onclick="shareFormLink()">&#128279; Share Link</button>
+    </div>
+
+    <div id="fbFormPreview" class="fb-form-preview">
+      <div class="fb-form-header">
+        <h1 id="fbPreviewTitle">Untitled Form</h1>
+        <p id="fbPreviewDesc"></p>
+      </div>
+      <div class="fb-form-body" id="fbFormBody">
+        <div style="text-align:center;padding:3rem 1rem;color:#9ca3af;">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">📸</div>
+          <h3 style="font-weight:700;color:#374151;margin-bottom:0.5rem;">Upload a form image to get started</h3>
+          <p style="font-size:0.88rem;">Or use the Add Field buttons on the left to build from scratch.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+<script>
+  // ═══════════════════════ AI FORM BUILDER ═══════════════════════
+
+  var formFields = [];
+  var currentPreviewMode = 'edit';
+  var formId = null;
+
+  // ── Upload & AI Analysis ──────────────────────────────────────
+
+  function handleFormDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFormUpload(e.dataTransfer.files[0]);
+    }
+  }
+
+  function handleFormUpload(file) {
+    if (!file) return;
+
+    // Show preview
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('fbPreviewImg').src = e.target.result;
+      document.getElementById('fbPreview').style.display = 'block';
+      document.getElementById('fbUploadZone').style.display = 'none';
+
+      // Start AI analysis
+      analyzeFormImage(e.target.result, file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function analyzeFormImage(imageData, fileName) {
+    var statusEl = document.getElementById('fbStatus');
+    var progressEl = document.getElementById('fbProgress');
+    var progressBar = document.getElementById('fbProgressBar');
+    var msgEl = document.getElementById('fbAnalysisMsg');
+
+    statusEl.style.display = '';
+    statusEl.className = 'fb-status analyzing';
+    statusEl.textContent = 'Analyzing...';
+    progressEl.style.display = 'block';
+    msgEl.textContent = 'AI is analyzing the form structure...';
+
+    // Simulated AI analysis with progressive updates
+    var stages = [
+      { pct: 15, msg: 'Detecting text regions...' },
+      { pct: 35, msg: 'Identifying form fields...' },
+      { pct: 55, msg: 'Classifying field types...' },
+      { pct: 75, msg: 'Extracting labels and options...' },
+      { pct: 90, msg: 'Building form structure...' },
+      { pct: 100, msg: 'Analysis complete!' },
+    ];
+
+    var i = 0;
+    var interval = setInterval(function() {
+      if (i < stages.length) {
+        progressBar.style.width = stages[i].pct + '%';
+        msgEl.textContent = stages[i].msg;
+        i++;
+      } else {
+        clearInterval(interval);
+        statusEl.className = 'fb-status ready';
+        statusEl.textContent = 'Ready';
+
+        // Generate fields based on form type heuristics
+        var detectedFields = detectFieldsFromFileName(fileName);
+        formFields = detectedFields;
+        renderFieldList();
+        renderFormPreview();
+      }
+    }, 600);
+  }
+
+  function detectFieldsFromFileName(name) {
+    var n = (name || '').toLowerCase();
+    var fields = [];
+
+    // Detect form type from filename and generate appropriate fields
+    if (n.indexOf('lease') !== -1 || n.indexOf('rental') !== -1 || n.indexOf('agreement') !== -1) {
+      document.getElementById('fbFormTitle').value = 'Residential Lease Agreement';
+      fields = getLeaseFormFields();
+    } else if (n.indexOf('application') !== -1 || n.indexOf('apply') !== -1) {
+      document.getElementById('fbFormTitle').value = 'Rental Application';
+      fields = getApplicationFormFields();
+    } else if (n.indexOf('maintenance') !== -1 || n.indexOf('repair') !== -1 || n.indexOf('work.order') !== -1) {
+      document.getElementById('fbFormTitle').value = 'Maintenance Request Form';
+      fields = getMaintenanceFormFields();
+    } else if (n.indexOf('inspection') !== -1 || n.indexOf('walkthrough') !== -1 || n.indexOf('checklist') !== -1) {
+      document.getElementById('fbFormTitle').value = 'Property Inspection Checklist';
+      fields = getInspectionFormFields();
+    } else if (n.indexOf('move') !== -1 && (n.indexOf('in') !== -1 || n.indexOf('out') !== -1)) {
+      document.getElementById('fbFormTitle').value = 'Move-In/Move-Out Checklist';
+      fields = getMoveFormFields();
+    } else if (n.indexOf('notice') !== -1 || n.indexOf('evict') !== -1) {
+      document.getElementById('fbFormTitle').value = 'Notice to Tenant';
+      fields = getNoticeFormFields();
+    } else {
+      // Generic form
+      document.getElementById('fbFormTitle').value = 'Custom Form';
+      fields = getGenericFormFields();
+    }
+
+    return fields;
+  }
+
+  // ── Template Field Sets ───────────────────────────────────────
+
+  function getLeaseFormFields() {
+    return [
+      { id: fid(), type: 'section', label: 'Parties' },
+      { id: fid(), type: 'text', label: 'Landlord Full Name', required: true, placeholder: '' },
+      { id: fid(), type: 'text', label: 'Tenant Full Name', required: true, placeholder: '' },
+      { id: fid(), type: 'text', label: 'Co-Tenant / Additional Occupant', required: false },
+      { id: fid(), type: 'section', label: 'Property Details' },
+      { id: fid(), type: 'address', label: 'Property Address', required: true },
+      { id: fid(), type: 'select', label: 'Unit Type', options: ['Apartment','House','Condo','Townhouse','Duplex','Studio','Room'], required: true },
+      { id: fid(), type: 'number', label: 'Bedrooms', placeholder: '2' },
+      { id: fid(), type: 'number', label: 'Bathrooms', placeholder: '1' },
+      { id: fid(), type: 'section', label: 'Lease Terms' },
+      { id: fid(), type: 'date', label: 'Lease Start Date', required: true },
+      { id: fid(), type: 'date', label: 'Lease End Date', required: true },
+      { id: fid(), type: 'number', label: 'Monthly Rent ($)', required: true, placeholder: '1200' },
+      { id: fid(), type: 'number', label: 'Security Deposit ($)', required: true, placeholder: '1200' },
+      { id: fid(), type: 'select', label: 'Payment Due Day', options: ['1st','5th','10th','15th','Last day'] },
+      { id: fid(), type: 'section', label: 'Utilities & Fees' },
+      { id: fid(), type: 'checkbox', label: 'Included Utilities', options: ['Water','Electric','Gas','Trash','Internet','Cable'] },
+      { id: fid(), type: 'number', label: 'Late Fee ($)', placeholder: '50' },
+      { id: fid(), type: 'number', label: 'Pet Deposit ($)', placeholder: '300' },
+      { id: fid(), type: 'section', label: 'Rules & Policies' },
+      { id: fid(), type: 'radio', label: 'Pets Allowed?', options: ['Yes','No','With Approval'] },
+      { id: fid(), type: 'radio', label: 'Smoking Allowed?', options: ['Yes','No','Outside Only'] },
+      { id: fid(), type: 'textarea', label: 'Additional Terms & Conditions' },
+      { id: fid(), type: 'section', label: 'Signatures' },
+      { id: fid(), type: 'signature', label: 'Landlord Signature', required: true },
+      { id: fid(), type: 'date', label: 'Date Signed (Landlord)' },
+      { id: fid(), type: 'signature', label: 'Tenant Signature', required: true },
+      { id: fid(), type: 'date', label: 'Date Signed (Tenant)' },
+    ];
+  }
+
+  function getApplicationFormFields() {
+    return [
+      { id: fid(), type: 'section', label: 'Personal Information' },
+      { id: fid(), type: 'text', label: 'Full Legal Name', required: true },
+      { id: fid(), type: 'date', label: 'Date of Birth', required: true },
+      { id: fid(), type: 'text', label: 'Social Security Number', required: true, placeholder: 'XXX-XX-XXXX' },
+      { id: fid(), type: 'email', label: 'Email Address', required: true },
+      { id: fid(), type: 'phone', label: 'Phone Number', required: true },
+      { id: fid(), type: 'text', label: "Driver's License #" },
+      { id: fid(), type: 'section', label: 'Current Address' },
+      { id: fid(), type: 'address', label: 'Current Address', required: true },
+      { id: fid(), type: 'text', label: 'Current Landlord Name' },
+      { id: fid(), type: 'phone', label: 'Current Landlord Phone' },
+      { id: fid(), type: 'number', label: 'Monthly Rent', placeholder: '$' },
+      { id: fid(), type: 'text', label: 'Reason for Moving' },
+      { id: fid(), type: 'section', label: 'Employment' },
+      { id: fid(), type: 'text', label: 'Employer Name', required: true },
+      { id: fid(), type: 'text', label: 'Job Title' },
+      { id: fid(), type: 'number', label: 'Monthly Income ($)', required: true },
+      { id: fid(), type: 'phone', label: 'Employer Phone' },
+      { id: fid(), type: 'section', label: 'References' },
+      { id: fid(), type: 'text', label: 'Reference 1 Name' },
+      { id: fid(), type: 'phone', label: 'Reference 1 Phone' },
+      { id: fid(), type: 'text', label: 'Reference 2 Name' },
+      { id: fid(), type: 'phone', label: 'Reference 2 Phone' },
+      { id: fid(), type: 'section', label: 'Authorization' },
+      { id: fid(), type: 'checkbox', label: 'I authorize background and credit checks', options: ['Yes, I authorize'], required: true },
+      { id: fid(), type: 'signature', label: 'Applicant Signature', required: true },
+      { id: fid(), type: 'date', label: 'Date' },
+    ];
+  }
+
+  function getMaintenanceFormFields() {
+    return [
+      { id: fid(), type: 'text', label: 'Tenant Name', required: true },
+      { id: fid(), type: 'address', label: 'Property Address / Unit', required: true },
+      { id: fid(), type: 'phone', label: 'Contact Phone', required: true },
+      { id: fid(), type: 'email', label: 'Contact Email' },
+      { id: fid(), type: 'date', label: 'Date of Request', required: true },
+      { id: fid(), type: 'select', label: 'Priority', options: ['Low','Medium','High','Emergency'], required: true },
+      { id: fid(), type: 'select', label: 'Category', options: ['Plumbing','Electrical','HVAC','Appliance','Pest Control','Structural','Landscaping','Other'], required: true },
+      { id: fid(), type: 'textarea', label: 'Description of Issue', required: true },
+      { id: fid(), type: 'radio', label: 'Permission to Enter Unit', options: ['Yes','No','Only with 24hr notice'] },
+      { id: fid(), type: 'signature', label: 'Tenant Signature' },
+    ];
+  }
+
+  function getInspectionFormFields() {
+    return [
+      { id: fid(), type: 'text', label: 'Inspector Name', required: true },
+      { id: fid(), type: 'address', label: 'Property Address', required: true },
+      { id: fid(), type: 'date', label: 'Inspection Date', required: true },
+      { id: fid(), type: 'select', label: 'Inspection Type', options: ['Move-In','Move-Out','Annual','Quarterly','Pre-Sale'] },
+      { id: fid(), type: 'section', label: 'Kitchen' },
+      { id: fid(), type: 'select', label: 'Countertops', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Appliances', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Plumbing/Faucet', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'section', label: 'Bathroom' },
+      { id: fid(), type: 'select', label: 'Toilet', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Shower/Tub', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Sink/Vanity', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'section', label: 'General' },
+      { id: fid(), type: 'select', label: 'Walls/Paint', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Flooring', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Windows/Blinds', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Doors/Locks', options: ['Good','Fair','Poor','N/A'] },
+      { id: fid(), type: 'select', label: 'Smoke Detectors', options: ['Working','Not Working','Missing'] },
+      { id: fid(), type: 'textarea', label: 'Additional Notes' },
+      { id: fid(), type: 'signature', label: 'Inspector Signature', required: true },
+      { id: fid(), type: 'signature', label: 'Tenant Signature' },
+    ];
+  }
+
+  function getMoveFormFields() {
+    return [
+      { id: fid(), type: 'text', label: 'Tenant Name', required: true },
+      { id: fid(), type: 'address', label: 'Property Address', required: true },
+      { id: fid(), type: 'date', label: 'Date', required: true },
+      { id: fid(), type: 'select', label: 'Type', options: ['Move-In','Move-Out'] },
+      { id: fid(), type: 'section', label: 'Room Conditions' },
+      { id: fid(), type: 'select', label: 'Living Room', options: ['Excellent','Good','Fair','Poor'] },
+      { id: fid(), type: 'select', label: 'Kitchen', options: ['Excellent','Good','Fair','Poor'] },
+      { id: fid(), type: 'select', label: 'Bedroom 1', options: ['Excellent','Good','Fair','Poor'] },
+      { id: fid(), type: 'select', label: 'Bedroom 2', options: ['Excellent','Good','Fair','Poor'] },
+      { id: fid(), type: 'select', label: 'Bathroom', options: ['Excellent','Good','Fair','Poor'] },
+      { id: fid(), type: 'textarea', label: 'Damage Notes' },
+      { id: fid(), type: 'checkbox', label: 'Keys Returned', options: ['Front Door','Back Door','Mailbox','Garage','Storage'] },
+      { id: fid(), type: 'signature', label: 'Tenant Signature', required: true },
+      { id: fid(), type: 'signature', label: 'Landlord Signature', required: true },
+    ];
+  }
+
+  function getNoticeFormFields() {
+    return [
+      { id: fid(), type: 'date', label: 'Date of Notice', required: true },
+      { id: fid(), type: 'text', label: 'Tenant Name', required: true },
+      { id: fid(), type: 'address', label: 'Property Address', required: true },
+      { id: fid(), type: 'select', label: 'Notice Type', options: ['Pay or Quit','Cure or Quit','Unconditional Quit','Lease Violation','Non-Renewal','Rent Increase'], required: true },
+      { id: fid(), type: 'number', label: 'Days to Comply', placeholder: '3' },
+      { id: fid(), type: 'number', label: 'Amount Owed ($)', placeholder: '' },
+      { id: fid(), type: 'textarea', label: 'Details / Violation Description', required: true },
+      { id: fid(), type: 'textarea', label: 'Remedy Required' },
+      { id: fid(), type: 'signature', label: 'Landlord/Manager Signature', required: true },
+      { id: fid(), type: 'date', label: 'Date Served' },
+      { id: fid(), type: 'select', label: 'Method of Service', options: ['Hand-delivered','Posted on door','Mailed (certified)','Email'] },
+    ];
+  }
+
+  function getGenericFormFields() {
+    return [
+      { id: fid(), type: 'text', label: 'Full Name', required: true },
+      { id: fid(), type: 'email', label: 'Email', required: true },
+      { id: fid(), type: 'phone', label: 'Phone' },
+      { id: fid(), type: 'date', label: 'Date' },
+      { id: fid(), type: 'textarea', label: 'Details' },
+      { id: fid(), type: 'signature', label: 'Signature' },
+    ];
+  }
+
+  // ── Field ID Generator ────────────────────────────────────────
+
+  var _fCounter = 0;
+  function fid() { return 'f_' + Date.now() + '_' + (++_fCounter); }
+
+  // ── Add / Remove / Reorder Fields ─────────────────────────────
+
+  function addField(type) {
+    var labels = {
+      text: 'Text Field', email: 'Email', phone: 'Phone', number: 'Number',
+      date: 'Date', select: 'Dropdown', textarea: 'Long Text', checkbox: 'Checkbox Group',
+      radio: 'Radio Group', signature: 'Signature', section: 'Section Title', address: 'Address'
+    };
+    var field = {
+      id: fid(),
+      type: type,
+      label: labels[type] || 'New Field',
+      required: false,
+      placeholder: ''
+    };
+    if (type === 'select' || type === 'radio' || type === 'checkbox') {
+      field.options = ['Option 1', 'Option 2', 'Option 3'];
+    }
+    formFields.push(field);
+    renderFieldList();
+    renderFormPreview();
+  }
+
+  function removeField(fieldId) {
+    formFields = formFields.filter(function(f) { return f.id !== fieldId; });
+    renderFieldList();
+    renderFormPreview();
+  }
+
+  function moveField(fieldId, dir) {
+    var idx = formFields.findIndex(function(f) { return f.id === fieldId; });
+    if (idx < 0) return;
+    var newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= formFields.length) return;
+    var temp = formFields[idx];
+    formFields[idx] = formFields[newIdx];
+    formFields[newIdx] = temp;
+    renderFieldList();
+    renderFormPreview();
+  }
+
+  function clearAllFields() {
+    if (!confirm('Remove all fields?')) return;
+    formFields = [];
+    renderFieldList();
+    renderFormPreview();
+  }
+
+  function updateFieldLabel(fieldId, newLabel) {
+    var f = formFields.find(function(x) { return x.id === fieldId; });
+    if (f) { f.label = newLabel; renderFormPreview(); }
+  }
+
+  function toggleFieldRequired(fieldId) {
+    var f = formFields.find(function(x) { return x.id === fieldId; });
+    if (f) { f.required = !f.required; renderFieldList(); renderFormPreview(); }
+  }
+
+  // ── Render Field List (sidebar) ───────────────────────────────
+
+  function renderFieldList() {
+    var container = document.getElementById('fbFieldList');
+    var countEl = document.getElementById('fbFieldCount');
+    if (countEl) countEl.textContent = formFields.length;
+
+    if (!container) return;
+
+    if (formFields.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:1rem;color:rgba(255,255,255,0.3);font-size:0.82rem;">No fields yet</div>';
+      return;
+    }
+
+    var typeIcons = {
+      text: 'Aa', email: '@', phone: '📱', number: '#', date: '📅',
+      select: '▼', textarea: '📝', checkbox: '☑', radio: '◉',
+      signature: '✍', section: '──', address: '📍'
+    };
+
+    container.innerHTML = formFields.map(function(f, i) {
+      return '<div class="fb-field-item" data-id="' + f.id + '">' +
+        '<div class="field-label">' +
+          '<span contenteditable="true" onblur="updateFieldLabel(\'' + f.id + '\', this.textContent)" style="max-width:180px;overflow:hidden;white-space:nowrap;">' + f.label + '</span>' +
+          '<div class="field-actions">' +
+            (f.type !== 'section' ? '<button onclick="toggleFieldRequired(\'' + f.id + '\')" title="Toggle required" style="color:' + (f.required ? '#f87171' : 'rgba(255,255,255,0.4)') + ';">*</button>' : '') +
+            '<button onclick="moveField(\'' + f.id + '\', -1)" title="Move up">&#9650;</button>' +
+            '<button onclick="moveField(\'' + f.id + '\', 1)" title="Move down">&#9660;</button>' +
+            '<button class="delete" onclick="removeField(\'' + f.id + '\')" title="Delete">&times;</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field-type">' + (typeIcons[f.type] || '') + ' ' + f.type + (f.required ? ' · required' : '') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Render Form Preview (main area) ───────────────────────────
+
+  function renderFormPreview() {
+    var title = document.getElementById('fbFormTitle').value || 'Untitled Form';
+    var desc = document.getElementById('fbFormDesc').value || '';
+    document.getElementById('fbPreviewTitle').textContent = title;
+    document.getElementById('fbPreviewDesc').textContent = desc;
+
+    var body = document.getElementById('fbFormBody');
+    if (formFields.length === 0) {
+      body.innerHTML = '<div style="text-align:center;padding:3rem 1rem;color:#9ca3af;">' +
+        '<div style="font-size:2.5rem;margin-bottom:0.75rem;">📸</div>' +
+        '<h3 style="font-weight:700;color:#374151;margin-bottom:0.5rem;">Upload a form image to get started</h3>' +
+        '<p style="font-size:0.88rem;">Or use the Add Field buttons on the left to build from scratch.</p></div>';
+      return;
+    }
+
+    body.innerHTML = formFields.map(function(f) {
+      if (f.type === 'section') {
+        return '<hr class="fb-section-divider"><div class="fb-section-title">' + escHtml(f.label) + '</div>';
+      }
+
+      var reqSpan = f.required ? ' <span class="required">*</span>' : '';
+      var html = '<div class="fb-form-field">';
+      html += '<label>' + escHtml(f.label) + reqSpan + '</label>';
+
+      switch (f.type) {
+        case 'text':
+        case 'email':
+        case 'phone':
+        case 'number':
+          var inputType = f.type === 'phone' ? 'tel' : f.type;
+          html += '<input type="' + inputType + '" placeholder="' + escHtml(f.placeholder || '') + '" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' />';
+          break;
+        case 'date':
+          html += '<input type="date" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' />';
+          break;
+        case 'textarea':
+          html += '<textarea rows="3" placeholder="' + escHtml(f.placeholder || '') + '" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + '></textarea>';
+          break;
+        case 'select':
+          html += '<select ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + '><option value="">Select...</option>';
+          (f.options || []).forEach(function(opt) { html += '<option>' + escHtml(opt) + '</option>'; });
+          html += '</select>';
+          break;
+        case 'checkbox':
+          html += '<div class="fb-check-group">';
+          (f.options || []).forEach(function(opt) {
+            html += '<label><input type="checkbox" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' /><span>' + escHtml(opt) + '</span></label>';
+          });
+          html += '</div>';
+          break;
+        case 'radio':
+          html += '<div class="fb-check-group">';
+          (f.options || []).forEach(function(opt) {
+            html += '<label><input type="radio" name="' + f.id + '" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' /><span>' + escHtml(opt) + '</span></label>';
+          });
+          html += '</div>';
+          break;
+        case 'signature':
+          html += '<div class="fb-signature-area">Click to sign</div>';
+          break;
+        case 'address':
+          html += '<input type="text" placeholder="Street Address" style="margin-bottom:6px;" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' />';
+          html += '<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:6px;">';
+          html += '<input type="text" placeholder="City" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' />';
+          html += '<input type="text" placeholder="State" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' />';
+          html += '<input type="text" placeholder="ZIP" ' + (currentPreviewMode === 'preview' ? 'disabled' : '') + ' />';
+          html += '</div>';
+          break;
+      }
+
+      if (f.hint) html += '<div class="hint">' + escHtml(f.hint) + '</div>';
+      html += '</div>';
+      return html;
+    }).join('');
+
+    // Add submit button in fill mode
+    if (currentPreviewMode === 'fill') {
+      body.innerHTML += '<div style="padding-top:1rem;border-top:2px solid #e5e7eb;margin-top:1rem;text-align:center;">' +
+        '<button onclick="submitFilledForm()" style="padding:0.75rem 2rem;background:#2563eb;color:white;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">Submit Form</button></div>';
+    }
+  }
+
+  function updateFormPreview() {
+    var title = document.getElementById('fbFormTitle').value;
+    var desc = document.getElementById('fbFormDesc').value;
+    document.getElementById('fbPreviewTitle').textContent = title || 'Untitled Form';
+    document.getElementById('fbPreviewDesc').textContent = desc || '';
+  }
+
+  function setPreviewMode(mode, btn) {
+    currentPreviewMode = mode;
+    document.querySelectorAll('.fb-toolbar button').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    renderFormPreview();
+  }
+
+  // ── Save / Load / Export ──────────────────────────────────────
+
+  function saveForm() {
+    var title = document.getElementById('fbFormTitle').value || 'Untitled Form';
+    var desc = document.getElementById('fbFormDesc').value || '';
+    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+
+    var form = {
+      id: formId || 'form_' + Date.now(),
+      title: title,
+      description: desc,
+      fields: formFields,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    var existing = forms.findIndex(function(f) { return f.id === form.id; });
+    if (existing >= 0) {
+      forms[existing] = form;
+    } else {
+      forms.push(form);
+    }
+
+    formId = form.id;
+    localStorage.setItem('rv_custom_forms', JSON.stringify(forms));
+    renderSavedForms();
+    showToast('Form saved!');
+  }
+
+  function loadForm(id) {
+    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+    var form = forms.find(function(f) { return f.id === id; });
+    if (!form) return;
+
+    formId = form.id;
+    formFields = form.fields || [];
+    document.getElementById('fbFormTitle').value = form.title || '';
+    document.getElementById('fbFormDesc').value = form.description || '';
+    renderFieldList();
+    renderFormPreview();
+  }
+
+  function deleteForm(id) {
+    if (!confirm('Delete this form?')) return;
+    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+    forms = forms.filter(function(f) { return f.id !== id; });
+    localStorage.setItem('rv_custom_forms', JSON.stringify(forms));
+    if (formId === id) {
+      formId = null;
+      formFields = [];
+      document.getElementById('fbFormTitle').value = 'Untitled Form';
+      document.getElementById('fbFormDesc').value = '';
+      renderFieldList();
+      renderFormPreview();
+    }
+    renderSavedForms();
+  }
+
+  function duplicateForm() {
+    if (formFields.length === 0) { alert('No form to duplicate.'); return; }
+    formId = null; // Create as new
+    formFields = formFields.map(function(f) { return Object.assign({}, f, { id: fid() }); });
+    document.getElementById('fbFormTitle').value += ' (Copy)';
+    saveForm();
+  }
+
+  function renderSavedForms() {
+    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+    var container = document.getElementById('fbSavedList');
+    if (!container) return;
+
+    if (forms.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:0.75rem;color:rgba(255,255,255,0.3);font-size:0.78rem;">No saved forms</div>';
+      return;
+    }
+
+    container.innerHTML = forms.map(function(f) {
+      var fieldCount = (f.fields || []).length;
+      var date = new Date(f.updated_at || f.created_at).toLocaleDateString();
+      return '<div class="fb-saved-item" onclick="loadForm(\'' + f.id + '\')">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<div class="name">' + escHtml(f.title) + '</div>' +
+          '<button onclick="event.stopPropagation();deleteForm(\'' + f.id + '\')" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:0.9rem;">&times;</button>' +
+        '</div>' +
+        '<div class="meta">' + fieldCount + ' fields · Updated ' + date + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function exportFormHTML() {
+    if (formFields.length === 0) { alert('No form to export.'); return; }
+
+    var title = document.getElementById('fbFormTitle').value || 'Untitled Form';
+    var preview = document.getElementById('fbFormPreview');
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escHtml(title) + '</title>' +
+      '<style>body{font-family:system-ui,sans-serif;max-width:700px;margin:2rem auto;padding:0 1rem;}' +
+      'label{display:block;font-weight:600;font-size:0.88rem;margin-bottom:4px;margin-top:1rem;}' +
+      'input,select,textarea{width:100%;padding:0.6rem;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.9rem;box-sizing:border-box;}' +
+      'h1{font-size:1.5rem;}hr{margin:1.5rem 0;border:none;border-top:2px solid #e5e7eb;}' +
+      '.required{color:#dc2626;}</style></head><body>' +
+      preview.innerHTML + '</body></html>';
+
+    var blob = new Blob([html], { type: 'text/html' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = title.replace(/[^a-zA-Z0-9]/g, '_') + '.html';
+    a.click();
+    showToast('Form exported as HTML!');
+  }
+
+  function shareFormLink() {
+    if (!formId) { alert('Save the form first.'); return; }
+    var url = window.location.origin + '/form-builder.html?form=' + formId;
+    navigator.clipboard.writeText(url).then(function() {
+      showToast('Link copied to clipboard!');
+    }).catch(function() {
+      prompt('Share this link:', url);
+    });
+  }
+
+  function submitFilledForm() {
+    showToast('Form submitted successfully!');
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+
+  function escHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  function showToast(msg) {
+    var toast = document.createElement('div');
+    toast.textContent = msg;
+    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:0.75rem 1.5rem;border-radius:10px;font-weight:600;font-size:0.88rem;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 2500);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────
+
+  (function() {
+    renderSavedForms();
+    renderFieldList();
+
+    // Check for form ID in URL
+    var params = new URLSearchParams(window.location.search);
+    var loadId = params.get('form');
+    if (loadId) loadForm(loadId);
+  })();
+</script>
+
+<!-- Supabase Backend -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+</body>
+</html>

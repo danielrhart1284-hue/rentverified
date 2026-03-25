@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nonprofit Hub – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .np-hero {
+      background: linear-gradient(135deg, #065f46 0%, #059669 50%, #34d399 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .np-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .np-hero p { font-size: 1rem; opacity: 0.85; max-width: 540px; margin: 0 auto 1.25rem; }
+    .np-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .np-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #a7f3d0; }
+    .np-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .np-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    .np-tabs { display: flex; gap: 4px; background: #f1f5f9; border-radius: 10px; padding: 3px; margin: 1.25rem 0; width: fit-content; }
+    .np-tab {
+      padding: 0.5rem 1.2rem; border: none; border-radius: 8px; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; background: transparent; color: #64748b;
+    }
+    .np-tab.active { background: white; color: #065f46; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    .np-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; padding: 1rem 0;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .np-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .np-search:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.12); }
+    .np-select { padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.85rem; background: white; color: #374151; }
+    .np-btn { padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700; font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s; }
+    .np-btn-primary { background: #059669; color: white; }
+    .np-btn-primary:hover { background: #065f46; }
+    .np-btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+    .np-btn-danger { background: #fee2e2; color: #dc2626; border: none; padding: 0.35rem 0.9rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+    .np-btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; padding: 0.35rem 0.9rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+    .np-btn-outline:hover { border-color: #059669; color: #065f46; }
+
+    /* Tables */
+    .np-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .np-table th { text-align: left; padding: 0.6rem 0.75rem; font-weight: 700; color: #64748b; font-size: 0.72rem; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; }
+    .np-table td { padding: 0.7rem 0.75rem; border-bottom: 1px solid #f1f5f9; }
+    .np-table tr:hover td { background: #ecfdf5; }
+    .np-table tr { cursor: pointer; }
+    .np-empty { text-align: center; padding: 2rem; color: #94a3b8; }
+
+    .fund-badge { display: inline-block; padding: 0.12rem 0.45rem; border-radius: 20px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
+    .fund-unrestricted { background: #d1fae5; color: #065f46; }
+    .fund-restricted { background: #fef3c7; color: #92400e; }
+    .fund-endowment { background: #dbeafe; color: #1e40af; }
+    .fund-capital { background: #ede9fe; color: #6d28d9; }
+    .fund-program { background: #fce7f3; color: #9d174d; }
+    .fund-other { background: #f1f5f9; color: #64748b; }
+
+    .status-pill { display: inline-block; padding: 0.12rem 0.45rem; border-radius: 20px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
+    .gs-researching { background: #e0f2fe; color: #0369a1; }
+    .gs-preparing { background: #fef3c7; color: #92400e; }
+    .gs-submitted { background: #ddd6fe; color: #6d28d9; }
+    .gs-under_review { background: #fde68a; color: #78350f; }
+    .gs-approved { background: #d1fae5; color: #065f46; }
+    .gs-declined { background: #fee2e2; color: #dc2626; }
+    .gs-active { background: #bbf7d0; color: #166534; }
+    .gs-reporting { background: #fce7f3; color: #9d174d; }
+    .gs-closed { background: #f1f5f9; color: #64748b; }
+
+    /* Fund summary cards */
+    .fund-cards { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .fund-card { background: white; border-radius: 12px; padding: 1rem 1.25rem; border: 1px solid #e2e8f0; min-width: 140px; flex: 1; }
+    .fund-card .amount { font-size: 1.3rem; font-weight: 900; color: #059669; }
+    .fund-card .label { font-size: 0.72rem; color: #64748b; text-transform: uppercase; }
+
+    /* Modals */
+    .np-modal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.45); align-items: center; justify-content: center; }
+    .np-modal.show { display: flex; }
+    .np-modal-inner { background: white; border-radius: 16px; width: 95%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    .np-modal-inner h2 { font-size: 1.2rem; color: #1e293b; margin-bottom: 1.25rem; }
+    .np-modal-close { float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; line-height: 1; }
+    .np-field { margin-bottom: 1rem; }
+    .np-field label { display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .np-field input, .np-field select, .np-field textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.88rem; box-sizing: border-box; }
+    .np-field textarea { min-height: 60px; resize: vertical; }
+    .np-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    @media (max-width: 600px) { .np-hero-stats { gap: 1.25rem; } .np-field-row { grid-template-columns: 1fr; } .fund-cards { flex-direction: column; } }
+  </style>
+</head>
+<body>
+
+  <nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:56px;display:flex;align-items:center;gap:1.5rem;font-size:.88rem;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.1rem;font-weight:800;color:#059669;text-decoration:none;">
+      <img src="images/logo.svg" alt="" style="height:28px;" onerror="this.style.display='none'">RentVerified
+    </a>
+    <a href="crm.html" style="color:#4b5563;text-decoration:none;font-weight:500;">CRM</a>
+    <a href="invoice-builder.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Invoices</a>
+    <a href="documents.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Docs</a>
+    <a href="e-signature.html" style="color:#4b5563;text-decoration:none;font-weight:500;">E-Sign</a>
+    <a href="accounting.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Accounting</a>
+    <a href="index.html" style="margin-left:auto;background:#059669;color:white;padding:0.35rem 1rem;border-radius:8px;font-weight:700;font-size:0.82rem;text-decoration:none;">Dashboard</a>
+  </nav>
+
+  <div class="np-hero">
+    <h1>Nonprofit Hub</h1>
+    <p>Track donations, manage volunteers, and monitor grant applications for your organization.</p>
+    <div class="np-hero-stats">
+      <div class="np-hero-stat"><div class="num" id="stat-donors">0</div><div class="lbl">Active Donors</div></div>
+      <div class="np-hero-stat"><div class="num" id="stat-raised">$0</div><div class="lbl">Total Raised</div></div>
+      <div class="np-hero-stat"><div class="num" id="stat-vol-hours">0</div><div class="lbl">Volunteer Hours</div></div>
+      <div class="np-hero-stat"><div class="num" id="stat-grants">0</div><div class="lbl">Active Grants</div></div>
+    </div>
+  </div>
+
+  <div class="np-wrap">
+    <!-- Fund Summary Cards -->
+    <div class="fund-cards" id="fund-cards"></div>
+
+    <div class="np-tabs">
+      <button class="np-tab active" onclick="showTab('donors')">❤️ Donors</button>
+      <button class="np-tab" onclick="showTab('volunteers')">🤝 Volunteers</button>
+      <button class="np-tab" onclick="showTab('grants')">📋 Grants</button>
+    </div>
+
+    <!-- DONORS -->
+    <div id="tab-donors">
+      <div class="np-toolbar">
+        <input type="text" class="np-search" id="donor-search" placeholder="Search donors..." oninput="loadDonors()">
+        <select class="np-select" id="donor-status" onchange="loadDonors()">
+          <option value="">All Statuses</option>
+          <option value="prospect">Prospect</option><option value="active">Active</option>
+          <option value="recurring">Recurring</option><option value="major">Major</option>
+          <option value="lapsed">Lapsed</option><option value="one_time">One-Time</option>
+        </select>
+        <button class="np-btn np-btn-primary" onclick="openNewDonor()">+ Add Donor</button>
+      </div>
+      <div style="overflow-x:auto;"><table class="np-table"><thead><tr>
+        <th>Donor</th><th>Type</th><th>Total Given</th><th>Last Gift</th><th>Fund</th><th>Status</th><th></th>
+      </tr></thead><tbody id="donor-body"></tbody></table></div>
+    </div>
+
+    <!-- VOLUNTEERS -->
+    <div id="tab-volunteers" style="display:none;">
+      <div class="np-toolbar">
+        <input type="text" class="np-search" id="vol-search" placeholder="Search volunteers, activities..." oninput="loadVolunteers()">
+        <button class="np-btn np-btn-primary" onclick="openNewVolunteer()">+ Log Hours</button>
+      </div>
+      <div style="overflow-x:auto;"><table class="np-table"><thead><tr>
+        <th>Volunteer</th><th>Activity</th><th>Hours</th><th>Date</th><th>Program</th><th>Status</th><th></th>
+      </tr></thead><tbody id="vol-body"></tbody></table></div>
+    </div>
+
+    <!-- GRANTS -->
+    <div id="tab-grants" style="display:none;">
+      <div class="np-toolbar">
+        <input type="text" class="np-search" id="grant-search" placeholder="Search grants, funders..." oninput="loadGrants()">
+        <select class="np-select" id="grant-status" onchange="loadGrants()">
+          <option value="">All Statuses</option>
+          <option value="researching">Researching</option><option value="preparing">Preparing</option>
+          <option value="submitted">Submitted</option><option value="under_review">Under Review</option>
+          <option value="approved">Approved</option><option value="declined">Declined</option>
+          <option value="active">Active</option><option value="reporting">Reporting</option><option value="closed">Closed</option>
+        </select>
+        <button class="np-btn np-btn-primary" onclick="openNewGrant()">+ Add Grant</button>
+      </div>
+      <div style="overflow-x:auto;"><table class="np-table"><thead><tr>
+        <th>Grant</th><th>Funder</th><th>Requested</th><th>Awarded</th><th>Deadline</th><th>Status</th><th></th>
+      </tr></thead><tbody id="grant-body"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ── Donor Modal ── -->
+  <div class="np-modal" id="modal-donor">
+    <div class="np-modal-inner">
+      <button class="np-modal-close" onclick="closeModal('modal-donor')">&times;</button>
+      <h2 id="donor-form-title">Add Donor</h2>
+      <input type="hidden" id="d-id">
+      <div class="np-field"><label>Donor Name *</label><input id="d-name" placeholder="Individual or organization name"></div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Email</label><input id="d-email" type="email"></div>
+        <div class="np-field"><label>Phone</label><input id="d-phone"></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Company / Org</label><input id="d-company"></div>
+        <div class="np-field"><label>Type</label><select id="d-type">
+          <option value="individual">Individual</option><option value="corporate">Corporate</option>
+          <option value="foundation">Foundation</option><option value="government">Government</option>
+          <option value="anonymous">Anonymous</option><option value="other">Other</option>
+        </select></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Status</label><select id="d-status">
+          <option value="prospect">Prospect</option><option value="active">Active</option>
+          <option value="recurring">Recurring</option><option value="major">Major Donor</option>
+          <option value="lapsed">Lapsed</option><option value="one_time">One-Time</option>
+        </select></div>
+        <div class="np-field"><label>Fund Designation</label><select id="d-fund">
+          <option value="unrestricted">Unrestricted</option><option value="restricted">Restricted</option>
+          <option value="endowment">Endowment</option><option value="capital">Capital</option>
+          <option value="program">Program</option><option value="other">Other</option>
+        </select></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Recurring Amount ($)</label><input id="d-recurring" type="number" step="0.01"></div>
+        <div class="np-field"><label>Source</label><input id="d-source" placeholder="Gala, online, referral..."></div>
+      </div>
+      <div class="np-field"><label>Notes</label><textarea id="d-notes"></textarea></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+        <button class="np-btn-outline" onclick="closeModal('modal-donor')">Cancel</button>
+        <button class="np-btn np-btn-primary" onclick="saveDonorForm()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Donation Modal ── -->
+  <div class="np-modal" id="modal-donation">
+    <div class="np-modal-inner">
+      <button class="np-modal-close" onclick="closeModal('modal-donation')">&times;</button>
+      <h2>Record Donation</h2>
+      <input type="hidden" id="don-donor-id">
+      <div class="np-field"><label>Donor</label><input id="don-donor-name" readonly style="background:#f8fafc;"></div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Amount ($) *</label><input id="don-amount" type="number" step="0.01"></div>
+        <div class="np-field"><label>Date</label><input id="don-date" type="date"></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Fund</label><select id="don-fund">
+          <option value="unrestricted">Unrestricted</option><option value="restricted">Restricted</option>
+          <option value="endowment">Endowment</option><option value="capital">Capital</option>
+          <option value="program">Program</option>
+        </select></div>
+        <div class="np-field"><label>Payment Method</label><select id="don-method">
+          <option value="check">Check</option><option value="credit_card">Credit Card</option>
+          <option value="bank_transfer">Bank Transfer</option><option value="online">Online</option>
+          <option value="cash">Cash</option><option value="in_kind">In-Kind</option><option value="stock">Stock</option>
+        </select></div>
+      </div>
+      <div class="np-field"><label>Campaign</label><input id="don-campaign" placeholder="Annual fund, gala, capital campaign..."></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+        <button class="np-btn-outline" onclick="closeModal('modal-donation')">Cancel</button>
+        <button class="np-btn np-btn-primary" onclick="saveDonationForm()">Record Donation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Volunteer Modal ── -->
+  <div class="np-modal" id="modal-vol">
+    <div class="np-modal-inner">
+      <button class="np-modal-close" onclick="closeModal('modal-vol')">&times;</button>
+      <h2 id="vol-form-title">Log Volunteer Hours</h2>
+      <input type="hidden" id="v-id">
+      <div class="np-field"><label>Volunteer Name *</label><input id="v-name"></div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Email</label><input id="v-email" type="email"></div>
+        <div class="np-field"><label>Phone</label><input id="v-phone"></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Activity *</label><input id="v-activity" placeholder="Event setup, tutoring, admin..."></div>
+        <div class="np-field"><label>Hours *</label><input id="v-hours" type="number" step="0.25"></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Date</label><input id="v-date" type="date"></div>
+        <div class="np-field"><label>Program</label><input id="v-program" placeholder="Which program or event"></div>
+      </div>
+      <div class="np-field"><label>Supervisor</label><input id="v-supervisor"></div>
+      <div class="np-field"><label>Notes</label><textarea id="v-notes"></textarea></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+        <button class="np-btn-outline" onclick="closeModal('modal-vol')">Cancel</button>
+        <button class="np-btn np-btn-primary" onclick="saveVolForm()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Grant Modal ── -->
+  <div class="np-modal" id="modal-grant">
+    <div class="np-modal-inner">
+      <button class="np-modal-close" onclick="closeModal('modal-grant')">&times;</button>
+      <h2 id="grant-form-title">Add Grant</h2>
+      <input type="hidden" id="g-id">
+      <div class="np-field"><label>Grant Name *</label><input id="g-name" placeholder="Community Health Initiative"></div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Funder *</label><input id="g-funder" placeholder="Foundation / agency name"></div>
+        <div class="np-field"><label>Contact</label><input id="g-contact" placeholder="Program officer"></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Amount Requested ($)</label><input id="g-requested" type="number" step="0.01"></div>
+        <div class="np-field"><label>Amount Awarded ($)</label><input id="g-awarded" type="number" step="0.01"></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Status</label><select id="g-status">
+          <option value="researching">Researching</option><option value="preparing">Preparing</option>
+          <option value="submitted">Submitted</option><option value="under_review">Under Review</option>
+          <option value="approved">Approved</option><option value="declined">Declined</option>
+          <option value="active">Active</option><option value="reporting">Reporting</option><option value="closed">Closed</option>
+        </select></div>
+        <div class="np-field"><label>Fund</label><select id="g-fund">
+          <option value="restricted">Restricted</option><option value="unrestricted">Unrestricted</option>
+          <option value="program">Program</option><option value="capital">Capital</option>
+        </select></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Deadline</label><input id="g-deadline" type="date"></div>
+        <div class="np-field"><label>Report Due</label><input id="g-report-due" type="date"></div>
+      </div>
+      <div class="np-field-row">
+        <div class="np-field"><label>Start Date</label><input id="g-start" type="date"></div>
+        <div class="np-field"><label>End Date</label><input id="g-end" type="date"></div>
+      </div>
+      <div class="np-field"><label>Program</label><input id="g-program" placeholder="Program this funds"></div>
+      <div class="np-field"><label>Notes</label><textarea id="g-notes"></textarea></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+        <button class="np-btn-outline" onclick="closeModal('modal-grant')">Cancel</button>
+        <button class="np-btn np-btn-primary" onclick="saveGrantForm()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="data-layer.js"></script>
+  <script>
+    var allDonors=[], allVols=[], allGrants=[];
+    var FUND_LABELS={unrestricted:'Unrestricted',restricted:'Restricted',endowment:'Endowment',capital:'Capital',program:'Program',other:'Other'};
+    var GS_LABELS={researching:'Researching',preparing:'Preparing',submitted:'Submitted',under_review:'Under Review',approved:'Approved',declined:'Declined',active:'Active',reporting:'Reporting',closed:'Closed'};
+
+    document.addEventListener('DOMContentLoaded', function(){ loadAll(); });
+
+    async function loadAll(){ await Promise.all([loadDonors(), loadVolunteers(), loadGrants()]); updateStats(); }
+
+    function showTab(t){
+      ['donors','volunteers','grants'].forEach(function(s){
+        document.getElementById('tab-'+s).style.display = s===t?'':'none';
+      });
+      document.querySelectorAll('.np-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.toLowerCase().includes(t.substring(0,3))); });
+    }
+
+    // ── DONORS ──
+    async function loadDonors(){
+      var f={}; var s=document.getElementById('donor-search').value.trim(); if(s) f.search=s;
+      var st=document.getElementById('donor-status').value; if(st) f.status=st;
+      allDonors = await RVData.getDonors(f); renderDonors(); updateStats();
+    }
+    function renderDonors(){
+      var b=document.getElementById('donor-body');
+      if(!allDonors.length){ b.innerHTML='<tr><td colspan="7" class="np-empty">No donors yet. Click "+ Add Donor" to get started.</td></tr>'; return; }
+      b.innerHTML=allDonors.map(function(d){
+        return '<tr onclick="openEditDonor(\''+d.id+'\')">'+
+          '<td><strong>'+esc(d.donor_name)+'</strong>'+(d.donor_company?'<br><span style="font-size:0.75rem;color:#94a3b8;">'+esc(d.donor_company)+'</span>':'')+'</td>'+
+          '<td>'+(d.donor_type||'').replace(/_/g,' ')+'</td>'+
+          '<td style="font-weight:700;color:#059669;">'+(d.total_donated?'$'+parseFloat(d.total_donated).toLocaleString():'—')+'</td>'+
+          '<td>'+(d.last_donation?new Date(d.last_donation).toLocaleDateString():'—')+'</td>'+
+          '<td><span class="fund-badge fund-'+(d.fund_designation||'other')+'">'+(FUND_LABELS[d.fund_designation]||'—')+'</span></td>'+
+          '<td>'+(d.status||'').replace(/_/g,' ')+'</td>'+
+          '<td><button class="np-btn np-btn-primary np-btn-sm" onclick="event.stopPropagation();openDonationModal(\''+d.id+'\',\''+esc(d.donor_name)+'\')">+ Gift</button></td>'+
+        '</tr>';
+      }).join('');
+    }
+    function openNewDonor(){ document.getElementById('donor-form-title').textContent='Add Donor'; document.getElementById('d-id').value='';
+      ['d-name','d-email','d-phone','d-company','d-source','d-notes'].forEach(function(id){document.getElementById(id).value='';});
+      document.getElementById('d-type').value='individual'; document.getElementById('d-status').value='prospect';
+      document.getElementById('d-fund').value='unrestricted'; document.getElementById('d-recurring').value='';
+      showModal('modal-donor');
+    }
+    function openEditDonor(id){ var d=allDonors.find(function(r){return r.id===id;}); if(!d) return;
+      document.getElementById('donor-form-title').textContent='Edit Donor'; document.getElementById('d-id').value=d.id;
+      document.getElementById('d-name').value=d.donor_name||''; document.getElementById('d-email').value=d.donor_email||'';
+      document.getElementById('d-phone').value=d.donor_phone||''; document.getElementById('d-company').value=d.donor_company||'';
+      document.getElementById('d-type').value=d.donor_type||'individual'; document.getElementById('d-status').value=d.status||'prospect';
+      document.getElementById('d-fund').value=d.fund_designation||'unrestricted'; document.getElementById('d-recurring').value=d.recurring_amount||'';
+      document.getElementById('d-source').value=d.source||''; document.getElementById('d-notes').value=d.notes||'';
+      showModal('modal-donor');
+    }
+    async function saveDonorForm(){ var name=document.getElementById('d-name').value.trim(); if(!name){alert('Name required.');return;}
+      var donor={donor_name:name,donor_email:document.getElementById('d-email').value.trim(),donor_phone:document.getElementById('d-phone').value.trim(),
+        donor_company:document.getElementById('d-company').value.trim(),donor_type:document.getElementById('d-type').value,
+        status:document.getElementById('d-status').value,fund_designation:document.getElementById('d-fund').value,
+        recurring_amount:parseFloat(document.getElementById('d-recurring').value)||null,
+        source:document.getElementById('d-source').value.trim(),notes:document.getElementById('d-notes').value.trim()};
+      var id=document.getElementById('d-id').value; if(id) donor.id=id;
+      await RVData.saveDonor(donor); closeModal('modal-donor'); loadDonors();
+    }
+    async function deleteDonorBtn(id){ if(!confirm('Delete this donor and all donations?')) return; await RVData.deleteDonor(id); loadDonors(); }
+
+    // ── DONATIONS ──
+    function openDonationModal(donorId, donorName){
+      document.getElementById('don-donor-id').value=donorId; document.getElementById('don-donor-name').value=donorName;
+      document.getElementById('don-amount').value=''; document.getElementById('don-date').value=new Date().toISOString().split('T')[0];
+      document.getElementById('don-fund').value='unrestricted'; document.getElementById('don-method').value='check';
+      document.getElementById('don-campaign').value=''; showModal('modal-donation');
+    }
+    async function saveDonationForm(){
+      var amt=parseFloat(document.getElementById('don-amount').value); if(!amt){alert('Amount required.');return;}
+      var don={donor_id:document.getElementById('don-donor-id').value,amount:amt,
+        donation_date:document.getElementById('don-date').value,fund_designation:document.getElementById('don-fund').value,
+        payment_method:document.getElementById('don-method').value,campaign:document.getElementById('don-campaign').value.trim()};
+      await RVData.saveDonation(don); closeModal('modal-donation'); loadDonors();
+    }
+
+    // ── VOLUNTEERS ──
+    async function loadVolunteers(){
+      var f={}; var s=document.getElementById('vol-search').value.trim(); if(s) f.search=s;
+      allVols = await RVData.getVolunteerHours(f); renderVolunteers();
+    }
+    function renderVolunteers(){
+      var b=document.getElementById('vol-body');
+      if(!allVols.length){ b.innerHTML='<tr><td colspan="7" class="np-empty">No volunteer hours logged. Click "+ Log Hours" to start.</td></tr>'; return; }
+      b.innerHTML=allVols.map(function(v){
+        return '<tr onclick="openEditVol(\''+v.id+'\')">'+
+          '<td><strong>'+esc(v.volunteer_name)+'</strong></td>'+
+          '<td>'+esc(v.activity)+'</td>'+
+          '<td style="font-weight:700;">'+v.hours+'h</td>'+
+          '<td>'+(v.volunteer_date?new Date(v.volunteer_date).toLocaleDateString():'—')+'</td>'+
+          '<td>'+esc(v.program||'—')+'</td>'+
+          '<td>'+(v.status||'logged')+'</td>'+
+          '<td><button class="np-btn-danger" onclick="event.stopPropagation();deleteVol(\''+v.id+'\')">×</button></td>'+
+        '</tr>';
+      }).join('');
+    }
+    function openNewVolunteer(){ document.getElementById('vol-form-title').textContent='Log Volunteer Hours'; document.getElementById('v-id').value='';
+      ['v-name','v-email','v-phone','v-activity','v-hours','v-program','v-supervisor','v-notes'].forEach(function(id){document.getElementById(id).value='';});
+      document.getElementById('v-date').value=new Date().toISOString().split('T')[0]; showModal('modal-vol');
+    }
+    function openEditVol(id){ var v=allVols.find(function(r){return r.id===id;}); if(!v) return;
+      document.getElementById('vol-form-title').textContent='Edit Hours'; document.getElementById('v-id').value=v.id;
+      document.getElementById('v-name').value=v.volunteer_name||''; document.getElementById('v-email').value=v.volunteer_email||'';
+      document.getElementById('v-phone').value=v.volunteer_phone||''; document.getElementById('v-activity').value=v.activity||'';
+      document.getElementById('v-hours').value=v.hours||''; document.getElementById('v-date').value=v.volunteer_date||'';
+      document.getElementById('v-program').value=v.program||''; document.getElementById('v-supervisor').value=v.supervisor||'';
+      document.getElementById('v-notes').value=v.notes||''; showModal('modal-vol');
+    }
+    async function saveVolForm(){ var name=document.getElementById('v-name').value.trim(); var act=document.getElementById('v-activity').value.trim();
+      var hrs=parseFloat(document.getElementById('v-hours').value); if(!name||!act||!hrs){alert('Name, activity, and hours required.');return;}
+      var entry={volunteer_name:name,volunteer_email:document.getElementById('v-email').value.trim(),
+        volunteer_phone:document.getElementById('v-phone').value.trim(),activity:act,hours:hrs,
+        volunteer_date:document.getElementById('v-date').value,program:document.getElementById('v-program').value.trim(),
+        supervisor:document.getElementById('v-supervisor').value.trim(),notes:document.getElementById('v-notes').value.trim()};
+      var id=document.getElementById('v-id').value; if(id) entry.id=id;
+      await RVData.saveVolunteerHours(entry); closeModal('modal-vol'); loadVolunteers();
+    }
+    async function deleteVol(id){ if(!confirm('Delete?')) return; await RVData.deleteVolunteerHours(id); loadVolunteers(); }
+
+    // ── GRANTS ──
+    async function loadGrants(){
+      var f={}; var s=document.getElementById('grant-search').value.trim(); if(s) f.search=s;
+      var st=document.getElementById('grant-status').value; if(st) f.status=st;
+      allGrants = await RVData.getGrants(f); renderGrants();
+    }
+    function renderGrants(){
+      var b=document.getElementById('grant-body');
+      if(!allGrants.length){ b.innerHTML='<tr><td colspan="7" class="np-empty">No grants tracked. Click "+ Add Grant" to start.</td></tr>'; return; }
+      b.innerHTML=allGrants.map(function(g){
+        return '<tr onclick="openEditGrant(\''+g.id+'\')">'+
+          '<td><strong>'+esc(g.grant_name)+'</strong>'+(g.program?'<br><span style="font-size:0.75rem;color:#94a3b8;">'+esc(g.program)+'</span>':'')+'</td>'+
+          '<td>'+esc(g.funder)+'</td>'+
+          '<td>'+(g.amount_requested?'$'+parseFloat(g.amount_requested).toLocaleString():'—')+'</td>'+
+          '<td style="font-weight:700;color:#059669;">'+(g.amount_awarded?'$'+parseFloat(g.amount_awarded).toLocaleString():'—')+'</td>'+
+          '<td>'+(g.deadline?new Date(g.deadline).toLocaleDateString():'—')+'</td>'+
+          '<td><span class="status-pill gs-'+g.status+'">'+GS_LABELS[g.status]+'</span></td>'+
+          '<td><button class="np-btn-danger" onclick="event.stopPropagation();deleteGrantBtn(\''+g.id+'\')">×</button></td>'+
+        '</tr>';
+      }).join('');
+    }
+    function openNewGrant(){ document.getElementById('grant-form-title').textContent='Add Grant'; document.getElementById('g-id').value='';
+      ['g-name','g-funder','g-contact','g-requested','g-awarded','g-deadline','g-report-due','g-start','g-end','g-program','g-notes'].forEach(function(id){document.getElementById(id).value='';});
+      document.getElementById('g-status').value='researching'; document.getElementById('g-fund').value='restricted'; showModal('modal-grant');
+    }
+    function openEditGrant(id){ var g=allGrants.find(function(r){return r.id===id;}); if(!g) return;
+      document.getElementById('grant-form-title').textContent='Edit Grant'; document.getElementById('g-id').value=g.id;
+      document.getElementById('g-name').value=g.grant_name||''; document.getElementById('g-funder').value=g.funder||'';
+      document.getElementById('g-contact').value=g.funder_contact||''; document.getElementById('g-requested').value=g.amount_requested||'';
+      document.getElementById('g-awarded').value=g.amount_awarded||''; document.getElementById('g-status').value=g.status||'researching';
+      document.getElementById('g-fund').value=g.fund_designation||'restricted'; document.getElementById('g-deadline').value=g.deadline||'';
+      document.getElementById('g-report-due').value=g.report_due||''; document.getElementById('g-start').value=g.start_date||'';
+      document.getElementById('g-end').value=g.end_date||''; document.getElementById('g-program').value=g.program||'';
+      document.getElementById('g-notes').value=g.notes||''; showModal('modal-grant');
+    }
+    async function saveGrantForm(){ var name=document.getElementById('g-name').value.trim(); var funder=document.getElementById('g-funder').value.trim();
+      if(!name||!funder){alert('Grant name and funder required.');return;}
+      var grant={grant_name:name,funder:funder,funder_contact:document.getElementById('g-contact').value.trim(),
+        amount_requested:parseFloat(document.getElementById('g-requested').value)||null,
+        amount_awarded:parseFloat(document.getElementById('g-awarded').value)||null,
+        status:document.getElementById('g-status').value,fund_designation:document.getElementById('g-fund').value,
+        deadline:document.getElementById('g-deadline').value||null,report_due:document.getElementById('g-report-due').value||null,
+        start_date:document.getElementById('g-start').value||null,end_date:document.getElementById('g-end').value||null,
+        program:document.getElementById('g-program').value.trim(),notes:document.getElementById('g-notes').value.trim()};
+      var id=document.getElementById('g-id').value; if(id) grant.id=id;
+      await RVData.saveGrant(grant); closeModal('modal-grant'); loadGrants();
+    }
+    async function deleteGrantBtn(id){ if(!confirm('Delete?')) return; await RVData.deleteGrant(id); loadGrants(); }
+
+    // ── STATS ──
+    async function updateStats(){
+      var donors = await RVData.getDonors({}); var activeDonors = donors.filter(function(d){return d.status!=='prospect'&&d.status!=='lapsed';});
+      document.getElementById('stat-donors').textContent = activeDonors.length;
+      var totalRaised = donors.reduce(function(s,d){return s+(parseFloat(d.total_donated)||0);},0);
+      document.getElementById('stat-raised').textContent = '$'+totalRaised.toLocaleString('en-US',{minimumFractionDigits:0});
+      var vols = await RVData.getVolunteerHours({});
+      var totalHrs = vols.reduce(function(s,v){return s+(parseFloat(v.hours)||0);},0);
+      document.getElementById('stat-vol-hours').textContent = totalHrs.toFixed(0);
+      var grants = await RVData.getGrants({});
+      var activeGrants = grants.filter(function(g){return g.status==='active'||g.status==='approved'||g.status==='reporting';});
+      document.getElementById('stat-grants').textContent = activeGrants.length;
+
+      // Fund breakdown cards
+      var fundTotals={unrestricted:0,restricted:0,endowment:0,program:0};
+      var allDons = await RVData.getDonations({});
+      allDons.forEach(function(d){ var f=d.fund_designation||'unrestricted'; if(fundTotals[f]!==undefined) fundTotals[f]+=(parseFloat(d.amount)||0); });
+      var cardsHtml='';
+      Object.keys(fundTotals).forEach(function(f){
+        cardsHtml+='<div class="fund-card"><div class="amount">$'+fundTotals[f].toLocaleString()+'</div><div class="label"><span class="fund-badge fund-'+f+'">'+FUND_LABELS[f]+'</span></div></div>';
+      });
+      document.getElementById('fund-cards').innerHTML=cardsHtml;
+    }
+
+    function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+    function showModal(id){document.getElementById(id).classList.add('show');}
+    function closeModal(id){document.getElementById(id).classList.remove('show');}
+  </script>
+<script src="share-widget.js" data-share-title="Nonprofit Hub" data-share-text="Manage your nonprofit on RentVerified"></script>
+</body>
+</html>

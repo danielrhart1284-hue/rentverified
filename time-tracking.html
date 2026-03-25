@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Time Tracking – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .tt-layout { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    .tt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .tt-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+
+    .timer-card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
+    .timer-display { font-size: 3.5rem; font-weight: 900; color: #1e1b4b; font-variant-numeric: tabular-nums; margin: 1rem 0; }
+    .timer-controls { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1rem; }
+    .btn-timer { padding: 0.65rem 2rem; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-timer.start { background: #059669; color: white; }
+    .btn-timer.start:hover { background: #047857; }
+    .btn-timer.stop { background: #dc2626; color: white; }
+    .btn-timer.stop:hover { background: #b91c1c; }
+    .btn-timer.pause { background: #d97706; color: white; }
+    .btn-timer.pause:hover { background: #b45309; }
+    .btn-timer.reset { background: #f3f4f6; color: #374151; }
+
+    .timer-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    .timer-meta label { display: block; font-size: 0.78rem; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
+    .timer-meta input, .timer-meta select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; box-sizing: border-box; }
+
+    .tt-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .tt-stat { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1rem; text-align: center; }
+    .tt-stat .val { font-size: 1.4rem; font-weight: 900; color: #4F46E5; }
+    .tt-stat .lbl { font-size: 0.72rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 4px; }
+
+    .tt-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
+    .tt-card h3 { padding: 1rem 1.25rem 0; font-size: 1rem; font-weight: 800; color: #1e1b4b; }
+    .tt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .tt-table th { text-align: left; padding: 0.65rem 1rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .tt-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #f3f4f6; }
+    .tt-table tr:hover td { background: #f9fafb; }
+    .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
+    .act-btn.del { background: #fee2e2; color: #dc2626; }
+    .act-btn.inv { background: #dbeafe; color: #2563eb; }
+
+    .manual-entry { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 1.5rem; }
+    .manual-entry h3 { font-size: 1rem; font-weight: 800; color: #1e1b4b; margin-bottom: 1rem; }
+    .me-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end; }
+    .me-row label { font-size: 0.78rem; font-weight: 600; color: #6b7280; }
+    .me-row input, .me-row select { padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.82rem; }
+
+    @media (max-width: 640px) {
+      .timer-meta { grid-template-columns: 1fr; }
+      .me-row { grid-template-columns: 1fr 1fr; }
+      .timer-display { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">RentVerified</span> <span style="font-weight:500;opacity:0.9;">Time Tracking</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="crm.html">CRM</a>
+    <a href="invoice-builder.html">Invoices</a>
+    <a href="time-tracking.html" style="color:#1a56db;font-weight:700;">Time</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<div class="tt-layout">
+  <div class="tt-header">
+    <h1>Time Tracking</h1>
+    <span style="font-size:0.85rem;color:#6b7280;">For attorneys, CPAs, consultants, and service providers</span>
+  </div>
+
+  <!-- Live Timer -->
+  <div class="timer-card">
+    <div style="font-size:0.85rem;font-weight:600;color:#6b7280;">Current Timer</div>
+    <div class="timer-display" id="timerDisplay">00:00:00</div>
+    <div class="timer-controls">
+      <button class="btn-timer start" id="btnStart" onclick="startTimer()">Start</button>
+      <button class="btn-timer pause" id="btnPause" onclick="pauseTimer()" style="display:none;">Pause</button>
+      <button class="btn-timer stop" id="btnStop" onclick="stopTimer()" style="display:none;">Stop & Save</button>
+      <button class="btn-timer reset" onclick="resetTimer()">Reset</button>
+    </div>
+    <div class="timer-meta">
+      <div><label>Client / Matter</label><input type="text" id="timerClient" placeholder="e.g. Smith v. Jones" /></div>
+      <div><label>Category</label>
+        <select id="timerCategory">
+          <option>Legal Research</option>
+          <option>Client Meeting</option>
+          <option>Court Appearance</option>
+          <option>Document Review</option>
+          <option>Tax Preparation</option>
+          <option>Audit</option>
+          <option>Consultation</option>
+          <option>Property Inspection</option>
+          <option>Admin / Other</option>
+        </select>
+      </div>
+      <div><label>Hourly Rate ($)</label><input type="number" id="timerRate" value="250" step="25" /></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="tt-stats" id="ttStats"></div>
+
+  <!-- Manual Entry -->
+  <div class="manual-entry">
+    <h3>Quick Manual Entry</h3>
+    <div class="me-row">
+      <div><label>Description</label><input type="text" id="meDesc" placeholder="What did you work on?" /></div>
+      <div><label>Hours</label><input type="number" id="meHours" value="1" step="0.25" min="0.25" /></div>
+      <div><label>Rate ($/hr)</label><input type="number" id="meRate" value="250" step="25" /></div>
+      <div><label>Date</label><input type="date" id="meDate" /></div>
+      <div style="padding-bottom:1px;"><button class="btn-timer start" style="padding:0.5rem 1rem;font-size:0.82rem;" onclick="addManualEntry()">Add</button></div>
+    </div>
+  </div>
+
+  <!-- Time Entries -->
+  <div class="tt-card">
+    <h3 style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Time Entries</span>
+      <button class="btn-timer reset" style="padding:0.35rem 1rem;font-size:0.78rem;" onclick="exportTimeEntries()">Export CSV</button>
+    </h3>
+    <div style="overflow-x:auto;">
+      <table class="tt-table">
+        <thead><tr><th>Date</th><th>Client / Matter</th><th>Category</th><th>Duration</th><th>Rate</th><th>Amount</th><th>Actions</th></tr></thead>
+        <tbody id="timeBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const TT_KEY = 'rv_time_entries';
+var timerInterval = null;
+var timerSeconds = 0;
+var timerRunning = false;
+
+function getEntries() {
+  var entries = JSON.parse(localStorage.getItem(TT_KEY) || '[]');
+  if (!entries.length) {
+    entries = [
+      { date: '2025-03-18', client: 'Smith v. Jones', category: 'Legal Research', hours: 2.5, rate: 300, amount: 750 },
+      { date: '2025-03-17', client: 'Harris Estate Planning', category: 'Document Review', hours: 1.75, rate: 300, amount: 525 },
+      { date: '2025-03-17', client: 'Acme Corp Tax Filing', category: 'Tax Preparation', hours: 3, rate: 250, amount: 750 },
+      { date: '2025-03-16', client: 'Sanders PM - Lease Review', category: 'Client Meeting', hours: 1, rate: 300, amount: 300 },
+      { date: '2025-03-15', client: 'Johnson Property Inspection', category: 'Property Inspection', hours: 0.5, rate: 150, amount: 75 },
+    ];
+    localStorage.setItem(TT_KEY, JSON.stringify(entries));
+  }
+  return entries;
+}
+
+function renderStats() {
+  var entries = getEntries();
+  var now = new Date();
+  var weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay());
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  var totalHours = 0, weekHours = 0, monthHours = 0, totalBilled = 0;
+  entries.forEach(function(e) {
+    totalHours += e.hours || 0;
+    totalBilled += e.amount || 0;
+    var d = new Date(e.date);
+    if (d >= weekStart) weekHours += e.hours || 0;
+    if (d >= monthStart) monthHours += e.hours || 0;
+  });
+
+  document.getElementById('ttStats').innerHTML = [
+    { val: totalHours.toFixed(1) + 'h', lbl: 'Total Hours' },
+    { val: weekHours.toFixed(1) + 'h', lbl: 'This Week' },
+    { val: monthHours.toFixed(1) + 'h', lbl: 'This Month' },
+    { val: '$' + totalBilled.toLocaleString(), lbl: 'Total Billed' },
+    { val: entries.length, lbl: 'Entries' },
+  ].map(function(s) {
+    return '<div class="tt-stat"><div class="val">' + s.val + '</div><div class="lbl">' + s.lbl + '</div></div>';
+  }).join('');
+}
+
+function renderEntries() {
+  var entries = getEntries();
+  var body = document.getElementById('timeBody');
+  if (!entries.length) {
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:2rem;">No time entries yet</td></tr>';
+    return;
+  }
+  body.innerHTML = entries.map(function(e, i) {
+    return '<tr>' +
+      '<td>' + e.date + '</td>' +
+      '<td><strong>' + (e.client || '') + '</strong></td>' +
+      '<td>' + (e.category || '') + '</td>' +
+      '<td>' + (e.hours || 0) + 'h</td>' +
+      '<td>$' + (e.rate || 0) + '/hr</td>' +
+      '<td><strong>$' + (e.amount || 0).toLocaleString() + '</strong></td>' +
+      '<td><button class="act-btn inv" onclick="createInvoiceFromEntry(' + i + ')">Invoice</button><button class="act-btn del" onclick="deleteEntry(' + i + ')">Del</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function startTimer() {
+  if (timerRunning) return;
+  timerRunning = true;
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('btnPause').style.display = '';
+  document.getElementById('btnStop').style.display = '';
+  timerInterval = setInterval(function() {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnStart').textContent = 'Resume';
+  document.getElementById('btnPause').style.display = 'none';
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  var hours = Math.round((timerSeconds / 3600) * 4) / 4; // Round to nearest 0.25
+  if (hours < 0.25) hours = 0.25;
+  var rate = parseFloat(document.getElementById('timerRate').value) || 0;
+
+  var entry = {
+    date: new Date().toISOString().split('T')[0],
+    client: document.getElementById('timerClient').value || 'Unspecified',
+    category: document.getElementById('timerCategory').value,
+    hours: hours,
+    rate: rate,
+    amount: Math.round(hours * rate * 100) / 100,
+  };
+
+  var entries = getEntries();
+  entries.unshift(entry);
+  localStorage.setItem(TT_KEY, JSON.stringify(entries));
+
+  resetTimer();
+  renderEntries();
+  renderStats();
+  alert('Saved: ' + hours + 'h = $' + entry.amount.toLocaleString());
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSeconds = 0;
+  updateTimerDisplay();
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnStart').textContent = 'Start';
+  document.getElementById('btnPause').style.display = 'none';
+  document.getElementById('btnStop').style.display = 'none';
+}
+
+function updateTimerDisplay() {
+  var h = Math.floor(timerSeconds / 3600);
+  var m = Math.floor((timerSeconds % 3600) / 60);
+  var s = timerSeconds % 60;
+  document.getElementById('timerDisplay').textContent =
+    String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function addManualEntry() {
+  var hours = parseFloat(document.getElementById('meHours').value) || 0;
+  var rate = parseFloat(document.getElementById('meRate').value) || 0;
+  var entry = {
+    date: document.getElementById('meDate').value || new Date().toISOString().split('T')[0],
+    client: document.getElementById('meDesc').value || 'Manual entry',
+    category: 'Admin / Other',
+    hours: hours,
+    rate: rate,
+    amount: Math.round(hours * rate * 100) / 100,
+  };
+  var entries = getEntries();
+  entries.unshift(entry);
+  localStorage.setItem(TT_KEY, JSON.stringify(entries));
+  document.getElementById('meDesc').value = '';
+  renderEntries();
+  renderStats();
+}
+
+function deleteEntry(idx) {
+  if (!confirm('Delete this time entry?')) return;
+  var entries = getEntries();
+  entries.splice(idx, 1);
+  localStorage.setItem(TT_KEY, JSON.stringify(entries));
+  renderEntries();
+  renderStats();
+}
+
+function createInvoiceFromEntry(idx) {
+  var e = getEntries()[idx];
+  if (!e) return;
+  // Store as pending invoice item and redirect
+  localStorage.setItem('rv_pending_invoice_item', JSON.stringify(e));
+  window.location.href = 'invoice-builder.html';
+}
+
+function exportTimeEntries() {
+  var entries = getEntries();
+  var csv = 'Date,Client/Matter,Category,Hours,Rate,Amount\n';
+  entries.forEach(function(e) {
+    csv += '"' + (e.date||'') + '","' + (e.client||'') + '","' + (e.category||'') + '",' + (e.hours||0) + ',' + (e.rate||0) + ',' + (e.amount||0) + '\n';
+  });
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rv_time_entries_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('meDate').value = new Date().toISOString().split('T')[0];
+  renderStats();
+  renderEntries();
+});
+</script>
+</body>
+</html>

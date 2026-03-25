@@ -480,6 +480,39 @@
       .form-row { grid-template-columns: 1fr; }
       .list-cta h2 { font-size: 1.5rem; }
     }
+
+    /* ── Community Q&A ── */
+    .qa-section { max-width: 900px; margin: 3rem auto; padding: 0 2rem; }
+    .qa-section h2 { font-size: 1.75rem; font-weight: 900; color: #111827; margin-bottom: 0.5rem; }
+    .qa-section .qa-sub { font-size: 0.95rem; color: #6b7280; margin-bottom: 1.5rem; }
+    .qa-ask-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .qa-ask-bar input { flex: 1; padding: 0.6rem 1rem; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 0.9rem; }
+    .qa-ask-bar input:focus { outline: none; border-color: #4F46E5; }
+    .qa-ask-bar button { padding: 0.6rem 1.5rem; background: #4F46E5; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; }
+    .qa-ask-bar button:hover { background: #4338ca; }
+    .qa-thread { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; transition: border-color 0.2s; }
+    .qa-thread:hover { border-color: #4F46E5; }
+    .qa-thread-header { display: flex; align-items: flex-start; gap: 0.75rem; }
+    .qa-avatar { width: 36px; height: 36px; border-radius: 50%; background: #ede9fe; color: #4F46E5; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+    .qa-thread-q { font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 0.25rem; }
+    .qa-thread-meta { font-size: 0.75rem; color: #9ca3af; }
+    .qa-thread-body { font-size: 0.88rem; color: #4b5563; line-height: 1.5; margin-top: 0.5rem; padding-left: 48px; }
+    .qa-tags { padding-left: 48px; margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .qa-tag { font-size: 0.72rem; background: #f3f4f6; color: #6b7280; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .qa-answers { padding-left: 48px; margin-top: 0.75rem; }
+    .qa-answer { background: #f9fafb; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; }
+    .qa-answer-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+    .qa-answer-name { font-weight: 700; font-size: 0.82rem; color: #111827; }
+    .qa-answer-badge { font-size: 0.68rem; background: #d1fae5; color: #059669; padding: 1px 6px; border-radius: 99px; font-weight: 600; }
+    .qa-answer-text { font-size: 0.85rem; color: #4b5563; line-height: 1.5; }
+    .qa-answer-time { font-size: 0.72rem; color: #9ca3af; margin-top: 0.25rem; }
+    .qa-reply-bar { display: flex; gap: 0.5rem; padding-left: 48px; margin-top: 0.5rem; }
+    .qa-reply-bar input { flex: 1; padding: 0.45rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.82rem; }
+    .qa-reply-bar button { padding: 0.45rem 1rem; background: #4F46E5; color: white; border: none; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+    .qa-vote { display: flex; align-items: center; gap: 4px; padding-left: 48px; margin-top: 0.5rem; }
+    .qa-vote button { background: none; border: 1px solid #d1d5db; border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 0.78rem; font-weight: 600; color: #6b7280; }
+    .qa-vote button:hover { border-color: #4F46E5; color: #4F46E5; }
+    .qa-vote span { font-size: 0.78rem; color: #6b7280; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -604,6 +637,19 @@
     </form>
   </div>
 </div>
+
+<!-- COMMUNITY Q&A -->
+<section class="qa-section" id="community-qa">
+  <h2>Community Q&A</h2>
+  <p class="qa-sub">Ask questions, share knowledge, and get answers from verified professionals in the network.</p>
+
+  <div class="qa-ask-bar">
+    <input type="text" id="qaNewQuestion" placeholder="Ask a question... (e.g. 'Best way to handle mold in a rental?')" />
+    <button onclick="postQuestion()">Ask</button>
+  </div>
+
+  <div id="qaThreads"></div>
+</section>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1051,7 +1097,7 @@ function openProfile(id) {
       <div class="profile-contact-info">
         <div class="contact-item"><strong>Phone</strong>${p.phone}</div>
         <div class="contact-item"><strong>Email</strong>${p.email}</div>
-        <div class="contact-item"><strong>Website</strong><a href="https://${p.website}" target="_blank">${p.website}</a></div>
+        ${p.website ? '<div class="contact-item"><strong>Website</strong><a href="https://' + p.website + '" target="_blank">' + p.website + '</a></div>' : ''}
         <div class="contact-item"><strong>Trade</strong>${p.trade}</div>
       </div>
     </div>
@@ -1134,9 +1180,146 @@ function showToast(msg) {
 document.getElementById('searchName').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
 document.getElementById('searchLocation').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
 
+// ── COMMUNITY Q&A ──
+const QA_KEY = 'rv_community_qa';
+
+function getQAThreads() {
+  var threads = JSON.parse(localStorage.getItem(QA_KEY) || '[]');
+  if (!threads.length) {
+    threads = [
+      {
+        id: 'q1', author: 'Sarah J.', avatar: 'SJ', question: 'What\'s the best way to handle mold discovered during a tenant move-in inspection?',
+        body: 'We found mold behind the bathroom vanity during a new tenant move-in. Property is in Salt Lake County. What are the landlord\'s obligations?',
+        tags: ['Property Management', 'Maintenance', 'Utah Law'],
+        votes: 12, date: '2025-03-17T10:00:00Z',
+        answers: [
+          { author: 'Tom R.', badge: 'Licensed Contractor', text: 'First step is to test whether it\'s surface mold or a deeper structural issue. For surface mold, a bleach solution works. For anything behind walls, you need professional remediation. In Utah, landlords must maintain habitable conditions — mold that affects health is a habitability issue.', date: '2025-03-17T14:30:00Z' },
+          { author: 'Lisa P.', badge: 'Attorney', text: 'Utah code 57-22 requires landlords to maintain premises in a habitable condition. Document everything with photos, hire a licensed mold inspector, and provide the tenant written notice of remediation steps. Keep all receipts.', date: '2025-03-17T16:00:00Z' }
+        ]
+      },
+      {
+        id: 'q2', author: 'Mike C.', avatar: 'MC', question: 'How do I structure a referral fee agreement with another professional on this platform?',
+        body: 'I\'m a real estate agent and I often refer clients to contractors on this network. What\'s the proper way to set up a referral fee arrangement?',
+        tags: ['Referrals', 'Business', 'Legal'],
+        votes: 8, date: '2025-03-15T09:00:00Z',
+        answers: [
+          { author: 'Lisa P.', badge: 'Attorney', text: 'You\'ll need a written referral agreement that specifies: percentage or flat fee, when payment is due, duration of the referral window (typically 90 days), and any exclusions. RentVerified\'s cross-referral tracking can help document these. Make sure both parties sign — the e-signature tool on this platform works great for this.', date: '2025-03-15T15:00:00Z' }
+        ]
+      },
+      {
+        id: 'q3', author: 'Amy W.', avatar: 'AW', question: 'Best accounting software for a small property management company?',
+        body: 'Managing 15 units. Currently using spreadsheets. What are the pros/cons of different accounting solutions that integrate well with property management?',
+        tags: ['Accounting', 'Property Management', 'Software'],
+        votes: 15, date: '2025-03-12T08:00:00Z',
+        answers: [
+          { author: 'David H.', badge: 'CPA', text: 'At 15 units you\'re right at the tipping point. QuickBooks Online + a PM add-on works well. Buildium or AppFolio if you want all-in-one. RentVerified\'s built-in accounting module handles the basics — owner statements, income/expense tracking, and reconciliation. For tax purposes, just make sure whatever you pick exports clean P&L reports.', date: '2025-03-12T12:00:00Z' }
+        ]
+      }
+    ];
+    localStorage.setItem(QA_KEY, JSON.stringify(threads));
+  }
+  return threads;
+}
+
+function renderQAThreads() {
+  var threads = getQAThreads();
+  var container = document.getElementById('qaThreads');
+  if (!container) return;
+
+  container.innerHTML = threads.map(function(t, ti) {
+    var answersHtml = (t.answers || []).map(function(a) {
+      return '<div class="qa-answer">' +
+        '<div class="qa-answer-header"><span class="qa-answer-name">' + a.author + '</span>' +
+        (a.badge ? '<span class="qa-answer-badge">' + a.badge + '</span>' : '') +
+        '</div>' +
+        '<div class="qa-answer-text">' + a.text + '</div>' +
+        '<div class="qa-answer-time">' + timeAgoQA(new Date(a.date)) + '</div>' +
+      '</div>';
+    }).join('');
+
+    var tagsHtml = (t.tags || []).map(function(tag) {
+      return '<span class="qa-tag">' + tag + '</span>';
+    }).join('');
+
+    return '<div class="qa-thread">' +
+      '<div class="qa-thread-header">' +
+        '<div class="qa-avatar">' + (t.avatar || '?') + '</div>' +
+        '<div><div class="qa-thread-q">' + t.question + '</div>' +
+        '<div class="qa-thread-meta">' + t.author + ' &bull; ' + timeAgoQA(new Date(t.date)) + ' &bull; ' + (t.answers || []).length + ' answers</div></div>' +
+      '</div>' +
+      '<div class="qa-thread-body">' + (t.body || '') + '</div>' +
+      '<div class="qa-tags">' + tagsHtml + '</div>' +
+      '<div class="qa-vote"><button onclick="voteQuestion(' + ti + ')">&#9650;</button><span>' + (t.votes || 0) + ' votes</span></div>' +
+      '<div class="qa-answers">' + answersHtml + '</div>' +
+      '<div class="qa-reply-bar"><input type="text" id="reply-' + ti + '" placeholder="Write an answer..." /><button onclick="postAnswer(' + ti + ')">Reply</button></div>' +
+    '</div>';
+  }).join('');
+}
+
+function postQuestion() {
+  var input = document.getElementById('qaNewQuestion');
+  var q = input.value.trim();
+  if (!q) return;
+  var threads = getQAThreads();
+  threads.unshift({
+    id: 'q' + Date.now(),
+    author: 'You',
+    avatar: 'Y',
+    question: q,
+    body: '',
+    tags: [],
+    votes: 0,
+    date: new Date().toISOString(),
+    answers: []
+  });
+  localStorage.setItem(QA_KEY, JSON.stringify(threads));
+  input.value = '';
+  renderQAThreads();
+  showToast('Question posted!');
+}
+
+function postAnswer(threadIdx) {
+  var input = document.getElementById('reply-' + threadIdx);
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) return;
+  var threads = getQAThreads();
+  if (!threads[threadIdx]) return;
+  threads[threadIdx].answers.push({
+    author: 'You',
+    badge: '',
+    text: text,
+    date: new Date().toISOString()
+  });
+  localStorage.setItem(QA_KEY, JSON.stringify(threads));
+  input.value = '';
+  renderQAThreads();
+  showToast('Answer posted!');
+}
+
+function voteQuestion(threadIdx) {
+  var threads = getQAThreads();
+  if (!threads[threadIdx]) return;
+  threads[threadIdx].votes = (threads[threadIdx].votes || 0) + 1;
+  localStorage.setItem(QA_KEY, JSON.stringify(threads));
+  renderQAThreads();
+}
+
+function timeAgoQA(date) {
+  var mins = Math.round((Date.now() - date.getTime()) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  if (mins < 1440) return Math.round(mins / 60) + 'h ago';
+  return Math.round(mins / 1440) + 'd ago';
+}
+
 // ── BOOT ──
 renderCategories();
 applyFilters();
+renderQAThreads();
 </script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
 </body>
 </html>

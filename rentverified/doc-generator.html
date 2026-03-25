@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document Generator – RentVerified</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background: #f3f4f6; }
+
+  /* ── Layout ── */
+  .dg-wrap { display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 64px); padding-top:64px; }
+
+  /* ── Sidebar ── */
+  .dg-side { background:#1e293b; color:#cbd5e1; padding:1.5rem 0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; }
+  .dg-side h3 { font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:#475569; padding:.5rem 1.25rem; margin:.9rem 0 .2rem; }
+  .dg-side a { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.25rem; color:#94a3b8; text-decoration:none; font-size:.85rem; font-weight:500; border-left:3px solid transparent; cursor:pointer; transition:all .15s; }
+  .dg-side a:hover,.dg-side a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#3b82f6; text-decoration:none; }
+
+  /* ── Logo Section ── */
+  .dg-logo-area { padding:1rem 1.25rem; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:.5rem; }
+  .dg-logo-preview { width:100%; max-height:70px; object-fit:contain; border-radius:6px; margin-bottom:.5rem; display:none; }
+  .dg-logo-upload { display:flex; align-items:center; gap:.5rem; padding:.5rem .75rem; background:rgba(255,255,255,.08); border-radius:8px; cursor:pointer; font-size:.78rem; color:#94a3b8; transition:all .15s; }
+  .dg-logo-upload:hover { background:rgba(255,255,255,.12); color:#fff; }
+
+  /* ── Main ── */
+  .dg-main { padding:2rem; max-width:1000px; }
+  .dg-main h1 { font-size:1.5rem; font-weight:800; color:#1e293b; margin-bottom:.25rem; }
+  .dg-main .subtitle { color:#64748b; font-size:.88rem; margin-bottom:1.75rem; }
+
+  /* ── Template Cards ── */
+  .tpl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1rem; margin-bottom:2rem; }
+  .tpl-card { background:#fff; border-radius:12px; border:2px solid #e5e7eb; padding:1.25rem; cursor:pointer; transition:all .15s; }
+  .tpl-card:hover { border-color:#3b82f6; transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,.08); }
+  .tpl-card .tpl-icon { font-size:2rem; margin-bottom:.5rem; }
+  .tpl-card .tpl-name { font-weight:700; font-size:.95rem; color:#1e293b; margin-bottom:.2rem; }
+  .tpl-card .tpl-desc { font-size:.78rem; color:#64748b; line-height:1.4; }
+  .tpl-card .tpl-tag { display:inline-block; font-size:.65rem; font-weight:700; padding:2px 8px; border-radius:99px; margin-top:.5rem; }
+  .tag-blue { background:#dbeafe; color:#1d4ed8; }
+  .tag-amber { background:#fef3c7; color:#92400e; }
+  .tag-green { background:#d1fae5; color:#065f46; }
+  .tag-purple { background:#ede9fe; color:#6d28d9; }
+  .tag-red { background:#fee2e2; color:#b91c1c; }
+
+  /* ── Form Builder ── */
+  .dg-form { display:none; }
+  .dg-form.active { display:block; }
+  .dg-panel { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); padding:1.5rem; margin-bottom:1.5rem; }
+  .dg-panel h2 { font-size:1.05rem; font-weight:700; color:#1e293b; margin-bottom:1rem; }
+  .dg-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+  .dg-full { grid-column:1/-1; }
+  .dg-field label { display:block; font-size:.82rem; font-weight:600; color:#374151; margin-bottom:4px; }
+  .dg-field input,.dg-field select,.dg-field textarea { width:100%; border:1.5px solid #e2e8f0; border-radius:8px; padding:.55rem .8rem; font-size:.88rem; font-family:inherit; outline:none; transition:border .15s; }
+  .dg-field input:focus,.dg-field select:focus,.dg-field textarea:focus { border-color:#3b82f6; }
+  .dg-field textarea { resize:vertical; min-height:80px; }
+
+  /* ── Line Items ── */
+  .li-table { width:100%; border-collapse:collapse; margin-top:.75rem; }
+  .li-table th { text-align:left; padding:.5rem .75rem; background:#f8fafc; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:#64748b; border-bottom:1px solid #e2e8f0; }
+  .li-table td { padding:.45rem .75rem; border-bottom:1px solid #f1f5f9; }
+  .li-table input { border:1px solid #e2e8f0; border-radius:6px; padding:.35rem .5rem; font-size:.82rem; width:100%; }
+  .li-add { padding:.4rem .8rem; background:#eff6ff; color:#1d4ed8; border:1.5px solid #bfdbfe; border-radius:8px; font-size:.78rem; font-weight:700; cursor:pointer; margin-top:.5rem; }
+  .li-del { background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:0 4px; }
+
+  /* ── Preview ── */
+  .dg-preview-wrap { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); overflow:hidden; }
+  .dg-preview-bar { display:flex; align-items:center; justify-content:space-between; padding:.75rem 1.5rem; background:#1e293b; color:#fff; }
+  .dg-preview-bar h3 { font-size:.88rem; font-weight:700; }
+  .dg-preview-bar .actions { display:flex; gap:.5rem; }
+  .dg-preview-bar .btn-print { padding:.35rem .9rem; background:#3b82f6; color:#fff; border:none; border-radius:6px; font-size:.78rem; font-weight:700; cursor:pointer; }
+  .dg-preview-bar .btn-save { padding:.35rem .9rem; background:#10b981; color:#fff; border:none; border-radius:6px; font-size:.78rem; font-weight:700; cursor:pointer; }
+  .dg-preview-frame { padding:2rem; min-height:600px; }
+
+  /* ── Document Styles (for print) ── */
+  .doc { font-family:'Segoe UI',sans-serif; color:#1e293b; line-height:1.6; max-width:800px; margin:0 auto; }
+  .doc-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:2px solid #1a56db; }
+  .doc-logo { max-height:60px; max-width:200px; object-fit:contain; }
+  .doc-company { text-align:right; font-size:.82rem; color:#64748b; }
+  .doc-company .name { font-size:1.1rem; font-weight:800; color:#1e293b; }
+  .doc-title { font-size:1.6rem; font-weight:900; color:#1e293b; margin-bottom:.5rem; }
+  .doc-meta { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+  .doc-meta-block { font-size:.85rem; }
+  .doc-meta-block .label { font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:#64748b; font-weight:700; margin-bottom:2px; }
+  .doc-items { width:100%; border-collapse:collapse; margin:1.5rem 0; }
+  .doc-items th { text-align:left; padding:.6rem .75rem; background:#f1f5f9; font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:#64748b; }
+  .doc-items td { padding:.55rem .75rem; border-bottom:1px solid #f1f5f9; font-size:.85rem; }
+  .doc-items .amount { text-align:right; font-weight:700; }
+  .doc-totals { display:flex; justify-content:flex-end; margin:1rem 0; }
+  .doc-totals table { min-width:250px; }
+  .doc-totals td { padding:.35rem .75rem; font-size:.88rem; }
+  .doc-totals .total-row td { font-weight:800; font-size:1.05rem; border-top:2px solid #1e293b; }
+  .doc-qr { text-align:center; margin:1.5rem 0; }
+  .doc-qr img { width:120px; height:120px; }
+  .doc-qr p { font-size:.75rem; color:#64748b; margin-top:.3rem; }
+  .doc-footer { border-top:1px solid #e2e8f0; padding-top:1rem; font-size:.78rem; color:#94a3b8; text-align:center; margin-top:2rem; }
+  .doc-terms { font-size:.8rem; color:#64748b; background:#f8fafc; border-radius:8px; padding:1rem; margin-top:1.5rem; }
+  .doc-terms h4 { font-size:.82rem; font-weight:700; color:#374151; margin-bottom:.35rem; }
+  .doc-sig { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:2rem; }
+  .doc-sig-line { border-top:1px solid #1e293b; padding-top:.5rem; font-size:.82rem; color:#64748b; }
+
+  /* ── Toast ── */
+  .rv-toast { position:fixed; bottom:2rem; right:2rem; z-index:99999; background:#065f46; color:#fff; padding:.85rem 1.5rem; border-radius:10px; font-weight:600; font-size:.88rem; box-shadow:0 8px 24px rgba(0,0,0,.2); transform:translateY(120%); opacity:0; transition:transform .3s,opacity .3s; }
+  .rv-toast.show { transform:translateY(0); opacity:1; }
+
+  /* ── Mobile ── */
+  .dg-mobile-btn { display:none; position:fixed; bottom:1.25rem; left:1.25rem; z-index:9998; width:52px; height:52px; border-radius:50%; border:none; background:#1a56db; color:#fff; font-size:1.4rem; box-shadow:0 4px 16px rgba(0,0,0,.25); cursor:pointer; }
+  .dg-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:99; }
+  .dg-overlay.show { display:block; }
+
+  @media(max-width:768px) {
+    .dg-wrap { grid-template-columns:1fr; }
+    .dg-side { position:fixed; left:-300px; top:0; bottom:0; width:280px; z-index:100; transition:left .3s; }
+    .dg-side.open { left:0; }
+    .dg-mobile-btn { display:flex; align-items:center; justify-content:center; }
+    .dg-main { padding:1.25rem; }
+    .tpl-grid { grid-template-columns:1fr; }
+    .dg-row { grid-template-columns:1fr; }
+    .doc-meta { grid-template-columns:1fr; }
+    .doc-header { flex-direction:column; gap:.75rem; }
+    .doc-company { text-align:left; }
+    nav .nav-links,nav .nav-cta { display:none; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background:#fff; }
+    nav,.dg-side,.dg-mobile-btn,.dg-overlay,.dg-preview-bar,.dg-form,.rv-toast,.dg-main>h1,.dg-main>.subtitle,.dg-main>#tpl-picker { display:none !important; }
+    .dg-wrap { grid-template-columns:1fr; padding-top:0; }
+    .dg-preview-wrap { box-shadow:none; }
+    .dg-preview-frame { padding:0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">Sanders PM</span> <span style="font-weight:500;opacity:.9;">· RentVerified</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="documents.html">Documents</a>
+    <a href="doc-generator.html" style="color:#2563eb;font-weight:700;">Doc Generator</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login</a>
+  </div>
+</nav>
+
+<!-- Toast -->
+<div class="rv-toast" id="rv-toast"></div>
+
+<!-- Mobile -->
+<button class="dg-mobile-btn" onclick="document.querySelector('.dg-side').classList.toggle('open');document.getElementById('dgOverlay').classList.toggle('show');">☰</button>
+<div class="dg-overlay" id="dgOverlay" onclick="document.querySelector('.dg-side').classList.remove('open');this.classList.remove('show');"></div>
+
+<div class="dg-wrap">
+  <!-- SIDEBAR -->
+  <div class="dg-side">
+    <div class="dg-logo-area">
+      <img class="dg-logo-preview" id="logo-preview" />
+      <div class="dg-logo-upload" onclick="document.getElementById('logo-input').click()">
+        📷 <span id="logo-label">Upload Your Logo</span>
+      </div>
+      <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+    </div>
+
+    <h3>Templates</h3>
+    <a class="active" onclick="showPicker()">📋 All Templates</a>
+
+    <h3>By Profession</h3>
+    <a onclick="filterTemplates('property_management')">🏠 Property Management</a>
+    <a onclick="filterTemplates('construction')">🏗️ Construction</a>
+    <a onclick="filterTemplates('accounting')">📊 Accounting</a>
+    <a onclick="filterTemplates('attorney')">⚖️ Legal</a>
+    <a onclick="filterTemplates('commercial')">🏢 Commercial RE</a>
+    <a onclick="filterTemplates('insurance')">🛡️ Insurance</a>
+    <a onclick="filterTemplates('str')">🏖️ Short-Term Rental</a>
+    <a onclick="filterTemplates('lending')">🏦 Lending</a>
+    <a onclick="filterTemplates('general')">💼 General Business</a>
+
+    <h3>My Documents</h3>
+    <a onclick="showSavedDocs()">📁 Saved Documents</a>
+
+    <h3>Navigation</h3>
+    <a href="documents.html">📄 Document Center</a>
+    <a href="index.html">🏠 Dashboard</a>
+  </div>
+
+  <!-- MAIN -->
+  <div class="dg-main">
+    <h1>Document Generator</h1>
+    <p class="subtitle">Create professional documents with your logo. Invoices include a QR code for instant payment.</p>
+
+    <!-- Template Picker -->
+    <div id="tpl-picker">
+      <div class="tpl-grid" id="tpl-grid"></div>
+    </div>
+
+    <!-- Form (shown when template selected) -->
+    <div class="dg-form" id="dg-form">
+      <div style="margin-bottom:1rem;">
+        <button onclick="showPicker()" style="background:none;border:none;color:#3b82f6;font-weight:700;cursor:pointer;font-size:.88rem;">← Back to Templates</button>
+      </div>
+
+      <div class="dg-panel">
+        <h2 id="form-title">Invoice</h2>
+
+        <!-- Company Info -->
+        <div class="dg-row">
+          <div class="dg-field">
+            <label>Company / Business Name *</label>
+            <input id="f-company" placeholder="Your business name" />
+          </div>
+          <div class="dg-field">
+            <label>Contact Name</label>
+            <input id="f-contact" placeholder="Your name" />
+          </div>
+        </div>
+        <div class="dg-row">
+          <div class="dg-field">
+            <label>Address</label>
+            <input id="f-address" placeholder="123 Main St, City, State ZIP" />
+          </div>
+          <div class="dg-field">
+            <label>Phone / Email</label>
+            <input id="f-phone" placeholder="(555) 123-4567 / email@example.com" />
+          </div>
+        </div>
+
+        <!-- Bill To -->
+        <h2 style="margin-top:1.5rem;">Bill To / Recipient</h2>
+        <div class="dg-row">
+          <div class="dg-field">
+            <label>Recipient Name *</label>
+            <input id="f-to-name" placeholder="Client / tenant name" />
+          </div>
+          <div class="dg-field">
+            <label>Recipient Company</label>
+            <input id="f-to-company" placeholder="(optional)" />
+          </div>
+        </div>
+        <div class="dg-row">
+          <div class="dg-field">
+            <label>Recipient Address</label>
+            <input id="f-to-address" placeholder="Client address" />
+          </div>
+          <div class="dg-field">
+            <label>Recipient Email</label>
+            <input id="f-to-email" placeholder="client@email.com" />
+          </div>
+        </div>
+
+        <!-- Document Details -->
+        <h2 style="margin-top:1.5rem;" id="details-title">Document Details</h2>
+        <div class="dg-row">
+          <div class="dg-field">
+            <label id="lbl-number">Invoice #</label>
+            <input id="f-number" />
+          </div>
+          <div class="dg-field">
+            <label id="lbl-date">Date</label>
+            <input id="f-date" type="date" />
+          </div>
+        </div>
+        <div class="dg-row">
+          <div class="dg-field">
+            <label id="lbl-due">Due Date</label>
+            <input id="f-due" type="date" />
+          </div>
+          <div class="dg-field" id="field-property" style="display:none;">
+            <label>Property Address</label>
+            <input id="f-property" placeholder="Property address" />
+          </div>
+          <div class="dg-field" id="field-matter" style="display:none;">
+            <label>Matter / Case #</label>
+            <input id="f-matter" placeholder="Matter number" />
+          </div>
+          <div class="dg-field" id="field-project" style="display:none;">
+            <label>Project / Job Name</label>
+            <input id="f-project" placeholder="Project name" />
+          </div>
+        </div>
+
+        <!-- Line Items -->
+        <h2 style="margin-top:1.5rem;" id="items-title">Line Items</h2>
+        <table class="li-table" id="li-table">
+          <thead>
+            <tr>
+              <th style="width:40%">Description</th>
+              <th id="th-qty">Qty / Hours</th>
+              <th id="th-rate">Rate</th>
+              <th style="text-align:right">Amount</th>
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody id="li-body"></tbody>
+        </table>
+        <button class="li-add" onclick="addLineItem()">+ Add Line Item</button>
+
+        <!-- Tax & Discount -->
+        <div class="dg-row" style="margin-top:1.25rem;">
+          <div class="dg-field">
+            <label>Tax Rate (%)</label>
+            <input id="f-tax" type="number" step="0.01" value="0" oninput="calcTotals()" />
+          </div>
+          <div class="dg-field">
+            <label>Discount ($)</label>
+            <input id="f-discount" type="number" step="0.01" value="0" oninput="calcTotals()" />
+          </div>
+        </div>
+
+        <!-- Notes / Terms -->
+        <div class="dg-row" style="margin-top:1rem;">
+          <div class="dg-field dg-full">
+            <label>Notes / Terms</label>
+            <textarea id="f-notes" placeholder="Payment terms, notes, special instructions..."></textarea>
+          </div>
+        </div>
+
+        <!-- Extra fields for specific templates -->
+        <div id="extra-fields"></div>
+
+        <div style="display:flex;gap:1rem;margin-top:1.5rem;">
+          <button class="btn-print" style="padding:.6rem 1.5rem;background:#1a56db;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;" onclick="generatePreview()">👁️ Preview Document</button>
+          <button class="btn-save" style="padding:.6rem 1.5rem;background:#10b981;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;" onclick="saveDocument()">💾 Save Document</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div id="dg-preview" style="display:none;">
+      <div class="dg-preview-wrap">
+        <div class="dg-preview-bar">
+          <h3>Document Preview</h3>
+          <div class="actions">
+            <button class="btn-save" onclick="saveDocument()">💾 Save</button>
+            <button class="btn-print" onclick="window.print()">🖨️ Print / PDF</button>
+            <button class="btn-print" style="background:#6b7280;" onclick="document.getElementById('dg-preview').style.display='none';">✕ Close</button>
+          </div>
+        </div>
+        <div class="dg-preview-frame" id="preview-frame"></div>
+      </div>
+    </div>
+
+    <!-- Saved Documents List -->
+    <div id="saved-docs" style="display:none;">
+      <div class="dg-panel">
+        <h2>Saved Documents</h2>
+        <div id="saved-docs-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /dg-main -->
+</div><!-- /dg-wrap -->
+
+<script src="app.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script>
+// Force localStorage mode
+if (typeof RVData !== 'undefined') RVData._useSupabase = function() { return false; };
+
+// ═══════════════════════════════════════════════════════════════════════
+// DOCUMENT GENERATOR ENGINE
+// ═══════════════════════════════════════════════════════════════════════
+
+var currentTemplate = null;
+
+// ── Toast ──
+function showToast(msg, type) {
+  var el = document.getElementById('rv-toast');
+  el.textContent = msg;
+  el.className = 'rv-toast' + (type === 'error' ? ' error' : '');
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+
+// ── Logo Management ──
+function handleLogoUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var data = e.target.result;
+    localStorage.setItem('rv_company_logo', data);
+    showLogoPreview(data);
+    showToast('Logo uploaded successfully');
+  };
+  reader.readAsDataURL(file);
+}
+
+function showLogoPreview(data) {
+  var img = document.getElementById('logo-preview');
+  img.src = data;
+  img.style.display = 'block';
+  document.getElementById('logo-label').textContent = 'Change Logo';
+}
+
+// Load saved logo on init
+(function() {
+  var logo = localStorage.getItem('rv_company_logo');
+  if (logo) showLogoPreview(logo);
+})();
+
+// ── Template Definitions ──
+var TEMPLATES = [
+  // PROPERTY MANAGEMENT
+  { id:'pm-invoice', name:'Rent Invoice', icon:'🏠', desc:'Invoice tenants for rent, fees, and charges', profession:'property_management', tag:'tag-blue', tagText:'Property Mgmt', fields:['property'] },
+  { id:'pm-late', name:'Late Payment Notice', icon:'⏰', desc:'Formal notice for overdue rent with fee calculation', profession:'property_management', tag:'tag-blue', tagText:'Property Mgmt', fields:['property'], noItems:true },
+  { id:'pm-moveio', name:'Move-In/Move-Out Checklist', icon:'📋', desc:'Room-by-room condition checklist with signatures', profession:'property_management', tag:'tag-blue', tagText:'Property Mgmt', fields:['property'], noItems:true },
+  { id:'pm-maint', name:'Maintenance Invoice', icon:'🔧', desc:'Charge tenants for maintenance or repairs', profession:'property_management', tag:'tag-blue', tagText:'Property Mgmt', fields:['property'] },
+
+  // CONSTRUCTION
+  { id:'con-invoice', name:'Construction Invoice', icon:'🏗️', desc:'Bill clients for labor, materials, and services', profession:'construction', tag:'tag-amber', tagText:'Construction', fields:['project'] },
+  { id:'con-estimate', name:'Estimate / Quote', icon:'📝', desc:'Provide project cost estimates before work begins', profession:'construction', tag:'tag-amber', tagText:'Construction', fields:['project'] },
+  { id:'con-change', name:'Change Order', icon:'🔄', desc:'Document scope changes and cost adjustments', profession:'construction', tag:'tag-amber', tagText:'Construction', fields:['project'] },
+  { id:'con-lien', name:'Lien Waiver', icon:'📜', desc:'Conditional or unconditional lien waiver for payment', profession:'construction', tag:'tag-amber', tagText:'Construction', fields:['project'], noItems:true },
+
+  // ACCOUNTING
+  { id:'acct-invoice', name:'Professional Services Invoice', icon:'📊', desc:'Bill clients for accounting, bookkeeping, or advisory', profession:'accounting', tag:'tag-green', tagText:'Accounting' },
+  { id:'acct-engage', name:'Engagement Letter', icon:'🤝', desc:'Formal agreement outlining scope of accounting services', profession:'accounting', tag:'tag-green', tagText:'Accounting', noItems:true },
+
+  // ATTORNEY
+  { id:'atty-invoice', name:'Legal Invoice (Time-Based)', icon:'⚖️', desc:'Itemized billing with time entries and expense reimbursements', profession:'attorney', tag:'tag-purple', tagText:'Legal', fields:['matter'] },
+  { id:'atty-retainer', name:'Retainer Agreement', icon:'📑', desc:'Client retainer agreement with terms and trust account details', profession:'attorney', tag:'tag-purple', tagText:'Legal', fields:['matter'], noItems:true },
+  { id:'atty-engage', name:'Engagement Letter', icon:'🤝', desc:'Scope of representation and fee agreement', profession:'attorney', tag:'tag-purple', tagText:'Legal', fields:['matter'], noItems:true },
+
+  // COMMERCIAL RE
+  { id:'cre-invoice', name:'Commission Invoice', icon:'🏢', desc:'Invoice for real estate commissions and brokerage fees', profession:'commercial', tag:'tag-blue', tagText:'Commercial RE' },
+  { id:'cre-loi', name:'Letter of Intent (LOI)', icon:'✉️', desc:'Non-binding letter expressing intent to lease or purchase', profession:'commercial', tag:'tag-blue', tagText:'Commercial RE', fields:['property'], noItems:true },
+
+  // INSURANCE
+  { id:'ins-invoice', name:'Insurance Invoice', icon:'🛡️', desc:'Premium invoices and broker fee statements', profession:'insurance', tag:'tag-red', tagText:'Insurance' },
+  { id:'ins-summary', name:'Policy Summary', icon:'📋', desc:'Coverage summary document for client records', profession:'insurance', tag:'tag-red', tagText:'Insurance', noItems:true },
+
+  // SHORT-TERM RENTAL
+  { id:'str-invoice', name:'Guest Invoice', icon:'🏖️', desc:'Charge guests for stays, cleaning, and damage fees', profession:'str', tag:'tag-purple', tagText:'STR' },
+  { id:'str-rules', name:'House Rules', icon:'📜', desc:'Guest rules document with check-in/out instructions', profession:'str', tag:'tag-purple', tagText:'STR', noItems:true },
+
+  // LENDING
+  { id:'lend-invoice', name:'Loan Servicing Invoice', icon:'🏦', desc:'Service fee invoices for loan origination and servicing', profession:'lending', tag:'tag-green', tagText:'Lending' },
+
+  // GENERAL BUSINESS
+  { id:'gen-invoice', name:'Invoice', icon:'💼', desc:'Standard business invoice for any service or product', profession:'general', tag:'tag-blue', tagText:'General' },
+  { id:'gen-receipt', name:'Receipt', icon:'🧾', desc:'Payment receipt confirming completed transaction', profession:'general', tag:'tag-blue', tagText:'General' },
+  { id:'gen-proposal', name:'Proposal', icon:'📄', desc:'Service proposal with scope, timeline, and pricing', profession:'general', tag:'tag-blue', tagText:'General' }
+];
+
+// ── Render Template Grid ──
+function renderTemplates(filter) {
+  var list = filter ? TEMPLATES.filter(function(t) { return t.profession === filter; }) : TEMPLATES;
+  var html = list.map(function(t) {
+    return '<div class="tpl-card" onclick="selectTemplate(\'' + t.id + '\')">' +
+      '<div class="tpl-icon">' + t.icon + '</div>' +
+      '<div class="tpl-name">' + t.name + '</div>' +
+      '<div class="tpl-desc">' + t.desc + '</div>' +
+      '<span class="tpl-tag ' + t.tag + '">' + t.tagText + '</span>' +
+    '</div>';
+  }).join('');
+  document.getElementById('tpl-grid').innerHTML = html;
+}
+
+function showPicker() {
+  document.getElementById('tpl-picker').style.display = '';
+  document.getElementById('dg-form').classList.remove('active');
+  document.getElementById('dg-preview').style.display = 'none';
+  document.getElementById('saved-docs').style.display = 'none';
+  renderTemplates();
+  // Update sidebar active
+  document.querySelectorAll('.dg-side a').forEach(function(a) { a.classList.remove('active'); });
+  document.querySelector('.dg-side a').classList.add('active');
+}
+
+function filterTemplates(prof) {
+  document.getElementById('tpl-picker').style.display = '';
+  document.getElementById('dg-form').classList.remove('active');
+  document.getElementById('dg-preview').style.display = 'none';
+  document.getElementById('saved-docs').style.display = 'none';
+  renderTemplates(prof);
+  // Update sidebar active
+  document.querySelectorAll('.dg-side a').forEach(function(a) { a.classList.remove('active'); });
+}
+
+function showSavedDocs() {
+  document.getElementById('tpl-picker').style.display = 'none';
+  document.getElementById('dg-form').classList.remove('active');
+  document.getElementById('dg-preview').style.display = 'none';
+  document.getElementById('saved-docs').style.display = '';
+  renderSavedDocs();
+}
+
+// ── Select Template ──
+function selectTemplate(id) {
+  currentTemplate = TEMPLATES.find(function(t) { return t.id === id; });
+  if (!currentTemplate) return;
+
+  document.getElementById('tpl-picker').style.display = 'none';
+  document.getElementById('dg-form').classList.add('active');
+  document.getElementById('dg-preview').style.display = 'none';
+  document.getElementById('saved-docs').style.display = 'none';
+  document.getElementById('form-title').textContent = currentTemplate.name;
+
+  // Show/hide context fields
+  document.getElementById('field-property').style.display = (currentTemplate.fields || []).includes('property') ? '' : 'none';
+  document.getElementById('field-matter').style.display = (currentTemplate.fields || []).includes('matter') ? '' : 'none';
+  document.getElementById('field-project').style.display = (currentTemplate.fields || []).includes('project') ? '' : 'none';
+
+  // Set labels based on template type
+  var isInvoice = id.indexOf('invoice') > -1 || id === 'con-estimate' || id === 'gen-receipt';
+  document.getElementById('lbl-number').textContent = isInvoice ? 'Invoice #' : 'Document #';
+
+  // Auto-generate number
+  document.getElementById('f-number').value = currentTemplate.id.split('-')[0].toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+
+  // Due date = 30 days from now for invoices
+  if (isInvoice) {
+    var due = new Date(); due.setDate(due.getDate() + 30);
+    document.getElementById('f-due').value = due.toISOString().split('T')[0];
+  }
+
+  // Prefill from session
+  try {
+    var session = JSON.parse(localStorage.getItem('rv_landlord_session') || '{}');
+    if (session.companyName) document.getElementById('f-company').value = session.companyName;
+    if (session.email) document.getElementById('f-phone').value = session.email;
+  } catch(e) {}
+
+  // Line items
+  if (currentTemplate.noItems) {
+    document.getElementById('items-title').style.display = 'none';
+    document.getElementById('li-table').style.display = 'none';
+    document.querySelector('.li-add').style.display = 'none';
+    document.getElementById('f-tax').parentElement.parentElement.parentElement.style.display = 'none';
+  } else {
+    document.getElementById('items-title').style.display = '';
+    document.getElementById('li-table').style.display = '';
+    document.querySelector('.li-add').style.display = '';
+    document.getElementById('f-tax').parentElement.parentElement.parentElement.style.display = '';
+    document.getElementById('li-body').innerHTML = '';
+    addLineItem();
+  }
+
+  // Extra fields for special templates
+  renderExtraFields();
+}
+
+// ── Extra Fields per Template Type ──
+function renderExtraFields() {
+  var html = '';
+  var id = currentTemplate.id;
+
+  if (id === 'pm-late') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Rent Amount Due ($)</label><input id="x-rent" type="number" value="1200" /></div>' +
+      '<div class="dg-field"><label>Late Fee ($)</label><input id="x-latefee" type="number" value="50" /></div>' +
+    '</div>' +
+    '<div class="dg-row"><div class="dg-field"><label>Days Overdue</label><input id="x-days" type="number" value="5" /></div>' +
+    '<div class="dg-field"><label>Cure Period (days)</label><input id="x-cure" type="number" value="3" /></div></div>';
+  }
+  else if (id === 'pm-moveio') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Type</label><select id="x-iotype"><option>Move-In</option><option>Move-Out</option></select></div>' +
+      '<div class="dg-field"><label>Unit / Apt #</label><input id="x-unit" placeholder="Unit 101" /></div></div>';
+  }
+  else if (id === 'atty-retainer') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Retainer Amount ($)</label><input id="x-retainer" type="number" value="5000" /></div>' +
+      '<div class="dg-field"><label>Hourly Rate ($)</label><input id="x-rate" type="number" value="350" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Scope of Representation</label><textarea id="x-scope" placeholder="Describe the scope of legal services..."></textarea></div></div>';
+  }
+  else if (id === 'cre-loi') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Transaction Type</label><select id="x-txtype"><option>Lease</option><option>Purchase</option><option>Sublease</option></select></div>' +
+      '<div class="dg-field"><label>Proposed Price / Rate</label><input id="x-price" placeholder="$25/SF/yr or $1,500,000" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Square Footage</label><input id="x-sqft" placeholder="10,000 SF" /></div>' +
+      '<div class="dg-field"><label>Proposed Term</label><input id="x-term" placeholder="5 years" /></div></div>';
+  }
+  else if (id === 'str-rules') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Check-In Time</label><input id="x-checkin" value="3:00 PM" /></div>' +
+      '<div class="dg-field"><label>Check-Out Time</label><input id="x-checkout" value="11:00 AM" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Max Guests</label><input id="x-maxguests" type="number" value="6" /></div>' +
+      '<div class="dg-field"><label>WiFi Password</label><input id="x-wifi" placeholder="password123" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>House Rules</label><textarea id="x-rules" placeholder="No smoking, no parties, quiet hours 10pm-8am...">No smoking inside the property.\nNo parties or events.\nQuiet hours: 10:00 PM – 8:00 AM.\nNo pets unless pre-approved.\nPlease take out trash before checkout.\nReport any damages immediately.</textarea></div></div>';
+  }
+  else if (id === 'ins-summary') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Policy Number</label><input id="x-polnum" placeholder="POL-123456" /></div>' +
+      '<div class="dg-field"><label>Carrier</label><input id="x-carrier" placeholder="State Farm" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Coverage Type</label><select id="x-covtype"><option>Landlord Insurance</option><option>Renters Insurance</option><option>Commercial Property</option><option>Liability</option><option>Umbrella</option></select></div>' +
+      '<div class="dg-field"><label>Annual Premium ($)</label><input id="x-premium" type="number" placeholder="1200" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Coverage Limit ($)</label><input id="x-limit" placeholder="500,000" /></div>' +
+      '<div class="dg-field"><label>Deductible ($)</label><input id="x-deductible" placeholder="1,000" /></div></div>';
+  }
+
+  document.getElementById('extra-fields').innerHTML = html;
+}
+
+// ── Line Items ──
+var lineItemCount = 0;
+function addLineItem() {
+  lineItemCount++;
+  var row = document.createElement('tr');
+  row.id = 'li-' + lineItemCount;
+  row.innerHTML = '<td><input placeholder="Description" oninput="calcTotals()" /></td>' +
+    '<td><input type="number" step="0.5" value="1" style="width:70px;" oninput="calcTotals()" /></td>' +
+    '<td><input type="number" step="0.01" value="0" style="width:90px;" oninput="calcTotals()" /></td>' +
+    '<td style="text-align:right;font-weight:700;padding-right:.75rem;" class="li-amt">$0.00</td>' +
+    '<td><button class="li-del" onclick="this.closest(\'tr\').remove();calcTotals();">✕</button></td>';
+  document.getElementById('li-body').appendChild(row);
+}
+
+function calcTotals() {
+  var rows = document.querySelectorAll('#li-body tr');
+  var subtotal = 0;
+  rows.forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    var qty = parseFloat(inputs[1].value) || 0;
+    var rate = parseFloat(inputs[2].value) || 0;
+    var amt = qty * rate;
+    subtotal += amt;
+    row.querySelector('.li-amt').textContent = '$' + amt.toFixed(2);
+  });
+  return subtotal;
+}
+
+// ── Generate QR Code URL ──
+function getQRUrl(paymentUrl) {
+  return 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(paymentUrl);
+}
+
+// ── Generate Preview ──
+function generatePreview() {
+  var company = document.getElementById('f-company').value || 'Your Company';
+  var contact = document.getElementById('f-contact').value || '';
+  var address = document.getElementById('f-address').value || '';
+  var phone = document.getElementById('f-phone').value || '';
+  var toName = document.getElementById('f-to-name').value || 'Recipient';
+  var toCompany = document.getElementById('f-to-company').value || '';
+  var toAddress = document.getElementById('f-to-address').value || '';
+  var toEmail = document.getElementById('f-to-email').value || '';
+  var docNum = document.getElementById('f-number').value || '';
+  var docDate = document.getElementById('f-date').value || '';
+  var dueDate = document.getElementById('f-due').value || '';
+  var notes = document.getElementById('f-notes').value || '';
+  var tax = parseFloat(document.getElementById('f-tax').value) || 0;
+  var discount = parseFloat(document.getElementById('f-discount').value) || 0;
+  var logo = localStorage.getItem('rv_company_logo');
+
+  var isInvoice = currentTemplate.id.indexOf('invoice') > -1 || currentTemplate.id === 'con-estimate' || currentTemplate.id === 'gen-receipt';
+
+  // Build header
+  var html = '<div class="doc">';
+  html += '<div class="doc-header">';
+  html += '<div>';
+  if (logo) html += '<img class="doc-logo" src="' + logo + '" /><br>';
+  html += '<span class="doc-company name">' + esc(company) + '</span>';
+  html += '</div>';
+  html += '<div class="doc-company">';
+  if (contact) html += '<div>' + esc(contact) + '</div>';
+  if (address) html += '<div>' + esc(address) + '</div>';
+  if (phone) html += '<div>' + esc(phone) + '</div>';
+  html += '</div></div>';
+
+  // Title
+  html += '<div class="doc-title">' + esc(currentTemplate.name) + '</div>';
+
+  // Meta
+  html += '<div class="doc-meta">';
+  html += '<div class="doc-meta-block"><div class="label">Bill To</div>';
+  html += '<div><strong>' + esc(toName) + '</strong></div>';
+  if (toCompany) html += '<div>' + esc(toCompany) + '</div>';
+  if (toAddress) html += '<div>' + esc(toAddress) + '</div>';
+  if (toEmail) html += '<div>' + esc(toEmail) + '</div>';
+  html += '</div>';
+  html += '<div class="doc-meta-block" style="text-align:right;">';
+  html += '<div class="label">' + (isInvoice ? 'Invoice' : 'Document') + ' #</div><div><strong>' + esc(docNum) + '</strong></div>';
+  if (docDate) html += '<div class="label" style="margin-top:.5rem;">Date</div><div>' + formatDate(docDate) + '</div>';
+  if (dueDate && isInvoice) html += '<div class="label" style="margin-top:.5rem;">Due Date</div><div><strong style="color:#dc2626;">' + formatDate(dueDate) + '</strong></div>';
+  html += '</div></div>';
+
+  // Template-specific content
+  if (currentTemplate.noItems) {
+    html += renderSpecialContent();
+  } else {
+    // Line items table
+    var subtotal = 0;
+    html += '<table class="doc-items"><thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>';
+    document.querySelectorAll('#li-body tr').forEach(function(row) {
+      var inputs = row.querySelectorAll('input');
+      var desc = inputs[0].value || '';
+      var qty = parseFloat(inputs[1].value) || 0;
+      var rate = parseFloat(inputs[2].value) || 0;
+      var amt = qty * rate;
+      subtotal += amt;
+      if (desc || amt > 0) {
+        html += '<tr><td>' + esc(desc) + '</td><td>' + qty + '</td><td>$' + rate.toFixed(2) + '</td><td class="amount">$' + amt.toFixed(2) + '</td></tr>';
+      }
+    });
+    html += '</tbody></table>';
+
+    // Totals
+    var taxAmt = subtotal * (tax / 100);
+    var total = subtotal + taxAmt - discount;
+    html += '<div class="doc-totals"><table>';
+    html += '<tr><td>Subtotal</td><td style="text-align:right">$' + subtotal.toFixed(2) + '</td></tr>';
+    if (tax > 0) html += '<tr><td>Tax (' + tax + '%)</td><td style="text-align:right">$' + taxAmt.toFixed(2) + '</td></tr>';
+    if (discount > 0) html += '<tr><td>Discount</td><td style="text-align:right">-$' + discount.toFixed(2) + '</td></tr>';
+    html += '<tr class="total-row"><td>Total Due</td><td style="text-align:right">$' + total.toFixed(2) + '</td></tr>';
+    html += '</table></div>';
+  }
+
+  // Notes
+  if (notes) {
+    html += '<div class="doc-terms"><h4>Notes & Terms</h4><p>' + esc(notes).replace(/\n/g, '<br>') + '</p></div>';
+  }
+
+  // QR Code (invoices only)
+  if (isInvoice) {
+    var payUrl = 'https://rentverified.com/pay/' + encodeURIComponent(docNum);
+    html += '<div class="doc-qr">';
+    html += '<img src="' + getQRUrl(payUrl) + '" alt="Payment QR Code" />';
+    html += '<p>Scan to pay online &middot; Payment options set by account holder</p>';
+    html += '</div>';
+  }
+
+  // Footer
+  html += '<div class="doc-footer">';
+  html += 'Generated by RentVerified &middot; ' + company + ' &middot; ' + formatDate(docDate);
+  html += '</div>';
+
+  html += '</div>';
+
+  document.getElementById('preview-frame').innerHTML = html;
+  document.getElementById('dg-preview').style.display = '';
+  document.getElementById('dg-preview').scrollIntoView({behavior:'smooth'});
+}
+
+// ── Render Special Content for Non-Item Templates ──
+function renderSpecialContent() {
+  var html = '';
+  var id = currentTemplate.id;
+
+  if (id === 'pm-late') {
+    var rent = val('x-rent','1200'), fee = val('x-latefee','50'), days = val('x-days','5'), cure = val('x-cure','3');
+    html += '<div style="background:#fef2f2;border:2px solid #fecaca;border-radius:10px;padding:1.25rem;margin:1.5rem 0;">';
+    html += '<h3 style="color:#b91c1c;margin-bottom:.75rem;">NOTICE OF LATE RENT PAYMENT</h3>';
+    html += '<p>This notice is to inform you that your rent payment of <strong>$' + rent + '</strong> is <strong>' + days + ' days overdue</strong>.</p>';
+    html += '<p style="margin-top:.75rem;">A late fee of <strong>$' + fee + '</strong> has been assessed. The total amount now due is <strong>$' + (parseFloat(rent) + parseFloat(fee)).toFixed(2) + '</strong>.</p>';
+    html += '<p style="margin-top:.75rem;">You have <strong>' + cure + ' days</strong> from the date of this notice to pay the full amount. Failure to pay may result in further action as permitted by Utah law.</p>';
+    html += '</div>';
+  }
+  else if (id === 'pm-moveio') {
+    var type = valEl('x-iotype') || 'Move-In';
+    var rooms = ['Living Room','Kitchen','Bathroom','Bedroom 1','Bedroom 2','Hallway','Garage/Storage'];
+    var conditions = ['Excellent','Good','Fair','Poor'];
+    html += '<h3 style="margin:1.5rem 0 .75rem;">' + type + ' Condition Report</h3>';
+    html += '<table class="doc-items"><thead><tr><th>Room</th><th>Walls</th><th>Floor</th><th>Fixtures</th><th>Notes</th></tr></thead><tbody>';
+    rooms.forEach(function(r) { html += '<tr><td><strong>' + r + '</strong></td><td>☐ Good ☐ Fair ☐ Poor</td><td>☐ Good ☐ Fair ☐ Poor</td><td>☐ Good ☐ Fair ☐ Poor</td><td style="min-width:120px;">___________</td></tr>'; });
+    html += '</tbody></table>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Landlord / Manager Signature &amp; Date</div></div><div><div class="doc-sig-line">Tenant Signature &amp; Date</div></div></div>';
+  }
+  else if (id === 'atty-retainer') {
+    var retainer = val('x-retainer','5000'), rate = val('x-rate','350');
+    var scope = valEl('x-scope') || 'Legal representation as discussed.';
+    html += '<div style="margin:1.5rem 0;line-height:1.8;font-size:.88rem;">';
+    html += '<p>This Retainer Agreement ("Agreement") is entered into between the attorney/firm identified above ("Attorney") and the client identified above ("Client").</p>';
+    html += '<h4 style="margin-top:1rem;">1. Scope of Representation</h4><p>' + esc(scope).replace(/\n/g, '<br>') + '</p>';
+    html += '<h4 style="margin-top:1rem;">2. Retainer Fee</h4><p>Client agrees to pay an initial retainer of <strong>$' + retainer + '</strong>. This retainer will be deposited into Attorney\'s trust account and billed against at the hourly rate.</p>';
+    html += '<h4 style="margin-top:1rem;">3. Hourly Rate</h4><p>Attorney\'s current hourly rate is <strong>$' + rate + '/hour</strong>. Client will receive monthly invoices detailing time spent.</p>';
+    html += '<h4 style="margin-top:1rem;">4. Trust Account</h4><p>All retainer funds are held in Attorney\'s IOLTA trust account in accordance with Utah Rules of Professional Conduct.</p>';
+    html += '</div>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Attorney Signature &amp; Date</div></div><div><div class="doc-sig-line">Client Signature &amp; Date</div></div></div>';
+  }
+  else if (id === 'atty-engage') {
+    html += '<div style="margin:1.5rem 0;line-height:1.8;font-size:.88rem;">';
+    html += '<p>This Engagement Letter confirms our agreement to provide legal services as outlined below.</p>';
+    html += '<h4>Scope:</h4><p>Attorney will represent Client in the matter described above. This engagement is limited to the specific matter identified and does not create an ongoing attorney-client relationship for other matters.</p>';
+    html += '<h4>Fees:</h4><p>Services will be billed at Attorney\'s standard hourly rates. Invoices are issued monthly and payment is due within 30 days.</p>';
+    html += '<h4>Confidentiality:</h4><p>All communications between Attorney and Client are protected by attorney-client privilege.</p>';
+    html += '</div>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Attorney Signature &amp; Date</div></div><div><div class="doc-sig-line">Client Signature &amp; Date</div></div></div>';
+  }
+  else if (id === 'cre-loi') {
+    var txtype = valEl('x-txtype') || 'Lease', price = valEl('x-price') || '$25/SF/yr';
+    var sqft = valEl('x-sqft') || '10,000 SF', term = valEl('x-term') || '5 years';
+    html += '<div style="margin:1.5rem 0;line-height:1.8;font-size:.88rem;">';
+    html += '<p>This Letter of Intent ("LOI") sets forth the basic terms under which the parties are prepared to negotiate a ' + txtype + ' agreement.</p>';
+    html += '<table class="doc-items" style="margin:1rem 0;"><tbody>';
+    html += '<tr><td><strong>Transaction Type</strong></td><td>' + txtype + '</td></tr>';
+    html += '<tr><td><strong>Proposed ' + (txtype === 'Lease' ? 'Rate' : 'Price') + '</strong></td><td>' + esc(price) + '</td></tr>';
+    html += '<tr><td><strong>Square Footage</strong></td><td>' + esc(sqft) + '</td></tr>';
+    html += '<tr><td><strong>Proposed Term</strong></td><td>' + esc(term) + '</td></tr>';
+    html += '</tbody></table>';
+    html += '<p><strong>Non-Binding:</strong> This LOI is a statement of intent only and does not constitute a binding agreement. A binding agreement will only exist upon execution of a definitive agreement.</p>';
+    html += '</div>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Proposer Signature &amp; Date</div></div><div><div class="doc-sig-line">Recipient Signature &amp; Date</div></div></div>';
+  }
+  else if (id === 'acct-engage') {
+    html += '<div style="margin:1.5rem 0;line-height:1.8;font-size:.88rem;">';
+    html += '<p>This letter confirms our engagement to provide the following professional accounting services:</p>';
+    html += '<h4>Services Included:</h4><ul style="margin:.5rem 0 1rem 1.5rem;"><li>Monthly bookkeeping and reconciliation</li><li>Quarterly financial statement preparation</li><li>Annual tax preparation and filing</li><li>Advisory services as requested</li></ul>';
+    html += '<h4>Client Responsibilities:</h4><p>Client agrees to provide timely access to financial records, bank statements, and receipts.</p>';
+    html += '<h4>Fees:</h4><p>Fees will be billed monthly per the agreed rate schedule. Payment is due within 15 days of invoice.</p>';
+    html += '</div>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Accountant Signature &amp; Date</div></div><div><div class="doc-sig-line">Client Signature &amp; Date</div></div></div>';
+  }
+  else if (id === 'con-change') {
+    html += '<div style="margin:1.5rem 0;">';
+    html += '<h3>Change Order</h3>';
+    html += '<p style="font-size:.88rem;margin:.75rem 0;">This change order modifies the original contract/estimate as described below.</p>';
+    html += '<table class="doc-items"><thead><tr><th>Description of Change</th><th style="text-align:right">Cost Impact</th></tr></thead><tbody>';
+    html += '<tr><td>_________________________________</td><td class="amount">$________</td></tr>';
+    html += '<tr><td>_________________________________</td><td class="amount">$________</td></tr>';
+    html += '</tbody></table>';
+    html += '<p style="font-size:.85rem;margin-top:1rem;">By signing below, both parties agree to the changes described above and any associated cost or schedule impact.</p>';
+    html += '</div>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Contractor Signature &amp; Date</div></div><div><div class="doc-sig-line">Client Signature &amp; Date</div></div></div>';
+  }
+  else if (id === 'con-lien') {
+    html += '<div style="margin:1.5rem 0;font-size:.88rem;line-height:1.8;">';
+    html += '<h3>Conditional Lien Waiver and Release on Progress Payment</h3>';
+    html += '<p>Upon receipt of payment in the amount of $__________, the undersigned waives and releases any and all lien rights against the property described above.</p>';
+    html += '<p><strong>This waiver is conditioned upon receipt of payment.</strong> If payment is not received, this waiver is null and void.</p>';
+    html += '<p style="margin-top:1rem;">Claimant: ________________________</p>';
+    html += '<p>Through date: ________________________</p>';
+    html += '</div>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Claimant Signature &amp; Date</div></div><div><div class="doc-sig-line">Notary (if required)</div></div></div>';
+  }
+  else if (id === 'str-rules') {
+    var checkin = valEl('x-checkin') || '3:00 PM', checkout = valEl('x-checkout') || '11:00 AM';
+    var maxguests = val('x-maxguests','6'), wifi = valEl('x-wifi') || '';
+    var rules = valEl('x-rules') || 'No smoking. No parties. Quiet hours 10pm-8am.';
+    html += '<div style="margin:1.5rem 0;font-size:.88rem;line-height:1.8;">';
+    html += '<h3 style="margin-bottom:1rem;">Welcome! Please Review Our House Rules</h3>';
+    html += '<table class="doc-items" style="margin-bottom:1rem;"><tbody>';
+    html += '<tr><td><strong>Check-In</strong></td><td>' + checkin + '</td></tr>';
+    html += '<tr><td><strong>Check-Out</strong></td><td>' + checkout + '</td></tr>';
+    html += '<tr><td><strong>Max Guests</strong></td><td>' + maxguests + '</td></tr>';
+    if (wifi) html += '<tr><td><strong>WiFi Password</strong></td><td>' + esc(wifi) + '</td></tr>';
+    html += '</tbody></table>';
+    html += '<h4>House Rules:</h4>';
+    html += '<div style="background:#f8fafc;border-radius:8px;padding:1rem;margin:.5rem 0;">' + esc(rules).replace(/\n/g, '<br>') + '</div>';
+    html += '<h4 style="margin-top:1rem;">Emergency Contact:</h4>';
+    html += '<p>If you have any issues during your stay, please contact us immediately.</p>';
+    html += '</div>';
+  }
+  else if (id === 'ins-summary') {
+    var polnum = valEl('x-polnum') || '', carrier = valEl('x-carrier') || '';
+    var covtype = valEl('x-covtype') || '', premium = valEl('x-premium') || '';
+    var limit = valEl('x-limit') || '', deductible = valEl('x-deductible') || '';
+    html += '<div style="margin:1.5rem 0;">';
+    html += '<h3>Insurance Coverage Summary</h3>';
+    html += '<table class="doc-items" style="margin:1rem 0;"><tbody>';
+    if (polnum) html += '<tr><td><strong>Policy Number</strong></td><td>' + esc(polnum) + '</td></tr>';
+    if (carrier) html += '<tr><td><strong>Carrier</strong></td><td>' + esc(carrier) + '</td></tr>';
+    if (covtype) html += '<tr><td><strong>Coverage Type</strong></td><td>' + esc(covtype) + '</td></tr>';
+    if (premium) html += '<tr><td><strong>Annual Premium</strong></td><td>$' + premium + '</td></tr>';
+    if (limit) html += '<tr><td><strong>Coverage Limit</strong></td><td>$' + esc(limit) + '</td></tr>';
+    if (deductible) html += '<tr><td><strong>Deductible</strong></td><td>$' + esc(deductible) + '</td></tr>';
+    html += '</tbody></table>';
+    html += '<p style="font-size:.82rem;color:#64748b;">This is a summary only. Refer to your full policy for complete terms, conditions, and exclusions.</p>';
+    html += '</div>';
+  }
+  else if (id === 'gen-proposal') {
+    html += '<div style="margin:1.5rem 0;font-size:.88rem;line-height:1.8;">';
+    html += '<h3>Service Proposal</h3>';
+    html += '<h4 style="margin-top:1rem;">Scope of Work:</h4>';
+    html += '<p>[Describe the services you will provide]</p>';
+    html += '<h4 style="margin-top:1rem;">Timeline:</h4>';
+    html += '<p>[Estimated start and completion dates]</p>';
+    html += '<h4 style="margin-top:1rem;">Investment:</h4>';
+    html += '<p>[Pricing details]</p>';
+    html += '<h4 style="margin-top:1rem;">Terms:</h4>';
+    html += '<p>This proposal is valid for 30 days. A 50% deposit is required to begin work.</p>';
+    html += '</div>';
+    html += '<div class="doc-sig"><div><div class="doc-sig-line">Provider Signature &amp; Date</div></div><div><div class="doc-sig-line">Client Acceptance &amp; Date</div></div></div>';
+  }
+
+  return html;
+}
+
+// ── Save Document ──
+function saveDocument() {
+  if (!currentTemplate) return;
+  var doc = {
+    id: 'doc_' + Date.now(),
+    templateId: currentTemplate.id,
+    templateName: currentTemplate.name,
+    company: document.getElementById('f-company').value,
+    toName: document.getElementById('f-to-name').value,
+    number: document.getElementById('f-number').value,
+    date: document.getElementById('f-date').value,
+    createdAt: new Date().toISOString(),
+    html: document.getElementById('preview-frame') ? document.getElementById('preview-frame').innerHTML : ''
+  };
+
+  var docs = JSON.parse(localStorage.getItem('rv_generated_docs') || '[]');
+  docs.push(doc);
+  localStorage.setItem('rv_generated_docs', JSON.stringify(docs));
+  showToast('Document saved successfully');
+}
+
+// ── Render Saved Documents ──
+function renderSavedDocs() {
+  var docs = JSON.parse(localStorage.getItem('rv_generated_docs') || '[]');
+  var el = document.getElementById('saved-docs-list');
+  if (!docs.length) {
+    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;"><div style="font-size:2rem;margin-bottom:.5rem;">📁</div><p>No saved documents yet. Create a document from a template to get started.</p></div>';
+    return;
+  }
+  var html = '<table class="li-table"><thead><tr><th>Document</th><th>Recipient</th><th>Number</th><th>Date</th><th></th></tr></thead><tbody>';
+  docs.reverse().forEach(function(d) {
+    html += '<tr>' +
+      '<td><strong>' + esc(d.templateName) + '</strong><br><span style="font-size:.75rem;color:#64748b;">' + esc(d.company || '') + '</span></td>' +
+      '<td>' + esc(d.toName || '') + '</td>' +
+      '<td>' + esc(d.number || '') + '</td>' +
+      '<td>' + (d.date ? formatDate(d.date) : '') + '</td>' +
+      '<td><button class="li-del" onclick="viewSavedDoc(\'' + d.id + '\')">👁️</button> <button class="li-del" onclick="deleteSavedDoc(\'' + d.id + '\')">🗑️</button></td>' +
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function viewSavedDoc(id) {
+  var docs = JSON.parse(localStorage.getItem('rv_generated_docs') || '[]');
+  var doc = docs.find(function(d) { return d.id === id; });
+  if (!doc) return;
+  document.getElementById('preview-frame').innerHTML = doc.html;
+  document.getElementById('dg-preview').style.display = '';
+  document.getElementById('saved-docs').style.display = 'none';
+  document.getElementById('dg-preview').scrollIntoView({behavior:'smooth'});
+}
+
+function deleteSavedDoc(id) {
+  if (!confirm('Delete this document?')) return;
+  var docs = JSON.parse(localStorage.getItem('rv_generated_docs') || '[]');
+  docs = docs.filter(function(d) { return d.id !== id; });
+  localStorage.setItem('rv_generated_docs', JSON.stringify(docs));
+  renderSavedDocs();
+  showToast('Document deleted');
+}
+
+// ── Helpers ──
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function formatDate(d) { if (!d) return ''; var p = d.split('-'); return p[1] + '/' + p[2] + '/' + p[0]; }
+function val(id, def) { var el = document.getElementById(id); return el ? (el.value || def) : def; }
+function valEl(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', function() {
+  renderTemplates();
+  // Auto-select template from URL param: ?template=con-invoice
+  var params = new URLSearchParams(window.location.search);
+  var tpl = params.get('template');
+  if (tpl && TEMPLATES.find(function(t) { return t.id === tpl; })) {
+    selectTemplate(tpl);
+  }
+});
+</script>
+<script src="share-widget.js" data-share-title="Document Generator" data-share-text="Create professional documents with RentVerified"></script>
+</body>
+</html>

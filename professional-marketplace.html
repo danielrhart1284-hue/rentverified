@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Professional Marketplace – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Professional Marketplace ── */
+    .pm-hero {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: white; padding: 3.5rem 2rem 2.5rem; text-align: center;
+    }
+    .pm-hero h1 { font-size: 2.4rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .pm-hero p { font-size: 1.05rem; opacity: 0.8; max-width: 560px; margin: 0 auto 1.5rem; }
+    .pm-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .pm-hero-stat { text-align: center; }
+    .pm-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #60a5fa; }
+    .pm-hero-stat .lbl { font-size: 0.75rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .pm-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ── Category Tabs ── */
+    .pm-cats {
+      display: flex; gap: 0.5rem; padding: 1.25rem 0; overflow-x: auto;
+      border-bottom: 1px solid #e5e7eb; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .pm-cat {
+      padding: 0.5rem 1.1rem; border-radius: 99px; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb;
+      background: white; color: #374151; white-space: nowrap; transition: 0.15s;
+    }
+    .pm-cat:hover { border-color: #93c5fd; color: #2563eb; }
+    .pm-cat.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+    /* ── Filter Bar ── */
+    .pm-filters {
+      display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .pm-search {
+      flex: 1; min-width: 200px; padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .pm-search:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .pm-filter-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; color: #374151; min-width: 130px;
+    }
+
+    /* ── Results Header ── */
+    .pm-results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .pm-results-header h2 { font-size: 1.15rem; font-weight: 800; }
+    .pm-results-count { font-size: 0.82rem; color: #6b7280; }
+
+    /* ── Professional Cards Grid ── */
+    .pm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+
+    .pm-card {
+      background: white; border-radius: 14px; border: 1px solid #e5e7eb;
+      overflow: hidden; transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .pm-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+    .pm-card-header {
+      padding: 1.25rem 1.25rem 0.75rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .pm-avatar {
+      width: 52px; height: 52px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 800; color: white; flex-shrink: 0;
+    }
+    .pm-card-name { font-size: 1.05rem; font-weight: 800; color: #111827; margin-bottom: 2px; }
+    .pm-card-title { font-size: 0.78rem; color: #6b7280; margin-bottom: 4px; }
+    .pm-card-location { font-size: 0.75rem; color: #9ca3af; }
+
+    .pm-card-badges { padding: 0 1.25rem; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.75rem; }
+    .pm-badge {
+      font-size: 0.7rem; font-weight: 600; padding: 2px 8px;
+      border-radius: 6px; background: #f0f9ff; color: #0369a1;
+    }
+    .pm-badge.verified { background: #d1fae5; color: #065f46; }
+    .pm-badge.featured { background: #fef3c7; color: #92400e; }
+
+    .pm-card-stats {
+      display: flex; gap: 1rem; padding: 0 1.25rem; margin-bottom: 0.75rem;
+    }
+    .pm-stat { font-size: 0.78rem; color: #6b7280; }
+    .pm-stat strong { color: #111827; font-weight: 700; }
+
+    .pm-card-desc {
+      padding: 0 1.25rem; font-size: 0.82rem; color: #4b5563;
+      line-height: 1.5; margin-bottom: 1rem;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    .pm-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.25rem; background: #f9fafb; border-top: 1px solid #f3f4f6;
+    }
+    .pm-price { font-size: 0.88rem; font-weight: 800; color: #111827; }
+    .pm-price span { font-size: 0.72rem; font-weight: 400; color: #9ca3af; }
+    .pm-cta {
+      padding: 0.45rem 1rem; background: #2563eb; color: white;
+      border: none; border-radius: 8px; font-weight: 700; font-size: 0.8rem;
+      cursor: pointer; transition: 0.15s;
+    }
+    .pm-cta:hover { background: #1e40af; }
+
+    /* ── Star Rating ── */
+    .pm-stars { color: #f59e0b; font-size: 0.8rem; letter-spacing: 1px; }
+    .pm-stars-dim { color: #d1d5db; }
+
+    /* ── Request Modal ── */
+    .pm-modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 9999; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .pm-modal-overlay.active { display: flex; }
+    .pm-modal {
+      background: white; border-radius: 16px; width: 100%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .pm-modal-head {
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pm-modal-head h3 { font-size: 1.1rem; font-weight: 800; }
+    .pm-modal-close {
+      width: 32px; height: 32px; border-radius: 8px; border: none;
+      background: #f3f4f6; font-size: 1.1rem; cursor: pointer; color: #6b7280;
+    }
+    .pm-modal-body { padding: 1.5rem; }
+    .pm-modal-body label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; color: #374151; }
+    .pm-modal-body input, .pm-modal-body select, .pm-modal-body textarea {
+      width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; font-family: inherit;
+    }
+    .pm-modal-body textarea { resize: vertical; min-height: 80px; }
+    .pm-modal-body input:focus, .pm-modal-body select:focus, .pm-modal-body textarea:focus {
+      outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .pm-modal-submit {
+      width: 100%; padding: 0.75rem; background: #2563eb; color: white;
+      border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+    }
+    .pm-modal-submit:hover { background: #1e40af; }
+
+    /* ── Engagement Tracker ── */
+    .pm-tracker {
+      background: white; border-radius: 14px; border: 1px solid #e5e7eb;
+      overflow: hidden; margin-bottom: 2rem;
+    }
+    .pm-tracker-head {
+      background: #1e293b; color: white; padding: 1rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pm-tracker-head h3 { font-size: 1rem; font-weight: 800; }
+    .pm-tracker-body { padding: 0.5rem 1.5rem; }
+    .pm-eng-row {
+      display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0;
+      border-bottom: 1px solid #f3f4f6; flex-wrap: wrap;
+    }
+    .pm-eng-row:last-child { border-bottom: none; }
+    .pm-eng-status {
+      font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .pm-eng-status.pending { background: #fef3c7; color: #92400e; }
+    .pm-eng-status.accepted { background: #dbeafe; color: #1e40af; }
+    .pm-eng-status.in_progress { background: #d1fae5; color: #065f46; }
+    .pm-eng-status.completed { background: #f0fdf4; color: #166534; }
+    .pm-eng-status.cancelled { background: #fee2e2; color: #991b1b; }
+
+    /* ── Bypass Notice ── */
+    .pm-bypass {
+      background: linear-gradient(135deg, #1e3a5f, #1e40af);
+      color: white; border-radius: 12px; padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem; font-size: 0.82rem; line-height: 1.6;
+    }
+    .pm-bypass strong { color: #93c5fd; }
+
+    /* ── Empty State ── */
+    .pm-empty { text-align: center; padding: 3rem 1rem; color: #9ca3af; }
+    .pm-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .pm-empty p { font-size: 0.9rem; }
+
+    /* ── Footer ── */
+    .pm-footer {
+      background: #111827; color: #9CA3AF; text-align: center;
+      padding: 2rem; font-size: 0.8rem; margin-top: 3rem;
+    }
+
+    /* ── Register Modal ── */
+    .pm-reg-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 10000; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .pm-reg-overlay.active { display: flex; }
+    .pm-reg-modal {
+      background: white; border-radius: 16px; width: 100%; max-width: 580px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .pm-reg-head {
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pm-reg-head h3 { font-size: 1.15rem; font-weight: 800; }
+    .pm-reg-body { padding: 1.5rem; }
+    .pm-reg-body label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; color: #374151; }
+    .pm-reg-body input, .pm-reg-body select, .pm-reg-body textarea {
+      width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; font-family: inherit; box-sizing: border-box;
+    }
+    .pm-reg-body textarea { resize: vertical; min-height: 80px; }
+    .pm-reg-body input:focus, .pm-reg-body select:focus, .pm-reg-body textarea:focus {
+      outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .pm-reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+    @media (max-width: 640px) { .pm-reg-row { grid-template-columns: 1fr; } }
+    .pm-reg-submit {
+      width: 100%; padding: 0.75rem; background: #2563eb; color: white;
+      border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+    }
+    .pm-reg-submit:hover { background: #1e40af; }
+    .pm-reg-success {
+      text-align: center; padding: 2rem 1rem;
+    }
+    .pm-reg-success .check { font-size: 3rem; margin-bottom: 1rem; }
+    .pm-reg-success h4 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .pm-reg-success p { color: #6b7280; font-size: 0.9rem; line-height: 1.6; }
+
+    @media (max-width: 640px) {
+      .pm-hero h1 { font-size: 1.75rem; }
+      .pm-grid { grid-template-columns: 1fr; }
+      .pm-filters { flex-direction: column; }
+      .pm-search { min-width: 100%; }
+      .pm-hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">Sanders PM</span> <span style="font-weight:500;opacity:0.9;">· RentVerified</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="listings.html">Browse Rentals</a>
+    <a href="network.html">Network</a>
+    <a href="professional-marketplace.html" style="color:#2563eb;font-weight:700;">Hire a Pro</a>
+  </div>
+  <div class="nav-cta">
+    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login / Sign Up</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="pm-hero">
+  <h1>Hire a Professional</h1>
+  <p>Find trusted accountants, attorneys, bookkeepers, and more — all vetted and booked through RentVerified.</p>
+  <div class="pm-hero-stats">
+    <div class="pm-hero-stat"><div class="num" id="pm-stat-pros">0</div><div class="lbl">Professionals</div></div>
+    <div class="pm-hero-stat"><div class="num" id="pm-stat-cats">17</div><div class="lbl">Categories</div></div>
+    <div class="pm-hero-stat"><div class="num" id="pm-stat-reviews">0</div><div class="lbl">Reviews</div></div>
+    <div class="pm-hero-stat"><div class="num" id="pm-stat-booked">0</div><div class="lbl">Booked This Month</div></div>
+  </div>
+  <div style="margin-top:1.5rem;">
+    <button onclick="openRegisterModal()" style="padding:0.7rem 2rem; background:white; color:#1e293b; border:none; border-radius:10px; font-weight:800; font-size:0.95rem; cursor:pointer; transition:0.15s;">
+      List Your Practice
+    </button>
+    <p style="font-size:0.72rem; opacity:0.6; margin-top:0.5rem;">Are you a professional? Join our marketplace for free.</p>
+  </div>
+</section>
+
+<div class="pm-wrap">
+
+  <!-- Category Tabs -->
+  <div class="pm-cats" id="pm-cats">
+    <div class="pm-cat active" data-cat="all" onclick="filterCategory('all')">All Professionals</div>
+    <div class="pm-cat" data-cat="accountant" onclick="filterCategory('accountant')">Accountants / CPA</div>
+    <div class="pm-cat" data-cat="attorney" onclick="filterCategory('attorney')">Attorneys</div>
+    <div class="pm-cat" data-cat="bookkeeper" onclick="filterCategory('bookkeeper')">Bookkeepers</div>
+    <div class="pm-cat" data-cat="tax" onclick="filterCategory('tax')">Tax Preparers</div>
+    <div class="pm-cat" data-cat="insurance" onclick="filterCategory('insurance')">Insurance Agents</div>
+    <div class="pm-cat" data-cat="inspector" onclick="filterCategory('inspector')">Property Inspectors</div>
+    <div class="pm-cat" data-cat="appraiser" onclick="filterCategory('appraiser')">Appraisers</div>
+    <div class="pm-cat" data-cat="notary" onclick="filterCategory('notary')">Notary / Signing</div>
+    <div class="pm-cat" data-cat="contractor" onclick="filterCategory('contractor')">General Contractor</div>
+    <div class="pm-cat" data-cat="plumber" onclick="filterCategory('plumber')">Plumbers</div>
+    <div class="pm-cat" data-cat="electrician" onclick="filterCategory('electrician')">Electricians</div>
+    <div class="pm-cat" data-cat="hvac" onclick="filterCategory('hvac')">HVAC Technicians</div>
+    <div class="pm-cat" data-cat="cleaner" onclick="filterCategory('cleaner')">Cleaning Services</div>
+    <div class="pm-cat" data-cat="handyman" onclick="filterCategory('handyman')">Handyman</div>
+    <div class="pm-cat" data-cat="painter" onclick="filterCategory('painter')">Painters</div>
+    <div class="pm-cat" data-cat="roofer" onclick="filterCategory('roofer')">Roofers</div>
+    <div class="pm-cat" data-cat="landscaper" onclick="filterCategory('landscaper')">Landscaping</div>
+  </div>
+
+  <!-- Filters -->
+  <div class="pm-filters">
+    <input type="text" class="pm-search" id="pm-search" placeholder="Search by name, specialty, or keyword..." oninput="filterProfessionals()" />
+    <select class="pm-filter-select" id="pm-sort" onchange="filterProfessionals()">
+      <option value="rating">Highest Rated</option>
+      <option value="price_low">Price: Low → High</option>
+      <option value="price_high">Price: High → Low</option>
+      <option value="reviews">Most Reviews</option>
+      <option value="recent">Recently Added</option>
+    </select>
+    <select class="pm-filter-select" id="pm-location" onchange="filterProfessionals()">
+      <option value="all">All Locations</option>
+      <option value="salt_lake">Salt Lake City</option>
+      <option value="provo">Provo / Orem</option>
+      <option value="ogden">Ogden</option>
+      <option value="st_george">St. George</option>
+      <option value="park_city">Park City</option>
+      <option value="remote">Remote / Virtual</option>
+    </select>
+    <select class="pm-filter-select" id="pm-price-range" onchange="filterProfessionals()">
+      <option value="all">Any Price</option>
+      <option value="0-100">Under $100/hr</option>
+      <option value="100-200">$100 – $200/hr</option>
+      <option value="200-500">$200 – $500/hr</option>
+      <option value="500+">$500+/hr</option>
+    </select>
+  </div>
+
+  <!-- Results Header -->
+  <div class="pm-results-header">
+    <h2 id="pm-results-title">All Professionals</h2>
+    <span class="pm-results-count" id="pm-results-count"></span>
+  </div>
+
+  <!-- Professional Cards Grid -->
+  <div class="pm-grid" id="pm-grid"></div>
+
+  <!-- Engagement Tracker -->
+  <div class="pm-tracker" id="pm-tracker">
+    <div class="pm-tracker-head">
+      <h3>My Engagements</h3>
+      <span style="font-size:0.78rem; opacity:0.7;" id="pm-eng-count">0 active</span>
+    </div>
+    <div class="pm-tracker-body" id="pm-tracker-body">
+      <div class="pm-empty">
+        <div class="pm-empty-icon">📋</div>
+        <p>No engagements yet. Browse professionals above and request a consultation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bypass Notice -->
+  <div class="pm-bypass">
+    <strong>🔒 Platform Protection:</strong> All professional engagements initiated through RentVerified are tracked with a 90-day referral window. Professional contact details are provided only after a consultation is booked. Direct contact outside the platform does not waive referral agreements. By using this marketplace, you agree to these terms.
+  </div>
+
+</div>
+
+<!-- Request Consultation Modal -->
+<div class="pm-modal-overlay" id="pm-modal">
+  <div class="pm-modal">
+    <div class="pm-modal-head">
+      <h3 id="pm-modal-title">Request Consultation</h3>
+      <button class="pm-modal-close" onclick="closePmModal()">&times;</button>
+    </div>
+    <div class="pm-modal-body">
+      <div id="pm-modal-pro-info" style="display:flex; gap:0.75rem; align-items:center; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid #e5e7eb;">
+        <div class="pm-avatar" id="pm-modal-avatar" style="width:44px;height:44px;font-size:1rem;"></div>
+        <div>
+          <div style="font-weight:700;" id="pm-modal-name"></div>
+          <div style="font-size:0.78rem; color:#6b7280;" id="pm-modal-specialty"></div>
+        </div>
+      </div>
+
+      <label>Your Name *</label>
+      <input type="text" id="pm-req-name" placeholder="Full name" />
+
+      <label>Email *</label>
+      <input type="email" id="pm-req-email" placeholder="you@example.com" />
+
+      <label>Phone</label>
+      <input type="tel" id="pm-req-phone" placeholder="(555) 000-0000" />
+
+      <label>Service Needed *</label>
+      <select id="pm-req-service">
+        <option value="">Select a service...</option>
+        <option>Tax Preparation (Business)</option>
+        <option>Tax Preparation (Personal)</option>
+        <option>Bookkeeping / Monthly Accounting</option>
+        <option>Financial Statement Preparation</option>
+        <option>Eviction Filing</option>
+        <option>Lease Review / Drafting</option>
+        <option>Entity Formation (LLC, Corp)</option>
+        <option>Real Estate Closing</option>
+        <option>Property Inspection</option>
+        <option>Insurance Quote</option>
+        <option>Appraisal</option>
+        <option>Notary / Signing</option>
+        <option>Plumbing Repair</option>
+        <option>Electrical Work</option>
+        <option>HVAC Service</option>
+        <option>Turnover / Deep Cleaning</option>
+        <option>Handyman Service</option>
+        <option>Interior / Exterior Painting</option>
+        <option>Roof Repair / Inspection</option>
+        <option>Landscaping / Snow Removal</option>
+        <option>General Contracting</option>
+        <option>General Consultation</option>
+        <option>Other</option>
+      </select>
+
+      <label>Describe Your Needs</label>
+      <textarea id="pm-req-desc" placeholder="Tell the professional what you need help with..."></textarea>
+
+      <label>Preferred Timeline</label>
+      <select id="pm-req-timeline">
+        <option>As soon as possible</option>
+        <option>Within 1 week</option>
+        <option>Within 1 month</option>
+        <option>Just exploring / no rush</option>
+      </select>
+
+      <label>Budget Range</label>
+      <select id="pm-req-budget">
+        <option value="">Select...</option>
+        <option>Under $250</option>
+        <option>$250 – $500</option>
+        <option>$500 – $1,000</option>
+        <option>$1,000 – $2,500</option>
+        <option>$2,500+</option>
+        <option>Not sure / Need a quote</option>
+      </select>
+
+      <button class="pm-modal-submit" onclick="submitConsultation()">Request Consultation</button>
+      <p style="font-size:0.72rem; color:#9ca3af; text-align:center; margin-top:0.75rem;">
+        The professional will respond within 24 hours. All communication goes through RentVerified.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Register as Professional Modal -->
+<div class="pm-reg-overlay" id="pm-reg-modal">
+  <div class="pm-reg-modal">
+    <div class="pm-reg-head">
+      <h3>List Your Practice</h3>
+      <button class="pm-modal-close" onclick="closeRegisterModal()">&times;</button>
+    </div>
+    <div class="pm-reg-body" id="pm-reg-body">
+      <p style="font-size:0.85rem; color:#6b7280; margin-bottom:1.25rem;">
+        Join the RentVerified professional marketplace. Your profile will be visible to property managers, landlords, and real estate businesses in your area.
+      </p>
+
+      <label>Full Name / Business Name *</label>
+      <input type="text" id="reg-name" placeholder="e.g. John Smith, LLC" />
+
+      <div class="pm-reg-row">
+        <div>
+          <label>Category *</label>
+          <select id="reg-category">
+            <option value="">Select your specialty...</option>
+            <option value="accountant">Accountant / CPA</option>
+            <option value="attorney">Attorney</option>
+            <option value="bookkeeper">Bookkeeper</option>
+            <option value="tax">Tax Preparer</option>
+            <option value="insurance">Insurance Agent</option>
+            <option value="inspector">Property Inspector</option>
+            <option value="appraiser">Appraiser</option>
+            <option value="notary">Notary / Signing</option>
+            <option value="contractor">General Contractor</option>
+            <option value="plumber">Plumber</option>
+            <option value="electrician">Electrician</option>
+            <option value="hvac">HVAC Technician</option>
+            <option value="cleaner">Cleaning Service</option>
+            <option value="handyman">Handyman</option>
+            <option value="painter">Painter</option>
+            <option value="roofer">Roofer</option>
+            <option value="landscaper">Landscaper</option>
+          </select>
+        </div>
+        <div>
+          <label>Professional Title *</label>
+          <input type="text" id="reg-title" placeholder="e.g. Licensed Master Plumber" />
+        </div>
+      </div>
+
+      <div class="pm-reg-row">
+        <div>
+          <label>Email *</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" />
+        </div>
+        <div>
+          <label>Phone</label>
+          <input type="tel" id="reg-phone" placeholder="(555) 000-0000" />
+        </div>
+      </div>
+
+      <div class="pm-reg-row">
+        <div>
+          <label>Location *</label>
+          <select id="reg-location">
+            <option value="">Select area...</option>
+            <option value="salt_lake">Salt Lake City</option>
+            <option value="provo">Provo / Orem</option>
+            <option value="ogden">Ogden</option>
+            <option value="st_george">St. George</option>
+            <option value="park_city">Park City</option>
+            <option value="remote">Remote / Virtual</option>
+          </select>
+        </div>
+        <div>
+          <label>Hourly Rate / Service Rate *</label>
+          <input type="text" id="reg-rate" placeholder="e.g. $85/hr or $250/visit" />
+        </div>
+      </div>
+
+      <label>Licenses & Certifications</label>
+      <input type="text" id="reg-licenses" placeholder="e.g. Utah CPA #12345, Licensed General Contractor" />
+
+      <label>Services Offered (comma-separated) *</label>
+      <input type="text" id="reg-services" placeholder="e.g. Drain Cleaning, Water Heater Install, Sewer Repair" />
+
+      <label>About Your Practice *</label>
+      <textarea id="reg-desc" placeholder="Tell property managers why they should hire you. Experience, specialties, availability, service area..."></textarea>
+
+      <label>Years of Experience</label>
+      <select id="reg-experience">
+        <option value="">Select...</option>
+        <option value="1-3">1-3 years</option>
+        <option value="3-5">3-5 years</option>
+        <option value="5-10">5-10 years</option>
+        <option value="10+">10+ years</option>
+      </select>
+
+      <div style="background:#f0f9ff; border-radius:10px; padding:1rem; margin-bottom:1.25rem; font-size:0.82rem; color:#0369a1;">
+        <strong>Free listing</strong> — No monthly fees. RentVerified earns a small referral fee only when you get booked.<br/>
+        <strong>Verified badge</strong> — After we confirm your license, you'll receive a verified badge.<br/>
+        <strong>Leads delivered</strong> — Property managers in your area will find and book you directly.
+      </div>
+
+      <button class="pm-reg-submit" onclick="submitRegistration()">Submit My Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="pm-footer">
+  &copy; 2026 Sanders Property Management &middot; RentVerified &middot;
+  <a href="index.html" style="color:#93c5fd;">Home</a> &middot;
+  <a href="listings.html" style="color:#93c5fd;">Rentals</a> &middot;
+  <a href="funding.html" style="color:#93c5fd;">Funding</a>
+</div>
+
+<script src="app.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script>
+  // ═══════════════════════════════════════════════════════════════════════
+  // Professional Marketplace Engine
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // ── Professional Directory (seed data — will be replaced by Supabase) ──
+  const PROFESSIONALS = [
+    {
+      id: 'pro_1', name: 'Sarah Mitchell, CPA', initials: 'SM', color: '#2563eb',
+      category: 'accountant', title: 'Certified Public Accountant',
+      location: 'salt_lake', locationLabel: 'Salt Lake City, UT',
+      rate: 175, rateLabel: '$175/hr',
+      rating: 4.9, reviews: 47, completedJobs: 128,
+      badges: ['CPA Licensed', 'Verified', 'Real Estate Specialist'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Specializing in real estate accounting, property management financials, 1031 exchanges, and small business tax strategy. 12+ years experience.',
+      services: ['Tax Preparation', 'Bookkeeping', 'Financial Statements', '1031 Exchange', 'Entity Structuring'],
+      joinedAt: '2025-06-15'
+    },
+    {
+      id: 'pro_2', name: 'Marcus Johnson, Esq.', initials: 'MJ', color: '#7c3aed',
+      category: 'attorney', title: 'Real Estate & Landlord-Tenant Attorney',
+      location: 'salt_lake', locationLabel: 'Salt Lake City, UT',
+      rate: 295, rateLabel: '$295/hr',
+      rating: 4.8, reviews: 63, completedJobs: 215,
+      badges: ['Utah Bar', 'Verified', 'Eviction Specialist'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Utah landlord-tenant law specialist. Handles evictions, lease disputes, fair housing compliance, and commercial real estate closings.',
+      services: ['Eviction Filing', 'Lease Review', 'Fair Housing', 'Commercial Closings', 'Dispute Resolution'],
+      joinedAt: '2025-04-20'
+    },
+    {
+      id: 'pro_3', name: 'Lisa Chen', initials: 'LC', color: '#059669',
+      category: 'bookkeeper', title: 'Property Management Bookkeeper',
+      location: 'remote', locationLabel: 'Remote / Virtual',
+      rate: 65, rateLabel: '$65/hr',
+      rating: 4.9, reviews: 31, completedJobs: 87,
+      badges: ['QuickBooks ProAdvisor', 'Verified'],
+      badgeTypes: ['', 'verified'],
+      desc: 'Full-service bookkeeping for property managers. Rent roll reconciliation, expense tracking, owner statements, and 1099 prep.',
+      services: ['Monthly Bookkeeping', 'Rent Reconciliation', 'Owner Statements', '1099 Preparation', 'QuickBooks Setup'],
+      joinedAt: '2025-08-10'
+    },
+    {
+      id: 'pro_4', name: 'David Torres, EA', initials: 'DT', color: '#dc2626',
+      category: 'tax', title: 'Enrolled Agent — Tax Specialist',
+      location: 'provo', locationLabel: 'Provo, UT',
+      rate: 125, rateLabel: '$125/hr',
+      rating: 4.7, reviews: 52, completedJobs: 340,
+      badges: ['IRS Enrolled Agent', 'Verified'],
+      badgeTypes: ['', 'verified'],
+      desc: 'Tax preparation and planning for landlords, property investors, and small businesses. Schedule E, depreciation, and cost segregation expert.',
+      services: ['Tax Preparation', 'Tax Planning', 'Schedule E', 'Cost Segregation', 'IRS Representation'],
+      joinedAt: '2025-03-01'
+    },
+    {
+      id: 'pro_5', name: 'Rachel Adams', initials: 'RA', color: '#f59e0b',
+      category: 'insurance', title: 'Licensed Insurance Agent',
+      location: 'salt_lake', locationLabel: 'Salt Lake City, UT',
+      rate: 0, rateLabel: 'Free Quotes',
+      rating: 4.8, reviews: 89, completedJobs: 412,
+      badges: ['Licensed Agent', 'Verified', 'Multi-Carrier'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Landlord insurance, renters insurance, and commercial property coverage. Compare quotes from 15+ carriers in minutes.',
+      services: ['Landlord Insurance', 'Renters Insurance', 'Commercial Property', 'Liability Coverage', 'Umbrella Policies'],
+      joinedAt: '2025-05-22'
+    },
+    {
+      id: 'pro_6', name: 'James Wright', initials: 'JW', color: '#0891b2',
+      category: 'inspector', title: 'Certified Property Inspector',
+      location: 'salt_lake', locationLabel: 'Salt Lake City, UT',
+      rate: 350, rateLabel: '$350/inspection',
+      rating: 4.9, reviews: 76, completedJobs: 520,
+      badges: ['ASHI Certified', 'Verified', 'Radon Certified'],
+      badgeTypes: ['', 'verified', ''],
+      desc: 'Full home inspections, move-in/move-out inspections, mold testing, radon testing, and sewer scopes. Same-week availability.',
+      services: ['Full Inspection', 'Move-In/Out', 'Mold Testing', 'Radon Testing', 'Sewer Scope'],
+      joinedAt: '2025-07-05'
+    },
+    {
+      id: 'pro_7', name: 'Karen Patel, MAI', initials: 'KP', color: '#6d28d9',
+      category: 'appraiser', title: 'Certified General Appraiser',
+      location: 'salt_lake', locationLabel: 'Salt Lake City, UT',
+      rate: 450, rateLabel: '$450/appraisal',
+      rating: 4.6, reviews: 28, completedJobs: 190,
+      badges: ['MAI Designated', 'Verified'],
+      badgeTypes: ['', 'verified'],
+      desc: 'Residential and commercial property appraisals. FHA, conventional, and investment property valuations. 15-year experience.',
+      services: ['Residential Appraisal', 'Commercial Appraisal', 'FHA Appraisal', 'Investment Analysis', 'BPO'],
+      joinedAt: '2025-09-12'
+    },
+    {
+      id: 'pro_8', name: 'Tom Bradley', initials: 'TB', color: '#be185d',
+      category: 'notary', title: 'Mobile Notary & Loan Signing Agent',
+      location: 'salt_lake', locationLabel: 'Salt Lake City Metro',
+      rate: 75, rateLabel: '$75/signing',
+      rating: 4.9, reviews: 142, completedJobs: 890,
+      badges: ['NNA Certified', 'Verified', 'Background Checked'],
+      badgeTypes: ['', 'verified', ''],
+      desc: 'Mobile notary services — I come to you. Loan signings, lease notarizations, power of attorney, and real estate closings. Same-day available.',
+      services: ['Loan Signing', 'Lease Notarization', 'POA', 'Real Estate Closing', 'General Notary'],
+      joinedAt: '2025-02-14'
+    },
+    {
+      id: 'pro_9', name: 'Angela Rivera, CPA', initials: 'AR', color: '#ea580c',
+      category: 'accountant', title: 'Forensic & Property Accountant',
+      location: 'ogden', locationLabel: 'Ogden, UT',
+      rate: 200, rateLabel: '$200/hr',
+      rating: 4.7, reviews: 19, completedJobs: 64,
+      badges: ['CPA Licensed', 'Verified', 'Forensic Specialist'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Forensic accounting for property disputes, embezzlement investigations, and complex multi-entity real estate portfolios.',
+      services: ['Forensic Accounting', 'Multi-Entity', 'Audit Preparation', 'Litigation Support', 'Portfolio Analysis'],
+      joinedAt: '2025-11-01'
+    },
+    {
+      id: 'pro_10', name: 'Nathan Kim, Esq.', initials: 'NK', color: '#4338ca',
+      category: 'attorney', title: 'Commercial Real Estate Attorney',
+      location: 'park_city', locationLabel: 'Park City, UT',
+      rate: 375, rateLabel: '$375/hr',
+      rating: 4.8, reviews: 34, completedJobs: 156,
+      badges: ['Utah Bar', 'Verified', 'Commercial Specialist'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Commercial leases, NNN agreements, property acquisitions, 1031 exchanges, and zoning/land use. Represents both landlords and investors.',
+      services: ['Commercial Leases', 'NNN Agreements', 'Acquisitions', '1031 Exchange', 'Zoning/Land Use'],
+      joinedAt: '2025-05-30'
+    },
+    {
+      id: 'pro_11', name: 'Maria Gonzalez', initials: 'MG', color: '#0d9488',
+      category: 'bookkeeper', title: 'Bilingual Bookkeeper',
+      location: 'st_george', locationLabel: 'St. George, UT',
+      rate: 55, rateLabel: '$55/hr',
+      rating: 4.8, reviews: 22, completedJobs: 45,
+      badges: ['Bilingual (EN/ES)', 'Verified'],
+      badgeTypes: ['', 'verified'],
+      desc: 'Bilingual bookkeeping services for property managers. Specializing in small portfolios (1-20 units). QuickBooks and Excel.',
+      services: ['Monthly Bookkeeping', 'Payroll', 'Accounts Receivable', 'Expense Tracking', 'Year-End Prep'],
+      joinedAt: '2026-01-08'
+    },
+    {
+      id: 'pro_12', name: 'Brian Foster', initials: 'BF', color: '#b91c1c',
+      category: 'tax', title: 'Real Estate Tax Strategist',
+      location: 'remote', locationLabel: 'Remote / Virtual',
+      rate: 200, rateLabel: '$200/hr',
+      rating: 5.0, reviews: 15, completedJobs: 78,
+      badges: ['CPA', 'Verified', 'Top Rated'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Advanced tax strategy for real estate investors. Cost segregation studies, opportunity zones, syndication tax, and passive activity rules.',
+      services: ['Cost Segregation', 'Opportunity Zones', 'Syndication Tax', 'Tax Strategy', 'Entity Planning'],
+      joinedAt: '2025-10-18'
+    },
+    // ── Trade & Contractor Professionals ──
+    {
+      id: 'pro_13', name: 'Mike Ramirez', initials: 'MR', color: '#b45309',
+      category: 'contractor', title: 'Licensed General Contractor',
+      location: 'salt_lake', locationLabel: 'Salt Lake City, UT',
+      rate: 95, rateLabel: '$95/hr',
+      rating: 4.8, reviews: 67, completedJobs: 310,
+      badges: ['Licensed GC', 'Verified', 'Insured'],
+      badgeTypes: ['', 'verified', ''],
+      desc: 'Full-service general contracting for property managers. Tenant buildouts, renovations, maintenance contracts, and emergency repairs. 18 years experience.',
+      services: ['Tenant Buildout', 'Renovation', 'Maintenance Contract', 'Emergency Repair', 'Code Compliance'],
+      joinedAt: '2025-04-10'
+    },
+    {
+      id: 'pro_14', name: 'Steve Patterson', initials: 'SP', color: '#0369a1',
+      category: 'plumber', title: 'Master Plumber',
+      location: 'salt_lake', locationLabel: 'Salt Lake City Metro',
+      rate: 110, rateLabel: '$110/hr',
+      rating: 4.9, reviews: 93, completedJobs: 680,
+      badges: ['Master Plumber', 'Verified', '24/7 Emergency'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Residential & commercial plumbing. Drain cleaning, water heaters, re-piping, sewer repair, and backflow testing. Same-day emergency service.',
+      services: ['Drain Cleaning', 'Water Heater', 'Re-Piping', 'Sewer Repair', 'Backflow Testing'],
+      joinedAt: '2025-03-15'
+    },
+    {
+      id: 'pro_15', name: 'Tony Nguyen', initials: 'TN', color: '#ca8a04',
+      category: 'electrician', title: 'Licensed Electrician',
+      location: 'provo', locationLabel: 'Provo / Utah County',
+      rate: 100, rateLabel: '$100/hr',
+      rating: 4.7, reviews: 41, completedJobs: 225,
+      badges: ['Licensed', 'Verified', 'Commercial Certified'],
+      badgeTypes: ['', 'verified', ''],
+      desc: 'Electrical panel upgrades, rewiring, outlets, lighting, EV charger installs, and code inspections for rental properties.',
+      services: ['Panel Upgrade', 'Rewiring', 'EV Charger Install', 'Lighting', 'Code Inspection'],
+      joinedAt: '2025-06-22'
+    },
+    {
+      id: 'pro_16', name: 'Carlos Ortiz', initials: 'CO', color: '#0891b2',
+      category: 'hvac', title: 'HVAC Technician — EPA Certified',
+      location: 'salt_lake', locationLabel: 'Wasatch Front',
+      rate: 95, rateLabel: '$95/hr',
+      rating: 4.8, reviews: 58, completedJobs: 420,
+      badges: ['EPA Certified', 'Verified', 'NATE Certified'],
+      badgeTypes: ['', 'verified', ''],
+      desc: 'Heating & cooling install, repair, and maintenance. Furnaces, AC units, mini-splits, ductwork, and seasonal tune-ups for property portfolios.',
+      services: ['AC Repair', 'Furnace Install', 'Mini-Split', 'Ductwork', 'Seasonal Maintenance'],
+      joinedAt: '2025-05-08'
+    },
+    {
+      id: 'pro_17', name: 'Clean Sweep Pro', initials: 'CS', color: '#059669',
+      category: 'cleaner', title: 'Commercial & Turnover Cleaning',
+      location: 'salt_lake', locationLabel: 'Salt Lake City Metro',
+      rate: 45, rateLabel: '$45/hr',
+      rating: 4.9, reviews: 112, completedJobs: 890,
+      badges: ['Bonded & Insured', 'Verified', 'Same-Day Available'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Move-out deep cleans, turnover cleans, carpet cleaning, and recurring property maintenance cleaning. Bulk pricing for 5+ units.',
+      services: ['Turnover Clean', 'Deep Clean', 'Carpet Cleaning', 'Window Cleaning', 'Recurring Service'],
+      joinedAt: '2025-02-28'
+    },
+    {
+      id: 'pro_18', name: 'Dan Wilson', initials: 'DW', color: '#7c3aed',
+      category: 'handyman', title: 'Licensed Handyman Service',
+      location: 'ogden', locationLabel: 'Ogden / Weber County',
+      rate: 65, rateLabel: '$65/hr',
+      rating: 4.7, reviews: 84, completedJobs: 530,
+      badges: ['Licensed', 'Verified', 'Property Specialist'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'All-around handyman for rental properties. Drywall repair, fixtures, doors, locks, minor plumbing & electrical, appliance install.',
+      services: ['Drywall Repair', 'Lock Change', 'Fixture Install', 'Appliance Install', 'Minor Repairs'],
+      joinedAt: '2025-07-14'
+    },
+    {
+      id: 'pro_19', name: 'Elite Paint Co.', initials: 'EP', color: '#dc2626',
+      category: 'painter', title: 'Interior & Exterior Painting',
+      location: 'salt_lake', locationLabel: 'Salt Lake Valley',
+      rate: 0, rateLabel: 'Free Estimates',
+      rating: 4.8, reviews: 49, completedJobs: 280,
+      badges: ['Licensed', 'Verified', 'Bulk Discounts'],
+      badgeTypes: ['', 'verified', 'featured'],
+      desc: 'Fast-turnaround interior painting for rental units. Turnover repaints in 1-2 days. Exterior painting, staining, and drywall repair. Volume discounts available.',
+      services: ['Interior Paint', 'Exterior Paint', 'Turnover Repaint', 'Drywall Patch', 'Staining'],
+      joinedAt: '2025-09-05'
+    },
+    {
+      id: 'pro_20', name: 'Summit Roofing', initials: 'SR', color: '#78350f',
+      category: 'roofer', title: 'Roofing Contractor',
+      location: 'salt_lake', locationLabel: 'Wasatch Front',
+      rate: 0, rateLabel: 'Free Inspections',
+      rating: 4.6, reviews: 33, completedJobs: 175,
+      badges: ['Licensed', 'Verified', 'Insurance Claims'],
+      badgeTypes: ['', 'verified', ''],
+      desc: 'Roof repair, replacement, and inspection for residential and commercial properties. Handle insurance claims. Shingle, tile, TPO, and metal roofing.',
+      services: ['Roof Repair', 'Replacement', 'Inspection', 'Insurance Claim', 'Gutter Install'],
+      joinedAt: '2025-08-20'
+    },
+    {
+      id: 'pro_21', name: 'Green Valley Landscaping', initials: 'GV', color: '#15803d',
+      category: 'landscaper', title: 'Commercial Landscaping & Maintenance',
+      location: 'salt_lake', locationLabel: 'Salt Lake City Metro',
+      rate: 55, rateLabel: '$55/hr',
+      rating: 4.7, reviews: 38, completedJobs: 210,
+      badges: ['Licensed', 'Verified', 'HOA Approved'],
+      badgeTypes: ['', 'verified', ''],
+      desc: 'Year-round property landscaping. Lawn care, irrigation, snow removal, tree trimming, and seasonal cleanup. Multi-property contracts available.',
+      services: ['Lawn Care', 'Irrigation', 'Snow Removal', 'Tree Trimming', 'Seasonal Cleanup'],
+      joinedAt: '2025-06-01'
+    }
+  ];
+
+  // ── State ──
+  let activeCategory = 'all';
+  let selectedProId = null;
+
+  // ── Render Stars ──
+  function renderStars(rating) {
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    return '<span class="pm-stars">' +
+      '★'.repeat(full) +
+      (half ? '★' : '') +
+      '</span>' +
+      '<span class="pm-stars-dim">' + '★'.repeat(empty) + '</span>' +
+      ' <span style="font-size:0.78rem;font-weight:700;color:#111827;">' + rating.toFixed(1) + '</span>';
+  }
+
+  // ── Render Professional Card ──
+  function renderProCard(pro) {
+    const badges = pro.badges.map((b, i) => {
+      const type = pro.badgeTypes[i] || '';
+      return '<span class="pm-badge ' + type + '">' + b + '</span>';
+    }).join('');
+
+    return '<div class="pm-card" data-id="' + pro.id + '">' +
+      '<div class="pm-card-header">' +
+        '<div class="pm-avatar" style="background:' + pro.color + ';">' + pro.initials + '</div>' +
+        '<div style="flex:1;">' +
+          '<div class="pm-card-name">' + pro.name + '</div>' +
+          '<div class="pm-card-title">' + pro.title + '</div>' +
+          '<div class="pm-card-location">📍 ' + pro.locationLabel + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pm-card-badges">' + badges + '</div>' +
+      '<div class="pm-card-stats">' +
+        '<div class="pm-stat">' + renderStars(pro.rating) + ' <span style="color:#9ca3af;">(' + pro.reviews + ')</span></div>' +
+      '</div>' +
+      '<div class="pm-card-desc">' + pro.desc + '</div>' +
+      '<div class="pm-card-footer">' +
+        '<div class="pm-price">' + pro.rateLabel + (pro.rate > 0 && pro.rateLabel.includes('/hr') ? '' : '') + '</div>' +
+        '<button class="pm-cta" onclick="openConsultation(\'' + pro.id + '\')">Request Consultation</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── Filter & Render ──
+  function filterCategory(cat) {
+    activeCategory = cat;
+    document.querySelectorAll('.pm-cat').forEach(el => {
+      el.classList.toggle('active', el.getAttribute('data-cat') === cat);
+    });
+    filterProfessionals();
+  }
+
+  function filterProfessionals() {
+    const search = (document.getElementById('pm-search').value || '').toLowerCase();
+    const sort = document.getElementById('pm-sort').value;
+    const location = document.getElementById('pm-location').value;
+    const priceRange = document.getElementById('pm-price-range').value;
+
+    let filtered = PROFESSIONALS.filter(p => {
+      // Category
+      if (activeCategory !== 'all' && p.category !== activeCategory) return false;
+      // Search
+      if (search) {
+        const haystack = (p.name + ' ' + p.title + ' ' + p.desc + ' ' + p.services.join(' ')).toLowerCase();
+        if (!haystack.includes(search)) return false;
+      }
+      // Location
+      if (location !== 'all' && p.location !== location) return false;
+      // Price
+      if (priceRange !== 'all') {
+        if (priceRange === '0-100' && p.rate >= 100) return false;
+        if (priceRange === '100-200' && (p.rate < 100 || p.rate >= 200)) return false;
+        if (priceRange === '200-500' && (p.rate < 200 || p.rate >= 500)) return false;
+        if (priceRange === '500+' && p.rate < 500) return false;
+      }
+      return true;
+    });
+
+    // Sort
+    if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+    else if (sort === 'price_low') filtered.sort((a, b) => a.rate - b.rate);
+    else if (sort === 'price_high') filtered.sort((a, b) => b.rate - a.rate);
+    else if (sort === 'reviews') filtered.sort((a, b) => b.reviews - a.reviews);
+    else if (sort === 'recent') filtered.sort((a, b) => new Date(b.joinedAt) - new Date(a.joinedAt));
+
+    // Render
+    const grid = document.getElementById('pm-grid');
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="pm-empty" style="grid-column:1/-1;"><div class="pm-empty-icon">🔍</div><p>No professionals found matching your criteria. Try adjusting your filters.</p></div>';
+    } else {
+      grid.innerHTML = filtered.map(renderProCard).join('');
+    }
+
+    // Update counts
+    const catLabels = {
+      all: 'All Professionals', accountant: 'Accountants / CPA', attorney: 'Attorneys',
+      bookkeeper: 'Bookkeepers', tax: 'Tax Preparers', insurance: 'Insurance Agents',
+      inspector: 'Property Inspectors', appraiser: 'Appraisers', notary: 'Notary / Signing',
+      contractor: 'General Contractors', plumber: 'Plumbers', electrician: 'Electricians',
+      hvac: 'HVAC Technicians', cleaner: 'Cleaning Services', handyman: 'Handyman',
+      painter: 'Painters', roofer: 'Roofers', landscaper: 'Landscaping'
+    };
+    document.getElementById('pm-results-title').textContent = catLabels[activeCategory] || 'Professionals';
+    document.getElementById('pm-results-count').textContent = filtered.length + ' professional' + (filtered.length !== 1 ? 's' : '') + ' found';
+  }
+
+  // ── Consultation Modal ──
+  function openConsultation(proId) {
+    selectedProId = proId;
+    const pro = PROFESSIONALS.find(p => p.id === proId);
+    if (!pro) return;
+
+    document.getElementById('pm-modal-title').textContent = 'Request Consultation — ' + pro.name;
+    document.getElementById('pm-modal-avatar').style.background = pro.color;
+    document.getElementById('pm-modal-avatar').textContent = pro.initials;
+    document.getElementById('pm-modal-name').textContent = pro.name;
+    document.getElementById('pm-modal-specialty').textContent = pro.title + ' · ' + pro.rateLabel;
+
+    // Prefill from session
+    var sessions = ['rv_landlord_session', 'rv_tenant_session', 'rv_commercial_session'];
+    for (var key of sessions) {
+      try {
+        var s = JSON.parse(localStorage.getItem(key));
+        if (s && s.email) {
+          var nameField = document.getElementById('pm-req-name');
+          var emailField = document.getElementById('pm-req-email');
+          if (emailField && !emailField.value) emailField.value = s.email;
+          if (nameField && !nameField.value && s.companyName) nameField.value = s.companyName;
+          break;
+        }
+      } catch(e) {}
+    }
+
+    // Track referral click
+    trackProReferral(proId, pro.name, 'modal_open');
+
+    document.getElementById('pm-modal').classList.add('active');
+  }
+
+  function closePmModal() {
+    document.getElementById('pm-modal').classList.remove('active');
+    selectedProId = null;
+  }
+
+  // Close modal on overlay click
+  document.getElementById('pm-modal').addEventListener('click', function(e) {
+    if (e.target === this) closePmModal();
+  });
+
+  // ── Submit Consultation Request ──
+  function submitConsultation() {
+    var name = document.getElementById('pm-req-name').value.trim();
+    var email = document.getElementById('pm-req-email').value.trim();
+    var service = document.getElementById('pm-req-service').value;
+
+    if (!name || !email || !service) {
+      alert('Please fill in your name, email, and select a service.');
+      return;
+    }
+
+    var pro = PROFESSIONALS.find(p => p.id === selectedProId);
+    if (!pro) return;
+
+    var engagement = {
+      id: 'eng_' + Date.now(),
+      proId: selectedProId,
+      proName: pro.name,
+      proTitle: pro.title,
+      proColor: pro.color,
+      proInitials: pro.initials,
+      proRate: pro.rateLabel,
+      clientName: name,
+      clientEmail: email,
+      clientPhone: document.getElementById('pm-req-phone').value.trim(),
+      service: service,
+      description: document.getElementById('pm-req-desc').value.trim(),
+      timeline: document.getElementById('pm-req-timeline').value,
+      budget: document.getElementById('pm-req-budget').value,
+      status: 'pending',
+      submittedAt: new Date().toISOString(),
+      referralWindowStart: new Date().toISOString(),
+      referralWindowEnd: new Date(Date.now() + 90 * 86400000).toISOString(),
+      commissionProtected: true,
+      updates: [
+        { status: 'pending', date: new Date().toISOString(), note: 'Consultation request submitted' }
+      ]
+    };
+
+    var engagements = JSON.parse(localStorage.getItem('rv_pro_engagements') || '[]');
+    engagements.push(engagement);
+    localStorage.setItem('rv_pro_engagements', JSON.stringify(engagements));
+
+    // Track referral
+    trackProReferral(selectedProId, pro.name, 'consultation_submit');
+
+    // Close modal and clear form
+    closePmModal();
+    document.getElementById('pm-req-name').value = '';
+    document.getElementById('pm-req-email').value = '';
+    document.getElementById('pm-req-phone').value = '';
+    document.getElementById('pm-req-service').value = '';
+    document.getElementById('pm-req-desc').value = '';
+
+    // Re-render tracker
+    renderEngagements();
+
+    // Scroll to tracker
+    document.getElementById('pm-tracker').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Success feedback
+    alert('Consultation request sent! ' + pro.name + ' will respond within 24 hours through RentVerified.');
+  }
+
+  // ── Engagement Tracker ──
+  function renderEngagements() {
+    var engagements = JSON.parse(localStorage.getItem('rv_pro_engagements') || '[]');
+    var body = document.getElementById('pm-tracker-body');
+    var countEl = document.getElementById('pm-eng-count');
+
+    var active = engagements.filter(e => !['completed', 'cancelled'].includes(e.status));
+    countEl.textContent = active.length + ' active';
+
+    if (engagements.length === 0) {
+      body.innerHTML = '<div class="pm-empty"><div class="pm-empty-icon">📋</div><p>No engagements yet. Browse professionals above and request a consultation.</p></div>';
+      return;
+    }
+
+    var statusLabels = {
+      pending: 'Pending',
+      accepted: 'Accepted',
+      in_progress: 'In Progress',
+      completed: 'Completed',
+      cancelled: 'Cancelled'
+    };
+
+    body.innerHTML = engagements.sort(function(a, b) {
+      return new Date(b.submittedAt) - new Date(a.submittedAt);
+    }).map(function(eng) {
+      var date = new Date(eng.submittedAt).toLocaleDateString();
+      return '<div class="pm-eng-row">' +
+        '<div class="pm-avatar" style="background:' + eng.proColor + '; width:36px; height:36px; font-size:0.75rem; border-radius:8px;">' + eng.proInitials + '</div>' +
+        '<div style="flex:1; min-width:120px;">' +
+          '<div style="font-weight:700; font-size:0.88rem;">' + eng.proName + '</div>' +
+          '<div style="font-size:0.72rem; color:#6b7280;">' + eng.service + ' · Requested ' + date + '</div>' +
+        '</div>' +
+        '<div><span class="pm-eng-status ' + eng.status + '">' + (statusLabels[eng.status] || eng.status) + '</span></div>' +
+        '<div style="font-size:0.72rem; color:#9ca3af;" title="Referral expires ' + new Date(eng.referralWindowEnd).toLocaleDateString() + '">🔒 Protected</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Referral Tracking (Commission Protection) ──
+  function trackProReferral(proId, proName, action) {
+    var referrals = JSON.parse(localStorage.getItem('rv_referral_log') || '[]');
+    referrals.push({
+      type: 'professional',
+      proId: proId,
+      proName: proName,
+      action: action,
+      timestamp: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 90 * 86400000).toISOString(),
+      source: 'professional_marketplace'
+    });
+    localStorage.setItem('rv_referral_log', JSON.stringify(referrals));
+  }
+
+  // ── Update Hero Stats ──
+  function updateHeroStats() {
+    document.getElementById('pm-stat-pros').textContent = PROFESSIONALS.length;
+    var totalReviews = PROFESSIONALS.reduce(function(sum, p) { return sum + p.reviews; }, 0);
+    document.getElementById('pm-stat-reviews').textContent = totalReviews.toLocaleString();
+    var engagements = JSON.parse(localStorage.getItem('rv_pro_engagements') || '[]');
+    var thisMonth = engagements.filter(function(e) {
+      var d = new Date(e.submittedAt);
+      var now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    document.getElementById('pm-stat-booked').textContent = thisMonth.length;
+  }
+
+  // ── Registration: List Your Practice ──
+  function openRegisterModal() {
+    document.getElementById('pm-reg-modal').classList.add('active');
+    // Reset to form view
+    document.getElementById('pm-reg-body').innerHTML = document.getElementById('pm-reg-body').dataset.originalHtml || document.getElementById('pm-reg-body').innerHTML;
+  }
+
+  function closeRegisterModal() {
+    document.getElementById('pm-reg-modal').classList.remove('active');
+  }
+  document.getElementById('pm-reg-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeRegisterModal();
+  });
+
+  function submitRegistration() {
+    var name = document.getElementById('reg-name').value.trim();
+    var category = document.getElementById('reg-category').value;
+    var title = document.getElementById('reg-title').value.trim();
+    var email = document.getElementById('reg-email').value.trim();
+    var location = document.getElementById('reg-location').value;
+    var rateText = document.getElementById('reg-rate').value.trim();
+    var services = document.getElementById('reg-services').value.trim();
+    var desc = document.getElementById('reg-desc').value.trim();
+
+    if (!name || !category || !title || !email || !location || !rateText || !services || !desc) {
+      alert('Please fill in all required fields (marked with *).');
+      return;
+    }
+
+    // Parse rate
+    var rateNum = parseInt(rateText.replace(/[^0-9]/g, '')) || 0;
+
+    // Build initials
+    var words = name.split(/\s+/);
+    var initials = words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+
+    // Random color
+    var colors = ['#2563eb','#7c3aed','#059669','#dc2626','#f59e0b','#0891b2','#6d28d9','#be185d','#b45309','#0369a1','#15803d','#ca8a04'];
+    var color = colors[Math.floor(Math.random() * colors.length)];
+
+    // Location labels
+    var locationLabels = {
+      salt_lake: 'Salt Lake City, UT', provo: 'Provo / Orem, UT', ogden: 'Ogden, UT',
+      st_george: 'St. George, UT', park_city: 'Park City, UT', remote: 'Remote / Virtual'
+    };
+
+    var profile = {
+      id: 'pro_reg_' + Date.now(),
+      name: name,
+      initials: initials,
+      color: color,
+      category: category,
+      title: title,
+      location: location,
+      locationLabel: locationLabels[location] || location,
+      rate: rateNum,
+      rateLabel: rateText,
+      rating: 0,
+      reviews: 0,
+      completedJobs: 0,
+      badges: ['New Listing'],
+      badgeTypes: ['featured'],
+      desc: desc,
+      services: services.split(',').map(function(s) { return s.trim(); }).filter(Boolean),
+      joinedAt: new Date().toISOString().split('T')[0],
+      email: email,
+      phone: document.getElementById('reg-phone').value.trim(),
+      licenses: document.getElementById('reg-licenses').value.trim(),
+      experience: document.getElementById('reg-experience').value,
+      isRegistered: true
+    };
+
+    // Save to localStorage
+    var registered = JSON.parse(localStorage.getItem('rv_pro_profiles') || '[]');
+    registered.push(profile);
+    localStorage.setItem('rv_pro_profiles', JSON.stringify(registered));
+
+    // Show success
+    document.getElementById('pm-reg-body').innerHTML =
+      '<div class="pm-reg-success">' +
+        '<div class="check">OK</div>' +
+        '<h4>You\'re Listed!</h4>' +
+        '<p><strong>' + name + '</strong> is now visible on the RentVerified Professional Marketplace.</p>' +
+        '<p style="margin-top:0.75rem;">Property managers in ' + (locationLabels[location] || 'your area') + ' can now find and book you. We\'ll review your listing for verification within 48 hours.</p>' +
+        '<button class="pm-reg-submit" onclick="closeRegisterModal(); filterProfessionals();" style="margin-top:1.25rem;">Back to Marketplace</button>' +
+      '</div>';
+
+    // Refresh grid
+    mergeRegisteredPros();
+    filterProfessionals();
+    updateHeroStats();
+  }
+
+  // ── Merge registered professionals into the directory ──
+  function mergeRegisteredPros() {
+    var registered = JSON.parse(localStorage.getItem('rv_pro_profiles') || '[]');
+    // Remove any previously merged registered pros
+    for (var i = PROFESSIONALS.length - 1; i >= 0; i--) {
+      if (PROFESSIONALS[i].isRegistered) PROFESSIONALS.splice(i, 1);
+    }
+    // Add them back
+    registered.forEach(function(p) { PROFESSIONALS.push(p); });
+  }
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('pm-reg-body').dataset.originalHtml = document.getElementById('pm-reg-body').innerHTML;
+    mergeRegisteredPros();
+    filterProfessionals();
+    renderEngagements();
+    updateHeroStats();
+  });
+
+  // Keyboard: Escape closes modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closePmModal(); closeRegisterModal(); }
+  });
+</script>
+<script src="share-widget.js" data-share-title="Find a Professional" data-share-text="Browse verified professionals on RentVerified"></script>
+</body>
+</html>

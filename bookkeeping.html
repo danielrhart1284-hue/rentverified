@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Bookkeeping</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Hero ── */
+    .bk-hero { background: linear-gradient(135deg, #059669 0%, #047857 60%, #065f46 100%); color: white; padding: 3.5rem 2rem 0; }
+    .bk-hero-inner { max-width: 1280px; margin: 0 auto; }
+    .bk-breadcrumb { font-size: 0.82rem; opacity: 0.8; margin-bottom: 0.75rem; }
+    .bk-breadcrumb a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .bk-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .bk-title-left { display: flex; align-items: center; gap: 1rem; }
+    .bk-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+    .bk-page-title { font-size: 1.7rem; font-weight: 900; }
+    .bk-page-sub { font-size: 0.9rem; opacity: 0.82; margin-top: 3px; }
+    .bk-header-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; padding-bottom: 1.2rem; }
+    .bk-stat-val { font-size: 1.4rem; font-weight: 800; }
+    .bk-stat-lbl { font-size: 0.72rem; opacity: 0.75; }
+
+    /* ── Tabs ── */
+    .bk-tabs { background: white; border-bottom: 2px solid #e5e7eb; position: sticky; top: 60px; z-index: 100; }
+    .bk-tabs-inner { max-width: 1280px; margin: 0 auto; padding: 0 2rem; display: flex; overflow-x: auto; }
+    .bk-tab { padding: 0.9rem 1.4rem; border: none; background: none; font-size: 0.88rem; font-weight: 600; color: #6b7280; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+    .bk-tab:hover { color: #374151; }
+    .bk-tab.active { color: #059669; border-bottom-color: #059669; }
+
+    /* ── Body ── */
+    .bk-body { max-width: 1280px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+    .bk-panel { display: none; }
+    .bk-panel.active { display: block; }
+
+    /* ── Stats ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.25rem; }
+    .stat-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.25rem; }
+    .stat-card-val { font-size: 1.5rem; font-weight: 800; color: #111827; }
+    .stat-card-lbl { font-size: 0.75rem; color: #6b7280; font-weight: 600; margin-top: 2px; }
+    .stat-card.green .stat-card-val { color: #059669; }
+    .stat-card.red .stat-card-val { color: #dc2626; }
+    .stat-card.blue .stat-card-val { color: #2563eb; }
+    .stat-card.amber .stat-card-val { color: #d97706; }
+
+    /* ── Quick Bar ── */
+    .quick-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .quick-bar-right { margin-left: auto; display: flex; gap: 0.5rem; }
+    .filter-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-chip { padding: 5px 14px; border-radius: 999px; border: 1.5px solid #e5e7eb; font-size: 0.8rem; font-weight: 600; color: #6b7280; cursor: pointer; transition: all 0.12s; background: white; }
+    .filter-chip:hover { border-color: #059669; color: #059669; }
+    .filter-chip.active { background: #059669; border-color: #059669; color: white; }
+
+    /* ── Transaction Table ── */
+    .bk-table-wrap { background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .bk-table { width: 100%; border-collapse: collapse; }
+    .bk-table th { background: #f9fafb; font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    .bk-table td { padding: 0.85rem 1rem; border-bottom: 1px solid #f3f4f6; font-size: 0.87rem; vertical-align: middle; }
+    .bk-table tr:last-child td { border-bottom: none; }
+    .bk-table tr:hover td { background: #f9fafb; }
+    .income-amt { color: #059669; font-weight: 700; }
+    .expense-amt { color: #dc2626; font-weight: 700; }
+    .cat-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; background: #f3f4f6; color: #6b7280; }
+
+    /* ── P&L Section ── */
+    .pl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .pl-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .pl-card-header { padding: 0.9rem 1.25rem; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+    .pl-card-title { font-size: 0.88rem; font-weight: 700; color: #374151; }
+    .pl-card-body { padding: 0.75rem 1.25rem; }
+    .pl-row { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.86rem; }
+    .pl-row:last-child { border-bottom: none; }
+    .pl-row-cat { color: #374151; font-weight: 500; }
+    .pl-row-amt { font-weight: 700; }
+    .pl-total-row { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 1.25rem; background: #f9fafb; border-top: 2px solid #e5e7eb; font-size: 0.9rem; font-weight: 800; }
+
+    /* ── Monthly Summary ── */
+    .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
+    .month-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.85rem 1rem; cursor: pointer; transition: all 0.12s; }
+    .month-card:hover { border-color: #059669; box-shadow: 0 2px 12px rgba(5,150,105,0.1); }
+    .month-card.selected { border-color: #059669; background: #f0fdf4; }
+    .month-card-name { font-size: 0.85rem; font-weight: 700; color: #374151; margin-bottom: 6px; }
+    .month-card-income { font-size: 0.8rem; color: #059669; font-weight: 600; }
+    .month-card-expense { font-size: 0.8rem; color: #dc2626; font-weight: 600; }
+    .month-card-net { font-size: 0.78rem; color: #6b7280; margin-top: 3px; }
+
+    /* ── Add Entry Modal ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: white; border-radius: 16px; padding: 1.75rem; max-width: 480px; width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal-title { font-size: 1rem; font-weight: 800; color: #111827; margin: 0 0 1.25rem; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.75rem; }
+    .form-group label { font-size: 0.78rem; font-weight: 600; color: #374151; }
+    .form-group input, .form-group select, .form-group textarea { padding: 0.55rem 0.75rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.88rem; outline: none; transition: border-color 0.15s; }
+    .form-group input:focus, .form-group select:focus { border-color: #059669; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .type-toggle { display: flex; gap: 0; border: 1.5px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 0.75rem; }
+    .type-toggle button { flex: 1; padding: 0.55rem; border: none; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.15s; background: white; color: #6b7280; }
+    .type-toggle button.income.active { background: #d1fae5; color: #059669; }
+    .type-toggle button.expense.active { background: #fee2e2; color: #dc2626; }
+
+    /* ── Bar Chart ── */
+    .bar-chart { display: flex; align-items: flex-end; gap: 0.5rem; height: 120px; padding: 0 0.5rem; }
+    .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 2px; }
+    .bar-wrap { display: flex; gap: 2px; align-items: flex-end; height: 100px; width: 100%; }
+    .bar { border-radius: 4px 4px 0 0; width: 100%; min-height: 2px; transition: height 0.4s ease; }
+    .bar.income-bar { background: #059669; }
+    .bar.expense-bar { background: #dc2626; }
+    .bar-label { font-size: 0.65rem; color: #9ca3af; font-weight: 600; }
+
+    /* ── Toast ── */
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { background: #111827; color: white; padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25); animation: slideUp 0.2s ease; }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+    .toast.info { background: #0891b2; }
+    @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .bk-hero { padding: 2rem 1rem 0; }
+      .bk-body { padding: 1rem; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .pl-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .bk-table th:nth-child(4), .bk-table td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="landlord-signup.html">Dashboard</a>
+    <a href="invoicing.html">Invoicing</a>
+    <a href="estimates.html">Estimates</a>
+    <a href="e-sign.html">E-Sign</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="bk-hero">
+  <div class="bk-hero-inner">
+    <div class="bk-breadcrumb"><a href="landlord-signup.html">Dashboard</a> &rsaquo; Business Tools &rsaquo; Bookkeeping</div>
+    <div class="bk-title-row">
+      <div class="bk-title-left">
+        <div class="bk-icon">📒</div>
+        <div>
+          <div class="bk-page-title">Bookkeeping</div>
+          <div class="bk-page-sub">Track income &amp; expenses, P&amp;L — replaces QuickBooks Simple Start</div>
+        </div>
+      </div>
+      <div class="bk-header-stats">
+        <div><div class="bk-stat-val" id="hs-income">$0</div><div class="bk-stat-lbl">Income (YTD)</div></div>
+        <div><div class="bk-stat-val" id="hs-expense">$0</div><div class="bk-stat-lbl">Expenses (YTD)</div></div>
+        <div><div class="bk-stat-val" id="hs-net">$0</div><div class="bk-stat-lbl">Net Profit</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="bk-tabs">
+  <div class="bk-tabs-inner">
+    <button class="bk-tab active" onclick="bkTab('ledger',this)">Ledger</button>
+    <button class="bk-tab" onclick="bkTab('pl',this)">Profit &amp; Loss</button>
+    <button class="bk-tab" onclick="bkTab('summary',this)">Monthly Summary</button>
+    <button class="bk-tab" onclick="bkTab('categories',this)">By Category</button>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="bk-body">
+
+  <!-- LEDGER TAB -->
+  <div id="bkpanel-ledger" class="bk-panel active">
+    <div class="stats-grid">
+      <div class="stat-card green"><div class="stat-card-val" id="s-income">$0</div><div class="stat-card-lbl">Total Income</div></div>
+      <div class="stat-card red"><div class="stat-card-val" id="s-expense">$0</div><div class="stat-card-lbl">Total Expenses</div></div>
+      <div class="stat-card blue"><div class="stat-card-val" id="s-net">$0</div><div class="stat-card-lbl">Net Profit</div></div>
+      <div class="stat-card amber"><div class="stat-card-val" id="s-txn">0</div><div class="stat-card-lbl">Transactions</div></div>
+    </div>
+    <div class="quick-bar">
+      <div class="filter-chips">
+        <button class="filter-chip active" onclick="bkFilter('all',this)">All</button>
+        <button class="filter-chip" onclick="bkFilter('income',this)">Income</button>
+        <button class="filter-chip" onclick="bkFilter('expense',this)">Expenses</button>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+        <select id="month-filter" onchange="renderLedger()" style="padding:0.45rem 0.75rem;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.84rem;outline:none;">
+          <option value="">All Months</option>
+        </select>
+        <input type="text" id="bk-search" placeholder="Search..." oninput="renderLedger()" style="padding:0.45rem 0.75rem;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.84rem;outline:none;width:160px;" />
+      </div>
+      <div class="quick-bar-right">
+        <button class="btn btn-primary btn-sm" onclick="openAddEntry()">+ Add Entry</button>
+      </div>
+    </div>
+    <div class="bk-table-wrap">
+      <table class="bk-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Notes</th>
+            <th>Amount</th>
+            <th>Balance</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ledger-tbody"></tbody>
+      </table>
+      <div id="ledger-empty" class="empty-state" style="display:none;padding:3rem;">
+        <div class="icon">📒</div><h3>No transactions yet</h3><p>Add your first income or expense entry.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- P&L TAB -->
+  <div id="bkpanel-pl" class="bk-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <h2 style="font-size:1.1rem;font-weight:800;color:#111827;margin:0;">Profit &amp; Loss Statement</h2>
+        <p style="font-size:0.82rem;color:#6b7280;margin:3px 0 0;" id="pl-period-label">Year to date</p>
+      </div>
+      <select id="pl-period" onchange="renderPL()" style="padding:0.5rem 0.85rem;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.84rem;outline:none;">
+        <option value="ytd">Year to Date</option>
+        <option value="last30">Last 30 Days</option>
+        <option value="last90">Last 90 Days</option>
+        <option value="thismonth">This Month</option>
+        <option value="lastmonth">Last Month</option>
+      </select>
+    </div>
+
+    <div class="pl-grid">
+      <!-- Income breakdown -->
+      <div class="pl-card">
+        <div class="pl-card-header">
+          <span class="pl-card-title" style="color:#059669;">↑ Income</span>
+          <span id="pl-income-total" style="font-weight:800;color:#059669;">$0</span>
+        </div>
+        <div class="pl-card-body" id="pl-income-rows"></div>
+        <div class="pl-total-row"><span>Total Income</span><span id="pl-income-sum" style="color:#059669;">$0</span></div>
+      </div>
+      <!-- Expense breakdown -->
+      <div class="pl-card">
+        <div class="pl-card-header">
+          <span class="pl-card-title" style="color:#dc2626;">↓ Expenses</span>
+          <span id="pl-expense-total" style="font-weight:800;color:#dc2626;">$0</span>
+        </div>
+        <div class="pl-card-body" id="pl-expense-rows"></div>
+        <div class="pl-total-row"><span>Total Expenses</span><span id="pl-expense-sum" style="color:#dc2626;">$0</span></div>
+      </div>
+    </div>
+
+    <!-- Net summary -->
+    <div id="pl-net-box" style="background:white;border:2px solid #e5e7eb;border-radius:12px;padding:1.25rem 1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:1rem;font-weight:800;color:#111827;">Net Profit / Loss</span>
+        <span id="pl-net-val" style="font-size:1.4rem;font-weight:900;">$0</span>
+      </div>
+      <div style="margin-top:0.75rem;height:8px;background:#f3f4f6;border-radius:999px;overflow:hidden;">
+        <div id="pl-profit-bar" style="height:100%;background:#059669;border-radius:999px;width:0%;transition:width 0.5s ease;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#9ca3af;margin-top:4px;">
+        <span>Expenses</span><span>Income</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTHLY SUMMARY TAB -->
+  <div id="bkpanel-summary" class="bk-panel">
+    <div style="margin-bottom:1rem;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#111827;margin:0 0 4px;">Monthly Summary</h2>
+      <p style="font-size:0.82rem;color:#6b7280;margin:0;">Income vs. expenses by month</p>
+    </div>
+
+    <!-- Mini bar chart -->
+    <div style="background:white;border:1px solid #e5e7eb;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">
+      <div style="font-size:0.78rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem;">6-Month Overview</div>
+      <div class="bar-chart" id="monthly-barchart"></div>
+      <div style="display:flex;gap:1rem;margin-top:0.5rem;font-size:0.75rem;">
+        <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#059669;"></div>Income</div>
+        <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#dc2626;"></div>Expenses</div>
+      </div>
+    </div>
+
+    <div class="month-grid" id="monthly-cards"></div>
+  </div>
+
+  <!-- BY CATEGORY TAB -->
+  <div id="bkpanel-categories" class="bk-panel">
+    <div style="margin-bottom:1rem;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#111827;margin:0 0 4px;">By Category</h2>
+      <p style="font-size:0.82rem;color:#6b7280;margin:0;">Breakdown of transactions by category</p>
+    </div>
+    <div id="cat-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;"></div>
+  </div>
+
+</div><!-- /bk-body -->
+
+<!-- Add Entry Modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal-box">
+    <h3 class="modal-title">Add Transaction</h3>
+    <div class="type-toggle">
+      <button class="income active" id="type-income" onclick="setType('income')">↑ Income</button>
+      <button class="expense" id="type-expense" onclick="setType('expense')">↓ Expense</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date</label><input type="date" id="entry-date" /></div>
+      <div class="form-group"><label>Amount ($)</label><input type="number" id="entry-amount" placeholder="0.00" min="0" step="0.01" /></div>
+    </div>
+    <div class="form-group"><label>Description</label><input type="text" id="entry-desc" placeholder="e.g., Rent payment — Unit 4B" /></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="entry-cat">
+          <option value="">Select category...</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Reference / Check #</label><input type="text" id="entry-ref" placeholder="Optional" /></div>
+    </div>
+    <div class="form-group"><label>Notes</label><input type="text" id="entry-notes" placeholder="Optional note" /></div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn btn-sm" style="background:#f3f4f6;color:#374151;border:none;" onclick="closeAddEntry()">Cancel</button>
+      <button class="btn btn-primary btn-sm" style="background:#059669;" onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ── Storage ──
+const BK_KEY = 'rv_bookkeeping';
+function loadEntries() { try { return JSON.parse(localStorage.getItem(BK_KEY))||[]; } catch { return []; } }
+function saveEntries(d) { localStorage.setItem(BK_KEY, JSON.stringify(d)); }
+
+// ── Categories ──
+const INCOME_CATS = ['Rent Payments','Service Revenue','Consulting Fees','Referral Income','Late Fees','Other Income'];
+const EXPENSE_CATS = ['Repairs & Maintenance','Insurance','Property Taxes','Utilities','Supplies & Materials','Marketing','Software & Tools','Professional Services','Travel','Payroll','Office Expenses','Other Expenses'];
+
+// ── Demo Seed ──
+function bkSeed() {
+  if (localStorage.getItem('rv_bk_seeded')) return;
+  const today = new Date();
+  const yr = today.getFullYear();
+  const entries = [];
+  const addE = (date, type, desc, cat, amt, notes='') => entries.push({ id:'bk_'+Math.random().toString(36).slice(2), date, type, desc, cat, amt: parseFloat(amt), notes, ref:'', createdAt: date });
+
+  // Last 6 months of data
+  for (let m=5; m>=0; m--) {
+    const month = new Date(today.getFullYear(), today.getMonth()-m, 1);
+    const mm = String(month.getMonth()+1).padStart(2,'0');
+    const yyyy = month.getFullYear();
+    const d = (day) => `${yyyy}-${mm}-${String(day).padStart(2,'0')}`;
+
+    // Income entries
+    addE(d(1),'income','Rent — Unit 1A','Rent Payments',1450);
+    addE(d(1),'income','Rent — Unit 2B','Rent Payments',1250);
+    addE(d(2),'income','Rent — Unit 3C','Rent Payments',1100);
+    addE(d(3),'income','Rent — Unit 4D','Rent Payments',1350);
+    if (m < 3) addE(d(15),'income','Late Fee — Unit 2B','Late Fees',75);
+    if (m === 1) addE(d(20),'income','Consulting — Smith LLC','Consulting Fees',500);
+
+    // Expense entries
+    addE(d(5),'expense','Property Insurance Premium','Insurance',280,'Monthly');
+    addE(d(8),'expense','Water & Sewer Bill','Utilities',145);
+    addE(d(10),'expense','Lawn Care Service','Repairs & Maintenance',120);
+    if (m % 2 === 0) addE(d(12),'expense','Plumbing Repair','Repairs & Maintenance',350,'Unit 2B drain');
+    addE(d(15),'expense','Property Management Software','Software & Tools',79,'RentVerified Pro');
+    addE(d(18),'expense','Office Supplies','Office Expenses',45);
+    if (m < 2) addE(d(22),'expense','Accountant Fees','Professional Services',200,'Quarterly review');
+  }
+  saveEntries(entries);
+  localStorage.setItem('rv_bk_seeded','1');
+}
+
+// ── Helpers ──
+const fmtM = n => '$' + parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function fmtDate(d) { if(!d) return '—'; return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+
+// ── Tab ──
+function bkTab(name, btn) {
+  document.querySelectorAll('.bk-tab').forEach(t=>t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.bk-panel').forEach(p=>p.classList.remove('active'));
+  const panel = document.getElementById('bkpanel-'+name);
+  if (panel) panel.classList.add('active');
+  if (name==='ledger') renderLedger();
+  else if (name==='pl') renderPL();
+  else if (name==='summary') renderSummary();
+  else if (name==='categories') renderCategories();
+}
+
+// ── Filter state ──
+let txnFilter = 'all';
+function bkFilter(f, btn) {
+  txnFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderLedger();
+}
+
+// ── Populate month filter ──
+function populateMonthFilter() {
+  const entries = loadEntries();
+  const months = [...new Set(entries.map(e=>e.date.slice(0,7)))].sort().reverse();
+  const sel = document.getElementById('month-filter');
+  if (!sel) return;
+  sel.innerHTML='<option value="">All Months</option>';
+  months.forEach(m => {
+    const d = new Date(m+'-01T12:00:00');
+    const label = d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const o = document.createElement('option'); o.value=m; o.textContent=label;
+    sel.appendChild(o);
+  });
+}
+
+// ── Ledger ──
+function renderLedger() {
+  let entries = loadEntries();
+  const monthVal = document.getElementById('month-filter')?.value||'';
+  const q = (document.getElementById('bk-search')?.value||'').toLowerCase();
+  if (txnFilter !== 'all') entries = entries.filter(e=>e.type===txnFilter);
+  if (monthVal) entries = entries.filter(e=>e.date.startsWith(monthVal));
+  if (q) entries = entries.filter(e=>e.desc.toLowerCase().includes(q)||e.cat.toLowerCase().includes(q)||(e.notes||'').toLowerCase().includes(q));
+  entries.sort((a,b)=>b.date.localeCompare(a.date));
+
+  // Running balance
+  const allSorted = loadEntries().sort((a,b)=>a.date.localeCompare(b.date));
+  let balance = 0;
+  const balMap = {};
+  allSorted.forEach(e=>{ balance += e.type==='income' ? e.amt : -e.amt; balMap[e.id]=balance; });
+
+  const tbody = document.getElementById('ledger-tbody');
+  tbody.innerHTML = '';
+  entries.forEach(e=>{
+    const tr = document.createElement('tr');
+    const isIncome = e.type==='income';
+    tr.innerHTML=`
+      <td style="font-size:0.82rem;color:#6b7280;">${fmtDate(e.date)}</td>
+      <td><div style="font-weight:600;">${e.desc}</div>${e.ref?`<div style="font-size:0.73rem;color:#9ca3af;">Ref: ${e.ref}</div>`:''}</td>
+      <td><span class="cat-chip">${e.cat}</span></td>
+      <td style="font-size:0.8rem;color:#9ca3af;">${e.notes||''}</td>
+      <td class="${isIncome?'income-amt':'expense-amt'}">${isIncome?'+':'-'}${fmtM(e.amt)}</td>
+      <td style="font-size:0.84rem;font-weight:600;color:${(balMap[e.id]||0)>=0?'#059669':'#dc2626'}">${fmtM(balMap[e.id]||0)}</td>
+      <td><button style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:0.85rem;" onclick="deleteEntry('${e.id}')">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('ledger-empty').style.display = entries.length?'none':'block';
+  updateBkStats();
+}
+
+function deleteEntry(id) {
+  const entries = loadEntries().filter(e=>e.id!==id);
+  saveEntries(entries);
+  bkToast('Entry deleted','info');
+  renderLedger();
+}
+
+function updateBkStats() {
+  const entries = loadEntries();
+  const income = entries.filter(e=>e.type==='income').reduce((s,e)=>s+e.amt,0);
+  const expense = entries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amt,0);
+  const net = income - expense;
+  document.getElementById('s-income').textContent=fmtM(income);
+  document.getElementById('s-expense').textContent=fmtM(expense);
+  document.getElementById('s-net').textContent=fmtM(net);
+  document.getElementById('s-net').style.color=net>=0?'#059669':'#dc2626';
+  document.getElementById('s-txn').textContent=entries.length;
+  document.getElementById('hs-income').textContent=fmtM(income);
+  document.getElementById('hs-expense').textContent=fmtM(expense);
+  document.getElementById('hs-net').textContent=fmtM(net);
+}
+
+// ── P&L ──
+function filterByPeriod(entries, period) {
+  const today = new Date();
+  const startOf = (offset) => { const d=new Date(today); d.setDate(d.getDate()-offset); return d.toISOString().split('T')[0]; };
+  if (period==='last30') return entries.filter(e=>e.date>=startOf(30));
+  if (period==='last90') return entries.filter(e=>e.date>=startOf(90));
+  if (period==='thismonth') { const m=today.toISOString().slice(0,7); return entries.filter(e=>e.date.startsWith(m)); }
+  if (period==='lastmonth') { const d=new Date(today.getFullYear(),today.getMonth()-1,1); const m=d.toISOString().slice(0,7); return entries.filter(e=>e.date.startsWith(m)); }
+  // ytd
+  return entries.filter(e=>e.date.startsWith(today.getFullYear()+''));
+}
+
+function renderPL() {
+  const period = document.getElementById('pl-period')?.value||'ytd';
+  const entries = filterByPeriod(loadEntries(), period);
+  const income = entries.filter(e=>e.type==='income');
+  const expense = entries.filter(e=>e.type==='expense');
+
+  const groupBy = (arr) => {
+    const map = {};
+    arr.forEach(e=>{ map[e.cat]=(map[e.cat]||0)+e.amt; });
+    return Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  };
+
+  const totalIncome = income.reduce((s,e)=>s+e.amt,0);
+  const totalExpense = expense.reduce((s,e)=>s+e.amt,0);
+  const net = totalIncome - totalExpense;
+
+  const buildRows = (groups, isIncome) => groups.map(([cat,amt])=>`
+    <div class="pl-row">
+      <span class="pl-row-cat">${cat}</span>
+      <span class="pl-row-amt" style="color:${isIncome?'#059669':'#dc2626'}">${fmtM(amt)}</span>
+    </div>`).join('');
+
+  const iRows = document.getElementById('pl-income-rows');
+  const eRows = document.getElementById('pl-expense-rows');
+  if (iRows) iRows.innerHTML = buildRows(groupBy(income),true) || '<div style="padding:0.5rem;font-size:0.84rem;color:#9ca3af;">No income for this period</div>';
+  if (eRows) eRows.innerHTML = buildRows(groupBy(expense),false) || '<div style="padding:0.5rem;font-size:0.84rem;color:#9ca3af;">No expenses for this period</div>';
+
+  ['pl-income-total','pl-income-sum'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtM(totalIncome);});
+  ['pl-expense-total','pl-expense-sum'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtM(totalExpense);});
+
+  const netEl = document.getElementById('pl-net-val');
+  if (netEl) { netEl.textContent=fmtM(net); netEl.style.color=net>=0?'#059669':'#dc2626'; }
+
+  const bar = document.getElementById('pl-profit-bar');
+  if (bar) {
+    const pct = totalIncome > 0 ? Math.min(100, (totalIncome/(totalIncome+totalExpense))*100) : 50;
+    bar.style.width=pct+'%';
+    bar.style.background=net>=0?'#059669':'#dc2626';
+  }
+}
+
+// ── Monthly Summary ──
+function renderSummary() {
+  const entries = loadEntries();
+  const months = [...new Set(entries.map(e=>e.date.slice(0,7)))].sort().reverse().slice(0,12);
+
+  // Bar chart (last 6)
+  const last6 = months.slice(0,6).reverse();
+  const maxAmt = last6.reduce((mx,m)=>{
+    const inc = entries.filter(e=>e.date.startsWith(m)&&e.type==='income').reduce((s,e)=>s+e.amt,0);
+    const exp = entries.filter(e=>e.date.startsWith(m)&&e.type==='expense').reduce((s,e)=>s+e.amt,0);
+    return Math.max(mx,inc,exp);
+  },1);
+
+  const chartEl = document.getElementById('monthly-barchart');
+  if (chartEl) {
+    chartEl.innerHTML = last6.map(m=>{
+      const inc = entries.filter(e=>e.date.startsWith(m)&&e.type==='income').reduce((s,e)=>s+e.amt,0);
+      const exp = entries.filter(e=>e.date.startsWith(m)&&e.type==='expense').reduce((s,e)=>s+e.amt,0);
+      const iH = Math.max(2, (inc/maxAmt)*90);
+      const eH = Math.max(2, (exp/maxAmt)*90);
+      const d = new Date(m+'-01T12:00:00');
+      const lbl = d.toLocaleDateString('en-US',{month:'short'});
+      return `<div class="bar-group">
+        <div class="bar-wrap"><div class="bar income-bar" style="height:${iH}px"></div><div class="bar expense-bar" style="height:${eH}px"></div></div>
+        <div class="bar-label">${lbl}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const cards = document.getElementById('monthly-cards');
+  if (!cards) return;
+  cards.innerHTML = months.map(m=>{
+    const d = new Date(m+'-01T12:00:00');
+    const lbl = d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const inc = entries.filter(e=>e.date.startsWith(m)&&e.type==='income').reduce((s,e)=>s+e.amt,0);
+    const exp = entries.filter(e=>e.date.startsWith(m)&&e.type==='expense').reduce((s,e)=>s+e.amt,0);
+    const net = inc-exp;
+    return `<div class="month-card">
+      <div class="month-card-name">${lbl}</div>
+      <div class="month-card-income">↑ ${fmtM(inc)}</div>
+      <div class="month-card-expense">↓ ${fmtM(exp)}</div>
+      <div class="month-card-net" style="color:${net>=0?'#059669':'#dc2626'};font-weight:700;">Net: ${fmtM(net)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── By Category ──
+function renderCategories() {
+  const entries = loadEntries();
+  const allCats = [...new Set(entries.map(e=>e.cat))].sort();
+  const el = document.getElementById('cat-grid');
+  if (!el) return;
+  el.innerHTML = allCats.map(cat=>{
+    const catEntries = entries.filter(e=>e.cat===cat);
+    const total = catEntries.reduce((s,e)=>s+(e.type==='income'?e.amt:-e.amt),0);
+    const isIncome = catEntries[0]?.type==='income';
+    const count = catEntries.length;
+    return `<div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:1rem 1.25rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+        <span style="font-size:0.88rem;font-weight:700;color:#374151;">${cat}</span>
+        <span style="font-size:0.82rem;font-weight:700;color:${isIncome?'#059669':'#dc2626'}">${isIncome?'+':''}${fmtM(Math.abs(total))}</span>
+      </div>
+      <div style="font-size:0.76rem;color:#9ca3af;">${count} transaction${count!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Add Entry Modal ──
+let entryType = 'income';
+function setType(t) {
+  entryType = t;
+  document.getElementById('type-income').className = 'income' + (t==='income'?' active':'');
+  document.getElementById('type-expense').className = 'expense' + (t==='expense'?' active':'');
+  populateCatDropdown();
+}
+function populateCatDropdown() {
+  const cats = entryType==='income' ? INCOME_CATS : EXPENSE_CATS;
+  const sel = document.getElementById('entry-cat');
+  if (!sel) return;
+  sel.innerHTML='<option value="">Select category...</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+}
+function openAddEntry() {
+  entryType='income';
+  setType('income');
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('entry-date').value=today;
+  document.getElementById('entry-amount').value='';
+  document.getElementById('entry-desc').value='';
+  document.getElementById('entry-ref').value='';
+  document.getElementById('entry-notes').value='';
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddEntry() { document.getElementById('add-modal').classList.remove('open'); }
+function saveEntry() {
+  const date = document.getElementById('entry-date')?.value;
+  const amt = parseFloat(document.getElementById('entry-amount')?.value||'0');
+  const desc = document.getElementById('entry-desc')?.value?.trim();
+  const cat = document.getElementById('entry-cat')?.value;
+  const notes = document.getElementById('entry-notes')?.value?.trim()||'';
+  const ref = document.getElementById('entry-ref')?.value?.trim()||'';
+  if (!date||!amt||!desc||!cat) { bkToast('Please fill in all required fields','error'); return; }
+  const entry = { id:'bk_'+Date.now(), date, type:entryType, desc, cat, amt, notes, ref, createdAt:date };
+  const entries = loadEntries();
+  entries.unshift(entry);
+  saveEntries(entries);
+  closeAddEntry();
+  populateMonthFilter();
+  renderLedger();
+  bkToast(`${entryType==='income'?'Income':'Expense'} entry added!`,'success');
+}
+
+// ── Toast ──
+function bkToast(msg, type='success') {
+  const el=document.createElement('div'); el.className=`toast ${type}`;
+  el.innerHTML=`<span>${{success:'✓',error:'✕',info:'ℹ'}[type]||'•'}</span> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='all 0.3s';setTimeout(()=>el.remove(),300);},3000);
+}
+
+// ── Init ──
+bkSeed();
+populateMonthFilter();
+renderLedger();
+</script>
+</body>
+</html>

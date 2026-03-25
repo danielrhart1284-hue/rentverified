@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking & Calendar – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root { --bk-primary: #0891b2; --bk-primary-dark: #0e7490; --bk-dark: #0f172a; --bk-light: #f0fdfa; --bk-border: #e2e8f0; }
+    body { background: #f3f4f6; }
+    .bk-layout { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .bk-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .bk-header h1 { font-size: 1.75rem; font-weight: 900; color: var(--bk-dark); }
+    .bk-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-bk { padding: 0.55rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-bk.primary { background: var(--bk-primary); color: white; }
+    .btn-bk.primary:hover { background: var(--bk-primary-dark); }
+    .btn-bk.outline { background: white; color: var(--bk-primary); border: 2px solid var(--bk-primary); }
+    .btn-bk.outline:hover { background: var(--bk-light); }
+    .btn-bk.danger { background: #fee2e2; color: #dc2626; }
+    .btn-bk.danger:hover { background: #fecaca; }
+    .btn-bk.success { background: #d1fae5; color: #065f46; }
+    .btn-bk.success:hover { background: #a7f3d0; }
+    .btn-bk.gray { background: #f3f4f6; color: #374151; }
+    .btn-bk.gray:hover { background: #e5e7eb; }
+    .btn-bk.warn { background: #fef3c7; color: #92400e; }
+    .btn-bk.warn:hover { background: #fde68a; }
+
+    /* Stats */
+    .bk-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .bk-stat { background: white; border-radius: 12px; border: 1px solid var(--bk-border); padding: 1.15rem; text-align: center; }
+    .bk-stat .val { font-size: 1.6rem; font-weight: 900; color: var(--bk-dark); }
+    .bk-stat .lbl { font-size: 0.72rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 4px; }
+
+    /* Tabs */
+    .bk-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--bk-border); margin-bottom: 1.5rem; }
+    .bk-tab { padding: 0.65rem 1.25rem; font-size: 0.88rem; font-weight: 700; color: #6b7280; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.15s; background: none; border-top: none; border-left: none; border-right: none; }
+    .bk-tab:hover { color: var(--bk-primary); }
+    .bk-tab.active { color: var(--bk-primary); border-bottom-color: var(--bk-primary); }
+    .bk-panel { display: none; }
+    .bk-panel.active { display: block; }
+
+    /* Calendar */
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .cal-nav h2 { font-size: 1.25rem; font-weight: 800; color: var(--bk-dark); }
+    .cal-nav button { background: white; border: 1px solid var(--bk-border); border-radius: 8px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .cal-nav button:hover { background: #f9fafb; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--bk-border); border-radius: 12px; overflow: hidden; }
+    .cal-day-header { background: var(--bk-dark); color: white; text-align: center; padding: 0.5rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .cal-day { background: white; min-height: 80px; padding: 0.4rem; cursor: pointer; transition: 0.15s; position: relative; }
+    .cal-day:hover { background: #f0fdfa; }
+    .cal-day.today { background: #ecfeff; }
+    .cal-day.other-month { background: #f9fafb; opacity: 0.5; }
+    .cal-day .day-num { font-size: 0.82rem; font-weight: 700; color: var(--bk-dark); margin-bottom: 2px; }
+    .cal-day.today .day-num { color: var(--bk-primary); }
+    .cal-dots { display: flex; flex-wrap: wrap; gap: 3px; }
+    .cal-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .cal-appt-mini { font-size: 0.65rem; padding: 1px 4px; border-radius: 4px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white; font-weight: 600; }
+
+    /* Day Side Panel */
+    .cal-container { display: flex; gap: 1rem; }
+    .cal-main { flex: 1; min-width: 0; }
+    .cal-side { width: 300px; flex-shrink: 0; background: white; border-radius: 12px; border: 1px solid var(--bk-border); padding: 1rem; max-height: 500px; overflow-y: auto; display: none; }
+    .cal-side.show { display: block; }
+    .cal-side h3 { font-size: 0.95rem; font-weight: 800; color: var(--bk-dark); margin-bottom: 0.75rem; }
+    .cal-side-appt { padding: 0.6rem; border-radius: 8px; border: 1px solid #f1f5f9; margin-bottom: 0.5rem; cursor: pointer; transition: 0.15s; }
+    .cal-side-appt:hover { border-color: var(--bk-primary); background: #f0fdfa; }
+    .cal-side-appt .time { font-size: 0.75rem; font-weight: 700; color: var(--bk-primary); }
+    .cal-side-appt .name { font-size: 0.85rem; font-weight: 600; color: var(--bk-dark); }
+    .cal-side-appt .svc { font-size: 0.72rem; color: #6b7280; }
+
+    /* Appointments Table */
+    .bk-card { background: white; border-radius: 12px; border: 1px solid var(--bk-border); overflow: hidden; }
+    .bk-filters { display: flex; gap: 0.75rem; padding: 1rem; border-bottom: 1px solid #f1f5f9; background: #fafafa; flex-wrap: wrap; }
+    .bk-filters input, .bk-filters select { padding: 0.45rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; }
+    .bk-filters input { flex: 1; min-width: 180px; }
+    .bk-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .bk-table th { text-align: left; padding: 0.7rem 1rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; background: #f9fafb; border-bottom: 2px solid var(--bk-border); }
+    .bk-table td { padding: 0.7rem 1rem; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .bk-table tr:hover td { background: #f9fafb; cursor: pointer; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
+    .badge.requested { background: #dbeafe; color: #1e40af; }
+    .badge.confirmed { background: #d1fae5; color: #065f46; }
+    .badge.canceled { background: #fee2e2; color: #dc2626; }
+    .badge.completed { background: #f3f4f6; color: #6b7280; }
+    .badge.noshow { background: #fef3c7; color: #92400e; }
+    .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
+    .act-btn.view { background: #ecfeff; color: var(--bk-primary); }
+    .act-btn.del { background: #fee2e2; color: #dc2626; }
+
+    /* Services Grid */
+    .svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .svc-card { background: white; border-radius: 12px; border: 1px solid var(--bk-border); padding: 1.25rem; position: relative; transition: 0.15s; }
+    .svc-card:hover { border-color: var(--bk-primary); box-shadow: 0 2px 8px rgba(8,145,178,0.1); }
+    .svc-card .svc-color { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; font-weight: 800; margin-bottom: 0.75rem; }
+    .svc-card h3 { font-size: 1rem; font-weight: 800; color: var(--bk-dark); margin-bottom: 0.25rem; }
+    .svc-card .desc { font-size: 0.82rem; color: #6b7280; margin-bottom: 0.75rem; line-height: 1.4; }
+    .svc-card .meta { display: flex; gap: 1rem; font-size: 0.78rem; color: #374151; font-weight: 600; }
+    .svc-card .meta span { display: flex; align-items: center; gap: 3px; }
+    .svc-card .svc-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .svc-card .public-badge { position: absolute; top: 0.75rem; right: 0.75rem; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+    .svc-card .public-badge.on { background: #d1fae5; color: #065f46; }
+    .svc-card .public-badge.off { background: #f3f4f6; color: #6b7280; }
+    .svc-add-card { background: white; border: 2px dashed #d1d5db; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; cursor: pointer; transition: 0.15s; min-height: 180px; }
+    .svc-add-card:hover { border-color: var(--bk-primary); background: #f0fdfa; }
+    .svc-add-card .plus { font-size: 2rem; color: #9ca3af; font-weight: 300; }
+    .svc-add-card .txt { font-size: 0.85rem; color: #6b7280; font-weight: 600; margin-top: 0.5rem; }
+
+    /* Public Preview */
+    .preview-frame { background: white; border-radius: 12px; border: 1px solid var(--bk-border); padding: 2rem; max-width: 600px; margin: 0 auto; }
+    .preview-frame .biz-name { font-size: 1.5rem; font-weight: 900; color: var(--bk-dark); text-align: center; margin-bottom: 0.5rem; }
+    .preview-frame .biz-sub { font-size: 0.88rem; color: #6b7280; text-align: center; margin-bottom: 1.5rem; }
+    .preview-svc { border: 1px solid var(--bk-border); border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; }
+    .preview-svc .info h4 { font-size: 0.95rem; font-weight: 700; color: var(--bk-dark); }
+    .preview-svc .info p { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+    .preview-svc .info .pmeta { font-size: 0.75rem; color: #374151; font-weight: 600; margin-top: 4px; }
+    .preview-book-form { background: #f9fafb; border-radius: 10px; padding: 1.25rem; margin-top: 0.75rem; display: none; }
+    .preview-book-form.show { display: block; }
+    .preview-book-form label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; margin-top: 0.75rem; }
+    .preview-book-form input, .preview-book-form select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 2rem; width: 90%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--bk-dark); }
+    .modal label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; margin-bottom: 0.75rem; box-sizing: border-box; }
+    .modal textarea { height: 60px; resize: vertical; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+    .modal .detail-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.88rem; }
+    .modal .detail-row .dlabel { color: #6b7280; font-weight: 600; }
+    .modal .detail-row .dval { color: var(--bk-dark); font-weight: 700; }
+
+    /* Toggle */
+    .toggle { position: relative; display: inline-block; width: 42px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle .slider { position: absolute; cursor: pointer; inset: 0; background: #d1d5db; border-radius: 24px; transition: 0.2s; }
+    .toggle .slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    .toggle input:checked + .slider { background: var(--bk-primary); }
+    .toggle input:checked + .slider::before { transform: translateX(18px); }
+
+    /* Toast */
+    .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { padding: 0.75rem 1.25rem; border-radius: 10px; color: white; font-size: 0.85rem; font-weight: 600; animation: slideIn 0.3s ease; }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+    .toast.info { background: var(--bk-primary); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    @media (max-width: 768px) {
+      .bk-layout { padding: 1rem; }
+      .bk-stats { grid-template-columns: 1fr 1fr; }
+      .cal-container { flex-direction: column; }
+      .cal-side { width: 100%; }
+      .cal-day { min-height: 50px; }
+      .cal-appt-mini { display: none; }
+      .svc-grid { grid-template-columns: 1fr; }
+      .bk-table { font-size: 0.78rem; }
+      .bk-table th:nth-child(5), .bk-table td:nth-child(5),
+      .bk-table th:nth-child(6), .bk-table td:nth-child(6) { display: none; }
+      .preview-frame { padding: 1rem; }
+    }
+    /* Mobile-friendly modals */
+    @media (max-width: 768px) {
+      .modal, [class*="modal"] { max-height: 95vh !important; width: 95% !important; max-width: none !important; margin: 0.5rem !important; border-radius: 12px !important; }
+      .modal-overlay, [class*="overlay"] { padding: 0.5rem !important; align-items: flex-end !important; }
+    }
+    /* Mobile-scrollable tables */
+    @media (max-width: 768px) {
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      th, td { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#0891b2"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#67e8f9"/></svg>
+    <span style="font-weight:800;">RentVerified</span> <span style="font-weight:500;opacity:0.9;">Booking</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="crm.html">CRM</a>
+    <a href="booking.html" style="color:#0891b2;font-weight:700;">Booking</a>
+    <a href="screening.html">Reviews</a>
+    <a href="tenant-portal.html">Messages</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="bk-layout">
+  <!-- Header -->
+  <div class="bk-header">
+    <h1>Booking &amp; Calendar</h1>
+    <div class="bk-actions">
+      <button class="btn-bk outline" onclick="openServiceModal()">+ New Service</button>
+      <button class="btn-bk primary" onclick="openApptModal()">+ New Appointment</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="bk-stats">
+    <div class="bk-stat"><div class="val" id="statToday">0</div><div class="lbl">Today's Appts</div></div>
+    <div class="bk-stat"><div class="val" id="statWeek">0</div><div class="lbl">This Week</div></div>
+    <div class="bk-stat"><div class="val" id="statPending">0</div><div class="lbl">Pending Requests</div></div>
+    <div class="bk-stat"><div class="val" id="statCompleted">0</div><div class="lbl">Completed This Month</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bk-tabs">
+    <button class="bk-tab active" data-tab="calendar">Calendar</button>
+    <button class="bk-tab" data-tab="appointments">Appointments List</button>
+    <button class="bk-tab" data-tab="services">Services</button>
+    <button class="bk-tab" data-tab="preview">Public Booking Preview</button>
+  </div>
+
+  <!-- Calendar Tab -->
+  <div class="bk-panel active" id="tab-calendar">
+    <div class="cal-container">
+      <div class="cal-main">
+        <div class="cal-nav">
+          <button onclick="changeMonth(-1)">&larr; Previous</button>
+          <h2 id="calTitle"></h2>
+          <button onclick="changeMonth(1)">Next &rarr;</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="cal-side" id="calSide">
+        <h3 id="calSideTitle">Appointments</h3>
+        <div id="calSideList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointments List Tab -->
+  <div class="bk-panel" id="tab-appointments">
+    <div class="bk-card">
+      <div class="bk-filters">
+        <input type="text" id="apptSearch" placeholder="Search by customer or service..." oninput="renderApptTable()" />
+        <select id="apptStatusFilter" onchange="renderApptTable()">
+          <option value="">All Statuses</option>
+          <option value="requested">Requested</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="canceled">Canceled</option>
+          <option value="noshow">No-Show</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="bk-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Date/Time</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="apptTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services Tab -->
+  <div class="bk-panel" id="tab-services">
+    <div class="svc-grid" id="svcGrid"></div>
+  </div>
+
+  <!-- Public Booking Preview Tab -->
+  <div class="bk-panel" id="tab-preview">
+    <div style="text-align:center;margin-bottom:1rem;"><span class="badge confirmed" style="font-size:0.78rem;padding:4px 12px;">Preview Mode</span></div>
+    <div class="preview-frame" id="previewFrame"></div>
+  </div>
+</div>
+
+<!-- Service Modal -->
+<div class="modal-overlay" id="serviceModal">
+  <div class="modal">
+    <h2 id="svcModalTitle">Add Service</h2>
+    <input type="hidden" id="svcId" />
+    <label>Service Name</label>
+    <input type="text" id="svcName" placeholder="e.g. Property Inspection" />
+    <label>Description</label>
+    <textarea id="svcDesc" placeholder="What this service includes..."></textarea>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+      <div>
+        <label>Duration</label>
+        <select id="svcDuration">
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60" selected>60 minutes</option>
+          <option value="90">90 minutes</option>
+          <option value="120">120 minutes</option>
+        </select>
+      </div>
+      <div>
+        <label>Price ($)</label>
+        <input type="number" id="svcPrice" placeholder="0" min="0" step="0.01" />
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+      <div>
+        <label>Category</label>
+        <input type="text" id="svcCategory" placeholder="e.g. Inspection" />
+      </div>
+      <div>
+        <label>Color</label>
+        <input type="color" id="svcColor" value="#0891b2" style="height:38px;padding:2px;" />
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;">
+      <label style="margin:0;">Public</label>
+      <label class="toggle"><input type="checkbox" id="svcPublic" checked /><span class="slider"></span></label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-bk primary" onclick="saveServiceForm()">Save Service</button>
+      <button class="btn-bk gray" onclick="closeModal('serviceModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Appointment Modal -->
+<div class="modal-overlay" id="apptModal">
+  <div class="modal">
+    <h2 id="apptModalTitle">New Appointment</h2>
+    <input type="hidden" id="apptId" />
+    <label>Customer Name</label>
+    <input type="text" id="apptCustomer" placeholder="Full name" />
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+      <div><label>Email</label><input type="email" id="apptEmail" placeholder="email@example.com" /></div>
+      <div><label>Phone</label><input type="tel" id="apptPhone" placeholder="801-555-0100" /></div>
+    </div>
+    <label>Service</label>
+    <select id="apptService"></select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+      <div><label>Date</label><input type="date" id="apptDate" /></div>
+      <div><label>Time</label><input type="time" id="apptTime" /></div>
+    </div>
+    <label>Status</label>
+    <select id="apptStatus">
+      <option value="requested">Requested</option>
+      <option value="confirmed">Confirmed</option>
+      <option value="completed">Completed</option>
+      <option value="canceled">Canceled</option>
+      <option value="noshow">No-Show</option>
+    </select>
+    <label>Notes</label>
+    <textarea id="apptNotes" placeholder="Additional notes..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-bk primary" onclick="saveApptForm()">Save Appointment</button>
+      <button class="btn-bk gray" onclick="closeModal('apptModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Appointment Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <h2>Appointment Details</h2>
+    <div id="detailContent"></div>
+    <div class="modal-actions" id="detailActions"></div>
+  </div>
+</div>
+
+<script>
+if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
+</script>
+<script src="data-layer.js"></script>
+<script src="supabase-config.js"></script>
+<script src="share-widget.js"></script>
+<script src="service-connect.js"></script>
+<script>
+// ─── Seed Data ──────────────────────────────────────────────────
+var SEED_SERVICES = [
+  { id:'svc_1', name:'Property Inspection', description:'Full property walk-through and condition report', duration_minutes:60, price:150, is_public:true, category:'Inspection', color:'#3b82f6' },
+  { id:'svc_2', name:'Consultation Call', description:'30-minute phone or video consultation', duration_minutes:30, price:0, is_public:true, category:'Consultation', color:'#8b5cf6' },
+  { id:'svc_3', name:'Lease Signing', description:'In-person lease review and signing appointment', duration_minutes:45, price:0, is_public:true, category:'Leasing', color:'#10b981' },
+  { id:'svc_4', name:'Maintenance Assessment', description:'On-site maintenance issue assessment', duration_minutes:90, price:75, is_public:true, category:'Maintenance', color:'#f59e0b' }
+];
+
+var SEED_APPOINTMENTS = [
+  { id:'appt_1', customer_name:'John Martinez', customer_contact:{email:'john@alpinepm.com',phone:'801-555-0101'}, service_id:'svc_1', start_time:'2026-03-22T10:00:00', end_time:'2026-03-22T11:00:00', status:'confirmed', notes:'Unit 4B inspection' },
+  { id:'appt_2', customer_name:'Sarah Chen', customer_contact:{email:'sarah@chendesign.com'}, service_id:'svc_2', start_time:'2026-03-22T14:00:00', end_time:'2026-03-22T14:30:00', status:'requested', notes:'Interested in property management services' },
+  { id:'appt_3', customer_name:'Mike Thompson', customer_contact:{email:'mike@summitbuild.com',phone:'801-555-0103'}, service_id:'svc_3', start_time:'2026-03-23T09:00:00', end_time:'2026-03-23T09:45:00', status:'confirmed', notes:'New lease for commercial unit' },
+  { id:'appt_4', customer_name:'Lisa Park', customer_contact:{email:'lisa@parkprops.com'}, service_id:'svc_4', start_time:'2026-03-24T11:00:00', end_time:'2026-03-24T12:30:00', status:'requested', notes:'Water damage assessment needed' },
+  { id:'appt_5', customer_name:'Robert Kim', customer_contact:{email:'rob@kimgroup.com'}, service_id:'svc_1', start_time:'2026-03-20T10:00:00', end_time:'2026-03-20T11:00:00', status:'completed', notes:'Move-out inspection completed' }
+];
+
+var services = [];
+var appointments = [];
+var calYear, calMonth;
+
+// ─── Init ───────────────────────────────────────────────────────
+async function init() {
+  await seedIfNeeded();
+  services = await RVData.getServices();
+  appointments = await RVData.getAppointments();
+  var now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  updateStats();
+  renderCalendar();
+  renderApptTable();
+  renderServices();
+  renderPreview();
+  setupTabs();
+}
+
+async function seedIfNeeded() {
+  var existing = await RVData.getServices();
+  if (existing.length === 0) {
+    for (var s of SEED_SERVICES) await RVData.saveService({...s});
+  }
+  var existingA = await RVData.getAppointments();
+  if (existingA.length === 0) {
+    for (var a of SEED_APPOINTMENTS) await RVData.saveAppointment({...a});
+  }
+}
+
+async function reload() {
+  services = await RVData.getServices();
+  appointments = await RVData.getAppointments();
+  updateStats();
+  renderCalendar();
+  renderApptTable();
+  renderServices();
+  renderPreview();
+}
+
+// ─── Tabs ───────────────────────────────────────────────────────
+function setupTabs() {
+  document.querySelectorAll('.bk-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.bk-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.bk-panel').forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+// ─── Stats ──────────────────────────────────────────────────────
+function updateStats() {
+  var now = new Date();
+  var todayStr = now.toISOString().slice(0, 10);
+  var weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  var weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  var monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  var today = appointments.filter(function(a) { return a.start_time && a.start_time.slice(0,10) === todayStr; }).length;
+  var week = appointments.filter(function(a) {
+    if (!a.start_time) return false;
+    var d = new Date(a.start_time);
+    return d >= weekStart && d <= weekEnd;
+  }).length;
+  var pending = appointments.filter(function(a) { return a.status === 'requested'; }).length;
+  var completed = appointments.filter(function(a) {
+    if (!a.start_time || a.status !== 'completed') return false;
+    var d = new Date(a.start_time);
+    return d >= monthStart && d <= monthEnd;
+  }).length;
+
+  document.getElementById('statToday').textContent = today;
+  document.getElementById('statWeek').textContent = week;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statCompleted').textContent = completed;
+}
+
+// ─── Calendar ───────────────────────────────────────────────────
+var MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function changeMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('calTitle').textContent = MONTH_NAMES[calMonth] + ' ' + calYear;
+  var grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Day headers
+  DAY_NAMES.forEach(function(d) {
+    var el = document.createElement('div');
+    el.className = 'cal-day-header';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  var firstDay = new Date(calYear, calMonth, 1).getDay();
+  var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  var prevDays = new Date(calYear, calMonth, 0).getDate();
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+
+  // Build appointment map
+  var apptMap = {};
+  appointments.forEach(function(a) {
+    if (!a.start_time) return;
+    var dateKey = a.start_time.slice(0, 10);
+    if (!apptMap[dateKey]) apptMap[dateKey] = [];
+    apptMap[dateKey].push(a);
+  });
+
+  // Previous month fill
+  for (var i = firstDay - 1; i >= 0; i--) {
+    var day = prevDays - i;
+    var el = document.createElement('div');
+    el.className = 'cal-day other-month';
+    el.innerHTML = '<div class="day-num">' + day + '</div>';
+    grid.appendChild(el);
+  }
+
+  // Current month
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateStr = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var el = document.createElement('div');
+    el.className = 'cal-day';
+    if (dateStr === todayStr) el.className += ' today';
+
+    var html = '<div class="day-num">' + d + '</div>';
+    var dayAppts = apptMap[dateStr] || [];
+    if (dayAppts.length > 0) {
+      dayAppts.slice(0, 3).forEach(function(a) {
+        var svc = getService(a.service_id);
+        var color = svc ? svc.color : '#6b7280';
+        var time = formatTime(a.start_time);
+        html += '<div class="cal-appt-mini" style="background:' + color + ';">' + time + ' ' + (a.customer_name || '').split(' ')[0] + '</div>';
+      });
+      if (dayAppts.length > 3) {
+        html += '<div style="font-size:0.65rem;color:#6b7280;margin-top:2px;">+' + (dayAppts.length - 3) + ' more</div>';
+      }
+    }
+
+    el.innerHTML = html;
+    el.setAttribute('data-date', dateStr);
+    el.addEventListener('click', function() { showDayPanel(this.getAttribute('data-date')); });
+    grid.appendChild(el);
+  }
+
+  // Next month fill
+  var totalCells = firstDay + daysInMonth;
+  var remaining = (7 - (totalCells % 7)) % 7;
+  for (var i = 1; i <= remaining; i++) {
+    var el = document.createElement('div');
+    el.className = 'cal-day other-month';
+    el.innerHTML = '<div class="day-num">' + i + '</div>';
+    grid.appendChild(el);
+  }
+}
+
+function showDayPanel(dateStr) {
+  var side = document.getElementById('calSide');
+  var list = document.getElementById('calSideList');
+  var d = new Date(dateStr + 'T00:00:00');
+  document.getElementById('calSideTitle').textContent = MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+
+  var dayAppts = appointments.filter(function(a) { return a.start_time && a.start_time.slice(0,10) === dateStr; });
+  dayAppts.sort(function(a,b) { return a.start_time.localeCompare(b.start_time); });
+
+  if (dayAppts.length === 0) {
+    list.innerHTML = '<p style="color:#9ca3af;font-size:0.85rem;text-align:center;padding:1rem;">No appointments</p>';
+  } else {
+    list.innerHTML = dayAppts.map(function(a) {
+      var svc = getService(a.service_id);
+      return '<div class="cal-side-appt" onclick="openDetailModal(\'' + a.id + '\')">' +
+        '<div class="time">' + formatTime(a.start_time) + ' - ' + formatTime(a.end_time) + '</div>' +
+        '<div class="name">' + esc(a.customer_name) + '</div>' +
+        '<div class="svc">' + (svc ? esc(svc.name) : 'Unknown') + '</div>' +
+        '<span class="badge ' + a.status + '">' + a.status + '</span>' +
+        '</div>';
+    }).join('');
+  }
+  side.classList.add('show');
+}
+
+// ─── Appointments Table ─────────────────────────────────────────
+function renderApptTable() {
+  var search = (document.getElementById('apptSearch').value || '').toLowerCase();
+  var statusFilter = document.getElementById('apptStatusFilter').value;
+  var tbody = document.getElementById('apptTableBody');
+
+  var filtered = appointments.filter(function(a) {
+    if (statusFilter && a.status !== statusFilter) return false;
+    if (search) {
+      var svc = getService(a.service_id);
+      var svcName = svc ? svc.name.toLowerCase() : '';
+      if ((a.customer_name || '').toLowerCase().indexOf(search) === -1 && svcName.indexOf(search) === -1) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:2rem;">No appointments found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(function(a) {
+    var svc = getService(a.service_id);
+    var duration = svc ? svc.duration_minutes + ' min' : '-';
+    return '<tr onclick="openDetailModal(\'' + a.id + '\')">' +
+      '<td><strong>' + esc(a.customer_name) + '</strong></td>' +
+      '<td>' + (svc ? esc(svc.name) : 'Unknown') + '</td>' +
+      '<td>' + formatDateTime(a.start_time) + '</td>' +
+      '<td>' + duration + '</td>' +
+      '<td><span class="badge ' + a.status + '">' + a.status + '</span></td>' +
+      '<td>' +
+        '<button class="act-btn view" onclick="event.stopPropagation();openDetailModal(\'' + a.id + '\')">View</button>' +
+        '<button class="act-btn del" onclick="event.stopPropagation();deleteAppt(\'' + a.id + '\')">Delete</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ─── Services Grid ──────────────────────────────────────────────
+function renderServices() {
+  var grid = document.getElementById('svcGrid');
+  var html = services.map(function(s) {
+    var initial = s.name ? s.name.charAt(0).toUpperCase() : '?';
+    var priceStr = s.price > 0 ? '$' + Number(s.price).toFixed(2) : 'Free';
+    return '<div class="svc-card">' +
+      '<span class="public-badge ' + (s.is_public ? 'on' : 'off') + '">' + (s.is_public ? 'Public' : 'Private') + '</span>' +
+      '<div class="svc-color" style="background:' + (s.color || '#0891b2') + ';">' + initial + '</div>' +
+      '<h3>' + esc(s.name) + '</h3>' +
+      '<div class="desc">' + esc(s.description || '') + '</div>' +
+      '<div class="meta"><span>' + (s.duration_minutes || 60) + ' min</span><span>' + priceStr + '</span>' +
+      (s.category ? '<span>' + esc(s.category) + '</span>' : '') + '</div>' +
+      '<div class="svc-actions">' +
+        '<button class="btn-bk outline" style="padding:0.3rem 0.8rem;font-size:0.78rem;" onclick="editService(\'' + s.id + '\')">Edit</button>' +
+        '<button class="btn-bk danger" style="padding:0.3rem 0.8rem;font-size:0.78rem;" onclick="deleteServiceById(\'' + s.id + '\')">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  html += '<div class="svc-add-card" onclick="openServiceModal()">' +
+    '<div class="plus">+</div><div class="txt">Add Service</div></div>';
+
+  grid.innerHTML = html;
+}
+
+// ─── Public Preview ─────────────────────────────────────────────
+function renderPreview() {
+  var frame = document.getElementById('previewFrame');
+  var publicSvcs = services.filter(function(s) { return s.is_public; });
+
+  var html = '<div class="biz-name">RentVerified</div>' +
+    '<div class="biz-sub">Book an appointment online</div>';
+
+  if (publicSvcs.length === 0) {
+    html += '<p style="text-align:center;color:#9ca3af;">No public services available</p>';
+  } else {
+    publicSvcs.forEach(function(s) {
+      var priceStr = s.price > 0 ? '$' + Number(s.price).toFixed(2) : 'Free';
+      html += '<div class="preview-svc" id="preview-svc-' + s.id + '">' +
+        '<div class="info">' +
+          '<h4>' + esc(s.name) + '</h4>' +
+          '<p>' + esc(s.description || '') + '</p>' +
+          '<div class="pmeta">' + (s.duration_minutes || 60) + ' min &middot; ' + priceStr + '</div>' +
+        '</div>' +
+        '<button class="btn-bk primary" style="flex-shrink:0;" onclick="toggleBookForm(\'' + s.id + '\')">Book Now</button>' +
+      '</div>' +
+      '<div class="preview-book-form" id="bookform-' + s.id + '">' +
+        '<label>Select Date</label>' +
+        '<input type="date" id="bookdate-' + s.id + '" min="' + new Date().toISOString().slice(0,10) + '" />' +
+        '<label>Select Time</label>' +
+        '<input type="time" id="booktime-' + s.id + '" />' +
+        '<label>Your Name</label>' +
+        '<input type="text" id="bookname-' + s.id + '" placeholder="Full name" />' +
+        '<label>Email</label>' +
+        '<input type="email" id="bookemail-' + s.id + '" placeholder="email@example.com" />' +
+        '<label>Phone (optional)</label>' +
+        '<input type="tel" id="bookphone-' + s.id + '" placeholder="801-555-0100" />' +
+        '<button class="btn-bk primary" style="margin-top:1rem;width:100%;" onclick="submitPreviewBooking(\'' + s.id + '\')">Confirm Booking</button>' +
+      '</div>';
+    });
+  }
+  frame.innerHTML = html;
+}
+
+function toggleBookForm(svcId) {
+  var form = document.getElementById('bookform-' + svcId);
+  form.classList.toggle('show');
+}
+
+async function submitPreviewBooking(svcId) {
+  var svc = getService(svcId);
+  var date = document.getElementById('bookdate-' + svcId).value;
+  var time = document.getElementById('booktime-' + svcId).value;
+  var name = document.getElementById('bookname-' + svcId).value.trim();
+  var email = document.getElementById('bookemail-' + svcId).value.trim();
+  var phone = document.getElementById('bookphone-' + svcId).value.trim();
+
+  if (!date || !time || !name || !email) { toast('Please fill in all required fields', 'error'); return; }
+
+  var startTime = date + 'T' + time + ':00';
+  var endDate = new Date(startTime);
+  endDate.setMinutes(endDate.getMinutes() + (svc ? svc.duration_minutes : 60));
+  var endTime = endDate.toISOString().slice(0, 19);
+
+  var contact = { email: email };
+  if (phone) contact.phone = phone;
+
+  await RVData.saveAppointment({
+    customer_name: name,
+    customer_contact: contact,
+    service_id: svcId,
+    start_time: startTime,
+    end_time: endTime,
+    status: 'requested',
+    notes: 'Booked via online widget'
+  });
+
+  toast('Booking request submitted!', 'success');
+  document.getElementById('bookform-' + svcId).classList.remove('show');
+  await reload();
+}
+
+// ─── Service Modal ──────────────────────────────────────────────
+function openServiceModal(svc) {
+  document.getElementById('svcModalTitle').textContent = svc ? 'Edit Service' : 'Add Service';
+  document.getElementById('svcId').value = svc ? svc.id : '';
+  document.getElementById('svcName').value = svc ? svc.name : '';
+  document.getElementById('svcDesc').value = svc ? (svc.description || '') : '';
+  document.getElementById('svcDuration').value = svc ? String(svc.duration_minutes || 60) : '60';
+  document.getElementById('svcPrice').value = svc ? (svc.price || 0) : '';
+  document.getElementById('svcCategory').value = svc ? (svc.category || '') : '';
+  document.getElementById('svcColor').value = svc ? (svc.color || '#0891b2') : '#0891b2';
+  document.getElementById('svcPublic').checked = svc ? svc.is_public : true;
+  document.getElementById('serviceModal').classList.add('show');
+}
+
+function editService(id) {
+  var svc = services.find(function(s) { return s.id === id; });
+  if (svc) openServiceModal(svc);
+}
+
+async function saveServiceForm() {
+  var name = document.getElementById('svcName').value.trim();
+  if (!name) { toast('Service name is required', 'error'); return; }
+
+  var data = {
+    name: name,
+    description: document.getElementById('svcDesc').value.trim(),
+    duration_minutes: parseInt(document.getElementById('svcDuration').value),
+    price: parseFloat(document.getElementById('svcPrice').value) || 0,
+    category: document.getElementById('svcCategory').value.trim(),
+    color: document.getElementById('svcColor').value,
+    is_public: document.getElementById('svcPublic').checked
+  };
+
+  var id = document.getElementById('svcId').value;
+  if (id) data.id = id;
+
+  await RVData.saveService(data);
+  closeModal('serviceModal');
+  toast(id ? 'Service updated' : 'Service created', 'success');
+  await reload();
+}
+
+async function deleteServiceById(id) {
+  if (!confirm('Delete this service?')) return;
+  await RVData.deleteService(id);
+  toast('Service deleted', 'info');
+  await reload();
+}
+
+// ─── Appointment Modal ──────────────────────────────────────────
+function openApptModal(appt) {
+  document.getElementById('apptModalTitle').textContent = appt ? 'Edit Appointment' : 'New Appointment';
+  document.getElementById('apptId').value = appt ? appt.id : '';
+  document.getElementById('apptCustomer').value = appt ? appt.customer_name : '';
+  document.getElementById('apptEmail').value = appt && appt.customer_contact ? (appt.customer_contact.email || '') : '';
+  document.getElementById('apptPhone').value = appt && appt.customer_contact ? (appt.customer_contact.phone || '') : '';
+
+  // Populate service dropdown
+  var sel = document.getElementById('apptService');
+  sel.innerHTML = services.map(function(s) {
+    return '<option value="' + s.id + '"' + (appt && appt.service_id === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>';
+  }).join('');
+
+  if (appt && appt.start_time) {
+    document.getElementById('apptDate').value = appt.start_time.slice(0, 10);
+    document.getElementById('apptTime').value = appt.start_time.slice(11, 16);
+  } else {
+    document.getElementById('apptDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('apptTime').value = '09:00';
+  }
+  document.getElementById('apptStatus').value = appt ? appt.status : 'requested';
+  document.getElementById('apptNotes').value = appt ? (appt.notes || '') : '';
+  document.getElementById('apptModal').classList.add('show');
+}
+
+async function saveApptForm() {
+  var name = document.getElementById('apptCustomer').value.trim();
+  if (!name) { toast('Customer name is required', 'error'); return; }
+
+  var svcId = document.getElementById('apptService').value;
+  var svc = getService(svcId);
+  var date = document.getElementById('apptDate').value;
+  var time = document.getElementById('apptTime').value;
+  if (!date || !time) { toast('Date and time are required', 'error'); return; }
+
+  var startTime = date + 'T' + time + ':00';
+  var endDate = new Date(startTime);
+  endDate.setMinutes(endDate.getMinutes() + (svc ? svc.duration_minutes : 60));
+  var endTime = endDate.getFullYear() + '-' + String(endDate.getMonth()+1).padStart(2,'0') + '-' +
+    String(endDate.getDate()).padStart(2,'0') + 'T' + String(endDate.getHours()).padStart(2,'0') + ':' +
+    String(endDate.getMinutes()).padStart(2,'0') + ':00';
+
+  var contact = { email: document.getElementById('apptEmail').value.trim() };
+  var phone = document.getElementById('apptPhone').value.trim();
+  if (phone) contact.phone = phone;
+
+  var data = {
+    customer_name: name,
+    customer_contact: contact,
+    service_id: svcId,
+    start_time: startTime,
+    end_time: endTime,
+    status: document.getElementById('apptStatus').value,
+    notes: document.getElementById('apptNotes').value.trim()
+  };
+
+  var id = document.getElementById('apptId').value;
+  if (id) data.id = id;
+
+  await RVData.saveAppointment(data);
+  closeModal('apptModal');
+  toast(id ? 'Appointment updated' : 'Appointment created', 'success');
+  await reload();
+}
+
+async function deleteAppt(id) {
+  if (!confirm('Delete this appointment?')) return;
+  await RVData.deleteAppointment(id);
+  toast('Appointment deleted', 'info');
+  await reload();
+}
+
+// ─── Detail Modal ───────────────────────────────────────────────
+function openDetailModal(id) {
+  var appt = appointments.find(function(a) { return a.id === id; });
+  if (!appt) return;
+  var svc = getService(appt.service_id);
+
+  var html = '<div class="detail-row"><span class="dlabel">Customer</span><span class="dval">' + esc(appt.customer_name) + '</span></div>';
+  if (appt.customer_contact) {
+    if (appt.customer_contact.email) html += '<div class="detail-row"><span class="dlabel">Email</span><span class="dval">' + esc(appt.customer_contact.email) + '</span></div>';
+    if (appt.customer_contact.phone) html += '<div class="detail-row"><span class="dlabel">Phone</span><span class="dval">' + esc(appt.customer_contact.phone) + '</span></div>';
+  }
+  html += '<div class="detail-row"><span class="dlabel">Service</span><span class="dval">' + (svc ? esc(svc.name) : 'Unknown') + '</span></div>';
+  html += '<div class="detail-row"><span class="dlabel">Date/Time</span><span class="dval">' + formatDateTime(appt.start_time) + ' - ' + formatTime(appt.end_time) + '</span></div>';
+  html += '<div class="detail-row"><span class="dlabel">Duration</span><span class="dval">' + (svc ? svc.duration_minutes + ' min' : '-') + '</span></div>';
+  html += '<div class="detail-row"><span class="dlabel">Status</span><span class="dval"><span class="badge ' + appt.status + '">' + appt.status + '</span></span></div>';
+
+  html += '<label style="display:block;margin-top:1rem;font-size:0.82rem;font-weight:600;color:#374151;">Notes</label>';
+  html += '<textarea id="detailNotes" style="width:100%;padding:0.5rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.85rem;resize:vertical;height:60px;box-sizing:border-box;">' + esc(appt.notes || '') + '</textarea>';
+
+  document.getElementById('detailContent').innerHTML = html;
+
+  var actions = '';
+  if (appt.status === 'requested') {
+    actions += '<button class="btn-bk success" onclick="updateApptStatus(\'' + id + '\',\'confirmed\')">Confirm</button>';
+    actions += '<button class="btn-bk danger" onclick="updateApptStatus(\'' + id + '\',\'canceled\')">Cancel</button>';
+  }
+  if (appt.status === 'confirmed') {
+    actions += '<button class="btn-bk primary" onclick="updateApptStatus(\'' + id + '\',\'completed\')">Complete</button>';
+    actions += '<button class="btn-bk warn" onclick="updateApptStatus(\'' + id + '\',\'noshow\')">No-Show</button>';
+    actions += '<button class="btn-bk danger" onclick="updateApptStatus(\'' + id + '\',\'canceled\')">Cancel</button>';
+  }
+  if (appt.status === 'completed') {
+    actions += '<button class="btn-bk primary" onclick="sendReviewRequest(\'' + id + '\')">Send Review Request</button>';
+  }
+  actions += '<button class="btn-bk outline" onclick="saveDetailNotes(\'' + id + '\')">Save Notes</button>';
+  actions += '<button class="btn-bk gray" onclick="closeModal(\'detailModal\')">Close</button>';
+
+  document.getElementById('detailActions').innerHTML = actions;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+async function updateApptStatus(id, status) {
+  var appt = appointments.find(function(a) { return a.id === id; });
+  if (!appt) return;
+  appt.status = status;
+  appt.notes = document.getElementById('detailNotes').value.trim();
+  await RVData.saveAppointment(appt);
+  closeModal('detailModal');
+  toast('Appointment ' + status, 'success');
+  await reload();
+}
+
+async function saveDetailNotes(id) {
+  var appt = appointments.find(function(a) { return a.id === id; });
+  if (!appt) return;
+  appt.notes = document.getElementById('detailNotes').value.trim();
+  await RVData.saveAppointment(appt);
+  toast('Notes saved', 'success');
+}
+
+function sendReviewRequest(id) {
+  var appt = appointments.find(function(a) { return a.id === id; });
+  if (!appt) return;
+  toast('Review request sent to ' + (appt.customer_contact ? appt.customer_contact.email : appt.customer_name), 'success');
+}
+
+// ─── Helpers ────────────────────────────────────────────────────
+function getService(id) {
+  return services.find(function(s) { return s.id === id; });
+}
+
+function formatTime(dt) {
+  if (!dt) return '';
+  var d = new Date(dt);
+  var h = d.getHours();
+  var m = String(d.getMinutes()).padStart(2, '0');
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + ':' + m + ' ' + ampm;
+}
+
+function formatDateTime(dt) {
+  if (!dt) return '';
+  var d = new Date(dt);
+  return (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear() + ' ' + formatTime(dt);
+}
+
+function esc(str) {
+  var d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function toast(msg, type) {
+  var container = document.getElementById('toastContainer');
+  var el = document.createElement('div');
+  el.className = 'toast ' + (type || 'info');
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(function() { el.remove(); }, 3000);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+});
+
+// ─── Start ──────────────────────────────────────────────────────
+init();
+</script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
+</body>
+</html>

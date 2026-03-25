@@ -164,7 +164,7 @@
         Sign In →
       </button>
       <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:#64748b;">No account? <a onclick="agentShowTab('signup')" style="color:#8b5cf6;font-weight:600;cursor:pointer;">Apply as Agent →</a></p>
-      <p style="text-align:center;margin-top:.4rem;font-size:.75rem;color:#94a3b8;">Sign in with your Supabase account</p>
+      <p style="text-align:center;margin-top:.4rem;font-size:.75rem;color:#94a3b8;">Demo: danielrhart1284@gmail.com / SPMis#1!</p>
     </div>
 
     <!-- ── SIGNUP PANEL ── -->
@@ -748,8 +748,8 @@
 <!-- Supabase Backend -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-<script src="auth.js"></script>
 <script src="data-layer.js"></script>
+<script src="auth.js"></script>
 
 <script>
 // ── DATA ─────────────────────────────────────────────
@@ -800,6 +800,7 @@ function loadSample() {
 }
 
 // ── AUTH ─────────────────────────────────────────────
+/* AGENT_ACCOUNTS removed — auth now handled by Supabase Auth via auth.js */
 
 // Tab toggle
 function agentShowTab(tab) {
@@ -834,20 +835,26 @@ async function agentLogin() {
   const email = document.getElementById('aLoginEmail').value.trim().toLowerCase();
   const pw    = document.getElementById('aLoginPw').value;
   const errEl = document.getElementById('aLoginErr');
-  if (!email || !pw) { errEl.textContent='⚠️ Please enter email and password.'; errEl.style.display='block'; return; }
-  try {
-    const result = await Auth.signIn(email, pw);
-    if (result.error) { errEl.textContent='⚠️ ' + result.error.message; errEl.style.display='block'; return; }
-    const profile = result.profile || {};
-    if (profile.role !== 'agent') { errEl.textContent='⚠️ This account is not registered as an agent.'; errEl.style.display='block'; await Auth.signOut(); return; }
-    errEl.style.display='none';
-    agentLaunchDashboard({ name: profile.full_name || email, email: email });
-  } catch(e) {
-    errEl.textContent='⚠️ Login failed: ' + e.message; errEl.style.display='block';
+  if (!email || !pw) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+
+  const { data, error } = await Auth.signIn(email, pw);
+  if (error) {
+    errEl.textContent = error.message || '⚠️ Incorrect credentials.';
+    errEl.style.display = 'block';
+    return;
   }
+  errEl.style.display = 'none';
+  const profile = data.profile || {};
+  const acct = {
+    name: ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || email,
+    email: email,
+    verificationStatus: profile.verification_status || 'approved'
+  };
+  localStorage.setItem('rv_doc_role', 'agent');
+  agentLaunchDashboard(acct);
 }
 
-function agentSignup() {
+async function agentSignup() {
   const name      = document.getElementById('as-name').value.trim();
   const email     = document.getElementById('as-email').value.trim();
   const phone     = document.getElementById('as-phone').value.trim();
@@ -879,19 +886,40 @@ function agentSignup() {
     errEl.textContent = '⚠️ You must certify your credentials are accurate to continue.'; errEl.style.display='block'; return;
   }
   errEl.style.display = 'none';
-  const acct = {
-    name, email, phone, brokerage, password: pw,
+
+  // Register via Supabase Auth
+  const { data, error: signUpErr } = await Auth.signUp({
+    email, password: pw,
+    firstName: name.split(' ')[0],
+    lastName: name.split(' ').slice(1).join(' '),
+    phone,
+    company: brokerage,
+    role: 'agent',
+    plan: 'agent'
+  });
+  if (signUpErr) {
+    errEl.textContent = signUpErr.message || 'Signup failed. Please try again.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Store agent-specific credentials locally
+  const agentMeta = {
     verificationStatus: 'pending',
-    joined: new Date().toISOString().split('T')[0],
     credentials: {
       dre: { number: dreNum, type: dreType, expires: dreExp, broker: brokerName, fileName: dreFile.name },
       eo:  { carrier: eoCarrier, policy: eoPolicy, coverage: eoCoverage, expires: eoExp, fileName: eoFile.name },
       submittedAt: new Date().toISOString()
     }
   };
-  const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
-  stored.push(acct);
-  localStorage.setItem('rv_agent_signups', JSON.stringify(stored));
+  localStorage.setItem('rv_agent_meta', JSON.stringify(agentMeta));
+
+  const acct = {
+    name, email, phone, brokerage,
+    verificationStatus: 'pending',
+    joined: new Date().toISOString().split('T')[0]
+  };
+  localStorage.setItem('rv_doc_role', 'agent');
   agentLaunchDashboard(acct);
 }
 

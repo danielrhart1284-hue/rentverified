@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Secure Document Upload</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { background: #f5f3ff; min-height: 100vh; }
+    /* ── Portal Header ── */
+    .cup-header {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: white; padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+    }
+    .cup-logo { font-size: 0.95rem; font-weight: 800; opacity: 0.85; margin-bottom: 1.25rem; }
+    .cup-from {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      background: rgba(255,255,255,0.15); border-radius: 999px;
+      padding: 0.4rem 1rem; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;
+    }
+    .cup-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .cup-sub { font-size: 0.9rem; opacity: 0.85; max-width: 420px; margin: 0 auto; }
+    /* ── Body ── */
+    .cup-body { max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+    /* ── Progress ── */
+    .cup-progress {
+      background: white; border-radius: 12px; padding: 1rem 1.25rem;
+      border: 1px solid #e5e7eb; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .cup-progress-bar { flex: 1; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+    .cup-progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#7c3aed); border-radius: 999px; transition: width 0.4s ease; }
+    .cup-progress-label { font-size: 0.82rem; font-weight: 700; color: #6b7280; white-space: nowrap; }
+    /* ── Checklist ── */
+    .cup-checklist { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .cup-item {
+      background: white; border: 1.5px solid #e5e7eb; border-radius: 12px;
+      overflow: hidden; transition: border-color 0.15s;
+    }
+    .cup-item.uploaded { border-color: #6ee7b7; }
+    .cup-item-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.9rem 1.1rem; cursor: pointer;
+    }
+    .cup-item-check {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid #d1d5db; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; transition: all 0.2s;
+    }
+    .cup-item.uploaded .cup-item-check { background: #059669; border-color: #059669; color: white; }
+    .cup-item-label { flex: 1; font-size: 0.92rem; font-weight: 600; color: #111827; }
+    .cup-item.uploaded .cup-item-label { color: #6b7280; }
+    .cup-item-status {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    }
+    .cup-item .cup-item-status { background: #f3f4f6; color: #6b7280; }
+    .cup-item.uploaded .cup-item-status { background: #d1fae5; color: #065f46; }
+    .cup-item-body {
+      padding: 0 1.1rem 1rem; display: none;
+      border-top: 1px solid #f3f4f6;
+    }
+    .cup-item.open .cup-item-body { display: block; }
+    .cup-drop-zone {
+      border: 2px dashed #c4b5fd; border-radius: 10px; padding: 1.5rem;
+      text-align: center; cursor: pointer; background: #faf5ff;
+      margin-top: 0.75rem; transition: all 0.15s;
+    }
+    .cup-drop-zone:hover, .cup-drop-zone.drag-over { border-color: #6366f1; background: #ede9fe; }
+    .cup-drop-zone-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+    .cup-drop-zone-text { font-size: 0.88rem; font-weight: 700; color: #374151; }
+    .cup-drop-zone-sub { font-size: 0.78rem; color: #9ca3af; margin-top: 0.25rem; }
+    .cup-file-input { display: none; }
+    .cup-uploaded-file {
+      display: flex; align-items: center; gap: 0.6rem;
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+      padding: 0.5rem 0.75rem; margin-top: 0.5rem; font-size: 0.84rem; color: #065f46; font-weight: 600;
+    }
+    /* ── Submit area ── */
+    .cup-submit-area {
+      background: white; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 1.5rem; text-align: center;
+    }
+    .cup-submit-title { font-size: 1rem; font-weight: 700; color: #111827; margin-bottom: 0.35rem; }
+    .cup-submit-sub { font-size: 0.85rem; color: #6b7280; margin-bottom: 1.25rem; }
+    .cup-submit-btn {
+      background: linear-gradient(135deg,#4f46e5,#7c3aed); color: white;
+      border: none; border-radius: 10px; padding: 0.75rem 2.5rem;
+      font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+    }
+    .cup-submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.45); }
+    .cup-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    /* ── Notes ── */
+    .cup-notes {
+      background: white; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 1.25rem; margin-bottom: 1.25rem;
+    }
+    .cup-notes-label { font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.5rem; }
+    .cup-notes textarea {
+      width: 100%; border: 1.5px solid #e5e7eb; border-radius: 8px;
+      padding: 0.6rem 0.85rem; font-size: 0.88rem; color: #374151;
+      outline: none; resize: vertical; font-family: inherit; box-sizing: border-box;
+    }
+    .cup-notes textarea:focus { border-color: #6366f1; }
+    /* ── Security note ── */
+    .cup-security {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.78rem; color: #9ca3af; display: flex; align-items: center; gap: 0.4rem; justify-content: center;
+    }
+    /* ── Success state ── */
+    .cup-success {
+      text-align: center; padding: 3rem 2rem;
+      background: white; border-radius: 16px; border: 1px solid #e5e7eb;
+      display: none;
+    }
+    .cup-success.visible { display: block; }
+    .cup-success-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .cup-success-title { font-size: 1.4rem; font-weight: 900; color: #111827; margin-bottom: 0.5rem; }
+    .cup-success-sub { font-size: 0.9rem; color: #6b7280; max-width: 360px; margin: 0 auto 1.5rem; }
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #1f2937; color: white; padding: 0.75rem 1.5rem;
+      border-radius: 10px; font-size: 0.88rem; font-weight: 600;
+      opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+    @media (max-width: 480px) {
+      .cup-title { font-size: 1.3rem; }
+      .cup-body { padding: 1rem 0.85rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="cup-header">
+  <div class="cup-logo">🔐 RentVerified Secure Portal</div>
+  <div class="cup-from">
+    <span>📨</span> From: <strong>Daniel Hart — RentVerified</strong>
+  </div>
+  <div class="cup-title" id="reqTitle">Secure Document Upload</div>
+  <div class="cup-sub" id="reqSub">Please upload the requested documents below. Your files are encrypted and securely transmitted.</div>
+</div>
+
+<!-- Body -->
+<div class="cup-body">
+
+  <!-- Progress -->
+  <div class="cup-progress">
+    <div class="cup-progress-bar"><div class="cup-progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="cup-progress-label" id="progressLabel">0 of 0 uploaded</div>
+  </div>
+
+  <!-- Document Checklist -->
+  <div class="cup-checklist" id="cupChecklist"></div>
+
+  <!-- Notes -->
+  <div class="cup-notes">
+    <div class="cup-notes-label">Optional Message</div>
+    <textarea id="clientNotes" rows="3" placeholder="Add a note to Daniel Hart (optional)…"></textarea>
+  </div>
+
+  <!-- Submit -->
+  <div class="cup-submit-area" id="submitArea">
+    <div class="cup-submit-title">Ready to submit?</div>
+    <div class="cup-submit-sub">Upload at least one document and click submit. You can come back to this link to add more.</div>
+    <button class="cup-submit-btn" id="submitBtn" onclick="submitDocs()" disabled>Submit Documents →</button>
+  </div>
+
+  <!-- Success -->
+  <div class="cup-success" id="successState">
+    <div class="cup-success-icon">✅</div>
+    <div class="cup-success-title">Documents Submitted!</div>
+    <div class="cup-success-sub">Daniel Hart has been notified. Your documents have been securely uploaded. You may close this page.</div>
+    <a href="doc-hub.html" style="display:inline-block;margin-top:1rem;padding:0.6rem 1.5rem;background:#4f46e5;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.88rem;">View RentVerified →</a>
+  </div>
+
+  <div class="cup-security">🔒 256-bit SSL encrypted · Files stored securely · Link expires in 90 days</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Demo request data ──
+const DEMO_REQUEST = {
+  id: 'r1',
+  title: 'Smith Home Purchase — Documents Needed',
+  from: 'Daniel Hart',
+  items: [
+    'Last 2 years federal tax returns',
+    'Last 2 months pay stubs',
+    'Last 2 months bank statements',
+    'Photo ID (front & back)',
+    'Proof of homeowners insurance',
+    'Signed purchase agreement',
+  ]
+};
+
+// ── State ──
+let uploadedItems = {};   // itemIndex -> [filename, ...]
+let openItem = null;
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  // In production, parse ?req=ID from URL and fetch from localStorage
+  const params = new URLSearchParams(window.location.search);
+  const reqId = params.get('req');
+  const saved = reqId ? getReqById(reqId) : null;
+  const req = saved || DEMO_REQUEST;
+
+  document.getElementById('reqTitle').textContent = req.title;
+  document.getElementById('reqSub').textContent = `Requested by ${req.from || 'your agent'}. Please upload the documents below.`;
+  renderChecklist(req.items);
+  updateProgress(req.items.length);
+});
+
+function getReqById(id) {
+  try {
+    const reqs = JSON.parse(localStorage.getItem('rv_doc_requests') || '[]');
+    return reqs.find(r => r.id === id) || null;
+  } catch { return null; }
+}
+
+function renderChecklist(items) {
+  const list = document.getElementById('cupChecklist');
+  list.innerHTML = items.map((item, i) => `
+    <div class="cup-item" id="cup-item-${i}">
+      <div class="cup-item-header" onclick="toggleItem(${i})">
+        <div class="cup-item-check" id="check-${i}"></div>
+        <div class="cup-item-label">${item}</div>
+        <span class="cup-item-status" id="status-${i}">Tap to upload</span>
+      </div>
+      <div class="cup-item-body" id="body-${i}">
+        <div class="cup-drop-zone" id="dz-${i}"
+          onclick="triggerItemUpload(${i})"
+          ondragover="dzDragOver(event,${i})"
+          ondragleave="dzDragLeave(${i})"
+          ondrop="dzDrop(event,${i})">
+          <div class="cup-drop-zone-icon">📤</div>
+          <div class="cup-drop-zone-text">Drop file or tap to browse</div>
+          <div class="cup-drop-zone-sub">PDF, JPG, PNG, DOCX, XLSX accepted</div>
+          <input type="file" class="cup-file-input" id="fi-${i}" multiple onchange="handleItemFile(event,${i})" />
+        </div>
+        <div id="uploaded-list-${i}"></div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleItem(i) {
+  const item = document.getElementById(`cup-item-${i}`);
+  const body = document.getElementById(`body-${i}`);
+  if (openItem !== null && openItem !== i) {
+    document.getElementById(`cup-item-${openItem}`).classList.remove('open');
+  }
+  item.classList.toggle('open');
+  openItem = item.classList.contains('open') ? i : null;
+}
+
+function triggerItemUpload(i) { document.getElementById(`fi-${i}`).click(); }
+
+function dzDragOver(e, i) { e.preventDefault(); document.getElementById(`dz-${i}`).classList.add('drag-over'); }
+function dzDragLeave(i) { document.getElementById(`dz-${i}`).classList.remove('drag-over'); }
+function dzDrop(e, i) {
+  e.preventDefault();
+  dzDragLeave(i);
+  const files = Array.from(e.dataTransfer.files);
+  markUploaded(i, files.map(f => f.name));
+}
+function handleItemFile(e, i) {
+  const files = Array.from(e.target.files);
+  markUploaded(i, files.map(f => f.name));
+}
+function markUploaded(i, filenames) {
+  if (!uploadedItems[i]) uploadedItems[i] = [];
+  uploadedItems[i].push(...filenames);
+
+  const item = document.getElementById(`cup-item-${i}`);
+  item.classList.add('uploaded');
+  document.getElementById(`check-${i}`).textContent = '✓';
+  document.getElementById(`status-${i}`).textContent = `${uploadedItems[i].length} file(s)`;
+
+  const ul = document.getElementById(`uploaded-list-${i}`);
+  ul.innerHTML = uploadedItems[i].map(fn =>
+    `<div class="cup-uploaded-file">✅ ${fn}</div>`).join('');
+
+  const totalItems = document.querySelectorAll('[id^="cup-item-"]').length;
+  updateProgress(totalItems);
+  showToast(`${filenames.join(', ')} ready to submit`, 'success');
+}
+
+function updateProgress(total) {
+  const done = Object.keys(uploadedItems).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} of ${total} uploaded`;
+  document.getElementById('submitBtn').disabled = done === 0;
+}
+
+function submitDocs() {
+  const uploadedCount = Object.keys(uploadedItems).length;
+  if (!uploadedCount) { showToast('Please upload at least one document', 'error'); return; }
+
+  // Save to rv_documents in localStorage (simulating server receipt)
+  try {
+    const docs = JSON.parse(localStorage.getItem('rv_documents') || '[]');
+    const activity = JSON.parse(localStorage.getItem('rv_doc_activity') || '[]');
+    Object.values(uploadedItems).flat().forEach(fn => {
+      docs.unshift({ id:'d'+Date.now()+Math.random().toString(36).slice(2), name:fn, folder:'other', size:512000, tags:['client-upload'], notes:'Uploaded via client portal', uploaded:Date.now(), sharedWith:[] });
+      activity.unshift({ id:'a'+Date.now(), type:'upload', text:'Client uploaded', doc:fn, time:Date.now() });
+    });
+    localStorage.setItem('rv_documents', JSON.stringify(docs));
+    localStorage.setItem('rv_doc_activity', JSON.stringify(activity));
+  } catch(e) {}
+
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('cupChecklist').style.display = 'none';
+  document.querySelector('.cup-progress').style.display = 'none';
+  document.querySelector('.cup-notes').style.display = 'none';
+  document.getElementById('successState').classList.add('visible');
+}
+
+let _toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (type ? ' ' + type : '');
+  clearTimeout(_toastTimer); t.classList.add('show');
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

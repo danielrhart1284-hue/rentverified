@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loan Officer Portal – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Navbar ── */
+    .lo-nav { background:#0f172a; color:#fff; padding:0.75rem 2rem; display:flex; align-items:center; gap:1rem; position:sticky; top:0; z-index:100; }
+    .lo-nav-logo { font-weight:900; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem; text-decoration:none; color:#fff; }
+    .lo-nav-logo span { color:#3b82f6; }
+    .lo-nav-label { font-size:0.8rem; background:rgba(59,130,246,0.2); color:#93c5fd; padding:2px 10px; border-radius:999px; font-weight:600; }
+    .lo-nav-spacer { flex:1; }
+    .lo-nav-bell { position:relative; cursor:pointer; font-size:1.3rem; }
+    .lo-nav-bell-count { position:absolute; top:-6px; right:-8px; background:#ef4444; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+
+    /* ── Hero ── */
+    .lo-hero { background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%); color:#fff; padding:3rem 2rem 4rem; text-align:center; }
+    .lo-hero h1 { font-size:2.2rem; font-weight:900; margin-bottom:0.5rem; }
+    .lo-hero p { font-size:1rem; opacity:0.8; max-width:500px; margin:0 auto; }
+    .lo-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; max-width:900px; margin:-2rem auto 0; position:relative; z-index:2; padding:0 2rem; }
+    .lo-stat-card { background:#fff; border-radius:12px; padding:1.25rem; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
+    .lo-stat-val { font-size:1.75rem; font-weight:900; color:#0f172a; }
+    .lo-stat-label { font-size:0.8rem; color:#6b7280; font-weight:600; margin-top:2px; }
+
+    /* ── Tabs ── */
+    .lo-tabs { display:flex; gap:0; max-width:1100px; margin:2.5rem auto 0; padding:0 2rem; border-bottom:2px solid #e5e7eb; }
+    .lo-tab { padding:0.75rem 1.25rem; font-weight:700; font-size:0.9rem; cursor:pointer; color:#6b7280; border-bottom:2px solid transparent; margin-bottom:-2px; transition:0.15s; background:none; border-top:none; border-left:none; border-right:none; }
+    .lo-tab:hover { color:#1a56db; }
+    .lo-tab.active { color:#1a56db; border-bottom-color:#1a56db; }
+    .lo-tab-count { background:#e5e7eb; color:#374151; font-size:0.7rem; padding:1px 7px; border-radius:999px; margin-left:6px; font-weight:700; }
+    .lo-tab.active .lo-tab-count { background:#dbeafe; color:#1a56db; }
+
+    /* ── Package List ── */
+    .lo-main { max-width:1100px; margin:1.5rem auto 3rem; padding:0 2rem; }
+    .lo-pkg { background:#fff; border-radius:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); margin-bottom:1rem; border:1px solid #e5e7eb; overflow:hidden; transition:0.2s; }
+    .lo-pkg:hover { box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+    .lo-pkg-header { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:1rem; padding:1rem 1.25rem; cursor:pointer; }
+    .lo-pkg-left { display:flex; flex-direction:column; gap:0.25rem; }
+    .lo-pkg-biz { font-weight:800; font-size:1.05rem; color:#0f172a; }
+    .lo-pkg-meta { font-size:0.8rem; color:#6b7280; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
+    .lo-pkg-metrics { display:flex; gap:1rem; font-size:0.8rem; }
+    .lo-pkg-metric { text-align:center; }
+    .lo-pkg-metric-val { font-weight:700; color:#0f172a; }
+    .lo-pkg-metric-lbl { color:#9ca3af; font-size:0.7rem; }
+    .lo-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:0.75rem; font-weight:700; text-transform:capitalize; }
+    .lo-badge-submitted { background:#dbeafe; color:#1d4ed8; }
+    .lo-badge-under_review { background:#fef3c7; color:#b45309; }
+    .lo-badge-pre_approved { background:#d1fae5; color:#047857; }
+    .lo-badge-funded { background:#a7f3d0; color:#065f46; }
+    .lo-badge-declined { background:#fee2e2; color:#b91c1c; }
+
+    /* ── Actions Row ── */
+    .lo-pkg-actions { display:flex; align-items:center; gap:0.5rem; padding:0.75rem 1.25rem; border-top:1px solid #f3f4f6; background:#f9fafb; flex-wrap:wrap; }
+    .lo-pkg-actions select { padding:0.4rem 0.6rem; border:1px solid #d1d5db; border-radius:8px; font-size:0.8rem; }
+    .lo-pkg-actions input { flex:1; min-width:150px; padding:0.4rem 0.6rem; border:1px solid #d1d5db; border-radius:8px; font-size:0.8rem; }
+    .lo-btn { padding:0.45rem 1rem; border:none; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:0.15s; }
+    .lo-btn-primary { background:#1a56db; color:#fff; }
+    .lo-btn-primary:hover { background:#1e40af; }
+    .lo-btn-outline { background:transparent; border:1px solid #d1d5db; color:#374151; }
+    .lo-btn-outline:hover { background:#f3f4f6; }
+    .lo-btn-sm { padding:0.35rem 0.75rem; font-size:0.75rem; }
+
+    /* ── Expanded Detail ── */
+    .lo-detail { display:none; padding:1.5rem 1.25rem; border-top:2px solid #e5e7eb; background:#f9fafb; }
+    .lo-detail.open { display:block; }
+    .lo-detail-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+    .lo-detail-card { background:#fff; border-radius:10px; padding:1rem; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .lo-detail-card-val { font-size:1.4rem; font-weight:900; color:#0f172a; }
+    .lo-detail-card-lbl { font-size:0.78rem; color:#6b7280; margin-top:2px; }
+
+    /* ── Charts ── */
+    .lo-section-title { font-size:1rem; font-weight:800; margin-bottom:0.75rem; color:#0f172a; }
+    .lo-chart-area { display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+    .lo-chart-box { background:#fff; border-radius:10px; padding:1rem 1.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .lo-bar-chart { display:flex; align-items:flex-end; gap:6px; height:120px; padding-top:0.5rem; }
+    .lo-bar { flex:1; border-radius:4px 4px 0 0; transition:height 0.4s; position:relative; min-width:0; }
+    .lo-bar-label { position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); font-size:0.6rem; color:#9ca3af; white-space:nowrap; }
+    .lo-bar-val { position:absolute; top:-16px; left:50%; transform:translateX(-50%); font-size:0.6rem; font-weight:700; color:#374151; }
+    .lo-expense-list { list-style:none; padding:0; margin:0; }
+    .lo-expense-item { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.6rem; }
+    .lo-expense-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .lo-expense-name { flex:1; font-size:0.82rem; color:#374151; }
+    .lo-expense-val { font-weight:700; font-size:0.82rem; color:#0f172a; }
+
+    /* ── Sparkline ── */
+    .lo-spark { display:flex; align-items:flex-end; gap:2px; height:40px; }
+    .lo-spark-bar { flex:1; border-radius:2px; background:#3b82f6; min-width:0; }
+
+    /* ── Timeline ── */
+    .lo-timeline { position:relative; padding-left:1.5rem; margin:1rem 0; }
+    .lo-timeline::before { content:''; position:absolute; left:5px; top:0; bottom:0; width:2px; background:#e5e7eb; }
+    .lo-tl-item { position:relative; margin-bottom:0.75rem; padding-left:1rem; }
+    .lo-tl-dot { position:absolute; left:-1.5rem; top:4px; width:12px; height:12px; border-radius:50%; border:2px solid #fff; }
+    .lo-tl-status { font-weight:700; font-size:0.85rem; text-transform:capitalize; }
+    .lo-tl-date { font-size:0.75rem; color:#9ca3af; }
+    .lo-tl-note { font-size:0.8rem; color:#6b7280; margin-top:2px; font-style:italic; }
+
+    /* ── Notes + Download ── */
+    .lo-detail-footer { display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap; margin-top:1rem; padding-top:1rem; border-top:1px solid #e5e7eb; }
+    .lo-note-input { flex:1; min-width:200px; }
+    .lo-note-input label { display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:4px; }
+    .lo-note-input textarea { width:100%; padding:0.5rem; border:1px solid #d1d5db; border-radius:8px; font-size:0.85rem; resize:vertical; min-height:60px; box-sizing:border-box; }
+
+    /* ── Toast ── */
+    .lo-toast { position:fixed; bottom:2rem; right:2rem; background:#0f172a; color:#fff; padding:0.85rem 1.5rem; border-radius:10px; font-size:0.9rem; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.25); transform:translateY(120%); transition:transform 0.3s; z-index:999; }
+    .lo-toast.show { transform:translateY(0); }
+
+    /* ── Footer ── */
+    .lo-footer { background:#0f172a; color:#94a3b8; text-align:center; padding:2rem; font-size:0.85rem; }
+    .lo-footer a { color:#93c5fd; text-decoration:none; }
+    .lo-footer a:hover { text-decoration:underline; }
+
+    /* ── Responsive ── */
+    @media(max-width:768px){
+      .lo-stats { grid-template-columns:repeat(2,1fr); }
+      .lo-detail-grid { grid-template-columns:repeat(2,1fr); }
+      .lo-chart-area { grid-template-columns:1fr; }
+      .lo-pkg-header { grid-template-columns:1fr; gap:0.5rem; }
+      .lo-pkg-metrics { justify-content:flex-start; }
+      .lo-tabs { overflow-x:auto; }
+      .lo-hero h1 { font-size:1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="lo-nav">
+  <a href="index.html" class="lo-nav-logo">Rent<span>Verified</span></a>
+  <span class="lo-nav-label">Loan Officer Portal</span>
+  <div class="lo-nav-spacer"></div>
+  <div class="lo-nav-bell" title="Notifications">
+    &#128276;
+    <span class="lo-nav-bell-count" id="bellCount">0</span>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="lo-hero">
+  <h1 id="heroGreeting">Welcome back</h1>
+  <p>Manage your loan packages and applicant financials</p>
+</section>
+<div class="lo-stats">
+  <div class="lo-stat-card"><div class="lo-stat-val" id="statTotal">0</div><div class="lo-stat-label">Total Packages</div></div>
+  <div class="lo-stat-card"><div class="lo-stat-val" id="statReview">0</div><div class="lo-stat-label">Under Review</div></div>
+  <div class="lo-stat-card"><div class="lo-stat-val" id="statApproved">0</div><div class="lo-stat-label">Pre-Approved</div></div>
+  <div class="lo-stat-card"><div class="lo-stat-val" id="statFunded">0</div><div class="lo-stat-label">Funded This Month</div></div>
+</div>
+
+<!-- ── Tabs ── -->
+<div class="lo-tabs" id="tabBar">
+  <button class="lo-tab active" data-filter="all">All<span class="lo-tab-count" id="cntAll">0</span></button>
+  <button class="lo-tab" data-filter="under_review">Under Review<span class="lo-tab-count" id="cntReview">0</span></button>
+  <button class="lo-tab" data-filter="pre_approved">Pre-Approved<span class="lo-tab-count" id="cntApproved">0</span></button>
+  <button class="lo-tab" data-filter="funded">Funded<span class="lo-tab-count" id="cntFunded">0</span></button>
+  <button class="lo-tab" data-filter="declined">Declined<span class="lo-tab-count" id="cntDeclined">0</span></button>
+</div>
+
+<!-- ── Package List ── -->
+<div class="lo-main" id="pkgList"></div>
+
+<!-- ── Toast ── -->
+<div class="lo-toast" id="toast"></div>
+
+<!-- ── Footer ── -->
+<footer class="lo-footer">
+  &copy; 2026 <a href="index.html">RentVerified</a>. All rights reserved. |
+  <a href="funding.html">Funding Hub</a> |
+  <a href="loans.html">Loan Pipeline</a>
+</footer>
+
+<!-- ── Scripts ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="share-widget.js" data-share-title="Loan Officer Portal" data-share-text="Review loan packages on RentVerified"></script>
+<script>
+// ════════════════════════════════════════════════════════════════════
+// Loan Officer Portal
+// ════════════════════════════════════════════════════════════════════
+if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
+
+(function(){
+  'use strict';
+
+  // ── Seed Data ──────────────────────────────────────────────────────
+  var SEED_PACKAGES = [
+    { id:'lp_demo_1', business_id:'biz_1', business_name:'Alpine Property Group', loan_officer_id:'lo_1', status:'under_review', shared_at:'2026-03-20T10:00:00Z', revenue_12mo:312000, expense_12mo:218400, cashflow_avg:7800, license_verified:true, loan_amount:250000, loan_type:'SBA 7(a)', status_history:[{status:'submitted',date:'2026-03-18T14:00:00Z'},{status:'under_review',date:'2026-03-20T10:00:00Z'}] },
+    { id:'lp_demo_2', business_id:'biz_2', business_name:'Summit Construction LLC', loan_officer_id:'lo_1', status:'pre_approved', shared_at:'2026-03-15T09:00:00Z', revenue_12mo:480000, expense_12mo:336000, cashflow_avg:12000, license_verified:true, loan_amount:500000, loan_type:'Equipment Financing', status_history:[{status:'submitted',date:'2026-03-12T11:00:00Z'},{status:'under_review',date:'2026-03-14T15:00:00Z'},{status:'pre_approved',date:'2026-03-18T09:00:00Z'}] },
+    { id:'lp_demo_3', business_id:'biz_3', business_name:'Redrock Rentals', loan_officer_id:'lo_1', status:'submitted', shared_at:'2026-03-21T16:00:00Z', revenue_12mo:156000, expense_12mo:124800, cashflow_avg:2600, license_verified:false, loan_amount:75000, loan_type:'Business Line of Credit', status_history:[{status:'submitted',date:'2026-03-21T16:00:00Z'}] }
+  ];
+
+  var EXPENSE_COLORS = ['#3b82f6','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1'];
+  var EXPENSE_CATS = ['Operations','Payroll','Maintenance','Insurance','Marketing','Utilities'];
+
+  var STATUS_COLORS = { submitted:'#3b82f6', under_review:'#f59e0b', pre_approved:'#10b981', funded:'#059669', declined:'#ef4444' };
+
+  // ── Helpers ────────────────────────────────────────────────────────
+  function fmtCurrency(v){ return '$' + Number(v||0).toLocaleString('en-US'); }
+  function fmtDate(d){ if(!d) return '—'; var dt=new Date(d); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+  function fmtDateShort(d){ if(!d) return ''; var dt=new Date(d); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+  function statusLabel(s){ return (s||'').replace(/_/g,' '); }
+
+  function getPackages(){
+    var raw = localStorage.getItem('rv_loan_packages');
+    if(!raw || JSON.parse(raw).length === 0){
+      localStorage.setItem('rv_loan_packages', JSON.stringify(SEED_PACKAGES));
+      return JSON.parse(JSON.stringify(SEED_PACKAGES));
+    }
+    return JSON.parse(raw);
+  }
+  function savePackages(arr){ localStorage.setItem('rv_loan_packages', JSON.stringify(arr)); }
+
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 3500);
+  }
+
+  // ── Officer Name ───────────────────────────────────────────────────
+  var officerName = 'Loan Officer';
+  try { var p = JSON.parse(localStorage.getItem('rv_profile')||'{}'); if(p.name) officerName = p.name; } catch(e){}
+  document.getElementById('heroGreeting').textContent = 'Welcome back, ' + officerName;
+
+  // ── Stats ──────────────────────────────────────────────────────────
+  function updateStats(){
+    var pkgs = getPackages();
+    var now = new Date();
+    var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    document.getElementById('statTotal').textContent = pkgs.length;
+    document.getElementById('statReview').textContent = pkgs.filter(function(p){return p.status==='under_review';}).length;
+    document.getElementById('statApproved').textContent = pkgs.filter(function(p){return p.status==='pre_approved';}).length;
+    document.getElementById('statFunded').textContent = pkgs.filter(function(p){
+      if(p.status!=='funded') return false;
+      var hist = p.status_history||[];
+      var fundedEntry = null;
+      for(var i=hist.length-1;i>=0;i--){ if(hist[i].status==='funded'){ fundedEntry=hist[i]; break; } }
+      return fundedEntry && new Date(fundedEntry.date) >= monthStart;
+    }).length;
+    // Bell count: new submissions (submitted status)
+    document.getElementById('bellCount').textContent = pkgs.filter(function(p){return p.status==='submitted';}).length;
+  }
+
+  // ── Tab Counts ─────────────────────────────────────────────────────
+  function updateTabCounts(){
+    var pkgs = getPackages();
+    document.getElementById('cntAll').textContent = pkgs.length;
+    document.getElementById('cntReview').textContent = pkgs.filter(function(p){return p.status==='under_review';}).length;
+    document.getElementById('cntApproved').textContent = pkgs.filter(function(p){return p.status==='pre_approved';}).length;
+    document.getElementById('cntFunded').textContent = pkgs.filter(function(p){return p.status==='funded';}).length;
+    document.getElementById('cntDeclined').textContent = pkgs.filter(function(p){return p.status==='declined';}).length;
+  }
+
+  // ── Generate Monthly Data (deterministic from revenue) ─────────────
+  function genMonthly(revenue12){
+    var months = [];
+    var base = revenue12 / 12;
+    var offsets = [0.85, 0.92, 1.05, 0.97, 1.1, 1.11];
+    for(var i=0; i<6; i++){
+      months.push(Math.round(base * offsets[i]));
+    }
+    return months;
+  }
+  function genExpenses(expense12){
+    var pcts = [0.30, 0.25, 0.18, 0.12, 0.10, 0.05];
+    return pcts.map(function(p,i){ return { name:EXPENSE_CATS[i], value:Math.round(expense12*p), color:EXPENSE_COLORS[i] }; });
+  }
+  function genCashflow(rev12, exp12){
+    var monthRev = genMonthly(rev12);
+    var monthExp = genMonthly(exp12);
+    return monthRev.map(function(r,i){ return r - monthExp[i]; });
+  }
+  function monthLabels(){
+    var now = new Date();
+    var labels = [];
+    for(var i=5; i>=0; i--){
+      var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      labels.push(d.toLocaleDateString('en-US',{month:'short'}));
+    }
+    return labels;
+  }
+
+  // ── Render Package Card ────────────────────────────────────────────
+  function renderPackage(pkg){
+    var card = document.createElement('div');
+    card.className = 'lo-pkg';
+    card.id = 'pkg-' + pkg.id;
+
+    // Header
+    var header = document.createElement('div');
+    header.className = 'lo-pkg-header';
+    header.onclick = function(){ toggleDetail(pkg.id); };
+    header.innerHTML =
+      '<div class="lo-pkg-left">' +
+        '<div class="lo-pkg-biz">' + (pkg.business_name||'Demo Business') + '</div>' +
+        '<div class="lo-pkg-meta">' +
+          '<span class="lo-badge lo-badge-' + pkg.status + '">' + statusLabel(pkg.status) + '</span>' +
+          '<span>Shared ' + fmtDate(pkg.shared_at) + '</span>' +
+          '<span>' + (pkg.loan_type||'—') + '</span>' +
+          '<span>' + fmtCurrency(pkg.loan_amount) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="lo-pkg-metrics">' +
+        '<div class="lo-pkg-metric"><div class="lo-pkg-metric-val">' + fmtCurrency(pkg.revenue_12mo) + '</div><div class="lo-pkg-metric-lbl">Revenue</div></div>' +
+        '<div class="lo-pkg-metric"><div class="lo-pkg-metric-val">' + fmtCurrency(pkg.expense_12mo) + '</div><div class="lo-pkg-metric-lbl">Expenses</div></div>' +
+        '<div class="lo-pkg-metric"><div class="lo-pkg-metric-val">' + fmtCurrency(pkg.cashflow_avg) + '/mo</div><div class="lo-pkg-metric-lbl">Cash Flow</div></div>' +
+      '</div>' +
+      '<div><span style="font-size:1.2rem;color:#9ca3af;">&#9660;</span></div>';
+    card.appendChild(header);
+
+    // Actions row
+    var actions = document.createElement('div');
+    actions.className = 'lo-pkg-actions';
+    actions.innerHTML =
+      '<select id="sel-' + pkg.id + '">' +
+        '<option value="">Change status...</option>' +
+        '<option value="under_review">Under Review</option>' +
+        '<option value="pre_approved">Pre-Approved</option>' +
+        '<option value="funded">Funded</option>' +
+        '<option value="declined">Declined</option>' +
+      '</select>' +
+      '<input type="text" id="note-' + pkg.id + '" placeholder="Optional note..." />' +
+      '<button class="lo-btn lo-btn-primary lo-btn-sm" onclick="window._loUpdateStatus(\'' + pkg.id + '\')">Update</button>' +
+      '<button class="lo-btn lo-btn-outline lo-btn-sm" onclick="window._loToggleDetail(\'' + pkg.id + '\')">View Details</button>';
+    card.appendChild(actions);
+
+    // Detail panel
+    var detail = document.createElement('div');
+    detail.className = 'lo-detail';
+    detail.id = 'detail-' + pkg.id;
+    detail.innerHTML = buildDetail(pkg);
+    card.appendChild(detail);
+
+    return card;
+  }
+
+  // ── Build Detail HTML ──────────────────────────────────────────────
+  function buildDetail(pkg){
+    var months = genMonthly(pkg.revenue_12mo);
+    var labels = monthLabels();
+    var maxMonth = Math.max.apply(null, months);
+    var expenses = genExpenses(pkg.expense_12mo);
+    var cashflows = genCashflow(pkg.revenue_12mo, pkg.expense_12mo);
+    var maxCf = Math.max.apply(null, cashflows.map(function(v){return Math.abs(v);}));
+
+    // Summary cards
+    var html = '<div class="lo-detail-grid">' +
+      '<div class="lo-detail-card"><div class="lo-detail-card-val">' + fmtCurrency(pkg.revenue_12mo) + '</div><div class="lo-detail-card-lbl">12-Month Revenue</div></div>' +
+      '<div class="lo-detail-card"><div class="lo-detail-card-val">' + fmtCurrency(pkg.expense_12mo) + '</div><div class="lo-detail-card-lbl">12-Month Expenses</div></div>' +
+      '<div class="lo-detail-card"><div class="lo-detail-card-val">' + fmtCurrency(pkg.cashflow_avg) + '</div><div class="lo-detail-card-lbl">Avg Monthly Cash Flow</div></div>' +
+      '<div class="lo-detail-card"><div class="lo-detail-card-val">' + (pkg.license_verified ? '<span style="color:#059669;">Verified</span>' : '<span style="color:#ef4444;">Unverified</span>') + '</div><div class="lo-detail-card-lbl">License Status</div></div>' +
+    '</div>';
+
+    // Charts area
+    html += '<div class="lo-chart-area">';
+
+    // Bar chart — Monthly Revenue
+    html += '<div class="lo-chart-box"><div class="lo-section-title">Monthly Revenue (Last 6 Months)</div><div class="lo-bar-chart">';
+    for(var i=0; i<6; i++){
+      var pct = maxMonth > 0 ? (months[i]/maxMonth*100) : 0;
+      html += '<div class="lo-bar" style="height:' + pct + '%;background:#3b82f6;">' +
+        '<span class="lo-bar-val">' + (months[i]/1000).toFixed(0) + 'k</span>' +
+        '<span class="lo-bar-label">' + labels[i] + '</span>' +
+      '</div>';
+    }
+    html += '</div></div>';
+
+    // Expense Breakdown
+    html += '<div class="lo-chart-box"><div class="lo-section-title">Expense Breakdown</div><ul class="lo-expense-list">';
+    for(var j=0; j<expenses.length; j++){
+      html += '<li class="lo-expense-item">' +
+        '<span class="lo-expense-dot" style="background:' + expenses[j].color + ';"></span>' +
+        '<span class="lo-expense-name">' + expenses[j].name + '</span>' +
+        '<span class="lo-expense-val">' + fmtCurrency(expenses[j].value) + '</span>' +
+      '</li>';
+    }
+    html += '</ul></div></div>';
+
+    // Cash Flow Trend
+    html += '<div class="lo-chart-box" style="margin-bottom:1.5rem;"><div class="lo-section-title">Cash Flow Trend</div><div class="lo-spark">';
+    for(var k=0; k<cashflows.length; k++){
+      var cfPct = maxCf > 0 ? (Math.abs(cashflows[k])/maxCf*100) : 0;
+      var cfColor = cashflows[k] >= 0 ? '#10b981' : '#ef4444';
+      html += '<div class="lo-spark-bar" style="height:' + Math.max(cfPct,5) + '%;background:' + cfColor + ';" title="' + fmtCurrency(cashflows[k]) + '"></div>';
+    }
+    html += '</div></div>';
+
+    // Owner Statements
+    var ownerStmts = [];
+    try { ownerStmts = JSON.parse(localStorage.getItem('rv_owner_statements')||'[]').filter(function(s){return s.business_id===pkg.business_id;}); } catch(e){}
+    if(ownerStmts.length > 0){
+      html += '<div class="lo-chart-box" style="margin-bottom:1.5rem;"><div class="lo-section-title">Owner Statements</div>';
+      for(var s=0; s<ownerStmts.length; s++){
+        html += '<div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;">' +
+          '<span>' + (ownerStmts[s].period||'—') + '</span>' +
+          '<span style="font-weight:700;">' + fmtCurrency(ownerStmts[s].net||ownerStmts[s].total_income) + '</span>' +
+        '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Documents
+    var docs = [];
+    try { docs = JSON.parse(localStorage.getItem('rv_documents')||'[]').filter(function(d){return d.business_id===pkg.business_id;}); } catch(e){}
+    if(docs.length > 0){
+      html += '<div class="lo-chart-box" style="margin-bottom:1.5rem;"><div class="lo-section-title">Documents</div>';
+      for(var dd=0; dd<docs.length; dd++){
+        html += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;">' +
+          '<span>&#128196;</span>' +
+          '<span style="flex:1;">' + (docs[dd].name||'Document') + '</span>' +
+          '<span style="color:#9ca3af;font-size:0.75rem;">' + (docs[dd].type||'') + '</span>' +
+        '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Status Timeline
+    html += '<div class="lo-chart-box" style="margin-bottom:1.5rem;"><div class="lo-section-title">Status Timeline</div><div class="lo-timeline">';
+    var hist = pkg.status_history || [];
+    for(var h=0; h<hist.length; h++){
+      var col = STATUS_COLORS[hist[h].status] || '#6b7280';
+      html += '<div class="lo-tl-item">' +
+        '<div class="lo-tl-dot" style="background:' + col + ';"></div>' +
+        '<div class="lo-tl-status" style="color:' + col + ';">' + statusLabel(hist[h].status) + '</div>' +
+        '<div class="lo-tl-date">' + fmtDate(hist[h].date) + '</div>' +
+        (hist[h].note ? '<div class="lo-tl-note">' + hist[h].note + '</div>' : '') +
+      '</div>';
+    }
+    html += '</div></div>';
+
+    // Footer: Download + Note
+    html += '<div class="lo-detail-footer">' +
+      '<div class="lo-note-input">' +
+        '<label>Add Note</label>' +
+        '<textarea id="detailNote-' + pkg.id + '" placeholder="Internal note about this applicant..."></textarea>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:0.5rem;">' +
+        '<button class="lo-btn lo-btn-primary" onclick="window._loSaveNote(\'' + pkg.id + '\')">Save Note</button>' +
+        '<button class="lo-btn lo-btn-outline" onclick="window.print()">Download PDF Package</button>' +
+      '</div>' +
+    '</div>';
+
+    return html;
+  }
+
+  // ── Toggle Detail ──────────────────────────────────────────────────
+  function toggleDetail(id){
+    var el = document.getElementById('detail-' + id);
+    if(el) el.classList.toggle('open');
+  }
+  window._loToggleDetail = toggleDetail;
+
+  // ── Update Status ──────────────────────────────────────────────────
+  window._loUpdateStatus = function(id){
+    var sel = document.getElementById('sel-' + id);
+    var noteEl = document.getElementById('note-' + id);
+    var newStatus = sel ? sel.value : '';
+    var note = noteEl ? noteEl.value.trim() : '';
+    if(!newStatus){ showToast('Please select a status.'); return; }
+
+    var pkgs = getPackages();
+    for(var i=0; i<pkgs.length; i++){
+      if(pkgs[i].id === id){
+        pkgs[i].status = newStatus;
+        if(!pkgs[i].status_history) pkgs[i].status_history = [];
+        var entry = { status:newStatus, date:new Date().toISOString() };
+        if(note) entry.note = note;
+        pkgs[i].status_history.push(entry);
+        break;
+      }
+    }
+    savePackages(pkgs);
+
+    // Also call RVData if available
+    if(typeof RVData !== 'undefined' && RVData.updateLoanStatus){
+      RVData.updateLoanStatus(id, newStatus, note);
+    }
+
+    showToast('Status updated to ' + statusLabel(newStatus) + '. Notification sent to applicant.');
+    renderAll();
+  };
+
+  // ── Save Note ──────────────────────────────────────────────────────
+  window._loSaveNote = function(id){
+    var textarea = document.getElementById('detailNote-' + id);
+    var note = textarea ? textarea.value.trim() : '';
+    if(!note){ showToast('Please enter a note.'); return; }
+
+    var pkgs = getPackages();
+    for(var i=0; i<pkgs.length; i++){
+      if(pkgs[i].id === id){
+        if(!pkgs[i].notes) pkgs[i].notes = [];
+        pkgs[i].notes.push({ text:note, date:new Date().toISOString() });
+        break;
+      }
+    }
+    savePackages(pkgs);
+    if(textarea) textarea.value = '';
+    showToast('Note saved.');
+  };
+
+  // ── Active filter ──────────────────────────────────────────────────
+  var activeFilter = 'all';
+
+  // ── Render All ─────────────────────────────────────────────────────
+  function renderAll(){
+    updateStats();
+    updateTabCounts();
+
+    var pkgs = getPackages();
+    var filtered = activeFilter === 'all' ? pkgs : pkgs.filter(function(p){ return p.status === activeFilter; });
+
+    var container = document.getElementById('pkgList');
+    container.innerHTML = '';
+
+    if(filtered.length === 0){
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:#9ca3af;">No packages match this filter.</div>';
+      return;
+    }
+
+    // Sort: most recent shared_at first
+    filtered.sort(function(a,b){ return new Date(b.shared_at) - new Date(a.shared_at); });
+
+    for(var i=0; i<filtered.length; i++){
+      container.appendChild(renderPackage(filtered[i]));
+    }
+  }
+
+  // ── Tab Clicks ─────────────────────────────────────────────────────
+  var tabBtns = document.querySelectorAll('.lo-tab');
+  for(var t=0; t<tabBtns.length; t++){
+    tabBtns[t].addEventListener('click', function(){
+      for(var j=0; j<tabBtns.length; j++) tabBtns[j].classList.remove('active');
+      this.classList.add('active');
+      activeFilter = this.getAttribute('data-filter');
+      renderAll();
+    });
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────
+  renderAll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Estimates</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Hero ── */
+    .est-hero { background: linear-gradient(135deg, #d97706 0%, #b45309 60%, #92400e 100%); color: white; padding: 3.5rem 2rem 0; }
+    .est-hero-inner { max-width: 1280px; margin: 0 auto; }
+    .est-breadcrumb { font-size: 0.82rem; opacity: 0.8; margin-bottom: 0.75rem; }
+    .est-breadcrumb a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    .est-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .est-title-left { display: flex; align-items: center; gap: 1rem; }
+    .est-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+    .est-page-title { font-size: 1.7rem; font-weight: 900; }
+    .est-page-sub { font-size: 0.9rem; opacity: 0.82; margin-top: 3px; }
+    .est-header-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; padding-bottom: 1.2rem; }
+    .est-stat-val { font-size: 1.4rem; font-weight: 800; }
+    .est-stat-lbl { font-size: 0.72rem; opacity: 0.75; }
+
+    /* ── Tabs ── */
+    .est-tabs { background: white; border-bottom: 2px solid #e5e7eb; position: sticky; top: 60px; z-index: 100; }
+    .est-tabs-inner { max-width: 1280px; margin: 0 auto; padding: 0 2rem; display: flex; overflow-x: auto; }
+    .est-tab { padding: 0.9rem 1.4rem; border: none; background: none; font-size: 0.88rem; font-weight: 600; color: #6b7280; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+    .est-tab:hover { color: #374151; }
+    .est-tab.active { color: #d97706; border-bottom-color: #d97706; }
+    .est-tab .badge { display: inline-flex; align-items: center; justify-content: center; background: #fef3c7; color: #92400e; font-size: 0.68rem; font-weight: 700; min-width: 17px; height: 17px; border-radius: 999px; padding: 0 4px; margin-left: 5px; }
+
+    /* ── Body ── */
+    .est-body { max-width: 1280px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+    .est-panel { display: none; }
+    .est-panel.active { display: block; }
+
+    /* ── Stats ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.25rem; }
+    .stat-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.25rem; }
+    .stat-card-val { font-size: 1.5rem; font-weight: 800; color: #111827; }
+    .stat-card-lbl { font-size: 0.75rem; color: #6b7280; font-weight: 600; margin-top: 2px; }
+    .stat-card.amber .stat-card-val { color: #d97706; }
+    .stat-card.green .stat-card-val { color: #059669; }
+    .stat-card.blue .stat-card-val { color: #2563eb; }
+    .stat-card.red .stat-card-val { color: #dc2626; }
+
+    /* ── Quick Bar ── */
+    .quick-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .quick-bar-right { margin-left: auto; display: flex; gap: 0.5rem; }
+    .filter-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-chip { padding: 5px 14px; border-radius: 999px; border: 1.5px solid #e5e7eb; font-size: 0.8rem; font-weight: 600; color: #6b7280; cursor: pointer; transition: all 0.12s; background: white; }
+    .filter-chip:hover { border-color: #d97706; color: #d97706; }
+    .filter-chip.active { background: #d97706; border-color: #d97706; color: white; }
+
+    /* ── Estimate Table ── */
+    .est-table-wrap { background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .est-table { width: 100%; border-collapse: collapse; }
+    .est-table th { background: #f9fafb; font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    .est-table td { padding: 0.9rem 1rem; border-bottom: 1px solid #f3f4f6; font-size: 0.87rem; vertical-align: middle; }
+    .est-table tr:last-child td { border-bottom: none; }
+    .est-table tr:hover td { background: #f9fafb; cursor: pointer; }
+
+    /* ── Status Badges ── */
+    .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; }
+    .status-draft { background: #f3f4f6; color: #6b7280; }
+    .status-sent { background: #dbeafe; color: #1d4ed8; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-declined { background: #fee2e2; color: #991b1b; }
+    .status-expired { background: #fef3c7; color: #92400e; }
+    .status-invoiced { background: #ede9fe; color: #4c1d95; }
+
+    /* ── Drawer ── */
+    .est-drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; backdrop-filter: blur(2px); }
+    .est-drawer-overlay.open { display: block; }
+    .est-drawer { position: fixed; right: 0; top: 0; bottom: 0; width: 580px; max-width: 95vw; background: white; z-index: 201; display: flex; flex-direction: column; box-shadow: -4px 0 30px rgba(0,0,0,0.12); transform: translateX(100%); transition: transform 0.25s ease; }
+    .est-drawer.open { transform: translateX(0); }
+    .drawer-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+    .drawer-title { font-size: 1.1rem; font-weight: 800; color: #111827; }
+    .drawer-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #9ca3af; }
+    .drawer-close:hover { color: #111827; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+    .drawer-footer { padding: 1.25rem 1.5rem; border-top: 1px solid #e5e7eb; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; }
+
+    /* ── Estimate Preview ── */
+    .est-preview { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 2rem; margin-bottom: 1.25rem; }
+    .est-preview-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .est-preview-logo { font-size: 1.2rem; font-weight: 900; color: #d97706; }
+    .est-preview-biz { font-size: 0.8rem; color: #6b7280; margin-top: 3px; }
+    .est-preview-num { font-size: 1.1rem; font-weight: 700; color: #111827; text-align: right; }
+    .est-preview-date { font-size: 0.8rem; color: #6b7280; text-align: right; }
+    .est-preview-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .est-party-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; margin-bottom: 4px; }
+    .est-party-name { font-size: 0.9rem; font-weight: 700; color: #111827; }
+    .est-party-info { font-size: 0.8rem; color: #6b7280; }
+    .est-line-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    .est-line-table th { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #6b7280; padding: 0.5rem 0.75rem; text-align: left; background: rgba(255,255,255,0.6); border-bottom: 1px solid #fde68a; }
+    .est-line-table td { padding: 0.6rem 0.75rem; font-size: 0.85rem; color: #374151; border-bottom: 1px solid rgba(253,230,138,0.4); }
+    .est-totals { text-align: right; }
+    .est-total-row { display: flex; justify-content: flex-end; gap: 2rem; font-size: 0.85rem; margin-bottom: 4px; }
+    .est-total-row.grand { font-size: 1.1rem; font-weight: 800; color: #111827; border-top: 1px solid #fde68a; padding-top: 8px; margin-top: 4px; }
+
+    /* ── New Estimate Form ── */
+    .est-form-section { margin-bottom: 1.5rem; }
+    .est-form-section h4 { font-size: 0.82rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid #f3f4f6; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 0.78rem; font-weight: 600; color: #374151; }
+    .form-group input, .form-group select, .form-group textarea { padding: 0.55rem 0.75rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.88rem; outline: none; transition: border-color 0.15s; color: #111827; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #d97706; }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+
+    /* ── Line Items ── */
+    .line-items-table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; }
+    .line-items-table th { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #9ca3af; padding: 0.4rem 0.5rem; text-align: left; }
+    .line-items-table td { padding: 0.4rem 0.5rem; vertical-align: middle; }
+    .line-items-table input { width: 100%; padding: 0.45rem 0.6rem; border: 1.5px solid #e5e7eb; border-radius: 6px; font-size: 0.84rem; outline: none; }
+    .line-items-table input:focus { border-color: #d97706; }
+    .li-desc { width: 40%; }
+    .li-qty { width: 10%; }
+    .li-rate { width: 18%; }
+    .li-tax { width: 10%; }
+    .li-total { width: 15%; font-size: 0.84rem; font-weight: 600; color: #111827; text-align: right; }
+    .li-del { width: 7%; }
+    .li-del button { background: none; border: none; color: #d1d5db; cursor: pointer; font-size: 1rem; }
+    .li-del button:hover { color: #ef4444; }
+    .est-totals-preview { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.75rem 1rem; text-align: right; }
+    .etp-row { display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 4px; color: #6b7280; }
+    .etp-row.grand { font-size: 1rem; font-weight: 800; color: #111827; border-top: 1px solid #fde68a; padding-top: 6px; margin-top: 4px; }
+
+    /* ── Convert banner ── */
+    .convert-banner { background: linear-gradient(135deg,#ede9fe,#f5f3ff); border: 1px solid #c4b5fd; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+    .convert-banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .convert-banner-text { flex: 1; }
+    .convert-banner-title { font-size: 0.92rem; font-weight: 700; color: #4c1d95; margin-bottom: 2px; }
+    .convert-banner-sub { font-size: 0.8rem; color: #6d28d9; }
+
+    /* ── Toast ── */
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { background: #111827; color: white; padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25); animation: slideUp 0.2s ease; }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+    .toast.info { background: #d97706; }
+    .toast.purple { background: #7c3aed; }
+    @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+    /* ── Empty State ── */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: #9ca3af; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .empty-state h3 { font-size: 1rem; font-weight: 700; color: #6b7280; margin-bottom: 0.4rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .est-hero { padding: 2rem 1rem 0; }
+      .est-body { padding: 1rem; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .form-row, .form-row.three { grid-template-columns: 1fr; }
+      .est-drawer { width: 100vw; }
+      .est-preview-parties { grid-template-columns: 1fr; }
+      .est-table th:nth-child(3), .est-table td:nth-child(3),
+      .est-table th:nth-child(4), .est-table td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="landlord-signup.html">Dashboard</a>
+    <a href="invoicing.html">Invoicing</a>
+    <a href="bookkeeping.html">Bookkeeping</a>
+    <a href="e-sign.html">E-Sign</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="est-hero">
+  <div class="est-hero-inner">
+    <div class="est-breadcrumb"><a href="landlord-signup.html">Dashboard</a> &rsaquo; Business Tools &rsaquo; Estimates</div>
+    <div class="est-title-row">
+      <div class="est-title-left">
+        <div class="est-icon">📐</div>
+        <div>
+          <div class="est-page-title">Estimates &amp; Proposals</div>
+          <div class="est-page-sub">Create quotes, get client approval, convert to invoices — replaces PandaDoc &amp; Proposify</div>
+        </div>
+      </div>
+      <div class="est-header-stats">
+        <div><div class="est-stat-val" id="hs-total">$0</div><div class="est-stat-lbl">Total Quoted</div></div>
+        <div><div class="est-stat-val" id="hs-approved">$0</div><div class="est-stat-lbl">Approved</div></div>
+        <div><div class="est-stat-val" id="hs-pending">0</div><div class="est-stat-lbl">Awaiting Response</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="est-tabs">
+  <div class="est-tabs-inner">
+    <button class="est-tab active" onclick="estTab('all',this)">All Estimates</button>
+    <button class="est-tab" onclick="estTab('draft',this)">Drafts</button>
+    <button class="est-tab" onclick="estTab('sent',this)">Sent <span class="badge" id="sent-badge">0</span></button>
+    <button class="est-tab" onclick="estTab('approved',this)">Approved</button>
+    <button class="est-tab" onclick="estTab('declined',this)">Declined</button>
+    <button class="est-tab" onclick="estTab('new',this)">+ New Estimate</button>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="est-body">
+
+  <!-- ALL ESTIMATES PANEL -->
+  <div id="estpanel-all" class="est-panel active">
+    <div class="stats-grid">
+      <div class="stat-card amber"><div class="stat-card-val" id="s-total">$0</div><div class="stat-card-lbl">Total Quoted</div></div>
+      <div class="stat-card green"><div class="stat-card-val" id="s-approved">$0</div><div class="stat-card-lbl">Approved Value</div></div>
+      <div class="stat-card blue"><div class="stat-card-val" id="s-pending">0</div><div class="stat-card-lbl">Awaiting Response</div></div>
+      <div class="stat-card red"><div class="stat-card-val" id="s-declined">0</div><div class="stat-card-lbl">Declined</div></div>
+    </div>
+    <div class="quick-bar">
+      <div class="filter-chips">
+        <button class="filter-chip active" onclick="filterEst('all',this)">All</button>
+        <button class="filter-chip" onclick="filterEst('draft',this)">Draft</button>
+        <button class="filter-chip" onclick="filterEst('sent',this)">Sent</button>
+        <button class="filter-chip" onclick="filterEst('approved',this)">Approved</button>
+        <button class="filter-chip" onclick="filterEst('declined',this)">Declined</button>
+        <button class="filter-chip" onclick="filterEst('invoiced',this)">Invoiced</button>
+      </div>
+      <div class="quick-bar-right">
+        <input type="text" id="est-search" placeholder="Search estimates..." oninput="renderEstList()" style="padding:0.5rem 0.85rem;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.84rem;outline:none;width:200px;" />
+        <button class="btn btn-primary btn-sm" onclick="estTab('new',null)" style="background:#d97706;">+ New Estimate</button>
+      </div>
+    </div>
+    <div class="est-table-wrap">
+      <table class="est-table">
+        <thead>
+          <tr>
+            <th>Estimate #</th>
+            <th>Client</th>
+            <th>Date</th>
+            <th>Valid Until</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="est-tbody"></tbody>
+      </table>
+      <div id="est-empty" class="empty-state" style="display:none;">
+        <div class="icon">📐</div><h3>No estimates yet</h3><p>Create your first estimate or proposal.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERED PANELS -->
+  <div id="estpanel-draft" class="est-panel">
+    <div class="quick-bar"><span style="font-size:0.9rem;font-weight:700;color:#374151;">Draft Estimates</span><div class="quick-bar-right"><button class="btn btn-primary btn-sm" style="background:#d97706;" onclick="estTab('new',null)">+ New Estimate</button></div></div>
+    <div class="est-table-wrap"><table class="est-table"><thead><tr><th>Estimate #</th><th>Client</th><th>Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="draft-tbody"></tbody></table><div id="draft-empty" class="empty-state" style="display:none;"><div class="icon">📝</div><h3>No draft estimates</h3></div></div>
+  </div>
+
+  <div id="estpanel-sent" class="est-panel">
+    <div class="quick-bar"><span style="font-size:0.9rem;font-weight:700;color:#1d4ed8;">Sent — Awaiting Response</span></div>
+    <div class="est-table-wrap"><table class="est-table"><thead><tr><th>Estimate #</th><th>Client</th><th>Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="sent-tbody"></tbody></table><div id="sent-empty" class="empty-state" style="display:none;"><div class="icon">📤</div><h3>No sent estimates</h3></div></div>
+  </div>
+
+  <div id="estpanel-approved" class="est-panel">
+    <div class="quick-bar"><span style="font-size:0.9rem;font-weight:700;color:#059669;">Approved Estimates</span></div>
+    <div class="est-table-wrap"><table class="est-table"><thead><tr><th>Estimate #</th><th>Client</th><th>Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="approved-tbody"></tbody></table><div id="approved-empty" class="empty-state" style="display:none;"><div class="icon">✅</div><h3>No approved estimates yet</h3></div></div>
+  </div>
+
+  <div id="estpanel-declined" class="est-panel">
+    <div class="quick-bar"><span style="font-size:0.9rem;font-weight:700;color:#dc2626;">Declined Estimates</span></div>
+    <div class="est-table-wrap"><table class="est-table"><thead><tr><th>Estimate #</th><th>Client</th><th>Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="declined-tbody"></tbody></table><div id="declined-empty" class="empty-state" style="display:none;"><div class="icon">🙁</div><h3>No declined estimates</h3></div></div>
+  </div>
+
+  <!-- NEW ESTIMATE PANEL -->
+  <div id="estpanel-new" class="est-panel">
+    <div style="max-width:780px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <h2 style="font-size:1.2rem;font-weight:800;color:#111827;margin:0;">New Estimate / Proposal</h2>
+          <p style="font-size:0.84rem;color:#6b7280;margin:3px 0 0;">Create a quote for a client. Approved estimates can be converted to invoices.</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-sm" style="background:#f3f4f6;color:#374151;border:none;" onclick="saveEstimate('draft')">Save Draft</button>
+          <button class="btn btn-primary btn-sm" style="background:#d97706;" onclick="saveEstimate('sent')">Save &amp; Send</button>
+        </div>
+      </div>
+
+      <div class="est-form-section">
+        <h4>From / To</h4>
+        <div class="form-row">
+          <div class="form-group"><label>From (Your Business)</label><input type="text" id="ef-from-name" value="Sanders Property Management" /></div>
+          <div class="form-group"><label>Client</label><select id="ef-client"><option value="">Select client...</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Your Email</label><input type="email" id="ef-from-email" value="billing@sanderspm.com" /></div>
+          <div class="form-group"><label>Client Email</label><input type="email" id="ef-client-email" placeholder="client@email.com" /></div>
+        </div>
+      </div>
+
+      <div class="est-form-section">
+        <h4>Estimate Details</h4>
+        <div class="form-row three">
+          <div class="form-group"><label>Estimate #</label><input type="text" id="ef-est-num" readonly style="background:#f9fafb;" /></div>
+          <div class="form-group"><label>Issue Date</label><input type="date" id="ef-date" /></div>
+          <div class="form-group"><label>Valid Until</label><input type="date" id="ef-valid-until" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Validity Period</label>
+            <select id="ef-validity" onchange="updateValidUntil()">
+              <option value="7">Valid for 7 days</option>
+              <option value="14" selected>Valid for 14 days</option>
+              <option value="30">Valid for 30 days</option>
+              <option value="60">Valid for 60 days</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Project / Service Type</label><input type="text" id="ef-project" placeholder="e.g., Plumbing Installation, Roofing Repair" /></div>
+        </div>
+      </div>
+
+      <div class="est-form-section">
+        <h4>Line Items</h4>
+        <table class="line-items-table">
+          <thead><tr><th class="li-desc">Description</th><th class="li-qty">Qty</th><th class="li-rate">Rate</th><th class="li-tax">Tax %</th><th class="li-total">Total</th><th class="li-del"></th></tr></thead>
+          <tbody id="est-line-body"></tbody>
+        </table>
+        <button class="btn btn-sm" style="background:#fffbeb;color:#d97706;border:1.5px solid #fde68a;" onclick="addEstLineItem()">+ Add Line Item</button>
+        <div class="est-totals-preview" style="margin-top:0.75rem;">
+          <div class="etp-row"><span>Subtotal</span><span id="etp-sub">$0.00</span></div>
+          <div class="etp-row"><span>Tax</span><span id="etp-tax">$0.00</span></div>
+          <div class="etp-row grand"><span>Estimate Total</span><span id="etp-total">$0.00</span></div>
+        </div>
+      </div>
+
+      <div class="est-form-section">
+        <h4>Notes &amp; Terms</h4>
+        <div class="form-row full">
+          <div class="form-group"><label>Notes / Scope Summary</label><textarea id="ef-notes" rows="3" placeholder="Describe scope of work, materials included, exclusions, payment terms, etc."></textarea></div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group"><label>Terms &amp; Conditions</label><textarea id="ef-terms" rows="2" placeholder="e.g., 50% deposit required. Balance due upon completion."></textarea></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /est-body -->
+
+<!-- Estimate Detail Drawer -->
+<div class="est-drawer-overlay" id="est-overlay" onclick="estCloseDrawer()"></div>
+<div class="est-drawer" id="est-drawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="est-drawer-title">Estimate</div>
+    <button class="drawer-close" onclick="estCloseDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="est-drawer-body"></div>
+  <div class="drawer-footer" id="est-drawer-footer"></div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ── Storage ──
+const EST_KEY = 'rv_estimates';
+const EST_CLIENTS_KEY = 'rv_est_clients';
+function loadEsts() { try { return JSON.parse(localStorage.getItem(EST_KEY))||[]; } catch { return []; } }
+function saveEsts(d) { localStorage.setItem(EST_KEY, JSON.stringify(d)); }
+function loadEstClients() { try { return JSON.parse(localStorage.getItem(EST_CLIENTS_KEY))||[]; } catch { return []; } }
+
+// ── Demo Seed ──
+function estSeed() {
+  if (localStorage.getItem('rv_est_seeded')) return;
+  const today = new Date(); const fmt = d => d.toISOString().split('T')[0];
+  const ago = n => { const d=new Date(today); d.setDate(d.getDate()-n); return fmt(d); };
+  const fwd = n => { const d=new Date(today); d.setDate(d.getDate()+n); return fmt(d); };
+
+  const clients = [
+    { id:'ec1', name:'Johnson Plumbing Co.', email:'bob@johnsonplumbing.com' },
+    { id:'ec2', name:'Greenfield Landscaping', email:'info@greenfield.com' },
+    { id:'ec3', name:'Apex Roofing LLC', email:'billing@apexroofing.com' },
+    { id:'ec4', name:'Mountain West HVAC', email:'accounts@mwhvac.com' },
+    { id:'ec5', name:'Premier Electric', email:'invoices@premierelectric.com' },
+  ];
+  localStorage.setItem(EST_CLIENTS_KEY, JSON.stringify(clients));
+
+  const ests = [
+    { id:'est1', num:'EST-2026-001', client:'ec1', clientName:'Johnson Plumbing Co.', clientEmail:'bob@johnsonplumbing.com', fromName:'Sanders Property Management', fromEmail:'billing@sanderspm.com', date:ago(30), validUntil:ago(16), project:'Annual Plumbing Maintenance', status:'approved', notes:'Includes all units at 123 Main St.', terms:'50% deposit required.', lines:[{desc:'Plumbing Inspection — 4 Units',qty:4,rate:175,tax:0},{desc:'Drain Cleaning Service',qty:4,rate:95,tax:0}], createdAt:ago(30) },
+    { id:'est2', num:'EST-2026-002', client:'ec2', clientName:'Greenfield Landscaping', clientEmail:'info@greenfield.com', fromName:'Sanders Property Management', fromEmail:'billing@sanderspm.com', date:ago(10), validUntil:fwd(4), project:'Spring Landscaping Package', status:'sent', notes:'Includes mowing, edging, planting, and fertilization.', terms:'Net 30', lines:[{desc:'Monthly Grounds Maintenance',qty:6,rate:420,tax:0},{desc:'Spring Planting & Mulch',qty:1,rate:880,tax:8.25}], createdAt:ago(10) },
+    { id:'est3', num:'EST-2026-003', client:'ec3', clientName:'Apex Roofing LLC', clientEmail:'billing@apexroofing.com', fromName:'Sanders Property Management', fromEmail:'billing@sanderspm.com', date:ago(20), validUntil:ago(6), project:'Roof Repair — Building B', status:'expired', notes:'', terms:'', lines:[{desc:'Roof Inspection & Assessment',qty:1,rate:350,tax:0},{desc:'Flat Roof Patch (per sq ft)',qty:200,rate:6.5,tax:8.25}], createdAt:ago(20) },
+    { id:'est4', num:'EST-2026-004', client:'ec4', clientName:'Mountain West HVAC', clientEmail:'accounts@mwhvac.com', fromName:'Sanders Property Management', fromEmail:'billing@sanderspm.com', date:ago(5), validUntil:fwd(9), project:'HVAC Service Contracts', status:'sent', notes:'', terms:'Annual contract, quarterly service visits.', lines:[{desc:'HVAC Annual Service — 4 units',qty:4,rate:299,tax:0}], createdAt:ago(5) },
+    { id:'est5', num:'EST-2026-005', client:'ec1', clientName:'Johnson Plumbing Co.', clientEmail:'bob@johnsonplumbing.com', fromName:'Sanders Property Management', fromEmail:'billing@sanderspm.com', date:ago(45), validUntil:ago(31), project:'Water Heater Replacement', status:'invoiced', notes:'Converted to Invoice INV-2026-001', terms:'', lines:[{desc:'Water Heater — 40 Gal',qty:1,rate:650,tax:8.25},{desc:'Installation Labor',qty:3,rate:95,tax:0}], createdAt:ago(45) },
+    { id:'est6', num:'EST-2026-006', client:'ec5', clientName:'Premier Electric', clientEmail:'invoices@premierelectric.com', fromName:'Sanders Property Management', fromEmail:'billing@sanderspm.com', date:ago(8), validUntil:fwd(6), project:'Panel Upgrade', status:'draft', notes:'', terms:'', lines:[{desc:'Electrical Panel Upgrade',qty:1,rate:1800,tax:0}], createdAt:ago(8) },
+    { id:'est7', num:'EST-2026-007', client:'ec2', clientName:'Greenfield Landscaping', clientEmail:'info@greenfield.com', fromName:'Sanders Property Management', fromEmail:'billing@sanderspm.com', date:ago(15), validUntil:ago(1), project:'Snow Removal Contract', status:'declined', notes:'Client chose another vendor.', terms:'', lines:[{desc:'Snow Removal — Per Visit',qty:20,rate:85,tax:0}], createdAt:ago(15) },
+  ];
+  saveEsts(ests);
+  localStorage.setItem('rv_est_seeded','1');
+  localStorage.setItem('rv_est_counter','8');
+}
+
+// ── Helpers ──
+function calcLines(lines) {
+  let sub=0, tax=0;
+  lines.forEach(l=>{ const a=(parseFloat(l.qty)||0)*(parseFloat(l.rate)||0); sub+=a; tax+=a*((parseFloat(l.tax)||0)/100); });
+  return { sub, tax, total: sub+tax };
+}
+const fmtM = n => '$'+parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function fmtDate(d) { if(!d) return '—'; return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+
+function effectiveStatus(est) {
+  if (['approved','declined','invoiced','draft'].includes(est.status)) return est.status;
+  if (est.validUntil && new Date(est.validUntil+'T12:00:00') < new Date()) return 'expired';
+  return est.status; // sent
+}
+
+function statusBadge(status) {
+  const cls={draft:'status-draft',sent:'status-sent',approved:'status-approved',declined:'status-declined',expired:'status-expired',invoiced:'status-invoiced'};
+  const lbl={draft:'Draft',sent:'Sent',approved:'Approved',declined:'Declined',expired:'Expired',invoiced:'Invoiced'};
+  return `<span class="status-badge ${cls[status]||'status-draft'}">${lbl[status]||status}</span>`;
+}
+
+// ── Tab ──
+let estFilter = 'all';
+function estTab(name, btn) {
+  document.querySelectorAll('.est-tab').forEach(t=>t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.est-panel').forEach(p=>p.classList.remove('active'));
+  const panel = document.getElementById('estpanel-'+name);
+  if (panel) panel.classList.add('active');
+  if (name !== 'new') renderEstAll();
+  else initEstForm();
+}
+
+function filterEst(f, btn) {
+  estFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderEstList();
+}
+
+// ── Render ──
+function buildRow(est, tbody) {
+  const status = effectiveStatus(est);
+  const totals = calcLines(est.lines||[]);
+  const isExpired = status==='expired';
+  const tr = document.createElement('tr');
+  tr.innerHTML=`
+    <td><span style="font-weight:700;color:#d97706;">${est.num}</span>${est.project?`<div style="font-size:0.74rem;color:#9ca3af;">${est.project}</div>`:''}</td>
+    <td><div style="font-weight:600;font-size:0.86rem;">${est.clientName}</div><div style="font-size:0.75rem;color:#9ca3af;">${est.clientEmail||''}</div></td>
+    <td style="font-size:0.84rem;color:#6b7280;">${fmtDate(est.date)}</td>
+    <td style="font-size:0.84rem;color:${isExpired?'#dc2626':'#6b7280'};">${fmtDate(est.validUntil)}</td>
+    <td style="font-weight:700;">${fmtM(totals.total)}</td>
+    <td>${statusBadge(status)}</td>
+    <td onclick="event.stopPropagation();">
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        ${status==='sent'?`
+          <button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#d1fae5;color:#065f46;border:none;" onclick="changeEstStatus('${est.id}','approved')">✓ Approve</button>
+          <button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#fee2e2;color:#991b1b;border:none;" onclick="changeEstStatus('${est.id}','declined')">✕ Decline</button>
+        `:''}
+        ${status==='approved'?`<button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#ede9fe;color:#4c1d95;border:none;" onclick="convertToInvoice('${est.id}')">→ Invoice</button>`:''}
+        ${status==='draft'?`<button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#dbeafe;color:#1d4ed8;border:none;" onclick="changeEstStatus('${est.id}','sent')">Send</button>`:''}
+        <button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#f3f4f6;color:#374151;border:none;" onclick="openEstDrawer('${est.id}')">View</button>
+      </div>
+    </td>
+  `;
+  tr.addEventListener('click', ()=>openEstDrawer(est.id));
+  tbody.appendChild(tr);
+}
+
+function renderEstList() {
+  const ests = loadEsts();
+  const q = (document.getElementById('est-search')?.value||'').toLowerCase();
+  const filtered = ests.filter(e=>{
+    const st = effectiveStatus(e);
+    const mF = estFilter==='all' || st===estFilter;
+    const mQ = !q || e.num.toLowerCase().includes(q) || e.clientName.toLowerCase().includes(q) || (e.project||'').toLowerCase().includes(q);
+    return mF && mQ;
+  });
+  const tbody = document.getElementById('est-tbody');
+  if (!tbody) return;
+  tbody.innerHTML='';
+  filtered.forEach(e=>buildRow(e,tbody));
+  document.getElementById('est-empty').style.display=filtered.length?'none':'block';
+}
+
+function renderTabList(filter, tbodyId, emptyId) {
+  const ests = loadEsts();
+  const filtered = ests.filter(e=>effectiveStatus(e)===filter);
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.innerHTML='';
+  filtered.forEach(e=>buildRow(e,tbody));
+  const empty = document.getElementById(emptyId);
+  if (empty) empty.style.display=filtered.length?'none':'block';
+}
+
+function renderEstAll() {
+  renderEstList();
+  renderTabList('draft','draft-tbody','draft-empty');
+  renderTabList('sent','sent-tbody','sent-empty');
+  renderTabList('approved','approved-tbody','approved-empty');
+  renderTabList('declined','declined-tbody','declined-empty');
+  updateEstStats();
+}
+
+function updateEstStats() {
+  const ests = loadEsts();
+  let total=0, approved=0, pendingCount=0, declinedCount=0;
+  ests.forEach(e=>{
+    const st=effectiveStatus(e);
+    const amt=calcLines(e.lines||[]).total;
+    total+=amt;
+    if(st==='approved'||st==='invoiced') approved+=amt;
+    if(st==='sent') pendingCount++;
+    if(st==='declined') declinedCount++;
+  });
+  const sentCount = ests.filter(e=>effectiveStatus(e)==='sent').length;
+  document.getElementById('s-total').textContent=fmtM(total);
+  document.getElementById('s-approved').textContent=fmtM(approved);
+  document.getElementById('s-pending').textContent=pendingCount;
+  document.getElementById('s-declined').textContent=declinedCount;
+  document.getElementById('hs-total').textContent=fmtM(total);
+  document.getElementById('hs-approved').textContent=fmtM(approved);
+  document.getElementById('hs-pending').textContent=pendingCount;
+  document.getElementById('sent-badge').textContent=sentCount;
+}
+
+// ── Actions ──
+function changeEstStatus(id, status) {
+  const ests = loadEsts();
+  const est = ests.find(e=>e.id===id);
+  if (!est) return;
+  est.status = status;
+  saveEsts(ests);
+  const msgs={approved:'Estimate approved!',declined:'Estimate marked declined',sent:'Estimate sent to client'};
+  estToast(msgs[status]||'Status updated', status==='approved'?'success':status==='declined'?'error':'info');
+  renderEstAll();
+}
+
+function convertToInvoice(id) {
+  const ests = loadEsts();
+  const est = ests.find(e=>e.id===id);
+  if (!est) return;
+  est.status='invoiced';
+  saveEsts(ests);
+
+  // Create invoice from estimate
+  const invs = JSON.parse(localStorage.getItem('rv_invoices')||'[]');
+  const counter = parseInt(localStorage.getItem('rv_inv_counter')||'1');
+  const today = new Date(); const fmt = d => d.toISOString().split('T')[0];
+  const due = new Date(today); due.setDate(due.getDate()+30);
+  const newInv = {
+    id:'inv_'+Date.now(), num:'INV-'+today.getFullYear()+'-'+String(counter).padStart(3,'0'),
+    client:est.client, clientName:est.clientName, clientEmail:est.clientEmail,
+    fromName:est.fromName, fromEmail:est.fromEmail,
+    date:fmt(today), dueDate:fmt(due), terms:'Net 30', currency:'USD', status:'draft',
+    notes:`Created from ${est.num}. ${est.notes||''}`.trim(), lines:est.lines,
+    createdAt:fmt(today)
+  };
+  invs.unshift(newInv);
+  localStorage.setItem('rv_invoices', JSON.stringify(invs));
+  localStorage.setItem('rv_inv_counter', String(counter+1));
+  estToast(`Converted to invoice ${newInv.num}! Go to Invoicing to send it.`, 'purple');
+  renderEstAll();
+  closeEstDrawer();
+}
+
+// ── Drawer ──
+function openEstDrawer(id) {
+  const est = loadEsts().find(e=>e.id===id);
+  if (!est) return;
+  const status = effectiveStatus(est);
+  const totals = calcLines(est.lines||[]);
+  document.getElementById('est-drawer-title').textContent = est.num+' — '+est.clientName;
+
+  const linesHtml = (est.lines||[]).map(l=>{
+    const amt=(parseFloat(l.qty)||0)*(parseFloat(l.rate)||0);
+    const taxAmt=amt*((parseFloat(l.tax)||0)/100);
+    return `<tr><td>${l.desc}</td><td>${l.qty}</td><td>${fmtM(l.rate)}</td><td>${l.tax||0}%</td><td style="text-align:right;font-weight:600;">${fmtM(amt+taxAmt)}</td></tr>`;
+  }).join('');
+
+  const convertBanner = status==='approved' ? `
+    <div class="convert-banner">
+      <div class="convert-banner-icon">🚀</div>
+      <div class="convert-banner-text">
+        <div class="convert-banner-title">Ready to Convert to Invoice?</div>
+        <div class="convert-banner-sub">This estimate is approved. Convert it to an invoice to collect payment.</div>
+      </div>
+      <button class="btn btn-sm" style="background:#7c3aed;color:white;border:none;white-space:nowrap;" onclick="convertToInvoice('${id}')">→ Convert to Invoice</button>
+    </div>` : '';
+
+  document.getElementById('est-drawer-body').innerHTML = `
+    <div style="margin-bottom:1rem;">${statusBadge(status)}</div>
+    ${convertBanner}
+    <div class="est-preview">
+      <div class="est-preview-header">
+        <div><div class="est-preview-logo">${est.fromName}</div><div class="est-preview-biz">${est.fromEmail}</div></div>
+        <div><div class="est-preview-num">ESTIMATE ${est.num}</div><div class="est-preview-date">Issued: ${fmtDate(est.date)}<br>Valid Until: ${fmtDate(est.validUntil)}</div></div>
+      </div>
+      ${est.project?`<div style="background:rgba(255,255,255,0.6);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:1rem;font-size:0.84rem;"><strong>Project:</strong> ${est.project}</div>`:''}
+      <div class="est-preview-parties">
+        <div><div class="est-party-label">From</div><div class="est-party-name">${est.fromName}</div><div class="est-party-info">${est.fromEmail}</div></div>
+        <div><div class="est-party-label">Prepared For</div><div class="est-party-name">${est.clientName}</div><div class="est-party-info">${est.clientEmail}</div></div>
+      </div>
+      <table class="est-line-table">
+        <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th style="text-align:right;">Total</th></tr></thead>
+        <tbody>${linesHtml}</tbody>
+      </table>
+      <div class="est-totals">
+        <div class="est-total-row"><span style="color:#6b7280;">Subtotal</span><span>${fmtM(totals.sub)}</span></div>
+        <div class="est-total-row"><span style="color:#6b7280;">Tax</span><span>${fmtM(totals.tax)}</span></div>
+        <div class="est-total-row grand"><span>Estimate Total</span><span>${fmtM(totals.total)}</span></div>
+      </div>
+      ${est.notes?`<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #fde68a;font-size:0.8rem;color:#6b7280;">${est.notes}</div>`:''}
+      ${est.terms?`<div style="margin-top:0.5rem;font-size:0.78rem;color:#92400e;font-weight:600;">Terms: ${est.terms}</div>`:''}
+    </div>
+  `;
+
+  const footer = document.getElementById('est-drawer-footer');
+  footer.innerHTML='';
+  if (status==='sent') {
+    const b1=document.createElement('button'); b1.className='btn btn-sm'; b1.style.cssText='background:#d1fae5;color:#065f46;border:none;';
+    b1.textContent='✓ Mark Approved'; b1.onclick=()=>{changeEstStatus(id,'approved');closeEstDrawer();};
+    footer.appendChild(b1);
+    const b2=document.createElement('button'); b2.className='btn btn-sm'; b2.style.cssText='background:#fee2e2;color:#991b1b;border:none;';
+    b2.textContent='✕ Mark Declined'; b2.onclick=()=>{changeEstStatus(id,'declined');closeEstDrawer();};
+    footer.appendChild(b2);
+  }
+  if (status==='approved') {
+    const b=document.createElement('button'); b.className='btn btn-sm'; b.style.cssText='background:#7c3aed;color:white;border:none;';
+    b.textContent='→ Convert to Invoice'; b.onclick=()=>convertToInvoice(id);
+    footer.appendChild(b);
+  }
+  if (status==='draft') {
+    const b=document.createElement('button'); b.className='btn btn-sm'; b.style.cssText='background:#dbeafe;color:#1d4ed8;border:none;';
+    b.textContent='Send Estimate'; b.onclick=()=>{changeEstStatus(id,'sent');closeEstDrawer();};
+    footer.appendChild(b);
+  }
+  const cb=document.createElement('button'); cb.className='btn btn-sm'; cb.style.cssText='background:#f3f4f6;color:#374151;border:none;';
+  cb.textContent='Close'; cb.onclick=closeEstDrawer;
+  footer.appendChild(cb);
+
+  document.getElementById('est-overlay').classList.add('open');
+  document.getElementById('est-drawer').classList.add('open');
+}
+function closeEstDrawer() {
+  document.getElementById('est-overlay').classList.remove('open');
+  document.getElementById('est-drawer').classList.remove('open');
+}
+
+// ── New Estimate Form ──
+let estLineItems = [];
+function initEstForm() {
+  const today = new Date();
+  document.getElementById('ef-date').value = today.toISOString().split('T')[0];
+  const counter = parseInt(localStorage.getItem('rv_est_counter')||'1');
+  document.getElementById('ef-est-num').value = 'EST-'+today.getFullYear()+'-'+String(counter).padStart(3,'0');
+  updateValidUntil();
+  populateEstClientDropdown();
+  estLineItems = [{desc:'',qty:1,rate:0,tax:0}];
+  renderEstLineItems();
+}
+function updateValidUntil() {
+  const days = parseInt(document.getElementById('ef-validity')?.value||'14');
+  const base = document.getElementById('ef-date')?.value||new Date().toISOString().split('T')[0];
+  const d = new Date(base+'T12:00:00'); d.setDate(d.getDate()+days);
+  const el = document.getElementById('ef-valid-until');
+  if (el) el.value = d.toISOString().split('T')[0];
+}
+function populateEstClientDropdown() {
+  const sel = document.getElementById('ef-client'); if (!sel) return;
+  const clients = loadEstClients();
+  sel.innerHTML='<option value="">Select client...</option>';
+  clients.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; o.dataset.email=c.email||''; sel.appendChild(o); });
+  sel.onchange=function(){ const opt=sel.options[sel.selectedIndex]; const el=document.getElementById('ef-client-email'); if(el) el.value=opt.dataset.email||''; };
+}
+function addEstLineItem() { estLineItems.push({desc:'',qty:1,rate:0,tax:0}); renderEstLineItems(); }
+function removeEstLine(i) { estLineItems.splice(i,1); renderEstLineItems(); }
+function renderEstLineItems() {
+  const tbody = document.getElementById('est-line-body'); if (!tbody) return;
+  tbody.innerHTML='';
+  estLineItems.forEach((li,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="li-desc"><input type="text" value="${li.desc}" placeholder="Service or item" oninput="estLineItems[${i}].desc=this.value" /></td>
+      <td class="li-qty"><input type="number" value="${li.qty}" min="0" step="0.01" oninput="estLineItems[${i}].qty=this.value;calcEstTotals()" /></td>
+      <td class="li-rate"><input type="number" value="${li.rate}" min="0" step="0.01" oninput="estLineItems[${i}].rate=this.value;calcEstTotals()" /></td>
+      <td class="li-tax"><input type="number" value="${li.tax}" min="0" max="100" step="0.01" oninput="estLineItems[${i}].tax=this.value;calcEstTotals()" /></td>
+      <td class="li-total" id="eli-total-${i}">${fmtM((parseFloat(li.qty)||0)*(parseFloat(li.rate)||0))}</td>
+      <td class="li-del"><button onclick="removeEstLine(${i})">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  calcEstTotals();
+}
+function calcEstTotals() {
+  const t = calcLines(estLineItems);
+  const g=id=>document.getElementById(id);
+  if(g('etp-sub'))g('etp-sub').textContent=fmtM(t.sub);
+  if(g('etp-tax'))g('etp-tax').textContent=fmtM(t.tax);
+  if(g('etp-total'))g('etp-total').textContent=fmtM(t.total);
+  estLineItems.forEach((li,i)=>{
+    const amt=(parseFloat(li.qty)||0)*(parseFloat(li.rate)||0);
+    const taxAmt=amt*((parseFloat(li.tax)||0)/100);
+    const el=document.getElementById('eli-total-'+i);
+    if(el) el.textContent=fmtM(amt+taxAmt);
+  });
+}
+function saveEstimate(status) {
+  const clientSel=document.getElementById('ef-client');
+  const clientOpt=clientSel?.options[clientSel.selectedIndex];
+  if (!clientOpt?.value) { estToast('Please select a client','error'); return; }
+  const filled=estLineItems.filter(l=>l.desc);
+  if (!filled.length) { estToast('Add at least one line item','error'); return; }
+  const num=document.getElementById('ef-est-num')?.value;
+  const newEst = {
+    id:'est_'+Date.now(), num,
+    client:clientOpt.value, clientName:clientOpt.text,
+    clientEmail:document.getElementById('ef-client-email')?.value||'',
+    fromName:document.getElementById('ef-from-name')?.value||'My Business',
+    fromEmail:document.getElementById('ef-from-email')?.value||'',
+    date:document.getElementById('ef-date')?.value||'',
+    validUntil:document.getElementById('ef-valid-until')?.value||'',
+    project:document.getElementById('ef-project')?.value||'',
+    status, notes:document.getElementById('ef-notes')?.value||'',
+    terms:document.getElementById('ef-terms')?.value||'',
+    lines:filled, createdAt:new Date().toISOString().split('T')[0]
+  };
+  const ests=loadEsts(); ests.unshift(newEst); saveEsts(ests);
+  const c=parseInt(localStorage.getItem('rv_est_counter')||'1');
+  localStorage.setItem('rv_est_counter',String(c+1));
+  estToast(`${num} ${status==='sent'?'sent to client':'saved as draft'}!`, 'success');
+  estTab('all',document.querySelector('.est-tab'));
+}
+
+// ── Toast ──
+function estToast(msg, type='success') {
+  const el=document.createElement('div'); el.className=`toast ${type}`;
+  el.innerHTML=`<span>${{success:'✓',error:'✕',info:'ℹ',purple:'🚀'}[type]||'•'}</span> ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='all 0.3s';setTimeout(()=>el.remove(),300);},4000);
+}
+
+// ── Init ──
+estSeed();
+renderEstAll();
+</script>
+</body>
+</html>

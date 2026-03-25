@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Switch to RentVerified — Migration Wizard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root { --mig-blue: #1a56db; --mig-blue-dark: #1e429f; --mig-green: #10b981; --mig-amber: #f59e0b; --mig-red: #ef4444; --mig-bg: #f3f4f6; --mig-border: #e5e7eb; --mig-dark: #111827; }
+    body { background: var(--mig-bg); }
+
+    /* ─── Navbar ─────────────────────────────────────────── */
+    .mig-nav { background: var(--mig-dark); padding: 0.85rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .mig-nav-logo { font-size: 1.15rem; font-weight: 900; color: #fff; text-decoration: none; }
+    .mig-nav-logo span { color: #60a5fa; }
+    .mig-nav-title { color: #9ca3af; font-size: 0.85rem; font-weight: 600; margin-left: auto; }
+    .mig-timer { color: #60a5fa; font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    /* ─── Progress Bar ───────────────────────────────────── */
+    .mig-progress { background: #fff; border-bottom: 1px solid var(--mig-border); padding: 1.25rem 2rem; }
+    .mig-steps { display: flex; align-items: center; justify-content: center; gap: 0; max-width: 700px; margin: 0 auto; }
+    .mig-step { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+    .mig-step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; border: 2px solid var(--mig-border); color: #9ca3af; background: #fff; transition: 0.3s; }
+    .mig-step.active .mig-step-num { background: var(--mig-blue); color: #fff; border-color: var(--mig-blue); }
+    .mig-step.done .mig-step-num { background: var(--mig-green); color: #fff; border-color: var(--mig-green); }
+    .mig-step-label { font-size: 0.78rem; font-weight: 700; color: #9ca3af; }
+    .mig-step.active .mig-step-label { color: var(--mig-blue); }
+    .mig-step.done .mig-step-label { color: var(--mig-green); }
+    .mig-step-line { width: 48px; height: 2px; background: var(--mig-border); margin: 0 0.5rem; flex-shrink: 0; }
+    .mig-step-line.done { background: var(--mig-green); }
+
+    /* ─── Layout ─────────────────────────────────────────── */
+    .mig-wrap { max-width: 960px; margin: 0 auto; padding: 2rem; }
+    .mig-panel { background: #fff; border-radius: 16px; border: 1px solid var(--mig-border); padding: 2rem; }
+    .mig-panel h2 { font-size: 1.5rem; font-weight: 900; color: var(--mig-dark); margin: 0 0 0.5rem; }
+    .mig-panel .subtitle { font-size: 0.9rem; color: #6b7280; margin-bottom: 1.5rem; }
+
+    /* ─── Buttons ─────────────────────────────────────────── */
+    .btn-mig { padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-mig:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-mig.primary { background: var(--mig-blue); color: #fff; }
+    .btn-mig.primary:hover:not(:disabled) { background: var(--mig-blue-dark); }
+    .btn-mig.outline { background: #fff; color: var(--mig-blue); border: 2px solid var(--mig-blue); }
+    .btn-mig.outline:hover { background: #eff6ff; }
+    .btn-mig.success { background: var(--mig-green); color: #fff; }
+    .btn-mig.success:hover { background: #059669; }
+    .mig-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+
+    /* ─── Step 1: Source Grid ─────────────────────────────── */
+    .source-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+    .source-card { background: #fff; border: 2px solid var(--mig-border); border-radius: 12px; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: 0.2s; }
+    .source-card:hover { border-color: #93c5fd; background: #eff6ff; }
+    .source-card.selected { border-color: var(--mig-blue); background: #eff6ff; box-shadow: 0 0 0 3px rgba(26,86,219,0.15); }
+    .source-card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .source-card-name { font-size: 0.85rem; font-weight: 700; color: var(--mig-dark); }
+    .source-card-desc { font-size: 0.7rem; color: #6b7280; margin-top: 4px; }
+
+    /* ─── Step 2: Upload Zones ────────────────────────────── */
+    .upload-zones { display: grid; gap: 1rem; }
+    .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+    .upload-zone:hover { border-color: var(--mig-blue); background: #eff6ff; }
+    .upload-zone.dragover { border-color: var(--mig-blue); background: #dbeafe; }
+    .upload-zone.has-file { border-color: var(--mig-green); border-style: solid; background: #f0fdf4; }
+    .upload-zone-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .upload-zone-title { font-size: 0.95rem; font-weight: 700; color: var(--mig-dark); }
+    .upload-zone-desc { font-size: 0.78rem; color: #6b7280; margin-top: 4px; }
+    .upload-zone-file { font-size: 0.8rem; font-weight: 600; color: var(--mig-green); margin-top: 0.5rem; }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-zone-skip { display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: #9ca3af; cursor: pointer; text-decoration: underline; }
+    .upload-zone-check { position: absolute; top: 12px; right: 12px; font-size: 1.25rem; color: var(--mig-green); display: none; }
+    .upload-zone.has-file .upload-zone-check { display: block; }
+
+    /* ─── Step 3: Map & Preview ───────────────────────────── */
+    .map-section { margin-bottom: 2rem; }
+    .map-section:last-child { margin-bottom: 0; }
+    .map-section-hdr { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--mig-border); }
+    .map-section-hdr h3 { font-size: 1.1rem; font-weight: 800; color: var(--mig-dark); margin: 0; }
+    .map-badge { padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 700; }
+    .map-badge.detected { background: #dbeafe; color: var(--mig-blue); }
+    .map-badge.count { background: #d1fae5; color: #065f46; }
+    .map-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .map-table th { text-align: left; padding: 0.6rem 0.75rem; background: #f9fafb; font-weight: 700; color: #374151; border-bottom: 2px solid var(--mig-border); }
+    .map-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .map-table tr:hover td { background: #f9fafb; }
+    .map-status { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 600; }
+    .map-status.ok { color: var(--mig-green); }
+    .map-status.warn { color: var(--mig-amber); }
+    .map-select { padding: 0.3rem 0.5rem; border-radius: 6px; border: 1px solid var(--mig-border); font-size: 0.78rem; font-weight: 600; background: #fff; }
+    .map-summary { background: #eff6ff; border-radius: 12px; padding: 1.25rem; margin-top: 1.5rem; display: flex; gap: 2rem; flex-wrap: wrap; }
+    .map-summary-item { text-align: center; }
+    .map-summary-item .val { font-size: 1.5rem; font-weight: 900; color: var(--mig-blue); }
+    .map-summary-item .lbl { font-size: 0.72rem; font-weight: 600; color: #6b7280; text-transform: uppercase; }
+
+    /* ─── Step 4: Import ──────────────────────────────────── */
+    .import-progress { margin-bottom: 2rem; }
+    .import-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 0; border-bottom: 1px solid #f3f4f6; }
+    .import-item-icon { font-size: 1.25rem; width: 32px; text-align: center; }
+    .import-item-label { font-size: 0.88rem; font-weight: 700; color: var(--mig-dark); flex: 1; }
+    .import-item-count { font-size: 0.82rem; color: #6b7280; font-weight: 600; }
+    .import-item-status { font-size: 0.8rem; font-weight: 700; min-width: 80px; text-align: right; }
+    .import-item-status.pending { color: #9ca3af; }
+    .import-item-status.running { color: var(--mig-blue); }
+    .import-item-status.done { color: var(--mig-green); }
+    .import-bar { height: 8px; background: #e5e7eb; border-radius: 99px; overflow: hidden; margin-top: 1.5rem; }
+    .import-bar-fill { height: 100%; background: linear-gradient(90deg, var(--mig-blue), var(--mig-green)); border-radius: 99px; transition: width 0.5s ease; width: 0%; }
+    .import-done { text-align: center; padding: 2rem 0; display: none; }
+    .import-done h2 { font-size: 1.5rem; font-weight: 900; color: var(--mig-dark); margin: 1rem 0 0.5rem; }
+    .import-done p { color: #6b7280; margin-bottom: 1.5rem; }
+    .import-done .big-check { font-size: 4rem; }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .mig-wrap { padding: 1rem; }
+      .mig-panel { padding: 1.25rem; }
+      .source-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem; }
+      .mig-steps { gap: 0; }
+      .mig-step-label { display: none; }
+      .mig-step-line { width: 24px; }
+      .map-table { font-size: 0.75rem; }
+      .map-table th, .map-table td { padding: 0.4rem; }
+      .map-summary { gap: 1rem; }
+      .mig-nav-title { display: none; }
+    }
+
+    /* ─── Animations ─────────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #e5e7eb; border-top-color: var(--mig-blue); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="mig-nav">
+  <a href="index.html" class="mig-nav-logo">Rent<span>Verified</span></a>
+  <div class="mig-nav-title">Switch to RentVerified</div>
+  <div class="mig-timer" id="migTimer">Migration time: 0:00</div>
+</div>
+
+<!-- Progress -->
+<div class="mig-progress">
+  <div class="mig-steps" id="migSteps">
+    <div class="mig-step active" data-step="1"><div class="mig-step-num">1</div><div class="mig-step-label">Select Source</div></div>
+    <div class="mig-step-line"></div>
+    <div class="mig-step" data-step="2"><div class="mig-step-num">2</div><div class="mig-step-label">Upload CSV</div></div>
+    <div class="mig-step-line"></div>
+    <div class="mig-step" data-step="3"><div class="mig-step-num">3</div><div class="mig-step-label">Map &amp; Preview</div></div>
+    <div class="mig-step-line"></div>
+    <div class="mig-step" data-step="4"><div class="mig-step-num">4</div><div class="mig-step-label">Import</div></div>
+  </div>
+</div>
+
+<div class="mig-wrap">
+
+  <!-- ═══════════════ STEP 1: SELECT SOURCE ═══════════════ -->
+  <div class="mig-panel fade-in" id="step1">
+    <h2>Where are you migrating from?</h2>
+    <p class="subtitle">Select the platform you currently use. We'll tailor the import to match their export format.</p>
+    <div class="source-grid" id="sourceGrid"></div>
+    <div class="mig-footer">
+      <div></div>
+      <button class="btn-mig primary" id="btn1Next" disabled onclick="goStep(2)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ STEP 2: UPLOAD CSV ═══════════════ -->
+  <div class="mig-panel fade-in" id="step2" style="display:none;">
+    <h2>Upload your data files</h2>
+    <p class="subtitle">Drag and drop CSV files or click to browse. Upload at least one file to continue.</p>
+    <div class="upload-zones" id="uploadZones"></div>
+    <div class="mig-footer">
+      <button class="btn-mig outline" onclick="goStep(1)">&larr; Back</button>
+      <button class="btn-mig primary" id="btn2Next" disabled onclick="goStep(3)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ STEP 3: MAP & PREVIEW ═══════════════ -->
+  <div class="mig-panel fade-in" id="step3" style="display:none;">
+    <h2>Review mapped data</h2>
+    <p class="subtitle">We auto-detected your columns. Adjust any mappings that look off, then continue to import.</p>
+    <div id="mapContent"></div>
+    <div class="mig-footer">
+      <button class="btn-mig outline" onclick="goStep(2)">&larr; Back</button>
+      <button class="btn-mig primary" id="btn3Next" onclick="goStep(4)">Import Data &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ STEP 4: IMPORT ═══════════════ -->
+  <div class="mig-panel fade-in" id="step4" style="display:none;">
+    <h2>Importing your data</h2>
+    <p class="subtitle">Saving records to RentVerified. This usually takes just a few seconds.</p>
+    <div class="import-progress" id="importProgress"></div>
+    <div class="import-bar"><div class="import-bar-fill" id="importBarFill"></div></div>
+    <div class="import-done" id="importDone">
+      <div class="big-check">&#10003;</div>
+      <h2>Migration Complete!</h2>
+      <p id="importDoneSummary"></p>
+      <button class="btn-mig success" id="btnGoDashboard" onclick="goDashboard()">Go to Dashboard &rarr;</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>
+if (typeof RVData !== 'undefined') RVData._useSupabase = function() { return false; };
+</script>
+<script>
+(function() {
+  'use strict';
+
+  /* ───────────────────────────────────────────────────────
+     SOURCES
+  ─────────────────────────────────────────────────────── */
+  var SOURCES = [
+    { id: 'appfolio',     name: 'AppFolio',          icon: '🏢', desc: 'Property management', types: ['properties','tenants','transactions','leases'] },
+    { id: 'buildium',     name: 'Buildium',           icon: '🏗️', desc: 'Property management', types: ['properties','tenants','transactions','leases'] },
+    { id: 'rentredi',     name: 'RentRedi',           icon: '🔑', desc: 'Landlord software', types: ['properties','tenants','transactions','leases'] },
+    { id: 'turbotenant',  name: 'TurboTenant',        icon: '🏠', desc: 'Landlord software', types: ['properties','tenants','transactions','leases'] },
+    { id: 'stessa',       name: 'Stessa',             icon: '📊', desc: 'RE accounting', types: ['properties','transactions'] },
+    { id: 'quickbooks',   name: 'QuickBooks',         icon: '📗', desc: 'Accounting', types: ['transactions'] },
+    { id: 'jobber',       name: 'Jobber',             icon: '🔧', desc: 'Field service', types: ['jobs','tenants','transactions'] },
+    { id: 'housecallpro', name: 'Housecall Pro',      icon: '🏡', desc: 'Home service', types: ['jobs','tenants','transactions'] },
+    { id: 'honeybook',    name: 'HoneyBook',          icon: '🍯', desc: 'Client management', types: ['tenants','transactions','appointments'] },
+    { id: 'clio',         name: 'Clio',               icon: '⚖️', desc: 'Legal practice', types: ['jobs','tenants'] },
+    { id: 'guesty',       name: 'Guesty / Hostaway',  icon: '✈️', desc: 'Short-term rental', types: ['properties','tenants','transactions','appointments'] },
+    { id: 'excel',        name: 'Excel / Sheets',     icon: '📄', desc: 'Spreadsheet', types: ['properties','tenants','transactions','leases','jobs','appointments'] },
+    { id: 'other',        name: 'Other CSV',          icon: '📁', desc: 'Any CSV file', types: ['properties','tenants','transactions','leases','jobs','appointments'] }
+  ];
+
+  var UPLOAD_TYPES = {
+    properties:   { icon: '📊', title: 'Properties / Units',       desc: 'Addresses, types, values' },
+    tenants:      { icon: '👥', title: 'Tenants / Clients / Contacts', desc: 'Names, emails, phones' },
+    transactions: { icon: '💰', title: 'Transactions / Payments',   desc: 'Dates, amounts, categories' },
+    leases:       { icon: '📄', title: 'Leases / Contracts',        desc: 'Terms, dates, rent amounts' },
+    jobs:         { icon: '🏗️', title: 'Jobs / Work Orders',        desc: 'For contractor sources' },
+    appointments: { icon: '📅', title: 'Appointments / Bookings',   desc: 'For service sources' }
+  };
+
+  /* ───────────────────────────────────────────────────────
+     COMPETITOR SIGNATURES
+  ─────────────────────────────────────────────────────── */
+  var COMPETITOR_SIGNATURES = {
+    appfolio: ['Property Name','Unit Name','Tenant Name','Move In','Lease From','Lease To','Market Rent'],
+    buildium: ['Property','Unit','Resident','Lease Start','Lease End','Monthly Rent','Balance'],
+    rentredi: ['Property Address','Unit','Tenant Name','Rent Amount','Lease Start Date','Lease End Date'],
+    turbotenant: ['Property Address','Unit Number','Tenant First Name','Tenant Last Name','Rent'],
+    stessa: ['Property Name','Property Address','City','State','Zip','Purchase Price','Monthly Rent'],
+    quickbooks_accounts: ['Account','Type','Detail Type','Description','Balance'],
+    quickbooks_transactions: ['Date','Transaction Type','No.','Name','Memo/Description','Account','Amount'],
+    jobber: ['Client Name','Client Email','Client Phone','Property Address','Job Title','Job Status'],
+    housecallpro: ['Customer Name','Email','Phone','Address','Job Name','Job Status','Total'],
+    honeybook: ['Contact Name','Email','Phone','Project Name','Project Status','Amount'],
+    clio: ['Matter','Client','Practice Area','Status','Open Date','Close Date'],
+    guesty: ['Listing Name','Channel','Check-in','Check-out','Guest Name','Total Price','Status']
+  };
+
+  /* ───────────────────────────────────────────────────────
+     FIELD MAPS
+  ─────────────────────────────────────────────────────── */
+  var FIELD_MAPS = {
+    properties: {
+      'Property Name|Property Address|Address|Listing Name': 'address',
+      'City': 'city',
+      'State': 'state',
+      'Zip|Zip Code|Postal': 'zip',
+      'Unit Name|Unit|Unit Number': 'unit',
+      'Property Type|Type': 'type',
+      'Market Rent|Monthly Rent|Rent Amount|Rent': 'rent',
+      'Purchase Price|Value': 'value',
+      'Bedrooms|Beds': 'bedrooms',
+      'Bathrooms|Baths': 'bathrooms',
+      'Square Feet|Sq Ft|SqFt': 'sqft'
+    },
+    tenants: {
+      'Tenant Name|Resident|Client Name|Contact Name|Customer Name|Guest Name': 'name',
+      'Email|Tenant Email|Client Email': 'email',
+      'Phone|Tenant Phone|Client Phone': 'phone',
+      'Move In|Lease Start|Lease Start Date|Check-in|Start Date': 'lease_start',
+      'Lease To|Lease End|Lease End Date|Check-out|End Date': 'lease_end',
+      'Monthly Rent|Rent Amount|Rent|Total Price|Amount': 'rent',
+      'Balance|Balance Due': 'balance',
+      'Status|Tenant Status|Resident Status': 'status'
+    },
+    transactions: {
+      'Date|Transaction Date|Payment Date': 'date',
+      'Amount|Total|Payment Amount': 'amount',
+      'Transaction Type|Type|Category': 'type',
+      'Description|Memo|Memo/Description|Notes': 'description',
+      'Account|Category': 'category',
+      'Name|Vendor|Payer|Tenant': 'party',
+      'Property|Property Name': 'property'
+    },
+    leases: {
+      'Property Name|Property Address|Property|Address': 'property',
+      'Unit Name|Unit|Unit Number': 'unit',
+      'Tenant Name|Resident|Lessee': 'tenant',
+      'Lease Start|Lease From|Start Date|Lease Start Date': 'start_date',
+      'Lease End|Lease To|End Date|Lease End Date': 'end_date',
+      'Monthly Rent|Rent Amount|Rent|Market Rent': 'rent',
+      'Security Deposit|Deposit': 'deposit',
+      'Status|Lease Status': 'status'
+    },
+    jobs: {
+      'Job Title|Job Name|Project Name|Matter': 'title',
+      'Client Name|Customer Name|Client': 'client',
+      'Address|Property Address|Job Address': 'address',
+      'Status|Job Status|Project Status': 'status',
+      'Total|Amount|Value': 'value',
+      'Start Date|Created|Open Date': 'start_date'
+    },
+    appointments: {
+      'Date|Appointment Date|Check-in': 'date',
+      'Time|Start Time': 'time',
+      'Client|Customer|Guest Name|Contact Name': 'client',
+      'Service|Type|Channel': 'service',
+      'Duration|Length': 'duration',
+      'Status|Appointment Status': 'status',
+      'Notes|Description': 'notes'
+    }
+  };
+
+  /* ───────────────────────────────────────────────────────
+     STATE
+  ─────────────────────────────────────────────────────── */
+  var state = {
+    currentStep: 1,
+    selectedSource: null,
+    uploadedFiles: {},     // { type: { file, parsed: [...], fileName } }
+    mappings: {},          // { type: { csvCol: ourField, ... } }
+    timerStart: null,
+    timerInterval: null,
+    detectedCompetitor: null
+  };
+
+  /* ───────────────────────────────────────────────────────
+     CSV PARSER
+  ─────────────────────────────────────────────────────── */
+  function parseCSV(text) {
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+    var rows = [];
+    var row = [];
+    var field = '';
+    var inQuotes = false;
+
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      var next = text[i + 1];
+
+      if (inQuotes) {
+        if (c === '"' && next === '"') { field += '"'; i++; }
+        else if (c === '"') { inQuotes = false; }
+        else { field += c; }
+      } else {
+        if (c === '"') { inQuotes = true; }
+        else if (c === ',') { row.push(field.trim()); field = ''; }
+        else if (c === '\r' && next === '\n') { row.push(field.trim()); rows.push(row); row = []; field = ''; i++; }
+        else if (c === '\n') { row.push(field.trim()); rows.push(row); row = []; field = ''; }
+        else { field += c; }
+      }
+    }
+    if (field || row.length) { row.push(field.trim()); rows.push(row); }
+
+    if (rows.length < 2) return [];
+
+    var headers = rows[0];
+    return rows.slice(1).filter(function(r) { return r.some(function(f) { return f; }); }).map(function(r) {
+      var obj = {};
+      headers.forEach(function(h, idx) { obj[h] = r[idx] || ''; });
+      return obj;
+    });
+  }
+
+  /* ───────────────────────────────────────────────────────
+     AUTO-DETECT COMPETITOR
+  ─────────────────────────────────────────────────────── */
+  function detectCompetitor(headers) {
+    var best = null;
+    var bestScore = 0;
+    var headerLower = headers.map(function(h) { return h.toLowerCase(); });
+
+    for (var key in COMPETITOR_SIGNATURES) {
+      var sig = COMPETITOR_SIGNATURES[key];
+      var score = 0;
+      sig.forEach(function(col) {
+        if (headerLower.indexOf(col.toLowerCase()) !== -1) score++;
+      });
+      var ratio = score / sig.length;
+      if (ratio > bestScore && ratio >= 0.3) {
+        bestScore = ratio;
+        best = key;
+      }
+    }
+    return best;
+  }
+
+  /* ───────────────────────────────────────────────────────
+     AUTO-MAP COLUMNS
+  ─────────────────────────────────────────────────────── */
+  function autoMapColumns(headers, dataType) {
+    var fieldMap = FIELD_MAPS[dataType];
+    if (!fieldMap) return {};
+    var mapping = {};
+    var headerLower = {};
+    headers.forEach(function(h) { headerLower[h.toLowerCase()] = h; });
+
+    for (var pattern in fieldMap) {
+      var ourField = fieldMap[pattern];
+      var alternatives = pattern.split('|');
+      for (var a = 0; a < alternatives.length; a++) {
+        var alt = alternatives[a].toLowerCase();
+        if (headerLower[alt]) {
+          mapping[headerLower[alt]] = ourField;
+          break;
+        }
+      }
+    }
+    return mapping;
+  }
+
+  /* ───────────────────────────────────────────────────────
+     GUESS DATA TYPE FROM HEADERS
+  ─────────────────────────────────────────────────────── */
+  function guessDataType(headers) {
+    var hl = headers.join('|').toLowerCase();
+    if (/property name|property address|listing name|purchase price|sqft|square feet|bedrooms/.test(hl)) return 'properties';
+    if (/tenant name|resident|client name|contact name|customer name|guest name/.test(hl)) return 'tenants';
+    if (/transaction type|memo\/description|payment date|payment amount/.test(hl)) return 'transactions';
+    if (/lease start|lease from|lease end|lease to|security deposit/.test(hl)) return 'leases';
+    if (/job title|job name|job status|matter|practice area/.test(hl)) return 'jobs';
+    if (/appointment|check-in|check-out|booking/.test(hl)) return 'appointments';
+    return null;
+  }
+
+  /* ───────────────────────────────────────────────────────
+     TIMER
+  ─────────────────────────────────────────────────────── */
+  function startTimer() {
+    if (state.timerStart) return;
+    state.timerStart = Date.now();
+    state.timerInterval = setInterval(function() {
+      var elapsed = Math.floor((Date.now() - state.timerStart) / 1000);
+      var mins = Math.floor(elapsed / 60);
+      var secs = elapsed % 60;
+      document.getElementById('migTimer').textContent = 'Migration time: ' + mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (state.timerInterval) clearInterval(state.timerInterval);
+  }
+
+  /* ───────────────────────────────────────────────────────
+     STEP NAVIGATION
+  ─────────────────────────────────────────────────────── */
+  window.goStep = function(step) {
+    state.currentStep = step;
+
+    // Show/hide panels
+    for (var s = 1; s <= 4; s++) {
+      var el = document.getElementById('step' + s);
+      el.style.display = (s === step) ? 'block' : 'none';
+      if (s === step) { el.classList.remove('fade-in'); void el.offsetWidth; el.classList.add('fade-in'); }
+    }
+
+    // Update progress indicators
+    var steps = document.querySelectorAll('.mig-step');
+    var lines = document.querySelectorAll('.mig-step-line');
+    steps.forEach(function(el, i) {
+      var sn = i + 1;
+      el.classList.remove('active', 'done');
+      if (sn === step) el.classList.add('active');
+      else if (sn < step) el.classList.add('done');
+    });
+    lines.forEach(function(el, i) {
+      el.classList.toggle('done', (i + 1) < step);
+    });
+
+    if (step === 3) buildMapPreview();
+    if (step === 4) runImport();
+  };
+
+  /* ───────────────────────────────────────────────────────
+     STEP 1: BUILD SOURCE GRID
+  ─────────────────────────────────────────────────────── */
+  function buildSourceGrid() {
+    var grid = document.getElementById('sourceGrid');
+    grid.innerHTML = '';
+    SOURCES.forEach(function(src) {
+      var card = document.createElement('div');
+      card.className = 'source-card';
+      card.setAttribute('data-id', src.id);
+      card.innerHTML = '<div class="source-card-icon">' + src.icon + '</div>' +
+        '<div class="source-card-name">' + src.name + '</div>' +
+        '<div class="source-card-desc">' + src.desc + '</div>';
+      card.onclick = function() {
+        document.querySelectorAll('.source-card').forEach(function(c) { c.classList.remove('selected'); });
+        card.classList.add('selected');
+        state.selectedSource = src;
+        document.getElementById('btn1Next').disabled = false;
+        buildUploadZones();
+      };
+      grid.appendChild(card);
+    });
+  }
+
+  /* ───────────────────────────────────────────────────────
+     STEP 2: BUILD UPLOAD ZONES
+  ─────────────────────────────────────────────────────── */
+  function buildUploadZones() {
+    var container = document.getElementById('uploadZones');
+    container.innerHTML = '';
+    state.uploadedFiles = {};
+
+    if (!state.selectedSource) return;
+    var types = state.selectedSource.types;
+
+    types.forEach(function(type) {
+      var info = UPLOAD_TYPES[type];
+      var zone = document.createElement('div');
+      zone.className = 'upload-zone';
+      zone.setAttribute('data-type', type);
+      zone.innerHTML =
+        '<div class="upload-zone-check">&#10003;</div>' +
+        '<div class="upload-zone-icon">' + info.icon + '</div>' +
+        '<div class="upload-zone-title">' + info.title + '</div>' +
+        '<div class="upload-zone-desc">' + info.desc + '</div>' +
+        '<div class="upload-zone-file" id="fileLabel_' + type + '"></div>' +
+        '<input type="file" accept=".csv,.txt,.tsv" data-type="' + type + '" />';
+
+      // Drag events
+      zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+      zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(type, e.dataTransfer.files[0], zone);
+      });
+
+      // File input change
+      var input = zone.querySelector('input[type="file"]');
+      input.addEventListener('change', function() {
+        if (this.files.length) handleFile(type, this.files[0], zone);
+      });
+
+      container.appendChild(zone);
+    });
+  }
+
+  function handleFile(type, file, zone) {
+    startTimer();
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var parsed = parseCSV(e.target.result);
+      if (parsed.length === 0) {
+        document.getElementById('fileLabel_' + type).textContent = 'No data rows found in file';
+        return;
+      }
+      state.uploadedFiles[type] = { file: file, parsed: parsed, fileName: file.name };
+      zone.classList.add('has-file');
+      document.getElementById('fileLabel_' + type).textContent = file.name + ' (' + parsed.length + ' rows)';
+
+      // Auto-detect competitor from headers
+      var headers = Object.keys(parsed[0]);
+      var detected = detectCompetitor(headers);
+      if (detected) state.detectedCompetitor = detected;
+
+      // Auto-detect correct data type if user dropped in wrong zone
+      var guessed = guessDataType(headers);
+      if (guessed && guessed !== type && !state.uploadedFiles[guessed]) {
+        state.uploadedFiles[guessed] = state.uploadedFiles[type];
+        delete state.uploadedFiles[type];
+        zone.classList.remove('has-file');
+        document.getElementById('fileLabel_' + type).textContent = '';
+        // Find the right zone
+        var rightZone = document.querySelector('.upload-zone[data-type="' + guessed + '"]');
+        if (rightZone) {
+          rightZone.classList.add('has-file');
+          document.getElementById('fileLabel_' + guessed).textContent = file.name + ' (' + parsed.length + ' rows) [auto-detected]';
+        }
+      }
+
+      updateBtn2();
+    };
+    reader.readAsText(file);
+  }
+
+  function updateBtn2() {
+    var hasAny = Object.keys(state.uploadedFiles).length > 0;
+    document.getElementById('btn2Next').disabled = !hasAny;
+  }
+
+  /* ───────────────────────────────────────────────────────
+     STEP 3: BUILD MAP & PREVIEW
+  ─────────────────────────────────────────────────────── */
+  function buildMapPreview() {
+    var container = document.getElementById('mapContent');
+    container.innerHTML = '';
+    state.mappings = {};
+
+    var totalCounts = {};
+
+    for (var type in state.uploadedFiles) {
+      var data = state.uploadedFiles[type];
+      var parsed = data.parsed;
+      var headers = Object.keys(parsed[0]);
+      var mapping = autoMapColumns(headers, type);
+      state.mappings[type] = mapping;
+
+      totalCounts[type] = parsed.length;
+
+      var section = document.createElement('div');
+      section.className = 'map-section';
+
+      var detected = state.detectedCompetitor || state.selectedSource.id;
+      var detectedLabel = detected.replace(/_/g, ' ');
+      detectedLabel = detectedLabel.charAt(0).toUpperCase() + detectedLabel.slice(1);
+
+      var info = UPLOAD_TYPES[type] || { title: type, icon: '📁' };
+
+      section.innerHTML =
+        '<div class="map-section-hdr">' +
+          '<h3>' + info.icon + ' ' + info.title + '</h3>' +
+          '<span class="map-badge detected">Detected: ' + detectedLabel + '</span>' +
+          '<span class="map-badge count">' + parsed.length + ' rows</span>' +
+        '</div>';
+
+      // Build preview table
+      var table = document.createElement('table');
+      table.className = 'map-table';
+
+      // Determine our target fields
+      var fieldMap = FIELD_MAPS[type] || {};
+      var allOurFields = [];
+      for (var p in fieldMap) { allOurFields.push(fieldMap[p]); }
+
+      // Table header
+      var thead = '<thead><tr><th>Status</th><th>CSV Column</th><th>Maps To</th><th>Sample Values (first 3)</th></tr></thead>';
+      var tbody = '<tbody>';
+
+      headers.forEach(function(h) {
+        var mapped = mapping[h] || '';
+        var isMatched = !!mapped;
+
+        // Build dropdown
+        var selectHtml = '<select class="map-select" data-type="' + type + '" data-csv-col="' + h.replace(/"/g, '&quot;') + '">';
+        selectHtml += '<option value="">(skip)</option>';
+        allOurFields.forEach(function(f) {
+          selectHtml += '<option value="' + f + '"' + (mapped === f ? ' selected' : '') + '>' + f + '</option>';
+        });
+        selectHtml += '</select>';
+
+        // Sample values
+        var samples = parsed.slice(0, 3).map(function(row) { return row[h] || ''; }).join(', ');
+        if (samples.length > 60) samples = samples.substring(0, 57) + '...';
+
+        var statusHtml = isMatched ?
+          '<span class="map-status ok">&#10003; Mapped</span>' :
+          '<span class="map-status warn">&#9888; Unmapped</span>';
+
+        tbody += '<tr><td>' + statusHtml + '</td><td><strong>' + escHtml(h) + '</strong></td><td>' + selectHtml + '</td><td style="color:#6b7280;font-size:0.78rem;">' + escHtml(samples) + '</td></tr>';
+      });
+
+      tbody += '</tbody>';
+      table.innerHTML = thead + tbody;
+      section.appendChild(table);
+      container.appendChild(section);
+    }
+
+    // Attach change handlers for mapping overrides
+    container.querySelectorAll('.map-select').forEach(function(sel) {
+      sel.addEventListener('change', function() {
+        var t = this.getAttribute('data-type');
+        var col = this.getAttribute('data-csv-col');
+        if (this.value) {
+          state.mappings[t][col] = this.value;
+        } else {
+          delete state.mappings[t][col];
+        }
+        // Update status icon in same row
+        var statusTd = this.closest('tr').querySelector('.map-status');
+        if (this.value) {
+          statusTd.className = 'map-status ok';
+          statusTd.innerHTML = '&#10003; Mapped';
+        } else {
+          statusTd.className = 'map-status warn';
+          statusTd.innerHTML = '&#9888; Unmapped';
+        }
+      });
+    });
+
+    // Summary bar
+    var summary = document.createElement('div');
+    summary.className = 'map-summary';
+    var summaryHtml = '';
+    for (var tt in totalCounts) {
+      var inf = UPLOAD_TYPES[tt] || { title: tt };
+      summaryHtml += '<div class="map-summary-item"><div class="val">' + totalCounts[tt] + '</div><div class="lbl">' + inf.title + '</div></div>';
+    }
+    summary.innerHTML = summaryHtml;
+    container.appendChild(summary);
+  }
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  /* ───────────────────────────────────────────────────────
+     STEP 4: RUN IMPORT
+  ─────────────────────────────────────────────────────── */
+  function runImport() {
+    var container = document.getElementById('importProgress');
+    container.innerHTML = '';
+    document.getElementById('importDone').style.display = 'none';
+
+    var types = Object.keys(state.uploadedFiles);
+    var totalRecords = 0;
+    types.forEach(function(t) { totalRecords += state.uploadedFiles[t].parsed.length; });
+
+    // Build import item rows
+    types.forEach(function(type) {
+      var info = UPLOAD_TYPES[type] || { icon: '📁', title: type };
+      var count = state.uploadedFiles[type].parsed.length;
+      var item = document.createElement('div');
+      item.className = 'import-item';
+      item.id = 'import_item_' + type;
+      item.innerHTML =
+        '<div class="import-item-icon">' + info.icon + '</div>' +
+        '<div class="import-item-label">' + info.title + '</div>' +
+        '<div class="import-item-count">' + count + ' records</div>' +
+        '<div class="import-item-status pending" id="import_status_' + type + '">Pending</div>';
+      container.appendChild(item);
+    });
+
+    // LS key map
+    var lsKeyMap = {
+      properties: 'rv_properties',
+      tenants: 'rv_tenants',
+      transactions: 'rv_transactions',
+      leases: 'rv_leases',
+      jobs: 'rv_jobs',
+      appointments: 'rv_appointments'
+    };
+
+    // Also create leads from contacts
+    var importedCounts = {};
+    var processed = 0;
+
+    function importNext(idx) {
+      if (idx >= types.length) {
+        finishImport(importedCounts);
+        return;
+      }
+
+      var type = types[idx];
+      var statusEl = document.getElementById('import_status_' + type);
+      statusEl.className = 'import-item-status running';
+      statusEl.innerHTML = '<span class="spinner"></span> Importing...';
+
+      // Simulate a slight delay per type for UX
+      setTimeout(function() {
+        var parsed = state.uploadedFiles[type].parsed;
+        var mapping = state.mappings[type] || {};
+        var lsKey = lsKeyMap[type] || ('rv_' + type);
+        var source = state.detectedCompetitor || state.selectedSource.id;
+        var prefix = type.substring(0, 3);
+
+        // Load existing data
+        var existing = [];
+        try { existing = JSON.parse(localStorage.getItem(lsKey)) || []; } catch (e) {}
+
+        var newRecords = parsed.map(function(row, i) {
+          var mapped = {};
+          for (var csvCol in mapping) {
+            var ourField = mapping[csvCol];
+            mapped[ourField] = row[csvCol] || '';
+          }
+          mapped.id = prefix + '_mig_' + Date.now() + '_' + i;
+          mapped.created_at = new Date().toISOString();
+          mapped.imported_from = source;
+          return mapped;
+        });
+
+        existing = existing.concat(newRecords);
+        localStorage.setItem(lsKey, JSON.stringify(existing));
+
+        // Also save contacts as leads
+        if (type === 'tenants') {
+          var existingLeads = [];
+          try { existingLeads = JSON.parse(localStorage.getItem('rv_leads')) || []; } catch (e) {}
+          newRecords.forEach(function(rec, li) {
+            existingLeads.push({
+              id: 'lead_mig_' + Date.now() + '_' + li,
+              name: rec.name || '',
+              email: rec.email || '',
+              phone: rec.phone || '',
+              source: 'Migration (' + source + ')',
+              stage: 'new',
+              created_at: new Date().toISOString(),
+              imported_from: source
+            });
+          });
+          localStorage.setItem('rv_leads', JSON.stringify(existingLeads));
+        }
+
+        importedCounts[type] = newRecords.length;
+        processed += newRecords.length;
+
+        statusEl.className = 'import-item-status done';
+        statusEl.textContent = 'Done ✓';
+
+        // Update progress bar
+        var pct = Math.round((processed / totalRecords) * 100);
+        document.getElementById('importBarFill').style.width = pct + '%';
+
+        importNext(idx + 1);
+      }, 300 + Math.random() * 400);
+    }
+
+    importNext(0);
+  }
+
+  function finishImport(counts) {
+    stopTimer();
+
+    var summaryParts = [];
+    for (var type in counts) {
+      var info = UPLOAD_TYPES[type] || { title: type };
+      summaryParts.push(counts[type] + ' ' + info.title.toLowerCase());
+    }
+
+    document.getElementById('importBarFill').style.width = '100%';
+    document.getElementById('importDone').style.display = 'block';
+    document.getElementById('importDoneSummary').textContent = 'Successfully imported ' + summaryParts.join(', ') + '.';
+
+    // Determine dashboard link
+    var hasJobs = !!counts.jobs;
+    var hasAppointments = !!counts.appointments;
+    var src = state.selectedSource ? state.selectedSource.id : '';
+    var dashLink = 'landlord-signup.html';
+    if (hasJobs && (src === 'jobber' || src === 'housecallpro')) dashLink = 'contractor-demo.html';
+    else if (src === 'honeybook') dashLink = 'booking.html';
+    else if (src === 'clio') dashLink = 'matters.html';
+    else if (src === 'quickbooks') dashLink = 'accounting.html';
+    else if (src === 'guesty') dashLink = 'str-manager.html';
+
+    window._dashLink = dashLink;
+  }
+
+  window.goDashboard = function() {
+    window.location.href = window._dashLink || 'landlord-signup.html';
+  };
+
+  /* ───────────────────────────────────────────────────────
+     INIT
+  ─────────────────────────────────────────────────────── */
+  buildSourceGrid();
+
+})();
+</script>
+</body>
+</html>

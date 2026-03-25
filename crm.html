@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM &amp; Lead Pipeline – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ─── Layout ─────────────────────────────────────────── */
+    .crm-wrap { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+
+    /* ─── Header ─────────────────────────────────────────── */
+    .crm-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
+    .crm-hdr h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; margin: 0; }
+    .crm-hdr-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn-crm { padding: 0.55rem 1.2rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: background 0.2s, transform 0.1s; }
+    .btn-crm:active { transform: scale(0.97); }
+    .btn-crm.primary { background: #4F46E5; color: #fff; }
+    .btn-crm.primary:hover { background: #4338ca; }
+    .btn-crm.outline { background: #fff; color: #4F46E5; border: 2px solid #4F46E5; }
+    .btn-crm.outline:hover { background: #eef2ff; }
+    .btn-crm.danger { background: #fee2e2; color: #dc2626; }
+    .btn-crm.danger:hover { background: #fecaca; }
+    .btn-crm.sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+    .btn-crm.success { background: #10b981; color: #fff; }
+    .btn-crm.success:hover { background: #059669; }
+
+    /* ─── Stats ───────────────────────────────────────────── */
+    .crm-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 1.25rem; }
+    .crm-stat { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1rem; text-align: center; }
+    .crm-stat .val { font-size: 1.5rem; font-weight: 900; color: #1e1b4b; }
+    .crm-stat .lbl { font-size: 0.7rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.04em; }
+
+    /* ─── View Toggle ─────────────────────────────────────── */
+    .view-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .view-tab { padding: 0.5rem 1.1rem; border-radius: 8px; font-size: 0.82rem; font-weight: 700; border: 2px solid #e5e7eb; background: #fff; color: #6b7280; cursor: pointer; transition: 0.2s; }
+    .view-tab.active { background: #4F46E5; color: #fff; border-color: #4F46E5; }
+    .view-tab:hover:not(.active) { border-color: #4F46E5; color: #4F46E5; }
+
+    /* ─── Kanban Pipeline ─────────────────────────────────── */
+    .kanban { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; min-height: 400px; }
+    .kanban-col { background: #f9fafb; border-radius: 12px; padding: 0.75rem; display: flex; flex-direction: column; min-width: 0; }
+    .kanban-col.drag-over { background: #eef2ff; outline: 2px dashed #4F46E5; }
+    .kanban-col-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--col-color, #e5e7eb); }
+    .kanban-col-title { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #374151; }
+    .kanban-col-count { font-size: 0.7rem; font-weight: 700; color: #6b7280; }
+    .kanban-col-val { font-size: 0.68rem; color: #9ca3af; margin-top: 2px; }
+    .kanban-cards { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; min-height: 60px; }
+
+    .k-card { background: #fff; border-radius: 10px; padding: 0.75rem; border: 1px solid #e5e7eb; border-left: 4px solid var(--col-color, #e5e7eb); cursor: grab; transition: box-shadow 0.2s, opacity 0.2s; }
+    .k-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .k-card.dragging { opacity: 0.4; }
+    .k-card-name { font-size: 0.85rem; font-weight: 700; color: #1e1b4b; margin-bottom: 4px; }
+    .k-card-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: #6b7280; margin-top: 3px; }
+    .k-card-val { font-weight: 800; color: #4F46E5; }
+    .source-badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: 0.65rem; font-weight: 700; background: #ede9fe; color: #5b21b6; }
+
+    /* ─── List View ────────────────────────────────────────── */
+    .list-wrap { display: none; }
+    .list-filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .list-filters input, .list-filters select { padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; }
+    .list-filters input { flex: 1; min-width: 200px; }
+    .list-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow-x: auto; }
+    .crm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .crm-table th { text-align: left; padding: 0.75rem 1rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; cursor: pointer; white-space: nowrap; user-select: none; }
+    .crm-table th:hover { color: #4F46E5; }
+    .crm-table th .sort-arrow { margin-left: 4px; font-size: 0.65rem; }
+    .crm-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; color: #374151; white-space: nowrap; }
+    .crm-table tr:hover td { background: #f9fafb; }
+    .status-sel { padding: 3px 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid #d1d5db; cursor: pointer; }
+    .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
+    .act-btn.view { background: #ede9fe; color: #4F46E5; }
+    .act-btn.del { background: #fee2e2; color: #dc2626; }
+
+    /* ─── Analytics View ───────────────────────────────────── */
+    .analytics-wrap { display: none; }
+    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .an-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; }
+    .an-card h3 { font-size: 0.9rem; font-weight: 800; color: #1e1b4b; margin: 0 0 1rem; }
+    .funnel-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .funnel-label { width: 80px; font-size: 0.75rem; font-weight: 700; color: #374151; text-align: right; }
+    .funnel-track { flex: 1; height: 28px; background: #f3f4f6; border-radius: 6px; overflow: hidden; position: relative; }
+    .funnel-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 0.72rem; font-weight: 700; color: #fff; min-width: 30px; transition: width 0.5s; }
+    .src-row { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.82rem; }
+    .src-row:last-child { border: 0; }
+    .src-name { font-weight: 600; color: #374151; }
+    .src-count { font-weight: 800; color: #4F46E5; }
+    .metric-big { font-size: 2.5rem; font-weight: 900; color: #4F46E5; }
+    .metric-label { font-size: 0.82rem; color: #6b7280; margin-top: 4px; }
+
+    /* ─── Modal ────────────────────────────────────────────── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 2rem; width: 92%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal h2 { font-size: 1.25rem; font-weight: 800; margin: 0 0 1.25rem; color: #1e1b4b; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af; line-height: 1; }
+    .modal-close:hover { color: #374151; }
+    .form-group { margin-bottom: 0.75rem; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    /* ─── Detail Modal ──────────────────────────────────────── */
+    .detail-modal { max-width: 700px; }
+    .detail-status-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .detail-status-btn { padding: 0.35rem 0.8rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; border: 2px solid #e5e7eb; background: #fff; cursor: pointer; transition: 0.2s; }
+    .detail-status-btn.active { color: #fff; border-color: transparent; }
+    .detail-info { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .detail-field { font-size: 0.82rem; }
+    .detail-field .dl { font-weight: 600; color: #6b7280; font-size: 0.72rem; text-transform: uppercase; margin-bottom: 2px; }
+    .detail-field .dv { color: #1e1b4b; font-weight: 600; }
+
+    .timeline { margin-top: 1rem; max-height: 280px; overflow-y: auto; }
+    .tl-item { display: flex; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid #f3f4f6; }
+    .tl-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+    .tl-icon.call { background: #dbeafe; color: #2563eb; }
+    .tl-icon.email { background: #ede9fe; color: #7c3aed; }
+    .tl-icon.sms { background: #d1fae5; color: #059669; }
+    .tl-icon.meeting { background: #fef3c7; color: #d97706; }
+    .tl-icon.note { background: #f3f4f6; color: #6b7280; }
+    .tl-body { flex: 1; min-width: 0; }
+    .tl-type { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #6b7280; }
+    .tl-note { font-size: 0.82rem; color: #374151; margin-top: 2px; }
+    .tl-date { font-size: 0.68rem; color: #9ca3af; margin-top: 2px; }
+
+    .log-form { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+    .log-form select, .log-form input { padding: 0.45rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.82rem; }
+    .log-form input { flex: 1; min-width: 160px; }
+
+    /* ─── Toast ────────────────────────────────────────────── */
+    .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; color: #fff; background: #4F46E5; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: toastIn 0.3s; }
+    .toast.success { background: #10b981; }
+    .toast.error { background: #ef4444; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ─── Responsive ───────────────────────────────────────── */
+    @media(max-width:768px) {
+      .crm-stats { grid-template-columns: repeat(2, 1fr); }
+      .kanban { grid-template-columns: repeat(6, 260px); overflow-x: auto; }
+      .crm-table .hide-m { display: none; }
+      .analytics-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .detail-info { grid-template-columns: 1fr; }
+    }
+    /* Mobile-friendly modals */
+    @media (max-width: 768px) {
+      .modal, [class*="modal"] { max-height: 95vh !important; width: 95% !important; max-width: none !important; margin: 0.5rem !important; border-radius: 12px !important; }
+      .modal-overlay, [class*="overlay"] { padding: 0.5rem !important; align-items: flex-end !important; }
+    }
+    /* Mobile-scrollable tables */
+    @media (max-width: 768px) {
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      th, td { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">RentVerified</span> <span style="font-weight:500;opacity:0.9;">CRM</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="crm.html" style="color:#1a56db;font-weight:700;">CRM</a>
+    <a href="workspace.html">Messages</a>
+    <a href="listings.html">Booking</a>
+    <a href="screening.html">Reviews</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-primary btn-sm">Home</a>
+  </div>
+</nav>
+
+<!-- ── Header ──────────────────────────────────────────── -->
+<div class="crm-wrap">
+  <div class="crm-hdr">
+    <h1>CRM &amp; Pipeline</h1>
+    <div class="crm-hdr-actions">
+      <button class="btn-crm outline" onclick="importCSV()">&#128229; Import</button>
+      <button class="btn-crm primary" onclick="openNewLead()">+ New Lead</button>
+    </div>
+  </div>
+
+  <!-- ── Stats ──────────────────────────────────────────── -->
+  <div class="crm-stats" id="statsBar">
+    <div class="crm-stat"><div class="val" id="statTotal">0</div><div class="lbl">Total Leads</div></div>
+    <div class="crm-stat"><div class="val" id="statNew">0</div><div class="lbl">New This Week</div></div>
+    <div class="crm-stat"><div class="val" id="statPipeline">$0</div><div class="lbl">Pipeline Value</div></div>
+    <div class="crm-stat"><div class="val" id="statConversion">0%</div><div class="lbl">Conversion Rate</div></div>
+    <div class="crm-stat"><div class="val" id="statWon">0</div><div class="lbl">Won This Month</div></div>
+  </div>
+
+  <!-- ── View Toggle ────────────────────────────────────── -->
+  <div class="view-tabs">
+    <button class="view-tab active" data-view="pipeline" onclick="switchView('pipeline')">&#9654; Pipeline</button>
+    <button class="view-tab" data-view="list" onclick="switchView('list')">&#9776; List</button>
+    <button class="view-tab" data-view="analytics" onclick="switchView('analytics')">&#128202; Analytics</button>
+  </div>
+
+  <!-- ── Pipeline (Kanban) View ─────────────────────────── -->
+  <div class="kanban" id="pipelineView"></div>
+
+  <!-- ── List View ──────────────────────────────────────── -->
+  <div class="list-wrap" id="listView">
+    <div class="list-filters">
+      <input type="text" id="listSearch" placeholder="Search leads..." oninput="renderList()" />
+      <select id="listStatusFilter" onchange="renderList()"><option value="">All Statuses</option></select>
+      <select id="listSourceFilter" onchange="renderList()"><option value="">All Sources</option></select>
+    </div>
+    <div class="list-card">
+      <table class="crm-table">
+        <thead>
+          <tr>
+            <th onclick="sortList('name')">Name <span class="sort-arrow"></span></th>
+            <th onclick="sortList('source')" class="hide-m">Source <span class="sort-arrow"></span></th>
+            <th onclick="sortList('status')">Status <span class="sort-arrow"></span></th>
+            <th onclick="sortList('value_estimate')">Value <span class="sort-arrow"></span></th>
+            <th class="hide-m" onclick="sortList('assigned_to')">Assigned <span class="sort-arrow"></span></th>
+            <th class="hide-m" onclick="sortList('created_at')">Created <span class="sort-arrow"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="listBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Analytics View ─────────────────────────────────── -->
+  <div class="analytics-wrap" id="analyticsView">
+    <div class="analytics-grid">
+      <div class="an-card">
+        <h3>Pipeline Funnel</h3>
+        <div id="funnelChart"></div>
+      </div>
+      <div class="an-card">
+        <h3>Lead Sources</h3>
+        <div id="sourceChart"></div>
+      </div>
+      <div class="an-card">
+        <h3>Conversion Rate</h3>
+        <div id="convMetric" style="text-align:center;padding:1.5rem 0;"></div>
+      </div>
+      <div class="an-card">
+        <h3>Average Deal Value</h3>
+        <div id="avgDealMetric" style="text-align:center;padding:1.5rem 0;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── New Lead Modal ────────────────────────────────────── -->
+<div class="modal-overlay" id="newLeadModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('newLeadModal')">&times;</button>
+    <h2 id="newLeadTitle">New Lead</h2>
+    <form onsubmit="saveNewLead(event)">
+      <input type="hidden" id="nlId" />
+      <div class="form-group"><label>Name *</label><input type="text" id="nlName" required /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="nlEmail" /></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="nlPhone" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Source</label>
+          <select id="nlSource">
+            <option value="website">Website</option>
+            <option value="referral">Referral</option>
+            <option value="network">Network</option>
+            <option value="cold_outreach">Cold Outreach</option>
+            <option value="social_media">Social Media</option>
+            <option value="walk_in">Walk-In</option>
+            <option value="advertising">Advertising</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="nlStatus">
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="qualified">Qualified</option>
+            <option value="proposal">Proposal</option>
+            <option value="won">Won</option>
+            <option value="lost">Lost</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Value Estimate ($)</label><input type="number" id="nlValue" min="0" step="100" /></div>
+        <div class="form-group"><label>Assigned To</label><input type="text" id="nlAssigned" /></div>
+      </div>
+      <div class="form-group"><label>Tags (comma-separated)</label><input type="text" id="nlTags" /></div>
+      <div class="form-group"><label>Notes</label><textarea id="nlNotes"></textarea></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+        <button type="button" class="btn-crm outline" onclick="closeModal('newLeadModal')">Cancel</button>
+        <button type="submit" class="btn-crm primary">Save Lead</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Lead Detail Modal ─────────────────────────────────── -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal detail-modal">
+    <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+    <h2 id="detailName">Lead Detail</h2>
+    <div class="detail-status-bar" id="detailStatusBar"></div>
+    <div class="detail-info" id="detailInfo"></div>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+      <button class="btn-crm outline sm" onclick="editFromDetail()">Edit</button>
+      <button class="btn-crm danger sm" onclick="deleteFromDetail()">Delete</button>
+    </div>
+    <h3 style="font-size:0.88rem;font-weight:800;color:#1e1b4b;margin:0 0 0.5rem;">Activity Timeline</h3>
+    <div class="timeline" id="detailTimeline"></div>
+    <div class="log-form" id="logForm">
+      <select id="logType">
+        <option value="call">Call</option>
+        <option value="email">Email</option>
+        <option value="sms">SMS</option>
+        <option value="meeting">Meeting</option>
+        <option value="note">Note</option>
+      </select>
+      <input type="text" id="logNote" placeholder="Add a note..." />
+      <button class="btn-crm primary sm" onclick="logActivity()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}</script>
+<script src="data-layer.js"></script>
+<script src="supabase-config.js"></script>
+<script src="share-widget.js"></script>
+<script src="service-connect.js"></script>
+<script src="business-advisor.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CRM & Lead Pipeline – RentVerified
+   ═══════════════════════════════════════════════════════════ */
+
+var SEED_LEADS = [
+  { id:'lead_1', name:'John Martinez', contact_info:{email:'john@alpinepm.com',phone:'801-555-0101'}, source:'referral', status:'qualified', value_estimate:15000, assigned_to:'Daniel', tags:['property-mgmt'], notes:'Referred by Mike at Summit Construction', created_at:'2026-03-15T10:00:00Z' },
+  { id:'lead_2', name:'Sarah Chen', contact_info:{email:'sarah@chendesign.com',phone:'801-555-0102'}, source:'website', status:'new', value_estimate:8000, assigned_to:'', tags:['design'], notes:'Filled out contact form, interested in renovation', created_at:'2026-03-21T14:30:00Z' },
+  { id:'lead_3', name:'Mike Thompson', contact_info:{email:'mike@summitbuild.com',phone:'801-555-0103'}, source:'network', status:'contacted', value_estimate:45000, assigned_to:'Daniel', tags:['construction'], notes:'Met at CCIM networking event', created_at:'2026-03-18T09:00:00Z' },
+  { id:'lead_4', name:'Lisa Park', contact_info:{email:'lisa@parkprops.com',phone:'801-555-0104'}, source:'cold_outreach', status:'proposal', value_estimate:22000, assigned_to:'Daniel', tags:['commercial'], notes:'Commercial lease management prospect', created_at:'2026-03-10T11:00:00Z' },
+  { id:'lead_5', name:'Robert Kim', contact_info:{email:'rob@kimgroup.com'}, source:'social_media', status:'won', value_estimate:35000, assigned_to:'Daniel', won_at:'2026-03-20T16:00:00Z', notes:'Signed 12-month PM contract', created_at:'2026-03-01T08:00:00Z' },
+  { id:'lead_6', name:'Amanda White', contact_info:{email:'amanda@whitelaw.com',phone:'801-555-0106'}, source:'referral', status:'lost', value_estimate:12000, lost_reason:'Went with competitor', notes:'', created_at:'2026-03-05T13:00:00Z' },
+  { id:'lead_7', name:'David Brown', contact_info:{email:'david@brownrentals.com'}, source:'walk_in', status:'new', value_estimate:5000, created_at:'2026-03-22T08:00:00Z' },
+  { id:'lead_8', name:'Jennifer Lopez', contact_info:{email:'jen@jlproperties.com',phone:'801-555-0108'}, source:'advertising', status:'contacted', value_estimate:28000, assigned_to:'Daniel', tags:['str'], notes:'Interested in STR management', created_at:'2026-03-19T15:00:00Z' }
+];
+
+var STATUSES = ['new','contacted','qualified','proposal','won','lost'];
+var STATUS_COLORS = { new:'#3b82f6', contacted:'#8b5cf6', qualified:'#f59e0b', proposal:'#06b6d4', won:'#10b981', lost:'#ef4444' };
+var STATUS_LABELS = { new:'New', contacted:'Contacted', qualified:'Qualified', proposal:'Proposal', won:'Won', lost:'Lost' };
+var SOURCE_LABELS = { website:'Website', referral:'Referral', network:'Network', cold_outreach:'Cold Outreach', social_media:'Social Media', walk_in:'Walk-In', advertising:'Advertising' };
+
+var leads = [];
+var currentView = 'pipeline';
+var currentDetailId = null;
+var listSortKey = 'created_at';
+var listSortAsc = false;
+
+/* ── Init ─────────────────────────────────────────────────── */
+async function init() {
+  await seedIfEmpty();
+  leads = await RVData.getLeads();
+  populateFilterDropdowns();
+  updateStats();
+  renderPipeline();
+  renderList();
+  renderAnalytics();
+}
+
+async function seedIfEmpty() {
+  var existing = await RVData.getLeads();
+  if (existing.length === 0) {
+    for (var i = 0; i < SEED_LEADS.length; i++) {
+      await RVData.saveLead(SEED_LEADS[i]);
+    }
+  }
+}
+
+function populateFilterDropdowns() {
+  var statusSel = document.getElementById('listStatusFilter');
+  var sourceSel = document.getElementById('listSourceFilter');
+  STATUSES.forEach(function(s) {
+    statusSel.innerHTML += '<option value="' + s + '">' + STATUS_LABELS[s] + '</option>';
+  });
+  Object.keys(SOURCE_LABELS).forEach(function(s) {
+    sourceSel.innerHTML += '<option value="' + s + '">' + SOURCE_LABELS[s] + '</option>';
+  });
+}
+
+/* ── Stats ─────────────────────────────────────────────────── */
+function updateStats() {
+  var now = new Date();
+  var weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  var total = leads.length;
+  var newThisWeek = leads.filter(function(l) { return new Date(l.created_at) >= weekAgo; }).length;
+  var active = leads.filter(function(l) { return l.status !== 'won' && l.status !== 'lost'; });
+  var pipelineVal = active.reduce(function(s, l) { return s + (l.value_estimate || 0); }, 0);
+  var wonLeads = leads.filter(function(l) { return l.status === 'won'; });
+  var convRate = total > 0 ? Math.round((wonLeads.length / total) * 100) : 0;
+  var wonMonth = wonLeads.filter(function(l) { return l.won_at && new Date(l.won_at) >= monthStart; }).length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statNew').textContent = newThisWeek;
+  document.getElementById('statPipeline').textContent = '$' + pipelineVal.toLocaleString();
+  document.getElementById('statConversion').textContent = convRate + '%';
+  document.getElementById('statWon').textContent = wonMonth;
+}
+
+/* ── View Toggle ───────────────────────────────────────────── */
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.view-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.view === view); });
+  document.getElementById('pipelineView').style.display = view === 'pipeline' ? 'grid' : 'none';
+  document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
+  document.getElementById('analyticsView').style.display = view === 'analytics' ? 'block' : 'none';
+  if (view === 'analytics') renderAnalytics();
+}
+
+/* ── Pipeline (Kanban) ─────────────────────────────────────── */
+function renderPipeline() {
+  var container = document.getElementById('pipelineView');
+  container.innerHTML = '';
+  STATUSES.forEach(function(status) {
+    var col = document.createElement('div');
+    col.className = 'kanban-col';
+    col.dataset.status = status;
+    col.style.setProperty('--col-color', STATUS_COLORS[status]);
+
+    var colLeads = leads.filter(function(l) { return l.status === status; });
+    var colVal = colLeads.reduce(function(s, l) { return s + (l.value_estimate || 0); }, 0);
+
+    col.innerHTML = '<div class="kanban-col-hdr" style="border-bottom-color:' + STATUS_COLORS[status] + '">' +
+      '<div><div class="kanban-col-title">' + STATUS_LABELS[status] + '</div>' +
+      '<div class="kanban-col-val">$' + colVal.toLocaleString() + '</div></div>' +
+      '<span class="kanban-col-count">' + colLeads.length + '</span></div>' +
+      '<div class="kanban-cards" data-status="' + status + '"></div>';
+
+    var cardsDiv = col.querySelector('.kanban-cards');
+
+    // Drop zone events
+    cardsDiv.addEventListener('dragover', function(e) { e.preventDefault(); col.classList.add('drag-over'); });
+    cardsDiv.addEventListener('dragleave', function() { col.classList.remove('drag-over'); });
+    cardsDiv.addEventListener('drop', function(e) {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      var leadId = e.dataTransfer.getData('text/plain');
+      if (leadId) moveLeadToStatus(leadId, status);
+    });
+
+    colLeads.forEach(function(lead) {
+      var card = document.createElement('div');
+      card.className = 'k-card';
+      card.style.setProperty('--col-color', STATUS_COLORS[status]);
+      card.draggable = true;
+      card.dataset.id = lead.id;
+      card.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('text/plain', lead.id);
+        card.classList.add('dragging');
+      });
+      card.addEventListener('dragend', function() { card.classList.remove('dragging'); });
+      card.addEventListener('click', function() { openDetail(lead.id); });
+
+      var srcLabel = SOURCE_LABELS[lead.source] || lead.source || '';
+      card.innerHTML = '<div class="k-card-name">' + esc(lead.name) + '</div>' +
+        '<span class="source-badge">' + esc(srcLabel) + '</span>' +
+        '<div class="k-card-row"><span class="k-card-val">$' + (lead.value_estimate || 0).toLocaleString() + '</span>' +
+        '<span>' + formatDate(lead.created_at) + '</span></div>' +
+        (lead.assigned_to ? '<div class="k-card-row"><span style="font-size:0.7rem;">&#128100; ' + esc(lead.assigned_to) + '</span></div>' : '');
+
+      cardsDiv.appendChild(card);
+    });
+
+    container.appendChild(col);
+  });
+}
+
+async function moveLeadToStatus(leadId, newStatus) {
+  var lead = leads.find(function(l) { return l.id === leadId; });
+  if (!lead || lead.status === newStatus) return;
+  lead.status = newStatus;
+  if (newStatus === 'won') lead.won_at = new Date().toISOString();
+  if (newStatus === 'lost' && !lead.lost_reason) lead.lost_reason = '';
+  await RVData.saveLead(lead);
+  leads = await RVData.getLeads();
+  updateStats();
+  renderPipeline();
+  renderList();
+  toast('Moved ' + lead.name + ' to ' + STATUS_LABELS[newStatus], 'success');
+}
+
+/* ── List View ─────────────────────────────────────────────── */
+function renderList() {
+  var search = (document.getElementById('listSearch').value || '').toLowerCase();
+  var statusF = document.getElementById('listStatusFilter').value;
+  var sourceF = document.getElementById('listSourceFilter').value;
+
+  var filtered = leads.filter(function(l) {
+    if (search && l.name.toLowerCase().indexOf(search) === -1) return false;
+    if (statusF && l.status !== statusF) return false;
+    if (sourceF && l.source !== sourceF) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort(function(a, b) {
+    var av = a[listSortKey] || '', bv = b[listSortKey] || '';
+    if (listSortKey === 'value_estimate') { av = av || 0; bv = bv || 0; }
+    if (av < bv) return listSortAsc ? -1 : 1;
+    if (av > bv) return listSortAsc ? 1 : -1;
+    return 0;
+  });
+
+  var tbody = document.getElementById('listBody');
+  tbody.innerHTML = '';
+  filtered.forEach(function(l) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + esc(l.name) + '</strong></td>' +
+      '<td class="hide-m"><span class="source-badge">' + esc(SOURCE_LABELS[l.source] || l.source || '') + '</span></td>' +
+      '<td><select class="status-sel" onchange="changeStatusInline(\'' + l.id + '\', this.value)">' +
+        STATUSES.map(function(s) { return '<option value="' + s + '"' + (l.status === s ? ' selected' : '') + '>' + STATUS_LABELS[s] + '</option>'; }).join('') +
+      '</select></td>' +
+      '<td style="font-weight:700;color:#4F46E5;">$' + (l.value_estimate || 0).toLocaleString() + '</td>' +
+      '<td class="hide-m">' + esc(l.assigned_to || '-') + '</td>' +
+      '<td class="hide-m">' + formatDate(l.created_at) + '</td>' +
+      '<td><button class="act-btn view" onclick="openDetail(\'' + l.id + '\')">View</button>' +
+      '<button class="act-btn del" onclick="deleteLead(\'' + l.id + '\')">Del</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function sortList(key) {
+  if (listSortKey === key) { listSortAsc = !listSortAsc; } else { listSortKey = key; listSortAsc = true; }
+  renderList();
+}
+
+async function changeStatusInline(id, newStatus) {
+  var lead = leads.find(function(l) { return l.id === id; });
+  if (!lead) return;
+  lead.status = newStatus;
+  if (newStatus === 'won') lead.won_at = new Date().toISOString();
+  await RVData.saveLead(lead);
+  leads = await RVData.getLeads();
+  updateStats();
+  renderPipeline();
+  toast(lead.name + ' moved to ' + STATUS_LABELS[newStatus], 'success');
+}
+
+/* ── Analytics View ────────────────────────────────────────── */
+function renderAnalytics() {
+  // Funnel
+  var funnelDiv = document.getElementById('funnelChart');
+  funnelDiv.innerHTML = '';
+  var maxCount = 0;
+  STATUSES.forEach(function(s) {
+    var c = leads.filter(function(l) { return l.status === s; }).length;
+    if (c > maxCount) maxCount = c;
+  });
+  STATUSES.forEach(function(s) {
+    var count = leads.filter(function(l) { return l.status === s; }).length;
+    var pct = maxCount > 0 ? Math.max((count / maxCount) * 100, 8) : 8;
+    funnelDiv.innerHTML += '<div class="funnel-bar">' +
+      '<span class="funnel-label">' + STATUS_LABELS[s] + '</span>' +
+      '<div class="funnel-track"><div class="funnel-fill" style="width:' + pct + '%;background:' + STATUS_COLORS[s] + ';">' + count + '</div></div></div>';
+  });
+
+  // Sources
+  var srcDiv = document.getElementById('sourceChart');
+  srcDiv.innerHTML = '';
+  var srcCounts = {};
+  leads.forEach(function(l) { var s = l.source || 'unknown'; srcCounts[s] = (srcCounts[s] || 0) + 1; });
+  var srcEntries = Object.entries(srcCounts).sort(function(a, b) { return b[1] - a[1]; });
+  srcEntries.forEach(function(e) {
+    srcDiv.innerHTML += '<div class="src-row"><span class="src-name">' + esc(SOURCE_LABELS[e[0]] || e[0]) + '</span><span class="src-count">' + e[1] + '</span></div>';
+  });
+
+  // Conversion
+  var wonCount = leads.filter(function(l) { return l.status === 'won'; }).length;
+  var convRate = leads.length > 0 ? Math.round((wonCount / leads.length) * 100) : 0;
+  document.getElementById('convMetric').innerHTML = '<div class="metric-big">' + convRate + '%</div><div class="metric-label">' + wonCount + ' won of ' + leads.length + ' total leads</div>';
+
+  // Avg deal value
+  var allValues = leads.filter(function(l) { return l.value_estimate > 0; });
+  var avg = allValues.length > 0 ? Math.round(allValues.reduce(function(s, l) { return s + l.value_estimate; }, 0) / allValues.length) : 0;
+  document.getElementById('avgDealMetric').innerHTML = '<div class="metric-big">$' + avg.toLocaleString() + '</div><div class="metric-label">Across ' + allValues.length + ' leads with estimates</div>';
+}
+
+/* ── New / Edit Lead Modal ──────────────────────────────────── */
+function openNewLead() {
+  document.getElementById('nlId').value = '';
+  document.getElementById('nlName').value = '';
+  document.getElementById('nlEmail').value = '';
+  document.getElementById('nlPhone').value = '';
+  document.getElementById('nlSource').value = 'website';
+  document.getElementById('nlStatus').value = 'new';
+  document.getElementById('nlValue').value = '';
+  document.getElementById('nlAssigned').value = '';
+  document.getElementById('nlTags').value = '';
+  document.getElementById('nlNotes').value = '';
+  document.getElementById('newLeadTitle').textContent = 'New Lead';
+  openModal('newLeadModal');
+}
+
+function openEditLead(lead) {
+  document.getElementById('nlId').value = lead.id;
+  document.getElementById('nlName').value = lead.name || '';
+  document.getElementById('nlEmail').value = (lead.contact_info && lead.contact_info.email) || '';
+  document.getElementById('nlPhone').value = (lead.contact_info && lead.contact_info.phone) || '';
+  document.getElementById('nlSource').value = lead.source || 'website';
+  document.getElementById('nlStatus').value = lead.status || 'new';
+  document.getElementById('nlValue').value = lead.value_estimate || '';
+  document.getElementById('nlAssigned').value = lead.assigned_to || '';
+  document.getElementById('nlTags').value = (lead.tags || []).join(', ');
+  document.getElementById('nlNotes').value = lead.notes || '';
+  document.getElementById('newLeadTitle').textContent = 'Edit Lead';
+  openModal('newLeadModal');
+}
+
+async function saveNewLead(e) {
+  e.preventDefault();
+  var id = document.getElementById('nlId').value;
+  var lead = id ? (leads.find(function(l) { return l.id === id; }) || {}) : {};
+  lead.name = document.getElementById('nlName').value;
+  lead.contact_info = {
+    email: document.getElementById('nlEmail').value,
+    phone: document.getElementById('nlPhone').value
+  };
+  lead.source = document.getElementById('nlSource').value;
+  lead.status = document.getElementById('nlStatus').value;
+  lead.value_estimate = parseInt(document.getElementById('nlValue').value) || 0;
+  lead.assigned_to = document.getElementById('nlAssigned').value;
+  var tagsStr = document.getElementById('nlTags').value;
+  lead.tags = tagsStr ? tagsStr.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
+  lead.notes = document.getElementById('nlNotes').value;
+  if (lead.status === 'won' && !lead.won_at) lead.won_at = new Date().toISOString();
+
+  await RVData.saveLead(lead);
+  leads = await RVData.getLeads();
+  closeModal('newLeadModal');
+  updateStats();
+  renderPipeline();
+  renderList();
+  toast(id ? 'Lead updated' : 'Lead created', 'success');
+}
+
+/* ── Detail Modal ───────────────────────────────────────────── */
+async function openDetail(id) {
+  currentDetailId = id;
+  var lead = leads.find(function(l) { return l.id === id; });
+  if (!lead) return;
+
+  document.getElementById('detailName').textContent = lead.name;
+
+  // Status bar
+  var statusBar = document.getElementById('detailStatusBar');
+  statusBar.innerHTML = '';
+  STATUSES.forEach(function(s) {
+    var btn = document.createElement('button');
+    btn.className = 'detail-status-btn' + (lead.status === s ? ' active' : '');
+    btn.textContent = STATUS_LABELS[s];
+    btn.style.borderColor = STATUS_COLORS[s];
+    if (lead.status === s) btn.style.background = STATUS_COLORS[s];
+    btn.onclick = function() { changeDetailStatus(id, s); };
+    statusBar.appendChild(btn);
+  });
+
+  // Info fields
+  var info = document.getElementById('detailInfo');
+  var email = (lead.contact_info && lead.contact_info.email) || '-';
+  var phone = (lead.contact_info && lead.contact_info.phone) || '-';
+  info.innerHTML =
+    '<div class="detail-field"><div class="dl">Email</div><div class="dv">' + esc(email) + '</div></div>' +
+    '<div class="detail-field"><div class="dl">Phone</div><div class="dv">' + esc(phone) + '</div></div>' +
+    '<div class="detail-field"><div class="dl">Source</div><div class="dv">' + esc(SOURCE_LABELS[lead.source] || lead.source || '-') + '</div></div>' +
+    '<div class="detail-field"><div class="dl">Value</div><div class="dv">$' + (lead.value_estimate || 0).toLocaleString() + '</div></div>' +
+    '<div class="detail-field"><div class="dl">Assigned To</div><div class="dv">' + esc(lead.assigned_to || '-') + '</div></div>' +
+    '<div class="detail-field"><div class="dl">Tags</div><div class="dv">' + esc((lead.tags || []).join(', ') || '-') + '</div></div>' +
+    '<div class="detail-field" style="grid-column:1/-1;"><div class="dl">Notes</div><div class="dv">' + esc(lead.notes || '-') + '</div></div>';
+
+  // Activity timeline
+  await renderTimeline(id);
+
+  openModal('detailModal');
+}
+
+async function renderTimeline(leadId) {
+  var activities = await RVData.getLeadActivities(leadId);
+  var tl = document.getElementById('detailTimeline');
+  if (activities.length === 0) {
+    tl.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;">No activities logged yet.</p>';
+    return;
+  }
+  tl.innerHTML = '';
+  activities.forEach(function(a) {
+    var iconClass = a.type || 'note';
+    var icons = { call:'&#128222;', email:'&#9993;', sms:'&#128172;', meeting:'&#128197;', note:'&#128221;' };
+    tl.innerHTML += '<div class="tl-item">' +
+      '<div class="tl-icon ' + iconClass + '">' + (icons[iconClass] || '&#128221;') + '</div>' +
+      '<div class="tl-body"><div class="tl-type">' + esc(a.type || 'note') + '</div>' +
+      '<div class="tl-note">' + esc(a.note || '') + '</div>' +
+      '<div class="tl-date">' + formatDateTime(a.created_at) + '</div></div></div>';
+  });
+}
+
+async function changeDetailStatus(id, newStatus) {
+  var lead = leads.find(function(l) { return l.id === id; });
+  if (!lead || lead.status === newStatus) return;
+  lead.status = newStatus;
+  if (newStatus === 'won') lead.won_at = new Date().toISOString();
+  await RVData.saveLead(lead);
+  leads = await RVData.getLeads();
+  updateStats();
+  renderPipeline();
+  renderList();
+  openDetail(id);
+  toast('Status changed to ' + STATUS_LABELS[newStatus], 'success');
+}
+
+function editFromDetail() {
+  var lead = leads.find(function(l) { return l.id === currentDetailId; });
+  if (!lead) return;
+  closeModal('detailModal');
+  openEditLead(lead);
+}
+
+async function deleteFromDetail() {
+  if (!confirm('Delete this lead? This cannot be undone.')) return;
+  await RVData.deleteLead(currentDetailId);
+  leads = await RVData.getLeads();
+  closeModal('detailModal');
+  updateStats();
+  renderPipeline();
+  renderList();
+  toast('Lead deleted', 'error');
+}
+
+async function deleteLead(id) {
+  var lead = leads.find(function(l) { return l.id === id; });
+  if (!lead) return;
+  if (!confirm('Delete ' + lead.name + '?')) return;
+  await RVData.deleteLead(id);
+  leads = await RVData.getLeads();
+  updateStats();
+  renderPipeline();
+  renderList();
+  toast('Lead deleted', 'error');
+}
+
+async function logActivity() {
+  var type = document.getElementById('logType').value;
+  var note = document.getElementById('logNote').value.trim();
+  if (!note) return;
+  await RVData.saveLeadActivity({ lead_id: currentDetailId, type: type, note: note });
+  document.getElementById('logNote').value = '';
+  await renderTimeline(currentDetailId);
+  toast('Activity logged', 'success');
+}
+
+/* ── Import CSV stub ───────────────────────────────────────── */
+function importCSV() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = async function(ev) {
+      var lines = ev.target.result.split('\n').filter(Boolean);
+      if (lines.length < 2) { toast('CSV file is empty or has no data rows', 'error'); return; }
+      var headers = lines[0].split(',').map(function(h) { return h.trim().toLowerCase(); });
+      var count = 0;
+      for (var i = 1; i < lines.length; i++) {
+        var vals = lines[i].split(',');
+        var lead = {
+          name: vals[headers.indexOf('name')] || 'Imported Lead',
+          contact_info: { email: vals[headers.indexOf('email')] || '', phone: vals[headers.indexOf('phone')] || '' },
+          source: vals[headers.indexOf('source')] || 'website',
+          status: 'new',
+          value_estimate: parseInt(vals[headers.indexOf('value')]) || 0,
+          notes: 'Imported from CSV'
+        };
+        await RVData.saveLead(lead);
+        count++;
+      }
+      leads = await RVData.getLeads();
+      updateStats();
+      renderPipeline();
+      renderList();
+      toast('Imported ' + count + ' leads', 'success');
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+/* ── Modal helpers ─────────────────────────────────────────── */
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// Close on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(function(ov) {
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.classList.remove('show'); });
+});
+
+/* ── Toast ─────────────────────────────────────────────────── */
+function toast(msg, type) {
+  var el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(function() { el.remove(); }, 3000);
+}
+
+/* ── Utilities ─────────────────────────────────────────────── */
+function esc(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+function formatDate(iso) {
+  if (!iso) return '-';
+  var d = new Date(iso);
+  return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+}
+function formatDateTime(iso) {
+  if (!iso) return '-';
+  var d = new Date(iso);
+  return formatDate(iso) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/* ── Boot ──────────────────────────────────────────────────── */
+init();
+</script>
+<script src="rv-micro.js"></script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-guide.js"></script>
+</body>
+</html>

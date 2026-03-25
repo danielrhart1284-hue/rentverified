@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Materials Price Lookup – RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Materials Page ── */
+    .mat-hero {
+      background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+      color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+    }
+    .mat-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .mat-hero p { font-size: 1rem; opacity: 0.8; max-width: 560px; margin: 0 auto 1.25rem; }
+    .mat-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .mat-hero-stat .num { font-size: 1.6rem; font-weight: 900; color: #fbbf24; }
+    .mat-hero-stat .lbl { font-size: 0.72rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .mat-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    /* ── Tabs ── */
+    .mat-tabs {
+      display: flex; gap: 0.5rem; border-bottom: 1px solid #e5e7eb;
+      padding: 1.25rem 0 0; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .mat-tab {
+      padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; border-bottom: 3px solid transparent;
+      color: #6b7280; transition: 0.15s;
+    }
+    .mat-tab:hover { color: #92400e; }
+    .mat-tab.active { color: #92400e; border-bottom-color: #d97706; }
+
+    /* ── Price Lookup ── */
+    .mat-lookup { margin-bottom: 2rem; }
+    .mat-lookup-bar {
+      display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .mat-lookup-search {
+      flex: 1; min-width: 220px; padding: 0.7rem 1rem 0.7rem 2.5rem;
+      border: 2px solid #d97706; border-radius: 12px; font-size: 0.95rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d97706' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
+    }
+    .mat-lookup-search:focus { outline: none; box-shadow: 0 0 0 3px rgba(217,119,6,0.15); }
+    .mat-cat-filter {
+      padding: 0.7rem 0.85rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.88rem; background: white; color: #374151; min-width: 150px;
+    }
+
+    /* ── Price Grid ── */
+    .mat-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .mat-card {
+      background: white; border-radius: 14px; border: 1px solid #e5e7eb;
+      padding: 1.25rem; transition: 0.15s; cursor: default;
+    }
+    .mat-card:hover { border-color: #d97706; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .mat-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.6rem; }
+    .mat-card-cat {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      padding: 2px 8px; border-radius: 99px; background: #fef3c7; color: #92400e;
+    }
+    .mat-card-price { font-size: 1.3rem; font-weight: 900; color: #92400e; }
+    .mat-card-price span { font-size: 0.75rem; font-weight: 500; color: #9ca3af; }
+    .mat-card-name { font-size: 0.95rem; font-weight: 700; color: #111827; margin-bottom: 4px; }
+    .mat-card-meta { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.6rem; }
+    .mat-card-trend { font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .mat-card-trend.up { color: #dc2626; }
+    .mat-card-trend.down { color: #059669; }
+    .mat-card-trend.flat { color: #6b7280; }
+    .mat-card-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .mat-card-btn {
+      padding: 0.35rem 0.9rem; border-radius: 8px; font-size: 0.78rem;
+      font-weight: 600; border: 1px solid #d1d5db; background: white;
+      color: #374151; cursor: pointer; transition: 0.15s;
+    }
+    .mat-card-btn:hover { border-color: #d97706; color: #92400e; }
+    .mat-card-btn.primary { background: #d97706; color: white; border-color: #d97706; }
+    .mat-card-btn.primary:hover { background: #b45309; }
+
+    /* ── Project Materials Tab ── */
+    .mat-proj-toolbar {
+      display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .mat-proj-search {
+      flex: 1; min-width: 180px; padding: 0.6rem 1rem; border: 1px solid #d1d5db;
+      border-radius: 10px; font-size: 0.88rem;
+    }
+    .mat-proj-search:focus { outline: none; border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.12); }
+    .mat-select {
+      padding: 0.6rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px;
+      font-size: 0.85rem; background: white; min-width: 130px;
+    }
+    .mat-btn {
+      padding: 0.6rem 1.3rem; border-radius: 10px; font-weight: 700;
+      font-size: 0.88rem; border: none; cursor: pointer; transition: 0.15s;
+    }
+    .mat-btn-primary { background: #d97706; color: white; }
+    .mat-btn-primary:hover { background: #b45309; }
+
+    /* Table */
+    .mat-table { width: 100%; border-collapse: collapse; background: white; border-radius: 14px; overflow: hidden; border: 1px solid #e5e7eb; }
+    .mat-table th {
+      background: #fef3c7; text-align: left; padding: 0.7rem 1rem; font-size: 0.75rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #92400e;
+    }
+    .mat-table td { padding: 0.75rem 1rem; font-size: 0.88rem; border-top: 1px solid #f3f4f6; color: #374151; }
+    .mat-table tr:hover td { background: #fffbeb; }
+
+    .status-pill {
+      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 99px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    }
+    .status-needed   { background: #fef3c7; color: #92400e; }
+    .status-ordered   { background: #dbeafe; color: #2563eb; }
+    .status-received  { background: #d1fae5; color: #065f46; }
+    .status-installed { background: #f3f4f6; color: #374151; }
+    .status-returned  { background: #fee2e2; color: #dc2626; }
+
+    /* ── Summary Cards ── */
+    .mat-summary {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .mat-sum-card {
+      background: white; border-radius: 14px; padding: 1.1rem 1.25rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e5e7eb; text-align: center;
+    }
+    .mat-sum-card .num { font-size: 1.5rem; font-weight: 900; color: #92400e; }
+    .mat-sum-card .lbl { font-size: 0.72rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+
+    /* ── Modal ── */
+    .mat-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center; z-index: 999;
+    }
+    .mat-modal-overlay.open { display: flex; }
+    .mat-modal {
+      background: white; border-radius: 16px; padding: 2rem; width: 100%; max-width: 560px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto;
+    }
+    .mat-modal h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 1.25rem; color: #111827; }
+    .mat-modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .mat-modal-field { margin-bottom: 1rem; }
+    .mat-modal-field label { display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 4px; color: #374151; }
+    .mat-modal-field input, .mat-modal-field select, .mat-modal-field textarea {
+      width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #d1d5db;
+      border-radius: 10px; font-size: 0.88rem; font-family: inherit;
+    }
+    .mat-modal-field input:focus, .mat-modal-field select:focus, .mat-modal-field textarea:focus {
+      outline: none; border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.12);
+    }
+    .mat-modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+    .mat-modal-actions button { padding: 0.6rem 1.5rem; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; }
+    .mat-modal-cancel { background: white; border: 1px solid #d1d5db; color: #374151; }
+    .mat-modal-save { background: #d97706; color: white; border: none; }
+    .mat-modal-save:hover { background: #b45309; }
+    .mat-modal-delete { background: #fee2e2; color: #dc2626; border: none; margin-right: auto; }
+    .mat-modal-delete:hover { background: #fecaca; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .mat-grid { grid-template-columns: 1fr; }
+      .mat-table { display: block; overflow-x: auto; }
+      .mat-modal-row { grid-template-columns: 1fr; }
+      .mat-hero h1 { font-size: 1.6rem; }
+      .mat-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ── Empty State ── */
+    .mat-empty { text-align: center; padding: 3rem 1rem; color: #9ca3af; }
+    .mat-empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .mat-empty h3 { font-size: 1.1rem; font-weight: 700; color: #6b7280; margin-bottom: 0.5rem; }
+    .mat-empty p { font-size: 0.88rem; max-width: 400px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav style="background:#fff;border-bottom:1px solid #e5e7eb;padding:0 2rem;height:56px;display:flex;align-items:center;gap:1.5rem;font-size:.88rem;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;font-size:1.1rem;font-weight:800;color:#92400e;text-decoration:none;">
+      <img src="images/logo.svg" alt="" style="height:28px;" onerror="this.style.display='none'">RentVerified
+    </a>
+    <a href="jobs.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Jobs</a>
+    <a href="crm.html" style="color:#4b5563;text-decoration:none;font-weight:500;">CRM</a>
+    <a href="invoice-builder.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Invoices</a>
+    <a href="time-tracking.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Time</a>
+    <a href="accounting.html" style="color:#4b5563;text-decoration:none;font-weight:500;">Accounting</a>
+    <a href="jobs.html" style="margin-left:auto;background:#d97706;color:white;padding:0.35rem 1rem;border-radius:8px;font-weight:700;font-size:0.82rem;text-decoration:none;">Dashboard</a>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <div class="mat-hero">
+    <h1>Materials & Pricing</h1>
+    <p>Look up current material prices, track project supplies, and manage your material costs.</p>
+    <div class="mat-hero-stats">
+      <div class="mat-hero-stat"><div class="num" id="stat-items">0</div><div class="lbl">Items Tracked</div></div>
+      <div class="mat-hero-stat"><div class="num" id="stat-cost">$0</div><div class="lbl">Total Cost</div></div>
+      <div class="mat-hero-stat"><div class="num" id="stat-needed">0</div><div class="lbl">Needed</div></div>
+      <div class="mat-hero-stat"><div class="num" id="stat-ordered">0</div><div class="lbl">On Order</div></div>
+    </div>
+  </div>
+
+  <div class="mat-wrap">
+    <!-- ── Tabs ── -->
+    <div class="mat-tabs">
+      <div class="mat-tab active" onclick="switchTab('lookup')">Price Lookup</div>
+      <div class="mat-tab" onclick="switchTab('project')">Project Materials</div>
+    </div>
+
+    <!-- ═══ TAB: Price Lookup ═══ -->
+    <div id="tab-lookup">
+      <div class="mat-lookup">
+        <div class="mat-lookup-bar">
+          <input type="text" class="mat-lookup-search" id="price-search" placeholder="Search materials... e.g. 2x4, drywall, copper pipe" oninput="filterPrices()" />
+          <select class="mat-cat-filter" id="price-cat-filter" onchange="filterPrices()">
+            <option value="">All Categories</option>
+            <option value="lumber">Lumber</option>
+            <option value="concrete">Concrete</option>
+            <option value="drywall">Drywall</option>
+            <option value="electrical">Electrical</option>
+            <option value="plumbing">Plumbing</option>
+            <option value="hvac">HVAC</option>
+            <option value="roofing">Roofing</option>
+            <option value="flooring">Flooring</option>
+            <option value="paint">Paint</option>
+            <option value="hardware">Hardware</option>
+            <option value="insulation">Insulation</option>
+            <option value="fixtures">Fixtures</option>
+            <option value="tile">Tile</option>
+            <option value="windows_doors">Windows & Doors</option>
+          </select>
+        </div>
+        <div class="mat-grid" id="price-grid"></div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: Project Materials ═══ -->
+    <div id="tab-project" style="display:none;">
+      <div class="mat-summary" id="proj-summary"></div>
+      <div class="mat-proj-toolbar">
+        <input type="text" class="mat-proj-search" id="proj-search" placeholder="Search materials..." oninput="renderProjectMaterials()" />
+        <select class="mat-select" id="proj-status-filter" onchange="renderProjectMaterials()">
+          <option value="">All Statuses</option>
+          <option value="needed">Needed</option>
+          <option value="ordered">Ordered</option>
+          <option value="received">Received</option>
+          <option value="installed">Installed</option>
+          <option value="returned">Returned</option>
+        </select>
+        <select class="mat-select" id="proj-cat-filter" onchange="renderProjectMaterials()">
+          <option value="">All Categories</option>
+          <option value="lumber">Lumber</option>
+          <option value="concrete">Concrete</option>
+          <option value="drywall">Drywall</option>
+          <option value="electrical">Electrical</option>
+          <option value="plumbing">Plumbing</option>
+          <option value="hvac">HVAC</option>
+          <option value="roofing">Roofing</option>
+          <option value="flooring">Flooring</option>
+          <option value="paint">Paint</option>
+          <option value="hardware">Hardware</option>
+          <option value="insulation">Insulation</option>
+          <option value="fixtures">Fixtures</option>
+          <option value="tile">Tile</option>
+          <option value="windows_doors">Windows & Doors</option>
+          <option value="fasteners">Fasteners</option>
+          <option value="other">Other</option>
+        </select>
+        <button class="mat-btn mat-btn-primary" onclick="openMaterialModal()">+ Add Material</button>
+      </div>
+      <div id="proj-table-wrap"></div>
+    </div>
+  </div>
+
+  <!-- ═══ Material Modal ═══ -->
+  <div class="mat-modal-overlay" id="materialModal" onclick="if(event.target===this)closeMaterialModal()">
+    <div class="mat-modal">
+      <h3 id="modal-title">Add Material</h3>
+      <input type="hidden" id="mat-id" />
+      <div class="mat-modal-row">
+        <div class="mat-modal-field">
+          <label>Material Name *</label>
+          <input type="text" id="mat-name" placeholder="e.g. 2x4 SPF Stud 8ft" />
+        </div>
+        <div class="mat-modal-field">
+          <label>Category</label>
+          <select id="mat-category">
+            <option value="">Select...</option>
+            <option value="lumber">Lumber</option>
+            <option value="concrete">Concrete</option>
+            <option value="drywall">Drywall</option>
+            <option value="electrical">Electrical</option>
+            <option value="plumbing">Plumbing</option>
+            <option value="hvac">HVAC</option>
+            <option value="roofing">Roofing</option>
+            <option value="flooring">Flooring</option>
+            <option value="paint">Paint</option>
+            <option value="hardware">Hardware</option>
+            <option value="insulation">Insulation</option>
+            <option value="fixtures">Fixtures</option>
+            <option value="tile">Tile</option>
+            <option value="siding">Siding</option>
+            <option value="windows_doors">Windows & Doors</option>
+            <option value="fasteners">Fasteners</option>
+            <option value="adhesives">Adhesives</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="mat-modal-row">
+        <div class="mat-modal-field">
+          <label>Quantity *</label>
+          <input type="number" id="mat-qty" value="1" min="0" step="0.01" oninput="calcTotal()" />
+        </div>
+        <div class="mat-modal-field">
+          <label>Unit</label>
+          <select id="mat-unit">
+            <option value="each">Each</option>
+            <option value="sqft">Sq Ft</option>
+            <option value="lnft">Linear Ft</option>
+            <option value="board">Board</option>
+            <option value="sheet">Sheet</option>
+            <option value="bag">Bag</option>
+            <option value="box">Box</option>
+            <option value="gallon">Gallon</option>
+            <option value="lb">Lb</option>
+            <option value="ton">Ton</option>
+          </select>
+        </div>
+      </div>
+      <div class="mat-modal-row">
+        <div class="mat-modal-field">
+          <label>Unit Price ($)</label>
+          <input type="number" id="mat-price" step="0.01" min="0" placeholder="0.00" oninput="calcTotal()" />
+        </div>
+        <div class="mat-modal-field">
+          <label>Total Price</label>
+          <input type="text" id="mat-total" readonly style="background:#f9fafb;font-weight:700;color:#92400e;" />
+        </div>
+      </div>
+      <div class="mat-modal-row">
+        <div class="mat-modal-field">
+          <label>Status</label>
+          <select id="mat-status">
+            <option value="needed">Needed</option>
+            <option value="ordered">Ordered</option>
+            <option value="received">Received</option>
+            <option value="installed">Installed</option>
+            <option value="returned">Returned</option>
+          </select>
+        </div>
+        <div class="mat-modal-field">
+          <label>Supplier</label>
+          <input type="text" id="mat-supplier" placeholder="e.g. Home Depot, 84 Lumber" />
+        </div>
+      </div>
+      <div class="mat-modal-field">
+        <label>Notes</label>
+        <textarea id="mat-notes" rows="2" placeholder="Special instructions, delivery notes..."></textarea>
+      </div>
+      <div class="mat-modal-actions">
+        <button class="mat-modal-delete" id="mat-delete-btn" style="display:none;" onclick="deleteMaterial()">Delete</button>
+        <button class="mat-modal-cancel" onclick="closeMaterialModal()">Cancel</button>
+        <button class="mat-modal-save" onclick="saveMaterial()">Save Material</button>
+      </div>
+    </div>
+  </div>
+
+<script src="app.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>
+  // ═══════════════════════════════════════════════════════════════════════
+  // Materials Price Lookup & Project Materials Tracker
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Force localStorage mode if Supabase has placeholder config
+  if (typeof RVData !== 'undefined' && RVData._useSupabase && RVData._useSupabase()) {
+    try { RVData._useSupabase = function() { return false; }; } catch(e) {}
+  }
+
+  // ── Built-in Material Price Database ──
+  // Regional averages (Utah/Mountain West), updated Q1 2026
+  var PRICE_DB = [
+    // ── Lumber ──
+    { name: '2x4 SPF Stud 8ft', category: 'lumber', price: 3.98, unit: 'each', supplier: 'Home Depot', trend: 'down', change: -5 },
+    { name: '2x6 SPF Stud 8ft', category: 'lumber', price: 5.67, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: '2x4x10 Treated Lumber', category: 'lumber', price: 7.48, unit: 'each', supplier: '84 Lumber', trend: 'up', change: 3 },
+    { name: '4x8 Plywood 1/2" CDX', category: 'lumber', price: 38.97, unit: 'sheet', supplier: 'Home Depot', trend: 'down', change: -8 },
+    { name: '4x8 OSB 7/16"', category: 'lumber', price: 25.48, unit: 'sheet', supplier: 'Lowes', trend: 'down', change: -12 },
+    { name: '4x8 Plywood 3/4" Sanded', category: 'lumber', price: 52.87, unit: 'sheet', supplier: '84 Lumber', trend: 'flat', change: 1 },
+    { name: '2x12 SPF 12ft', category: 'lumber', price: 18.96, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: -1 },
+    { name: 'LVL Beam 1-3/4x11-7/8 20ft', category: 'lumber', price: 189.00, unit: 'each', supplier: '84 Lumber', trend: 'up', change: 4 },
+
+    // ── Concrete ──
+    { name: 'Ready-Mix Concrete (per yard)', category: 'concrete', price: 155.00, unit: 'yard', supplier: 'Local Batch', trend: 'up', change: 6 },
+    { name: 'Quikrete 80lb Bag', category: 'concrete', price: 6.47, unit: 'bag', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Sakrete 60lb Fast-Set', category: 'concrete', price: 5.98, unit: 'bag', supplier: 'Lowes', trend: 'flat', change: 1 },
+    { name: '#4 Rebar 20ft', category: 'concrete', price: 12.88, unit: 'each', supplier: 'Home Depot', trend: 'down', change: -3 },
+    { name: 'Wire Mesh 5x150 Roll', category: 'concrete', price: 109.00, unit: 'roll', supplier: 'Local Supply', trend: 'flat', change: 2 },
+
+    // ── Drywall ──
+    { name: '4x8 Drywall 1/2"', category: 'drywall', price: 13.48, unit: 'sheet', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: '4x8 Drywall 5/8" Type X', category: 'drywall', price: 17.98, unit: 'sheet', supplier: 'Lowes', trend: 'flat', change: 1 },
+    { name: 'Joint Compound 4.5 Gal', category: 'drywall', price: 18.97, unit: 'bucket', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Drywall Tape 250ft', category: 'drywall', price: 4.28, unit: 'roll', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Corner Bead Metal 8ft', category: 'drywall', price: 3.18, unit: 'each', supplier: 'Lowes', trend: 'flat', change: 0 },
+
+    // ── Electrical ──
+    { name: 'Romex 14/2 NM-B 250ft', category: 'electrical', price: 78.97, unit: 'roll', supplier: 'Home Depot', trend: 'down', change: -4 },
+    { name: 'Romex 12/2 NM-B 250ft', category: 'electrical', price: 109.00, unit: 'roll', supplier: 'Home Depot', trend: 'down', change: -3 },
+    { name: 'Romex 10/3 NM-B 125ft', category: 'electrical', price: 142.00, unit: 'roll', supplier: 'Lowes', trend: 'flat', change: 1 },
+    { name: '200A Main Breaker Panel', category: 'electrical', price: 189.00, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Standard Outlet Receptacle', category: 'electrical', price: 0.78, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'GFCI Outlet', category: 'electrical', price: 18.47, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+
+    // ── Plumbing ──
+    { name: '1/2" Copper Pipe Type L 10ft', category: 'plumbing', price: 24.98, unit: 'each', supplier: 'Home Depot', trend: 'down', change: -6 },
+    { name: '3/4" Copper Pipe Type L 10ft', category: 'plumbing', price: 38.47, unit: 'each', supplier: 'Home Depot', trend: 'down', change: -5 },
+    { name: '1/2" PEX-A 100ft', category: 'plumbing', price: 42.98, unit: 'roll', supplier: 'Home Depot', trend: 'flat', change: -1 },
+    { name: '3" PVC DWV Pipe 10ft', category: 'plumbing', price: 12.48, unit: 'each', supplier: 'Lowes', trend: 'flat', change: 0 },
+    { name: '40 Gal Water Heater (Gas)', category: 'plumbing', price: 529.00, unit: 'each', supplier: 'Home Depot', trend: 'up', change: 3 },
+
+    // ── HVAC ──
+    { name: '6" Flex Duct 25ft', category: 'hvac', price: 24.97, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: '4x10 Floor Register', category: 'hvac', price: 6.98, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Mini-Split 12K BTU', category: 'hvac', price: 849.00, unit: 'each', supplier: '?"s HVAC Supply', trend: 'down', change: -4 },
+    { name: '16x25x1 MERV 11 Filter 4pk', category: 'hvac', price: 28.97, unit: 'pack', supplier: 'Home Depot', trend: 'flat', change: 0 },
+
+    // ── Roofing ──
+    { name: 'Arch Shingles Bundle (33sqft)', category: 'roofing', price: 36.98, unit: 'bundle', supplier: 'Home Depot', trend: 'up', change: 5 },
+    { name: 'Synthetic Underlayment 10sq', category: 'roofing', price: 89.00, unit: 'roll', supplier: 'ABC Supply', trend: 'flat', change: 1 },
+    { name: 'Drip Edge 10ft', category: 'roofing', price: 5.97, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Ice & Water Shield 75ft', category: 'roofing', price: 69.00, unit: 'roll', supplier: 'ABC Supply', trend: 'flat', change: 2 },
+
+    // ── Flooring ──
+    { name: 'LVP Plank (per sqft)', category: 'flooring', price: 2.49, unit: 'sqft', supplier: 'Floor & Decor', trend: 'down', change: -3 },
+    { name: '3/4" Red Oak Hardwood (per sqft)', category: 'flooring', price: 5.89, unit: 'sqft', supplier: 'Lumber Liquidators', trend: 'flat', change: 1 },
+    { name: 'Carpet + Pad (per sqft)', category: 'flooring', price: 3.29, unit: 'sqft', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Porcelain Tile 12x24 (per sqft)', category: 'flooring', price: 2.99, unit: 'sqft', supplier: 'Floor & Decor', trend: 'flat', change: -1 },
+
+    // ── Paint ──
+    { name: 'Interior Latex Flat (5 Gal)', category: 'paint', price: 98.00, unit: 'bucket', supplier: 'Sherwin-Williams', trend: 'flat', change: 0 },
+    { name: 'Interior Eggshell (1 Gal)', category: 'paint', price: 38.98, unit: 'gallon', supplier: 'Sherwin-Williams', trend: 'flat', change: 0 },
+    { name: 'Primer PVA (5 Gal)', category: 'paint', price: 59.00, unit: 'bucket', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Exterior Semi-Gloss (1 Gal)', category: 'paint', price: 49.98, unit: 'gallon', supplier: 'Sherwin-Williams', trend: 'up', change: 2 },
+
+    // ── Insulation ──
+    { name: 'R-13 Batt 15" 40sqft', category: 'insulation', price: 18.47, unit: 'bag', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'R-19 Batt 23" 75sqft', category: 'insulation', price: 42.48, unit: 'bag', supplier: 'Home Depot', trend: 'flat', change: 1 },
+    { name: 'R-30 Blown-In (per bag)', category: 'insulation', price: 14.97, unit: 'bag', supplier: 'Lowes', trend: 'flat', change: 0 },
+    { name: 'Rigid Foam 4x8 2" XPS', category: 'insulation', price: 42.98, unit: 'sheet', supplier: 'Home Depot', trend: 'flat', change: 0 },
+
+    // ── Fixtures ──
+    { name: 'Standard Toilet (Round)', category: 'fixtures', price: 129.00, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Bathroom Vanity 36"', category: 'fixtures', price: 279.00, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: -2 },
+    { name: 'Kitchen Faucet (Pull-Down)', category: 'fixtures', price: 149.00, unit: 'each', supplier: 'Lowes', trend: 'flat', change: 0 },
+    { name: 'Stainless Steel Sink 33"', category: 'fixtures', price: 189.00, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+
+    // ── Windows & Doors ──
+    { name: 'Vinyl Window 36x48 DH', category: 'windows_doors', price: 219.00, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 1 },
+    { name: 'Steel Entry Door 36"', category: 'windows_doors', price: 348.00, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Interior Prehung Door 30"', category: 'windows_doors', price: 89.00, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Sliding Patio Door 72x80', category: 'windows_doors', price: 589.00, unit: 'each', supplier: 'Lowes', trend: 'up', change: 3 },
+
+    // ── Hardware ──
+    { name: 'Deck Screws #8 2.5" 1lb', category: 'hardware', price: 8.98, unit: 'lb', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Framing Nails 16d 5lb', category: 'hardware', price: 12.47, unit: 'box', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Simpson Strong-Tie A35', category: 'hardware', price: 1.78, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 },
+    { name: 'Joist Hanger LUS26', category: 'hardware', price: 2.18, unit: 'each', supplier: 'Home Depot', trend: 'flat', change: 0 }
+  ];
+
+  var allProjectMaterials = [];
+
+  // ── Tab Switching ──
+  function switchTab(tab) {
+    document.querySelectorAll('.mat-tab').forEach(function(t, i) {
+      t.classList.toggle('active', (tab === 'lookup' && i === 0) || (tab === 'project' && i === 1));
+    });
+    document.getElementById('tab-lookup').style.display = tab === 'lookup' ? '' : 'none';
+    document.getElementById('tab-project').style.display = tab === 'project' ? '' : 'none';
+    if (tab === 'project') loadProjectMaterials();
+  }
+
+  // ═══ PRICE LOOKUP ═══
+  function filterPrices() {
+    var query = document.getElementById('price-search').value.toLowerCase().trim();
+    var cat = document.getElementById('price-cat-filter').value;
+
+    var filtered = PRICE_DB.filter(function(item) {
+      if (cat && item.category !== cat) return false;
+      if (query && item.name.toLowerCase().indexOf(query) === -1 && item.category.indexOf(query) === -1) return false;
+      return true;
+    });
+
+    renderPriceGrid(filtered);
+  }
+
+  function renderPriceGrid(items) {
+    var grid = document.getElementById('price-grid');
+
+    if (items.length === 0) {
+      grid.innerHTML = '<div class="mat-empty"><div class="mat-empty-icon">🔍</div><h3>No materials found</h3><p>Try a different search term or category filter.</p></div>';
+      return;
+    }
+
+    grid.innerHTML = items.map(function(item) {
+      var trendIcon = item.trend === 'up' ? '&#9650;' : item.trend === 'down' ? '&#9660;' : '&#8212;';
+      var trendClass = item.trend === 'up' ? 'up' : item.trend === 'down' ? 'down' : 'flat';
+      var changeText = item.change > 0 ? '+' + item.change + '%' : item.change < 0 ? item.change + '%' : 'Stable';
+
+      return '<div class="mat-card">' +
+        '<div class="mat-card-top">' +
+          '<span class="mat-card-cat">' + formatCategory(item.category) + '</span>' +
+          '<div class="mat-card-price">$' + item.price.toFixed(2) + ' <span>/ ' + item.unit + '</span></div>' +
+        '</div>' +
+        '<div class="mat-card-name">' + esc(item.name) + '</div>' +
+        '<div class="mat-card-meta">' + esc(item.supplier) + '</div>' +
+        '<div class="mat-card-trend ' + trendClass + '">' +
+          '<span>' + trendIcon + '</span> ' + changeText + ' vs last quarter' +
+        '</div>' +
+        '<div class="mat-card-actions">' +
+          '<button class="mat-card-btn primary" onclick="addFromLookup(\'' + esc(item.name).replace(/'/g, "\\'") + '\',\'' + item.category + '\',' + item.price + ',\'' + item.unit + '\',\'' + esc(item.supplier).replace(/'/g, "\\'") + '\')">+ Add to Project</button>' +
+          '<button class="mat-card-btn" onclick="copyPrice(\'' + esc(item.name).replace(/'/g, "\\'") + '\',' + item.price + ',\'' + item.unit + '\')">Copy Price</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function addFromLookup(name, category, price, unit, supplier) {
+    document.getElementById('mat-id').value = '';
+    document.getElementById('mat-name').value = name;
+    document.getElementById('mat-category').value = category;
+    document.getElementById('mat-qty').value = 1;
+    document.getElementById('mat-unit').value = unit || 'each';
+    document.getElementById('mat-price').value = price;
+    document.getElementById('mat-status').value = 'needed';
+    document.getElementById('mat-supplier').value = supplier || '';
+    document.getElementById('mat-notes').value = '';
+    document.getElementById('mat-delete-btn').style.display = 'none';
+    document.getElementById('modal-title').textContent = 'Add Material to Project';
+    calcTotal();
+    document.getElementById('materialModal').classList.add('open');
+  }
+
+  function copyPrice(name, price, unit) {
+    var text = name + ': $' + price.toFixed(2) + '/' + unit;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    } else {
+      var ta = document.createElement('textarea'); ta.value = text;
+      ta.style.cssText = 'position:fixed;left:-9999px;';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+    }
+    // Quick feedback
+    var btn = event.target;
+    var orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.color = '#059669';
+    setTimeout(function() { btn.textContent = orig; btn.style.color = ''; }, 1500);
+  }
+
+  // ═══ PROJECT MATERIALS ═══
+  async function loadProjectMaterials() {
+    try {
+      allProjectMaterials = await RVData.getProjectMaterials({});
+    } catch(e) {
+      allProjectMaterials = JSON.parse(localStorage.getItem('rv_project_materials') || '[]');
+    }
+    updateStats();
+    renderProjectSummary();
+    renderProjectMaterials();
+  }
+
+  function updateStats() {
+    var items = allProjectMaterials;
+    var totalCost = items.reduce(function(s, i) { return s + (parseFloat(i.total_price) || 0); }, 0);
+    var needed = items.filter(function(i) { return i.status === 'needed'; }).length;
+    var ordered = items.filter(function(i) { return i.status === 'ordered'; }).length;
+
+    document.getElementById('stat-items').textContent = items.length;
+    document.getElementById('stat-cost').textContent = '$' + totalCost.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    document.getElementById('stat-needed').textContent = needed;
+    document.getElementById('stat-ordered').textContent = ordered;
+  }
+
+  function renderProjectSummary() {
+    var items = allProjectMaterials;
+    var totalCost = items.reduce(function(s, i) { return s + (parseFloat(i.total_price) || 0); }, 0);
+    var needed = items.filter(function(i) { return i.status === 'needed'; });
+    var neededCost = needed.reduce(function(s, i) { return s + (parseFloat(i.total_price) || 0); }, 0);
+    var ordered = items.filter(function(i) { return i.status === 'ordered'; });
+    var orderedCost = ordered.reduce(function(s, i) { return s + (parseFloat(i.total_price) || 0); }, 0);
+    var received = items.filter(function(i) { return i.status === 'received' || i.status === 'installed'; });
+    var receivedCost = received.reduce(function(s, i) { return s + (parseFloat(i.total_price) || 0); }, 0);
+
+    document.getElementById('proj-summary').innerHTML =
+      '<div class="mat-sum-card"><div class="num">$' + totalCost.toLocaleString('en-US', { minimumFractionDigits: 0 }) + '</div><div class="lbl">Total Budget</div></div>' +
+      '<div class="mat-sum-card"><div class="num" style="color:#d97706;">$' + neededCost.toLocaleString('en-US', { minimumFractionDigits: 0 }) + '</div><div class="lbl">Still Needed</div></div>' +
+      '<div class="mat-sum-card"><div class="num" style="color:#2563eb;">$' + orderedCost.toLocaleString('en-US', { minimumFractionDigits: 0 }) + '</div><div class="lbl">On Order</div></div>' +
+      '<div class="mat-sum-card"><div class="num" style="color:#059669;">$' + receivedCost.toLocaleString('en-US', { minimumFractionDigits: 0 }) + '</div><div class="lbl">Received</div></div>';
+  }
+
+  function renderProjectMaterials() {
+    var search = document.getElementById('proj-search').value.toLowerCase().trim();
+    var statusFilter = document.getElementById('proj-status-filter').value;
+    var catFilter = document.getElementById('proj-cat-filter').value;
+
+    var filtered = allProjectMaterials.filter(function(item) {
+      if (statusFilter && item.status !== statusFilter) return false;
+      if (catFilter && item.category !== catFilter) return false;
+      if (search && item.material_name.toLowerCase().indexOf(search) === -1 &&
+          (item.supplier || '').toLowerCase().indexOf(search) === -1) return false;
+      return true;
+    });
+
+    var wrap = document.getElementById('proj-table-wrap');
+
+    if (filtered.length === 0 && allProjectMaterials.length === 0) {
+      wrap.innerHTML = '<div class="mat-empty"><div class="mat-empty-icon">📦</div><h3>No materials tracked yet</h3>' +
+        '<p>Use the Price Lookup tab to find materials and add them, or click "+ Add Material" above.</p></div>';
+      return;
+    }
+
+    if (filtered.length === 0) {
+      wrap.innerHTML = '<div class="mat-empty"><div class="mat-empty-icon">🔍</div><h3>No matching materials</h3><p>Try adjusting your filters.</p></div>';
+      return;
+    }
+
+    wrap.innerHTML = '<table class="mat-table"><thead><tr>' +
+      '<th>Material</th><th>Category</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>Status</th><th>Supplier</th><th></th>' +
+    '</tr></thead><tbody>' +
+    filtered.map(function(item) {
+      return '<tr onclick="editMaterial(\'' + item.id + '\')" style="cursor:pointer;">' +
+        '<td style="font-weight:600;">' + esc(item.material_name) + '</td>' +
+        '<td>' + formatCategory(item.category || '') + '</td>' +
+        '<td>' + (item.quantity || '') + ' ' + (item.unit || '') + '</td>' +
+        '<td>$' + (parseFloat(item.unit_price) || 0).toFixed(2) + '</td>' +
+        '<td style="font-weight:700;color:#92400e;">$' + (parseFloat(item.total_price) || 0).toFixed(2) + '</td>' +
+        '<td><span class="status-pill status-' + (item.status || 'needed') + '">' + (item.status || 'needed') + '</span></td>' +
+        '<td>' + esc(item.supplier || '—') + '</td>' +
+        '<td><button class="mat-card-btn" onclick="event.stopPropagation();editMaterial(\'' + item.id + '\')">Edit</button></td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table>';
+  }
+
+  // ═══ MODAL ═══
+  function openMaterialModal() {
+    document.getElementById('mat-id').value = '';
+    document.getElementById('mat-name').value = '';
+    document.getElementById('mat-category').value = '';
+    document.getElementById('mat-qty').value = 1;
+    document.getElementById('mat-unit').value = 'each';
+    document.getElementById('mat-price').value = '';
+    document.getElementById('mat-total').value = '';
+    document.getElementById('mat-status').value = 'needed';
+    document.getElementById('mat-supplier').value = '';
+    document.getElementById('mat-notes').value = '';
+    document.getElementById('mat-delete-btn').style.display = 'none';
+    document.getElementById('modal-title').textContent = 'Add Material';
+    document.getElementById('materialModal').classList.add('open');
+  }
+
+  function editMaterial(id) {
+    var item = allProjectMaterials.find(function(m) { return m.id === id; });
+    if (!item) return;
+
+    document.getElementById('mat-id').value = item.id;
+    document.getElementById('mat-name').value = item.material_name || '';
+    document.getElementById('mat-category').value = item.category || '';
+    document.getElementById('mat-qty').value = item.quantity || 1;
+    document.getElementById('mat-unit').value = item.unit || 'each';
+    document.getElementById('mat-price').value = item.unit_price || '';
+    document.getElementById('mat-status').value = item.status || 'needed';
+    document.getElementById('mat-supplier').value = item.supplier || '';
+    document.getElementById('mat-notes').value = item.notes || '';
+    document.getElementById('mat-delete-btn').style.display = '';
+    document.getElementById('modal-title').textContent = 'Edit Material';
+    calcTotal();
+    document.getElementById('materialModal').classList.add('open');
+  }
+
+  function closeMaterialModal() {
+    document.getElementById('materialModal').classList.remove('open');
+  }
+
+  function calcTotal() {
+    var qty = parseFloat(document.getElementById('mat-qty').value) || 0;
+    var price = parseFloat(document.getElementById('mat-price').value) || 0;
+    document.getElementById('mat-total').value = '$' + (qty * price).toFixed(2);
+  }
+
+  async function saveMaterial() {
+    var name = document.getElementById('mat-name').value.trim();
+    if (!name) { alert('Please enter a material name.'); return; }
+
+    var item = {
+      material_name: name,
+      category: document.getElementById('mat-category').value || null,
+      quantity: parseFloat(document.getElementById('mat-qty').value) || 1,
+      unit: document.getElementById('mat-unit').value || 'each',
+      unit_price: parseFloat(document.getElementById('mat-price').value) || 0,
+      status: document.getElementById('mat-status').value || 'needed',
+      supplier: document.getElementById('mat-supplier').value.trim() || null,
+      notes: document.getElementById('mat-notes').value.trim() || null
+    };
+
+    var id = document.getElementById('mat-id').value;
+    if (id) item.id = id;
+
+    try {
+      await RVData.saveProjectMaterial(item);
+    } catch(e) {
+      // Fallback direct localStorage
+      var rows = JSON.parse(localStorage.getItem('rv_project_materials') || '[]');
+      if (item.id) {
+        item.total_price = parseFloat((item.quantity * item.unit_price).toFixed(2));
+        rows = rows.map(function(r) { return r.id === item.id ? Object.assign(r, item) : r; });
+      } else {
+        item.id = Date.now().toString();
+        item.total_price = parseFloat((item.quantity * item.unit_price).toFixed(2));
+        item.created_at = new Date().toISOString();
+        rows.unshift(item);
+      }
+      localStorage.setItem('rv_project_materials', JSON.stringify(rows));
+    }
+
+    closeMaterialModal();
+    await loadProjectMaterials();
+  }
+
+  async function deleteMaterial() {
+    var id = document.getElementById('mat-id').value;
+    if (!id || !confirm('Delete this material?')) return;
+
+    try {
+      await RVData.deleteProjectMaterial(id);
+    } catch(e) {
+      var rows = JSON.parse(localStorage.getItem('rv_project_materials') || '[]');
+      rows = rows.filter(function(r) { return r.id !== id; });
+      localStorage.setItem('rv_project_materials', JSON.stringify(rows));
+    }
+
+    closeMaterialModal();
+    await loadProjectMaterials();
+  }
+
+  // ═══ HELPERS ═══
+  function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function formatCategory(cat) {
+    if (!cat) return '';
+    return cat.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+  }
+
+  // ═══ INIT ═══
+  document.addEventListener('DOMContentLoaded', function() {
+    filterPrices(); // show all prices
+    loadProjectMaterials();
+  });
+</script>
+<script src="share-widget.js" data-share-title="Materials Price Lookup" data-share-text="Look up construction material prices on RentVerified"></script>
+<script src="recommended-supplies.js" data-industry="construction"></script>
+</body>
+</html>

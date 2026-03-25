@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentVerified — Professional Directory</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style id="page-styles">
+    /* ── Hero ── */
+    .dir-hero {
+      background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 60%, #2563eb 100%);
+      color: white;
+      padding: 3.5rem 2rem 2.5rem;
+    }
+    .dir-hero-inner { max-width: 1200px; margin: 0 auto; }
+    .dir-hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .dir-hero p { font-size: 1rem; opacity: 0.88; margin-bottom: 1.5rem; max-width: 540px; }
+    .dir-search-bar {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      max-width: 800px;
+    }
+    .dir-search-bar input, .dir-search-bar select {
+      padding: 0.7rem 1rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: white;
+      color: #111827;
+      outline: none;
+    }
+    .dir-search-bar input { flex: 2; min-width: 180px; }
+    .dir-search-bar select { flex: 1; min-width: 140px; }
+    .dir-search-btn {
+      padding: 0.7rem 1.5rem;
+      background: #fbbf24;
+      color: #111827;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .dir-search-btn:hover { background: #f59e0b; }
+    .dir-hero-stats { display: flex; gap: 1.5rem; margin-top: 1.25rem; flex-wrap: wrap; }
+    .dir-hero-stat { font-size: 0.88rem; opacity: 0.9; }
+    .dir-hero-stat strong { font-size: 1.2rem; font-weight: 900; display: block; }
+
+    /* ── Layout ── */
+    .dir-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Filters sidebar ── */
+    .dir-filters {
+      background: white;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 1.25rem;
+      position: sticky;
+      top: 80px;
+    }
+    .dir-filters h3 { font-size: 0.88rem; font-weight: 800; color: #111827; margin-bottom: 1rem; }
+    .filter-section { margin-bottom: 1.25rem; }
+    .filter-section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+    .filter-category-btn {
+      display: flex; align-items: center; gap: 0.5rem;
+      width: 100%; padding: 0.45rem 0.6rem;
+      border: none; background: none;
+      font-size: 0.84rem; font-weight: 600; color: #374151;
+      cursor: pointer; border-radius: 7px; text-align: left;
+      transition: background 0.1s;
+    }
+    .filter-category-btn:hover { background: #f3f4f6; }
+    .filter-category-btn.active { background: #eff6ff; color: #1d4ed8; font-weight: 700; }
+    .filter-category-count {
+      margin-left: auto; font-size: 0.7rem; font-weight: 700;
+      color: #9ca3af; background: #f3f4f6; padding: 1px 6px; border-radius: 999px;
+    }
+    .filter-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.4rem 0; border-bottom: 1px solid #f3f4f6;
+      font-size: 0.84rem; font-weight: 600; color: #374151;
+    }
+    .filter-toggle-row:last-child { border-bottom: none; }
+    .filter-checkbox { width: 16px; height: 16px; accent-color: #1d4ed8; cursor: pointer; }
+    .filter-select {
+      width: 100%; padding: 0.45rem 0.6rem;
+      border: 1.5px solid #e5e7eb; border-radius: 7px;
+      font-size: 0.84rem; color: #374151; outline: none;
+    }
+    .filter-select:focus { border-color: #1d4ed8; }
+
+    /* ── Featured section ── */
+    .dir-featured {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border: 1.5px solid #fde68a;
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .dir-featured-label {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.07em; color: #92400e; margin-bottom: 0.75rem;
+    }
+    .featured-scroll {
+      display: flex; gap: 0.85rem; overflow-x: auto;
+      padding-bottom: 0.25rem;
+      scrollbar-width: none;
+    }
+    .featured-scroll::-webkit-scrollbar { display: none; }
+    .featured-mini-card {
+      flex-shrink: 0;
+      background: white;
+      border: 1.5px solid #fde68a;
+      border-radius: 12px;
+      padding: 1rem;
+      width: 200px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    .featured-mini-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .fmc-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800; color: white;
+      margin-bottom: 0.6rem;
+    }
+    .fmc-name { font-size: 0.88rem; font-weight: 800; color: #111827; }
+    .fmc-title { font-size: 0.75rem; color: #6b7280; margin-bottom: 0.4rem; }
+    .fmc-stars { font-size: 0.78rem; color: #f59e0b; }
+
+    /* ── Results header ── */
+    .dir-results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .dir-results-count { font-size: 0.9rem; font-weight: 700; color: #374151; }
+    .dir-sort-select {
+      padding: 0.4rem 0.75rem; border: 1.5px solid #e5e7eb;
+      border-radius: 8px; font-size: 0.84rem; color: #374151;
+      outline: none; background: white;
+    }
+
+    /* ── Pro cards ── */
+    .dir-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .pro-card {
+      background: white;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1rem;
+      align-items: start;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .pro-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.07); border-color: #d1d5db; }
+    .pro-card.featured-card { border-color: #fde68a; background: linear-gradient(135deg, #fffef7, #fffbeb); }
+    .pro-avatar {
+      width: 60px; height: 60px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 800; color: white; flex-shrink: 0;
+    }
+    .pro-info { min-width: 0; }
+    .pro-name-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 3px; }
+    .pro-name { font-size: 1rem; font-weight: 800; color: #111827; }
+    .pro-badge {
+      font-size: 0.7rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 999px; white-space: nowrap;
+    }
+    .badge-verified { background: #d1fae5; color: #065f46; }
+    .badge-trusted { background: #dbeafe; color: #1e40af; }
+    .badge-featured { background: #fef3c7; color: #92400e; }
+    .pro-title { font-size: 0.85rem; color: #6b7280; margin-bottom: 0.5rem; }
+    .pro-rating-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+    .pro-stars { color: #f59e0b; font-size: 0.88rem; }
+    .pro-rating-val { font-size: 0.88rem; font-weight: 700; color: #111827; }
+    .pro-reviews { font-size: 0.82rem; color: #6b7280; }
+    .pro-location { font-size: 0.82rem; color: #6b7280; }
+    .pro-specialties { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .specialty-tag {
+      font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
+      background: #f3f4f6; border-radius: 999px; color: #374151;
+    }
+    .pro-availability {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.75rem; font-weight: 700; padding: 3px 8px;
+      border-radius: 999px; margin-top: 0.4rem;
+    }
+    .avail-now { background: #d1fae5; color: #065f46; }
+    .avail-soon { background: #fef3c7; color: #92400e; }
+    .avail-busy { background: #fee2e2; color: #991b1b; }
+    .avail-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .avail-dot.now { background: #10b981; }
+    .avail-dot.soon { background: #f59e0b; }
+    .avail-dot.busy { background: #ef4444; }
+    .pro-actions { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; flex-shrink: 0; }
+    .btn-quote {
+      padding: 0.55rem 1.1rem;
+      background: #1d4ed8; color: white;
+      border: none; border-radius: 9px;
+      font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-quote:hover { background: #1e40af; }
+    .btn-view-profile {
+      padding: 0.5rem 1rem;
+      background: white; color: #374151;
+      border: 1.5px solid #e5e7eb; border-radius: 9px;
+      font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.12s;
+    }
+    .btn-view-profile:hover { border-color: #1d4ed8; color: #1d4ed8; }
+    .pro-trust-score {
+      font-size: 0.78rem; font-weight: 800; color: #7c3aed;
+      text-align: right;
+    }
+
+    /* ── Quote modal ── */
+    .quote-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 9000;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .quote-overlay.open { display: flex; }
+    .quote-modal {
+      background: white; border-radius: 18px;
+      width: 100%; max-width: 520px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .quote-modal-header {
+      background: linear-gradient(135deg, #1e40af, #1d4ed8);
+      color: white; padding: 1.5rem;
+    }
+    .quote-modal-header h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .quote-modal-header p { font-size: 0.85rem; opacity: 0.85; margin: 0; }
+    .quote-modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .quote-field label { display: block; font-size: 0.84rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; }
+    .quote-field input, .quote-field select, .quote-field textarea {
+      width: 100%; padding: 0.55rem 0.85rem;
+      border: 1.5px solid #e5e7eb; border-radius: 8px;
+      font-size: 0.88rem; outline: none;
+      transition: border-color 0.15s; box-sizing: border-box;
+      font-family: inherit;
+    }
+    .quote-field input:focus, .quote-field select:focus, .quote-field textarea:focus { border-color: #1d4ed8; }
+    .quote-field textarea { resize: vertical; min-height: 90px; }
+    .quote-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .quote-modal-footer {
+      padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb;
+      display: flex; justify-content: flex-end; gap: 0.75rem;
+    }
+    .btn-cancel-quote {
+      padding: 0.6rem 1.25rem; border-radius: 8px;
+      border: 1.5px solid #e5e7eb; background: white;
+      font-size: 0.88rem; font-weight: 700; color: #374151; cursor: pointer;
+    }
+    .btn-send-quote {
+      padding: 0.6rem 1.5rem; border-radius: 8px;
+      background: #1d4ed8; border: none;
+      font-size: 0.88rem; font-weight: 700; color: white; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-send-quote:hover { background: #1e40af; }
+
+    /* ── Profile modal ── */
+    .profile-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 9000;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .profile-overlay.open { display: flex; }
+    .profile-modal {
+      background: white; border-radius: 18px;
+      width: 100%; max-width: 600px; max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+    }
+    .profile-modal-header {
+      background: linear-gradient(135deg, #1e3a8a, #1e40af);
+      color: white; padding: 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .profile-modal-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; font-weight: 800; color: white;
+      flex-shrink: 0; border: 3px solid rgba(255,255,255,0.3);
+    }
+    .profile-modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: rgba(255,255,255,0.15); border: none;
+      color: white; font-size: 1.2rem; cursor: pointer;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .profile-modal-body { padding: 1.5rem; }
+    .profile-section { margin-bottom: 1.5rem; }
+    .profile-section-title {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #9ca3af; margin-bottom: 0.75rem;
+    }
+    .review-item {
+      background: #f9fafb; border-radius: 10px; padding: 0.9rem;
+      margin-bottom: 0.6rem;
+    }
+    .review-item-header { display: flex; justify-content: space-between; margin-bottom: 0.35rem; }
+    .review-author { font-size: 0.84rem; font-weight: 700; color: #111827; }
+    .review-date { font-size: 0.75rem; color: #9ca3af; }
+    .review-stars { color: #f59e0b; font-size: 0.85rem; margin-bottom: 0.25rem; }
+    .review-text { font-size: 0.84rem; color: #374151; line-height: 1.5; }
+
+    /* ── Toast ── */
+    .dir-toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: #111827; color: white;
+      padding: 0.75rem 1.25rem; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      transform: translateY(60px); opacity: 0;
+      transition: transform 0.25s, opacity 0.25s; z-index: 99999;
+    }
+    .dir-toast.show { transform: translateY(0); opacity: 1; }
+    .dir-toast.success { background: #059669; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .dir-layout { grid-template-columns: 1fr; padding: 1rem; }
+      .dir-filters { position: static; }
+      .pro-card { grid-template-columns: auto 1fr; }
+      .pro-actions { flex-direction: row; align-items: center; grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#1a56db"/>
+      <path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/>
+      <circle cx="22" cy="12" r="3" fill="#93c5fd"/>
+    </svg>
+    RentVerified
+  </a>
+  <div class="nav-links">
+    <a href="network.html">Pro Network</a>
+    <a href="directory.html" style="color:var(--primary);font-weight:700;">Directory</a>
+    <a href="community.html">Community</a>
+    <a href="referrals.html">Referrals</a>
+  </div>
+  <div class="nav-cta">
+    <a href="landlord-signup.html" class="btn btn-primary btn-sm">Business Login</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="dir-hero">
+  <div class="dir-hero-inner">
+    <h1>Professional Directory</h1>
+    <p>Find, hire, and request quotes from verified professionals in your area. Every profile is reviewed and rated by real clients.</p>
+    <div class="dir-search-bar">
+      <input type="text" id="heroSearch" placeholder="Search by name, specialty, or keyword…" oninput="filterPros()" />
+      <select id="heroLocation" onchange="filterPros()">
+        <option value="">All Locations</option>
+        <option value="Utah County">Utah County, UT</option>
+        <option value="Salt Lake">Salt Lake City, UT</option>
+        <option value="Denver">Denver, CO</option>
+        <option value="Phoenix">Phoenix, AZ</option>
+        <option value="Austin">Austin, TX</option>
+      </select>
+      <button class="dir-search-btn" onclick="filterPros()">Search</button>
+    </div>
+    <div class="dir-hero-stats">
+      <div class="dir-hero-stat"><strong id="statPros">0</strong>Verified Professionals</div>
+      <div class="dir-hero-stat"><strong id="statCategories">8</strong>Categories</div>
+      <div class="dir-hero-stat"><strong id="statReviews">0</strong>Reviews</div>
+    </div>
+  </div>
+</div>
+
+<div class="dir-layout">
+
+  <!-- FILTERS -->
+  <aside class="dir-filters">
+    <h3>Filters</h3>
+
+    <div class="filter-section">
+      <div class="filter-section-label">Category</div>
+      <button class="filter-category-btn active" onclick="setCategory('All', this)">
+        All Categories <span class="filter-category-count" id="catAll">0</span>
+      </button>
+      <button class="filter-category-btn" onclick="setCategory('Legal', this)">⚖️ Legal</button>
+      <button class="filter-category-btn" onclick="setCategory('Financial', this)">💼 Financial</button>
+      <button class="filter-category-btn" onclick="setCategory('Insurance', this)">🛡 Insurance</button>
+      <button class="filter-category-btn" onclick="setCategory('Construction', this)">🔧 Construction</button>
+      <button class="filter-category-btn" onclick="setCategory('Real Estate', this)">🏡 Real Estate</button>
+      <button class="filter-category-btn" onclick="setCategory('Marketing', this)">📣 Marketing</button>
+      <button class="filter-category-btn" onclick="setCategory('IT / Tech', this)">💻 IT / Tech</button>
+      <button class="filter-category-btn" onclick="setCategory('Consulting', this)">🧭 Consulting</button>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-section-label">Availability</div>
+      <div class="filter-toggle-row">
+        <span>Available Now</span>
+        <input type="checkbox" class="filter-checkbox" id="filterAvailNow" onchange="filterPros()" />
+      </div>
+      <div class="filter-toggle-row">
+        <span>Verified Only</span>
+        <input type="checkbox" class="filter-checkbox" id="filterVerified" onchange="filterPros()" />
+      </div>
+      <div class="filter-toggle-row">
+        <span>Trusted Pro Badge</span>
+        <input type="checkbox" class="filter-checkbox" id="filterTrusted" onchange="filterPros()" />
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-section-label">Min Rating</div>
+      <select class="filter-select" id="filterRating" onchange="filterPros()">
+        <option value="0">Any rating</option>
+        <option value="3">3+ stars</option>
+        <option value="4">4+ stars</option>
+        <option value="4.5">4.5+ stars</option>
+      </select>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-section-label">Price Range</div>
+      <select class="filter-select" id="filterPrice" onchange="filterPros()">
+        <option value="">Any price</option>
+        <option value="$">$ Budget-friendly</option>
+        <option value="$$">$$ Mid-range</option>
+        <option value="$$$">$$$ Premium</option>
+      </select>
+    </div>
+
+    <button onclick="clearFilters()" class="btn btn-outline" style="width:100%;font-size:0.82rem;padding:0.5rem;margin-top:0.25rem;">Clear All Filters</button>
+  </aside>
+
+  <!-- RESULTS -->
+  <div>
+    <!-- FEATURED -->
+    <div class="dir-featured">
+      <div class="dir-featured-label">⭐ Featured Professionals</div>
+      <div class="featured-scroll" id="featuredScroll"></div>
+    </div>
+
+    <!-- RESULTS HEADER -->
+    <div class="dir-results-header">
+      <div class="dir-results-count" id="resultsCount">Loading…</div>
+      <select class="dir-sort-select" id="sortSelect" onchange="filterPros()">
+        <option value="rating">Sort: Top Rated</option>
+        <option value="reviews">Sort: Most Reviews</option>
+        <option value="trust">Sort: Trust Score</option>
+        <option value="newest">Sort: Newest</option>
+      </select>
+    </div>
+
+    <!-- CARDS -->
+    <div class="dir-cards" id="dirCards"></div>
+  </div>
+
+</div>
+
+<!-- QUOTE MODAL -->
+<div class="quote-overlay" id="quoteOverlay" onclick="closeQuoteOnBackdrop(event)">
+  <div class="quote-modal">
+    <div class="quote-modal-header">
+      <h3 id="quoteProName">Request a Quote</h3>
+      <p>Describe your project and we'll connect you right away.</p>
+    </div>
+    <div class="quote-modal-body">
+      <div class="quote-field">
+        <label>Project Description</label>
+        <textarea id="quoteDesc" placeholder="Describe what you need help with…"></textarea>
+      </div>
+      <div class="quote-row">
+        <div class="quote-field">
+          <label>Budget Range</label>
+          <select id="quoteBudget">
+            <option>Under $500</option>
+            <option>$500 – $2,000</option>
+            <option>$2,000 – $10,000</option>
+            <option>$10,000+</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div class="quote-field">
+          <label>Timeline</label>
+          <select id="quoteTimeline">
+            <option>ASAP</option>
+            <option>Within 1 week</option>
+            <option>Within 1 month</option>
+            <option>Flexible</option>
+          </select>
+        </div>
+      </div>
+      <div class="quote-field">
+        <label>Your Name</label>
+        <input type="text" id="quoteClientName" placeholder="Your name" />
+      </div>
+      <div class="quote-field">
+        <label>Contact (email or phone)</label>
+        <input type="text" id="quoteContact" placeholder="email@example.com or (555) 000-0000" />
+      </div>
+    </div>
+    <div class="quote-modal-footer">
+      <button class="btn-cancel-quote" onclick="closeQuote()">Cancel</button>
+      <button class="btn-send-quote" onclick="sendQuote()">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="profile-overlay" id="profileOverlay" onclick="closeProfileOnBackdrop(event)">
+  <div class="profile-modal" style="position:relative;">
+    <button class="profile-modal-close" onclick="closeProfile()">✕</button>
+    <div class="profile-modal-header" id="profileHeader"></div>
+    <div class="profile-modal-body" id="profileBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="dir-toast" id="dirToast"></div>
+
+<script src="data-layer.js"></script>
+<script>
+/* ── Demo professional data ── */
+const COLORS = ['#1d4ed8','#7c3aed','#059669','#dc2626','#d97706','#0891b2','#be185d','#15803d'];
+
+const PROS_DATA = [
+  { id:1, name:'Sarah Mitchell', title:'Real Estate Attorney', category:'Legal', specialty:['Real Estate Law','Eviction Defense','Lease Review','Contract Review'],
+    rating:4.9, reviews:127, trust:94, location:'Utah County', available:'now', verified:true, trusted:true, featured:true, price:'$$',
+    bio:'15+ years specializing in real estate transactions, evictions, and landlord-tenant law. AVVO Top Attorney 2023.',
+    reviewList:[{author:'Daniel H.',stars:5,date:'2 weeks ago',text:'Sarah handled my eviction case professionally and quickly. Highly recommend!'},
+                {author:'Amy R.',stars:5,date:'1 month ago',text:'Excellent communication and very knowledgeable about Utah real estate law.'}] },
+  { id:2, name:'Marcus Johnson', title:'CPA & Business Accountant', category:'Financial', specialty:['Tax Preparation','Bookkeeping','Business Formation','LLC Setup'],
+    rating:4.8, reviews:89, trust:91, location:'Salt Lake', available:'now', verified:true, trusted:true, featured:true, price:'$$',
+    bio:'CPA with 12 years serving landlords, contractors, and small businesses. QuickBooks ProAdvisor.',
+    reviewList:[{author:'Jake T.',stars:5,date:'3 weeks ago',text:'Marcus saved me thousands on my rental property taxes. Incredible!'},
+                {author:'Lisa M.',stars:4,date:'2 months ago',text:'Very thorough and responsive. Will definitely use again.'}] },
+  { id:3, name:'Torres Construction LLC', title:'General Contractor', category:'Construction', specialty:['Renovations','Roofing','Plumbing','HVAC','Electrical'],
+    rating:4.7, reviews:64, trust:88, location:'Utah County', available:'soon', verified:true, trusted:false, featured:false, price:'$',
+    bio:'Licensed general contractor serving Utah County since 2015. Specializing in rental property renovation and repair.',
+    reviewList:[{author:'Kevin P.',stars:5,date:'1 month ago',text:'Fast, reliable, and priced fairly. Fixed our roof in 2 days.'},
+                {author:'Sandra B.',stars:4,date:'6 weeks ago',text:'Good work, minor communication delays but overall satisfied.'}] },
+  { id:4, name:'Elena Vasquez', title:'Insurance Broker', category:'Insurance', specialty:['Landlord Insurance','Property & Casualty','Workers Comp','Business Liability'],
+    rating:4.9, reviews:103, trust:92, location:'Utah County', available:'now', verified:true, trusted:true, featured:true, price:'$',
+    bio:'Independent broker with access to 20+ carriers. Specializes in landlord and commercial property coverage.',
+    reviewList:[{author:'Chris W.',stars:5,date:'1 week ago',text:'Elena got me a better rate than my previous broker in 24 hours!'},
+                {author:'Monica L.',stars:5,date:'1 month ago',text:'She shops around and finds the best deal. Very responsive.'}] },
+  { id:5, name:'Ryan Park Digital', title:'Digital Marketing & SEO', category:'Marketing', specialty:['SEO','Google Ads','Social Media','Web Design'],
+    rating:4.6, reviews:47, trust:82, location:'Denver', available:'now', verified:true, trusted:false, featured:false, price:'$$',
+    bio:'Full-service digital marketing for small businesses. Specializing in real estate and service business growth.',
+    reviewList:[{author:'Tom S.',stars:5,date:'2 months ago',text:'Our Google rankings improved dramatically in 3 months!'},
+                {author:'Rachel K.',stars:4,date:'3 months ago',text:'Good results and clear reporting. Pricing is fair.'}] },
+  { id:6, name:'Jennifer Nguyen, Esq.', title:'Business & Contract Attorney', category:'Legal', specialty:['Business Formation','Contracts','Employment Law','IP'],
+    rating:4.7, reviews:56, trust:87, location:'Salt Lake', available:'busy', verified:true, trusted:true, featured:false, price:'$$$',
+    bio:'Business attorney focused on helping entrepreneurs and property managers protect their interests.',
+    reviewList:[{author:'Andre M.',stars:5,date:'3 weeks ago',text:'Jennifer drafted a bulletproof operating agreement for our LLC.'},
+                {author:'Priya N.',stars:4,date:'2 months ago',text:'Very professional and detail-oriented.'}] },
+  { id:7, name:'FastFix Plumbing', title:'Licensed Plumber', category:'Construction', specialty:['Plumbing Repair','Emergency','Water Heaters','Remodel'],
+    rating:4.5, reviews:38, trust:80, location:'Utah County', available:'now', verified:true, trusted:false, featured:false, price:'$',
+    bio:'24/7 emergency plumbing for residential and multi-family properties. Licensed & insured.',
+    reviewList:[{author:'Bill T.',stars:5,date:'1 week ago',text:'Showed up at 11pm for a burst pipe. Legend.'},
+                {author:'Emma C.',stars:4,date:'1 month ago',text:'Good service, fair pricing.'}] },
+  { id:8, name:'NovaTech Solutions', title:'IT Support & Managed Services', category:'IT / Tech', specialty:['IT Support','Cybersecurity','Cloud Setup','Software Dev'],
+    rating:4.6, reviews:29, trust:79, location:'Phoenix', available:'now', verified:true, trusted:false, featured:false, price:'$$',
+    bio:'Managed IT services for small and medium businesses. Flat-rate monthly support plans available.',
+    reviewList:[{author:'Casey R.',stars:5,date:'1 month ago',text:'They migrated our whole team to Google Workspace seamlessly.'},
+                {author:'Dana P.',stars:4,date:'2 months ago',text:'Very knowledgeable, fast response times.'}] },
+];
+
+let activeCategory = 'All';
+let currentQuotePro = null;
+let currentProfilePro = null;
+
+/* ── Render featured ── */
+function renderFeatured() {
+  const featured = PROS_DATA.filter(p => p.featured);
+  const el = document.getElementById('featuredScroll');
+  el.innerHTML = featured.map(p => {
+    const color = COLORS[p.id % COLORS.length];
+    const initials = p.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+    const stars = '★'.repeat(Math.floor(p.rating)) + (p.rating%1>=0.5?'½':'');
+    return `<div class="featured-mini-card" onclick="openProfile(${p.id})">
+      <div class="fmc-avatar" style="background:${color}">${initials}</div>
+      <div class="fmc-name">${p.name}</div>
+      <div class="fmc-title">${p.title}</div>
+      <div class="fmc-stars">${'★'.repeat(5)} ${p.rating}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Stars helper ── */
+function renderStars(rating) {
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - (half?1:0));
+}
+
+/* ── Render cards ── */
+function filterPros() {
+  const query = (document.getElementById('heroSearch').value || '').toLowerCase();
+  const location = document.getElementById('heroLocation').value;
+  const availNow = document.getElementById('filterAvailNow').checked;
+  const verifiedOnly = document.getElementById('filterVerified').checked;
+  const trustedOnly = document.getElementById('filterTrusted').checked;
+  const minRating = parseFloat(document.getElementById('filterRating').value) || 0;
+  const priceFilter = document.getElementById('filterPrice').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let results = PROS_DATA.filter(p => {
+    if (activeCategory !== 'All' && p.category !== activeCategory) return false;
+    if (query && !p.name.toLowerCase().includes(query) && !p.title.toLowerCase().includes(query)
+        && !p.specialty.some(s => s.toLowerCase().includes(query))) return false;
+    if (location && !p.location.includes(location)) return false;
+    if (availNow && p.available !== 'now') return false;
+    if (verifiedOnly && !p.verified) return false;
+    if (trustedOnly && !p.trusted) return false;
+    if (p.rating < minRating) return false;
+    if (priceFilter && p.price !== priceFilter) return false;
+    return true;
+  });
+
+  results.sort((a,b) => {
+    if (sort==='rating') return b.rating - a.rating;
+    if (sort==='reviews') return b.reviews - a.reviews;
+    if (sort==='trust') return b.trust - a.trust;
+    return b.id - a.id;
+  });
+
+  document.getElementById('resultsCount').textContent = `${results.length} professional${results.length!==1?'s':''} found`;
+  document.getElementById('statPros').textContent = PROS_DATA.length;
+  document.getElementById('statReviews').textContent = PROS_DATA.reduce((a,p)=>a+p.reviews,0);
+
+  const el = document.getElementById('dirCards');
+  if (!results.length) {
+    el.innerHTML = `<div style="text-align:center;padding:4rem 2rem;color:#9ca3af;">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">🔍</div>
+      <h3 style="font-size:1rem;font-weight:700;color:#4b5563;margin-bottom:0.35rem;">No professionals found</h3>
+      <p style="font-size:0.85rem;">Try adjusting your filters or search terms.</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = results.map(p => {
+    const color = COLORS[p.id % COLORS.length];
+    const initials = p.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+    const availClass = p.available === 'now' ? 'avail-now' : p.available === 'soon' ? 'avail-soon' : 'avail-busy';
+    const availDot = p.available;
+    const availText = p.available === 'now' ? 'Available Now' : p.available === 'soon' ? 'Booked Until Next Week' : 'Currently Unavailable';
+    return `<div class="pro-card ${p.featured?'featured-card':''}">
+      <div class="pro-avatar" style="background:${color}">${initials}</div>
+      <div class="pro-info">
+        <div class="pro-name-row">
+          <span class="pro-name">${p.name}</span>
+          ${p.verified ? '<span class="pro-badge badge-verified">✓ Verified</span>' : ''}
+          ${p.trusted ? '<span class="pro-badge badge-trusted">Trusted Pro</span>' : ''}
+          ${p.featured ? '<span class="pro-badge badge-featured">⭐ Featured</span>' : ''}
+        </div>
+        <div class="pro-title">${p.title} · ${p.location}</div>
+        <div class="pro-rating-row">
+          <span class="pro-stars" style="color:#f59e0b;">${renderStars(p.rating)}</span>
+          <span class="pro-rating-val">${p.rating}</span>
+          <span class="pro-reviews">(${p.reviews} reviews)</span>
+          <span style="color:#6b7280;font-size:0.82rem;">${p.price}</span>
+        </div>
+        <div class="pro-specialties">${p.specialty.map(s=>`<span class="specialty-tag">${s}</span>`).join('')}</div>
+        <span class="pro-availability ${availClass}">
+          <span class="avail-dot ${availDot}"></span>${availText}
+        </span>
+      </div>
+      <div class="pro-actions">
+        <button class="btn-quote" onclick="openQuote(${p.id})">Request Quote</button>
+        <button class="btn-view-profile" onclick="openProfile(${p.id})">View Profile</button>
+        <div class="pro-trust-score">Trust Score: ${p.trust}/100</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setCategory(cat, btn) {
+  activeCategory = cat;
+  document.querySelectorAll('.filter-category-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterPros();
+}
+
+function clearFilters() {
+  activeCategory = 'All';
+  document.querySelectorAll('.filter-category-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-category-btn').classList.add('active');
+  document.getElementById('heroSearch').value = '';
+  document.getElementById('heroLocation').value = '';
+  document.getElementById('filterAvailNow').checked = false;
+  document.getElementById('filterVerified').checked = false;
+  document.getElementById('filterTrusted').checked = false;
+  document.getElementById('filterRating').value = '0';
+  document.getElementById('filterPrice').value = '';
+  filterPros();
+}
+
+/* ── Quote modal ── */
+function openQuote(id) {
+  currentQuotePro = PROS_DATA.find(p => p.id === id);
+  document.getElementById('quoteProName').textContent = `Request Quote — ${currentQuotePro.name}`;
+  document.getElementById('quoteDesc').value = '';
+  document.getElementById('quoteClientName').value = '';
+  document.getElementById('quoteContact').value = '';
+  document.getElementById('quoteOverlay').classList.add('open');
+}
+function closeQuote() { document.getElementById('quoteOverlay').classList.remove('open'); }
+function closeQuoteOnBackdrop(e) { if (e.target === document.getElementById('quoteOverlay')) closeQuote(); }
+
+function sendQuote() {
+  const desc = document.getElementById('quoteDesc').value.trim();
+  const name = document.getElementById('quoteClientName').value.trim();
+  if (!desc || !name) { showToast('Please fill in your name and project description', ''); return; }
+  // Save to localStorage
+  const requests = JSON.parse(localStorage.getItem('rv_quote_requests') || '[]');
+  requests.push({
+    id: Date.now(),
+    proId: currentQuotePro.id, proName: currentQuotePro.name,
+    desc, budget: document.getElementById('quoteBudget').value,
+    timeline: document.getElementById('quoteTimeline').value,
+    clientName: name, contact: document.getElementById('quoteContact').value,
+    status: 'Sent', sent: new Date().toISOString()
+  });
+  localStorage.setItem('rv_quote_requests', JSON.stringify(requests));
+  closeQuote();
+  showToast(`✅ Quote request sent to ${currentQuotePro.name}! They'll respond shortly.`, 'success');
+}
+
+/* ── Profile modal ── */
+function openProfile(id) {
+  currentProfilePro = PROS_DATA.find(p => p.id === id);
+  const p = currentProfilePro;
+  const color = COLORS[p.id % COLORS.length];
+  const initials = p.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+  document.getElementById('profileHeader').innerHTML = `
+    <div class="profile-modal-avatar" style="background:${color};opacity:0.9">${initials}</div>
+    <div>
+      <div style="font-size:1.1rem;font-weight:900;">${p.name}</div>
+      <div style="font-size:0.85rem;opacity:0.85;">${p.title} · ${p.location}</div>
+      <div style="font-size:0.82rem;margin-top:4px;">⭐ ${p.rating} · ${p.reviews} reviews · Trust Score: ${p.trust}/100</div>
+    </div>`;
+  document.getElementById('profileBody').innerHTML = `
+    <div class="profile-section">
+      <div class="profile-section-title">About</div>
+      <p style="font-size:0.88rem;color:#374151;line-height:1.6;">${p.bio}</p>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">Specialties</div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">${p.specialty.map(s=>`<span class="specialty-tag" style="font-size:0.82rem;padding:4px 10px;">${s}</span>`).join('')}</div>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title">Client Reviews</div>
+      ${p.reviewList.map(r => `<div class="review-item">
+        <div class="review-item-header"><span class="review-author">${r.author}</span><span class="review-date">${r.date}</span></div>
+        <div class="review-stars">${'★'.repeat(r.stars)}</div>
+        <div class="review-text">${r.text}</div>
+      </div>`).join('')}
+    </div>
+    <div style="padding-top:0.5rem;">
+      <button class="btn-quote" onclick="closeProfile();openQuote(${p.id})" style="width:100%;padding:0.75rem;font-size:0.95rem;">Request a Quote from ${p.name.split(' ')[0]}</button>
+    </div>`;
+  document.getElementById('profileOverlay').classList.add('open');
+}
+function closeProfile() { document.getElementById('profileOverlay').classList.remove('open'); }
+function closeProfileOnBackdrop(e) { if (e.target === document.getElementById('profileOverlay')) closeProfile(); }
+
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('dirToast');
+  t.textContent = msg; t.className = `dir-toast ${type}`;
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => {
+    t.classList.add('show');
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  });
+}
+
+/* ── Init ── */
+renderFeatured();
+filterPros();
+</script>
+</body>
+</html>
