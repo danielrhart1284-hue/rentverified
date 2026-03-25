@@ -1,5 +1,5 @@
 /**
- * RentVerified — Recommended Supplies Widget
+ * 3120 Life — Recommended Supplies Widget
  * ============================================
  * Drop-in widget showing recommended supplies from Home Depot & Northern Tool.
  * Auto-detects industry from page context and shows relevant deals.

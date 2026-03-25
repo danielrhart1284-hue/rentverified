@@ -1,5 +1,5 @@
 /**
- * RentVerified Mobile Bottom Navigation
+ * 3120 Life Mobile Bottom Navigation
  * Auto-injects a thumb-friendly bottom nav bar on screens < 768px.
  * Detects current page to show contextually relevant nav items.
  */

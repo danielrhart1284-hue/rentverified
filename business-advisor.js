@@ -1,5 +1,5 @@
 /**
- * RentVerified — AI Business Advisor
+ * 3120 Life — AI Business Advisor
  * ====================================
  * Business Health Score (0–100) + Prioritized Action List + Setup Wizard
  *

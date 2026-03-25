@@ -1,5 +1,5 @@
 /**
- * RentVerified Micro-Interactions
+ * 3120 Life Micro-Interactions
  * Enhanced toasts, button ripples, card hover lift, confetti, page transitions.
  */
 (function() {

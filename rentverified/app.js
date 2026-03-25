@@ -1,4 +1,4 @@
-// RentVerified - Shared Application JavaScript
+// 3120 Life - Shared Application JavaScript
 // AI Chat Widget + localStorage Data Layer + Cloudinary Upload + Broadcast + Utilities
 // ML-Powered Document Parsing & Scam Detection (Hugging Face Transformers.js)
 // Version 3.0 - Full Platform Build + Open-Source ML Models
@@ -167,7 +167,7 @@ function buildResponses() {
     { keys: ['can i schedule a tour', 'schedule a tour', 'schedule a viewing', 'want to see it', 'come see', 'visit the property', 'book a tour', 'tour available', 'can i visit', 'showing'], response: tourMsg },
     { keys: ['how do i apply', 'how to apply', 'rental application', 'start application', 'application process', 'apply for'], response: 'To apply, click the "Request Rental Application" button on the listing page. You will fill out our comprehensive 9-section online application. The application is free! After submission, you will receive a TransUnion SmartMove invite (~$40-45 paid directly to TransUnion).' },
     { keys: ['what is the lease term', 'lease term', 'lease length', 'how long is the lease', 'lease duration', '12 month', 'month to month'], response: 'This property offers a standard 12-month lease. Move-in is available ' + avail + '. Month-to-month arrangements may be available after the initial lease term.' },
-    { keys: ['is this a scam', 'is this real', 'is this legitimate', 'scam', 'verify', 'legit'], response: 'This is a 100% legitimate, verified listing managed by ' + manager + ' on RentVerified. You can verify by entering listing ID ' + listId + ' at ' + RV_CONFIG.websiteUrl + ' or scanning the QR code. We will never ask you to wire money, pay via gift cards, or send payment before a signed lease.' },
+    { keys: ['is this a scam', 'is this real', 'is this legitimate', 'scam', 'verify', 'legit'], response: 'This is a 100% legitimate, verified listing managed by ' + manager + ' on 3120 Life. You can verify by entering listing ID ' + listId + ' at ' + RV_CONFIG.websiteUrl + ' or scanning the QR code. We will never ask you to wire money, pay via gift cards, or send payment before a signed lease.' },
     { keys: ['are pets allowed', 'pet policy', 'pets ok', 'can i have a pet', 'dog allowed', 'cat allowed', 'pet friendly', 'pets'], response: 'Pets are ' + petPolicy + ' at ' + manager + '. Please mention any pets in your application and management will review. A pet deposit may apply.' },
     { keys: ['is there parking', 'parking available', 'parking included', 'garage', 'carport'], response: 'Yes, ' + parking + ' at no additional charge.' },
     { keys: ['when is it available', 'move in date', 'available date', 'when can i move in', 'move-in', 'availability'], response: addr + ' is available for move-in ' + avail + '. Would you like to schedule a tour or start an application?' },
@@ -180,14 +180,14 @@ function buildResponses() {
     { keys: ['cash app', 'cashapp'], response: 'Rent is paid via Cash App to ' + RV_CONFIG.cashAppTag + '. Zero processing fees!' },
     { keys: ['zelle'], response: 'Yes, Zelle is accepted! Send to ' + RV_CONFIG.zelleContact + '.' },
     { keys: ['venmo'], response: 'Currently, rent payments are accepted via Cash App (' + RV_CONFIG.cashAppTag + ') and Zelle (' + RV_CONFIG.zelleContact + '). Venmo may be available in the future.' },
-    { keys: ['zillow'], response: 'We list on Zillow and right here on RentVerified with AI support, secure applications, and listing verification.' },
-    { keys: ['facebook', 'fb marketplace'], response: 'We advertise on Facebook Marketplace. Always verify Facebook listings here at RentVerified before sending money. Our QR codes and listing IDs confirm you are talking to the real ' + manager + '.' },
+    { keys: ['zillow'], response: 'We list on Zillow and right here on 3120 Life with AI support, secure applications, and listing verification.' },
+    { keys: ['facebook', 'fb marketplace'], response: 'We advertise on Facebook Marketplace. Always verify Facebook listings here at 3120 Life before sending money. Our QR codes and listing IDs confirm you are talking to the real ' + manager + '.' },
     { keys: ['craigslist'], response: 'We may list on Craigslist. Always verify any listing by checking the listing ID at ' + RV_CONFIG.websiteUrl + '.' },
     { keys: ['ksl'], response: "Yes, we list on KSL Classifieds. Verify any KSL listing with the listing ID at " + RV_CONFIG.websiteUrl + '.' },
     { keys: ['background check', 'credit check', 'screening', 'smartmove', 'transunion'], response: "After your application is reviewed, you will receive a TransUnion SmartMove invite. You pay ~$40-45 directly to TransUnion. Results are typically available within minutes." },
     { keys: ['lease signing', 'sign lease', 'e-sign', 'electronic signature', 'esign'], response: "Once approved, you will receive a secure link to electronically sign your lease. E-signatures are legally valid under Utah's UETA and federal ESIGN Act." },
     { keys: ['maintenance', 'repair', 'fix something', 'broken', 'maintenance request'], response: 'Submit maintenance requests through the Tenant Portal. Log in, go to Maintenance, describe the issue.' },
-    { keys: ['tenant portal', 'my portal', 'log in', 'login', 'my account'], response: 'Access your Tenant Portal at the top of any RentVerified page to view your lease, pay rent, submit maintenance requests, and message your landlord.' },
+    { keys: ['tenant portal', 'my portal', 'log in', 'login', 'my account'], response: 'Access your Tenant Portal at the top of any 3120 Life page to view your lease, pay rent, submit maintenance requests, and message your landlord.' },
     { keys: ['contact', 'reach', 'phone', 'email', 'get in touch'], response: 'Reach ' + manager + ' by replying here or via email at ' + RV_CONFIG.supportEmail + '.' },
     { keys: ['neighborhood', 'area', 'nearby', 'location', 'close to'], response: p.neighborhood || 'This property is well-located with convenient access to local amenities.' },
     { keys: ['move out', 'end lease', 'vacate', 'notice to vacate', 'breaking lease'], response: 'Provide written notice as specified in your lease agreement. Contact ' + manager + ' to discuss options.' },
@@ -1172,11 +1172,11 @@ document.addEventListener('DOMContentLoaded', function() {
             '<div style="display:flex;align-items:center;gap:8px;margin-bottom:0.5rem;">' +
             '<span style="font-size:1.5rem;">&#9989;</span>' +
             '<strong style="color:#166534;font-size:1.1rem;">VERIFIED - This listing is legitimate</strong></div>' +
-            '<p style="color:#374151;font-size:0.9rem;">This listing is managed by <strong>' + escapeHtml(clientName) + '</strong> on RentVerified. ' +
+            '<p style="color:#374151;font-size:0.9rem;">This listing is managed by <strong>' + escapeHtml(clientName) + '</strong> on 3120 Life. ' +
             'They will never ask for payment before a signed lease or in-person viewing.</p></div>';
           resultDiv.style.display = 'block';
         } else {
-          alert('VERIFIED - This listing is legitimate and managed by ' + clientName + ' on RentVerified.');
+          alert('VERIFIED - This listing is legitimate and managed by ' + clientName + ' on 3120 Life.');
         }
       } else if (result && !result.verified) {
         if (resultDiv) {
@@ -1648,7 +1648,7 @@ function generateStatementPDF(statement) {
       });
     }
     y += 10; doc.setFontSize(8); doc.setTextColor(150);
-    doc.text('Generated by RentVerified — Sanders Property Management', 105, y, { align: 'center' });
+    doc.text('Generated by 3120 Life — Sanders Property Management', 105, y, { align: 'center' });
     doc.save('Owner_Statement_' + statement.month + '.pdf');
   });
 }
@@ -1707,7 +1707,7 @@ function generateTaxPDF(summary) {
     });
     y += 10; doc.setFontSize(8); doc.setTextColor(150);
     doc.text('For informational purposes only. Consult a tax professional for official filings.', 105, y, { align: 'center' }); y += 5;
-    doc.text('Generated by RentVerified on ' + new Date().toLocaleDateString(), 105, y, { align: 'center' });
+    doc.text('Generated by 3120 Life on ' + new Date().toLocaleDateString(), 105, y, { align: 'center' });
     doc.save('Tax_Summary_' + summary.year + '.pdf');
   });
 }

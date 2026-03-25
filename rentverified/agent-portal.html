@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Listing Agent Portal – RentVerified</title>
+  <title>Listing Agent Portal – 3120 Life</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     body { background:#f3f4f6; }
@@ -122,7 +122,7 @@
 <body>
 
 <nav class="nav">
-  <div class="nav-brand"><span class="nav-logo">✓</span><span>RentVerified</span></div>
+  <div class="nav-brand"><span class="nav-logo">✓</span><span>3120 Life</span></div>
   <div class="nav-links">
     <a href="index.html">Home</a>
     <a href="listings.html">Listings</a>
@@ -136,7 +136,7 @@
     <div style="text-align:center;margin-bottom:1.5rem;">
       <div style="font-size:2.5rem;margin-bottom:.5rem;">📋</div>
       <h2 style="font-size:1.5rem;font-weight:800;color:#1e293b;margin-bottom:.3rem;">Listing Agent Portal</h2>
-      <p style="color:#64748b;font-size:.9rem;">RentVerified · Utah Licensed Agents</p>
+      <p style="color:#64748b;font-size:.9rem;">3120 Life · Utah Licensed Agents</p>
     </div>
     <!-- Tabs -->
     <div style="display:flex;gap:8px;margin-bottom:20px;">
@@ -295,7 +295,7 @@
   <aside class="ap-sidebar">
     <div style="padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:.5rem;">
       <div style="color:#fff;font-weight:700;font-size:.95rem;" id="agentName">Daniel Hart</div>
-      <div style="color:#94a3b8;font-size:.75rem;">Listing Agent · RentVerified Pro</div>
+      <div style="color:#94a3b8;font-size:.75rem;">Listing Agent · 3120 Life Pro</div>
     </div>
     <h3>My Business</h3>
     <a class="active" onclick="showSec('overview',this)">📊 Overview</a>
@@ -483,7 +483,7 @@
 
     <!-- MY PROFILE -->
     <div id="sec-profile" style="display:none;">
-      <div class="page-header"><div><h1>📣 My Public Profile</h1><p>Edit how you appear on the RentVerified professional network.</p></div>
+      <div class="page-header"><div><h1>📣 My Public Profile</h1><p>Edit how you appear on the 3120 Life professional network.</p></div>
         <a href="network.html" class="btn btn-outline">Preview on Network →</a>
       </div>
       <div class="panel">
@@ -749,6 +749,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="data-layer.js"></script>
+<script src="auth.js"></script>
 
 <script>
 // ── DATA ─────────────────────────────────────────────
@@ -799,10 +800,7 @@ function loadSample() {
 }
 
 // ── AUTH ─────────────────────────────────────────────
-const AGENT_ACCOUNTS = [
-  { email:'danielrhart1284@gmail.com', password:'SPMis#1!', name:'Daniel Hart' },
-  { email:'agent@rentverified.test', password:'TestAgent49', name:'Test Agent' }
-];
+/* AGENT_ACCOUNTS removed — auth now handled by Supabase Auth via auth.js */
 
 // Tab toggle
 function agentShowTab(tab) {
@@ -833,22 +831,30 @@ function agentLaunchDashboard(acct) {
   if (pendingBanner) pendingBanner.style.display = isApproved ? 'none' : 'flex';
 }
 
-function agentLogin() {
+async function agentLogin() {
   const email = document.getElementById('aLoginEmail').value.trim().toLowerCase();
   const pw    = document.getElementById('aLoginPw').value;
   const errEl = document.getElementById('aLoginErr');
-  let acct  = AGENT_ACCOUNTS.find(a=>a.email.toLowerCase()===email && a.password===pw);
-  // Also check localStorage signups
-  if (!acct) {
-    const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
-    acct = stored.find(a=>a.email.toLowerCase()===email && a.password===pw);
+  if (!email || !pw) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+
+  const { data, error } = await Auth.signIn(email, pw);
+  if (error) {
+    errEl.textContent = error.message || '⚠️ Incorrect credentials.';
+    errEl.style.display = 'block';
+    return;
   }
-  if(!acct){ errEl.textContent='⚠️ Incorrect credentials.'; errEl.style.display='block'; return; }
-  errEl.style.display='none';
+  errEl.style.display = 'none';
+  const profile = data.profile || {};
+  const acct = {
+    name: ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || email,
+    email: email,
+    verificationStatus: profile.verification_status || 'approved'
+  };
+  localStorage.setItem('rv_doc_role', 'agent');
   agentLaunchDashboard(acct);
 }
 
-function agentSignup() {
+async function agentSignup() {
   const name      = document.getElementById('as-name').value.trim();
   const email     = document.getElementById('as-email').value.trim();
   const phone     = document.getElementById('as-phone').value.trim();
@@ -880,23 +886,45 @@ function agentSignup() {
     errEl.textContent = '⚠️ You must certify your credentials are accurate to continue.'; errEl.style.display='block'; return;
   }
   errEl.style.display = 'none';
-  const acct = {
-    name, email, phone, brokerage, password: pw,
+
+  // Register via Supabase Auth
+  const { data, error: signUpErr } = await Auth.signUp({
+    email, password: pw,
+    firstName: name.split(' ')[0],
+    lastName: name.split(' ').slice(1).join(' '),
+    phone,
+    company: brokerage,
+    role: 'agent',
+    plan: 'agent'
+  });
+  if (signUpErr) {
+    errEl.textContent = signUpErr.message || 'Signup failed. Please try again.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Store agent-specific credentials locally
+  const agentMeta = {
     verificationStatus: 'pending',
-    joined: new Date().toISOString().split('T')[0],
     credentials: {
       dre: { number: dreNum, type: dreType, expires: dreExp, broker: brokerName, fileName: dreFile.name },
       eo:  { carrier: eoCarrier, policy: eoPolicy, coverage: eoCoverage, expires: eoExp, fileName: eoFile.name },
       submittedAt: new Date().toISOString()
     }
   };
-  const stored = JSON.parse(localStorage.getItem('rv_agent_signups') || '[]');
-  stored.push(acct);
-  localStorage.setItem('rv_agent_signups', JSON.stringify(stored));
+  localStorage.setItem('rv_agent_meta', JSON.stringify(agentMeta));
+
+  const acct = {
+    name, email, phone, brokerage,
+    verificationStatus: 'pending',
+    joined: new Date().toISOString().split('T')[0]
+  };
+  localStorage.setItem('rv_doc_role', 'agent');
   agentLaunchDashboard(acct);
 }
 
-function agentLogout() {
+async function agentLogout() {
+  await Auth.signOut();
   document.getElementById('agent-dashboard').style.display='none';
   document.getElementById('agent-login').style.display='flex';
   localStorage.removeItem('rv_doc_role');

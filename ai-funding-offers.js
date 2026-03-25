@@ -1,5 +1,5 @@
 /**
- * RentVerified — Proactive AI Funding Offers
+ * 3120 Life — Proactive AI Funding Offers
  * =============================================
  * QuickBooks Capital-style proactive loan offers
  * Uses existing accounting_entries, payments, ownerstatements to compute eligibility

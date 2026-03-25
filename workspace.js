@@ -1,5 +1,5 @@
 // ============================================================================
-// RentVerified — Workspace Module
+// 3120 Life — Workspace Module
 // ============================================================================
 // Handles multi-tenant workspace operations:
 //   - Create / join / switch workspaces

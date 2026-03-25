@@ -1,5 +1,5 @@
 // ============================================================================
-// RentVerified — Twilio SMS Integration
+// 3120 Life — Twilio SMS Integration
 // ============================================================================
 // NOTE: SMS sending MUST happen server-side (Supabase Edge Function)
 // This file contains:
@@ -12,37 +12,37 @@
 const RVMessages = {
   templates: {
     rent_reminder: (name, amount, dueDate, payLink) =>
-      `Hi ${name}, your rent of $${amount} is due ${dueDate}. Pay securely: ${payLink} - RentVerified`,
+      `Hi ${name}, your rent of $${amount} is due ${dueDate}. Pay securely: ${payLink} - 3120 Life`,
 
     payment_confirmation: (name, amount, month) =>
-      `✅ ${name}, your payment of $${amount} for ${month} rent has been received. Thank you! - RentVerified`,
+      `✅ ${name}, your payment of $${amount} for ${month} rent has been received. Thank you! - 3120 Life`,
 
     late_notice: (name, daysLate, lateFee, payLink) =>
-      `${name}, your rent is ${daysLate} days past due. A $${lateFee} late fee applies. Pay now: ${payLink} - RentVerified`,
+      `${name}, your rent is ${daysLate} days past due. A $${lateFee} late fee applies. Pay now: ${payLink} - 3120 Life`,
 
     maintenance_submitted: (name, requestId) =>
-      `${name}, your maintenance request #${requestId} has been submitted. We'll update you when it's assigned. - RentVerified`,
+      `${name}, your maintenance request #${requestId} has been submitted. We'll update you when it's assigned. - 3120 Life`,
 
     maintenance_update: (name, requestId, status) =>
-      `${name}, maintenance request #${requestId} status: ${status}. - RentVerified`,
+      `${name}, maintenance request #${requestId} status: ${status}. - 3120 Life`,
 
     lease_expiry: (name, expiryDate, renewLink) =>
-      `${name}, your lease expires on ${expiryDate}. Renew now to lock in your rate: ${renewLink} - RentVerified`,
+      `${name}, your lease expires on ${expiryDate}. Renew now to lock in your rate: ${renewLink} - 3120 Life`,
 
     verification_code: (code) =>
-      `Your RentVerified verification code is ${code}. Expires in 10 minutes.`,
+      `Your 3120 Life verification code is ${code}. Expires in 10 minutes.`,
 
     welcome: (name) =>
-      `Welcome to RentVerified, ${name}! Your account is set up and ready to go. Log in: https://rentverified.com - RentVerified`,
+      `Welcome to 3120 Life, ${name}! Your account is set up and ready to go. Log in: https://rentverified.com - 3120 Life`,
 
     deposit_bond_offer: (name, savings, applyLink) =>
-      `Great news ${name}! This property accepts deposit bonds — move in for just ~$17/mo instead of $${savings}. Apply: ${applyLink} - RentVerified`,
+      `Great news ${name}! This property accepts deposit bonds — move in for just ~$17/mo instead of $${savings}. Apply: ${applyLink} - 3120 Life`,
 
     funding_status: (name, status, link) =>
-      `${name}, your business funding application status: ${status}. View details: ${link} - RentVerified`,
+      `${name}, your business funding application status: ${status}. View details: ${link} - 3120 Life`,
 
     showing_reminder: (name, address, dateTime) =>
-      `Reminder: ${name}, your showing at ${address} is scheduled for ${dateTime}. - RentVerified`
+      `Reminder: ${name}, your showing at ${address} is scheduled for ${dateTime}. - 3120 Life`
   },
 
   // Format phone number to E.164 (+1XXXXXXXXXX)
@@ -125,16 +125,16 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const templates: Record<string, (data: any) => string> = {
-  rent_reminder: (d) => `Hi ${d.name}, your rent of $${d.amount} is due ${d.dueDate}. Pay securely: ${d.payLink} - RentVerified`,
-  payment_confirmation: (d) => `✅ ${d.name}, your payment of $${d.amount} for ${d.month} rent has been received. Thank you! - RentVerified`,
-  late_notice: (d) => `${d.name}, your rent is ${d.daysLate} days past due. A $${d.lateFee} late fee applies. Pay now: ${d.payLink} - RentVerified`,
-  maintenance_submitted: (d) => `${d.name}, your maintenance request #${d.requestId} has been submitted. We'll update you when it's assigned. - RentVerified`,
-  maintenance_update: (d) => `${d.name}, maintenance request #${d.requestId} status: ${d.status}. - RentVerified`,
-  lease_expiry: (d) => `${d.name}, your lease expires on ${d.expiryDate}. Renew now: ${d.renewLink} - RentVerified`,
-  verification_code: (d) => `Your RentVerified verification code is ${d.code}. Expires in 10 minutes.`,
-  welcome: (d) => `Welcome to RentVerified, ${d.name}! Your account is set up. Log in: https://rentverified.com - RentVerified`,
-  deposit_bond_offer: (d) => `Great news ${d.name}! Deposit bonds available — move in for ~$17/mo instead of $${d.savings}. Apply: ${d.applyLink} - RentVerified`,
-  funding_status: (d) => `${d.name}, your funding application status: ${d.status}. Details: ${d.link} - RentVerified`,
+  rent_reminder: (d) => `Hi ${d.name}, your rent of $${d.amount} is due ${d.dueDate}. Pay securely: ${d.payLink} - 3120 Life`,
+  payment_confirmation: (d) => `✅ ${d.name}, your payment of $${d.amount} for ${d.month} rent has been received. Thank you! - 3120 Life`,
+  late_notice: (d) => `${d.name}, your rent is ${d.daysLate} days past due. A $${d.lateFee} late fee applies. Pay now: ${d.payLink} - 3120 Life`,
+  maintenance_submitted: (d) => `${d.name}, your maintenance request #${d.requestId} has been submitted. We'll update you when it's assigned. - 3120 Life`,
+  maintenance_update: (d) => `${d.name}, maintenance request #${d.requestId} status: ${d.status}. - 3120 Life`,
+  lease_expiry: (d) => `${d.name}, your lease expires on ${d.expiryDate}. Renew now: ${d.renewLink} - 3120 Life`,
+  verification_code: (d) => `Your 3120 Life verification code is ${d.code}. Expires in 10 minutes.`,
+  welcome: (d) => `Welcome to 3120 Life, ${d.name}! Your account is set up. Log in: https://rentverified.com - 3120 Life`,
+  deposit_bond_offer: (d) => `Great news ${d.name}! Deposit bonds available — move in for ~$17/mo instead of $${d.savings}. Apply: ${d.applyLink} - 3120 Life`,
+  funding_status: (d) => `${d.name}, your funding application status: ${d.status}. Details: ${d.link} - 3120 Life`,
 }
 
 serve(async (req) => {

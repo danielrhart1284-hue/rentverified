@@ -1,5 +1,5 @@
 // ============================================================================
-// RentVerified — Service Connect Widget
+// 3120 Life — Service Connect Widget
 // ============================================================================
 // Universal drop-in widget for connecting landlords with service professionals.
 // Self-contained IIFE. Only dependency: data-layer.js (window.RVData).

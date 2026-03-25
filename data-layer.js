@@ -1,5 +1,5 @@
 // ============================================================================
-// RentVerified — Data Layer
+// 3120 Life — Data Layer
 // ============================================================================
 // This module provides a unified API for all data operations.
 // It uses Supabase when configured, falls back to localStorage when not.

@@ -1,5 +1,5 @@
 // ============================================================================
-// RentVerified — Social Share Widget
+// 3120 Life — Social Share Widget
 // ============================================================================
 // Drop-in share FAB for any page.  Just add:
 //   <script src="share-widget.js"></script>
@@ -21,7 +21,7 @@
   var cfgEl = scriptTag || document.body;
 
   var cfg = {
-    title: cfgEl.getAttribute('data-share-title') || document.title || 'RentVerified',
+    title: cfgEl.getAttribute('data-share-title') || document.title || '3120 Life',
     text:  cfgEl.getAttribute('data-share-text')  || '',
     url:   cfgEl.getAttribute('data-share-url')    || window.location.href,
     position: cfgEl.getAttribute('data-share-position') || 'right',

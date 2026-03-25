@@ -1,5 +1,5 @@
 // ============================================================================
-// RentVerified — Supabase Configuration
+// 3120 Life — Supabase Configuration
 // ============================================================================
 // SETUP INSTRUCTIONS:
 // 1. Go to https://supabase.com → New Project
@@ -216,7 +216,7 @@ const STRIPE_CONFIG = {
   cardFeeFixed: 0.30,
   // ACH fee
   achFee: 0.80,
-  // Platform fee percentage (what RentVerified keeps)
+  // Platform fee percentage (what 3120 Life keeps)
   platformFeePercent: 0.02,
 };
 
