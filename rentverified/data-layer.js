@@ -2112,6 +2112,52 @@ const RVData = {
     localStorage.setItem('rv_business_deadlines', JSON.stringify(items));
   },
 
+  // ─── INVITES ────────────────────────────────────────────────────────
+
+  async getInvites(filters = {}) {
+    if (this._useSupabase()) {
+      let q = _scopeQuery(supabase.from('invites').select('*')).order('created_at', { ascending: false });
+      if (filters.status) q = q.eq('status', filters.status);
+      if (filters.invite_type) q = q.eq('invite_type', filters.invite_type);
+      const { data } = await q;
+      return data || [];
+    }
+    let items = JSON.parse(localStorage.getItem('rv_invites') || '[]');
+    if (filters.status) items = items.filter(i => i.status === filters.status);
+    if (filters.invite_type) items = items.filter(i => i.invite_type === filters.invite_type);
+    return items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  },
+
+  async saveInvite(invite) {
+    if (!invite.referral_code) invite.referral_code = 'INV-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    if (!invite.expires_at) invite.expires_at = new Date(Date.now() + 30 * 86400000).toISOString();
+    if (this._useSupabase()) {
+      const row = _stampWorkspace(invite);
+      if (invite.id) { const { data } = await supabase.from('invites').update(row).eq('id', invite.id).select().single(); return data; }
+      const { data } = await supabase.from('invites').insert(row).select().single();
+      return data;
+    }
+    let items = JSON.parse(localStorage.getItem('rv_invites') || '[]');
+    if (invite.id) { items = items.map(i => i.id === invite.id ? { ...i, ...invite } : i); }
+    else { invite.id = 'inv_' + Date.now(); invite.created_at = new Date().toISOString(); invite.sent_at = new Date().toISOString(); items.push(invite); }
+    localStorage.setItem('rv_invites', JSON.stringify(items));
+    return invite;
+  },
+
+  async sendInvite(invite) {
+    invite.status = 'sent';
+    var saved = await this.saveInvite(invite);
+    saved.invite_url = window.location.origin + '/onboarding.html?ref=' + saved.referral_code;
+    console.log('[Invite] ' + invite.channel + ' to ' + (invite.recipient_email || invite.recipient_phone) + ' → ' + saved.invite_url);
+    return saved;
+  },
+
+  async sendBulkInvites(invites) {
+    var results = [];
+    for (var i = 0; i < invites.length; i++) { results.push(await this.sendInvite(invites[i])); }
+    return results;
+  },
+
   // ─── AFFILIATE CLICKS ───────────────────────────────────────────────
 
   async logAffiliateClick(click) {

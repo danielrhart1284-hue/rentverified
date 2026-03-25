@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invite People — 3120 Life</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .inv-wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .inv-header { margin-bottom: 2rem; }
+    .inv-header h1 { font-size: 1.6rem; font-weight: 900; }
+    .inv-header p { color: #6b7280; margin-top: 4px; }
+
+    .inv-tabs { display: flex; gap: 2px; border-bottom: 2px solid #e5e7eb; margin-bottom: 2rem; }
+    .inv-tab { padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #6b7280; background: none; border-top: none; border-left: none; border-right: none; }
+    .inv-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+    .inv-panel { display: none; }
+    .inv-panel.active { display: block; }
+
+    /* Send Form */
+    .inv-form { background: white; border-radius: 14px; border: 1px solid #e5e7eb; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .inv-form h3 { font-size: 1rem; font-weight: 800; margin-bottom: 1rem; }
+    .inv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .inv-field label { display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 3px; }
+    .inv-field input, .inv-field select, .inv-field textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; font-family: inherit; }
+    .inv-field textarea { min-height: 80px; resize: vertical; }
+    .inv-field input:focus, .inv-field select:focus, .inv-field textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+    .inv-channel-btns { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .inv-ch-btn { flex: 1; padding: 0.65rem; border: 2px solid #e5e7eb; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 700; font-size: 0.82rem; background: white; transition: all 0.15s; }
+    .inv-ch-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+
+    .inv-send-btn { width: 100%; padding: 0.75rem; background: #2563eb; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+    .inv-send-btn:hover { background: #1d4ed8; }
+
+    /* Bulk */
+    .inv-bulk-area { background: #f8fafc; border: 2px dashed #d1d5db; border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1rem; cursor: pointer; }
+    .inv-bulk-area:hover { border-color: #3b82f6; background: #f0f9ff; }
+    .inv-bulk-area p { font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem; }
+
+    /* History */
+    .inv-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .inv-table th { text-align: left; padding: 0.6rem 0.75rem; color: #6b7280; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #e5e7eb; }
+    .inv-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
+    .inv-status { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+    .inv-status.sent { background: #dbeafe; color: #1d4ed8; }
+    .inv-status.delivered { background: #d1fae5; color: #065f46; }
+    .inv-status.opened { background: #fef3c7; color: #92400e; }
+    .inv-status.accepted { background: #d1fae5; color: #065f46; }
+    .inv-status.expired { background: #f3f4f6; color: #6b7280; }
+    .inv-status.bounced { background: #fee2e2; color: #991b1b; }
+
+    .inv-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .inv-stat-card { background: white; border-radius: 10px; border: 1px solid #e5e7eb; padding: 1rem; text-align: center; }
+    .inv-stat-card .num { font-size: 1.4rem; font-weight: 900; }
+    .inv-stat-card .lbl { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
+
+    /* Templates */
+    .inv-template { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.15s; }
+    .inv-template:hover { border-color: #3b82f6; background: #f0f9ff; }
+    .inv-template h4 { font-weight: 700; font-size: 0.88rem; margin-bottom: 0.25rem; }
+    .inv-template p { font-size: 0.78rem; color: #6b7280; }
+
+    /* Preview */
+    .inv-preview { background: #1e293b; color: white; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+    .inv-preview h4 { font-size: 0.82rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.75rem; }
+    .inv-preview-msg { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem; font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; }
+
+    .inv-toast { position: fixed; bottom: 2rem; right: 2rem; z-index: 99999; background: #065f46; color: white; padding: 0.85rem 1.5rem; border-radius: 10px; font-weight: 600; font-size: 0.88rem; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(120%); opacity: 0; transition: all 0.3s; }
+    .inv-toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 640px) {
+      .inv-row { grid-template-columns: 1fr; }
+      .inv-stats { grid-template-columns: repeat(2, 1fr); }
+      .inv-channel-btns { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">3120</span> <span style="font-weight:500;opacity:0.9;">Life</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="crm.html">CRM</a>
+    <a href="messages.html">Messages</a>
+    <a href="invite.html" style="color:#2563eb;font-weight:700;">Invite</a>
+  </div>
+</nav>
+
+<div class="inv-wrap">
+  <div class="inv-header">
+    <h1>📨 Invite People to 3120 Life</h1>
+    <p>Grow your network. Every invite earns referral credit when they sign up.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="inv-stats" id="invStats"></div>
+
+  <!-- Tabs -->
+  <div class="inv-tabs">
+    <button class="inv-tab active" onclick="switchInvTab('send',this)">Send Invite</button>
+    <button class="inv-tab" onclick="switchInvTab('bulk',this)">Bulk Invite</button>
+    <button class="inv-tab" onclick="switchInvTab('templates',this)">Templates</button>
+    <button class="inv-tab" onclick="switchInvTab('history',this)">History</button>
+  </div>
+
+  <!-- SEND TAB -->
+  <div class="inv-panel active" id="invPanel-send">
+    <div class="inv-form">
+      <h3>Send an Invitation</h3>
+
+      <!-- Channel -->
+      <div style="margin-bottom:1rem;">
+        <label style="font-size:0.78rem;font-weight:600;color:#374151;margin-bottom:4px;display:block;">How do you want to send it?</label>
+        <div class="inv-channel-btns">
+          <div class="inv-ch-btn active" onclick="setChannel('email',this)">📧 Email</div>
+          <div class="inv-ch-btn" onclick="setChannel('sms',this)">📱 Text Message</div>
+          <div class="inv-ch-btn" onclick="setChannel('both',this)">📧+📱 Both</div>
+        </div>
+      </div>
+
+      <div class="inv-row">
+        <div class="inv-field">
+          <label>Their Name</label>
+          <input type="text" id="invName" placeholder="John Smith" />
+        </div>
+        <div class="inv-field">
+          <label>Invite As</label>
+          <select id="invType">
+            <option value="business_owner">Business Owner</option>
+            <option value="tenant">Tenant / Renter</option>
+            <option value="client">My Client</option>
+            <option value="vendor">Vendor / Supplier</option>
+            <option value="contractor">Contractor</option>
+            <option value="loan_officer">Loan Officer</option>
+            <option value="accountant">Accountant / CPA</option>
+            <option value="attorney">Attorney</option>
+            <option value="insurance_agent">Insurance Agent</option>
+            <option value="team_member">Team Member</option>
+            <option value="general">Just Check It Out</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="inv-row" id="emailRow">
+        <div class="inv-field">
+          <label>Email Address</label>
+          <input type="email" id="invEmail" placeholder="john@example.com" />
+        </div>
+        <div class="inv-field" id="phoneField">
+          <label>Phone Number</label>
+          <input type="tel" id="invPhone" placeholder="(801) 555-0123" />
+        </div>
+      </div>
+
+      <div class="inv-field" style="margin-bottom:1rem;">
+        <label>Personal Message (optional)</label>
+        <textarea id="invMessage" placeholder="Hey! I've been using this platform to run my business and thought you'd like it too..."></textarea>
+      </div>
+
+      <!-- Preview -->
+      <div class="inv-preview">
+        <h4>📋 Message Preview</h4>
+        <div class="inv-preview-msg" id="invPreview">Loading preview...</div>
+      </div>
+
+      <button class="inv-send-btn" onclick="sendInvite()" style="margin-top:1.25rem;">Send Invitation →</button>
+    </div>
+  </div>
+
+  <!-- BULK TAB -->
+  <div class="inv-panel" id="invPanel-bulk">
+    <div class="inv-form">
+      <h3>Bulk Invite</h3>
+      <p style="font-size:0.85rem;color:#6b7280;margin-bottom:1rem;">Paste a list of emails (one per line) or upload a CSV with name, email, and phone columns.</p>
+
+      <div class="inv-field" style="margin-bottom:1rem;">
+        <label>Invite As</label>
+        <select id="bulkType">
+          <option value="business_owner">Business Owners</option>
+          <option value="tenant">Tenants</option>
+          <option value="client">Clients</option>
+          <option value="vendor">Vendors</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+
+      <div class="inv-field" style="margin-bottom:1rem;">
+        <label>Paste Emails (one per line)</label>
+        <textarea id="bulkEmails" rows="8" placeholder="john@example.com&#10;jane@example.com&#10;mike@example.com"></textarea>
+      </div>
+
+      <div class="inv-bulk-area" onclick="document.getElementById('bulkCSV').click()">
+        <div style="font-size:2rem;">📁</div>
+        <p>Or click to upload a CSV file</p>
+        <p style="font-size:0.72rem;color:#94a3b8;">Columns: name, email, phone (optional)</p>
+        <input type="file" id="bulkCSV" accept=".csv" style="display:none" onchange="handleBulkCSV(this)" />
+      </div>
+
+      <div id="bulkPreviewCount" style="font-size:0.85rem;color:#374151;font-weight:600;margin-bottom:1rem;"></div>
+
+      <button class="inv-send-btn" onclick="sendBulkInvites()">Send All Invitations →</button>
+    </div>
+  </div>
+
+  <!-- TEMPLATES TAB -->
+  <div class="inv-panel" id="invPanel-templates">
+    <div class="inv-form">
+      <h3>Message Templates</h3>
+      <p style="font-size:0.85rem;color:#6b7280;margin-bottom:1rem;">Click a template to use it when sending invites.</p>
+
+      <div class="inv-template" onclick="useTemplate('business')">
+        <h4>🏢 Business Owner Invite</h4>
+        <p>"Hey [Name], I've been using 3120 Life to run my business — CRM, invoicing, booking, accounting, all in one place. It replaced 5 apps for me. You should check it out: [link]"</p>
+      </div>
+
+      <div class="inv-template" onclick="useTemplate('tenant')">
+        <h4>🏠 Tenant Invite</h4>
+        <p>"Hi [Name], we use 3120 Life for rent payments and maintenance requests. Please create your account so you can pay rent online and submit maintenance requests: [link]"</p>
+      </div>
+
+      <div class="inv-template" onclick="useTemplate('contractor')">
+        <h4>🔧 Contractor Invite</h4>
+        <p>"Hey [Name], I'm using 3120 Life for job tracking, invoicing, and getting funding. It's built for contractors. Check it out: [link]"</p>
+      </div>
+
+      <div class="inv-template" onclick="useTemplate('professional')">
+        <h4>💼 Professional (CPA, Attorney, Lender)</h4>
+        <p>"Hi [Name], I'd like to connect with you through 3120 Life — it lets me share my financials securely so we can work together faster. Create your provider account here: [link]"</p>
+      </div>
+
+      <div class="inv-template" onclick="useTemplate('client')">
+        <h4>👤 Client Invite</h4>
+        <p>"Hi [Name], I've set up a client portal for you on 3120 Life. You can view appointments, pay invoices, and message me directly: [link]"</p>
+      </div>
+
+      <div class="inv-template" onclick="useTemplate('general')">
+        <h4>🌐 General / Just Check It Out</h4>
+        <p>"Hey [Name], have you seen 3120 Life? It's an all-in-one platform for running your business — CRM, invoicing, booking, reviews, funding, all built in. Free to start: [link]"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="inv-panel" id="invPanel-history">
+    <div class="inv-form">
+      <h3>Invite History</h3>
+      <table class="inv-table" id="invHistoryTable">
+        <thead>
+          <tr><th>Name</th><th>Contact</th><th>Type</th><th>Channel</th><th>Status</th><th>Sent</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="invHistoryBody"></tbody>
+      </table>
+      <div id="invEmpty" style="display:none;text-align:center;padding:2rem;color:#94a3b8;">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">📨</div>
+        <p>No invites sent yet. Send your first invite to start growing your network!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="inv-toast" id="invToast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>
+  RVData._useSupabase = function() { return false; };
+
+  var selectedChannel = 'email';
+
+  var TEMPLATES = {
+    business: "Hey {name}, I've been using 3120 Life to run my business — CRM, invoicing, booking, accounting, all in one place. It replaced 5 apps for me. You should check it out:\n\n{link}\n\nFree to start, takes 5 minutes to set up.",
+    tenant: "Hi {name}, we use 3120 Life for rent payments and maintenance requests. Please create your tenant account so you can pay rent online and submit requests:\n\n{link}",
+    contractor: "Hey {name}, I'm using 3120 Life for job tracking, time tracking, invoicing, and getting funding. It's built for contractors like us. Check it out:\n\n{link}\n\nFree to start.",
+    professional: "Hi {name}, I'd like to connect with you through 3120 Life. It lets me share my financial data securely so we can work together faster — no more chasing documents. Create your provider account here:\n\n{link}",
+    client: "Hi {name}, I've set up a client portal for you on 3120 Life. You can view your appointments, pay invoices, and message me directly:\n\n{link}",
+    general: "Hey {name}, have you seen 3120 Life? It's an all-in-one platform for running your business — CRM, invoicing, booking, reviews, funding, all built in. Free to start:\n\n{link}"
+  };
+
+  function switchInvTab(tab, btn) {
+    document.querySelectorAll('.inv-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.inv-panel').forEach(function(p) { p.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    var panel = document.getElementById('invPanel-' + tab);
+    if (panel) panel.classList.add('active');
+    if (tab === 'history') renderHistory();
+  }
+
+  function setChannel(ch, btn) {
+    selectedChannel = ch;
+    document.querySelectorAll('.inv-ch-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('phoneField').style.display = (ch === 'email') ? 'none' : 'block';
+    updatePreview();
+  }
+
+  function updatePreview() {
+    var name = document.getElementById('invName').value || '[Name]';
+    var msg = document.getElementById('invMessage').value;
+    var type = document.getElementById('invType').value;
+    if (!msg) {
+      var templateKey = type === 'tenant' ? 'tenant' : type === 'client' ? 'client' :
+        type === 'contractor' ? 'contractor' :
+        (type === 'loan_officer' || type === 'accountant' || type === 'attorney' || type === 'insurance_agent') ? 'professional' :
+        type === 'business_owner' ? 'business' : 'general';
+      msg = TEMPLATES[templateKey];
+    }
+    msg = msg.replace(/\{name\}/g, name).replace(/\{link\}/g, window.location.origin + '/onboarding.html?ref=XXXXXXXX');
+    document.getElementById('invPreview').textContent = msg;
+  }
+
+  // Update preview on input
+  ['invName', 'invMessage', 'invType'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePreview);
+    if (el) el.addEventListener('change', updatePreview);
+  });
+
+  function useTemplate(key) {
+    document.getElementById('invMessage').value = TEMPLATES[key] || '';
+    switchInvTab('send', document.querySelector('.inv-tab'));
+    updatePreview();
+    showToast('Template loaded! Customize and send.');
+  }
+
+  async function sendInvite() {
+    var name = document.getElementById('invName').value.trim();
+    var email = document.getElementById('invEmail').value.trim();
+    var phone = document.getElementById('invPhone').value.trim();
+    var type = document.getElementById('invType').value;
+    var msg = document.getElementById('invMessage').value || document.getElementById('invPreview').textContent;
+
+    if (!name) { alert('Please enter their name.'); return; }
+    if (selectedChannel !== 'sms' && !email) { alert('Please enter an email address.'); return; }
+    if (selectedChannel !== 'email' && !phone) { alert('Please enter a phone number.'); return; }
+
+    var invite = {
+      recipient_name: name,
+      recipient_email: email,
+      recipient_phone: phone,
+      invite_type: type,
+      channel: selectedChannel,
+      message: msg
+    };
+
+    var saved = await RVData.sendInvite(invite);
+    showToast('Invitation sent to ' + name + '!');
+
+    // Clear form
+    document.getElementById('invName').value = '';
+    document.getElementById('invEmail').value = '';
+    document.getElementById('invPhone').value = '';
+    document.getElementById('invMessage').value = '';
+    updatePreview();
+    renderStats();
+  }
+
+  async function sendBulkInvites() {
+    var raw = document.getElementById('bulkEmails').value.trim();
+    if (!raw) { alert('Please paste email addresses or upload a CSV.'); return; }
+    var lines = raw.split('\n').map(function(l) { return l.trim(); }).filter(Boolean);
+    var type = document.getElementById('bulkType').value;
+
+    var invites = lines.map(function(line) {
+      var parts = line.split(',');
+      return {
+        recipient_name: parts[1] ? parts[0].trim() : '',
+        recipient_email: (parts[1] || parts[0]).trim(),
+        recipient_phone: (parts[2] || '').trim(),
+        invite_type: type,
+        channel: 'email',
+        message: TEMPLATES[type === 'tenant' ? 'tenant' : type === 'business_owner' ? 'business' : 'general']
+      };
+    });
+
+    await RVData.sendBulkInvites(invites);
+    showToast(invites.length + ' invitations sent!');
+    document.getElementById('bulkEmails').value = '';
+    document.getElementById('bulkPreviewCount').textContent = '';
+    renderStats();
+  }
+
+  function handleBulkCSV(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var lines = e.target.result.split('\n').filter(function(l) { return l.trim() && !l.toLowerCase().startsWith('name'); });
+      document.getElementById('bulkEmails').value = lines.join('\n');
+      document.getElementById('bulkPreviewCount').textContent = lines.length + ' contacts loaded from CSV.';
+    };
+    reader.readAsText(file);
+  }
+
+  async function renderHistory() {
+    var invites = await RVData.getInvites();
+    var tbody = document.getElementById('invHistoryBody');
+    var empty = document.getElementById('invEmpty');
+
+    if (invites.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = invites.map(function(inv) {
+      var contact = inv.recipient_email || inv.recipient_phone || '-';
+      var date = inv.sent_at ? new Date(inv.sent_at).toLocaleDateString() : '-';
+      var typeLabel = inv.invite_type.replace(/_/g, ' ');
+      return '<tr>' +
+        '<td><strong>' + (inv.recipient_name || '-') + '</strong></td>' +
+        '<td style="font-size:0.78rem;">' + contact + '</td>' +
+        '<td><span style="font-size:0.72rem;text-transform:capitalize;">' + typeLabel + '</span></td>' +
+        '<td>' + (inv.channel === 'both' ? '📧📱' : inv.channel === 'sms' ? '📱' : '📧') + '</td>' +
+        '<td><span class="inv-status ' + inv.status + '">' + inv.status + '</span></td>' +
+        '<td style="font-size:0.78rem;">' + date + '</td>' +
+        '<td><button onclick="resendInvite(\'' + inv.id + '\')" style="background:#3b82f6;color:white;border:none;border-radius:6px;padding:3px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;">Resend</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  async function resendInvite(id) {
+    var invites = await RVData.getInvites();
+    var inv = invites.find(function(i) { return i.id === id; });
+    if (!inv) return;
+    inv.id = null; // Create new
+    inv.status = 'sent';
+    await RVData.sendInvite(inv);
+    showToast('Resent to ' + (inv.recipient_name || inv.recipient_email));
+    renderHistory();
+    renderStats();
+  }
+
+  async function renderStats() {
+    var invites = await RVData.getInvites();
+    var total = invites.length;
+    var sent = invites.filter(function(i) { return i.status === 'sent' || i.status === 'delivered'; }).length;
+    var accepted = invites.filter(function(i) { return i.status === 'accepted'; }).length;
+    var rate = total > 0 ? Math.round((accepted / total) * 100) : 0;
+
+    document.getElementById('invStats').innerHTML =
+      '<div class="inv-stat-card"><div class="num" style="color:#3b82f6;">' + total + '</div><div class="lbl">Total Sent</div></div>' +
+      '<div class="inv-stat-card"><div class="num" style="color:#f59e0b;">' + sent + '</div><div class="lbl">Pending</div></div>' +
+      '<div class="inv-stat-card"><div class="num" style="color:#10b981;">' + accepted + '</div><div class="lbl">Accepted</div></div>' +
+      '<div class="inv-stat-card"><div class="num" style="color:#7c3aed;">' + rate + '%</div><div class="lbl">Conversion</div></div>';
+  }
+
+  function showToast(msg) {
+    var el = document.getElementById('invToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 3500);
+  }
+
+  // Init
+  updatePreview();
+  renderStats();
+  document.getElementById('phoneField').style.display = 'none';
+</script>
+<script src="rv-mobile-nav.js"></script>
+<script src="rv-micro.js"></script>
+<script src="share-widget.js" data-share-title="Join 3120 Life" data-share-text="Run your entire business from one place"></script>
+</body>
+</html>
