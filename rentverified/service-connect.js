@@ -38,7 +38,7 @@
     { id: 'ia_2', name: 'Kevin Blake',         role: 'insurance_agent',  company: 'Wasatch Insurance',       verified: true, rating: 4.6, initials: 'KB', color: '#059669', specialties: ['Landlord Insurance', 'Umbrella', 'E&O'] },
     { id: 'ac_1', name: 'Sarah Mitchell, CPA', role: 'accountant',       company: 'Mitchell & Associates',   verified: true, rating: 4.9, initials: 'SM', color: '#2563eb', specialties: ['Real Estate Tax', '1031 Exchange', 'Entity Structuring'] },
     { id: 'ac_2', name: 'David Torres, EA',    role: 'accountant',       company: 'Torres Tax Group',        verified: true, rating: 4.7, initials: 'DT', color: '#dc2626', specialties: ['Schedule E', 'Cost Segregation', 'IRS Representation'] },
-    { id: 'at_1', name: 'Marcus Johnson, Esq.', role: 'attorney',        company: 'Johnson Legal Group',     verified: true, rating: 4.8, initials: 'MJ', color: '#7c3aed', specialties: ['Evictions', 'Lease Disputes', 'Fair Housing'] },
+    { id: 'at_1', name: '[User Name], Esq.', role: 'attorney',        company: 'Johnson Legal Group',     verified: true, rating: 4.8, initials: 'MJ', color: '#7c3aed', specialties: ['Evictions', 'Lease Disputes', 'Fair Housing'] },
     { id: 'mk_1', name: 'Ashley Rivera',       role: 'marketing_agency', company: 'Elevate Digital',         verified: true, rating: 4.9, initials: 'AR', color: '#ec4899', specialties: ['Social Media', 'Google Ads', 'Brand Strategy'] },
     { id: 'bk_1', name: 'Lisa Chen',           role: 'bookkeeper',       company: 'Chen Bookkeeping',        verified: true, rating: 4.9, initials: 'LC', color: '#059669', specialties: ['QuickBooks', 'Rent Reconciliation', '1099 Prep'] }
   ];

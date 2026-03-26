@@ -54,8 +54,8 @@ function getListingsForClient(clientId) {
   var data = rvGet(key);
   if (!data || !Array.isArray(data)) {
     data = [
-      { address: '119 E 600 S #119, Orem, UT 84058', beds: 2, baths: 1, sqft: 900, rent: 1200, tenant: 'Jane Doe', status: 'rented', listingId: 'RV-2026-0001', description: '2-bedroom, 1-bathroom condo in Orem. Wood-style flooring and tile. Near UVU & BYU.', photos: [], type: 'Condo' },
-      { address: '456 Oak Avenue, Apt 1B', beds: 1, baths: 1, sqft: 620, rent: 950, tenant: 'Robert Lee', status: 'rented', listingId: 'RV-2026-0002', description: 'Cozy 1-bedroom apartment. Updated kitchen, great natural light.', photos: [], type: 'Apartment' },
+      { address: '119 E 600 S #119, Orem, UT 84058', beds: 2, baths: 1, sqft: 900, rent: 1200, tenant: '[Tenant Name]', status: 'rented', listingId: 'RV-2026-0001', description: '2-bedroom, 1-bathroom condo in Orem. Wood-style flooring and tile. Near UVU & BYU.', photos: [], type: 'Condo' },
+      { address: '456 Oak Avenue, Apt 1B', beds: 1, baths: 1, sqft: 620, rent: 950, tenant: '[Tenant Name]', status: 'rented', listingId: 'RV-2026-0002', description: 'Cozy 1-bedroom apartment. Updated kitchen, great natural light.', photos: [], type: 'Apartment' },
       { address: '789 Pine Road', beds: 3, baths: 2, sqft: 1400, rent: 1650, tenant: '', status: 'available', listingId: 'RV-2026-0003', description: 'Spacious 3-bedroom house with yard. Family-friendly neighborhood.', photos: [], type: 'House' },
     ];
     rvSet(key, data);
@@ -1291,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', function() {
       rent: 1200,
       start: '2026-01-15',
       end: '2027-01-14',
-      tenant: 'Jane Doe',
+      tenant: '[Tenant Name]',
       landlord: RV_CONFIG.companyName,
       status: 'active',
     });
@@ -1332,8 +1332,8 @@ function seedLedgerData() {
                 '2025-07','2025-08','2025-09','2025-10','2025-11','2025-12',
                 '2026-01','2026-02'];
   var tenants = [
-    { name: 'Jane Doe', property: '123 Maple Street, Unit 2A', rent: 1200, pmFee: 96 },
-    { name: 'Robert Lee', property: '456 Oak Avenue, Apt 1B', rent: 950, pmFee: 76 },
+    { name: '[Tenant Name]', property: '123 Maple Street, Unit 2A', rent: 1200, pmFee: 96 },
+    { name: '[Tenant Name]', property: '456 Oak Avenue, Apt 1B', rent: 950, pmFee: 76 },
   ];
   var entries = [];
   tenants.forEach(function(t) {
