@@ -14,9 +14,9 @@ var RV_CONFIG = {
   websiteUrl: 'https://rentverified.vercel.app',
   companyName: 'Sanders Property Management',
   companyShort: 'Sanders PM',
-  supportEmail: 'danielrhart1284@gmail.com',
+  supportEmail: 'demo@3120life.com',
   cashAppTag: '$SandersRentals',
-  zelleContact: 'danielrhart1284@gmail.com',
+  zelleContact: 'demo@3120life.com',
 };
 
 // ============================================================================
@@ -70,7 +70,7 @@ function getClients() {
   var data = rvGet(RV_KEYS.CLIENTS);
   if (!data || !Array.isArray(data)) {
     data = [
-      { id: 'sanders-pm', name: 'Sanders Property Management', email: 'danielrhart1284@gmail.com', plan: 'pro', role: 'pm', createdAt: '2026-01-15' },
+      { id: 'sanders-pm', name: 'Sanders Property Management', email: 'demo@3120life.com', plan: 'pro', role: 'pm', createdAt: '2026-01-15' },
     ];
     rvSet(RV_KEYS.CLIENTS, data);
   }
@@ -121,8 +121,8 @@ function saveMaintenanceRequests(arr) { rvSet(RV_KEYS.MAINTENANCE_REQUESTS, arr)
 // AUTHENTICATION
 // ============================================================================
 var ACCOUNTS = [
-  { email: 'danielrhart1284@gmail.com', username: 'danielrhart1284', password: 'SPMdemo2026', name: 'Sanders PM', role: 'admin', clientId: 'sanders-pm' },
-  { email: 'admin@3120life.com', username: 'admin', password: 'RVadmin2026', name: 'Admin', role: 'admin', clientId: 'admin' },
+  { email: 'demo@3120life.com', username: 'demo_user', password: 'demo123', name: 'Sanders PM', role: 'admin', clientId: 'sanders-pm' },
+  { email: 'admin@3120life.com', username: 'admin', password: 'demo123', name: 'Admin', role: 'admin', clientId: 'admin' },
 ];
 
 function authenticateUser(emailOrUsername, password) {
@@ -1606,7 +1606,7 @@ function generateStatementPDF(statement) {
     doc.text('Monthly Owner Statement', 105, y, { align: 'center' }); y += 8;
     doc.setFontSize(10); doc.setFont('helvetica', 'normal');
     doc.text('Sanders Property Management', 105, y, { align: 'center' }); y += 5;
-    doc.text('danielrhart1284@gmail.com', 105, y, { align: 'center' }); y += 10;
+    doc.text('demo@3120life.com', 105, y, { align: 'center' }); y += 10;
     doc.setDrawColor(200); doc.line(15, y, 195, y); y += 8;
 
     doc.setFontSize(11);
