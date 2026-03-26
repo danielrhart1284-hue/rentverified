@@ -50,8 +50,8 @@ var MOCK = {
   ],
 
   loanOfficers: [
-    { name: 'Pinnacle Lending', contact: 'Michael Torres', phone: '(801) 555-2100', specialty: 'SBA & Business Loans', city: 'Salt Lake City', nmls: '445821' },
-    { name: 'Mountain West Capital', contact: 'Jennifer Park', phone: '(801) 555-2200', specialty: 'Hard Money & Bridge', city: 'Lehi', nmls: '338901' }
+    { name: '[Loan Officer]', contact: '[Loan Officer Name]', phone: '(801) 555-2100', specialty: 'SBA & Business Loans', city: 'Salt Lake City', nmls: '445821' },
+    { name: '[Loan Officer]', contact: '[Loan Officer Name]', phone: '(801) 555-2200', specialty: 'Hard Money & Bridge', city: 'Lehi', nmls: '338901' }
   ],
 
   cleaningServices: [

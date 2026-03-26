@@ -1,76 +1,72 @@
 /**
- * 3120 Life — Mock Data (Utah-Consistent)
- * =========================================
- * All demo/placeholder data for the platform.
- * ONLY use data from this file — no lorem ipsum, no random names.
- * Every name, business, and address is Utah-consistent.
+ * 3120 Life — Mock Data (FICTIONAL — NOT REAL BUSINESSES)
+ * ========================================================
+ * All names below are COMPLETELY FICTIONAL.
+ * They are NOT real companies, NOT real people, NOT real addresses.
+ * They exist ONLY as UI placeholders for development/demo.
+ *
+ * IMPORTANT: These should NEVER appear on the live public site.
+ * On the live site, all data comes from real user signups.
+ * Mock data is for ADMIN TESTING ONLY.
  *
  * Usage: <script src="mock-data.js"></script>
- *        Then use: MOCK.properties, MOCK.professionals, etc.
  */
 
 var MOCK = {
 
+  // ── DISCLAIMER — shown wherever mock data appears ──
+  disclaimer: 'Sample data for demonstration only. Names and businesses shown are fictional.',
+
   // ══════════════════════════════════════════════════════════
-  // PROPERTIES (Sanders Property Management portfolio)
+  // PROPERTIES (fictional addresses — NOT real)
   // ══════════════════════════════════════════════════════════
   properties: [
-    { address: '119 E 600 S #119', city: 'Orem', state: 'UT', zip: '84058', beds: 2, baths: 1, sqft: 900, rent: 1200, type: 'apartment', status: 'occupied' },
-    { address: '456 Oak Avenue, Apt 1B', city: 'Herriman', state: 'UT', zip: '84096', beds: 1, baths: 1, sqft: 620, rent: 950, type: 'apartment', status: 'occupied' },
-    { address: '789 Pine Road', city: 'Draper', state: 'UT', zip: '84020', beds: 3, baths: 2, sqft: 1400, rent: 1650, type: 'house', status: 'occupied' },
-    { address: '2142 S King St', city: 'Salt Lake City', state: 'UT', zip: '84115', beds: 3, baths: 2, sqft: 1600, rent: 1850, type: 'house', status: 'vacant' },
-    { address: '331 W Center St #204', city: 'Provo', state: 'UT', zip: '84601', beds: 2, baths: 1, sqft: 850, rent: 1100, type: 'apartment', status: 'occupied' }
+    { address: '100 Demo Street #1', city: 'Anytown', state: 'UT', zip: '84000', beds: 2, baths: 1, sqft: 900, rent: 1200, type: 'apartment', status: 'example' },
+    { address: '200 Sample Ave #2B', city: 'Anytown', state: 'UT', zip: '84000', beds: 1, baths: 1, sqft: 620, rent: 950, type: 'apartment', status: 'example' },
+    { address: '300 Test Lane', city: 'Anytown', state: 'UT', zip: '84000', beds: 3, baths: 2, sqft: 1400, rent: 1650, type: 'house', status: 'example' }
   ],
 
   // ══════════════════════════════════════════════════════════
-  // PROFESSIONALS (Utah-based, realistic names)
+  // PROFESSIONALS (ALL FICTIONAL — NOT REAL BUSINESSES)
   // ══════════════════════════════════════════════════════════
   contractors: [
-    { name: 'Utah Valley Electric', contact: 'Jake Morrison', phone: '(801) 555-2201', specialty: 'Electrical', city: 'Lehi', license: 'UT-E-44821' },
-    { name: 'Wasatch Plumbing Co', contact: 'Carlos Mendez', phone: '(801) 555-3302', specialty: 'Plumbing', city: 'Sandy', license: 'UT-P-55193' },
-    { name: 'Summit HVAC Solutions', contact: 'Tanner Reid', phone: '(801) 555-4403', specialty: 'HVAC', city: 'Draper', license: 'UT-H-33027' },
-    { name: 'RedRock Painting', contact: 'Maria Lopez', phone: '(801) 555-5504', specialty: 'Painting', city: 'Herriman', license: 'UT-GC-19384' },
-    { name: 'Beehive Roofing', contact: 'Brett Hansen', phone: '(801) 555-6605', specialty: 'Roofing', city: 'Orem', license: 'UT-R-27456' },
-    { name: 'Timpanogos Landscaping', contact: 'David Nguyen', phone: '(801) 555-7706', specialty: 'Landscaping', city: 'Provo', license: 'UT-LC-88142' }
+    { name: '[Your Electrician Here]', contact: 'Available after signup', phone: '', specialty: 'Electrical', city: '', license: '' },
+    { name: '[Your Plumber Here]', contact: 'Available after signup', phone: '', specialty: 'Plumbing', city: '', license: '' },
+    { name: '[Your HVAC Tech Here]', contact: 'Available after signup', phone: '', specialty: 'HVAC', city: '', license: '' }
   ],
 
   accountants: [
-    { name: 'Alpine CPA Group', contact: 'Sarah Mitchell, CPA', phone: '(801) 555-8100', specialty: 'Real Estate Accounting', city: 'Salt Lake City' },
-    { name: 'Granite Tax & Advisory', contact: 'Kevin Park, EA', phone: '(801) 555-8200', specialty: 'Small Business Tax', city: 'Sandy' }
+    { name: '[Your CPA Here]', contact: 'Available after signup', phone: '', specialty: 'Accounting', city: '' }
   ],
 
   attorneys: [
-    { name: 'Wasatch Legal Partners', contact: 'Marcus Chen, Esq.', phone: '(801) 555-9100', specialty: 'Landlord-Tenant Law', city: 'Salt Lake City' },
-    { name: 'Bonneville Law Group', contact: 'Rachel Adams, Esq.', phone: '(801) 555-9200', specialty: 'Business Formation', city: 'Provo' }
+    { name: '[Your Attorney Here]', contact: 'Available after signup', phone: '', specialty: 'Legal', city: '' }
   ],
 
   insurance: [
-    { name: 'Crossroads Insurance', contact: 'Tom Bradley', phone: '(801) 555-1100', specialty: 'Landlord & Commercial', city: 'Salt Lake City', carriers: 15 },
-    { name: 'Zion Coverage Group', contact: 'Lisa Patel', phone: '(801) 555-1200', specialty: 'Property & Liability', city: 'Ogden', carriers: 12 }
+    { name: '[Your Insurance Agent Here]', contact: 'Available after signup', phone: '', specialty: 'Insurance', city: '', carriers: 0 }
   ],
 
   loanOfficers: [
-    { name: 'Pinnacle Lending', contact: 'Michael Torres', phone: '(801) 555-2100', specialty: 'SBA & Business Loans', city: 'Salt Lake City', nmls: '445821' },
-    { name: 'Mountain West Capital', contact: 'Jennifer Park', phone: '(801) 555-2200', specialty: 'Hard Money & Bridge', city: 'Lehi', nmls: '338901' }
+    { name: '[Your Loan Officer Here]', contact: 'Available after signup', phone: '', specialty: 'Lending', city: '', nmls: '' }
   ],
 
   cleaningServices: [
-    { name: 'Fresh Start Cleaning Co', contact: 'Ana Rivera', phone: '(801) 555-3100', specialty: 'Residential & Move-Out', city: 'Herriman' },
-    { name: 'Peak Shine Janitorial', contact: 'James Wright', phone: '(801) 555-3200', specialty: 'Commercial Cleaning', city: 'Salt Lake City' }
+    { name: '[Your Cleaning Service Here]', contact: 'Available after signup', phone: '', specialty: 'Cleaning', city: '' }
   ],
 
   salons: [
-    { name: 'The Hive Salon', contact: 'Jessica Taylor', phone: '(801) 555-4100', specialty: 'Hair & Color', city: 'Draper' },
-    { name: 'Canyon Cuts Barbershop', contact: 'Derek Kim', phone: '(801) 555-4200', specialty: 'Men\'s Grooming', city: 'Provo' }
+    { name: '[Your Salon Here]', contact: 'Available after signup', phone: '', specialty: 'Beauty', city: '' }
   ],
 
   // ══════════════════════════════════════════════════════════
-  // PLACEHOLDER TEXT (no lorem ipsum — use these)
+  // PLACEHOLDER TEXT
   // ══════════════════════════════════════════════════════════
   placeholders: {
-    description: 'Professional service based in the Wasatch Front area.',
+    description: 'Your business description will appear here.',
     emptyState: 'Nothing here yet. Add your first item to get started.',
-    noReviews: 'We\'re new! No reviews yet — be the first to share your experience.',
+    noReviews: 'No reviews yet — your reviews will appear here after clients leave feedback.',
+    noProfessionals: 'No professionals have joined the network yet. Be the first!',
     note: 'Notes will appear here once you start adding them.',
     searchHint: 'Search by name, address, or keyword...',
     upcoming: 'No upcoming items scheduled.',
@@ -78,17 +74,14 @@ var MOCK = {
   },
 
   // ══════════════════════════════════════════════════════════
-  // SAMPLE TRANSACTIONS (for accounting demos)
+  // SAMPLE TRANSACTIONS (generic, no real business names)
   // ══════════════════════════════════════════════════════════
   transactions: [
-    { type: 'income', category: 'Rent', amount: 1200, description: 'Rent - 119 E 600 S #119', date: '2026-03-01', property: '119 E 600 S #119' },
-    { type: 'income', category: 'Rent', amount: 950, description: 'Rent - 456 Oak Avenue', date: '2026-03-01', property: '456 Oak Avenue' },
-    { type: 'income', category: 'Rent', amount: 1650, description: 'Rent - 789 Pine Road', date: '2026-03-01', property: '789 Pine Road' },
-    { type: 'expense', category: 'Maintenance', amount: 275, description: 'Water heater repair - Wasatch Plumbing', date: '2026-03-05', property: '789 Pine Road' },
-    { type: 'expense', category: 'Insurance', amount: 180, description: 'Landlord policy premium - Crossroads Insurance', date: '2026-03-10', property: 'Portfolio' },
-    { type: 'expense', category: 'Utilities', amount: 95, description: 'Water bill - vacant unit', date: '2026-03-12', property: '2142 S King St' }
+    { type: 'income', category: 'Revenue', amount: 1200, description: 'Monthly revenue - Unit 1', date: '2026-03-01', property: 'Unit 1' },
+    { type: 'income', category: 'Revenue', amount: 950, description: 'Monthly revenue - Unit 2', date: '2026-03-01', property: 'Unit 2' },
+    { type: 'expense', category: 'Maintenance', amount: 275, description: 'Repair expense', date: '2026-03-05', property: 'Unit 3' },
+    { type: 'expense', category: 'Insurance', amount: 180, description: 'Insurance premium', date: '2026-03-10', property: 'Portfolio' }
   ]
 };
 
-// Make available globally
 if (typeof window !== 'undefined') window.MOCK = MOCK;
