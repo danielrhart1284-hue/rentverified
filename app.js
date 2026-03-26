@@ -121,8 +121,8 @@ function saveMaintenanceRequests(arr) { rvSet(RV_KEYS.MAINTENANCE_REQUESTS, arr)
 // AUTHENTICATION
 // ============================================================================
 var ACCOUNTS = [
-  { email: 'demo@3120life.com', username: 'demo_user', password: 'demo123', name: 'Sanders PM', role: 'admin', clientId: 'sanders-pm' },
-  { email: 'admin@3120life.com', username: 'admin', password: 'demo123', name: 'Admin', role: 'admin', clientId: 'admin' },
+  { email: 'demo@3120life.com', username: 'demo_user', password: '', name: 'Sanders PM', role: 'admin', clientId: 'sanders-pm' },
+  { email: 'admin@3120life.com', username: 'admin', password: '', name: 'Admin', role: 'admin', clientId: 'admin' },
 ];
 
 function authenticateUser(emailOrUsername, password) {
