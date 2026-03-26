@@ -59,6 +59,14 @@
     .hero-sug-item .sug-label { font-weight: 600; }
     .hero-sug-item .sug-keywords { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
     .hero-sug-item + .hero-sug-item { border-top: 1px solid rgba(255,255,255,0.06); }
+    .tool-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 0.9rem; border-radius: 99px; font-size: 0.82rem; font-weight: 600;
+      animation: pillFadeIn 0.3s ease both;
+    }
+    .tool-pill.base { background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+    .tool-pill.specific { background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    @keyframes pillFadeIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
     }
     .hero-tools {
       max-width: 480px; margin: 0 auto 2.5rem;
@@ -328,14 +336,13 @@
 
   <div class="hero-search-wrap">
     <span class="hero-search-icon">🔍</span>
-    <input type="text" class="hero-search" id="industrySearch" placeholder="Try: plumber, salon, landlord, attorney..." autocomplete="off" aria-label="Search your business type" />
+    <input type="text" class="hero-search" id="industrySearch" placeholder="What do you do? (e.g. cleaning, plumber, landlord, salon...)" autocomplete="off" aria-label="Describe your business" />
     <div class="hero-suggestions" id="industrySuggestions"></div>
   </div>
 
-  <div class="hero-tools" id="heroTools">
-    <ul id="heroToolList">
-      <!-- Populated by JS on industry selection -->
-    </ul>
+  <div id="heroToolRec" style="display:none;max-width:680px;margin:0 auto 2rem;">
+    <div style="font-size:0.82rem;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:0.75rem;">Here's what we'd set up for you:</div>
+    <div id="heroToolPills" style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;"></div>
   </div>
 
   <div style="text-align:center;">
@@ -597,68 +604,68 @@
 
 <script>
 /* ── Industry Picker logic ── */
-var industryData = {
-  property_management: [
-    'Rent collection & tenant screening',
-    'Lease management & maintenance tracking',
-    'Owner statements & accounting',
-    'AI funding offers based on your portfolio'
-  ],
-  construction_trades: [
-    'Job tracking & crew scheduling',
-    'Invoicing with QR code payments',
-    'Materials price lookup',
-    'AI Business Advisor with health score'
-  ],
-  salon_beauty: [
-    'Online booking & calendar',
-    'Client portal & review management',
-    'Invoicing & payment tracking',
-    'Business health score & deadlines'
-  ],
-  attorney_law: [
-    'Matter management & time tracking',
-    'Trust accounting & invoicing',
-    'Document management & e-signature',
-    'Client portal & deadline tracking'
-  ],
-  accounting_bookkeeping: [
-    'CRM & lead pipeline',
-    'Invoicing & payments',
-    'Document management & e-signature',
-    'AI Business Advisor'
-  ],
-  insurance_agency: [
-    'CRM & lead pipeline',
-    'Policy tracking & renewals',
-    'Invoicing & payments',
-    'AI Business Advisor'
-  ],
-  commercial_re: [
-    'CRM & lead pipeline',
-    'Lease management & accounting',
-    'Document management & e-signature',
-    'AI funding offers based on your portfolio'
-  ],
-  short_term_rental: [
-    'Booking & calendar management',
-    'Guest portal & review collection',
-    'Invoicing & payment tracking',
-    'AI Business Advisor with health score'
-  ],
-  _default: [
-    'CRM & lead pipeline',
-    'Invoicing & payments',
-    'Booking & calendar',
-    'AI Business Advisor'
-  ]
+// industryData removed — now using smart TOOL_LIBRARY matching above
+var _legacy = {
 };
 
-// ── Industry Search Data ──
+// ══════════════════════════════════════════════════════════════
+// SMART TOOL RECOMMENDER ENGINE
+// ══════════════════════════════════════════════════════════════
+
+// BASE TOOLS — every business gets these
+var BASE_TOOLS = [
+  { icon:'📊', name:'Accounting', desc:'Track income & expenses' },
+  { icon:'💰', name:'Invoicing', desc:'Send invoices, get paid' },
+  { icon:'📋', name:'CRM', desc:'Track leads & clients' }
+];
+
+// TOOL LIBRARY — mapped to keywords
+var TOOL_LIBRARY = [
+  { icon:'📅', name:'Online Booking', keywords:'cleaning,salon,hair,barber,spa,massage,nail,tutor,coach,fitness,yoga,gym,dog,pet,grooming,photographer,therapist,consultant,esthetician,waxing,lashes,facial,beauty,trainer,instructor,music,lesson,tattoo,piercing', desc:'Clients book appointments online' },
+  { icon:'🔄', name:'Recurring Scheduling', keywords:'cleaning,maid,housekeeping,janitorial,lawn,landscaping,pool,pest,trash,laundry,subscription,maintenance', desc:'Automate repeat appointments' },
+  { icon:'👥', name:'Team Scheduling', keywords:'cleaning,maid,construction,contractor,restaurant,catering,salon,agency,crew,staff,team,employees,hvac,plumb,electric,roofing', desc:'Assign staff to jobs' },
+  { icon:'📱', name:'Field App', keywords:'cleaning,plumb,electric,hvac,handyman,contractor,painter,roofer,landscaping,pest,inspector,mover,delivery,repair,technician,installer,carpenter,mason,welder', desc:'Mobile check-in, photos, GPS' },
+  { icon:'⭐', name:'Reviews & Reputation', keywords:'cleaning,salon,restaurant,contractor,plumb,electric,landscaping,photographer,tutor,coach,spa,barber,nail,dog,grooming,tattoo,auto,mechanic,mover,handyman,painter', desc:'Collect & display reviews' },
+  { icon:'🏠', name:'Rent Collection', keywords:'landlord,property,rental,apartment,housing,units,tenant,duplex,triplex,complex,real estate,property manager', desc:'Collect rent online' },
+  { icon:'🔍', name:'Tenant Screening', keywords:'landlord,property,rental,apartment,housing,property manager', desc:'Background & credit checks' },
+  { icon:'🔧', name:'Maintenance Tracking', keywords:'landlord,property,rental,apartment,property manager,facility,building', desc:'Track repair requests' },
+  { icon:'📝', name:'Lease Management', keywords:'landlord,property,rental,apartment,property manager,commercial,office,warehouse', desc:'Create & manage leases' },
+  { icon:'📋', name:'Owner Statements', keywords:'landlord,property,property manager', desc:'Generate owner reports' },
+  { icon:'🏗️', name:'Job Tracking', keywords:'contractor,plumb,electric,hvac,handyman,painter,roofer,carpenter,mason,welder,framing,drywall,flooring,tile,remodel,renovation,general contractor,gc,construction', desc:'Track jobs from bid to completion' },
+  { icon:'⏱️', name:'Time Tracking', keywords:'contractor,plumb,electric,hvac,attorney,lawyer,accountant,cpa,consultant,freelance,agency,designer,developer,construction,carpenter,painter', desc:'Log billable hours' },
+  { icon:'🧱', name:'Materials & Supplies', keywords:'contractor,plumb,electric,hvac,construction,painter,roofer,carpenter,cleaning,maid,janitorial,restaurant,bakery,salon', desc:'Track inventory & costs' },
+  { icon:'📄', name:'Estimates & Quotes', keywords:'contractor,plumb,electric,hvac,handyman,painter,roofer,cleaning,maid,landscaping,mover,auto,mechanic,pest,construction,remodel', desc:'Send professional quotes' },
+  { icon:'🏠', name:'Client Portal', keywords:'cleaning,salon,attorney,accountant,contractor,coach,consultant,therapist,tutor,agency,property manager,photographer', desc:'Clients view appointments & pay' },
+  { icon:'📸', name:'Before/After Photos', keywords:'cleaning,maid,contractor,painter,landscaping,remodel,renovation,detailing,auto,handyman,roofer', desc:'Document your work visually' },
+  { icon:'⚖️', name:'Matter Management', keywords:'attorney,lawyer,legal,paralegal,law firm,litigation', desc:'Track cases & deadlines' },
+  { icon:'🔒', name:'Trust Accounting', keywords:'attorney,lawyer,legal,law firm', desc:'IOLTA trust account tracking' },
+  { icon:'🛡️', name:'Policy Tracking', keywords:'insurance,agent,broker,policy,coverage,underwriter', desc:'Manage client policies' },
+  { icon:'📊', name:'Commission Tracking', keywords:'insurance,agent,broker,real estate,commercial,mortgage,loan officer', desc:'Track your commissions' },
+  { icon:'🏢', name:'Deal Pipeline', keywords:'commercial,broker,cre,investment,development,real estate agent,mortgage,loan', desc:'Track deals from lead to close' },
+  { icon:'🏖️', name:'Booking Calendar', keywords:'airbnb,vrbo,str,vacation,short term,hosting,cabin,beach', desc:'Manage reservations' },
+  { icon:'🧹', name:'Cleaning Schedules', keywords:'airbnb,vrbo,str,vacation,short term,hosting,turnover', desc:'Automate turnover cleaning' },
+  { icon:'🍽️', name:'Menu & Inventory', keywords:'restaurant,cafe,bakery,catering,food truck,bar,brewery,pizza,kitchen,chef,diner,bistro', desc:'Track food costs & menu pricing' },
+  { icon:'📣', name:'Ad Builder', keywords:'marketing,agency,advertising,social media,seo,branding,design,creative,real estate,landlord,property manager', desc:'Create listing ads' },
+  { icon:'🏦', name:'Loan Connect', keywords:'landlord,property,contractor,restaurant,business,franchise,expansion,funding,loan,capital,construction', desc:'Get funded with AI packaging' },
+  { icon:'🤖', name:'AI Business Advisor', keywords:'', desc:'Health score & action list' },
+  { icon:'📄', name:'Document Management', keywords:'attorney,lawyer,accountant,property manager,landlord,contractor,insurance,commercial,real estate', desc:'Store & share documents' },
+  { icon:'✍️', name:'E-Signature', keywords:'attorney,lawyer,landlord,property manager,contractor,real estate,commercial,insurance,lease', desc:'Sign documents digitally' },
+  { icon:'🚗', name:'Route Planning', keywords:'cleaning,maid,plumb,electric,hvac,pest,landscaping,delivery,mover,inspector,mobile,field,technician', desc:'Optimize daily routes' }
+];
+
+var searchInput = document.getElementById('industrySearch');
+var sugBox = document.getElementById('industrySuggestions');
+var toolRec = document.getElementById('heroToolRec');
+var toolPills = document.getElementById('heroToolPills');
+var heroCta = document.getElementById('heroCta');
+var activeIdx = -1;
+
+// ── Industry suggestions (for dropdown) ──
 var INDUSTRIES = [
-  { key:'property_management', label:'Property Management', icon:'🏠', keywords:'landlord,rental,apartment,property,real estate,units,tenant,rent,housing,duplex,triplex,complex' },
-  { key:'construction_trades', label:'Construction & Trades', icon:'🏗️', keywords:'contractor,plumber,plumbing,electrician,electrical,hvac,handyman,painter,roofer,carpenter,welder,mason,general contractor,gc,remodel,renovation,framing,drywall,flooring,tile' },
-  { key:'salon_beauty', label:'Salon & Beauty', icon:'💇', keywords:'salon,hair,hairstylist,barber,beauty,nail,spa,esthetician,cosmetology,lashes,brows,makeup,waxing,facial,massage,tanning' },
+  { key:'property_management', label:'Property Management', icon:'🏠', keywords:'landlord,rental,apartment,property,real estate,units,tenant,rent,housing,duplex,triplex,complex,property manager' },
+  { key:'construction_trades', label:'Construction & Trades', icon:'🏗️', keywords:'contractor,plumber,plumbing,electrician,electrical,hvac,handyman,painter,roofer,carpenter,welder,mason,general contractor,gc,remodel,renovation,framing,drywall,flooring,tile,construction' },
+  { key:'cleaning_service', label:'Cleaning & Housekeeping', icon:'🧹', keywords:'cleaning,maid,housekeeping,janitorial,house cleaner,commercial cleaning,residential cleaning,deep clean,move out clean,carpet' },
+  { key:'salon_beauty', label:'Salon & Beauty', icon:'💇', keywords:'salon,hair,hairstylist,barber,beauty,nail,spa,esthetician,cosmetology,lashes,brows,makeup,waxing,facial,massage,tanning,tattoo,piercing' },
   { key:'attorney_law', label:'Attorney / Law Firm', icon:'⚖️', keywords:'attorney,lawyer,law firm,legal,paralegal,litigation,defense,estate planning,family law,criminal,immigration,injury,bankruptcy' },
   { key:'accounting_bookkeeping', label:'Accounting & Bookkeeping', icon:'📊', keywords:'accountant,cpa,bookkeeper,bookkeeping,tax,tax prep,payroll,audit,financial,enrolled agent,quickbooks' },
   { key:'insurance_agency', label:'Insurance Agency', icon:'🛡️', keywords:'insurance,agent,broker,policy,coverage,liability,auto,home,life,health,workers comp,commercial insurance' },
@@ -667,26 +674,72 @@ var INDUSTRIES = [
   { key:'restaurant_food', label:'Restaurant & Food', icon:'🍽️', keywords:'restaurant,cafe,bakery,catering,food truck,bar,brewery,pizza,kitchen,chef,diner,bistro' },
   { key:'marketing_agency', label:'Marketing Agency', icon:'📣', keywords:'marketing,agency,advertising,social media,seo,branding,design,creative,pr,content,digital' },
   { key:'retail_shop', label:'Retail & Shop', icon:'🛍️', keywords:'retail,store,shop,ecommerce,boutique,clothing,merchandise,wholesale,inventory' },
-  { key:'other', label:'Other Business', icon:'💼', keywords:'business,freelance,consulting,coaching,tutoring,cleaning,landscaping,moving,photography,fitness,gym,yoga,dog,pet,auto,mechanic' }
+  { key:'landscaping', label:'Landscaping & Lawn Care', icon:'🌿', keywords:'landscaping,lawn,mowing,yard,garden,tree,irrigation,sprinkler,snow removal,outdoor' },
+  { key:'auto_service', label:'Auto & Mechanic', icon:'🔧', keywords:'auto,mechanic,oil change,tire,body shop,detailing,car wash,tow,transmission,brake' },
+  { key:'pet_service', label:'Pet Services', icon:'🐕', keywords:'dog,pet,grooming,walking,sitting,boarding,daycare,vet,veterinary,training,animal' },
+  { key:'fitness', label:'Fitness & Training', icon:'💪', keywords:'fitness,gym,yoga,trainer,personal training,crossfit,pilates,martial arts,dance,instructor,coach' },
+  { key:'photography', label:'Photography & Video', icon:'📷', keywords:'photography,photographer,video,videographer,wedding,portrait,event,studio,film,drone' },
+  { key:'other', label:'Other Business', icon:'💼', keywords:'freelance,consulting,coaching,tutoring,moving,therapy,counseling,notary,music,lesson' }
 ];
 
-var searchInput = document.getElementById('industrySearch');
-var sugBox = document.getElementById('industrySuggestions');
-var toolList = document.getElementById('heroToolList');
-var heroCta = document.getElementById('heroCta');
-var activeIdx = -1;
+// ── Smart tool matching ──
+function getRecommendedTools(query) {
+  if (!query || query.length < 2) return [];
+  var q = query.toLowerCase();
+  var matched = [];
+  var seen = {};
+
+  TOOL_LIBRARY.forEach(function(tool) {
+    if (seen[tool.name]) return;
+    var kws = tool.keywords.split(',');
+    for (var i = 0; i < kws.length; i++) {
+      if (kws[i] && q.indexOf(kws[i]) > -1 || kws[i].indexOf(q) > -1) {
+        matched.push(tool);
+        seen[tool.name] = true;
+        break;
+      }
+    }
+  });
+
+  // AI Advisor is always included if we have any matches
+  if (matched.length > 0 && !seen['AI Business Advisor']) {
+    matched.push(TOOL_LIBRARY.find(function(t) { return t.name === 'AI Business Advisor'; }));
+  }
+
+  return matched;
+}
+
+function renderToolPills(query) {
+  var specific = getRecommendedTools(query);
+  if (specific.length === 0) { toolRec.style.display = 'none'; return; }
+
+  var html = '';
+  // Base tools first
+  BASE_TOOLS.forEach(function(t) {
+    html += '<span class="tool-pill base" title="' + t.desc + '">' + t.icon + ' ' + t.name + '</span>';
+  });
+  // Then specific tools
+  specific.forEach(function(t, i) {
+    html += '<span class="tool-pill specific" style="animation-delay:' + (i * 0.05) + 's" title="' + t.desc + '">' + t.icon + ' ' + t.name + '</span>';
+  });
+
+  toolPills.innerHTML = html;
+  toolRec.style.display = 'block';
+  heroCta.style.opacity = '1';
+  heroCta.style.pointerEvents = 'auto';
+}
 
 function matchIndustries(query) {
-  if (!query) return INDUSTRIES;
+  if (!query) return INDUSTRIES.slice(0, 8);
   var q = query.toLowerCase();
   return INDUSTRIES.filter(function(ind) {
-    return ind.label.toLowerCase().indexOf(q) > -1 || ind.keywords.indexOf(q) > -1;
+    return ind.label.toLowerCase().indexOf(q) > -1 || ind.keywords.split(',').some(function(kw) { return kw.indexOf(q) > -1 || q.indexOf(kw) > -1; });
   });
 }
 
 function renderSuggestions(matches) {
   if (matches.length === 0) {
-    sugBox.innerHTML = '<div class="hero-sug-item" style="color:rgba(255,255,255,0.4);justify-content:center;">No match — try "plumber", "salon", or "landlord"</div>';
+    sugBox.innerHTML = '<div class="hero-sug-item" style="color:rgba(255,255,255,0.4);text-align:center;display:block;padding:1rem;">We\'ll customize your tools — just click <strong>Start Free</strong> below!</div>';
     sugBox.classList.add('show');
     return;
   }
@@ -694,7 +747,7 @@ function renderSuggestions(matches) {
     return '<div class="hero-sug-item' + (i === activeIdx ? ' active' : '') + '" data-key="' + ind.key + '">' +
       '<span class="sug-icon">' + ind.icon + '</span>' +
       '<div><div class="sug-label">' + ind.label + '</div>' +
-      '<div class="sug-keywords">' + ind.keywords.split(',').slice(0,4).join(' · ') + '</div></div></div>';
+      '<div class="sug-keywords">' + ind.keywords.split(',').slice(0,5).join(' · ') + '</div></div></div>';
   }).join('');
   sugBox.classList.add('show');
 }
@@ -704,34 +757,33 @@ function selectIndustry(key) {
   if (!ind) return;
   searchInput.value = ind.label;
   sugBox.classList.remove('show');
-  var tools = industryData[key] || industryData._default;
-  toolList.innerHTML = '';
-  tools.forEach(function(t) {
-    var li = document.createElement('li');
-    li.textContent = t;
-    toolList.appendChild(li);
-  });
-  heroCta.style.opacity = '1';
-  heroCta.style.pointerEvents = 'auto';
+  renderToolPills(ind.keywords);
   heroCta.href = 'onboarding.html?industry=' + encodeURIComponent(key);
 }
 
+// ── Event Listeners ──
+var debounceTimer;
 searchInput.addEventListener('input', function() {
   activeIdx = -1;
-  var matches = matchIndustries(this.value.trim());
+  var val = this.value.trim();
+  var matches = matchIndustries(val);
   renderSuggestions(matches);
+  // Debounce tool pills
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(function() { renderToolPills(val); }, 300);
 });
 
 searchInput.addEventListener('focus', function() {
-  var matches = matchIndustries(this.value.trim());
-  renderSuggestions(matches);
+  if (!this.value.trim()) {
+    renderSuggestions(INDUSTRIES.slice(0, 8));
+  }
 });
 
 searchInput.addEventListener('keydown', function(e) {
   var items = sugBox.querySelectorAll('.hero-sug-item[data-key]');
   if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); renderSuggestions(matchIndustries(this.value.trim())); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); renderSuggestions(matchIndustries(this.value.trim())); }
-  else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); selectIndustry(items[activeIdx].getAttribute('data-key')); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (activeIdx >= 0 && items[activeIdx]) { selectIndustry(items[activeIdx].getAttribute('data-key')); } else { sugBox.classList.remove('show'); renderToolPills(this.value.trim()); } }
   else if (e.key === 'Escape') { sugBox.classList.remove('show'); }
 });
 
