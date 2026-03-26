@@ -3368,7 +3368,38 @@
       return;
     }
 
-    const { data, error } = await Auth.signIn(email, password);
+    // Demo mode: bypass Supabase auth if not configured
+    var isDemo = (typeof RVData !== 'undefined' && typeof RVData._useSupabase === 'function' && !RVData._useSupabase()) ||
+                 (typeof isSupabaseConfigured === 'function' && !isSupabaseConfigured());
+
+    var data, error;
+    if (isDemo) {
+      // Check against hardcoded demo accounts
+      var DEMO_ACCOUNTS = [
+        { email: 'danielrhart1284@gmail.com', password: 'Sandersis#1PM!', role: 'landlord', first_name: 'Daniel', last_name: 'Hart', company: 'Sanders PM', plan: 'enterprise' },
+        { email: 'daniel@3120life.com', password: 'admin', role: 'landlord', first_name: 'Daniel', last_name: 'Hart', company: 'Sanders PM', plan: 'enterprise' },
+        { email: 'admin@3120life.com', password: 'admin', role: 'admin', first_name: 'Admin', last_name: '', company: '3120 Life', plan: 'enterprise' }
+      ];
+      var match = DEMO_ACCOUNTS.find(function(a) { return a.email === email && a.password === password; });
+      if (match) {
+        data = { profile: match, user: { email: match.email, user_metadata: match } };
+        error = null;
+      } else {
+        // Also allow any email + password "demo" to log in during demo mode
+        if (password === 'demo' || password === 'demo123') {
+          data = { profile: { role: 'landlord', first_name: email.split('@')[0], last_name: '', company: 'My Business' }, user: { email: email } };
+          error = null;
+        } else {
+          data = null;
+          error = { message: 'Demo mode: Use your credentials shown below, or use password "demo" for quick access.' };
+        }
+      }
+    } else {
+      var result = await Auth.signIn(email, password);
+      data = result.data;
+      error = result.error;
+    }
+
     if (error) {
       if (errEl) {
         errEl.textContent = error.message || 'Incorrect email or password. Please try again.';
