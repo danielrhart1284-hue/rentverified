@@ -1292,11 +1292,20 @@
   document.addEventListener('DOMContentLoaded', function() {
     renderIndustries();
 
-    // Check URL param for industry
+    // Check URL param for industry — auto-select and skip to Step 2
     var params = new URLSearchParams(window.location.search);
     var urlIndustry = params.get('industry');
     if (urlIndustry) {
       localStorage.setItem('rv_selected_industry', urlIndustry);
+      // Find matching industry in our list and select it
+      var match = INDUSTRIES.find(function(ind) {
+        return ind.key === urlIndustry || ind.key.indexOf(urlIndustry) > -1 || urlIndustry.indexOf(ind.key) > -1;
+      });
+      if (match) {
+        selectIndustry(match.key);
+        // Auto-advance to Step 2 after a brief moment
+        setTimeout(function() { goStep(2); }, 300);
+      }
     }
 
     // Check if already onboarded
