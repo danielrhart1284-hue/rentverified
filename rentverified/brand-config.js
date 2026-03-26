@@ -22,7 +22,7 @@ var BRAND = {
   // ── Founder ──
   founder: {
     name: 'Daniel Hart',
-    company: 'Sanders Property Management',
+    company: '[Your Business Name]',
     email: 'daniel@3120life.com',
     phone: '(801) 555-3120',
     title: 'Founder & CEO'

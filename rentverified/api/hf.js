@@ -1,4 +1,4 @@
-// RentVerified – Hugging Face API Proxy (Vercel Serverless Function)
+// 3120 Life – Hugging Face API Proxy (Vercel Serverless Function)
 // Keeps HF_API_KEY secret on the server, never exposed to the browser.
 // POST /api/hf  { task, prompt, context }
 // Returns      { result: "..." }
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
 
   // Map task names to system prompts
   const SYSTEM_PROMPTS = {
-    'listing-description': `You are a professional property listing copywriter for Sanders Property Management in Utah.
+    'listing-description': `You are a professional property listing copywriter for [Your Business Name] in Utah.
 Write compelling, accurate rental listing descriptions. Be warm, clear, and highlight the best features.
 Keep it 3–5 sentences. No exaggeration. Focus on lifestyle benefits.`,
 
