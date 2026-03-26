@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payroll &ndash; 3120 Life</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { background: #f3f4f6; }
+    .pr-layout { max-width: 1100px; margin: 0 auto; padding: 5.5rem 1.5rem 2rem; }
+    .pr-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+    .pr-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+    .pr-header .sub { font-size: 0.85rem; color: #6b7280; }
+
+    .toolbar { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .toolbar select { padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; }
+    .toolbar label { font-size: 0.82rem; font-weight: 600; color: #374151; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-left: 4px solid #e2e8f0; }
+    .stat-card.emp { border-left-color: #3b82f6; }
+    .stat-card.gross { border-left-color: #10b981; }
+    .stat-card.ded { border-left-color: #f59e0b; }
+    .stat-card.net { border-left-color: #8b5cf6; }
+    .stat-card .label { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-card .value { font-size: 1.6rem; font-weight: 700; color: #1e293b; margin-top: .25rem; }
+
+    .pr-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
+    .pr-card h3 { padding: 1rem 1.25rem 0; font-size: 1rem; font-weight: 800; color: #1e1b4b; }
+    .pr-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .pr-table th { text-align: left; padding: 0.65rem 1rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .pr-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #f3f4f6; }
+    .pr-table tr:hover td { background: #f9fafb; }
+    .pr-table input[type="number"] { width: 70px; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.82rem; }
+
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+    .badge.hourly { background: #dbeafe; color: #1e40af; }
+    .badge.salary { background: #ede9fe; color: #5b21b6; }
+
+    .btn-add { background: #4f46e5; color: #fff; border: none; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+    .btn-add:hover { background: #4338ca; }
+    .btn-run { background: #059669; color: #fff; border: none; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+    .btn-run:hover { background: #047857; }
+
+    .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
+    .act-btn.edit { background: #dbeafe; color: #2563eb; }
+    .act-btn.del { background: #fee2e2; color: #dc2626; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 2rem; width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1.2rem; font-weight: 800; color: #1e1b4b; margin-bottom: 1rem; }
+    .modal label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; margin-top: 0.75rem; }
+    .modal input, .modal select { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .modal-actions .btn-save { flex: 1; background: #4f46e5; color: #fff; border: none; padding: 0.6rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .modal-actions .btn-cancel { flex: 1; background: #f3f4f6; color: #374151; border: none; padding: 0.6rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+    .run-history { margin-top: 1rem; }
+    .run-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem; }
+    .run-card .run-date { font-weight: 700; color: #1e1b4b; font-size: 0.9rem; }
+    .run-card .run-total { color: #059669; font-weight: 700; }
+
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e293b; color: #fff; padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; z-index: 2000; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .empty-state { text-align: center; padding: 3rem; color: #9ca3af; }
+
+    @media (max-width: 768px) {
+      .pr-layout { padding: 5rem 0.75rem 1.5rem; }
+      .pr-table { font-size: 0.78rem; }
+      .pr-table th, .pr-table td { padding: 0.5rem 0.5rem; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">3120 Life</span> <span style="font-weight:500;opacity:0.9;">Payroll</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="time-tracking.html">Time Tracking</a>
+    <a href="payroll.html" style="color:#1a56db;font-weight:700;">Payroll</a>
+    <a href="accounting.html">Accounting</a>
+  </div>
+  <div class="nav-cta"><a href="index.html" class="btn btn-primary btn-sm">Dashboard</a></div>
+</nav>
+
+<div class="pr-layout">
+  <div class="pr-header">
+    <div>
+      <h1>Payroll</h1>
+      <span class="sub">Calculate pay for hourly and salaried employees</span>
+    </div>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+      <button class="btn-add" onclick="openModal()">+ Add Employee</button>
+      <button class="btn-run" onclick="runPayroll()">Run Payroll</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <label>Pay Period:</label>
+    <select id="payPeriod" onchange="renderTable()">
+      <option value="weekly">Weekly</option>
+      <option value="biweekly" selected>Bi-Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card emp"><div class="label">Employees</div><div class="value" id="statEmp">0</div></div>
+    <div class="stat-card gross"><div class="label">Total Gross</div><div class="value" id="statGross">$0</div></div>
+    <div class="stat-card ded"><div class="label">Total Deductions</div><div class="value" id="statDed">$0</div></div>
+    <div class="stat-card net"><div class="label">Total Net</div><div class="value" id="statNet">$0</div></div>
+  </div>
+
+  <div class="pr-card">
+    <h3>Employee Roster</h3>
+    <div style="overflow-x:auto;">
+      <table class="pr-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Rate</th>
+            <th>Hours</th>
+            <th>Gross Pay</th>
+            <th>Tax %</th>
+            <th>Deductions</th>
+            <th>Net Pay</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="empTable"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="emptyState">No employees added yet. Click "+ Add Employee" to start.</div>
+  </div>
+
+  <div class="pr-card">
+    <h3>Payroll History</h3>
+    <div id="runHistory" class="run-history" style="padding:1rem 1.25rem;">
+      <div class="empty-state" id="emptyRuns">No payroll runs yet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Add Employee</h2>
+    <label>Employee Name</label>
+    <input type="text" id="fName" placeholder="e.g. John Smith" />
+    <label>Type</label>
+    <select id="fType" onchange="toggleRateLabel()">
+      <option value="hourly">Hourly</option>
+      <option value="salary">Salary</option>
+    </select>
+    <label id="rateLabel">Hourly Rate ($)</label>
+    <input type="number" id="fRate" min="0" step="0.01" placeholder="e.g. 25.00" />
+    <label>Tax Withholding (%)</label>
+    <input type="number" id="fTax" min="0" max="100" step="0.5" value="22" />
+    <input type="hidden" id="fEditIdx" value="-1" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEmployee()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>RVData._useSupabase = function() { return false; };</script>
+<script src="share-widget.js"></script>
+<script>
+var EMP_KEY = 'rv_payroll_employees';
+var RUN_KEY = 'rv_payroll_runs';
+
+function getEmployees() { try { return JSON.parse(localStorage.getItem(EMP_KEY)) || []; } catch(e) { return []; } }
+function saveEmployees(d) { localStorage.setItem(EMP_KEY, JSON.stringify(d)); }
+function getRuns() { try { return JSON.parse(localStorage.getItem(RUN_KEY)) || []; } catch(e) { return []; } }
+function saveRuns(d) { localStorage.setItem(RUN_KEY, JSON.stringify(d)); }
+
+function getPeriodHours() {
+  var p = document.getElementById('payPeriod').value;
+  if (p === 'weekly') return 40;
+  if (p === 'biweekly') return 80;
+  return 173.33; // monthly approx
+}
+
+function calcGross(emp) {
+  if (emp.type === 'salary') {
+    var p = document.getElementById('payPeriod').value;
+    var annual = parseFloat(emp.rate) || 0;
+    if (p === 'weekly') return annual / 52;
+    if (p === 'biweekly') return annual / 26;
+    return annual / 12;
+  }
+  var hours = parseFloat(emp.hours) || 0;
+  return hours * (parseFloat(emp.rate) || 0);
+}
+
+function renderTable() {
+  var list = getEmployees();
+  document.getElementById('emptyState').style.display = list.length ? 'none' : 'block';
+  var totalGross = 0, totalDed = 0, totalNet = 0;
+  document.getElementById('empTable').innerHTML = list.map(function(emp, i) {
+    var gross = calcGross(emp);
+    var tax = parseFloat(emp.tax) || 0;
+    var ded = gross * tax / 100;
+    var net = gross - ded;
+    totalGross += gross; totalDed += ded; totalNet += net;
+    return '<tr>' +
+      '<td><strong>' + esc(emp.name) + '</strong></td>' +
+      '<td><span class="badge ' + emp.type + '">' + emp.type + '</span></td>' +
+      '<td>' + (emp.type === 'salary' ? '$'+num(emp.rate)+'/yr' : '$'+num(emp.rate)+'/hr') + '</td>' +
+      '<td>' + (emp.type === 'hourly' ? '<input type="number" value="'+(emp.hours||0)+'" min="0" step="0.5" onchange="updateHours('+i+',this.value)">' : 'N/A') + '</td>' +
+      '<td>$' + num(gross) + '</td>' +
+      '<td>' + tax + '%</td>' +
+      '<td>$' + num(ded) + '</td>' +
+      '<td><strong>$' + num(net) + '</strong></td>' +
+      '<td>' +
+        '<button class="act-btn edit" onclick="editEmployee('+i+')">Edit</button>' +
+        '<button class="act-btn del" onclick="deleteEmployee('+i+')">Del</button>' +
+      '</td></tr>';
+  }).join('');
+
+  document.getElementById('statEmp').textContent = list.length;
+  document.getElementById('statGross').textContent = '$' + num(totalGross);
+  document.getElementById('statDed').textContent = '$' + num(totalDed);
+  document.getElementById('statNet').textContent = '$' + num(totalNet);
+}
+
+function updateHours(i, val) {
+  var list = getEmployees();
+  if (list[i]) { list[i].hours = parseFloat(val) || 0; saveEmployees(list); renderTable(); }
+}
+
+function toggleRateLabel() {
+  var t = document.getElementById('fType').value;
+  document.getElementById('rateLabel').textContent = t === 'salary' ? 'Annual Salary ($)' : 'Hourly Rate ($)';
+}
+
+function openModal() {
+  document.getElementById('modalTitle').textContent = 'Add Employee';
+  document.getElementById('fName').value = '';
+  document.getElementById('fType').value = 'hourly';
+  document.getElementById('fRate').value = '';
+  document.getElementById('fTax').value = '22';
+  document.getElementById('fEditIdx').value = '-1';
+  toggleRateLabel();
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function editEmployee(i) {
+  var list = getEmployees();
+  var emp = list[i];
+  if (!emp) return;
+  document.getElementById('modalTitle').textContent = 'Edit Employee';
+  document.getElementById('fName').value = emp.name;
+  document.getElementById('fType').value = emp.type;
+  document.getElementById('fRate').value = emp.rate;
+  document.getElementById('fTax').value = emp.tax;
+  document.getElementById('fEditIdx').value = i;
+  toggleRateLabel();
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function saveEmployee() {
+  var name = document.getElementById('fName').value.trim();
+  var type = document.getElementById('fType').value;
+  var rate = parseFloat(document.getElementById('fRate').value) || 0;
+  var tax = parseFloat(document.getElementById('fTax').value) || 0;
+  if (!name) { toast('Enter employee name'); return; }
+  if (!rate) { toast('Enter pay rate'); return; }
+  var list = getEmployees();
+  var idx = parseInt(document.getElementById('fEditIdx').value);
+  var emp = { name: name, type: type, rate: rate, tax: tax, hours: 0, id: Date.now() };
+  if (idx >= 0 && list[idx]) {
+    emp.hours = list[idx].hours;
+    emp.id = list[idx].id;
+    list[idx] = emp;
+  } else {
+    list.push(emp);
+  }
+  saveEmployees(list);
+  closeModal(); renderTable();
+  toast(idx >= 0 ? 'Employee updated' : 'Employee added');
+}
+
+function deleteEmployee(i) {
+  if (!confirm('Remove this employee?')) return;
+  var list = getEmployees(); list.splice(i,1); saveEmployees(list); renderTable(); toast('Employee removed');
+}
+
+function runPayroll() {
+  var list = getEmployees();
+  if (!list.length) { toast('Add employees first'); return; }
+  var period = document.getElementById('payPeriod').value;
+  var totalGross = 0, totalNet = 0;
+  var details = list.map(function(emp) {
+    var gross = calcGross(emp);
+    var ded = gross * (parseFloat(emp.tax)||0) / 100;
+    var net = gross - ded;
+    totalGross += gross; totalNet += net;
+    return { name: emp.name, gross: gross, deductions: ded, net: net };
+  });
+  var run = {
+    date: new Date().toISOString(),
+    period: period,
+    employees: details.length,
+    totalGross: totalGross,
+    totalNet: totalNet,
+    details: details
+  };
+  var runs = getRuns();
+  runs.unshift(run);
+  saveRuns(runs);
+  renderRuns();
+  toast('Payroll run complete — Net: $' + num(totalNet));
+}
+
+function renderRuns() {
+  var runs = getRuns();
+  document.getElementById('emptyRuns').style.display = runs.length ? 'none' : 'block';
+  var html = runs.slice(0,10).map(function(r) {
+    var d = new Date(r.date);
+    return '<div class="run-card"><span class="run-date">' + d.toLocaleDateString() + ' — ' + (r.period||'biweekly') + '</span> | ' +
+      r.employees + ' employees | Gross: $' + num(r.totalGross) + ' | <span class="run-total">Net: $' + num(r.totalNet) + '</span></div>';
+  }).join('');
+  document.getElementById('runHistory').innerHTML = (runs.length ? '' : '<div class="empty-state" id="emptyRuns">No payroll runs yet.</div>') + html;
+}
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function num(v) { return (parseFloat(v)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); }, 3500); }
+
+document.addEventListener('DOMContentLoaded', function() { renderTable(); renderRuns(); });
+</script>
+</body>
+</html>

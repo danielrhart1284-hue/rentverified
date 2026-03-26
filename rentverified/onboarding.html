@@ -53,6 +53,7 @@
       background: white; border-radius: 16px; width: 100%; max-width: 640px;
       padding: 2.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     }
+    .ob-card.ob-card-wide { max-width: 780px; }
     .ob-card h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: 0.5rem; color: #111827; }
     .ob-card .ob-subtitle { font-size: 0.95rem; color: #6b7280; margin-bottom: 2rem; line-height: 1.5; }
 
@@ -123,18 +124,84 @@
     .ob-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .ob-hint { font-size: 0.72rem; color: #9ca3af; margin-top: 4px; }
 
-    /* ── Feature Toggle Grid ── */
-    .ob-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-    .ob-feature {
-      display: flex; align-items: center; gap: 0.6rem;
-      padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid #e5e7eb;
-      cursor: pointer; transition: 0.15s; user-select: none;
+    /* ── Tool Picker ── */
+    .tp-search {
+      width: 100%; padding: 0.7rem 0.85rem 0.7rem 2.4rem; border: 1px solid #d1d5db;
+      border-radius: 10px; font-size: 0.9rem; font-family: inherit; margin-bottom: 1.25rem;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.868-3.834zm-5.242.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") 0.75rem center no-repeat;
     }
-    .ob-feature:hover { background: #f9fafb; }
-    .ob-feature.on { background: #f0fdf4; border-color: #86efac; }
-    .ob-feature input[type="checkbox"] { width: 16px; height: 16px; accent-color: #059669; flex-shrink: 0; }
-    .ob-feature-label { font-size: 0.82rem; font-weight: 600; color: #374151; }
-    .ob-feature-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .tp-search:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+    .tp-category {
+      border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+    .tp-category summary {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1rem;
+      font-weight: 700; font-size: 0.92rem; color: #111827; cursor: pointer;
+      list-style: none; user-select: none; background: #f9fafb;
+    }
+    .tp-category summary::-webkit-details-marker { display: none; }
+    .tp-category summary::before {
+      content: ''; display: inline-block; width: 0; height: 0;
+      border-left: 5px solid #9ca3af; border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent; transition: transform 0.2s; flex-shrink: 0;
+    }
+    .tp-category[open] summary::before { transform: rotate(90deg); }
+    .tp-category summary .tp-cat-icon { font-size: 1.15rem; }
+    .tp-category summary .tp-cat-count {
+      margin-left: auto; font-size: 0.72rem; font-weight: 600;
+      color: #6b7280; background: #e5e7eb; padding: 2px 8px; border-radius: 99px;
+    }
+
+    .tp-tool-list { padding: 0.25rem 0; }
+
+    .tp-tool {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 1rem; transition: background 0.1s; cursor: pointer;
+    }
+    .tp-tool:hover { background: #f9fafb; }
+    .tp-tool.tp-hidden { display: none; }
+
+    /* Toggle switch */
+    .tp-toggle {
+      position: relative; width: 38px; height: 22px; flex-shrink: 0;
+    }
+    .tp-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .tp-toggle .tp-slider {
+      position: absolute; inset: 0; background: #d1d5db; border-radius: 99px;
+      transition: 0.2s; cursor: pointer;
+    }
+    .tp-toggle .tp-slider::before {
+      content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px;
+      background: white; border-radius: 50%; transition: 0.2s;
+    }
+    .tp-toggle input:checked + .tp-slider { background: #059669; }
+    .tp-toggle input:checked + .tp-slider::before { transform: translateX(16px); }
+
+    .tp-tool-icon { font-size: 1.2rem; flex-shrink: 0; width: 24px; text-align: center; }
+    .tp-tool-info { flex: 1; min-width: 0; }
+    .tp-tool-name { font-size: 0.85rem; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 0.5rem; }
+    .tp-tool-desc { font-size: 0.72rem; color: #9ca3af; margin-top: 1px; }
+
+    .tp-rec-pill {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 0.62rem; font-weight: 700; color: #059669; background: #d1fae5;
+      padding: 1px 7px; border-radius: 99px; white-space: nowrap;
+    }
+
+    /* Sticky bottom bar */
+    .tp-sticky-bar {
+      position: sticky; bottom: -2.5rem; margin: 1.5rem -2.5rem -2.5rem;
+      padding: 1rem 2.5rem; background: white;
+      border-top: 1px solid #e5e7eb; display: flex; align-items: center;
+      justify-content: space-between; border-radius: 0 0 16px 16px;
+      z-index: 10;
+    }
+    .tp-count { font-size: 0.88rem; font-weight: 700; color: #374151; }
+    .tp-count span { color: #059669; }
+
+    .tp-actions { display: flex; gap: 0.75rem; }
 
     /* ── Team Invite ── */
     .ob-invite-row {
@@ -174,7 +241,7 @@
       font-size: 0.78rem; color: #4b5563; padding: 3px 0;
       display: flex; align-items: center; gap: 6px;
     }
-    .ob-plan-features li::before { content: '✓'; color: #059669; font-weight: 700; }
+    .ob-plan-features li::before { content: '\2713'; color: #059669; font-weight: 700; }
 
     /* ── Buttons ── */
     .ob-actions { display: flex; justify-content: space-between; margin-top: 2rem; gap: 1rem; }
@@ -221,10 +288,11 @@
       .ob-sidebar-footer { display: none; }
       .ob-main { padding: 1.5rem; }
       .ob-card { padding: 1.5rem; }
+      .ob-card.ob-card-wide { max-width: 100%; }
       .ob-industry-grid { grid-template-columns: 1fr; }
       .ob-plans { grid-template-columns: 1fr; }
-      .ob-features { grid-template-columns: 1fr; }
       .ob-row { grid-template-columns: 1fr; }
+      .tp-sticky-bar { margin: 1.5rem -1.5rem -1.5rem; padding: 1rem 1.5rem; }
     }
   </style>
 </head>
@@ -248,7 +316,7 @@
       </div>
       <div class="ob-step" data-step="3">
         <div class="ob-step-num">3</div>
-        <div class="ob-step-info"><h4>Features</h4><p>Customize your tools</p></div>
+        <div class="ob-step-info"><h4>Tool Picker</h4><p>Choose your tools</p></div>
       </div>
       <div class="ob-step" data-step="4">
         <div class="ob-step-num">4</div>
@@ -265,7 +333,7 @@
   <!-- Main Content -->
   <div class="ob-main">
 
-    <!-- ═══ STEP 1: Industry Selection ═══ -->
+    <!-- STEP 1: Industry Selection -->
     <div class="ob-card ob-panel active" id="ob-step-1">
       <h2>What type of business are you?</h2>
       <p class="ob-subtitle">We'll customize your dashboard, features, and terminology based on your industry.</p>
@@ -279,7 +347,7 @@
       </div>
     </div>
 
-    <!-- ═══ STEP 2: Business Details ═══ -->
+    <!-- STEP 2: Business Details -->
     <div class="ob-card ob-panel" id="ob-step-2">
       <h2>Tell us about your business</h2>
       <p class="ob-subtitle" id="ob-biz-subtitle">We'll use this to set up your workspace.</p>
@@ -325,10 +393,10 @@
       <div class="ob-field" id="ob-units-field">
         <label id="ob-label-units">How many units do you manage?</label>
         <select id="ob-units">
-          <option value="1-5">1–5 units</option>
-          <option value="6-20">6–20 units</option>
-          <option value="21-50">21–50 units</option>
-          <option value="51-100">51–100 units</option>
+          <option value="1-5">1-5 units</option>
+          <option value="6-20">6-20 units</option>
+          <option value="21-50">21-50 units</option>
+          <option value="51-100">51-100 units</option>
           <option value="100+">100+ units</option>
         </select>
       </div>
@@ -339,20 +407,25 @@
       </div>
     </div>
 
-    <!-- ═══ STEP 3: Feature Customization ═══ -->
-    <div class="ob-card ob-panel" id="ob-step-3">
-      <h2>Customize Your Tools</h2>
-      <p class="ob-subtitle">Based on <strong id="ob-industry-label"></strong>, we've pre-selected the most relevant features. Toggle any on or off.</p>
+    <!-- STEP 3: Tool Picker -->
+    <div class="ob-card ob-card-wide ob-panel" id="ob-step-3">
+      <h2>Choose Your Tools</h2>
+      <p class="ob-subtitle">Based on <strong id="ob-industry-label"></strong>, we've recommended tools for you. Toggle any tool on or off — you can always change later.</p>
 
-      <div class="ob-features" id="ob-features-grid"></div>
+      <input type="text" class="tp-search" id="tp-search" placeholder="Search tools..." oninput="filterTools(this.value)" />
 
-      <div class="ob-actions">
-        <button class="ob-btn-back" onclick="goStep(2)">Back</button>
-        <button class="ob-btn-next" onclick="goStep(4)">Continue</button>
+      <div id="tp-categories"></div>
+
+      <div class="tp-sticky-bar">
+        <div class="tp-count"><span id="tp-selected-count">0</span> tools selected</div>
+        <div class="tp-actions">
+          <button class="ob-btn-back" onclick="goStep(2)">Back</button>
+          <button class="ob-btn-next" onclick="goStep(4)">Continue</button>
+        </div>
       </div>
     </div>
 
-    <!-- ═══ STEP 4: Team Invites ═══ -->
+    <!-- STEP 4: Team Invites -->
     <div class="ob-card ob-panel" id="ob-step-4">
       <h2>Invite Your Team</h2>
       <p class="ob-subtitle">Add team members now or skip this step. You can always invite people later from your dashboard.</p>
@@ -377,7 +450,7 @@
       </div>
     </div>
 
-    <!-- ═══ STEP 5: Plan Selection ═══ -->
+    <!-- STEP 5: Plan Selection -->
     <div class="ob-card ob-panel" id="ob-step-5">
       <h2>Choose Your Plan</h2>
       <p class="ob-subtitle">Start free, upgrade anytime. All plans include a 14-day trial of Pro features.</p>
@@ -390,25 +463,25 @@
       </div>
     </div>
 
-    <!-- ═══ SUCCESS ═══ -->
+    <!-- SUCCESS -->
     <div class="ob-card ob-panel" id="ob-step-done">
       <div class="ob-success">
-        <div class="ob-success-icon">🚀</div>
+        <div class="ob-success-icon">&#x1F680;</div>
         <h2>Your Workspace is Ready!</h2>
         <p id="ob-success-msg">Welcome to 3120 Life. Your workspace has been set up for property management.</p>
         <div class="ob-success-features" id="ob-success-features"></div>
-        <a id="ob-dashboard-link" href="landlord-signup.html" class="ob-btn-finish" style="display:inline-block; text-decoration:none; max-width:320px;">Go to Dashboard →</a>
+        <a id="ob-dashboard-link" href="landlord-signup.html" class="ob-btn-finish" style="display:inline-block; text-decoration:none; max-width:320px;">Go to Dashboard &#x2192;</a>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- ═══ Waitlist Modal ═══ -->
+<!-- Waitlist Modal -->
 <div class="ob-waitlist-overlay" id="waitlistOverlay" onclick="if(event.target===this)closeWaitlist()">
   <div class="ob-waitlist-card">
     <button class="ob-waitlist-close" onclick="closeWaitlist()">&times;</button>
-    <div style="font-size:2.5rem;margin-bottom:0.5rem;" id="waitlistIcon">🔒</div>
+    <div style="font-size:2.5rem;margin-bottom:0.5rem;" id="waitlistIcon">&#x1F512;</div>
     <h3 id="waitlistTitle">Coming Soon</h3>
     <p id="waitlistDesc">This vertical is launching soon — join the waitlist to get early access.</p>
     <div id="waitlistForm">
@@ -416,7 +489,7 @@
       <button class="ob-waitlist-btn" id="waitlistSubmit" onclick="submitWaitlist()">Join the Waitlist</button>
     </div>
     <div id="waitlistSuccess" class="ob-waitlist-success" style="display:none;">
-      ✅ You're on the list! We'll email you when this vertical launches.
+      You're on the list! We'll email you when this vertical launches.
     </div>
   </div>
 </div>
@@ -428,231 +501,320 @@
 <script src="workspace.js"></script>
 <script>
   // ═══════════════════════════════════════════════════════════════════════
-  // Industry-Specific Onboarding Engine
+  // Industry-Specific Onboarding Engine with Full Tool Picker
   // ═══════════════════════════════════════════════════════════════════════
 
-  // ── Industry Definitions (extended from workspace.js) ──
-  // comingSoon: true → locked tile, opens waitlist modal instead of selecting
+  // ── Industry Definitions ──
   var INDUSTRIES = [
     {
-      key: 'property_management', icon: '🏠', name: 'Property Management',
+      key: 'property_management', icon: '\u{1F3E0}', name: 'Property Management',
       desc: 'Residential landlords & property managers',
       companyLabel: 'Company Name', unitsLabel: 'How many units do you manage?',
-      unitsOptions: ['1–5 units','6–20 units','21–50 units','51–100 units','100+ units'],
+      unitsOptions: ['1\u20135 units','6\u201320 units','21\u201350 units','51\u2013100 units','100+ units'],
       subtitle: 'We\'ll set up rent collection, maintenance, leases, and tenant screening.',
       successMsg: 'property management'
     },
     {
-      key: 'construction_trades', icon: '🏗️', name: 'Construction & Trades',
+      key: 'construction_trades', icon: '\u{1F3D7}\uFE0F', name: 'Construction & Trades',
       desc: 'GCs, subs, plumbers, electricians, HVAC & all skilled trades',
       companyLabel: 'Business Name', unitsLabel: 'How many crew members?',
-      unitsOptions: ['Just me','2–5 crew','6–15 crew','15+ crew'],
+      unitsOptions: ['Just me','2\u20135 crew','6\u201315 crew','15+ crew'],
       subtitle: 'We\'ll set up jobs, scheduling, time tracking, quotes, and invoicing.',
       successMsg: 'construction & trades business'
     },
     {
-      key: 'accountant', icon: '📊', name: 'Accountant / Bookkeeper',
+      key: 'accountant', icon: '\u{1F4CA}', name: 'Accountant / Bookkeeper',
       desc: 'Tax prep, bookkeeping, advisory',
       companyLabel: 'Firm Name', unitsLabel: 'How many clients?',
-      unitsOptions: ['1–10 clients','11–50 clients','51–100 clients','100+ clients'],
+      unitsOptions: ['1\u201310 clients','11\u201350 clients','51\u2013100 clients','100+ clients'],
       subtitle: 'We\'ll set up client management, time tracking, invoicing, and document storage.',
       successMsg: 'accounting practice'
     },
     {
-      key: 'restaurant_food', icon: '🍽️', name: 'Restaurant / Food Service',
+      key: 'restaurant_food', icon: '\u{1F37D}\uFE0F', name: 'Restaurant / Food Service',
       desc: 'Restaurants, food trucks, catering, bakeries',
       companyLabel: 'Business Name', unitsLabel: 'How many locations?',
-      unitsOptions: ['1 location','2–3 locations','4–10 locations','10+ locations'],
+      unitsOptions: ['1 location','2\u20133 locations','4\u201310 locations','10+ locations'],
       subtitle: 'We\'ll set up booking, invoicing, inventory tracking, staff management, and reviews.',
       successMsg: 'food service business'
     },
     {
-      key: 'retail', icon: '🛍️', name: 'Retail / Shop Owner',
+      key: 'retail', icon: '\u{1F6CD}\uFE0F', name: 'Retail / Shop Owner',
       desc: 'Retail stores, e-commerce, boutiques',
       companyLabel: 'Store / Brand Name', unitsLabel: 'How many locations?',
-      unitsOptions: ['1 location','2–5 locations','6–15 locations','15+ locations'],
+      unitsOptions: ['1 location','2\u20135 locations','6\u201315 locations','15+ locations'],
       subtitle: 'We\'ll set up inventory, invoicing, CRM, accounting, and sales tracking.',
       successMsg: 'retail business'
     },
     {
-      key: 'salon_beauty', icon: '💇', name: 'Salon / Barber / Beauty',
+      key: 'salon_beauty', icon: '\u{1F487}', name: 'Salon / Barber / Beauty',
       desc: 'Hair salons, barbers, nail techs, estheticians',
       companyLabel: 'Business Name', unitsLabel: 'How many stylists/technicians?',
-      unitsOptions: ['Just me','2–5 people','6–15 people','15+ people'],
+      unitsOptions: ['Just me','2\u20135 people','6\u201315 people','15+ people'],
       subtitle: 'We\'ll set up appointment booking, client management, reviews, invoicing, and social sharing.',
       successMsg: 'beauty business'
     },
     {
-      key: 'fitness_training', icon: '💪', name: 'Fitness / Personal Training',
+      key: 'fitness_training', icon: '\u{1F4AA}', name: 'Fitness / Personal Training',
       desc: 'Gyms, personal trainers, yoga studios, coaches',
       companyLabel: 'Business Name', unitsLabel: 'How many clients?',
-      unitsOptions: ['1–10 clients','11–30 clients','31–100 clients','100+ clients'],
+      unitsOptions: ['1\u201310 clients','11\u201330 clients','31\u2013100 clients','100+ clients'],
       subtitle: 'We\'ll set up booking, client tracking, invoicing, and session management.',
       successMsg: 'fitness business'
     },
     {
-      key: 'photography_creative', icon: '📸', name: 'Photography / Creative',
+      key: 'photography_creative', icon: '\u{1F4F8}', name: 'Photography / Creative',
       desc: 'Photographers, videographers, designers, artists',
       companyLabel: 'Business / Studio Name', unitsLabel: 'Monthly projects?',
-      unitsOptions: ['1–5 projects','6–15 projects','16–30 projects','30+ projects'],
+      unitsOptions: ['1\u20135 projects','6\u201315 projects','16\u201330 projects','30+ projects'],
       subtitle: 'We\'ll set up project tracking, client CRM, invoicing, contracts, and portfolio sharing.',
       successMsg: 'creative business'
     },
     {
-      key: 'cleaning', icon: '🧹', name: 'Cleaning / Janitorial',
+      key: 'cleaning', icon: '\u{1F9F9}', name: 'Cleaning / Janitorial',
       desc: 'Residential cleaning, commercial janitorial, carpet cleaning',
       companyLabel: 'Business Name', unitsLabel: 'How many crew members?',
-      unitsOptions: ['Just me','2–5 crew','6–15 crew','15+ crew'],
+      unitsOptions: ['Just me','2\u20135 crew','6\u201315 crew','15+ crew'],
       subtitle: 'We\'ll set up job scheduling, client management, invoicing, and crew tracking.',
       successMsg: 'cleaning business'
     },
     {
-      key: 'tutoring_education', icon: '📚', name: 'Tutoring / Education',
+      key: 'tutoring_education', icon: '\u{1F4DA}', name: 'Tutoring / Education',
       desc: 'Tutors, online courses, training centers, coaches',
       companyLabel: 'Business Name', unitsLabel: 'How many students?',
-      unitsOptions: ['1–10 students','11–30 students','31–100 students','100+ students'],
+      unitsOptions: ['1\u201310 students','11\u201330 students','31\u2013100 students','100+ students'],
       subtitle: 'We\'ll set up booking, student tracking, invoicing, and session management.',
       successMsg: 'education business'
     },
     {
-      key: 'pet_services', icon: '🐾', name: 'Pet Services',
+      key: 'pet_services', icon: '\u{1F43E}', name: 'Pet Services',
       desc: 'Dog walking, grooming, pet sitting, boarding',
       companyLabel: 'Business Name', unitsLabel: 'Monthly clients?',
-      unitsOptions: ['1–10 clients','11–30 clients','31–100 clients','100+ clients'],
+      unitsOptions: ['1\u201310 clients','11\u201330 clients','31\u2013100 clients','100+ clients'],
       subtitle: 'We\'ll set up booking, client management, invoicing, and pet profiles.',
       successMsg: 'pet services business'
     },
     {
-      key: 'auto_services', icon: '🚗', name: 'Auto / Mechanic',
+      key: 'auto_services', icon: '\u{1F697}', name: 'Auto / Mechanic',
       desc: 'Auto repair, detailing, body shops, towing',
       companyLabel: 'Shop Name', unitsLabel: 'Monthly vehicles?',
-      unitsOptions: ['1–20 vehicles','21–50 vehicles','51–100 vehicles','100+ vehicles'],
+      unitsOptions: ['1\u201320 vehicles','21\u201350 vehicles','51\u2013100 vehicles','100+ vehicles'],
       subtitle: 'We\'ll set up job tracking, parts/invoicing, client management, and scheduling.',
       successMsg: 'auto services business'
     },
     {
-      key: 'attorney', icon: '⚖️', name: 'Attorney / Law Firm',
+      key: 'attorney', icon: '\u2696\uFE0F', name: 'Attorney / Law Firm',
       desc: 'Case management, billing, deadlines',
       companyLabel: 'Firm Name', unitsLabel: 'How many attorneys?',
-      unitsOptions: ['Solo practitioner','2–5 attorneys','6–20 attorneys','20+ attorneys'],
+      unitsOptions: ['Solo practitioner','2\u20135 attorneys','6\u201320 attorneys','20+ attorneys'],
       subtitle: 'We\'ll set up matter management, time billing, deadlines, trust accounting, and document storage.',
       successMsg: 'law practice'
     },
     {
-      key: 'lending', icon: '🏦', name: 'Lending / Mortgage',
+      key: 'lending', icon: '\u{1F3E6}', name: 'Lending / Mortgage',
       desc: 'Loan pipelines, doc checklists, funding',
       companyLabel: 'Company Name', unitsLabel: 'Monthly loan volume?',
-      unitsOptions: ['1–5 loans/mo','6–20 loans/mo','21–50 loans/mo','50+ loans/mo'],
+      unitsOptions: ['1\u20135 loans/mo','6\u201320 loans/mo','21\u201350 loans/mo','50+ loans/mo'],
       subtitle: 'We\'ll set up your loan pipeline, document checklists, borrower management, and accounting.',
       successMsg: 'lending operation'
     },
     {
-      key: 'marketing_consulting', icon: '📣', name: 'Marketing / Consultant',
+      key: 'marketing_consulting', icon: '\u{1F4E3}', name: 'Marketing / Consultant',
       desc: 'Proposals, retainers, client projects',
       companyLabel: 'Agency / Business Name', unitsLabel: 'Monthly active clients?',
-      unitsOptions: ['1–5 clients','6–15 clients','16–30 clients','30+ clients'],
+      unitsOptions: ['1\u20135 clients','6\u201315 clients','16\u201330 clients','30+ clients'],
       subtitle: 'We\'ll set up proposal management, retainer tracking, client CRM, and invoicing.',
       successMsg: 'marketing business'
     },
     {
-      key: 'commercial_re', icon: '🏢', name: 'Commercial Real Estate',
+      key: 'commercial_re', icon: '\u{1F3E2}', name: 'Commercial Real Estate',
       desc: 'NNN/CAM, tenant buildout, commercial leases',
       companyLabel: 'Brokerage / Company Name', unitsLabel: 'Portfolio size?',
-      unitsOptions: ['1–5 properties','6–20 properties','21–50 properties','50+ properties'],
+      unitsOptions: ['1\u20135 properties','6\u201320 properties','21\u201350 properties','50+ properties'],
       subtitle: 'We\'ll set up commercial lease management, NNN/CAM tracking, tenant buildout coordination, and deal pipeline.',
       successMsg: 'commercial real estate business'
     },
     {
-      key: 'insurance', icon: '🛡️', name: 'Insurance Agent / Broker',
+      key: 'insurance', icon: '\u{1F6E1}\uFE0F', name: 'Insurance Agent / Broker',
       desc: 'Policy pipeline, renewals, commissions',
       companyLabel: 'Agency Name', unitsLabel: 'How many agents?',
-      unitsOptions: ['Solo agent','2–5 agents','6–15 agents','15+ agents'],
+      unitsOptions: ['Solo agent','2\u20135 agents','6\u201315 agents','15+ agents'],
       subtitle: 'We\'ll set up your policy pipeline, renewal tracking, commission management, and CRM.',
       successMsg: 'insurance agency'
     },
     {
-      key: 'wellness_spa', icon: '💆', name: 'Medical Spa / Wellness',
+      key: 'wellness_spa', icon: '\u{1F486}', name: 'Medical Spa / Wellness',
       desc: 'Appointments, inventory, consent forms',
       companyLabel: 'Practice Name', unitsLabel: 'How many providers?',
-      unitsOptions: ['Solo provider','2–5 providers','6–15 providers','15+ providers'],
+      unitsOptions: ['Solo provider','2\u20135 providers','6\u201315 providers','15+ providers'],
       subtitle: 'We\'ll set up appointment scheduling, inventory tracking, consent forms, and client management.',
       successMsg: 'wellness practice'
     },
     {
-      key: 'nonprofit', icon: '💚', name: 'Nonprofit / Association',
+      key: 'nonprofit', icon: '\u{1F49A}', name: 'Nonprofit / Association',
       desc: 'Donors, volunteers, grants, fund accounting',
       companyLabel: 'Organization Name', unitsLabel: 'Annual budget?',
-      unitsOptions: ['Under $100K','$100K–$500K','$500K–$2M','$2M+'],
+      unitsOptions: ['Under $100K','$100K\u2013$500K','$500K\u2013$2M','$2M+'],
       subtitle: 'We\'ll set up donor management, volunteer tracking, grant applications, and fund accounting.',
       successMsg: 'nonprofit organization'
     },
     {
-      key: 'short_term_rental', icon: '🏖️', name: 'Short-Term Rental',
+      key: 'short_term_rental', icon: '\u{1F3D6}\uFE0F', name: 'Short-Term Rental',
       desc: 'Airbnb, VRBO, guest management',
       companyLabel: 'Business Name', unitsLabel: 'How many listings?',
-      unitsOptions: ['1–3 listings','4–10 listings','11–25 listings','25+ listings'],
+      unitsOptions: ['1\u20133 listings','4\u201310 listings','11\u201325 listings','25+ listings'],
       subtitle: 'We\'ll set up guest management, booking calendar, cleaning schedules, and channel integration.',
       successMsg: 'short-term rental business'
     },
     {
-      key: 'general', icon: '🚀', name: 'Something Else',
-      desc: 'Don\'t see your business? No problem — we\'ll set you up.',
+      key: 'general', icon: '\u{1F680}', name: 'Something Else',
+      desc: 'Don\'t see your business? No problem \u2014 we\'ll set you up.',
       companyLabel: 'Business Name', unitsLabel: 'How many team members?',
-      unitsOptions: ['Just me','2–10 people','11–50 people','50+ people'],
+      unitsOptions: ['Just me','2\u201310 people','11\u201350 people','50+ people'],
       subtitle: 'Tell us what you do and we\'ll build a workspace with the tools that fit. You can turn features on or off anytime.',
       successMsg: 'business',
       customType: true
     }
   ];
 
-  // ── Feature Definitions ──
-  var FEATURES = [
-    { key: 'properties',     icon: '🏠', label: 'Properties',       group: 'core' },
-    { key: 'tenants',        icon: '👥', label: 'Tenants / Clients', group: 'core' },
-    { key: 'leases',         icon: '📄', label: 'Leases / Contracts', group: 'core' },
-    { key: 'maintenance',    icon: '🔧', label: 'Maintenance / Work Orders', group: 'operations' },
-    { key: 'payments',       icon: '💳', label: 'Payments',          group: 'financial' },
-    { key: 'accounting',     icon: '📊', label: 'Accounting',        group: 'financial' },
-    { key: 'invoices',       icon: '📃', label: 'Invoicing',         group: 'financial' },
-    { key: 'screening',      icon: '🔍', label: 'Screening',         group: 'operations' },
-    { key: 'documents',      icon: '📁', label: 'Documents',         group: 'core' },
-    { key: 'e_signature',    icon: '✍️', label: 'E-Signatures',      group: 'core' },
-    { key: 'time_tracking',  icon: '⏱️', label: 'Time Tracking',     group: 'operations' },
-    { key: 'crm',            icon: '📇', label: 'CRM',               group: 'operations' },
-    { key: 'insurance',      icon: '🛡️', label: 'Insurance',         group: 'financial' },
-    { key: 'eviction',       icon: '⚠️', label: 'Eviction Mgmt',     group: 'legal' },
-    { key: 'deposit_bonds',  icon: '🔐', label: 'Deposit Bonds',     group: 'financial' },
-    { key: 'credit_builder', icon: '📈', label: 'Credit Builder',    group: 'financial' },
-    { key: 'owner_statements', icon: '📋', label: 'Owner Statements', group: 'financial' },
-    { key: 'listings',       icon: '📢', label: 'Listing Syndication', group: 'marketing' },
-    { key: 'projects',       icon: '🏗️', label: 'Jobs / Projects',    group: 'operations' },
-    { key: 'scheduling',     icon: '📅', label: 'Scheduling',         group: 'operations' },
-    { key: 'quotes',         icon: '📝', label: 'Quotes & Estimates', group: 'financial' }
+  // ═══════════════════════════════════════════════════════════════════════
+  // FULL TOOL CATALOG — 40+ tools organized by category
+  // ═══════════════════════════════════════════════════════════════════════
+  var TOOL_CATALOG = [
+    // Money (always recommended)
+    { cat: 'money', catLabel: 'Money', catIcon: '\u{1F4B0}', id: 'accounting', name: 'Accounting & Bookkeeping', desc: 'Track income, expenses, profit', icon: '\u{1F4CA}' },
+    { cat: 'money', catLabel: 'Money', catIcon: '\u{1F4B0}', id: 'invoicing', name: 'Invoicing & QR Payments', desc: 'Send invoices, clients scan to pay', icon: '\u{1F4C3}' },
+    { cat: 'money', catLabel: 'Money', catIcon: '\u{1F4B0}', id: 'expense_tracking', name: 'Expense Tracking', desc: 'Log expenses, snap receipt photos', icon: '\u{1F9FE}' },
+    { cat: 'money', catLabel: 'Money', catIcon: '\u{1F4B0}', id: 'commission_tracking', name: 'Commission Tracking', desc: 'Track sales team commissions & payouts', icon: '\u{1F4B8}' },
+
+    // Clients & Sales
+    { cat: 'clients', catLabel: 'Clients & Sales', catIcon: '\u{1F465}', id: 'crm', name: 'CRM & Lead Pipeline', desc: 'Track leads from first contact to client', icon: '\u{1F4C7}' },
+    { cat: 'clients', catLabel: 'Clients & Sales', catIcon: '\u{1F465}', id: 'client_portal', name: 'Client Portal', desc: 'Clients view appointments, pay invoices, message you', icon: '\u{1F464}' },
+    { cat: 'clients', catLabel: 'Clients & Sales', catIcon: '\u{1F465}', id: 'reviews', name: 'Reviews & Reputation', desc: 'Collect reviews, display on your profile', icon: '\u2B50' },
+    { cat: 'clients', catLabel: 'Clients & Sales', catIcon: '\u{1F465}', id: 'referral_program', name: 'Referral Program', desc: 'Earn referrals from happy clients', icon: '\u{1F91D}' },
+    { cat: 'clients', catLabel: 'Clients & Sales', catIcon: '\u{1F465}', id: 'email_campaigns', name: 'Email Campaigns', desc: 'Send newsletters, promotions, follow-ups', icon: '\u{1F4E7}' },
+
+    // Scheduling & Operations
+    { cat: 'scheduling', catLabel: 'Scheduling & Operations', catIcon: '\u{1F4C5}', id: 'online_booking', name: 'Online Booking', desc: 'Clients book appointments from your page', icon: '\u{1F4C5}' },
+    { cat: 'scheduling', catLabel: 'Scheduling & Operations', catIcon: '\u{1F4C5}', id: 'team_scheduling', name: 'Team Scheduling', desc: 'Assign staff to jobs and shifts', icon: '\u{1F465}' },
+    { cat: 'scheduling', catLabel: 'Scheduling & Operations', catIcon: '\u{1F4C5}', id: 'recurring_appointments', name: 'Recurring Appointments', desc: 'Automate repeat bookings (weekly cleaning, etc.)', icon: '\u{1F501}' },
+    { cat: 'scheduling', catLabel: 'Scheduling & Operations', catIcon: '\u{1F4C5}', id: 'time_tracking', name: 'Time Tracking', desc: 'Track hours for employees, contractors, billable work', icon: '\u23F1\uFE0F' },
+    { cat: 'scheduling', catLabel: 'Scheduling & Operations', catIcon: '\u{1F4C5}', id: 'route_planning', name: 'Route Planning', desc: 'Optimize daily routes for field workers', icon: '\u{1F5FA}\uFE0F' },
+    { cat: 'scheduling', catLabel: 'Scheduling & Operations', catIcon: '\u{1F4C5}', id: 'waitlist_mgmt', name: 'Waitlist Management', desc: 'Manage walk-ins and waitlists', icon: '\u{1F4CB}' },
+    { cat: 'scheduling', catLabel: 'Scheduling & Operations', catIcon: '\u{1F4C5}', id: 'project_mgmt', name: 'Project Management', desc: 'Track projects with tasks and milestones', icon: '\u{1F4CC}' },
+
+    // Field & Mobile
+    { cat: 'field', catLabel: 'Field & Mobile', catIcon: '\u{1F4F1}', id: 'field_app', name: 'Field App', desc: 'Mobile check-in/out, photos, GPS, signatures', icon: '\u{1F4F1}' },
+    { cat: 'field', catLabel: 'Field & Mobile', catIcon: '\u{1F4F1}', id: 'before_after_photos', name: 'Before/After Photos', desc: 'Document work visually', icon: '\u{1F4F7}' },
+    { cat: 'field', catLabel: 'Field & Mobile', catIcon: '\u{1F4F1}', id: 'mileage_tracking', name: 'Mileage Tracking', desc: 'Log miles for tax deductions', icon: '\u{1F698}' },
+
+    // Property
+    { cat: 'property', catLabel: 'Property', catIcon: '\u{1F3E0}', id: 'rent_collection', name: 'Rent Collection', desc: 'Collect rent online', icon: '\u{1F4B5}' },
+    { cat: 'property', catLabel: 'Property', catIcon: '\u{1F3E0}', id: 'tenant_screening', name: 'Tenant Screening', desc: 'Background & credit checks', icon: '\u{1F50D}' },
+    { cat: 'property', catLabel: 'Property', catIcon: '\u{1F3E0}', id: 'lease_mgmt', name: 'Lease Management', desc: 'Create & manage leases', icon: '\u{1F4DC}' },
+    { cat: 'property', catLabel: 'Property', catIcon: '\u{1F3E0}', id: 'maintenance_tracking', name: 'Maintenance Tracking', desc: 'Track repair requests', icon: '\u{1F527}' },
+    { cat: 'property', catLabel: 'Property', catIcon: '\u{1F3E0}', id: 'owner_statements', name: 'Owner Statements', desc: 'Generate owner reports', icon: '\u{1F4CB}' },
+
+    // Documents & Legal
+    { cat: 'documents', catLabel: 'Documents & Legal', catIcon: '\u{1F4C4}', id: 'document_mgmt', name: 'Document Management', desc: 'Store, organize, share files', icon: '\u{1F4C1}' },
+    { cat: 'documents', catLabel: 'Documents & Legal', catIcon: '\u{1F4C4}', id: 'e_signature', name: 'E-Signature', desc: 'Sign documents digitally', icon: '\u270D\uFE0F' },
+    { cat: 'documents', catLabel: 'Documents & Legal', catIcon: '\u{1F4C4}', id: 'estimates_quotes', name: 'Estimates & Quotes', desc: 'Send professional quotes', icon: '\u{1F4DD}' },
+    { cat: 'documents', catLabel: 'Documents & Legal', catIcon: '\u{1F4C4}', id: 'contracts_proposals', name: 'Contracts & Proposals', desc: 'Create service agreements', icon: '\u{1F4D1}' },
+    { cat: 'documents', catLabel: 'Documents & Legal', catIcon: '\u{1F4C4}', id: 'form_builder', name: 'Form Builder', desc: 'Build custom forms & checklists', icon: '\u{1F4CB}' },
+    { cat: 'documents', catLabel: 'Documents & Legal', catIcon: '\u{1F4C4}', id: 'compliance_tracking', name: 'Compliance Tracking', desc: 'Track licenses, permits, deadlines', icon: '\u2705' },
+
+    // Industry-Specific
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'job_tracking', name: 'Job Tracking', desc: 'Track jobs from bid to done (construction)', icon: '\u{1F6E0}\uFE0F' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'materials_supplies', name: 'Materials & Supplies', desc: 'Track inventory & costs', icon: '\u{1F4E6}' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'matter_mgmt', name: 'Matter Management', desc: 'Track cases & deadlines (legal)', icon: '\u2696\uFE0F' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'trust_accounting', name: 'Trust Accounting', desc: 'IOLTA trust accounts (legal)', icon: '\u{1F3E6}' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'policy_tracking', name: 'Policy Tracking', desc: 'Manage client policies (insurance)', icon: '\u{1F6E1}\uFE0F' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'deal_pipeline', name: 'Deal Pipeline', desc: 'Track deals from lead to close (RE/commercial)', icon: '\u{1F4C8}' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'booking_calendar', name: 'Booking Calendar', desc: 'Manage reservations (STR)', icon: '\u{1F4C6}' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'cleaning_schedules', name: 'Cleaning Schedules', desc: 'Automate turnover cleaning (STR)', icon: '\u{1F9F9}' },
+    { cat: 'industry', catLabel: 'Industry-Specific', catIcon: '\u{1F3D7}\uFE0F', id: 'menu_inventory', name: 'Menu & Inventory', desc: 'Track food costs (restaurant)', icon: '\u{1F37D}\uFE0F' },
+
+    // AI & Growth
+    { cat: 'ai_growth', catLabel: 'AI & Growth', catIcon: '\u{1F916}', id: 'ai_advisor', name: 'AI Business Advisor', desc: 'Health score, action list, deadline tracking', icon: '\u{1F916}' },
+    { cat: 'ai_growth', catLabel: 'AI & Growth', catIcon: '\u{1F916}', id: 'loan_connect', name: 'Loan Connect', desc: 'Get funded with AI-packaged financials', icon: '\u{1F4B0}' },
+    { cat: 'ai_growth', catLabel: 'AI & Growth', catIcon: '\u{1F916}', id: 'service_connect', name: 'Service Connect', desc: 'Find accountants, attorneys, insurance agents', icon: '\u{1F310}' },
+    { cat: 'ai_growth', catLabel: 'AI & Growth', catIcon: '\u{1F916}', id: 'gift_cards_loyalty', name: 'Gift Cards & Loyalty', desc: 'Reward repeat customers', icon: '\u{1F381}' },
+    { cat: 'ai_growth', catLabel: 'AI & Growth', catIcon: '\u{1F916}', id: 'ad_builder', name: 'Ad Builder', desc: 'Create listing and promo ads', icon: '\u{1F4E2}' }
   ];
 
-  // ── Default Features Per Industry ──
-  var INDUSTRY_FEATURES = {
-    property_management:  { properties:1, tenants:1, leases:1, maintenance:1, payments:1, accounting:1, screening:1, documents:1, insurance:1, deposit_bonds:1, credit_builder:1, eviction:1, owner_statements:1, listings:1, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:0, quotes:0 },
-    commercial_re:        { properties:1, tenants:1, leases:1, maintenance:1, payments:1, accounting:1, screening:1, documents:1, insurance:1, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:1, listings:1, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:0, quotes:0 },
-    attorney:             { properties:0, tenants:0, leases:1, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:1, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:1, projects:0, scheduling:0, quotes:0 },
-    construction_trades:  { properties:0, tenants:0, leases:0, maintenance:1, payments:1, accounting:1, screening:0, documents:1, insurance:1, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:1, projects:1, scheduling:1, quotes:1 },
-    insurance:            { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:1, deposit_bonds:1, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:0, quotes:0 },
-    short_term_rental:    { properties:1, tenants:1, leases:1, maintenance:1, payments:1, accounting:1, screening:1, documents:1, insurance:1, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:1, listings:1, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:0, quotes:0 },
-    accountant:           { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:1, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:1, projects:0, scheduling:0, quotes:0 },
-    general:              { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:1, projects:0, scheduling:0, quotes:0 },
-    wellness_spa:         { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:1, quotes:0 },
-    lending:              { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:1, documents:1, insurance:0, deposit_bonds:0, credit_builder:1, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:0, quotes:0 },
-    marketing_consulting: { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:1, projects:1, scheduling:0, quotes:0 },
-    nonprofit:            { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:1, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:0, quotes:0 },
-    restaurant_food:      { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:0, invoices:1, crm:1, time_tracking:1, projects:0, scheduling:1, quotes:0 },
-    retail:               { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:0, invoices:1, crm:1, time_tracking:1, projects:0, scheduling:0, quotes:0 },
-    salon_beauty:         { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:0, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:1, quotes:0 },
-    fitness_training:     { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:1, quotes:0 },
-    photography_creative: { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:1, invoices:1, crm:1, time_tracking:1, projects:1, scheduling:1, quotes:1 },
-    cleaning:             { properties:0, tenants:0, leases:0, maintenance:1, payments:1, accounting:1, screening:0, documents:1, insurance:1, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:0, invoices:1, crm:1, time_tracking:1, projects:1, scheduling:1, quotes:1 },
-    tutoring_education:   { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:0, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:0, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:1, quotes:0 },
-    pet_services:         { properties:0, tenants:0, leases:0, maintenance:0, payments:1, accounting:1, screening:0, documents:1, insurance:1, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:0, invoices:1, crm:1, time_tracking:0, projects:0, scheduling:1, quotes:0 },
-    auto_services:        { properties:0, tenants:0, leases:0, maintenance:1, payments:1, accounting:1, screening:0, documents:1, insurance:1, deposit_bonds:0, credit_builder:0, eviction:0, owner_statements:0, listings:0, e_signature:0, invoices:1, crm:1, time_tracking:1, projects:1, scheduling:1, quotes:1 }
+  // ── Ordered category keys for rendering ──
+  var CAT_ORDER = ['money','clients','scheduling','field','property','documents','industry','ai_growth'];
+
+  // ── Property-related industries (show Property category) ──
+  var PROPERTY_INDUSTRIES = ['property_management','commercial_re','short_term_rental','lending'];
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // KEYWORD -> TOOL MAPPING
+  // ═══════════════════════════════════════════════════════════════════════
+  var KEYWORD_TOOL_MAP = [
+    {
+      keywords: ['cleaning','maid','housekeeping','janitorial'],
+      tools: ['online_booking','recurring_appointments','team_scheduling','field_app','reviews','materials_supplies','estimates_quotes','client_portal','before_after_photos','route_planning','time_tracking','mileage_tracking']
+    },
+    {
+      keywords: ['plumber','electrician','hvac','contractor','handyman','painter','roofer'],
+      tools: ['job_tracking','time_tracking','materials_supplies','estimates_quotes','field_app','before_after_photos','team_scheduling','route_planning','mileage_tracking']
+    },
+    {
+      keywords: ['salon','hair','barber','spa','nail','beauty'],
+      tools: ['online_booking','recurring_appointments','client_portal','reviews','menu_inventory','gift_cards_loyalty','time_tracking','waitlist_mgmt']
+    },
+    {
+      keywords: ['attorney','lawyer','legal'],
+      tools: ['matter_mgmt','trust_accounting','time_tracking','document_mgmt','e_signature','client_portal']
+    },
+    {
+      keywords: ['landlord','property','rental'],
+      tools: ['rent_collection','tenant_screening','lease_mgmt','maintenance_tracking','owner_statements','document_mgmt']
+    },
+    {
+      keywords: ['restaurant','cafe','bakery','food'],
+      tools: ['menu_inventory','team_scheduling','time_tracking','waitlist_mgmt','reviews']
+    },
+    {
+      keywords: ['insurance','agent','broker'],
+      tools: ['policy_tracking','crm','commission_tracking','document_mgmt']
+    },
+    {
+      keywords: ['real estate','commercial','broker'],
+      tools: ['deal_pipeline','crm','commission_tracking','document_mgmt','e_signature']
+    }
+  ];
+
+  // Always included for every industry
+  var ALWAYS_ON_TOOLS = ['accounting','invoicing','ai_advisor'];
+
+  // Default fallback (any business)
+  var DEFAULT_TOOLS = ['crm','invoicing','accounting','time_tracking','reviews'];
+
+  // ── Industry key -> recommended tool IDs ──
+  var INDUSTRY_TOOL_MAP = {
+    property_management: ['rent_collection','tenant_screening','lease_mgmt','maintenance_tracking','owner_statements','document_mgmt','e_signature','crm','client_portal','reviews'],
+    commercial_re: ['deal_pipeline','crm','commission_tracking','document_mgmt','e_signature','lease_mgmt','owner_statements','rent_collection','maintenance_tracking'],
+    short_term_rental: ['booking_calendar','cleaning_schedules','rent_collection','maintenance_tracking','owner_statements','reviews','client_portal','online_booking'],
+    construction_trades: ['job_tracking','time_tracking','materials_supplies','estimates_quotes','field_app','before_after_photos','team_scheduling','route_planning','mileage_tracking','crm'],
+    cleaning: ['online_booking','recurring_appointments','team_scheduling','field_app','reviews','materials_supplies','estimates_quotes','client_portal','before_after_photos','route_planning','time_tracking','mileage_tracking'],
+    salon_beauty: ['online_booking','recurring_appointments','client_portal','reviews','gift_cards_loyalty','time_tracking','waitlist_mgmt'],
+    attorney: ['matter_mgmt','trust_accounting','time_tracking','document_mgmt','e_signature','client_portal','compliance_tracking'],
+    insurance: ['policy_tracking','crm','commission_tracking','document_mgmt','e_signature','client_portal'],
+    lending: ['crm','document_mgmt','e_signature','compliance_tracking','loan_connect','client_portal'],
+    restaurant_food: ['menu_inventory','team_scheduling','time_tracking','waitlist_mgmt','reviews','online_booking'],
+    retail: ['crm','reviews','gift_cards_loyalty','time_tracking','email_campaigns'],
+    accountant: ['time_tracking','client_portal','document_mgmt','e_signature','crm','compliance_tracking'],
+    marketing_consulting: ['crm','time_tracking','contracts_proposals','estimates_quotes','project_mgmt','client_portal','email_campaigns'],
+    fitness_training: ['online_booking','recurring_appointments','client_portal','reviews','time_tracking'],
+    photography_creative: ['crm','contracts_proposals','estimates_quotes','client_portal','project_mgmt','time_tracking','e_signature'],
+    tutoring_education: ['online_booking','recurring_appointments','client_portal','time_tracking','reviews'],
+    pet_services: ['online_booking','recurring_appointments','client_portal','reviews','route_planning','mileage_tracking'],
+    auto_services: ['job_tracking','time_tracking','materials_supplies','estimates_quotes','reviews','crm'],
+    wellness_spa: ['online_booking','recurring_appointments','client_portal','reviews','form_builder','compliance_tracking','waitlist_mgmt'],
+    nonprofit: ['crm','document_mgmt','compliance_tracking','email_campaigns','time_tracking'],
+    general: ['crm','time_tracking','reviews']
   };
 
   // ── Plans ──
@@ -678,7 +840,8 @@
   var currentStep = 1;
   var selectedIndustry = null;
   var selectedPlan = 'pro';
-  var enabledFeatures = {};
+  var toolSelections = {}; // id -> true/false
+  var recommendedTools = {}; // id -> true (for badge display)
 
   // ── Render Industry Grid ──
   function renderIndustries() {
@@ -711,8 +874,51 @@
     var ht = document.getElementById('ob-helper-text');
     if (ht) ht.style.display = 'none';
 
-    // Pre-load features for this industry
-    enabledFeatures = Object.assign({}, INDUSTRY_FEATURES[key] || INDUSTRY_FEATURES.general);
+    // Build recommended tools for this industry
+    computeRecommendedTools(key);
+  }
+
+  function computeRecommendedTools(industryKey) {
+    recommendedTools = {};
+    toolSelections = {};
+
+    // Always-on tools
+    ALWAYS_ON_TOOLS.forEach(function(id) {
+      recommendedTools[id] = true;
+      toolSelections[id] = true;
+    });
+
+    // Industry-specific recommendations
+    var industryTools = INDUSTRY_TOOL_MAP[industryKey] || INDUSTRY_TOOL_MAP.general;
+    industryTools.forEach(function(id) {
+      recommendedTools[id] = true;
+      toolSelections[id] = true;
+    });
+
+    // Default tools (always recommended)
+    DEFAULT_TOOLS.forEach(function(id) {
+      if (!toolSelections[id]) {
+        recommendedTools[id] = true;
+        toolSelections[id] = true;
+      }
+    });
+
+    // Also check keyword matching from industry name
+    var ind = INDUSTRIES.find(function(i) { return i.key === industryKey; });
+    if (ind) {
+      var searchText = (ind.name + ' ' + ind.desc).toLowerCase();
+      KEYWORD_TOOL_MAP.forEach(function(mapping) {
+        var matched = mapping.keywords.some(function(kw) {
+          return searchText.indexOf(kw) !== -1;
+        });
+        if (matched) {
+          mapping.tools.forEach(function(id) {
+            recommendedTools[id] = true;
+            toolSelections[id] = true;
+          });
+        }
+      });
+    }
   }
 
   // ── Waitlist Modal ──
@@ -721,9 +927,9 @@
   function openWaitlist(key, icon, name) {
     waitlistVertical = key;
     document.getElementById('waitlistIcon').textContent = icon;
-    document.getElementById('waitlistTitle').textContent = name + ' — Coming Soon';
+    document.getElementById('waitlistTitle').textContent = name + ' \u2014 Coming Soon';
     document.getElementById('waitlistDesc').textContent =
-      'This vertical is launching soon — join the waitlist to get early access.';
+      'This vertical is launching soon \u2014 join the waitlist to get early access.';
     document.getElementById('waitlistForm').style.display = '';
     document.getElementById('waitlistSuccess').style.display = 'none';
     document.getElementById('waitlistEmail').value = '';
@@ -743,7 +949,6 @@
     document.getElementById('waitlistSubmit').disabled = true;
     document.getElementById('waitlistSubmit').textContent = 'Saving...';
 
-    // Save to localStorage (and Supabase when configured)
     var waitlist = JSON.parse(localStorage.getItem('rv_vertical_waitlist') || '[]');
     waitlist.push({
       id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
@@ -753,7 +958,6 @@
     });
     localStorage.setItem('rv_vertical_waitlist', JSON.stringify(waitlist));
 
-    // Try Supabase if available
     if (typeof RVData !== 'undefined' && RVData._useSupabase && RVData._useSupabase()) {
       try {
         RVData._supabase().from('vertical_waitlist').insert({
@@ -762,7 +966,6 @@
       } catch(e) {}
     }
 
-    // Show success
     document.getElementById('waitlistForm').style.display = 'none';
     document.getElementById('waitlistSuccess').style.display = '';
     setTimeout(function() { closeWaitlist(); }, 2500);
@@ -782,30 +985,113 @@
       return '<option>' + opt + '</option>';
     }).join('');
 
-    // Show/hide units field
     var hideUnits = (selectedIndustry === 'general');
     document.getElementById('ob-units-field').style.display = hideUnits ? 'none' : '';
   }
 
-  // ── Render Features Grid ──
-  function renderFeatures() {
+  // ═══════════════════════════════════════════════════════════════════════
+  // TOOL PICKER — Render, Toggle, Filter, Count
+  // ═══════════════════════════════════════════════════════════════════════
+
+  function renderToolPicker() {
     var ind = INDUSTRIES.find(function(i) { return i.key === selectedIndustry; });
     document.getElementById('ob-industry-label').textContent = ind ? ind.name : 'your industry';
 
-    var grid = document.getElementById('ob-features-grid');
-    grid.innerHTML = FEATURES.map(function(f) {
-      var isOn = enabledFeatures[f.key] ? true : false;
-      return '<label class="ob-feature ' + (isOn ? 'on' : '') + '" data-key="' + f.key + '">' +
-        '<input type="checkbox" ' + (isOn ? 'checked' : '') + ' onchange="toggleFeature(\'' + f.key + '\', this)" />' +
-        '<span class="ob-feature-icon">' + f.icon + '</span>' +
-        '<span class="ob-feature-label">' + f.label + '</span>' +
-      '</label>';
-    }).join('');
+    var isPropertyIndustry = PROPERTY_INDUSTRIES.indexOf(selectedIndustry) !== -1;
+
+    // Group tools by category
+    var catMap = {};
+    TOOL_CATALOG.forEach(function(tool) {
+      if (!catMap[tool.cat]) catMap[tool.cat] = { label: tool.catLabel, icon: tool.catIcon, tools: [] };
+      catMap[tool.cat].tools.push(tool);
+    });
+
+    var container = document.getElementById('tp-categories');
+    var html = '';
+
+    CAT_ORDER.forEach(function(catKey) {
+      var cat = catMap[catKey];
+      if (!cat) return;
+
+      // Hide property category for non-property industries
+      if (catKey === 'property' && !isPropertyIndustry) return;
+
+      // Check if any tool in this category is recommended
+      var hasRecommended = cat.tools.some(function(t) { return recommendedTools[t.id]; });
+      var openAttr = hasRecommended ? ' open' : '';
+
+      // Count selected in this category
+      var selectedInCat = cat.tools.filter(function(t) { return toolSelections[t.id]; }).length;
+
+      html += '<details class="tp-category" data-cat="' + catKey + '"' + openAttr + '>';
+      html += '<summary><span class="tp-cat-icon">' + cat.icon + '</span> ' + cat.label;
+      html += '<span class="tp-cat-count" data-cat-count="' + catKey + '">' + selectedInCat + '/' + cat.tools.length + '</span>';
+      html += '</summary>';
+      html += '<div class="tp-tool-list">';
+
+      cat.tools.forEach(function(tool) {
+        var isOn = toolSelections[tool.id] ? true : false;
+        var isRec = recommendedTools[tool.id] ? true : false;
+        var recBadge = isRec ? '<span class="tp-rec-pill">\u2713 Recommended</span>' : '';
+
+        html += '<div class="tp-tool" data-tool-id="' + tool.id + '" data-tool-name="' + tool.name.toLowerCase() + '" data-tool-desc="' + tool.desc.toLowerCase() + '">';
+        html += '<label class="tp-toggle"><input type="checkbox" ' + (isOn ? 'checked' : '') + ' onchange="toggleTool(\'' + tool.id + '\', this, \'' + catKey + '\')" /><span class="tp-slider"></span></label>';
+        html += '<span class="tp-tool-icon">' + tool.icon + '</span>';
+        html += '<div class="tp-tool-info">';
+        html += '<div class="tp-tool-name">' + tool.name + ' ' + recBadge + '</div>';
+        html += '<div class="tp-tool-desc">' + tool.desc + '</div>';
+        html += '</div>';
+        html += '</div>';
+      });
+
+      html += '</div></details>';
+    });
+
+    container.innerHTML = html;
+    updateToolCount();
   }
 
-  function toggleFeature(key, checkbox) {
-    enabledFeatures[key] = checkbox.checked ? 1 : 0;
-    checkbox.closest('.ob-feature').classList.toggle('on', checkbox.checked);
+  function toggleTool(toolId, checkbox, catKey) {
+    toolSelections[toolId] = checkbox.checked;
+    updateToolCount();
+    updateCatCount(catKey);
+  }
+
+  function updateToolCount() {
+    var count = 0;
+    for (var id in toolSelections) {
+      if (toolSelections[id]) count++;
+    }
+    document.getElementById('tp-selected-count').textContent = count;
+  }
+
+  function updateCatCount(catKey) {
+    var cat = TOOL_CATALOG.filter(function(t) { return t.cat === catKey; });
+    var selected = cat.filter(function(t) { return toolSelections[t.id]; }).length;
+    var el = document.querySelector('[data-cat-count="' + catKey + '"]');
+    if (el) el.textContent = selected + '/' + cat.length;
+  }
+
+  function filterTools(query) {
+    var q = query.toLowerCase().trim();
+    document.querySelectorAll('.tp-tool').forEach(function(el) {
+      if (!q) {
+        el.classList.remove('tp-hidden');
+        return;
+      }
+      var name = el.getAttribute('data-tool-name') || '';
+      var desc = el.getAttribute('data-tool-desc') || '';
+      var match = name.indexOf(q) !== -1 || desc.indexOf(q) !== -1;
+      el.classList.toggle('tp-hidden', !match);
+    });
+
+    // Auto-expand categories that have visible tools when searching
+    if (q) {
+      document.querySelectorAll('.tp-category').forEach(function(det) {
+        var hasVisible = det.querySelector('.tp-tool:not(.tp-hidden)');
+        if (hasVisible) det.open = true;
+      });
+    }
   }
 
   // ── Team Invites ──
@@ -839,16 +1125,13 @@
 
   function selectPlan(key) {
     selectedPlan = key;
-    document.querySelectorAll('.ob-plan').forEach(function(el) {
-      el.classList.toggle('selected', el.textContent.includes(PLANS.find(function(p) { return p.key === key; }).name));
-    });
     renderPlans();
   }
 
   // ── Step Navigation ──
   function goStep(step) {
     if (step === 2) adaptStep2();
-    if (step === 3) renderFeatures();
+    if (step === 3) renderToolPicker();
     if (step === 5) renderPlans();
 
     // Validate step 2
@@ -902,6 +1185,16 @@
       if (invEmail) invites.push({ email: invEmail, role: invRole });
     });
 
+    // Build selected tools array
+    var selectedToolIds = [];
+    for (var id in toolSelections) {
+      if (toolSelections[id]) selectedToolIds.push(id);
+    }
+
+    // Build legacy enabledFeatures for backward compat
+    var enabledFeatures = {};
+    selectedToolIds.forEach(function(id) { enabledFeatures[id] = 1; });
+
     // Build onboarding record
     var onboarding = {
       industry: selectedIndustry,
@@ -914,6 +1207,7 @@
       state: state,
       units: units,
       features: enabledFeatures,
+      tools: selectedToolIds,
       invites: invites,
       plan: selectedPlan,
       completedAt: new Date().toISOString()
@@ -922,12 +1216,16 @@
     // Save to localStorage
     localStorage.setItem('rv_onboarding', JSON.stringify(onboarding));
 
+    // Save tool selections
+    localStorage.setItem('rv_tool_selections', JSON.stringify(selectedToolIds));
+
     // Save workspace config
     var wsConfig = {
       name: company,
       industry: selectedIndustry,
       plan: selectedPlan,
       feature_flags: enabledFeatures,
+      tool_selections: selectedToolIds,
       city: city,
       state: state,
       owner_name: name,
@@ -944,10 +1242,10 @@
     // Set session so dashboard knows onboarding is done
     localStorage.setItem('rv_onboarding_complete', 'true');
 
-    // Show success
-    var enabledList = FEATURES.filter(function(f) { return enabledFeatures[f.key]; });
-    document.getElementById('ob-success-features').innerHTML = enabledList.map(function(f) {
-      return '<span class="ob-success-tag">' + f.icon + ' ' + f.label + '</span>';
+    // Show success — list selected tools
+    var selectedToolObjs = TOOL_CATALOG.filter(function(t) { return toolSelections[t.id]; });
+    document.getElementById('ob-success-features').innerHTML = selectedToolObjs.map(function(t) {
+      return '<span class="ob-success-tag">' + t.icon + ' ' + t.name + '</span>';
     }).join('');
     document.getElementById('ob-success-msg').textContent =
       'Welcome to 3120 Life, ' + name.split(' ')[0] + '! Your workspace has been set up for ' + (ind ? ind.successMsg : 'your business') + '.';
@@ -987,12 +1285,19 @@
 
     // Mark all steps done
     document.querySelectorAll('.ob-step').forEach(function(el) { el.classList.add('done'); el.classList.remove('active'); });
-    document.getElementById('ob-current-step').textContent = '✓';
+    document.getElementById('ob-current-step').textContent = '\u2713';
   }
 
   // ── Init ──
   document.addEventListener('DOMContentLoaded', function() {
     renderIndustries();
+
+    // Check URL param for industry
+    var params = new URLSearchParams(window.location.search);
+    var urlIndustry = params.get('industry');
+    if (urlIndustry) {
+      localStorage.setItem('rv_selected_industry', urlIndustry);
+    }
 
     // Check if already onboarded
     var existing = localStorage.getItem('rv_onboarding');
@@ -1000,7 +1305,6 @@
       try {
         var ob = JSON.parse(existing);
         if (ob.industry) {
-          // Pre-select industry
           selectIndustry(ob.industry);
           if (ob.company) document.getElementById('ob-company').value = ob.company;
           if (ob.name) document.getElementById('ob-name').value = ob.name;

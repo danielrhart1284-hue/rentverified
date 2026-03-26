@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commission Tracking &ndash; 3120 Life</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { background: #f3f4f6; }
+    .ct-layout { max-width: 1100px; margin: 0 auto; padding: 5.5rem 1.5rem 2rem; }
+    .ct-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+    .ct-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+    .ct-header .sub { font-size: 0.85rem; color: #6b7280; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-left: 4px solid #e2e8f0; }
+    .stat-card.earned { border-left-color: #10b981; }
+    .stat-card.pending { border-left-color: #f59e0b; }
+    .stat-card.paid { border-left-color: #3b82f6; }
+    .stat-card.month { border-left-color: #8b5cf6; }
+    .stat-card .label { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-card .value { font-size: 1.6rem; font-weight: 700; color: #1e293b; margin-top: .25rem; }
+
+    .ct-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
+    .ct-card h3 { padding: 1rem 1.25rem 0; font-size: 1rem; font-weight: 800; color: #1e1b4b; }
+    .ct-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .ct-table th { text-align: left; padding: 0.65rem 1rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .ct-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #f3f4f6; }
+    .ct-table tr:hover td { background: #f9fafb; }
+
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+    .badge.pending { background: #fef3c7; color: #92400e; }
+    .badge.approved { background: #dbeafe; color: #1e40af; }
+    .badge.paid { background: #d1fae5; color: #065f46; }
+
+    .btn-add { background: #4f46e5; color: #fff; border: none; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+    .btn-add:hover { background: #4338ca; }
+
+    .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
+    .act-btn.approve { background: #dbeafe; color: #2563eb; }
+    .act-btn.pay { background: #d1fae5; color: #065f46; }
+    .act-btn.del { background: #fee2e2; color: #dc2626; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1.2rem; font-weight: 800; color: #1e1b4b; margin-bottom: 1rem; }
+    .modal label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; margin-top: 0.75rem; }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+    .modal textarea { resize: vertical; min-height: 60px; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .modal-actions .btn-save { flex: 1; background: #4f46e5; color: #fff; border: none; padding: 0.6rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .modal-actions .btn-cancel { flex: 1; background: #f3f4f6; color: #374151; border: none; padding: 0.6rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+    .calc-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
+    .calc-result { background: #f0fdf4; border-radius: 8px; padding: 0.75rem; text-align: center; margin-top: 0.75rem; font-weight: 700; color: #065f46; }
+
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e293b; color: #fff; padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; z-index: 2000; pointer-events: none; }
+    .toast.show { opacity: 1; }
+
+    .empty-state { text-align: center; padding: 3rem; color: #9ca3af; }
+
+    @media (max-width: 768px) {
+      .ct-layout { padding: 5rem 0.75rem 1.5rem; }
+      .ct-table { font-size: 0.78rem; }
+      .ct-table th, .ct-table td { padding: 0.5rem 0.6rem; }
+      .calc-row { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">3120 Life</span> <span style="font-weight:500;opacity:0.9;">Commission</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="crm.html">CRM</a>
+    <a href="invoice-builder.html">Invoicing</a>
+    <a href="commission-tracking.html" style="color:#1a56db;font-weight:700;">Commission</a>
+    <a href="accounting.html">Accounting</a>
+  </div>
+  <div class="nav-cta"><a href="index.html" class="btn btn-primary btn-sm">Dashboard</a></div>
+</nav>
+
+<div class="ct-layout">
+  <div class="ct-header">
+    <div>
+      <h1>Commission Tracking</h1>
+      <span class="sub">Track sales commissions across your team</span>
+    </div>
+    <button class="btn-add" onclick="openModal()">+ Log Commission</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card earned"><div class="label">Total Earned</div><div class="value" id="statEarned">$0</div></div>
+    <div class="stat-card pending"><div class="label">Pending</div><div class="value" id="statPending">$0</div></div>
+    <div class="stat-card paid"><div class="label">Paid Out</div><div class="value" id="statPaid">$0</div></div>
+    <div class="stat-card month"><div class="label">This Month</div><div class="value" id="statMonth">$0</div></div>
+  </div>
+
+  <div class="ct-card">
+    <h3>Commission Log</h3>
+    <div style="overflow-x:auto;">
+      <table class="ct-table">
+        <thead>
+          <tr>
+            <th>Salesperson</th>
+            <th>Deal / Client</th>
+            <th>Sale Amount</th>
+            <th>Rate</th>
+            <th>Commission</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="commTable"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="emptyState">No commissions logged yet. Click "+ Log Commission" to get started.</div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Log Commission</h2>
+    <label>Salesperson</label>
+    <input type="text" id="fSalesperson" placeholder="e.g. Jane Doe" />
+    <label>Deal / Client</label>
+    <input type="text" id="fDeal" placeholder="e.g. Acme Corp — Website Redesign" />
+    <div class="calc-row">
+      <div>
+        <label>Sale Amount ($)</label>
+        <input type="number" id="fSaleAmt" min="0" step="0.01" oninput="calcCommission()" />
+      </div>
+      <div>
+        <label>Rate (%)</label>
+        <input type="number" id="fRate" min="0" max="100" step="0.5" value="10" oninput="calcCommission()" />
+      </div>
+      <div>
+        <label>Date</label>
+        <input type="date" id="fDate" />
+      </div>
+    </div>
+    <div class="calc-result" id="calcResult">Commission: $0.00</div>
+    <label>Notes</label>
+    <textarea id="fNotes" placeholder="Optional notes..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveCommission()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>RVData._useSupabase = function() { return false; };</script>
+<script src="share-widget.js"></script>
+<script>
+var STORAGE_KEY = 'rv_commissions';
+
+function getCommissions() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveCommissions(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+function renderStats() {
+  var list = getCommissions();
+  var total = 0, pending = 0, paid = 0, month = 0;
+  var now = new Date();
+  var thisMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  list.forEach(function(c) {
+    var amt = parseFloat(c.commission) || 0;
+    total += amt;
+    if (c.status === 'pending') pending += amt;
+    else if (c.status === 'approved') pending += amt;
+    if (c.status === 'paid') paid += amt;
+    if (c.date && c.date.substring(0,7) === thisMonth) month += amt;
+  });
+  document.getElementById('statEarned').textContent = '$' + total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('statPending').textContent = '$' + pending.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('statPaid').textContent = '$' + paid.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('statMonth').textContent = '$' + month.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function renderTable() {
+  var list = getCommissions();
+  document.getElementById('emptyState').style.display = list.length ? 'none' : 'block';
+  document.getElementById('commTable').innerHTML = list.map(function(c, i) {
+    return '<tr>' +
+      '<td>' + esc(c.salesperson) + '</td>' +
+      '<td>' + esc(c.deal) + '</td>' +
+      '<td>$' + num(c.saleAmount) + '</td>' +
+      '<td>' + num(c.rate) + '%</td>' +
+      '<td><strong>$' + num(c.commission) + '</strong></td>' +
+      '<td><span class="badge ' + c.status + '">' + c.status + '</span></td>' +
+      '<td>' + (c.date || '') + '</td>' +
+      '<td>' +
+        (c.status === 'pending' ? '<button class="act-btn approve" onclick="setStatus('+i+',\'approved\')">Approve</button>' : '') +
+        (c.status === 'approved' ? '<button class="act-btn pay" onclick="setStatus('+i+',\'paid\')">Mark Paid</button>' : '') +
+        '<button class="act-btn del" onclick="deleteComm('+i+')">Del</button>' +
+      '</td></tr>';
+  }).join('');
+}
+
+function setStatus(i, status) {
+  var list = getCommissions();
+  if (list[i]) { list[i].status = status; saveCommissions(list); renderTable(); renderStats(); toast('Status updated to ' + status); }
+}
+
+function deleteComm(i) {
+  if (!confirm('Delete this commission entry?')) return;
+  var list = getCommissions(); list.splice(i,1); saveCommissions(list); renderTable(); renderStats(); toast('Commission deleted');
+}
+
+function calcCommission() {
+  var amt = parseFloat(document.getElementById('fSaleAmt').value) || 0;
+  var rate = parseFloat(document.getElementById('fRate').value) || 0;
+  var comm = amt * rate / 100;
+  document.getElementById('calcResult').textContent = 'Commission: $' + comm.toFixed(2);
+}
+
+function openModal() {
+  document.getElementById('fSalesperson').value = '';
+  document.getElementById('fDeal').value = '';
+  document.getElementById('fSaleAmt').value = '';
+  document.getElementById('fRate').value = '10';
+  document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fNotes').value = '';
+  calcCommission();
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function saveCommission() {
+  var sp = document.getElementById('fSalesperson').value.trim();
+  var deal = document.getElementById('fDeal').value.trim();
+  var saleAmt = parseFloat(document.getElementById('fSaleAmt').value) || 0;
+  var rate = parseFloat(document.getElementById('fRate').value) || 0;
+  if (!sp) { toast('Enter salesperson name'); return; }
+  if (!saleAmt) { toast('Enter sale amount'); return; }
+  var comm = saleAmt * rate / 100;
+  var list = getCommissions();
+  list.unshift({
+    salesperson: sp, deal: deal, saleAmount: saleAmt, rate: rate,
+    commission: comm, status: 'pending',
+    date: document.getElementById('fDate').value,
+    notes: document.getElementById('fNotes').value.trim(),
+    id: Date.now()
+  });
+  saveCommissions(list);
+  closeModal(); renderTable(); renderStats();
+  toast('Commission logged: $' + comm.toFixed(2));
+}
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function num(v) { return (parseFloat(v)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); }, 3500); }
+
+document.addEventListener('DOMContentLoaded', function() { renderStats(); renderTable(); });
+</script>
+</body>
+</html>

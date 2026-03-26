@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gift Cards &amp; Loyalty &ndash; 3120 Life</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { background: #f3f4f6; }
+    .ly-layout { max-width: 1100px; margin: 0 auto; padding: 5.5rem 1.5rem 2rem; }
+    .ly-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+    .ly-header h1 { font-size: 1.75rem; font-weight: 900; color: #1e1b4b; }
+    .ly-header .sub { font-size: 0.85rem; color: #6b7280; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+    .tab-btn { flex: 1; padding: 0.85rem; text-align: center; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; background: transparent; color: #6b7280; transition: 0.2s; }
+    .tab-btn.active { background: #4f46e5; color: #fff; }
+    .tab-btn:hover:not(.active) { background: #f3f4f6; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-left: 4px solid #e2e8f0; }
+    .stat-card.a { border-left-color: #3b82f6; }
+    .stat-card.b { border-left-color: #10b981; }
+    .stat-card.c { border-left-color: #f59e0b; }
+    .stat-card.d { border-left-color: #8b5cf6; }
+    .stat-card .label { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-card .value { font-size: 1.6rem; font-weight: 700; color: #1e293b; margin-top: .25rem; }
+
+    .ly-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
+    .ly-card h3 { padding: 1rem 1.25rem 0; font-size: 1rem; font-weight: 800; color: #1e1b4b; }
+    .ly-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .ly-table th { text-align: left; padding: 0.65rem 1rem; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .ly-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #f3f4f6; }
+    .ly-table tr:hover td { background: #f9fafb; }
+
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+    .badge.active { background: #d1fae5; color: #065f46; }
+    .badge.redeemed { background: #dbeafe; color: #1e40af; }
+    .badge.expired { background: #fee2e2; color: #991b1b; }
+    .badge.partial { background: #fef3c7; color: #92400e; }
+
+    .btn-add { background: #4f46e5; color: #fff; border: none; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+    .btn-add:hover { background: #4338ca; }
+
+    .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
+    .act-btn.redeem { background: #dbeafe; color: #2563eb; }
+    .act-btn.del { background: #fee2e2; color: #dc2626; }
+    .act-btn.add-pts { background: #d1fae5; color: #065f46; }
+
+    /* Gift card visual */
+    .gc-preview { display: inline-block; background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; min-width: 260px; margin: 0.5rem; }
+    .gc-preview .gc-code { font-family: monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+    .gc-preview .gc-amount { font-size: 1.6rem; font-weight: 900; }
+    .gc-preview .gc-to { font-size: 0.82rem; opacity: 0.85; margin-top: 0.25rem; }
+
+    /* Loyalty settings */
+    .settings-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: #f9fafb; border-radius: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .settings-row label { font-weight: 700; font-size: 0.88rem; color: #374151; }
+    .settings-row input { width: 80px; padding: 0.4rem 0.6rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; }
+    .settings-row .save-btn { background: #4f46e5; color: #fff; border: none; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 2rem; width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1.2rem; font-weight: 800; color: #1e1b4b; margin-bottom: 1rem; }
+    .modal label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; margin-top: 0.75rem; }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
+    .modal textarea { resize: vertical; min-height: 50px; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .modal-actions .btn-save { flex: 1; background: #4f46e5; color: #fff; border: none; padding: 0.6rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .modal-actions .btn-cancel { flex: 1; background: #f3f4f6; color: #374151; border: none; padding: 0.6rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e293b; color: #fff; padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; z-index: 2000; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .empty-state { text-align: center; padding: 3rem; color: #9ca3af; }
+
+    @media (max-width: 768px) {
+      .ly-layout { padding: 5rem 0.75rem 1.5rem; }
+      .ly-table { font-size: 0.78rem; }
+      .ly-table th, .ly-table td { padding: 0.5rem 0.5rem; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .row2 { grid-template-columns: 1fr; }
+      .gc-preview { min-width: auto; width: 100%; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <span style="font-weight:800;">3120 Life</span> <span style="font-weight:500;opacity:0.9;">Loyalty</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="crm.html">CRM</a>
+    <a href="client-portal.html">Clients</a>
+    <a href="loyalty.html" style="color:#1a56db;font-weight:700;">Loyalty</a>
+  </div>
+  <div class="nav-cta"><a href="index.html" class="btn btn-primary btn-sm">Dashboard</a></div>
+</nav>
+
+<div class="ly-layout">
+  <div class="ly-header">
+    <div>
+      <h1>Gift Cards &amp; Loyalty</h1>
+      <span class="sub">Manage gift cards and loyalty rewards</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('gc')">Gift Cards</button>
+    <button class="tab-btn" onclick="switchTab('loyalty')">Loyalty Points</button>
+  </div>
+
+  <!-- Gift Cards Tab -->
+  <div class="tab-content active" id="tab-gc">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+      <div class="stats-grid" style="flex:1;min-width:0;">
+        <div class="stat-card a"><div class="label">Total Issued</div><div class="value" id="gcIssued">0</div></div>
+        <div class="stat-card b"><div class="label">Total Value</div><div class="value" id="gcValue">$0</div></div>
+        <div class="stat-card c"><div class="label">Remaining Balance</div><div class="value" id="gcRemaining">$0</div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <button class="btn-add" onclick="openGCModal()">+ Issue Gift Card</button>
+    </div>
+
+    <div class="ly-card">
+      <h3>Gift Cards</h3>
+      <div style="overflow-x:auto;">
+        <table class="ly-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Recipient</th>
+              <th>Original Amount</th>
+              <th>Remaining</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="gcTable"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="gcEmpty">No gift cards issued yet.</div>
+    </div>
+  </div>
+
+  <!-- Loyalty Tab -->
+  <div class="tab-content" id="tab-loyalty">
+    <div class="settings-row">
+      <label>Points per $1 spent:</label>
+      <input type="number" id="ptsPerDollar" min="1" max="100" step="1" value="1" />
+      <label>Points to redeem $1:</label>
+      <input type="number" id="ptsToRedeem" min="1" max="10000" step="1" value="100" />
+      <button class="save-btn" onclick="saveLoyaltySettings()">Save Settings</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+      <div class="stats-grid" style="flex:1;min-width:0;">
+        <div class="stat-card a"><div class="label">Total Members</div><div class="value" id="lyMembers">0</div></div>
+        <div class="stat-card b"><div class="label">Total Points Issued</div><div class="value" id="lyIssued">0</div></div>
+        <div class="stat-card d"><div class="label">Total Redeemed</div><div class="value" id="lyRedeemed">0</div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <button class="btn-add" onclick="openMemberModal()">+ Add Member</button>
+    </div>
+
+    <div class="ly-card">
+      <h3>Loyalty Members</h3>
+      <div style="overflow-x:auto;">
+        <table class="ly-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Points Balance</th>
+              <th>Total Earned</th>
+              <th>Total Redeemed</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="lyTable"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="lyEmpty">No loyalty members yet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Gift Card Modal -->
+<div class="modal-overlay" id="gcModal">
+  <div class="modal">
+    <h2>Issue Gift Card</h2>
+    <label>Amount ($)</label>
+    <input type="number" id="gcAmount" min="1" step="0.01" placeholder="e.g. 50.00" />
+    <label>Recipient Name</label>
+    <input type="text" id="gcRecipient" placeholder="e.g. Jane Doe" />
+    <label>Email (optional)</label>
+    <input type="email" id="gcEmail" placeholder="e.g. jane@example.com" />
+    <label>Custom Message (optional)</label>
+    <textarea id="gcMessage" placeholder="Happy Birthday! Enjoy your gift."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeGCModal()">Cancel</button>
+      <button class="btn-save" onclick="issueGiftCard()">Issue Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- Member Modal -->
+<div class="modal-overlay" id="memberModal">
+  <div class="modal">
+    <h2>Add Loyalty Member</h2>
+    <label>Name</label>
+    <input type="text" id="mName" placeholder="e.g. John Smith" />
+    <label>Email (optional)</label>
+    <input type="email" id="mEmail" placeholder="e.g. john@example.com" />
+    <label>Starting Points</label>
+    <input type="number" id="mPoints" min="0" step="1" value="0" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeMemberModal()">Cancel</button>
+      <button class="btn-save" onclick="addMember()">Add Member</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>RVData._useSupabase = function() { return false; };</script>
+<script src="share-widget.js"></script>
+<script>
+var GC_KEY = 'rv_gift_cards';
+var LY_KEY = 'rv_loyalty_members';
+var LY_SETTINGS_KEY = 'rv_loyalty_settings';
+
+function getGiftCards() { try { return JSON.parse(localStorage.getItem(GC_KEY)) || []; } catch(e) { return []; } }
+function saveGiftCards(d) { localStorage.setItem(GC_KEY, JSON.stringify(d)); }
+function getMembers() { try { return JSON.parse(localStorage.getItem(LY_KEY)) || []; } catch(e) { return []; } }
+function saveMembers(d) { localStorage.setItem(LY_KEY, JSON.stringify(d)); }
+function getSettings() { try { return JSON.parse(localStorage.getItem(LY_SETTINGS_KEY)) || {ptsPerDollar:1,ptsToRedeem:100}; } catch(e) { return {ptsPerDollar:1,ptsToRedeem:100}; } }
+
+function generateCode() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = '';
+  for (var i = 0; i < 16; i++) {
+    if (i > 0 && i % 4 === 0) code += '-';
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(b,i) {
+    b.classList.toggle('active', (tab==='gc' && i===0) || (tab==='loyalty' && i===1));
+  });
+  document.getElementById('tab-gc').classList.toggle('active', tab==='gc');
+  document.getElementById('tab-loyalty').classList.toggle('active', tab==='loyalty');
+}
+
+// Gift Cards
+function renderGCStats() {
+  var list = getGiftCards();
+  var totalVal = 0, remaining = 0;
+  list.forEach(function(gc) {
+    totalVal += parseFloat(gc.amount) || 0;
+    remaining += parseFloat(gc.remaining) || 0;
+  });
+  document.getElementById('gcIssued').textContent = list.length;
+  document.getElementById('gcValue').textContent = '$' + num(totalVal);
+  document.getElementById('gcRemaining').textContent = '$' + num(remaining);
+}
+
+function renderGCTable() {
+  var list = getGiftCards();
+  document.getElementById('gcEmpty').style.display = list.length ? 'none' : 'block';
+  document.getElementById('gcTable').innerHTML = list.map(function(gc, i) {
+    var status = 'active';
+    if (parseFloat(gc.remaining) <= 0) status = 'redeemed';
+    else if (parseFloat(gc.remaining) < parseFloat(gc.amount)) status = 'partial';
+    var statusLabel = status === 'active' ? 'Active' : (status === 'redeemed' ? 'Redeemed' : 'Partial');
+    return '<tr>' +
+      '<td><code style="font-weight:700;">' + esc(gc.code) + '</code></td>' +
+      '<td>' + esc(gc.recipient) + '</td>' +
+      '<td>$' + num(gc.amount) + '</td>' +
+      '<td><strong>$' + num(gc.remaining) + '</strong></td>' +
+      '<td><span class="badge ' + status + '">' + statusLabel + '</span></td>' +
+      '<td>' + (gc.date || '') + '</td>' +
+      '<td>' +
+        (parseFloat(gc.remaining) > 0 ? '<button class="act-btn redeem" onclick="redeemGC('+i+')">Redeem</button>' : '') +
+        '<button class="act-btn del" onclick="deleteGC('+i+')">Del</button>' +
+      '</td></tr>';
+  }).join('');
+}
+
+function openGCModal() {
+  document.getElementById('gcAmount').value = '';
+  document.getElementById('gcRecipient').value = '';
+  document.getElementById('gcEmail').value = '';
+  document.getElementById('gcMessage').value = '';
+  document.getElementById('gcModal').classList.add('show');
+}
+function closeGCModal() { document.getElementById('gcModal').classList.remove('show'); }
+
+function issueGiftCard() {
+  var amount = parseFloat(document.getElementById('gcAmount').value);
+  var recipient = document.getElementById('gcRecipient').value.trim();
+  if (!amount || amount <= 0) { toast('Enter a valid amount'); return; }
+  if (!recipient) { toast('Enter recipient name'); return; }
+  var list = getGiftCards();
+  list.unshift({
+    code: generateCode(),
+    recipient: recipient,
+    email: document.getElementById('gcEmail').value.trim(),
+    message: document.getElementById('gcMessage').value.trim(),
+    amount: amount,
+    remaining: amount,
+    date: new Date().toISOString().split('T')[0],
+    id: Date.now()
+  });
+  saveGiftCards(list);
+  closeGCModal(); renderGCTable(); renderGCStats();
+  toast('Gift card issued: $' + amount.toFixed(2));
+}
+
+function redeemGC(i) {
+  var list = getGiftCards();
+  var gc = list[i]; if (!gc) return;
+  var amt = prompt('Redeem from "' + gc.code + '"\nRemaining: $' + parseFloat(gc.remaining).toFixed(2) + '\nEnter amount to redeem:');
+  if (amt === null) return;
+  amt = parseFloat(amt);
+  if (isNaN(amt) || amt <= 0) { toast('Enter a valid amount'); return; }
+  if (amt > parseFloat(gc.remaining)) { toast('Amount exceeds remaining balance'); return; }
+  list[i].remaining = (parseFloat(gc.remaining) - amt).toFixed(2);
+  saveGiftCards(list); renderGCTable(); renderGCStats();
+  toast('Redeemed $' + amt.toFixed(2) + ' from card');
+}
+
+function deleteGC(i) {
+  if (!confirm('Delete this gift card?')) return;
+  var list = getGiftCards(); list.splice(i,1); saveGiftCards(list); renderGCTable(); renderGCStats(); toast('Gift card deleted');
+}
+
+// Loyalty
+function loadSettings() {
+  var s = getSettings();
+  document.getElementById('ptsPerDollar').value = s.ptsPerDollar || 1;
+  document.getElementById('ptsToRedeem').value = s.ptsToRedeem || 100;
+}
+
+function saveLoyaltySettings() {
+  var s = {
+    ptsPerDollar: parseInt(document.getElementById('ptsPerDollar').value) || 1,
+    ptsToRedeem: parseInt(document.getElementById('ptsToRedeem').value) || 100
+  };
+  localStorage.setItem(LY_SETTINGS_KEY, JSON.stringify(s));
+  toast('Loyalty settings saved');
+}
+
+function renderLYStats() {
+  var list = getMembers();
+  var totalIssued = 0, totalRedeemed = 0;
+  list.forEach(function(m) {
+    totalIssued += parseInt(m.totalEarned) || 0;
+    totalRedeemed += parseInt(m.totalRedeemed) || 0;
+  });
+  document.getElementById('lyMembers').textContent = list.length;
+  document.getElementById('lyIssued').textContent = totalIssued.toLocaleString();
+  document.getElementById('lyRedeemed').textContent = totalRedeemed.toLocaleString();
+}
+
+function renderLYTable() {
+  var list = getMembers();
+  document.getElementById('lyEmpty').style.display = list.length ? 'none' : 'block';
+  document.getElementById('lyTable').innerHTML = list.map(function(m, i) {
+    return '<tr>' +
+      '<td><strong>' + esc(m.name) + '</strong></td>' +
+      '<td>' + esc(m.email || '—') + '</td>' +
+      '<td><strong>' + ((parseInt(m.points)||0).toLocaleString()) + '</strong></td>' +
+      '<td>' + ((parseInt(m.totalEarned)||0).toLocaleString()) + '</td>' +
+      '<td>' + ((parseInt(m.totalRedeemed)||0).toLocaleString()) + '</td>' +
+      '<td>' + (m.joined || '') + '</td>' +
+      '<td>' +
+        '<button class="act-btn add-pts" onclick="addPoints('+i+')">+ Pts</button>' +
+        '<button class="act-btn redeem" onclick="redeemPoints('+i+')">Redeem</button>' +
+        '<button class="act-btn del" onclick="deleteMember('+i+')">Del</button>' +
+      '</td></tr>';
+  }).join('');
+}
+
+function openMemberModal() {
+  document.getElementById('mName').value = '';
+  document.getElementById('mEmail').value = '';
+  document.getElementById('mPoints').value = '0';
+  document.getElementById('memberModal').classList.add('show');
+}
+function closeMemberModal() { document.getElementById('memberModal').classList.remove('show'); }
+
+function addMember() {
+  var name = document.getElementById('mName').value.trim();
+  if (!name) { toast('Enter member name'); return; }
+  var pts = parseInt(document.getElementById('mPoints').value) || 0;
+  var list = getMembers();
+  list.push({
+    name: name,
+    email: document.getElementById('mEmail').value.trim(),
+    points: pts,
+    totalEarned: pts,
+    totalRedeemed: 0,
+    joined: new Date().toISOString().split('T')[0],
+    id: Date.now()
+  });
+  saveMembers(list);
+  closeMemberModal(); renderLYTable(); renderLYStats();
+  toast('Member added');
+}
+
+function addPoints(i) {
+  var list = getMembers();
+  var m = list[i]; if (!m) return;
+  var pts = prompt('Add points for "' + m.name + '"\nCurrent balance: ' + (m.points||0) + '\nEnter points to add:');
+  if (pts === null) return;
+  pts = parseInt(pts);
+  if (isNaN(pts) || pts <= 0) { toast('Enter a valid number'); return; }
+  list[i].points = (parseInt(m.points)||0) + pts;
+  list[i].totalEarned = (parseInt(m.totalEarned)||0) + pts;
+  saveMembers(list); renderLYTable(); renderLYStats();
+  toast(pts + ' points added to ' + m.name);
+}
+
+function redeemPoints(i) {
+  var list = getMembers();
+  var m = list[i]; if (!m) return;
+  var s = getSettings();
+  var pts = prompt('Redeem points for "' + m.name + '"\nBalance: ' + (m.points||0) + ' pts\n' + s.ptsToRedeem + ' pts = $1.00\nEnter points to redeem:');
+  if (pts === null) return;
+  pts = parseInt(pts);
+  if (isNaN(pts) || pts <= 0) { toast('Enter a valid number'); return; }
+  if (pts > (parseInt(m.points)||0)) { toast('Insufficient points'); return; }
+  list[i].points = (parseInt(m.points)||0) - pts;
+  list[i].totalRedeemed = (parseInt(m.totalRedeemed)||0) + pts;
+  saveMembers(list); renderLYTable(); renderLYStats();
+  var dollarValue = (pts / s.ptsToRedeem).toFixed(2);
+  toast(pts + ' points redeemed ($' + dollarValue + ' value)');
+}
+
+function deleteMember(i) {
+  if (!confirm('Remove this member?')) return;
+  var list = getMembers(); list.splice(i,1); saveMembers(list); renderLYTable(); renderLYStats(); toast('Member removed');
+}
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function num(v) { return (parseFloat(v)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); }, 3500); }
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadSettings();
+  renderGCStats(); renderGCTable();
+  renderLYStats(); renderLYTable();
+});
+</script>
+</body>
+</html>
