@@ -294,7 +294,7 @@
     </div>
     <div id="tLoginErr" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:.75rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;"></div>
     <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.8rem;" onclick="doTenantLogin()">Sign In to Portal →</button>
-    <button onclick="demoTenantLogin()" style="width:100%;padding:0.7rem;margin-top:0.5rem;background:#f0fdf4;color:#059669;border:1.5px solid #bbf7d0;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;transition:0.15s;">Try Demo →</button>
+    <!-- Demo button removed for production -->
     <p style="text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--gray-600);">
       New tenant? <a href="mailto:danielrhart1284@gmail.com">Request portal access</a>
     </p>
@@ -1482,12 +1482,9 @@
 
   /* ── LEASE EXPIRY REMINDER (tenant) ── */
   function renderTenantLeaseReminder() {
-    // Seeded lease data (will read from rv_tenant_lease in future)
-    const lease = JSON.parse(localStorage.getItem('rv_tenant_lease') || 'null') || {
-      end: '2026-05-15',
-      address: '123 Maple Street, Unit 2A',
-      landlord: 'Sanders Property Management'
-    };
+    // Lease data from localStorage (no default seed data)
+    const lease = JSON.parse(localStorage.getItem('rv_tenant_lease') || 'null');
+    if (!lease) { const wrap = document.getElementById('tenant-lease-banner'); if (wrap) wrap.style.display = 'none'; return; }
     const today = new Date(); today.setHours(0,0,0,0);
     const endDate = new Date(lease.end); endDate.setHours(0,0,0,0);
     const days = Math.ceil((endDate - today) / 86400000);
@@ -1533,9 +1530,7 @@
   document.addEventListener('DOMContentLoaded', renderTenantLeaseReminder);
 
   function demoTenantLogin() {
-    localStorage.setItem('rv_doc_role', 'tenant');
-    localStorage.setItem('rv_tenant_session', JSON.stringify({ email: 'demo@3120life.com', name: 'Demo Tenant', loggedIn: true }));
-    showPortal('Demo Tenant');
+    // Demo login removed for production
   }
 
   function switchTab(name) {}

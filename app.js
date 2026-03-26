@@ -1326,37 +1326,10 @@ function addLedgerEntry(entry) {
 }
 
 function seedLedgerData() {
+  // Seed data removed for production — no fake tenants/payments
   var key = 'rv_rent_ledger';
   if (localStorage.getItem(key)) return;
-  var months = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06',
-                '2025-07','2025-08','2025-09','2025-10','2025-11','2025-12',
-                '2026-01','2026-02'];
-  var tenants = [
-    { name: 'Jane Doe', property: '123 Maple Street, Unit 2A', rent: 1200, pmFee: 96 },
-    { name: 'Robert Lee', property: '456 Oak Avenue, Apt 1B', rent: 950, pmFee: 76 },
-  ];
-  var entries = [];
-  tenants.forEach(function(t) {
-    months.forEach(function(m, mi) {
-      var paidDate = m + '-0' + (1 + Math.floor(Math.random() * 5));
-      var paid = mi < months.length - 1;
-      entries.push({
-        id: 'LED-seed-' + t.name.replace(/\s/g,'') + '-' + m,
-        tenant: t.name,
-        property: t.property,
-        month: m,
-        rentDue: t.rent,
-        rentPaid: paid ? t.rent : 0,
-        pmFee: t.pmFee,
-        pmFeePercent: 8,
-        paidDate: paid ? paidDate : null,
-        status: paid ? 'paid' : 'due',
-        method: paid ? ['Cash App','Zelle','ACH'][mi % 3] : null,
-        createdAt: new Date().toISOString()
-      });
-    });
-  });
-  localStorage.setItem(key, JSON.stringify(entries));
+  localStorage.setItem(key, JSON.stringify([]));
 }
 
 // ── Monthly Owner Statement Generator ─────────────────────────────────────

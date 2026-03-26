@@ -5,63 +5,178 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>3120 Life — Run Your Entire Business From One Place</title>
   <link rel="stylesheet" href="styles.css" />
+  <link id="dyslexia-font-link" rel="stylesheet" href="" />
   <style>
+    /* ── Body text baseline ── */
+    body { line-height: 1.7; }
+
     /* ── Hero ── */
     .hero {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0f172a 100%);
+      background: #0f172a;
       color: white; padding: 5rem 2rem 4rem; text-align: center;
       position: relative; overflow: hidden;
     }
     .hero::before {
       content: ''; position: absolute; inset: 0;
-      background: radial-gradient(circle at 30% 20%, rgba(59,130,246,0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 80%, rgba(139,92,246,0.1) 0%, transparent 50%);
+      background: radial-gradient(circle at 30% 20%, rgba(59,130,246,0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(139,92,246,0.07) 0%, transparent 50%);
     }
     .hero > * { position: relative; z-index: 1; }
-    .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3);
-      border-radius: 99px; padding: 6px 18px; font-size: 0.8rem; font-weight: 700;
-      margin-bottom: 1.5rem; letter-spacing: 0.04em; color: #93c5fd;
-    }
     .hero h1 {
-      font-size: 3.2rem; font-weight: 900; line-height: 1.1;
-      margin-bottom: 1.25rem; max-width: 750px; margin-left: auto; margin-right: auto;
+      font-size: 2.8rem; font-weight: 900; line-height: 1.15;
+      margin-bottom: 1.5rem; max-width: 650px; margin-left: auto; margin-right: auto;
     }
-    .hero h1 .grad { background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero p { font-size: 1.1rem; opacity: 0.8; max-width: 580px; margin: 0 auto 2.5rem; line-height: 1.6; }
-    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hero-select-wrap {
+      max-width: 420px; margin: 0 auto 2rem; position: relative;
+    }
+    .hero-select {
+      width: 100%; padding: 1rem 1.25rem; font-size: 1.05rem;
+      border: 2px solid rgba(255,255,255,0.2); border-radius: 12px;
+      background: rgba(255,255,255,0.08); color: white;
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+      font-weight: 600; transition: border-color 0.2s;
+    }
+    .hero-select:focus { outline: none; border-color: #3b82f6; }
+    .hero-select option { background: #1e293b; color: white; }
+    .hero-select-arrow {
+      position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: rgba(255,255,255,0.5); font-size: 0.8rem;
+    }
+    .hero-tools {
+      max-width: 480px; margin: 0 auto 2.5rem;
+      min-height: 140px; text-align: left;
+    }
+    .hero-tools ul {
+      list-style: none; padding: 0; margin: 0;
+    }
+    .hero-tools li {
+      padding: 0.5rem 0; font-size: 1rem; color: rgba(255,255,255,0.85);
+      display: flex; align-items: flex-start; gap: 10px; line-height: 1.7;
+    }
+    .hero-tools li::before {
+      content: '\2713'; color: #34d399; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+    }
     .hero-btn {
       padding: 0.85rem 2rem; border-radius: 12px; font-weight: 800; font-size: 1rem;
       text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
     }
     .hero-btn-primary { background: #3b82f6; color: white; }
     .hero-btn-primary:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,130,246,0.3); }
-    .hero-btn-outline { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.3); }
-    .hero-btn-outline:hover { border-color: white; background: rgba(255,255,255,0.08); }
-    .hero-stats {
-      display: flex; gap: 3rem; justify-content: center; margin-top: 3.5rem; flex-wrap: wrap;
-    }
-    .hero-stat { text-align: center; }
-    .hero-stat .num { font-size: 2rem; font-weight: 900; color: #60a5fa; }
-    .hero-stat .lbl { font-size: 0.78rem; opacity: 0.6; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-    /* ── Industry Picker ── */
-    .industry-section { padding: 4rem 2rem; background: #f8fafc; text-align: center; }
-    .industry-section h2 { font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 0.5rem; }
-    .industry-section p { color: #64748b; font-size: 1rem; margin-bottom: 2.5rem; max-width: 550px; margin-left: auto; margin-right: auto; }
-    .industry-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 1rem; max-width: 900px; margin: 0 auto;
+    /* ── AI Advisor Section ── */
+    .advisor-section {
+      padding: 5rem 2rem; background: #f8fafc; text-align: center;
     }
-    .industry-card {
-      background: white; border: 2px solid #e2e8f0; border-radius: 14px;
-      padding: 1.5rem 1rem; text-align: center; cursor: pointer;
-      transition: all 0.2s; text-decoration: none; color: #1e293b;
+    .advisor-section h2 {
+      font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 0.5rem;
     }
-    .industry-card:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-    .industry-card .ic-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .industry-card .ic-name { font-size: 0.82rem; font-weight: 700; }
+    .advisor-section > p {
+      color: #64748b; margin-bottom: 2.5rem; max-width: 520px; margin-left: auto; margin-right: auto;
+    }
+    .advisor-card {
+      max-width: 560px; margin: 0 auto; background: #0f172a; border-radius: 20px;
+      padding: 2rem; text-align: left; color: white;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .advisor-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem;
+      font-size: 1rem; font-weight: 700;
+    }
+    .advisor-header span { font-size: 1.4rem; }
+    .advisor-score-row {
+      display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .advisor-score-circle {
+      width: 72px; height: 72px; border-radius: 50%;
+      border: 4px solid #10b981; display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; font-weight: 900; color: #10b981; flex-shrink: 0;
+    }
+    .advisor-score-label {
+      font-size: 0.85rem; color: #94a3b8; line-height: 1.7;
+    }
+    .advisor-items { list-style: none; padding: 0; margin: 0; }
+    .advisor-items li {
+      padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+      background: rgba(255,255,255,0.06); border-radius: 10px;
+      font-size: 0.88rem; color: #e2e8f0; line-height: 1.7;
+      border-left: 3px solid #3b82f6;
+    }
+
+    /* ── QR Payment Section ── */
+    .qr-section {
+      padding: 5rem 2rem; max-width: 1000px; margin: 0 auto;
+    }
+    .qr-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+    }
+    .qr-mock {
+      background: white; border-radius: 16px; padding: 2rem;
+      border: 1px solid #e2e8f0; box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+      text-align: center;
+    }
+    .qr-mock-header {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #64748b; font-weight: 700; margin-bottom: 0.5rem;
+    }
+    .qr-mock-amount {
+      font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 1.25rem;
+    }
+    .qr-mock svg { margin: 0 auto; display: block; }
+    .qr-mock-label {
+      font-size: 0.78rem; color: #94a3b8; margin-top: 0.75rem;
+    }
+    .qr-content h2 {
+      font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 1rem;
+    }
+    .qr-content ul {
+      list-style: none; padding: 0; margin: 0;
+    }
+    .qr-content li {
+      padding: 0.6rem 0; font-size: 1rem; color: #374151; line-height: 1.7;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .qr-content li::before {
+      content: '\2713'; color: #10b981; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ── Verified Badge Section ── */
+    .verified-section {
+      padding: 5rem 2rem; background: #f8fafc; text-align: center;
+    }
+    .verified-section h2 {
+      font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 0.5rem;
+    }
+    .verified-section > p {
+      color: #64748b; margin-bottom: 2.5rem; max-width: 560px; margin-left: auto; margin-right: auto; line-height: 1.7;
+    }
+    .verified-card {
+      max-width: 380px; margin: 0 auto; background: white; border-radius: 16px;
+      padding: 2rem; border: 1px solid #e2e8f0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06); text-align: left;
+    }
+    .verified-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #10b981; color: white; padding: 6px 14px;
+      border-radius: 8px; font-size: 0.78rem; font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .verified-badge svg { width: 14px; height: 14px; fill: white; }
+    .verified-name {
+      font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;
+    }
+    .verified-type {
+      font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem;
+    }
+    .verified-stars {
+      color: #f59e0b; font-size: 1rem; margin-bottom: 1rem; letter-spacing: 2px;
+    }
+    .verified-book-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #3b82f6; color: white; padding: 0.65rem 1.5rem;
+      border-radius: 10px; font-weight: 700; font-size: 0.88rem;
+      text-decoration: none; border: none; cursor: pointer;
+    }
+    .verified-book-btn:hover { background: #2563eb; }
 
     /* ── Value Props ── */
     .value-section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
@@ -78,7 +193,7 @@
       align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem;
     }
     .value-card h3 { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; }
-    .value-card p { font-size: 0.88rem; color: #64748b; line-height: 1.6; }
+    .value-card p { font-size: 0.88rem; color: #64748b; line-height: 1.7; }
 
     /* ── Features Showcase ── */
     .features-section { padding: 5rem 2rem; background: #0f172a; color: white; }
@@ -106,19 +221,6 @@
     .compare-table .x { color: #cbd5e1; }
     .compare-table .us { background: #eff6ff; font-weight: 700; }
 
-    /* ── Social Proof ── */
-    .proof-section { padding: 4rem 2rem; background: #f8fafc; text-align: center; }
-    .proof-section h2 { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-bottom: 2rem; }
-    .proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 900px; margin: 0 auto; }
-    .proof-card {
-      background: white; border-radius: 14px; padding: 1.5rem; text-align: left;
-      border: 1px solid #e2e8f0;
-    }
-    .proof-card .stars { color: #f59e0b; font-size: 0.9rem; margin-bottom: 0.5rem; }
-    .proof-card .quote { font-size: 0.88rem; color: #374151; line-height: 1.6; margin-bottom: 1rem; font-style: italic; }
-    .proof-card .author { font-size: 0.78rem; font-weight: 700; color: #1e293b; }
-    .proof-card .role { font-size: 0.72rem; color: #94a3b8; }
-
     /* ── CTA ── */
     .cta-section {
       padding: 5rem 2rem; text-align: center;
@@ -126,7 +228,10 @@
       color: white;
     }
     .cta-section h2 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.75rem; }
-    .cta-section p { font-size: 1.05rem; opacity: 0.85; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .cta-section p { font-size: 1.05rem; opacity: 0.85; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hero-btn-outline { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.3); padding: 0.85rem 2rem; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .hero-btn-outline:hover { border-color: white; background: rgba(255,255,255,0.08); }
 
     /* ── Footer ── */
     .site-footer {
@@ -134,31 +239,46 @@
     }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; max-width: 1100px; margin: 0 auto; }
     .footer-brand { font-size: 1.2rem; font-weight: 900; color: white; margin-bottom: 0.5rem; }
-    .footer-desc { font-size: 0.82rem; line-height: 1.6; }
+    .footer-desc { font-size: 0.82rem; line-height: 1.7; }
     .footer-col h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: white; margin-bottom: 0.75rem; }
     .footer-col a { display: block; color: #94a3b8; text-decoration: none; font-size: 0.82rem; padding: 0.2rem 0; }
     .footer-col a:hover { color: #60a5fa; }
     .footer-bottom { text-align: center; padding: 1.5rem 2rem; background: #0a0f1c; color: #64748b; font-size: 0.75rem; }
 
+    /* ── Dyslexia Toggle ── */
+    .dyslexia-toggle {
+      position: fixed; bottom: 1.25rem; left: 1.25rem; z-index: 99999;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #1e293b; color: #94a3b8; border: 2px solid #334155;
+      font-size: 0.85rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .dyslexia-toggle:hover { background: #334155; color: white; }
+    .dyslexia-toggle.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+
+    /* ── Dyslexia-friendly mode ── */
+    body.dyslexia-mode,
+    body.dyslexia-mode * {
+      font-family: 'Atkinson Hyperlegible', sans-serif !important;
+      line-height: 1.8 !important;
+      letter-spacing: 0.02em !important;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .hero h1 { font-size: 2rem; }
-      .hero-stats { gap: 1.5rem; }
-      .hero-stat .num { font-size: 1.5rem; }
       .value-grid { grid-template-columns: 1fr; }
       .feat-grid { grid-template-columns: repeat(2, 1fr); }
-      .proof-grid { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .compare-table { font-size: 0.78rem; }
       .compare-table th:nth-child(n+4), .compare-table td:nth-child(n+4) { display: none; }
+      .qr-grid { grid-template-columns: 1fr; }
+      .qr-mock { max-width: 320px; margin: 0 auto; }
     }
     @media (max-width: 480px) {
       .hero { padding: 3rem 1.25rem 2.5rem; }
       .hero h1 { font-size: 1.7rem; }
-      .industry-grid { grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
-      .industry-card { padding: 1rem 0.5rem; }
-      .industry-card .ic-icon { font-size: 1.5rem; }
-      .industry-card .ic-name { font-size: 0.72rem; }
       .feat-grid { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
     }
@@ -184,93 +304,183 @@
   </div>
 </nav>
 
-<!-- ═══════════ HERO ═══════════ -->
+<!-- ═══════════ HERO — Choose Your Adventure ═══════════ -->
 <section class="hero">
-  <div class="hero-eyebrow">🚀 Built for 13+ industries</div>
-  <h1>Run your entire business <span class="grad">from one place.</span></h1>
-  <p>CRM, invoicing, booking, accounting, lending, reviews, documents, and AI — all connected. Stop paying for 9 different tools.</p>
-  <div class="hero-btns">
-    <a href="onboarding.html" class="hero-btn hero-btn-primary">Start Free →</a>
-    <a href="#industries" class="hero-btn hero-btn-outline">See Your Industry</a>
+  <h1>What kind of business do you run?</h1>
+
+  <div class="hero-select-wrap">
+    <select class="hero-select" id="industryPicker" aria-label="Select your industry">
+      <option value="" disabled selected>Select your industry...</option>
+      <option value="property_management">Property Management</option>
+      <option value="construction_trades">Construction &amp; Trades</option>
+      <option value="salon_beauty">Salon &amp; Beauty</option>
+      <option value="attorney_law">Attorney / Law Firm</option>
+      <option value="accounting_bookkeeping">Accounting &amp; Bookkeeping</option>
+      <option value="insurance_agency">Insurance Agency</option>
+      <option value="commercial_re">Commercial Real Estate</option>
+      <option value="short_term_rental">Short-Term Rental</option>
+      <option value="restaurant_food">Restaurant &amp; Food</option>
+      <option value="marketing_agency">Marketing Agency</option>
+      <option value="retail_shop">Retail &amp; Shop</option>
+      <option value="other">Other Business</option>
+    </select>
+    <div class="hero-select-arrow">&#9662;</div>
   </div>
-  <div class="hero-stats">
-    <div class="hero-stat"><div class="num">9→1</div><div class="lbl">Tools Replaced</div></div>
-    <div class="hero-stat"><div class="num">$0</div><div class="lbl">To Start</div></div>
-    <div class="hero-stat"><div class="num">5 min</div><div class="lbl">Setup Time</div></div>
-    <div class="hero-stat"><div class="num">13+</div><div class="lbl">Industries</div></div>
+
+  <div class="hero-tools" id="heroTools">
+    <ul id="heroToolList">
+      <!-- Populated by JS on industry selection -->
+    </ul>
+  </div>
+
+  <div style="text-align:center;">
+    <a href="onboarding.html" class="hero-btn hero-btn-primary" id="heroCta" style="opacity:0.5;pointer-events:none;">Start Free &rarr;</a>
   </div>
 </section>
 
-<!-- ═══════════ INDUSTRY PICKER ═══════════ -->
-<section class="industry-section" id="industries">
-  <h2>Built for your industry</h2>
-  <p>Pick your business type and get a dashboard customized for exactly how you work.</p>
-  <div class="industry-grid">
-    <a href="onboarding.html?industry=property_management" class="industry-card">
-      <div class="ic-icon">🏠</div><div class="ic-name">Landlord / PM</div>
-    </a>
-    <a href="onboarding.html?industry=construction_trades" class="industry-card">
-      <div class="ic-icon">🏗️</div><div class="ic-name">Contractor</div>
-    </a>
-    <a href="onboarding.html?industry=commercial_re" class="industry-card">
-      <div class="ic-icon">🏢</div><div class="ic-name">Commercial RE</div>
-    </a>
-    <a href="onboarding.html?industry=short_term_rental" class="industry-card">
-      <div class="ic-icon">🏖️</div><div class="ic-name">Short-Term Rental</div>
-    </a>
-    <a href="onboarding.html?industry=solo_attorney" class="industry-card">
-      <div class="ic-icon">⚖️</div><div class="ic-name">Attorney</div>
-    </a>
-    <a href="onboarding.html?industry=accounting_firm" class="industry-card">
-      <div class="ic-icon">📊</div><div class="ic-name">Accountant</div>
-    </a>
-    <a href="onboarding.html?industry=insurance_agency" class="industry-card">
-      <div class="ic-icon">🛡️</div><div class="ic-name">Insurance</div>
-    </a>
-    <a href="onboarding.html?industry=salon_barber" class="industry-card">
-      <div class="ic-icon">💇</div><div class="ic-name">Salon / Barber</div>
-    </a>
-    <a href="onboarding.html?industry=restaurant_food" class="industry-card">
-      <div class="ic-icon">🍽️</div><div class="ic-name">Restaurant</div>
-    </a>
-    <a href="onboarding.html?industry=general_business" class="industry-card">
-      <div class="ic-icon">💼</div><div class="ic-name">Any Business</div>
-    </a>
+<!-- ═══════════ AI ADVISOR SNIPPET ═══════════ -->
+<section class="advisor-section">
+  <h2>Meet your AI Business Advisor</h2>
+  <p>Here's what your advisor looks like — a daily health check and action plan, personalized to your business.</p>
+
+  <div class="advisor-card">
+    <div class="advisor-header">
+      <span>&#129302;</span> AI Business Advisor
+    </div>
+    <div class="advisor-score-row">
+      <div class="advisor-score-circle">87</div>
+      <div class="advisor-score-label">
+        <strong style="color:white;font-size:1rem;">Business Health Score</strong><br>
+        Updated daily based on your financials, compliance, and activity.
+      </div>
+    </div>
+    <ul class="advisor-items">
+      <li>Your cash flow is up 12% this month. Consider reinvesting in marketing.</li>
+      <li>Insurance renewal due in 28 days. Get quotes now.</li>
+      <li>2 new leads haven't been contacted. Follow up today.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════ QR CODE PAYMENT VISUAL ═══════════ -->
+<section class="qr-section">
+  <div class="qr-grid">
+    <div class="qr-mock">
+      <div class="qr-mock-header">Invoice #1042</div>
+      <div class="qr-mock-amount">$1,250.00</div>
+      <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- QR code pattern (decorative) -->
+        <rect width="160" height="160" rx="8" fill="#f8fafc"/>
+        <rect x="12" y="12" width="40" height="40" rx="4" fill="#0f172a"/>
+        <rect x="16" y="16" width="32" height="32" rx="2" fill="#f8fafc"/>
+        <rect x="22" y="22" width="20" height="20" rx="2" fill="#0f172a"/>
+        <rect x="108" y="12" width="40" height="40" rx="4" fill="#0f172a"/>
+        <rect x="112" y="16" width="32" height="32" rx="2" fill="#f8fafc"/>
+        <rect x="118" y="22" width="20" height="20" rx="2" fill="#0f172a"/>
+        <rect x="12" y="108" width="40" height="40" rx="4" fill="#0f172a"/>
+        <rect x="16" y="112" width="32" height="32" rx="2" fill="#f8fafc"/>
+        <rect x="22" y="118" width="20" height="20" rx="2" fill="#0f172a"/>
+        <!-- Center data blocks -->
+        <rect x="60" y="12" width="10" height="10" fill="#0f172a"/>
+        <rect x="76" y="12" width="10" height="10" fill="#0f172a"/>
+        <rect x="92" y="12" width="10" height="10" fill="#0f172a"/>
+        <rect x="60" y="28" width="10" height="10" fill="#0f172a"/>
+        <rect x="76" y="36" width="10" height="10" fill="#0f172a"/>
+        <rect x="92" y="28" width="10" height="10" fill="#0f172a"/>
+        <rect x="60" y="44" width="10" height="10" fill="#0f172a"/>
+        <rect x="60" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="76" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="92" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="12" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="28" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="44" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="108" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="124" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="140" y="60" width="10" height="10" fill="#0f172a"/>
+        <rect x="60" y="76" width="10" height="10" fill="#0f172a"/>
+        <rect x="76" y="76" width="10" height="10" fill="#0f172a"/>
+        <rect x="92" y="76" width="10" height="10" fill="#0f172a"/>
+        <rect x="60" y="92" width="10" height="10" fill="#0f172a"/>
+        <rect x="76" y="92" width="10" height="10" fill="#0f172a"/>
+        <rect x="108" y="76" width="10" height="10" fill="#0f172a"/>
+        <rect x="124" y="92" width="10" height="10" fill="#0f172a"/>
+        <rect x="140" y="76" width="10" height="10" fill="#0f172a"/>
+        <rect x="108" y="108" width="10" height="10" fill="#0f172a"/>
+        <rect x="124" y="108" width="10" height="10" fill="#0f172a"/>
+        <rect x="140" y="108" width="10" height="10" fill="#0f172a"/>
+        <rect x="108" y="124" width="10" height="10" fill="#0f172a"/>
+        <rect x="140" y="124" width="10" height="10" fill="#0f172a"/>
+        <rect x="108" y="140" width="10" height="10" fill="#0f172a"/>
+        <rect x="124" y="140" width="10" height="10" fill="#0f172a"/>
+        <rect x="140" y="140" width="10" height="10" fill="#0f172a"/>
+        <rect x="60" y="108" width="10" height="10" fill="#0f172a"/>
+        <rect x="76" y="120" width="10" height="10" fill="#0f172a"/>
+        <rect x="92" y="108" width="10" height="10" fill="#0f172a"/>
+        <rect x="60" y="140" width="10" height="10" fill="#0f172a"/>
+        <rect x="92" y="140" width="10" height="10" fill="#0f172a"/>
+      </svg>
+      <div class="qr-mock-label">Scan to pay</div>
+    </div>
+    <div class="qr-content">
+      <h2>Get paid faster with QR invoices</h2>
+      <ul>
+        <li>Generate invoices in seconds</li>
+        <li>Clients scan to pay instantly</li>
+        <li>Track every payment automatically</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ VERIFIED BY 3120 BADGE ═══════════ -->
+<section class="verified-section">
+  <h2>Verified professionals you can trust</h2>
+  <p>Every professional on our network is license-verified, insured, and reviewed by real clients.</p>
+
+  <div class="verified-card">
+    <div class="verified-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 15l-4-4 1.41-1.41L11 13.17l6.59-6.59L19 8l-8 8z"/></svg>
+      Verified by 3120
+    </div>
+    <div class="verified-name">[Professional Name]</div>
+    <div class="verified-type">Licensed &amp; Insured</div>
+    <div class="verified-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+    <button class="verified-book-btn" onclick="window.location.href='professional-marketplace.html'">Quick Book &rarr;</button>
   </div>
 </section>
 
 <!-- ═══════════ VALUE PROPS ═══════════ -->
 <section class="value-section">
   <h2>Everything you need. Nothing you don't.</h2>
-  <p>One platform replaces your CRM, booking tool, invoicing software, accounting app, and more.</p>
+  <p>One platform with CRM, booking, invoicing, accounting, and more — all connected.</p>
   <div class="value-grid">
     <div class="value-card">
-      <div class="value-icon" style="background:#eff6ff;">💰</div>
+      <div class="value-icon" style="background:#eff6ff;">&#128176;</div>
       <h3>Get Paid Faster</h3>
-      <p>Send invoices with QR codes, collect payments online, track who owes you — all in one place. No more chasing checks.</p>
+      <p>Send invoices with QR codes, collect payments online, track who owes you — all in one place.</p>
     </div>
     <div class="value-card">
-      <div class="value-icon" style="background:#f0fdf4;">📊</div>
+      <div class="value-icon" style="background:#f0fdf4;">&#128202;</div>
       <h3>Know Your Numbers</h3>
-      <p>Real-time revenue, expenses, and cash flow. AI-generated health score tells you exactly where your business stands.</p>
+      <p>Real-time revenue, expenses, and cash flow. AI-generated health score tells you where your business stands.</p>
     </div>
     <div class="value-card">
-      <div class="value-icon" style="background:#fef3c7;">🏦</div>
+      <div class="value-icon" style="background:#fef3c7;">&#127974;</div>
       <h3>Get Funded</h3>
-      <p>Your financial data auto-packages into loan applications. Connect with verified lenders in one click. No more document chasing.</p>
+      <p>Your financial data auto-packages into loan applications. Connect with verified lenders in one click.</p>
     </div>
     <div class="value-card">
-      <div class="value-icon" style="background:#f5f3ff;">📅</div>
+      <div class="value-icon" style="background:#f5f3ff;">&#128197;</div>
       <h3>Book Clients Online</h3>
       <p>Public booking page, appointment calendar, automated reminders. Clients self-schedule without calling you.</p>
     </div>
     <div class="value-card">
-      <div class="value-icon" style="background:#fef2f2;">⭐</div>
+      <div class="value-icon" style="background:#fef2f2;">&#11088;</div>
       <h3>Build Your Reputation</h3>
-      <p>Automatically request reviews after every job. Display them on your profile. Outrank competitors on trust.</p>
+      <p>Automatically request reviews after every job. Display them on your profile. Build trust before clients call.</p>
     </div>
     <div class="value-card">
-      <div class="value-icon" style="background:#f0f9ff;">🤝</div>
+      <div class="value-icon" style="background:#f0f9ff;">&#129309;</div>
       <h3>Grow Your Network</h3>
       <p>Connect with other business owners, get referrals, join industry groups, and find verified professionals.</p>
     </div>
@@ -280,20 +490,20 @@
 <!-- ═══════════ FEATURES ═══════════ -->
 <section class="features-section">
   <h2>One platform. Every tool.</h2>
-  <p>Stop paying for 9 subscriptions. Everything is built in.</p>
+  <p>Built to replace the tools you're already paying for.</p>
   <div class="feat-grid">
-    <div class="feat-item" onclick="showFeature(this)" data-title="CRM & Pipeline" data-desc="Track every lead from first contact to paying customer. Drag-and-drop kanban board, activity logging (calls, emails, meetings), lead scoring, and analytics. Know exactly where every deal stands." data-link="crm.html"><div class="fi-icon">📊</div><h4>CRM & Pipeline</h4><p>Track leads to close</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Booking & Calendar" data-desc="Let your clients book appointments online 24/7. Set your services, prices, and available times. Get notified instantly when someone books. Syncs with your calendar." data-link="booking.html"><div class="fi-icon">📅</div><h4>Booking & Calendar</h4><p>Clients book online 24/7</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Invoicing & Documents" data-desc="Create professional invoices with your logo in seconds. QR codes let clients pay from their phone. E-signatures built in. Generate contracts, estimates, and receipts." data-link="doc-generator.html"><div class="fi-icon">📄</div><h4>Invoicing & Docs</h4><p>Send invoices with QR pay</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Accounting" data-desc="Track income and expenses automatically. See profit by month, by property, or by project. Generate reports for your CPA at tax time. No accounting degree needed." data-link="accounting.html"><div class="fi-icon">💰</div><h4>Accounting</h4><p>Track income & expenses</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Loan Connect" data-desc="Need funding? We package your financial data (revenue, expenses, cash flow) and connect you directly with loan officers. One click to share — no chasing documents. Get pre-approved faster." data-link="loan-connect.html"><div class="fi-icon">🏦</div><h4>Loan Connect</h4><p>Get funded faster</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Reviews & Reputation" data-desc="Automatically ask clients for reviews after a job is done. Publish the best ones to your profile. Track your rating over time. Build trust before clients even call you." data-link="reviews.html"><div class="fi-icon">⭐</div><h4>Reviews</h4><p>Build your reputation</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Messages" data-desc="Three inboxes keep you organized: Internal (your team), Network (your accountant, attorney, lender), and Deals (promotions and offers). Important messages never get buried." data-link="messages.html"><div class="fi-icon">💬</div><h4>Messages</h4><p>Team + professional inbox</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Community & Network" data-desc="Join groups with other business owners in your industry or area. Give and receive recommendations. Find trusted professionals. Grow your network without networking events." data-link="community.html"><div class="fi-icon">🤝</div><h4>Community</h4><p>Connect with other owners</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Field App" data-desc="Built for people who work with their hands. See today's jobs, get GPS directions, capture photos, collect signatures, and take payment — all from your phone." data-link="field-app.html"><div class="fi-icon">📱</div><h4>Field App</h4><p>Work from your phone</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="AI Business Advisor" data-desc="Get a health score for your business (0-100) updated daily. The AI checks your licenses, insurance, revenue trends, and deadlines — then gives you a to-do list of what to fix first." data-link="onboarding.html"><div class="fi-icon">🤖</div><h4>AI Advisor</h4><p>Daily health check + to-dos</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Insurance" data-desc="Track all your policies in one place. Get alerts before anything expires. Compare quotes from multiple carriers. Never get caught without coverage." data-link="insurance.html"><div class="fi-icon">🛡️</div><h4>Insurance</h4><p>Track & compare policies</p></div>
-    <div class="feat-item" onclick="showFeature(this)" data-title="Client Portal" data-desc="Give your clients their own login. They can view appointments, pay invoices, send you messages, and see their history — without calling you. Professional and convenient." data-link="client-portal.html"><div class="fi-icon">📋</div><h4>Client Portal</h4><p>Clients help themselves</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="CRM & Pipeline" data-desc="Track every lead from first contact to paying customer. Drag-and-drop kanban board, activity logging (calls, emails, meetings), lead scoring, and analytics. Know exactly where every deal stands." data-link="crm.html"><div class="fi-icon">&#128202;</div><h4>CRM &amp; Pipeline</h4><p>Track leads to close</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Booking & Calendar" data-desc="Let your clients book appointments online 24/7. Set your services, prices, and available times. Get notified instantly when someone books. Syncs with your calendar." data-link="booking.html"><div class="fi-icon">&#128197;</div><h4>Booking &amp; Calendar</h4><p>Clients book online 24/7</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Invoicing & Documents" data-desc="Create professional invoices with your logo in seconds. QR codes let clients pay from their phone. E-signatures built in. Generate contracts, estimates, and receipts." data-link="doc-generator.html"><div class="fi-icon">&#128196;</div><h4>Invoicing &amp; Docs</h4><p>Send invoices with QR pay</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Accounting" data-desc="Track income and expenses automatically. See profit by month, by property, or by project. Generate reports for your CPA at tax time. No accounting degree needed." data-link="accounting.html"><div class="fi-icon">&#128176;</div><h4>Accounting</h4><p>Track income &amp; expenses</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Loan Connect" data-desc="Need funding? We package your financial data (revenue, expenses, cash flow) and connect you directly with loan officers. One click to share — no chasing documents." data-link="loan-connect.html"><div class="fi-icon">&#127974;</div><h4>Loan Connect</h4><p>Get funded faster</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Reviews & Reputation" data-desc="Automatically ask clients for reviews after a job is done. Publish the best ones to your profile. Track your rating over time. Build trust before clients even call you." data-link="reviews.html"><div class="fi-icon">&#11088;</div><h4>Reviews</h4><p>Build your reputation</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Messages" data-desc="Three inboxes keep you organized: Internal (your team), Network (your accountant, attorney, lender), and Deals (promotions and offers). Important messages never get buried." data-link="messages.html"><div class="fi-icon">&#128172;</div><h4>Messages</h4><p>Team + professional inbox</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Community & Network" data-desc="Join groups with other business owners in your industry or area. Give and receive recommendations. Find trusted professionals. Grow your network without networking events." data-link="community.html"><div class="fi-icon">&#129309;</div><h4>Community</h4><p>Connect with other owners</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Field App" data-desc="Built for people who work with their hands. See today's jobs, get GPS directions, capture photos, collect signatures, and take payment — all from your phone." data-link="field-app.html"><div class="fi-icon">&#128241;</div><h4>Field App</h4><p>Work from your phone</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="AI Business Advisor" data-desc="Get a health score for your business (0-100) updated daily. The AI checks your licenses, insurance, revenue trends, and deadlines — then gives you a to-do list of what to fix first." data-link="onboarding.html"><div class="fi-icon">&#129302;</div><h4>AI Advisor</h4><p>Daily health check + to-dos</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Insurance" data-desc="Track all your policies in one place. Get alerts before anything expires. Compare quotes from multiple carriers. Never get caught without coverage." data-link="insurance.html"><div class="fi-icon">&#128737;</div><h4>Insurance</h4><p>Track &amp; compare policies</p></div>
+    <div class="feat-item" onclick="showFeature(this)" data-title="Client Portal" data-desc="Give your clients their own login. They can view appointments, pay invoices, send you messages, and see their history — without calling you. Professional and convenient." data-link="client-portal.html"><div class="fi-icon">&#128203;</div><h4>Client Portal</h4><p>Clients help themselves</p></div>
   </div>
 </section>
 
@@ -304,62 +514,38 @@
     <div id="featModalIcon" style="font-size:2.5rem;margin-bottom:0.75rem;"></div>
     <h3 id="featModalTitle" style="font-size:1.3rem;font-weight:800;color:#1e293b;margin-bottom:0.75rem;"></h3>
     <p id="featModalDesc" style="font-size:0.95rem;color:#4b5563;line-height:1.7;margin-bottom:1.5rem;"></p>
-    <a id="featModalLink" href="#" style="display:inline-flex;align-items:center;gap:8px;background:#3b82f6;color:white;padding:0.7rem 1.5rem;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;">Try It Free →</a>
+    <a id="featModalLink" href="#" style="display:inline-flex;align-items:center;gap:8px;background:#3b82f6;color:white;padding:0.7rem 1.5rem;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;">Try It Free &rarr;</a>
   </div>
 </div>
 
 <!-- ═══════════ COMPARISON ═══════════ -->
 <section class="compare-section">
-  <h2>Built to replace up to 9 tools</h2>
-  <p>Here's what you're probably paying for today — and what you get with 3120 Life.</p>
+  <h2>Built to replace the tools you're already paying for</h2>
+  <p>Here's what you might be paying for today — and what comes included with 3120 Life.</p>
   <table class="compare-table">
     <thead>
-      <tr><th>Feature</th><th>Separate Tools</th><th>Cost/mo</th><th class="us">3120 Life</th></tr>
+      <tr><th>Feature</th><th>Typical Tool</th><th>Typical Cost/mo</th><th class="us">3120 Life</th></tr>
     </thead>
     <tbody>
-      <tr><td>CRM</td><td>HubSpot / Zoho</td><td>$45+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Booking</td><td>Calendly / Acuity</td><td>$16+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Invoicing</td><td>FreshBooks / Wave</td><td>$17+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Accounting</td><td>QuickBooks</td><td>$30+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Reviews</td><td>Podium / Birdeye</td><td>$249+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Field App</td><td>Jobber / Housecall</td><td>$49+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Documents</td><td>DocuSign / PandaDoc</td><td>$25+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Community</td><td>Alignable</td><td>$12+</td><td class="us check">✓ Built in</td></tr>
-      <tr><td>Lending</td><td>Manual applications</td><td>Hours of work</td><td class="us check">✓ AI-powered</td></tr>
-      <tr style="font-weight:800;background:#f8fafc;"><td>TOTAL</td><td>9 logins, 9 bills</td><td>$443+/mo</td><td class="us" style="color:#10b981;">Starting at $0</td></tr>
+      <tr><td>CRM</td><td>HubSpot / Zoho</td><td>$45+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Booking</td><td>Calendly / Acuity</td><td>$16+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Invoicing</td><td>FreshBooks / Wave</td><td>$17+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Accounting</td><td>QuickBooks</td><td>$30+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Reviews</td><td>Podium / Birdeye</td><td>$249+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Field App</td><td>Jobber / Housecall</td><td>$49+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Documents</td><td>DocuSign / PandaDoc</td><td>$25+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Community</td><td>Alignable</td><td>$12+</td><td class="us check">&#10003; Built in</td></tr>
+      <tr><td>Lending</td><td>Manual applications</td><td>Hours of work</td><td class="us check">&#10003; AI-powered</td></tr>
     </tbody>
   </table>
-</section>
-
-<!-- ═══════════ WHY 3120 LIFE ═══════════ -->
-<section class="proof-section">
-  <h2>Built in Utah. Built for you.</h2>
-  <p style="max-width:600px;margin:0 auto 2.5rem;color:#64748b;font-size:1rem;">We're a local team building the tools small businesses actually need — not another bloated enterprise platform.</p>
-  <div class="proof-grid">
-    <div class="proof-card" style="text-align:center;">
-      <div style="font-size:2.5rem;font-weight:900;color:#3b82f6;">13+</div>
-      <div style="font-weight:700;color:#1e293b;margin-top:0.25rem;">Industry Types</div>
-      <div style="font-size:0.85rem;color:#64748b;margin-top:0.5rem;">Landlords, contractors, salons, attorneys, accountants, and more — each gets a custom dashboard.</div>
-    </div>
-    <div class="proof-card" style="text-align:center;">
-      <div style="font-size:2.5rem;font-weight:900;color:#10b981;">5 min</div>
-      <div style="font-weight:700;color:#1e293b;margin-top:0.25rem;">Setup Time</div>
-      <div style="font-size:0.85rem;color:#64748b;margin-top:0.5rem;">Pick your industry, answer 3 questions, and your dashboard is ready. No training needed.</div>
-    </div>
-    <div class="proof-card" style="text-align:center;">
-      <div style="font-size:2.5rem;font-weight:900;color:#f59e0b;">9 tools</div>
-      <div style="font-weight:700;color:#1e293b;margin-top:0.25rem;">Replaced</div>
-      <div style="font-size:0.85rem;color:#64748b;margin-top:0.5rem;">CRM, invoicing, booking, accounting, reviews, messaging, documents — all in one subscription.</div>
-    </div>
-  </div>
 </section>
 
 <!-- ═══════════ CTA ═══════════ -->
 <section class="cta-section">
   <h2>Start running your business smarter.</h2>
-  <p>Free to start. No credit card required. Pick your industry and you're live in 5 minutes.</p>
+  <p>Free to start. No credit card required. Pick your industry and get set up in minutes.</p>
   <div class="hero-btns">
-    <a href="onboarding.html" class="hero-btn hero-btn-primary" style="background:white;color:#1e40af;">Start Free →</a>
+    <a href="onboarding.html" class="hero-btn hero-btn-primary" style="background:white;color:#1e40af;">Start Free &rarr;</a>
     <a href="professional-marketplace.html" class="hero-btn hero-btn-outline">Hire a Pro</a>
   </div>
 </section>
@@ -401,7 +587,87 @@
   <br><span style="opacity:0.7;">3120 Life is currently in beta. Features shown represent planned functionality. Some data is for demonstration purposes.</span>
 </div>
 
+<!-- ═══════════ DYSLEXIA-FRIENDLY TOGGLE ═══════════ -->
+<button class="dyslexia-toggle" id="dyslexiaToggle" title="Toggle dyslexia-friendly font" aria-label="Toggle dyslexia-friendly font">Aa</button>
+
 <script>
+/* ── Industry Picker logic ── */
+var industryData = {
+  property_management: [
+    'Rent collection & tenant screening',
+    'Lease management & maintenance tracking',
+    'Owner statements & accounting',
+    'AI funding offers based on your portfolio'
+  ],
+  construction_trades: [
+    'Job tracking & crew scheduling',
+    'Invoicing with QR code payments',
+    'Materials price lookup',
+    'AI Business Advisor with health score'
+  ],
+  salon_beauty: [
+    'Online booking & calendar',
+    'Client portal & review management',
+    'Invoicing & payment tracking',
+    'Business health score & deadlines'
+  ],
+  attorney_law: [
+    'Matter management & time tracking',
+    'Trust accounting & invoicing',
+    'Document management & e-signature',
+    'Client portal & deadline tracking'
+  ],
+  accounting_bookkeeping: [
+    'CRM & lead pipeline',
+    'Invoicing & payments',
+    'Document management & e-signature',
+    'AI Business Advisor'
+  ],
+  insurance_agency: [
+    'CRM & lead pipeline',
+    'Policy tracking & renewals',
+    'Invoicing & payments',
+    'AI Business Advisor'
+  ],
+  commercial_re: [
+    'CRM & lead pipeline',
+    'Lease management & accounting',
+    'Document management & e-signature',
+    'AI funding offers based on your portfolio'
+  ],
+  short_term_rental: [
+    'Booking & calendar management',
+    'Guest portal & review collection',
+    'Invoicing & payment tracking',
+    'AI Business Advisor with health score'
+  ],
+  _default: [
+    'CRM & lead pipeline',
+    'Invoicing & payments',
+    'Booking & calendar',
+    'AI Business Advisor'
+  ]
+};
+
+var picker = document.getElementById('industryPicker');
+var toolList = document.getElementById('heroToolList');
+var heroCta = document.getElementById('heroCta');
+
+picker.addEventListener('change', function() {
+  var val = this.value;
+  var tools = industryData[val] || industryData._default;
+  toolList.innerHTML = '';
+  tools.forEach(function(t) {
+    var li = document.createElement('li');
+    li.textContent = t;
+    toolList.appendChild(li);
+  });
+  heroCta.style.opacity = '1';
+  heroCta.style.pointerEvents = 'auto';
+  heroCta.href = 'onboarding.html?industry=' + encodeURIComponent(val);
+});
+
+/* ── Feature modal ── */
 function showFeature(el) {
   var icon = el.querySelector('.fi-icon').textContent;
   var title = el.getAttribute('data-title');
@@ -416,6 +682,43 @@ function showFeature(el) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') document.getElementById('featModal').style.display = 'none';
 });
+
+/* ── Dyslexia-friendly font toggle ── */
+(function() {
+  var btn = document.getElementById('dyslexiaToggle');
+  var fontLink = document.getElementById('dyslexia-font-link');
+  var STORAGE_KEY = 'rv_dyslexia_font';
+  var FONT_URL = 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap';
+
+  function enableDyslexia() {
+    fontLink.href = FONT_URL;
+    document.body.classList.add('dyslexia-mode');
+    btn.classList.add('active');
+    try { localStorage.setItem(STORAGE_KEY, 'on'); } catch(e) {}
+  }
+
+  function disableDyslexia() {
+    fontLink.href = '';
+    document.body.classList.remove('dyslexia-mode');
+    btn.classList.remove('active');
+    try { localStorage.setItem(STORAGE_KEY, 'off'); } catch(e) {}
+  }
+
+  btn.addEventListener('click', function() {
+    if (document.body.classList.contains('dyslexia-mode')) {
+      disableDyslexia();
+    } else {
+      enableDyslexia();
+    }
+  });
+
+  // Load saved preference
+  try {
+    if (localStorage.getItem(STORAGE_KEY) === 'on') {
+      enableDyslexia();
+    }
+  } catch(e) {}
+})();
 </script>
 <script src="app.js"></script>
 <script src="rv-mobile-nav.js"></script>
