@@ -98,14 +98,18 @@ const Auth = (function() {
     });
   }
 
-  /** Get current session (checks Supabase, caches in memory) */
+  /** Get current session (always checks Supabase for fresh token) */
   async function getSession() {
-    if (_session) return _session;
     const sb = getSupabase();
-    if (!sb) return null;
-    const { data: { session } } = await sb.auth.getSession();
-    _session = session;
-    return session;
+    if (!sb) return _session || null;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      _session = session;
+      return session;
+    } catch (e) {
+      console.warn('getSession failed:', e);
+      return _session || null;
+    }
   }
 
   /** Get current user */

@@ -34,130 +34,50 @@ function isSupabaseConfigured() {
 // AUTH MODULE — Real authentication via Supabase
 // ============================================================================
 
-const RVAuth = {
-  // Get current session
-  async getSession() {
+// RVAuth removed — use Auth module from auth.js instead (single source of truth)
+
+// ============================================================================
+// AUDIT LOGGING — Immutable forensic trail via Supabase
+// ============================================================================
+
+const RVAudit = {
+  /** Log an audit event to the immutable audit_log table */
+  async log(action, resourceType, resourceId, metadata) {
     const sb = getSupabase();
     if (!sb) return null;
-    const { data: { session } } = await sb.auth.getSession();
-    return session;
-  },
-
-  // Get current user
-  async getUser() {
-    const sb = getSupabase();
-    if (!sb) return null;
-    const { data: { user } } = await sb.auth.getUser();
-    return user;
-  },
-
-  // Sign up new user
-  async signUp({ email, password, firstName, lastName, phone, company, role = 'landlord', plan = 'starter' }) {
-    const sb = getSupabase();
-    if (!sb) return { error: 'Supabase not configured' };
-
-    const { data, error } = await sb.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-          company: company,
-          role: role
-        }
-      }
+    const { data, error } = await sb.rpc('log_audit_event', {
+      p_action: action,
+      p_resource_type: resourceType || null,
+      p_resource_id: resourceId || null,
+      p_metadata: metadata || {}
     });
-
-    if (error) return { data: null, error };
-
-    // Update profile with additional fields
-    if (data.user) {
-      await sb.from('profiles').update({
-        phone,
-        company,
-        plan,
-        role
-      }).eq('id', data.user.id);
-    }
-
-    return { data, error: null };
-  },
-
-  // Sign in
-  async signIn(email, password) {
-    const sb = getSupabase();
-    if (!sb) return { error: 'Supabase not configured' };
-
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) return { data: null, error };
-
-    // Load profile
-    const { data: profile } = await sb.from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
-
-    return { data: { ...data, profile }, error: null };
-  },
-
-  // Sign out
-  async signOut() {
-    const sb = getSupabase();
-    if (!sb) return;
-    await sb.auth.signOut();
-    // Clear any localStorage remnants
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('rv_')) localStorage.removeItem(key);
-    });
-  },
-
-  // Get user profile from database
-  async getProfile() {
-    const sb = getSupabase();
-    if (!sb) return null;
-    const user = await this.getUser();
-    if (!user) return null;
-
-    const { data } = await sb.from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    if (error) console.error('Audit log error:', error);
     return data;
   },
 
-  // Update profile
-  async updateProfile(updates) {
+  /** Fetch audit log entries (workspace-scoped via RLS) */
+  async getLog(options = {}) {
     const sb = getSupabase();
-    if (!sb) return { error: 'Supabase not configured' };
-    const user = await this.getUser();
-    if (!user) return { error: 'Not authenticated' };
-
-    const { data, error } = await sb.from('profiles')
-      .update(updates)
-      .eq('id', user.id)
-      .select()
-      .single();
-    return { data, error };
+    if (!sb) return [];
+    let q = sb.from('audit_log').select('*').order('created_at', { ascending: false });
+    if (options.limit) q = q.limit(options.limit);
+    if (options.action) q = q.eq('action', options.action);
+    if (options.resource_type) q = q.eq('resource_type', options.resource_type);
+    if (options.since) q = q.gte('created_at', options.since);
+    const { data } = await q;
+    return data || [];
   },
 
-  // Password reset
-  async resetPassword(email) {
+  /** Expire stale time-limited grants */
+  async expireGrants() {
     const sb = getSupabase();
-    if (!sb) return { error: 'Supabase not configured' };
-    return await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password.html'
-    });
-  },
-
-  // Listen for auth state changes
-  onAuthStateChange(callback) {
-    const sb = getSupabase();
-    if (!sb) return;
-    return sb.auth.onAuthStateChange(callback);
+    if (!sb) return 0;
+    const { data } = await sb.rpc('expire_stale_grants');
+    return data || 0;
   }
 };
+
+if (typeof window !== 'undefined') window.RVAudit = RVAudit;
 
 // ============================================================================
 // FILE STORAGE — Supabase Storage for documents, photos, IDs

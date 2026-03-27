@@ -21,7 +21,7 @@
       line-height: 1.8;
     }
     .logo {
-      width: 64px; height: 64px; background: #1a56db; border-radius: 16px;
+      width: 64px; height: 64px; background: #00E676; border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
       margin-bottom: 2rem;
     }
@@ -76,14 +76,24 @@
   </form>
 
   <div class="footer">[Your Business Name] &middot; Herriman, UT &middot; 3120life.com</div>
+  <a href="admin.html" style="color:#334155;font-size:0.7rem;text-decoration:none;margin-top:1.5rem;display:inline-block;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">Admin</a>
 
   <div class="toast" id="toast"></div>
 
   <script>
     function handleNotify(e) {
       e.preventDefault();
-      var email = document.getElementById('notifyEmail').value;
-      var list = JSON.parse(localStorage.getItem('rv_notify_list') || '[]');
+      var email = document.getElementById('notifyEmail').value.trim().toLowerCase();
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem('rv_notify_list') || '[]'); } catch(err) { list = []; }
+      if (list.some(function(item) { return item.email === email; })) {
+        var t = document.getElementById('toast');
+        t.textContent = "You're already on the list!";
+        t.classList.add('show');
+        setTimeout(function() { t.classList.remove('show'); }, 4000);
+        document.getElementById('notifyEmail').value = '';
+        return false;
+      }
       list.push({ email: email, date: new Date().toISOString() });
       localStorage.setItem('rv_notify_list', JSON.stringify(list));
 

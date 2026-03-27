@@ -10,7 +10,7 @@
     --amber-d: #d97706;
     --amber-l: #fef3c7;
     --amber-bg: #fffbeb;
-    --dark: #1e1b4b;
+    --dark: #121212;
     --gray: #6b7280;
     --light: #f9fafb;
     --white: #ffffff;
@@ -25,7 +25,7 @@
   #login-screen {
     min-height: 100vh;
     display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #1e1b4b 0%, #78350f 100%);
+    background: linear-gradient(135deg, #121212 0%, #78350f 100%);
   }
   .login-box {
     background: var(--white);
@@ -125,7 +125,7 @@
     border-left: 3px solid transparent; transition: all .15s;
   }
   nav a:hover { background: rgba(255,255,255,.06); color: var(--white); }
-  nav a.active { background: rgba(245,158,11,.12); color: var(--amber); border-left-color: var(--amber); }
+  nav a.active { background: #00E676; color: #121212; border-left-color: #00E676; font-weight: 700; }
   nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
   .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.1); }
   .sidebar-footer a { color: rgba(255,255,255,.5); font-size: .8rem; cursor: pointer; text-decoration: none; }
@@ -153,7 +153,9 @@
     background: var(--white); border-radius: 12px; padding: 20px;
     box-shadow: 0 1px 4px rgba(0,0,0,.06);
     border-left: 4px solid var(--amber);
+    cursor: pointer; transition: box-shadow .2s, transform .15s;
   }
+  .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); transform: translateY(-2px); }
   .stat-card .label { font-size: .78rem; color: var(--gray); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
   .stat-card .value { font-size: 2rem; font-weight: 900; color: var(--dark); margin-top: 4px; }
   .stat-card .delta { font-size: .78rem; color: var(--green); margin-top: 2px; }
@@ -312,10 +314,24 @@
   .review-response-area textarea:focus { outline:none;border-color:var(--amber); }
   .review-response-saved { font-size:.82rem;color:#374151;background:var(--amber-l);border-radius:8px;padding:8px 12px;margin-top:8px;border-left:3px solid var(--amber); }
 
+  /* Mobile menu */
+  .vendor-mobile-btn {
+    display: none; position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1001;
+    width: 52px; height: 52px; border-radius: 50%; border: none;
+    background: var(--amber); color: var(--dark); font-size: 1.4rem; font-weight: 800;
+    cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  }
+  .vendor-mobile-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 999;
+  }
+  .vendor-mobile-overlay.show { display: block; }
   @media (max-width: 900px) {
     .stats { grid-template-columns: 1fr 1fr; }
     .two-col { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; z-index: 1000; transition: left .25s ease; overflow-y: auto; }
+    .sidebar.open { left: 0; }
+    .vendor-mobile-btn { display: flex; align-items: center; justify-content: center; }
   }
 /* Invoices */
 .inv-table { width:100%;border-collapse:collapse; }
@@ -540,7 +556,9 @@
      APP SHELL
 ══════════════════════════════════════════ -->
 <div id="app" style="display:none;flex-direction:row;">
-  <div class="sidebar">
+  <button class="vendor-mobile-btn" id="vendorMobileBtn" onclick="toggleVendorSidebar()">☰</button>
+  <div class="vendor-mobile-overlay" id="vendorOverlay" onclick="toggleVendorSidebar()"></div>
+  <div class="sidebar" id="vendorSidebar">
     <div class="sidebar-brand">
       <h2>🔧 3120 Life</h2>
       <div class="sub">Vendor Portal</div>
@@ -646,22 +664,22 @@
           💡 <strong>How leads work:</strong> New work orders from local landlords appear in your Lead Feed. View full job details for free — pay $5 only when you accept a lead. Decline as many as you want at no cost.
         </div>
         <div class="stats">
-          <div class="stat-card">
+          <div class="stat-card" onclick="goToPage('leads')">
             <div class="label">New Leads</div>
             <div class="value" id="stat-new-leads">0</div>
             <div class="delta">Waiting for you</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="goToPage('jobs')">
             <div class="label">Active Jobs</div>
             <div class="value" id="stat-active">0</div>
             <div class="delta">In progress</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="goToPage('jobs')">
             <div class="label">Completed</div>
             <div class="value" id="stat-completed">0</div>
             <div class="delta">All time</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="goToPage('earnings')">
             <div class="label">Total Earned</div>
             <div class="value" id="stat-earned">$0</div>
             <div class="delta">This month</div>
@@ -1235,8 +1253,14 @@ async function doLogin() {
     err.style.display = 'block';
     return;
   }
-  err.style.display = 'none';
   const profile = data.profile || {};
+  if (profile.role && profile.role !== 'vendor') {
+    err.textContent = 'Access denied. This portal is for vendor accounts only.';
+    err.style.display = 'block';
+    await Auth.signOut();
+    return;
+  }
+  err.style.display = 'none';
   currentVendor = {
     name: ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || email,
     email: email,
@@ -1246,7 +1270,6 @@ async function doLogin() {
     zips: profile.zips || [],
     joined: profile.created_at ? profile.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
   };
-  localStorage.setItem('rv_vendor_session', JSON.stringify(currentVendor));
   localStorage.setItem('rv_doc_role', 'vendor');
   launchApp();
 }
@@ -1331,7 +1354,6 @@ async function doSignup() {
     joined: new Date().toISOString().split('T')[0],
     verificationStatus: 'pending'
   };
-  localStorage.setItem('rv_vendor_session', JSON.stringify(currentVendor));
   localStorage.setItem('rv_doc_role', 'vendor');
   launchApp();
 }
@@ -1419,25 +1441,38 @@ function launchApp() {
 }
 
 /* Check for existing session */
-window.addEventListener('DOMContentLoaded', () => {
-  const sess = localStorage.getItem('rv_vendor_session');
-  if (sess) {
-    currentVendor = JSON.parse(sess);
-    launchApp();
-    // Show compliance badge if any credentials expiring/expired
-    (function() {
-      const TODAY = new Date('2026-03-09');
-      const stored = JSON.parse(localStorage.getItem('rv_compliance_creds') || 'null');
-      if (stored && stored.credentials) {
-        const issues = stored.credentials.filter(cr => {
-          const d = Math.round((new Date(cr.exp) - TODAY) / 86400000);
-          return d <= 45;
-        });
-        const badge = document.getElementById('comp-badge-vp');
-        if (badge && issues.length > 0) badge.textContent = issues.length;
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const session = await Auth.getSession();
+    if (session) {
+      const profile = await Auth.getProfile();
+      if (profile && profile.role === 'vendor') {
+        currentVendor = {
+          name: ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || profile.email,
+          email: profile.email,
+          biz: profile.company || '',
+          phone: profile.phone || '',
+          trades: profile.trades || [],
+          zips: profile.zips || [],
+          joined: profile.created_at ? profile.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
+        };
+        launchApp();
+        // Show compliance badge if any credentials expiring/expired
+        (function() {
+          const TODAY = new Date('2026-03-09');
+          const stored = JSON.parse(localStorage.getItem('rv_compliance_creds') || 'null');
+          if (stored && stored.credentials) {
+            const issues = stored.credentials.filter(cr => {
+              const d = Math.round((new Date(cr.exp) - TODAY) / 86400000);
+              return d <= 45;
+            });
+            const badge = document.getElementById('comp-badge-vp');
+            if (badge && issues.length > 0) badge.textContent = issues.length;
+          }
+        })();
       }
-    })();
-  }
+    }
+  } catch(e) { console.warn('Session restore failed:', e); }
 });
 
 /* ══════════════════════════════
@@ -1447,20 +1482,52 @@ const PAGE_TITLES = {
   overview: ['Overview', 'Welcome back — here\'s your activity'],
   leads: ['Lead Feed', 'Matched work orders in your service area'],
   jobs: ['My Jobs', 'All accepted jobs and their status'],
+  invoices: ['Invoices', 'Create and manage invoices for your jobs'],
   earnings: ['Earnings', 'Your income and billing summary'],
+  leadmgr: ['Lead Manager', 'Track and manage your sales pipeline'],
+  network: ['My Network', 'Connect with other vendors in your area'],
   reviews: ['Reviews', 'Feedback from landlords you\'ve worked with'],
+  profile: ['My Profile', 'Your public-facing vendor profile'],
   settings: ['Settings', 'Update your profile and preferences']
 };
+
+function toggleVendorSidebar() {
+  document.getElementById('vendorSidebar').classList.toggle('open');
+  document.getElementById('vendorOverlay').classList.toggle('show');
+}
 
 function nav(page, el) {
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   el.classList.add('active');
   document.querySelectorAll('section.page').forEach(s => s.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  const [title, sub] = PAGE_TITLES[page];
-  document.getElementById('page-title').textContent = title;
-  document.getElementById('page-sub').textContent = sub;
+  const panel = document.getElementById('page-' + page);
+  if (!panel) { console.warn('Unknown page:', page); return false; }
+  panel.classList.add('active');
+  if (PAGE_TITLES[page]) {
+    const [title, sub] = PAGE_TITLES[page];
+    document.getElementById('page-title').textContent = title;
+    document.getElementById('page-sub').textContent = sub;
+  }
+  // Close mobile sidebar on nav
+  document.getElementById('vendorSidebar').classList.remove('open');
+  document.getElementById('vendorOverlay').classList.remove('show');
   return false;
+}
+
+function goToPage(page) {
+  // Find the sidebar nav link for this page and activate it
+  const link = document.querySelector('nav a[onclick*="nav(\'' + page + '\'"]');
+  if (link) { nav(page, link); } else {
+    // Fallback: just switch the page directly
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('section.page').forEach(s => s.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (PAGE_TITLES[page]) {
+      const [title, sub] = PAGE_TITLES[page];
+      document.getElementById('page-title').textContent = title;
+      document.getElementById('page-sub').textContent = sub;
+    }
+  }
 }
 
 /* ══════════════════════════════

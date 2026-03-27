@@ -1907,6 +1907,8 @@ const RVData = {
   // ─── ACCESS GRANTS ─────────────────────────────────────────────────
 
   async getAccessGrants(filters = {}) {
+    // Defense-in-depth: expire stale grants before fetching
+    await this.expireStaleGrants();
     if (this._useSupabase()) {
       let q = _scopeQuery(supabase.from('access_grants').select('*')).order('created_at', { ascending: false });
       if (filters.status) q = q.eq('status', filters.status);
@@ -1939,6 +1941,86 @@ const RVData = {
     let items = JSON.parse(localStorage.getItem('rv_access_grants') || '[]');
     items = items.map(g => g.id === id ? { ...g, status: 'revoked' } : g);
     localStorage.setItem('rv_access_grants', JSON.stringify(items));
+    // localStorage fallback: log revocation manually (DB mode uses triggers)
+    await this.logAuditEvent('grant.revoke', 'grant', id);
+  },
+
+  // ─── AUDIT LOGGING (Zero-Trust Forensic Trail) ─────────────────────
+
+  async logAuditEvent(action, resourceType, resourceId, metadata) {
+    if (this._useSupabase()) {
+      try {
+        const { data, error } = await supabase.rpc('log_audit_event', {
+          p_action: action,
+          p_resource_type: resourceType || null,
+          p_resource_id: resourceId || null,
+          p_metadata: metadata || {}
+        });
+        if (error) console.error('Audit log error:', error);
+        return data;
+      } catch (e) { console.error('Audit log failed:', e); return null; }
+    }
+    // localStorage fallback for demo mode
+    var log = JSON.parse(localStorage.getItem('rv_audit_log') || '[]');
+    log.unshift({
+      id: 'al_' + Date.now(),
+      action: action,
+      resource_type: resourceType,
+      resource_id: resourceId,
+      metadata: metadata || {},
+      user_id: 'demo',
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('rv_audit_log', JSON.stringify(log));
+    return log[0].id;
+  },
+
+  async getAuditLog(filters) {
+    filters = filters || {};
+    if (this._useSupabase()) {
+      let q = _scopeQuery(supabase.from('audit_log').select('*'));
+      if (filters.action) q = q.eq('action', filters.action);
+      if (filters.resource_type) q = q.eq('resource_type', filters.resource_type);
+      if (filters.resource_id) q = q.eq('resource_id', filters.resource_id);
+      if (filters.user_id) q = q.eq('user_id', filters.user_id);
+      if (filters.since) q = q.gte('created_at', filters.since);
+      if (filters.action_prefix) q = q.like('action', filters.action_prefix + '%');
+      const { data } = await q.order('created_at', { ascending: false }).limit(filters.limit || 100);
+      return data || [];
+    }
+    var log = JSON.parse(localStorage.getItem('rv_audit_log') || '[]');
+    if (filters.action) log = log.filter(function(e) { return e.action === filters.action; });
+    if (filters.action_prefix) log = log.filter(function(e) { return e.action.startsWith(filters.action_prefix); });
+    if (filters.resource_type) log = log.filter(function(e) { return e.resource_type === filters.resource_type; });
+    return log.slice(0, filters.limit || 100);
+  },
+
+  async expireStaleGrants() {
+    if (this._useSupabase()) {
+      try {
+        var result = await supabase.rpc('expire_stale_grants');
+        return result.data || 0;
+      } catch (e) { return 0; }
+    }
+    // localStorage fallback
+    var grants = JSON.parse(localStorage.getItem('rv_access_grants') || '[]');
+    var count = 0;
+    var now = new Date();
+    grants = grants.map(function(g) {
+      if (g.status === 'active' && g.expires_at && new Date(g.expires_at) < now) {
+        g.status = 'expired'; count++;
+      }
+      return g;
+    });
+    if (count > 0) localStorage.setItem('rv_access_grants', JSON.stringify(grants));
+    return count;
+  },
+
+  async logDocumentAccess(docId, accessType, docName) {
+    return this.logAuditEvent(
+      accessType === 'download' ? 'document.download' : 'document.view',
+      'document', docId, { name: docName || '' }
+    );
   },
 
   // ─── LOAN PACKAGES ─────────────────────────────────────────────────

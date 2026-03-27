@@ -30,6 +30,21 @@
     .ac-tab.active { color:var(--ac-blue); border-bottom-color:var(--ac-blue); }
     .ac-panel { display:none; }
     .ac-panel.active { display:block; }
+    /* Expiry countdown */
+    .expiry-badge { display:inline-flex; align-items:center; gap:.25rem; padding:.2rem .6rem; border-radius:12px; font-size:.72rem; font-weight:700; }
+    .expiry-badge.normal { background:#fef3c7; color:#92400e; }
+    .expiry-badge.urgent { background:#fee2e2; color:#991b1b; animation:pulse-urgent 1.5s infinite; }
+    .expiry-badge.expired { background:#f1f5f9; color:#64748b; }
+    @keyframes pulse-urgent { 0%,100%{opacity:1;} 50%{opacity:.6;} }
+    /* Audit filters */
+    .audit-filters { display:flex; gap:.5rem; padding:.75rem 0; flex-wrap:wrap; }
+    .audit-filter-btn { padding:.35rem .8rem; border-radius:8px; border:1px solid var(--ac-border); background:#fff; cursor:pointer; font-size:.78rem; font-weight:600; color:var(--ac-muted); transition:all .15s; }
+    .audit-filter-btn:hover { border-color:var(--ac-blue); color:var(--ac-blue); }
+    .audit-filter-btn.active { background:var(--ac-blue); color:#fff; border-color:var(--ac-blue); }
+    /* Duration presets */
+    .duration-presets { display:flex; gap:.4rem; flex-wrap:wrap; margin:.75rem 0; }
+    .dur-btn { padding:.4rem .9rem; border-radius:8px; border:1.5px solid var(--ac-border); background:#fff; cursor:pointer; font-size:.8rem; font-weight:600; color:var(--ac-text); transition:all .15s; }
+    .dur-btn:hover, .dur-btn.selected { border-color:var(--ac-blue); color:var(--ac-blue); background:#eff6ff; }
     /* Grant Card */
     .grant-card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); padding:1.5rem; margin-bottom:1rem; border:1px solid var(--ac-border); position:relative; }
     .grant-card.revoked { opacity:.65; }
@@ -163,30 +178,40 @@
 <script src="data-layer.js"></script>
 <script src="share-widget.js" data-share-title="Access Control" data-share-text="Manage data access on 3120 Life"></script>
 <script>
-if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
+/* ── State ── */
+var grants = [];
+var auditLog = [];
+var auditFilter = 'all';
 
-/* ── Seed Data ── */
-var SEED_GRANTS_DISPLAY = [];
-var SEED_AUDIT = [];
-
-/* Persist to localStorage for audit log */
-if (!localStorage.getItem('rv_audit_log')) {
-  localStorage.setItem('rv_audit_log', JSON.stringify(SEED_AUDIT));
-}
-
-/* Try to load from RVData, fall back to seed */
-var grants = SEED_GRANTS_DISPLAY;
-var auditLog = JSON.parse(localStorage.getItem('rv_audit_log') || '[]');
-
-function init() {
+async function init() {
+  // Load grants (includes auto-expiry check)
   if (typeof RVData !== 'undefined' && RVData.getAccessGrants) {
     try {
-      RVData.getAccessGrants({ status:'active' }).then(function(data) {
-        if (data && data.length) grants = data;
-        renderAll();
-      }).catch(function() { renderAll(); });
-    } catch(e) { renderAll(); }
-  } else {
+      var allGrants = await RVData.getAccessGrants();
+      if (allGrants && allGrants.length) grants = allGrants;
+    } catch(e) { console.warn('Grant load failed:', e); }
+  }
+  if (!grants.length) {
+    grants = JSON.parse(localStorage.getItem('rv_access_grants') || '[]');
+  }
+
+  // Load audit log from DB (falls back to localStorage)
+  if (typeof RVData !== 'undefined' && RVData.getAuditLog) {
+    try {
+      auditLog = await RVData.getAuditLog({ limit: 200 });
+    } catch(e) { auditLog = []; }
+  }
+  if (!auditLog.length) {
+    auditLog = JSON.parse(localStorage.getItem('rv_audit_log') || '[]');
+  }
+
+  renderAll();
+
+  // Refresh expiry countdowns every 60 seconds
+  setInterval(refreshCountdowns, 60000);
+
+  // Was: legacy block
+  if (false) {
     renderAll();
   }
 }
@@ -202,7 +227,7 @@ function renderAll() {
 function renderSummary() {
   var active = grants.filter(function(g){return g.status==='active';}).length;
   var revoked = grants.filter(function(g){return g.status==='revoked';}).length;
-  var accesses = auditLog.filter(function(a){return a.action==='data_accessed';}).length;
+  var accesses = auditLog.filter(function(a){return a.action==='data_accessed' || (a.action && a.action.startsWith('document.'));}).length;
   document.getElementById('summaryBar').innerHTML =
     '<div class="summary-card"><div class="summary-icon green">&#9989;</div><div><div class="summary-num">' + active + '</div><div class="summary-label">Active Grants</div></div></div>' +
     '<div class="summary-card"><div class="summary-icon red">&#128683;</div><div><div class="summary-num">' + revoked + '</div><div class="summary-label">Revoked</div></div></div>' +
@@ -242,6 +267,19 @@ function buildGrantCard(g, isRevoked) {
   var pills = (g.data_shared||[]).map(function(d){ return '<span class="data-pill">' + d + '</span>'; }).join('');
   var meta = '<span>&#128197; Granted ' + formatDate(g.granted_at) + '</span>';
   if (isRevoked && g.revoked_at) { meta += '<span>&#128683; Revoked ' + formatDate(g.revoked_at) + '</span>'; }
+  // Expiry countdown for scoped grants
+  if (!isRevoked && g.expires_at) {
+    var remaining = new Date(g.expires_at) - new Date();
+    if (remaining <= 0) {
+      meta += ' <span class="expiry-badge expired">&#9200; EXPIRED</span>';
+    } else {
+      var hrs = Math.floor(remaining / 3600000);
+      var days = Math.floor(hrs / 24);
+      var display = days > 0 ? days + 'd ' + (hrs % 24) + 'h' : hrs + 'h ' + Math.floor((remaining % 3600000)/60000) + 'm';
+      var urgency = hrs < 6 ? 'urgent' : 'normal';
+      meta += ' <span class="expiry-badge ' + urgency + '" data-expires="' + g.expires_at + '">&#9200; ' + display + ' left</span>';
+    }
+  }
   var actions = '';
   if (!isRevoked) {
     actions = '<div class="grant-actions"><button class="btn btn-revoke btn-sm" onclick="confirmRevoke(\'' + g.id + '\',\'' + escHtml(g.professional_name) + '\')">&#128274; Revoke Access</button></div>';
@@ -268,21 +306,61 @@ function buildGrantCard(g, isRevoked) {
 /* ── Audit Log ── */
 function renderAuditLog() {
   var el = document.getElementById('panel-audit');
-  if (!auditLog.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--ac-muted);">No audit entries yet</div>'; return; }
-  var html = '<div class="audit-timeline">';
-  html += auditLog.map(function(a) {
+
+  // Filter bar
+  var filterHtml = '<div class="audit-filters">' +
+    '<button class="audit-filter-btn' + (auditFilter==='all'?' active':'') + '" onclick="setAuditFilter(\'all\')">All</button>' +
+    '<button class="audit-filter-btn' + (auditFilter==='document'?' active':'') + '" onclick="setAuditFilter(\'document\')">Documents</button>' +
+    '<button class="audit-filter-btn' + (auditFilter==='grant'?' active':'') + '" onclick="setAuditFilter(\'grant\')">Grants</button>' +
+    '<button class="audit-filter-btn' + (auditFilter==='login'?' active':'') + '" onclick="setAuditFilter(\'login\')">Logins</button>' +
+    '</div>';
+
+  // Filter entries
+  var filtered = auditLog;
+  if (auditFilter !== 'all') {
+    filtered = auditLog.filter(function(a) {
+      return a.action && a.action.startsWith(auditFilter + '.');
+    });
+    // Also include old-format entries for backwards compat
+    if (auditFilter === 'grant') {
+      var oldGrant = auditLog.filter(function(a) { return a.action === 'granted' || a.action === 'revoked'; });
+      filtered = filtered.concat(oldGrant);
+    }
+  }
+
+  if (!filtered.length) {
+    el.innerHTML = filterHtml + '<div style="text-align:center;padding:3rem;color:var(--ac-muted);">No audit entries' + (auditFilter!=='all'?' for this filter':'') + '</div>';
+    return;
+  }
+  var html = filterHtml + '<div class="audit-timeline">';
+  html += filtered.map(function(a) {
+    var action = a.action || '';
+    var dotClass = action.split('.')[0] || action;
+    var provider = a.provider || (a.metadata && a.metadata.professional_id) || a.user_id || '';
+    var detail = a.detail || '';
+    if (!detail && a.metadata) {
+      if (a.metadata.name) detail = a.metadata.name;
+      if (a.metadata.professional_id) detail = 'Professional: ' + a.metadata.professional_id;
+      if (a.metadata.expired_at) detail = 'Auto-expired at ' + formatDateTime(a.metadata.expired_at);
+    }
+    var time = a.timestamp || a.created_at || '';
     return '<div class="audit-entry">' +
-      '<div class="audit-dot ' + a.action + '"></div>' +
+      '<div class="audit-dot ' + dotClass + '"></div>' +
       '<div class="audit-card">' +
-        '<div class="audit-action ' + a.action + '">' + formatAction(a.action) + '</div>' +
-        '<div class="audit-provider">' + escHtml(a.provider) + '</div>' +
-        '<div class="audit-detail">' + escHtml(a.detail) + '</div>' +
-        '<div class="audit-time">' + formatDateTime(a.timestamp) + '</div>' +
+        '<div class="audit-action ' + dotClass + '">' + formatAction(action) + '</div>' +
+        (provider ? '<div class="audit-provider">' + escHtml(String(provider)) + '</div>' : '') +
+        (detail ? '<div class="audit-detail">' + escHtml(String(detail)) + '</div>' : '') +
+        (time ? '<div class="audit-time">' + formatDateTime(time) + '</div>' : '') +
       '</div>' +
     '</div>';
   }).join('');
   html += '</div>';
   el.innerHTML = html;
+}
+
+function setAuditFilter(f) {
+  auditFilter = f;
+  renderAuditLog();
 }
 
 /* ── Actions ── */
@@ -300,8 +378,12 @@ function closeConfirm() {
   pendingRevokeId = null;
 }
 
-function executeRevoke() {
+async function executeRevoke() {
   if (!pendingRevokeId) return;
+  // Use RVData if available (triggers DB audit log automatically)
+  if (typeof RVData !== 'undefined' && RVData.revokeAccessGrant) {
+    await RVData.revokeAccessGrant(pendingRevokeId);
+  }
   grants.forEach(function(g) {
     if (g.id === pendingRevokeId) {
       g.status = 'revoked';
@@ -311,7 +393,7 @@ function executeRevoke() {
   var grant = grants.find(function(g){return g.id===pendingRevokeId;});
   auditLog.unshift({
     timestamp: new Date().toISOString(),
-    action: 'revoked',
+    action: 'grant.revoke',
     provider: grant ? grant.professional_name : 'Unknown',
     detail: 'Access revoked by business owner'
   });
@@ -321,7 +403,11 @@ function executeRevoke() {
   toast('Access revoked successfully');
 }
 
-function regrant(id) {
+async function regrant(id) {
+  // Use RVData if available
+  if (typeof RVData !== 'undefined' && RVData.saveAccessGrant) {
+    await RVData.saveAccessGrant({ id: id, status: 'active' });
+  }
   grants.forEach(function(g) {
     if (g.id === id) {
       g.status = 'active';
@@ -331,7 +417,7 @@ function regrant(id) {
   var grant = grants.find(function(g){return g.id===id;});
   auditLog.unshift({
     timestamp: new Date().toISOString(),
-    action: 'granted',
+    action: 'grant.regrant',
     provider: grant ? grant.professional_name : 'Unknown',
     detail: 'Access re-granted by business owner'
   });
@@ -352,8 +438,44 @@ function formatDateTime(d) {
 }
 
 function formatAction(a) {
-  var map = { granted:'Access Granted', revoked:'Access Revoked', data_accessed:'Data Accessed' };
+  var map = {
+    'granted': 'Access Granted',
+    'revoked': 'Access Revoked',
+    'data_accessed': 'Data Accessed',
+    'document.view': '&#128065; Document Viewed',
+    'document.download': '&#128229; Document Downloaded',
+    'document.upload': '&#128196; Document Uploaded',
+    'document.delete': '&#128465; Document Deleted',
+    'grant.create': '&#9989; Access Granted',
+    'grant.revoke': '&#128683; Access Revoked',
+    'grant.expire': '&#9200; Access Expired',
+    'grant.regrant': '&#128275; Access Re-granted',
+    'data.access': '&#128196; Data Accessed',
+    'data.export': '&#128230; Data Exported',
+    'login.success': '&#128272; Login Success',
+    'login.failure': '&#9888; Login Failed',
+    'settings.change': '&#9881; Settings Changed',
+    'member.add': '&#128101; Member Added',
+    'member.remove': '&#128101; Member Removed'
+  };
   return map[a] || a;
+}
+
+function refreshCountdowns() {
+  document.querySelectorAll('.expiry-badge[data-expires]').forEach(function(el) {
+    var exp = new Date(el.dataset.expires);
+    var remaining = exp - new Date();
+    if (remaining <= 0) {
+      el.textContent = '⏰ EXPIRED';
+      el.className = 'expiry-badge expired';
+      return;
+    }
+    var hrs = Math.floor(remaining / 3600000);
+    var days = Math.floor(hrs / 24);
+    var display = days > 0 ? days + 'd ' + (hrs % 24) + 'h' : hrs + 'h ' + Math.floor((remaining % 3600000)/60000) + 'm';
+    el.textContent = '⏰ ' + display + ' left';
+    el.className = 'expiry-badge ' + (hrs < 6 ? 'urgent' : 'normal');
+  });
 }
 
 function escHtml(s) {
