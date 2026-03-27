@@ -28,7 +28,7 @@
     .ml-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #f3f4f6; }
     .ml-table tr:hover td { background: #f9fafb; }
 
-    .purpose-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: rgba(0,230,118,0.12); color: #5b21b6; }
+    .purpose-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: rgba(0,230,118,0.12); color: #065f46; }
 
     .btn-add { background: #00E676; color: #121212; border: none; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
     .btn-add:hover { background: #00C853; }
@@ -96,7 +96,7 @@
     <div class="stat-card deduction">
       <div class="label">Estimated Deduction</div>
       <div class="value" id="statDeduction">$0</div>
-      <div class="detail">IRS rate: $0.67/mile (2026)</div>
+      <div class="detail" id="irsRateLabel">IRS rate: $0.70/mile (2025)</div>
     </div>
     <div class="stat-card trips">
       <div class="label">Trips This Month</div>
@@ -144,14 +144,25 @@
     <input type="text" id="fFrom" placeholder="e.g. Office — 123 Main St" />
     <label>End Location</label>
     <input type="text" id="fTo" placeholder="e.g. Client site — 456 Oak Ave" />
-    <label>Purpose</label>
-    <select id="fPurpose">
-      <option value="client_visit">Client Visit</option>
-      <option value="supply_run">Supply Run</option>
-      <option value="job_site">Job Site</option>
-      <option value="errand">Business Errand</option>
-      <option value="other">Other</option>
-    </select>
+    <div class="row2">
+      <div>
+        <label>Trip Type</label>
+        <select id="fTripType">
+          <option value="business">Business</option>
+          <option value="personal">Personal</option>
+        </select>
+      </div>
+      <div>
+        <label>Purpose</label>
+        <select id="fPurpose">
+          <option value="client_visit">Client Visit</option>
+          <option value="supply_run">Supply Run</option>
+          <option value="job_site">Job Site</option>
+          <option value="errand">Business Errand</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
     <label>Client / Job (optional)</label>
     <input type="text" id="fClient" placeholder="e.g. Smith Renovation" />
     <label>Notes (optional)</label>
@@ -171,7 +182,7 @@
 <script src="share-widget.js"></script>
 <script>
 var STORAGE_KEY = 'rv_mileage_trips';
-var IRS_RATE = 0.67;
+var IRS_RATE = 0.70; // 2025 IRS standard mileage rate (update when 2026 rate published)
 
 function getTrips() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { return []; } }
 function saveTrips(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
@@ -182,9 +193,11 @@ function renderStats() {
   var year = now.getFullYear();
   var thisMonth = year + '-' + String(now.getMonth()+1).padStart(2,'0');
   var totalMiles = 0, monthTrips = 0;
+  var yearStr = String(year);
   list.forEach(function(t) {
     var m = parseFloat(t.miles) || 0;
-    if (t.date && t.date.substring(0,4) == year) totalMiles += m;
+    // Only count business trips toward deduction (not personal)
+    if (t.date && t.date.substring(0,4) === yearStr && t.tripType !== 'personal') totalMiles += m;
     if (t.date && t.date.substring(0,7) === thisMonth) monthTrips++;
   });
   document.getElementById('statMiles').textContent = totalMiles.toLocaleString(undefined,{maximumFractionDigits:1});
@@ -201,9 +214,9 @@ function renderTable() {
       '<td>' + esc(t.from) + '</td>' +
       '<td>' + esc(t.to) + '</td>' +
       '<td><strong>' + (parseFloat(t.miles)||0).toFixed(1) + '</strong></td>' +
-      '<td><span class="purpose-badge">' + formatPurpose(t.purpose) + '</span></td>' +
+      '<td><span class="purpose-badge">' + formatPurpose(t.purpose) + '</span>' + (t.tripType === 'personal' ? ' <span style="font-size:.65rem;color:#dc2626;font-weight:700;">PERSONAL</span>' : '') + '</td>' +
       '<td>' + esc(t.client || '—') + '</td>' +
-      '<td><button class="act-btn del" onclick="deleteTrip('+i+')">Del</button></td>' +
+      '<td><button class="act-btn edit" onclick="editTrip('+i+')">Edit</button> <button class="act-btn del" onclick="deleteTrip('+i+')">Del</button></td>' +
       '</tr>';
   }).join('');
 }
@@ -218,43 +231,84 @@ function deleteTrip(i) {
   var list = getTrips(); list.splice(i,1); saveTrips(list); renderTable(); renderStats(); toast('Trip deleted');
 }
 
+var editingTripIdx = -1;
+
 function openModal() {
+  editingTripIdx = -1;
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fDate').max = new Date().toISOString().split('T')[0];
   document.getElementById('fMiles').value = '';
   document.getElementById('fFrom').value = '';
   document.getElementById('fTo').value = '';
+  document.getElementById('fTripType').value = 'business';
   document.getElementById('fPurpose').value = 'client_visit';
   document.getElementById('fClient').value = '';
   document.getElementById('fNotes').value = '';
+  document.querySelector('.modal h2').textContent = 'Log Trip';
   document.getElementById('modalOverlay').classList.add('show');
 }
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function editTrip(i) {
+  var list = getTrips();
+  var t = list[i];
+  if (!t) return;
+  editingTripIdx = i;
+  document.getElementById('fDate').value = t.date || '';
+  document.getElementById('fDate').max = new Date().toISOString().split('T')[0];
+  document.getElementById('fMiles').value = t.miles || '';
+  document.getElementById('fFrom').value = t.from || '';
+  document.getElementById('fTo').value = t.to || '';
+  document.getElementById('fTripType').value = t.tripType || 'business';
+  document.getElementById('fPurpose').value = t.purpose || 'client_visit';
+  document.getElementById('fClient').value = t.client || '';
+  document.getElementById('fNotes').value = t.notes || '';
+  document.querySelector('.modal h2').textContent = 'Edit Trip';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); editingTripIdx = -1; }
 
 function saveTrip() {
+  var date = document.getElementById('fDate').value;
+  if (!date) { toast('Enter a date'); return; }
   var miles = parseFloat(document.getElementById('fMiles').value);
   var from = document.getElementById('fFrom').value.trim();
   var to = document.getElementById('fTo').value.trim();
   if (!miles || miles <= 0) { toast('Enter miles driven'); return; }
   if (!from) { toast('Enter start location'); return; }
   if (!to) { toast('Enter end location'); return; }
-  var list = getTrips();
-  list.unshift({
-    date: document.getElementById('fDate').value,
+  var tripType = document.getElementById('fTripType').value;
+  var trip = {
+    date: date,
     from: from, to: to, miles: miles,
+    tripType: tripType,
     purpose: document.getElementById('fPurpose').value,
     client: document.getElementById('fClient').value.trim(),
     notes: document.getElementById('fNotes').value.trim(),
-    id: Date.now()
-  });
+    id: Date.now() + '_' + Math.random().toString(36).slice(2,6)
+  };
+  var list = getTrips();
+  if (editingTripIdx >= 0 && list[editingTripIdx]) {
+    trip.id = list[editingTripIdx].id;
+    list[editingTripIdx] = trip;
+    toast('Trip updated');
+  } else {
+    list.unshift(trip);
+    var deduction = tripType === 'personal' ? '' : ' ($' + (miles * IRS_RATE).toFixed(2) + ' deduction)';
+    toast('Trip logged: ' + miles.toFixed(1) + ' miles' + deduction);
+  }
   saveTrips(list);
   closeModal(); renderTable(); renderStats();
-  toast('Trip logged: ' + miles.toFixed(1) + ' miles ($' + (miles * IRS_RATE).toFixed(2) + ' deduction)');
 }
 
 function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); }, 3500); }
 
-document.addEventListener('DOMContentLoaded', function() { renderStats(); renderTable(); });
+document.addEventListener('DOMContentLoaded', function() {
+  renderStats(); renderTable();
+  document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+});
 </script>
 </body>
 </html>

@@ -23,7 +23,7 @@
     .form-full { margin-bottom: 0.75rem; }
     label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
     input, select, textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #00E676; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #00E676; box-shadow: 0 0 0 3px rgba(0,230,118,0.12); }
 
     .line-items { margin-bottom: 1rem; }
     .line-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
@@ -162,8 +162,11 @@
 const INV_KEY = 'rv_invoices';
 var lineItemCount = 0;
 
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
 function getInvoices() {
-  var inv = JSON.parse(localStorage.getItem(INV_KEY) || '[]');
+  var inv;
+  try { inv = JSON.parse(localStorage.getItem(INV_KEY) || '[]'); } catch(e) { inv = []; }
   if (!inv.length) {
     inv = [
       { num: 'INV-001', client: '[Your Business]', email: 'admin@yourbusiness.com', address: '123 Main St, SLC UT', date: '2025-03-01', due: '2025-03-31', status: 'paid', items: [{ desc: 'Property management software - March', qty: 1, rate: 199 }], notes: 'Thank you for your business!', total: 199 },
@@ -184,12 +187,12 @@ function renderInvoiceList() {
   }
   body.innerHTML = invoices.map(function(inv, i) {
     return '<tr>' +
-      '<td><strong>' + inv.num + '</strong></td>' +
-      '<td>' + inv.client + '</td>' +
-      '<td>' + inv.date + '</td>' +
-      '<td>' + inv.due + '</td>' +
+      '<td><strong>' + esc(inv.num) + '</strong></td>' +
+      '<td>' + esc(inv.client) + '</td>' +
+      '<td>' + esc(inv.date) + '</td>' +
+      '<td>' + esc(inv.due) + '</td>' +
       '<td>$' + (inv.total || 0).toLocaleString() + '</td>' +
-      '<td><span class="badge-status ' + inv.status + '">' + inv.status.toUpperCase() + '</span></td>' +
+      '<td><span class="badge-status ' + esc(inv.status) + '">' + esc((inv.status||'').toUpperCase()) + '</span></td>' +
       '<td><button class="btn-inv outline" style="padding:3px 10px;font-size:0.72rem;" onclick="editInvoice(' + i + ')">Edit</button> <button class="btn-inv outline" style="padding:3px 10px;font-size:0.72rem;color:#dc2626;border-color:#dc2626;" onclick="deleteInvoice(' + i + ')">Del</button></td>' +
     '</tr>';
   }).join('');
@@ -218,7 +221,7 @@ function addLineItem(desc, qty, rate) {
   div.innerHTML =
     '<input type="text" placeholder="Description" id="lid-' + n + '" value="' + (desc || '') + '" />' +
     '<input type="number" placeholder="Qty" id="liq-' + n + '" value="' + (qty || 1) + '" min="1" oninput="calcTotals()" />' +
-    '<input type="number" placeholder="Rate" id="lir-' + n + '" value="' + (rate || '') + '" step="0.01" oninput="calcTotals()" />' +
+    '<input type="number" placeholder="Rate" id="lir-' + n + '" value="' + (rate || '') + '" min="0" step="0.01" oninput="calcTotals()" />' +
     '<div class="li-total" id="lit-' + n + '">$0</div>' +
     '<button class="btn-remove" onclick="removeLine(' + n + ')">X</button>';
   container.appendChild(div);
@@ -261,12 +264,23 @@ function getLineItemData() {
   return items;
 }
 
+function nextInvNum() {
+  var counter = parseInt(localStorage.getItem('rv_inv_counter') || '1');
+  var num = 'INV-' + String(counter).padStart(3, '0');
+  localStorage.setItem('rv_inv_counter', String(counter + 1));
+  return num;
+}
+
 function saveInvoice() {
+  var client = document.getElementById('invClient').value.trim();
+  if (!client) { alert('Client name is required.'); return; }
   var items = getLineItemData();
-  var total = items.reduce(function(s, i) { return s + (i.qty * i.rate); }, 0);
+  var filledItems = items.filter(function(i) { return i.desc && i.rate > 0; });
+  if (!filledItems.length) { alert('Add at least one line item with a description and rate.'); return; }
+  var total = filledItems.reduce(function(s, i) { return s + (Math.max(0,i.qty) * Math.max(0,i.rate)); }, 0);
   var inv = {
-    num: document.getElementById('invNum').value || 'INV-' + String(getInvoices().length + 1).padStart(3, '0'),
-    client: document.getElementById('invClient').value,
+    num: document.getElementById('invNum').value || nextInvNum(),
+    client: client,
     email: document.getElementById('invClientEmail').value,
     address: document.getElementById('invClientAddr').value,
     date: document.getElementById('invDate').value,
@@ -281,7 +295,7 @@ function saveInvoice() {
   if (existingIdx >= 0) invoices[existingIdx] = inv;
   else invoices.push(inv);
   localStorage.setItem(INV_KEY, JSON.stringify(invoices));
-  alert('Invoice saved!');
+  showToast('Invoice saved!');
   switchInvTab('list');
 }
 
@@ -316,12 +330,34 @@ function deleteInvoice(idx) {
 }
 
 function previewInvoice() {
-  alert('Invoice preview: Print this page or use your browser\'s Print function (Ctrl+P) to generate a PDF.');
+  var items = getLineItemData().filter(function(i) { return i.desc; });
+  var total = items.reduce(function(s,i) { return s + (i.qty * i.rate); }, 0);
+  var client = document.getElementById('invClient').value || 'Client';
+  var num = document.getElementById('invNum').value;
+  var date = document.getElementById('invDate').value;
+  var due = document.getElementById('invDue').value;
+  var notes = document.getElementById('invNotes').value;
+  var rows = items.map(function(i) { return '<tr><td>'+esc(i.desc)+'</td><td style="text-align:right">'+i.qty+'</td><td style="text-align:right">$'+(i.rate).toFixed(2)+'</td><td style="text-align:right">$'+(i.qty*i.rate).toFixed(2)+'</td></tr>'; }).join('');
+  var w = window.open('', '_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>Invoice '+esc(num)+'</title><style>body{font-family:sans-serif;max-width:700px;margin:2rem auto;padding:1rem;color:#1e293b}h1{font-size:1.5rem}table{width:100%;border-collapse:collapse;margin:1.5rem 0}th,td{padding:.5rem .75rem;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f1f5f9;font-size:.8rem;text-transform:uppercase}tfoot td{font-weight:700;border-top:2px solid #1e293b}.meta{display:flex;justify-content:space-between;margin:1rem 0}.notes{background:#f8fafc;padding:1rem;border-radius:8px;margin-top:1.5rem;font-size:.9rem}@media print{body{margin:0}}</style></head><body>');
+  w.document.write('<h1>INVOICE '+esc(num)+'</h1><div class="meta"><div><strong>Bill To:</strong><br>'+esc(client)+'</div><div style="text-align:right"><strong>Date:</strong> '+esc(date)+'<br><strong>Due:</strong> '+esc(due)+'</div></div>');
+  w.document.write('<table><thead><tr><th>Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="3" style="text-align:right">Total</td><td style="text-align:right">$'+total.toFixed(2)+'</td></tr></tfoot></table>');
+  if (notes) w.document.write('<div class="notes"><strong>Notes:</strong> '+esc(notes)+'</div>');
+  w.document.write('<script>setTimeout(function(){window.print()},300);<\/script></body></html>');
+  w.document.close();
+}
+
+function showToast(msg) {
+  var el = document.getElementById('invToast');
+  if (!el) { var d = document.createElement('div'); d.id = 'invToast'; d.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:#00E676;color:#121212;padding:.75rem 1.5rem;border-radius:10px;font-weight:700;opacity:0;transition:all .3s;z-index:999;'; document.body.appendChild(d); el = d; }
+  el.textContent = msg;
+  el.style.transform = 'translateX(-50%) translateY(0)'; el.style.opacity = '1';
+  setTimeout(function() { el.style.transform = 'translateX(-50%) translateY(80px)'; el.style.opacity = '0'; }, 3500);
 }
 
 function resetCreateForm() {
-  var invoices = getInvoices();
-  document.getElementById('invNum').value = 'INV-' + String(invoices.length + 1).padStart(3, '0');
+  var counter = parseInt(localStorage.getItem('rv_inv_counter') || '1');
+  document.getElementById('invNum').value = 'INV-' + String(counter).padStart(3, '0');
   document.getElementById('invClient').value = '';
   document.getElementById('invClientEmail').value = '';
   document.getElementById('invClientAddr').value = '';

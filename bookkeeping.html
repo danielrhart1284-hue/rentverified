@@ -340,6 +340,9 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script>
+// ── Utilities ──
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
 // ── Storage ──
 const BK_KEY = 'rv_bookkeeping';
 function loadEntries() { try { return JSON.parse(localStorage.getItem(BK_KEY))||[]; } catch { return []; } }
@@ -449,12 +452,12 @@ function renderLedger() {
     const isIncome = e.type==='income';
     tr.innerHTML=`
       <td style="font-size:0.82rem;color:#6b7280;">${fmtDate(e.date)}</td>
-      <td><div style="font-weight:600;">${e.desc}</div>${e.ref?`<div style="font-size:0.73rem;color:#9ca3af;">Ref: ${e.ref}</div>`:''}</td>
-      <td><span class="cat-chip">${e.cat}</span></td>
-      <td style="font-size:0.8rem;color:#9ca3af;">${e.notes||''}</td>
+      <td><div style="font-weight:600;">${esc(e.desc)}</div>${e.ref?`<div style="font-size:0.73rem;color:#9ca3af;">Ref: ${esc(e.ref)}</div>`:''}</td>
+      <td><span class="cat-chip">${esc(e.cat)}</span></td>
+      <td style="font-size:0.8rem;color:#9ca3af;">${esc(e.notes||'')}</td>
       <td class="${isIncome?'income-amt':'expense-amt'}">${isIncome?'+':'-'}${fmtM(e.amt)}</td>
       <td style="font-size:0.84rem;font-weight:600;color:${(balMap[e.id]||0)>=0?'#059669':'#dc2626'}">${fmtM(balMap[e.id]||0)}</td>
-      <td><button style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:0.85rem;" onclick="deleteEntry('${e.id}')">✕</button></td>
+      <td><button style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:0.85rem;" onclick="deleteEntry('${esc(e.id)}')">✕</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -463,6 +466,7 @@ function renderLedger() {
 }
 
 function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
   const entries = loadEntries().filter(e=>e.id!==id);
   saveEntries(entries);
   bkToast('Entry deleted','info');
@@ -637,7 +641,8 @@ function saveEntry() {
   const cat = document.getElementById('entry-cat')?.value;
   const notes = document.getElementById('entry-notes')?.value?.trim()||'';
   const ref = document.getElementById('entry-ref')?.value?.trim()||'';
-  if (!date||!amt||!desc||!cat) { bkToast('Please fill in all required fields','error'); return; }
+  if (!date||!desc||!cat) { bkToast('Please fill in all required fields','error'); return; }
+  if (!amt || amt <= 0) { bkToast('Amount must be greater than zero','error'); return; }
   const entry = { id:'bk_'+Date.now(), date, type:entryType, desc, cat, amt, notes, ref, createdAt:date };
   const entries = loadEntries();
   entries.unshift(entry);
@@ -651,7 +656,7 @@ function saveEntry() {
 // ── Toast ──
 function bkToast(msg, type='success') {
   const el=document.createElement('div'); el.className=`toast ${type}`;
-  el.innerHTML=`<span>${{success:'✓',error:'✕',info:'ℹ'}[type]||'•'}</span> ${msg}`;
+  el.innerHTML=`<span>${{success:'✓',error:'✕',info:'ℹ'}[type]||'•'}</span> ${esc(msg)}`;
   document.getElementById('toast-container').appendChild(el);
   setTimeout(()=>{el.style.opacity='0';el.style.transition='all 0.3s';setTimeout(()=>el.remove(),300);},3000);
 }

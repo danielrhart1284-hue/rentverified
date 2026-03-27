@@ -201,8 +201,15 @@ function calcGross(emp) {
     if (p === 'biweekly') return annual / 26;
     return annual / 12;
   }
-  var hours = parseFloat(emp.hours) || 0;
-  return hours * (parseFloat(emp.rate) || 0);
+  var hours = Math.max(0, parseFloat(emp.hours) || 0);
+  var rate = Math.max(0, parseFloat(emp.rate) || 0);
+  // FLSA overtime: 1.5x after 40 hours/week
+  var p = document.getElementById('payPeriod').value;
+  var otThreshold = (p === 'biweekly') ? 80 : (p === 'monthly' ? 173.33 : 40);
+  if (hours > otThreshold) {
+    return (otThreshold * rate) + ((hours - otThreshold) * rate * 1.5);
+  }
+  return hours * rate;
 }
 
 function renderTable() {
@@ -238,7 +245,8 @@ function renderTable() {
 
 function updateHours(i, val) {
   var list = getEmployees();
-  if (list[i]) { list[i].hours = parseFloat(val) || 0; saveEmployees(list); renderTable(); }
+  var hours = Math.max(0, parseFloat(val) || 0);
+  if (list[i]) { list[i].hours = hours; saveEmployees(list); renderTable(); }
 }
 
 function toggleRateLabel() {
@@ -279,10 +287,11 @@ function saveEmployee() {
   var rate = parseFloat(document.getElementById('fRate').value) || 0;
   var tax = parseFloat(document.getElementById('fTax').value) || 0;
   if (!name) { toast('Enter employee name'); return; }
-  if (!rate) { toast('Enter pay rate'); return; }
+  if (rate <= 0) { toast('Pay rate must be greater than 0'); return; }
+  if (tax < 0 || tax > 100) { toast('Tax must be between 0% and 100%'); return; }
   var list = getEmployees();
   var idx = parseInt(document.getElementById('fEditIdx').value);
-  var emp = { name: name, type: type, rate: rate, tax: tax, hours: 0, id: Date.now() };
+  var emp = { name: name, type: type, rate: rate, tax: tax, hours: 0, id: Date.now() + '_' + Math.random().toString(36).slice(2,8) };
   if (idx >= 0 && list[idx]) {
     emp.hours = list[idx].hours;
     emp.id = list[idx].id;
@@ -312,7 +321,14 @@ function runPayroll() {
     totalGross += gross; totalNet += net;
     return { name: emp.name, gross: gross, deductions: ded, net: net };
   });
+  // Duplicate run detection
+  var today = new Date().toISOString().slice(0, 10);
+  var runs = getRuns();
+  var dup = runs.find(function(r) { return r.period === period && r.date && r.date.slice(0,10) === today; });
+  if (dup && !confirm('Payroll already run for ' + period + ' today. Run again?')) return;
+
   var run = {
+    id: 'run_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
     date: new Date().toISOString(),
     period: period,
     employees: details.length,
@@ -320,7 +336,6 @@ function runPayroll() {
     totalNet: totalNet,
     details: details
   };
-  var runs = getRuns();
   runs.unshift(run);
   saveRuns(runs);
   renderRuns();
@@ -329,20 +344,35 @@ function runPayroll() {
 
 function renderRuns() {
   var runs = getRuns();
-  document.getElementById('emptyRuns').style.display = runs.length ? 'none' : 'block';
-  var html = runs.slice(0,10).map(function(r) {
+  var emptyEl = document.getElementById('emptyRuns');
+  if (emptyEl) emptyEl.style.display = runs.length ? 'none' : 'block';
+  if (!runs.length) {
+    document.getElementById('runHistory').innerHTML = '';
+    return;
+  }
+  document.getElementById('runHistory').innerHTML = runs.slice(0,10).map(function(r) {
     var d = new Date(r.date);
-    return '<div class="run-card"><span class="run-date">' + d.toLocaleDateString() + ' — ' + (r.period||'biweekly') + '</span> | ' +
+    var dateStr = isNaN(d.getTime()) ? 'Unknown date' : d.toLocaleDateString();
+    return '<div class="run-card"><span class="run-date">' + dateStr + ' — ' + (r.period||'biweekly') + '</span> | ' +
       r.employees + ' employees | Gross: $' + num(r.totalGross) + ' | <span class="run-total">Net: $' + num(r.totalNet) + '</span></div>';
   }).join('');
-  document.getElementById('runHistory').innerHTML = (runs.length ? '' : '<div class="empty-state" id="emptyRuns">No payroll runs yet.</div>') + html;
 }
 
 function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 function num(v) { return (parseFloat(v)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); }, 3500); }
 
-document.addEventListener('DOMContentLoaded', function() { renderTable(); renderRuns(); });
+document.addEventListener('DOMContentLoaded', function() {
+  renderTable(); renderRuns();
+  // Close modal on overlay click
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+});
 </script>
 </body>
 </html>

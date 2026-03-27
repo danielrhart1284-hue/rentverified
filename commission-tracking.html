@@ -202,7 +202,7 @@ function renderTable() {
       '<td>$' + num(c.saleAmount) + '</td>' +
       '<td>' + num(c.rate) + '%</td>' +
       '<td><strong>$' + num(c.commission) + '</strong></td>' +
-      '<td><span class="badge ' + c.status + '">' + c.status + '</span></td>' +
+      '<td><span class="badge ' + (['pending','approved','paid'].indexOf(c.status)>=0?c.status:'pending') + '">' + esc(c.status) + '</span></td>' +
       '<td>' + (c.date || '') + '</td>' +
       '<td>' +
         (c.status === 'pending' ? '<button class="act-btn approve" onclick="setStatus('+i+',\'approved\')">Approve</button>' : '') +
@@ -247,16 +247,20 @@ function saveCommission() {
   var deal = document.getElementById('fDeal').value.trim();
   var saleAmt = parseFloat(document.getElementById('fSaleAmt').value) || 0;
   var rate = parseFloat(document.getElementById('fRate').value) || 0;
+  var date = document.getElementById('fDate').value;
   if (!sp) { toast('Enter salesperson name'); return; }
-  if (!saleAmt) { toast('Enter sale amount'); return; }
+  if (!deal) { toast('Enter deal/client name'); return; }
+  if (!saleAmt || saleAmt <= 0) { toast('Sale amount must be greater than zero'); return; }
+  if (rate < 0 || rate > 100) { toast('Rate must be between 0% and 100%'); return; }
+  if (!date) { toast('Enter a date'); return; }
   var comm = saleAmt * rate / 100;
   var list = getCommissions();
   list.unshift({
     salesperson: sp, deal: deal, saleAmount: saleAmt, rate: rate,
     commission: comm, status: 'pending',
-    date: document.getElementById('fDate').value,
+    date: date,
     notes: document.getElementById('fNotes').value.trim(),
-    id: Date.now()
+    id: Date.now() + '_' + Math.random().toString(36).slice(2,6)
   });
   saveCommissions(list);
   closeModal(); renderTable(); renderStats();
@@ -267,7 +271,11 @@ function esc(s) { var d = document.createElement('div'); d.textContent = s || ''
 function num(v) { return (parseFloat(v)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); }, 3500); }
 
-document.addEventListener('DOMContentLoaded', function() { renderStats(); renderTable(); });
+document.addEventListener('DOMContentLoaded', function() {
+  renderStats(); renderTable();
+  document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+});
 </script>
 </body>
 </html>
