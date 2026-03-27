@@ -62,7 +62,7 @@
     .sts { display:inline-block; padding:.2rem .65rem; border-radius:99px; font-size:.75rem; font-weight:600; }
     .sts-open       { background:#fef9c3; color:#854d0e; }
     .sts-assigned   { background:#dbeafe; color:#1d4ed8; }
-    .sts-inprogress { background:rgba(0,230,118,0.12); color:#7c3aed; }
+    .sts-inprogress { background:rgba(0,230,118,0.12); color:#059669; }
     .sts-done       { background:#dcfce7; color:#15803d; }
     .sts-closed     { background:#f1f5f9; color:#475569; }
     /* Table */
@@ -101,7 +101,7 @@
     /* Btn */
     .btn { padding:.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; transition:all .15s; }
     .btn-primary { background:#00E676; color:#fff; }
-    .btn-primary:hover { background:#1e40af; }
+    .btn-primary:hover { background:#00C853; }
     .btn-success { background:#10b981; color:#fff; }
     .btn-success:hover { background:#059669; }
     .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
@@ -361,11 +361,19 @@ const AI_RECS = {
   'Other':         'Document the issue thoroughly with photos. Determine trade needed before assigning a vendor.'
 };
 
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
 function loadData() {
-  try { workOrders = JSON.parse(localStorage.getItem('rv_workorders') || '[]'); } catch(e){ workOrders=[]; }
+  // Use rv_maintenance_requests to align with data-layer.js and tenant-portal
+  try { workOrders = JSON.parse(localStorage.getItem('rv_maintenance_requests') || '[]'); } catch(e){ workOrders=[]; }
+  // Also load legacy key and merge if it has data
+  try {
+    var legacy = JSON.parse(localStorage.getItem('rv_workorders') || '[]');
+    if (legacy.length && !workOrders.length) { workOrders = legacy; saveOrders(); }
+  } catch(e){}
   try { vendors = JSON.parse(localStorage.getItem('rv_vendors') || '[]'); } catch(e){ vendors=[]; }
 }
-function saveOrders() { localStorage.setItem('rv_workorders', JSON.stringify(workOrders)); }
+function saveOrders() { localStorage.setItem('rv_maintenance_requests', JSON.stringify(workOrders)); }
 function saveVendors() { localStorage.setItem('rv_vendors', JSON.stringify(vendors)); }
 
 function uid() { return 'WO-' + Date.now().toString(36).toUpperCase(); }
@@ -428,6 +436,7 @@ const COLS = [
   { key:'Assigned',    label:'🔵 Assigned' },
   { key:'In Progress', label:'🟣 In Progress' },
   { key:'Completed',   label:'✅ Completed' },
+  { key:'Closed',      label:'🔒 Closed' },
 ];
 
 function renderKanban() {
@@ -437,10 +446,10 @@ function renderKanban() {
     return `<div class="kboard">
       <div class="kboard-header"><span>${col.label}</span><span>${cards.length}</span></div>
       ${cards.length ? cards.map(w => `
-        <div class="kcard pri-${w.priority.toLowerCase()}" onclick="openModal('${w.id}')">
-          <div class="kprop">${w.prop}</div>
-          <div class="kdesc">${w.cat} — ${w.desc.slice(0,50)}${w.desc.length>50?'…':''}</div>
-          <div class="kmeta">${w.id} · <span class="pri pri-${w.priority.toLowerCase()}">${w.priority}</span></div>
+        <div class="kcard pri-${esc(w.priority).toLowerCase()}" onclick="openModal('${esc(w.id)}')">
+          <div class="kprop">${esc(w.prop)}</div>
+          <div class="kdesc">${esc(w.cat)} — ${esc(w.desc.slice(0,50))}${w.desc.length>50?'…':''}</div>
+          <div class="kmeta">${esc(w.id)} · <span class="pri pri-${esc(w.priority).toLowerCase()}">${esc(w.priority)}</span></div>
         </div>`).join('')
       : '<div style="font-size:.8rem;color:#cbd5e1;text-align:center;padding:.75rem 0;">No orders</div>'}
     </div>`;
@@ -471,15 +480,15 @@ function renderTable() {
   const tbody = document.getElementById('woTbody');
   tbody.innerHTML = f.length ? f.map(w => `
     <tr>
-      <td style="font-size:.78rem;font-family:monospace;color:#64748b;">${w.id}</td>
-      <td style="font-size:.82rem;">${w.prop}</td>
-      <td><strong>${w.cat}</strong><br><span style="font-size:.78rem;color:#64748b;">${w.desc.slice(0,60)}…</span></td>
-      <td><span class="pri pri-${w.priority.toLowerCase()}">${w.priority}</span></td>
-      <td><span class="sts sts-${w.status.replace(' ','').toLowerCase()}">${w.status}</span></td>
-      <td style="font-size:.8rem;">${w.submitted}</td>
-      <td style="font-size:.82rem;color:#64748b;">${w.vendor||'Unassigned'}</td>
+      <td style="font-size:.78rem;font-family:monospace;color:#64748b;">${esc(w.id)}</td>
+      <td style="font-size:.82rem;">${esc(w.prop)}</td>
+      <td><strong>${esc(w.cat)}</strong><br><span style="font-size:.78rem;color:#64748b;">${esc(w.desc.slice(0,60))}…</span></td>
+      <td><span class="pri pri-${esc(w.priority).toLowerCase()}">${esc(w.priority)}</span></td>
+      <td><span class="sts sts-${w.status.replace(' ','').toLowerCase()}">${esc(w.status)}</span></td>
+      <td style="font-size:.8rem;">${esc(w.submitted)}</td>
+      <td style="font-size:.82rem;color:#64748b;">${esc(w.vendor||'Unassigned')}</td>
       <td>
-        <button class="btn btn-outline btn-sm" onclick="openModal('${w.id}')">View</button>
+        <button class="btn btn-outline btn-sm" onclick="openModal('${esc(w.id)}')">View</button>
       </td>
     </tr>`).join('')
   : '<tr><td colspan="8"><div style="text-align:center;padding:2rem;color:#94a3b8;">No work orders match your filters.</div></td></tr>';
@@ -504,7 +513,7 @@ function openModal(id) {
     </div>
     <div style="background:#f8fafc;border-radius:8px;padding:1rem;margin-bottom:1.25rem;">
       <div style="font-size:.75rem;color:#64748b;text-transform:uppercase;margin-bottom:.5rem;">Description</div>
-      <p style="color:#374151;font-size:.9rem;">${w.desc}</p>
+      <p style="color:#374151;font-size:.9rem;">${esc(w.desc)}</p>
     </div>
     <div style="display:flex;gap:.75rem;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;">
       <div style="font-size:.82rem;font-weight:600;color:#374151;">Update Status:</div>
@@ -702,10 +711,10 @@ function renderVendorGrid() {
         ${vendors.map(v => `
           <div class="vendor-card">
             <div>
-              <div class="vendor-name">${v.name}</div>
-              <div class="vendor-trade">${v.trade}${v.lic?' · License: '+v.lic:''}</div>
-              <div style="font-size:.8rem;color:#64748b;margin-top:.2rem;">${v.phone} · ${v.email}</div>
-              ${v.notes?`<div style="font-size:.78rem;color:#94a3b8;margin-top:.2rem;">${v.notes}</div>`:''}
+              <div class="vendor-name">${esc(v.name)}</div>
+              <div class="vendor-trade">${esc(v.trade)}${v.lic?' · License: '+esc(v.lic):''}</div>
+              <div style="font-size:.8rem;color:#64748b;margin-top:.2rem;">${esc(v.phone)} · ${esc(v.email)}</div>
+              ${v.notes?`<div style="font-size:.78rem;color:#94a3b8;margin-top:.2rem;">${esc(v.notes)}</div>`:''}
             </div>
             <div style="text-align:right;">
               <div class="vendor-rating">★ ${v.rating.toFixed(1)}</div>

@@ -53,7 +53,7 @@
     /* Buttons */
     .btn { padding:.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; transition:all .15s; }
     .btn-primary { background:#00E676; color:#fff; }
-    .btn-primary:hover { background:#1e40af; }
+    .btn-primary:hover { background:#00C853; }
     .btn-success { background:#10b981; color:#fff; }
     .btn-success:hover { background:#059669; }
     .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
@@ -257,7 +257,7 @@
         <div class="panel-body">
           <div class="form-grid">
             <div class="fg"><label>Select Lease</label>
-              <select id="esignLease" id="esignLease"></select>
+              <select id="esignLease"></select>
             </div>
             <div class="fg"><label>Tenant Email</label><input id="esignEmail" type="email" placeholder="tenant@example.com"></div>
           </div>
@@ -323,8 +323,9 @@ let leases = [];
 function loadData() {
   try { leases = JSON.parse(localStorage.getItem('rv_leases') || '[]'); } catch(e){ leases=[]; }
 }
-function saveData() { localStorage.setItem('rv_leases', JSON.stringify(leases)); }
-function uid() { return 'LS-' + Date.now().toString(36).toUpperCase(); }
+function saveData() { try { localStorage.setItem('rv_leases', JSON.stringify(leases)); } catch(e) { toast('⚠️ Storage full — could not save.'); } }
+function uid() { return 'LS-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6); }
+function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
 
 function loadSample() {
   if(leases.length) return;
@@ -424,8 +425,8 @@ function renderLeaseCards() {
     return `<div class="lease-card ${sts==='expiring'?'expiring-soon':''}">
       <div class="lc-top">
         <div>
-          <div class="lc-prop">🏠 ${l.prop}</div>
-          <div class="lc-tenant">👤 ${l.tenant}${l.co?' & '+l.co:''}</div>
+          <div class="lc-prop">🏠 ${esc(l.prop)}</div>
+          <div class="lc-tenant">👤 ${esc(l.tenant)}${l.co?' & '+esc(l.co):''}</div>
         </div>
         <span class="lsts lsts-${sts}">${sts.charAt(0).toUpperCase()+sts.slice(1)}</span>
       </div>
@@ -456,6 +457,8 @@ function createLease() {
   const end    = document.getElementById('nlEnd').value;
   const rent   = parseFloat(document.getElementById('nlRent').value);
   if(!tenant||!email||!start||!end||!rent) return toast('⚠️ Please fill in all required fields.');
+  if(new Date(end) <= new Date(start)) return toast('⚠️ End date must be after start date.');
+  if(rent <= 0) return toast('⚠️ Rent must be a positive number.');
   const utils = [...document.querySelectorAll('#utilityChecks input:checked')].map(c=>c.value);
   const l = {
     id: uid(),

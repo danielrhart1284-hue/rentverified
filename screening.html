@@ -27,7 +27,7 @@
     .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:#3b82f6; }
     .btn { padding:.55rem 1.1rem; border-radius:8px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; transition:all .15s; }
     .btn-primary { background:#00E676; color:#fff; }
-    .btn-primary:hover { background:#1e40af; }
+    .btn-primary:hover { background:#00C853; }
     .btn-success { background:#10b981; color:#fff; }
     .btn-outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
     .btn-sm { padding:.35rem .75rem; font-size:.78rem; }
@@ -278,7 +278,8 @@ function loadData() {
 }
 function saveApps() { localStorage.setItem('rv_applicants', JSON.stringify(applicants)); }
 function saveCriteriaData() { localStorage.setItem('rv_criteria', JSON.stringify(screeningCriteria)); }
-function uid() { return 'APP-'+Date.now().toString(36).toUpperCase(); }
+function uid() { return 'APP-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6); }
+function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
 
 function loadSample() {
   if(applicants.length) return;
@@ -322,9 +323,13 @@ function runScreening() {
   const evict = document.getElementById('aEviction').value;
   const bank  = document.getElementById('aBankrupt').value;
   const empLen= document.getElementById('aEmpLen').value;
-  const rent  = 1200; // default property rent
+  // Try to get rent from property data, fall back to default
+  var propRent = 1200;
+  try { var props = JSON.parse(localStorage.getItem('rv_listings_default')||'[]'); if(props.length && props[0].rent) propRent = parseFloat(props[0].rent); } catch(e){}
+  const rent = propRent;
 
   if(!name) return toast('⚠️ Enter applicant name.');
+  if(income < 0) return toast('⚠️ Income cannot be negative.');
 
   // Scoring algorithm
   let score = 0; const checks = [];
@@ -332,7 +337,7 @@ function runScreening() {
   // Credit check (30 pts)
   if(credit >= screeningCriteria.creditMin + 100) { score+=30; checks.push({lbl:'Credit Score', val:credit||'Not provided', res:'pass', note:'Excellent credit'}); }
   else if(credit >= screeningCriteria.creditMin) { score+=20; checks.push({lbl:'Credit Score', val:credit||'Not provided', res:'warn', note:'Meets minimum'}); }
-  else { score+=5; checks.push({lbl:'Credit Score', val:credit||'Not provided', res:'fail', note:`Below minimum (${screeningCriteria.creditMin})`}); }
+  else { score+=0; checks.push({lbl:'Credit Score', val:credit||'Not provided', res:'fail', note:`Below minimum (${screeningCriteria.creditMin})`}); }
 
   // Income check (30 pts) — rent × multiplier
   const minIncome = rent * screeningCriteria.incomeMulti;
@@ -378,7 +383,7 @@ function showResults(app) {
   document.getElementById('resultsPanel').innerHTML = `
     <div class="panel">
       <div class="panel-header">
-        <h2>${app.name}</h2>
+        <h2>${esc(app.name)}</h2>
         <span class="decision ${dcls}">${dLabel}</span>
       </div>
       <div class="panel-body" style="text-align:center;">
@@ -437,15 +442,20 @@ function renderHistory() {
   tbody.innerHTML = applicants.length
     ? applicants.map(a=>`<tr>
         <td><strong>${a.name}</strong><br><span style="font-size:.78rem;color:#64748b;">${a.email}</span></td>
-        <td style="font-size:.82rem;">${a.prop}</td>
+        <td style="font-size:.82rem;">${esc(a.prop)}</td>
         <td>$${(a.income||0).toLocaleString()}/mo</td>
         <td>${a.creditScore||'—'}</td>
         <td><strong>${a.score||'—'}</strong>/100</td>
-        <td><span class="decision ${a.decision==='approved'?'decision-approved':a.decision==='denied'?'decision-denied':a.decision==='review'?'decision-review':'decision-pending'}">${a.decision||'Pending'}</span></td>
-        <td style="font-size:.82rem;">${a.applied}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="if(a=${JSON.stringify(a).replace(/'/g,"\\'")}){showResults(applicants.find(x=>x.id===\'${a.id}\'))}">View</button></td>
+        <td><span class="decision ${['approved','denied','review','pending'].indexOf(a.decision)>=0?'decision-'+a.decision:'decision-pending'}">${esc(a.decision||'Pending')}</span></td>
+        <td style="font-size:.82rem;">${esc(a.applied)}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="viewApplicant('${esc(a.id)}')">View</button></td>
       </tr>`).join('')
     : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#94a3b8;">No applicants yet.</td></tr>';
+}
+
+function viewApplicant(id) {
+  var app = applicants.find(function(x){ return x.id === id; });
+  if (app) showResults(app);
 }
 
 function loadCriteriaForm() {
@@ -482,7 +492,7 @@ function quickShareApp() {
   if (!name) { alert('Enter the prospect\'s name.'); return; }
   const link = 'https://3120life.com/apply?ref=' + btoa(name).slice(0,8);
   const confirm = document.getElementById('quick-share-confirm');
-  confirm.innerHTML = `✅ Application link sent to ${name}${email ? ' at ' + email : ''}! Link: <a href="${link}" style="color:#6ee7b7;" target="_blank">${link}</a>`;
+  confirm.innerHTML = `✅ Application link sent to ${esc(name)}${email ? ' at ' + esc(email) : ''}! Link: <a href="${esc(link)}" style="color:#6ee7b7;" target="_blank">${esc(link)}</a>`;
   confirm.style.display = 'block';
   toast(`🚀 Application sent to ${name}!`);
   // Pre-fill name in manual form
