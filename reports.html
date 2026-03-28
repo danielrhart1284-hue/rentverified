@@ -1,0 +1,2499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Center – 3120 Life</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Layout ─────────────────────────────────────────── */
+    body { background: #f3f4f6; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; }
+    .rpt-wrapper {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+      padding-top: 64px;
+    }
+    /* ── Sidebar ────────────────────────────────────────── */
+    .rpt-sidebar {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+    .rpt-sidebar h3 {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #64748b;
+      padding: .5rem 1.5rem;
+      margin: 1rem 0 .25rem;
+    }
+    .rpt-sidebar a {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .5rem 1.5rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: .82rem;
+      border-left: 3px solid transparent;
+      transition: all .15s;
+      cursor: pointer;
+    }
+    .rpt-sidebar a:hover, .rpt-sidebar a.active {
+      background: rgba(255,255,255,.06);
+      color: #fff;
+      border-left-color: #00E676;
+    }
+    .rpt-sidebar-search {
+      padding: .75rem 1.25rem;
+    }
+    .rpt-sidebar-search input {
+      width: 100%;
+      padding: .45rem .75rem;
+      border: 1.5px solid #334155;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: .82rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .rpt-sidebar-search input::placeholder { color: #64748b; }
+    .rpt-sidebar-search input:focus { border-color: #00E676; }
+    .rpt-upload-btn {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin: .5rem 1.25rem;
+      padding: .55rem 1rem;
+      background: linear-gradient(135deg, #00E676, #00c764);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      width: calc(100% - 2.5rem);
+      justify-content: center;
+    }
+    .rpt-upload-btn:hover { background: linear-gradient(135deg, #00c764, #00a854); }
+
+    /* ── Main Content ───────────────────────────────────── */
+    .rpt-main { padding: 2rem; max-width: 1200px; }
+    .rpt-page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+    }
+    .rpt-page-header h1 { font-size: 1.5rem; color: #1e293b; }
+    .rpt-page-header p { color: #64748b; font-size: .9rem; margin-top: .2rem; }
+
+    /* ── Card Grid (Catalog) ───────────────────────────── */
+    .rpt-catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .rpt-card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: .85rem;
+      cursor: pointer;
+      transition: all .15s;
+      position: relative;
+    }
+    .rpt-card:hover {
+      border-color: #00E676;
+      box-shadow: 0 4px 16px rgba(0,230,118,.12);
+      transform: translateY(-1px);
+    }
+    .rpt-card-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      background: #f0fdf4;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rpt-card-body { flex: 1; min-width: 0; }
+    .rpt-card-body h4 { font-size: .88rem; color: #1e293b; margin: 0 0 .25rem; }
+    .rpt-card-body p { font-size: .78rem; color: #64748b; margin: 0 0 .5rem; line-height: 1.3; }
+    .rpt-card-meta { display: flex; gap: .5rem; }
+    .rpt-freq {
+      font-size: .68rem;
+      font-weight: 600;
+      padding: .15rem .5rem;
+      border-radius: 99px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .rpt-gen-btn {
+      position: absolute;
+      bottom: .75rem;
+      right: .75rem;
+      padding: .3rem .75rem;
+      border: none;
+      border-radius: 6px;
+      background: #00E676;
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .rpt-card:hover .rpt-gen-btn { opacity: 1; }
+
+    /* ── Report Detail View ─────────────────────────────── */
+    .rpt-detail { display: none; }
+    .rpt-detail.active { display: block; }
+    .rpt-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .4rem .85rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      background: #fff;
+      color: #374151;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1.25rem;
+      transition: all .15s;
+    }
+    .rpt-back-btn:hover { border-color: #94a3b8; }
+    .rpt-config-panel {
+      background: #fff;
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .rpt-config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+    .rpt-config-group { display: flex; flex-direction: column; gap: .35rem; }
+    .rpt-config-group label { font-size: .78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    .rpt-config-group input, .rpt-config-group select {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: .5rem .75rem;
+      font-size: .88rem;
+      color: #1e293b;
+      outline: none;
+      background: #fff;
+    }
+    .rpt-config-group input:focus, .rpt-config-group select:focus { border-color: #00E676; }
+    .rpt-generate-btn {
+      padding: .55rem 1.25rem;
+      background: #00E676;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .rpt-generate-btn:hover { background: #00c764; }
+
+    /* ── Results Panel ──────────────────────────────────── */
+    .rpt-results {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    .rpt-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .rpt-results-header h2 { font-size: 1rem; color: #1e293b; margin: 0; }
+    .rpt-results-actions { display: flex; gap: .5rem; }
+    .rpt-btn-csv, .rpt-btn-print {
+      padding: .35rem .85rem;
+      border-radius: 7px;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+      color: #374151;
+      transition: all .15s;
+    }
+    .rpt-btn-csv:hover { background: #f0fdf4; border-color: #10b981; color: #059669; }
+    .rpt-btn-print:hover { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
+    .rpt-results-body { padding: 1.5rem; overflow-x: auto; }
+
+    /* ── Data Table ─────────────────────────────────────── */
+    .rpt-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .rpt-table th {
+      text-align: left;
+      padding: .6rem .85rem;
+      background: #f8fafc;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .rpt-table td {
+      padding: .65rem .85rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: #374151;
+    }
+    .rpt-table tr:last-child td { border-bottom: none; }
+    .rpt-table tr:hover td { background: #f8fafc; }
+    .rpt-table .text-right { text-align: right; }
+    .rpt-table .total-row { font-weight: 700; border-top: 2px solid #1e293b; }
+    .rpt-table .total-row td { background: #f8fafc; }
+    .rpt-table .subtotal-row { font-weight: 600; }
+    .rpt-table .subtotal-row td { border-top: 1px solid #cbd5e1; background: #fafafa; }
+    .rpt-table .section-header td {
+      font-weight: 700;
+      font-size: .8rem;
+      text-transform: uppercase;
+      color: #1e293b;
+      background: #f1f5f9;
+      padding-top: .85rem;
+    }
+    .amt-pos { color: #059669; font-weight: 600; }
+    .amt-neg { color: #dc2626; font-weight: 600; }
+    .badge-active { background: #dcfce7; color: #166534; padding: .15rem .5rem; border-radius: 99px; font-size: .72rem; font-weight: 600; }
+    .badge-expired { background: #fef2f2; color: #dc2626; padding: .15rem .5rem; border-radius: 99px; font-size: .72rem; font-weight: 600; }
+    .badge-pending { background: #fef3c7; color: #92400e; padding: .15rem .5rem; border-radius: 99px; font-size: .72rem; font-weight: 600; }
+    .badge-warn { background: #fef3c7; color: #92400e; padding: .15rem .5rem; border-radius: 99px; font-size: .72rem; font-weight: 600; }
+    .badge-ok { background: #dcfce7; color: #166534; padding: .15rem .5rem; border-radius: 99px; font-size: .72rem; font-weight: 600; }
+
+    /* ── Empty state ────────────────────────────────────── */
+    .rpt-empty { text-align: center; padding: 3rem; color: #94a3b8; }
+    .rpt-empty .icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .rpt-empty p { font-size: .9rem; }
+
+    /* ── Toast ──────────────────────────────────────────── */
+    .rpt-toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      color: #fff;
+      padding: .75rem 1.25rem;
+      border-radius: 10px;
+      font-size: .88rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all .3s;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .rpt-toast.show { opacity: 1; transform: translateY(0); }
+    .rpt-toast.error { background: #dc2626; }
+
+    /* ── AI Upload Modal ───────────────────────────────── */
+    .rpt-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+    .rpt-modal-overlay.open { display: flex; }
+    .rpt-modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .rpt-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .rpt-modal-header h2 { font-size: 1.1rem; color: #1e293b; margin: 0; }
+    .rpt-modal-close {
+      width: 32px; height: 32px; border: none; background: #f1f5f9;
+      border-radius: 8px; font-size: 1.1rem; cursor: pointer; color: #374151;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rpt-modal-body { padding: 1.5rem; }
+    .rpt-upload-zone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      margin-bottom: 1rem;
+    }
+    .rpt-upload-zone:hover { border-color: #00E676; background: #f0fdf4; }
+    .rpt-upload-zone .icon { font-size: 2rem; margin-bottom: .5rem; }
+    .rpt-upload-zone p { color: #64748b; font-size: .88rem; }
+    .rpt-upload-zone small { color: #94a3b8; font-size: .78rem; }
+    .rpt-modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    .rpt-hamburger {
+      display: none; width: 36px; height: 36px; border: none; background: #f1f5f9;
+      border-radius: 8px; font-size: 1.2rem; cursor: pointer; color: #374151;
+      align-items: center; justify-content: center;
+    }
+    .rpt-sidebar-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 998;
+    }
+    .rpt-sidebar-backdrop.open { display: block; }
+    @media (max-width: 768px) {
+      .rpt-wrapper { grid-template-columns: 1fr; }
+      .rpt-sidebar {
+        display: none; position: fixed; top: 0; left: 0; bottom: 0; width: 260px;
+        z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.15); overflow-y: auto;
+      }
+      .rpt-sidebar.open { display: block; }
+      .rpt-hamburger { display: flex; }
+      .rpt-catalog-grid { grid-template-columns: 1fr; }
+      .rpt-config-grid { grid-template-columns: 1fr; }
+      .rpt-modal { width: 95%; max-width: none; margin: .5rem; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .rpt-catalog-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      th, td { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="position:fixed;top:0;left:0;right:0;height:64px;background:#0f172a;display:flex;align-items:center;padding:0 1.5rem;z-index:100;">
+  <div style="display:flex;align-items:center;gap:.5rem;">
+    <button class="rpt-hamburger" onclick="toggleRptSidebar()">&#9776;</button>
+    <div style="width:32px;height:32px;background:#00E676;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 36 36" fill="none"><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/></svg>
+    </div>
+    <span style="color:#00E676;font-weight:700;font-size:1.1rem;">3120 Life</span>
+  </div>
+  <div style="display:flex;gap:1rem;margin-left:2rem;">
+    <a href="index.html" style="color:#94a3b8;text-decoration:none;font-size:.85rem;">Dashboard</a>
+    <a href="accounting.html" style="color:#94a3b8;text-decoration:none;font-size:.85rem;">Accounting</a>
+    <a href="reports.html" style="color:#00E676;text-decoration:none;font-size:.85rem;font-weight:700;">Reports</a>
+  </div>
+</nav>
+
+<div class="rpt-sidebar-backdrop" id="rptBackdrop" onclick="toggleRptSidebar()"></div>
+
+<div class="rpt-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SIDEBAR                                             -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <aside class="rpt-sidebar" id="rptSidebar">
+    <div class="rpt-sidebar-search">
+      <input type="text" id="rptSearchInput" placeholder="&#128269; Search reports..." oninput="filterSidebarReports(this.value)">
+    </div>
+    <button class="rpt-upload-btn" onclick="openAIUploadModal()">&#128228; AI Upload Report</button>
+
+    <!-- My Templates (populated from localStorage) -->
+    <div id="myTemplatesSection" style="display:none;">
+      <h3>&#128203; My Templates</h3>
+      <div id="myTemplatesList"></div>
+    </div>
+
+    <h3>&#128202; Financial</h3>
+    <a data-report="income-statement" onclick="showReport('income-statement')">Income Statement (P&amp;L)</a>
+    <a data-report="cash-flow" onclick="showReport('cash-flow')">Cash Flow Statement</a>
+    <a data-report="balance-sheet" onclick="showReport('balance-sheet')">Balance Sheet</a>
+    <a data-report="owner-statement" onclick="showReport('owner-statement')">Owner Statement</a>
+    <a data-report="general-ledger" onclick="showReport('general-ledger')">General Ledger</a>
+    <a data-report="budget-vs-actual" onclick="showReport('budget-vs-actual')">Budget vs. Actual</a>
+    <a data-report="ytd-comparison" onclick="showReport('ytd-comparison')">YTD Comparison</a>
+    <a data-report="ar-aging" onclick="showReport('ar-aging')">AR Aging</a>
+    <a data-report="ap-report" onclick="showReport('ap-report')">AP Report</a>
+    <a data-report="mgmt-fee-summary" onclick="showReport('mgmt-fee-summary')">Management Fee Summary</a>
+    <a data-report="owner-distribution" onclick="showReport('owner-distribution')">Owner Distribution</a>
+    <a data-report="bank-reconciliation" onclick="showReport('bank-reconciliation')">Bank Reconciliation</a>
+
+    <h3>&#127968; Leasing &amp; Tenant</h3>
+    <a data-report="rent-roll" onclick="showReport('rent-roll')">Rent Roll</a>
+    <a data-report="occupancy-vacancy" onclick="showReport('occupancy-vacancy')">Occupancy / Vacancy</a>
+    <a data-report="lease-expiration" onclick="showReport('lease-expiration')">Lease Expiration</a>
+    <a data-report="lease-activity" onclick="showReport('lease-activity')">Lease Activity</a>
+    <a data-report="late-payment" onclick="showReport('late-payment')">Late Payment / Collections</a>
+    <a data-report="screening-summary" onclick="showReport('screening-summary')">Screening Summary</a>
+    <a data-report="move-in-out" onclick="showReport('move-in-out')">Move-In / Move-Out</a>
+    <a data-report="security-deposit" onclick="showReport('security-deposit')">Security Deposit Ledger</a>
+
+    <h3>&#128295; Maintenance</h3>
+    <a data-report="work-order" onclick="showReport('work-order')">Work Order Report</a>
+    <a data-report="preventive-maint" onclick="showReport('preventive-maint')">Preventive Maintenance</a>
+    <a data-report="vendor-performance" onclick="showReport('vendor-performance')">Vendor Performance</a>
+    <a data-report="capex-schedule" onclick="showReport('capex-schedule')">CapEx Schedule</a>
+    <a data-report="maint-cost-analysis" onclick="showReport('maint-cost-analysis')">Maintenance Cost Analysis</a>
+    <a data-report="inspection-report" onclick="showReport('inspection-report')">Inspection Report</a>
+
+    <h3>&#128203; Compliance &amp; Legal</h3>
+    <a data-report="1099-summary" onclick="showReport('1099-summary')">1099 Summary</a>
+    <a data-report="tax-remittance" onclick="showReport('tax-remittance')">Tax Remittance Log</a>
+    <a data-report="insurance-tracker" onclick="showReport('insurance-tracker')">Insurance / License Tracker</a>
+    <a data-report="compliance-checklist" onclick="showReport('compliance-checklist')">Compliance Checklist</a>
+    <a data-report="eviction-log" onclick="showReport('eviction-log')">Eviction Activity Log</a>
+
+    <h3>&#128200; Executive / Portfolio</h3>
+    <a data-report="executive-summary" onclick="showReport('executive-summary')">Executive Summary</a>
+    <a data-report="portfolio-performance" onclick="showReport('portfolio-performance')">Portfolio Performance</a>
+    <a data-report="noi-report" onclick="showReport('noi-report')">NOI Report</a>
+    <a data-report="dscr-report" onclick="showReport('dscr-report')">DSCR Report</a>
+    <a data-report="tenant-health" onclick="showReport('tenant-health')">Tenant Health Score</a>
+
+    <h3>Navigation</h3>
+    <a href="index.html">&#127968; Dashboard</a>
+    <a href="accounting.html">&#128200; Accounting</a>
+    <a href="owner-statements.html">&#128184; Owner Statements</a>
+    <a href="documents.html">&#128193; Documents</a>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- MAIN CONTENT                                        -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <main class="rpt-main">
+
+    <!-- CATALOG VIEW -->
+    <div id="rptCatalogView">
+      <div class="rpt-page-header">
+        <div>
+          <h1>&#128202; Report Center</h1>
+          <p>Generate, preview, and export reports across your entire portfolio.</p>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+          <input type="text" id="rptCatalogSearch" placeholder="Filter reports..." oninput="filterCatalogCards(this.value)" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .8rem;font-size:.85rem;outline:none;width:200px;">
+        </div>
+      </div>
+      <div class="rpt-catalog-grid" id="rptCatalogGrid">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="rptDetailView" class="rpt-detail">
+      <button class="rpt-back-btn" onclick="backToCatalog()">&larr; Back to Reports</button>
+      <h1 id="rptDetailTitle" style="font-size:1.4rem;color:#1e293b;margin:0 0 .25rem;"></h1>
+      <p id="rptDetailDesc" style="color:#64748b;font-size:.9rem;margin:0 0 1.25rem;"></p>
+
+      <div class="rpt-config-panel">
+        <div class="rpt-config-grid">
+          <div class="rpt-config-group">
+            <label>Start Date</label>
+            <input type="date" id="rptStartDate">
+          </div>
+          <div class="rpt-config-group">
+            <label>End Date</label>
+            <input type="date" id="rptEndDate">
+          </div>
+          <div class="rpt-config-group">
+            <label>Property</label>
+            <select id="rptPropertyFilter">
+              <option value="">All Properties</option>
+            </select>
+          </div>
+          <div class="rpt-config-group">
+            <label>Format</label>
+            <select id="rptFormat">
+              <option value="preview">Preview</option>
+              <option value="csv">CSV Download</option>
+              <option value="print">Print</option>
+            </select>
+          </div>
+          <div class="rpt-config-group" style="justify-content:flex-end;">
+            <button class="rpt-generate-btn" onclick="generateCurrentReport()">&#9654; Generate Report</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="rpt-results" id="rptResults" style="display:none;">
+        <div class="rpt-results-header">
+          <h2 id="rptResultsTitle">Results</h2>
+          <div class="rpt-results-actions">
+            <button class="rpt-btn-csv" onclick="exportCurrentCSV()">&#11015; CSV</button>
+            <button class="rpt-btn-print" onclick="printCurrentReport()">&#128424; Print</button>
+          </div>
+        </div>
+        <div class="rpt-results-body" id="rptResultsBody">
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="rpt-toast" id="rptToast"></div>
+
+<!-- AI Upload Modal -->
+<div class="rpt-modal-overlay" id="aiUploadModal">
+  <div class="rpt-modal">
+    <div class="rpt-modal-header">
+      <h2>&#128228; AI Upload Report</h2>
+      <button class="rpt-modal-close" onclick="closeAIUploadModal()">&times;</button>
+    </div>
+    <div class="rpt-modal-body">
+      <div class="rpt-upload-zone" id="aiUploadZone">
+        <div class="icon">&#128196;</div>
+        <p>Drop a file here or click to upload</p>
+        <small>PDF, CSV, Excel, or image &mdash; AI will auto-detect the report type</small>
+      </div>
+      <input type="file" id="aiUploadFile" accept=".pdf,.csv,.xlsx,.xls,.png,.jpg,.jpeg" style="display:none;" onchange="handleAIUpload(this)">
+      <div id="aiUploadStatus" style="display:none;text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;margin-bottom:.5rem;">&#9889;</div>
+        <p style="color:#1e293b;font-weight:600;">Analyzing document...</p>
+        <p style="color:#64748b;font-size:.82rem;">AI is detecting the report type and extracting data.</p>
+      </div>
+      <!-- AI identification result -->
+      <div id="aiUploadResult" style="display:none;padding:1rem;">
+        <div id="aiResultMatch" style="display:none;text-align:center;">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">&#9989;</div>
+          <p style="color:#1e293b;font-weight:600;" id="aiResultMatchText"></p>
+          <p style="color:#64748b;font-size:.82rem;">Confidence: <span id="aiResultConfidence"></span></p>
+          <button id="aiResultConfirmBtn" style="margin-top:.75rem;padding:.5rem 1.25rem;border:none;border-radius:8px;background:#16a34a;color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;">Confirm &amp; Generate</button>
+        </div>
+        <div id="aiResultNoMatch" style="display:none;text-align:center;">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">&#128269;</div>
+          <p style="color:#1e293b;font-weight:600;">We couldn't identify this report. What type is it?</p>
+          <select id="aiResultDropdown" style="margin-top:.75rem;padding:.5rem .75rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;width:100%;max-width:340px;"></select>
+          <br>
+          <button id="aiResultSelectBtn" style="margin-top:.75rem;padding:.5rem 1.25rem;border:none;border-radius:8px;background:#00E676;color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;">Use Selected Type</button>
+        </div>
+      </div>
+    </div>
+    <div class="rpt-modal-footer">
+      <button style="padding:.45rem 1rem;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;color:#374151;font-size:.85rem;cursor:pointer;" onclick="closeAIUploadModal()">Cancel</button>
+      <button style="padding:.45rem 1rem;border:none;border-radius:8px;background:#00E676;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;opacity:.5;" disabled id="aiUploadProcess">Process Report</button>
+    </div>
+  </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script>
+// ============================================================================
+// 3120 Life — Report Center
+// ============================================================================
+
+RVData._useSupabase = function(){ return false; };
+
+// ── Utilities ───────────────────────────────────────────────────────────────
+
+function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+function fmt(n){ return '$'+parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtDate(d){ if(!d) return '\u2014'; var dt=new Date(d); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtPct(n){ return parseFloat(n||0).toFixed(1)+'%'; }
+function toast(msg,type){ var t=document.getElementById('rptToast'); t.textContent=msg; t.className='rpt-toast show '+(type||''); setTimeout(function(){ t.classList.remove('show'); },3000); }
+function downloadCSV(csv,filename){ var b=new Blob([csv],{type:'text/csv'}); var u=URL.createObjectURL(b); var a=document.createElement('a'); a.href=u; a.download=filename; a.click(); setTimeout(function(){ URL.revokeObjectURL(u); },1000); }
+function printReport(html,title){ var w=window.open('','_blank'); w.document.write('<html><head><title>'+esc(title)+'</title><style>body{font-family:Arial,sans-serif;padding:2rem;color:#1e293b;}table{width:100%;border-collapse:collapse;margin:1rem 0;}th,td{padding:.5rem .75rem;text-align:left;border-bottom:1px solid #e2e8f0;}th{background:#f8fafc;font-size:.8rem;text-transform:uppercase;color:#64748b;}.text-right{text-align:right;}.total-row{font-weight:700;border-top:2px solid #1e293b;}h1{font-size:1.3rem;}h2{font-size:1rem;color:#475569;margin:1.5rem 0 .5rem;}.meta{color:#64748b;font-size:.85rem;margin-bottom:1.5rem;}</style></head><body>'+html+'</body></html>'); w.document.close(); w.onload=function(){ w.print(); }; }
+
+function dateInRange(dateStr, start, end){
+  if(!dateStr) return false;
+  var d = new Date(dateStr).getTime();
+  if(start && d < new Date(start).getTime()) return false;
+  if(end && d > new Date(end+'T23:59:59').getTime()) return false;
+  return true;
+}
+
+function getDefaultDates(){
+  var now = new Date();
+  var y = now.getFullYear();
+  return { start: y+'-01-01', end: y+'-12-31' };
+}
+
+function getConfigParams(){
+  return {
+    startDate: document.getElementById('rptStartDate').value,
+    endDate: document.getElementById('rptEndDate').value,
+    property: document.getElementById('rptPropertyFilter').value,
+    format: document.getElementById('rptFormat').value
+  };
+}
+
+// ── Seed / Demo Data ────────────────────────────────────────────────────────
+
+function seedDemoData(){
+  // Only seed if data is empty
+  var acct = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+  if(acct.length === 0){
+    var now = new Date();
+    var y = now.getFullYear();
+    var demoAccounting = [
+      {id:'d1',entry_date:y+'-01-05',description:'Rent - Unit 101',amount:1500,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:true},
+      {id:'d2',entry_date:y+'-01-05',description:'Rent - Unit 102',amount:1350,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:true},
+      {id:'d3',entry_date:y+'-01-05',description:'Rent - Unit 201',amount:1800,type:'income',category:'Rent Income',property:'456 Oak Ave',reconciled:true},
+      {id:'d4',entry_date:y+'-01-08',description:'Water bill',amount:220,type:'expense',category:'Utilities',property:'3120 Main St',reconciled:true},
+      {id:'d5',entry_date:y+'-01-10',description:'Plumber repair',amount:475,type:'expense',category:'Maintenance',property:'3120 Main St',reconciled:false},
+      {id:'d6',entry_date:y+'-01-15',description:'Management fee',amount:350,type:'expense',category:'Management Fees',property:'3120 Main St',reconciled:true},
+      {id:'d7',entry_date:y+'-01-15',description:'Management fee',amount:180,type:'expense',category:'Management Fees',property:'456 Oak Ave',reconciled:true},
+      {id:'d8',entry_date:y+'-01-20',description:'Insurance premium',amount:425,type:'expense',category:'Insurance',property:'3120 Main St',reconciled:true},
+      {id:'d9',entry_date:y+'-01-25',description:'Owner distribution',amount:1200,type:'expense',category:'Owner Distribution',property:'3120 Main St',reconciled:true},
+      {id:'d10',entry_date:y+'-02-05',description:'Rent - Unit 101',amount:1500,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:true},
+      {id:'d11',entry_date:y+'-02-05',description:'Rent - Unit 102',amount:1350,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:true},
+      {id:'d12',entry_date:y+'-02-05',description:'Rent - Unit 201',amount:1800,type:'income',category:'Rent Income',property:'456 Oak Ave',reconciled:true},
+      {id:'d13',entry_date:y+'-02-08',description:'Electric bill',amount:310,type:'expense',category:'Utilities',property:'456 Oak Ave',reconciled:true},
+      {id:'d14',entry_date:y+'-02-12',description:'HVAC servicing',amount:650,type:'expense',category:'Maintenance',property:'456 Oak Ave',reconciled:false},
+      {id:'d15',entry_date:y+'-02-15',description:'Management fee',amount:350,type:'expense',category:'Management Fees',property:'3120 Main St',reconciled:true},
+      {id:'d16',entry_date:y+'-02-18',description:'Lawn care',amount:175,type:'expense',category:'Maintenance',property:'3120 Main St',reconciled:true},
+      {id:'d17',entry_date:y+'-02-20',description:'Late fee collected',amount:75,type:'income',category:'Late Fees',property:'3120 Main St',reconciled:true},
+      {id:'d18',entry_date:y+'-02-25',description:'Owner distribution',amount:1400,type:'expense',category:'Owner Distribution',property:'3120 Main St',reconciled:true},
+      {id:'d19',entry_date:y+'-03-05',description:'Rent - Unit 101',amount:1500,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:false},
+      {id:'d20',entry_date:y+'-03-05',description:'Rent - Unit 102',amount:1350,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:false},
+      {id:'d21',entry_date:y+'-03-05',description:'Rent - Unit 201',amount:1800,type:'income',category:'Rent Income',property:'456 Oak Ave',reconciled:false},
+      {id:'d22',entry_date:y+'-03-10',description:'Trash service',amount:95,type:'expense',category:'Utilities',property:'3120 Main St',reconciled:false},
+      {id:'d23',entry_date:y+'-03-12',description:'Property tax payment',amount:1250,type:'expense',category:'Taxes',property:'3120 Main St',reconciled:false},
+      {id:'d24',entry_date:y+'-03-15',description:'Loan payment',amount:2100,type:'expense',category:'Loan Payments',property:'3120 Main St',reconciled:false},
+      {id:'d25',entry_date:y+'-03-18',description:'Capital improvement - new roof',amount:8500,type:'expense',category:'Capital Improvements',property:'456 Oak Ave',reconciled:false},
+      {id:'d26',entry_date:(y-1)+'-06-15',description:'Rent - Unit 101 (PY)',amount:1400,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:true},
+      {id:'d27',entry_date:(y-1)+'-06-20',description:'Maintenance (PY)',amount:300,type:'expense',category:'Maintenance',property:'3120 Main St',reconciled:true},
+      {id:'d28',entry_date:(y-1)+'-07-15',description:'Rent - Unit 102 (PY)',amount:1300,type:'income',category:'Rent Income',property:'3120 Main St',reconciled:true}
+    ];
+    localStorage.setItem('rv_accounting', JSON.stringify(demoAccounting));
+  }
+
+  var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+  if(leases.length === 0){
+    var y2 = new Date().getFullYear();
+    var demoLeases = [
+      {id:'l1',unit:'Unit 101',tenant_name:'John Smith',start_date:y2+'-01-01',end_date:y2+'-12-31',monthly_rent:1500,deposit:1500,status:'active',property:'3120 Main St',move_in_date:y2+'-01-01'},
+      {id:'l2',unit:'Unit 102',tenant_name:'Maria Garcia',start_date:y2+'-01-01',end_date:y2+'-06-30',monthly_rent:1350,deposit:1350,status:'active',property:'3120 Main St',move_in_date:y2+'-01-01'},
+      {id:'l3',unit:'Unit 201',tenant_name:'James Wilson',start_date:(y2-1)+'-07-01',end_date:y2+'-06-30',monthly_rent:1800,deposit:1800,status:'active',property:'456 Oak Ave',move_in_date:(y2-1)+'-07-01'},
+      {id:'l4',unit:'Unit 103',tenant_name:'Sarah Johnson',start_date:(y2-1)+'-03-01',end_date:(y2-1)+'-12-31',monthly_rent:1200,deposit:1200,status:'expired',property:'3120 Main St',move_in_date:(y2-1)+'-03-01',move_out_date:y2+'-01-15'},
+      {id:'l5',unit:'Unit 202',tenant_name:'','start_date:'',end_date:'',monthly_rent:0,deposit:0,status:'vacant',property:'456 Oak Ave'}
+    ];
+    localStorage.setItem('rv_leases', JSON.stringify(demoLeases));
+  }
+
+  var apps = JSON.parse(localStorage.getItem('rv_applicants')||'[]');
+  if(apps.length === 0){
+    var y3 = new Date().getFullYear();
+    var demoApps = [
+      {id:'a1',name:'Robert Brown',date:y3+'-01-10',score:720,decision:'Approved',property:'3120 Main St'},
+      {id:'a2',name:'Lisa Chen',date:y3+'-01-18',score:680,decision:'Approved',property:'456 Oak Ave'},
+      {id:'a3',name:'Mike Davis',date:y3+'-02-05',score:590,decision:'Denied',property:'3120 Main St'},
+      {id:'a4',name:'Emma Taylor',date:y3+'-02-22',score:750,decision:'Approved',property:'3120 Main St'},
+      {id:'a5',name:'David Kim',date:y3+'-03-10',score:640,decision:'Pending',property:'456 Oak Ave'}
+    ];
+    localStorage.setItem('rv_applicants', JSON.stringify(demoApps));
+  }
+
+  var maint = JSON.parse(localStorage.getItem('rv_maintenance_requests')||'[]');
+  if(maint.length === 0){
+    var y4 = new Date().getFullYear();
+    var demoMaint = [
+      {id:'m1',title:'Leaky faucet',unit:'Unit 101',property:'3120 Main St',status:'completed',priority:'medium',created_at:y4+'-01-12',completed_at:y4+'-01-14',cost:125,vendor:'ABC Plumbing',category:'Plumbing'},
+      {id:'m2',title:'HVAC not cooling',unit:'Unit 201',property:'456 Oak Ave',status:'completed',priority:'high',created_at:y4+'-01-20',completed_at:y4+'-01-22',cost:650,vendor:'Cool Air HVAC',category:'HVAC'},
+      {id:'m3',title:'Broken window',unit:'Unit 102',property:'3120 Main St',status:'in_progress',priority:'high',created_at:y4+'-02-08',completed_at:'',cost:350,vendor:'GlassWorks',category:'General'},
+      {id:'m4',title:'Paint touch-up',unit:'Unit 103',property:'3120 Main St',status:'pending',priority:'low',created_at:y4+'-02-15',completed_at:'',cost:200,vendor:'',category:'General'},
+      {id:'m5',title:'Annual HVAC inspection',unit:'All Units',property:'3120 Main St',status:'scheduled',priority:'medium',created_at:y4+'-03-01',completed_at:'',cost:400,vendor:'Cool Air HVAC',category:'HVAC',preventive:true},
+      {id:'m6',title:'Lawn mowing',unit:'Exterior',property:'3120 Main St',status:'completed',priority:'low',created_at:y4+'-02-01',completed_at:y4+'-02-02',cost:175,vendor:'GreenScape',category:'Landscaping'}
+    ];
+    localStorage.setItem('rv_maintenance_requests', JSON.stringify(demoMaint));
+  }
+
+  // Seed budgets
+  var budgets = JSON.parse(localStorage.getItem('rv_budgets')||'[]');
+  if(budgets.length === 0){
+    var yb = new Date().getFullYear();
+    var demoBudgets = [
+      {category:'Rent Income',type:'income',planned:14000,period:yb+'-Q1'},
+      {category:'Late Fees',type:'income',planned:200,period:yb+'-Q1'},
+      {category:'Utilities',type:'expense',planned:2000,period:yb+'-Q1'},
+      {category:'Maintenance',type:'expense',planned:3000,period:yb+'-Q1'},
+      {category:'Insurance',type:'expense',planned:1500,period:yb+'-Q1'},
+      {category:'Management Fees',type:'expense',planned:2000,period:yb+'-Q1'},
+      {category:'Taxes',type:'expense',planned:1500,period:yb+'-Q1'},
+      {category:'Loan Payments',type:'expense',planned:6000,period:yb+'-Q1'}
+    ];
+    localStorage.setItem('rv_budgets', JSON.stringify(demoBudgets));
+  }
+}
+
+// ── REPORT_REGISTRY ─────────────────────────────────────────────────────────
+
+var REPORT_REGISTRY = [
+
+  // ═══════════════════════════════════════════════════════
+  // FINANCIAL REPORTS
+  // ═══════════════════════════════════════════════════════
+
+  {
+    id:'income-statement', name:'Income Statement (P&L)', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Revenue and expenses for a period with net income calculation.',
+    frequency:'Monthly', keywords:['income','p&l','profit','loss','revenue','expense'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      if(p.property) entries = entries.filter(function(e){ return e.property===p.property; });
+      var income={}, expenses={}, totalIncome=0, totalExpenses=0;
+      entries.forEach(function(e){
+        if(e.type==='income'){
+          income[e.category]=(income[e.category]||0)+parseFloat(e.amount);
+          totalIncome+=parseFloat(e.amount);
+        } else {
+          expenses[e.category]=(expenses[e.category]||0)+parseFloat(e.amount);
+          totalExpenses+=parseFloat(e.amount);
+        }
+      });
+      return {income:income, expenses:expenses, totalIncome:totalIncome, totalExpenses:totalExpenses, net:totalIncome-totalExpenses};
+    },
+    toCSV: function(data){
+      var lines=['Category,Amount'];
+      lines.push('--- REVENUE ---,');
+      for(var k in data.income) lines.push(k+','+data.income[k].toFixed(2));
+      lines.push('Total Revenue,'+data.totalIncome.toFixed(2));
+      lines.push('--- EXPENSES ---,');
+      for(var k2 in data.expenses) lines.push(k2+','+data.expenses[k2].toFixed(2));
+      lines.push('Total Expenses,'+data.totalExpenses.toFixed(2));
+      lines.push('Net Income,'+(data.net).toFixed(2));
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Income Statement (P&amp;L)</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+(p.property?' | Property: '+esc(p.property):'')+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Category</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      h+='<tr class="section-header"><td colspan="2">Revenue</td></tr>';
+      for(var k in data.income) h+='<tr><td>'+esc(k)+'</td><td class="text-right amt-pos">'+fmt(data.income[k])+'</td></tr>';
+      h+='<tr class="subtotal-row"><td>Total Revenue</td><td class="text-right amt-pos">'+fmt(data.totalIncome)+'</td></tr>';
+      h+='<tr class="section-header"><td colspan="2">Expenses</td></tr>';
+      for(var k2 in data.expenses) h+='<tr><td>'+esc(k2)+'</td><td class="text-right amt-neg">'+fmt(data.expenses[k2])+'</td></tr>';
+      h+='<tr class="subtotal-row"><td>Total Expenses</td><td class="text-right amt-neg">'+fmt(data.totalExpenses)+'</td></tr>';
+      h+='<tr class="total-row"><td>Net Income</td><td class="text-right '+(data.net>=0?'amt-pos':'amt-neg')+'">'+fmt(data.net)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'cash-flow', name:'Cash Flow Statement', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Operating, investing, and financing cash flows.',
+    frequency:'Monthly', keywords:['cash','flow','operating','investing','financing'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      if(p.property) entries = entries.filter(function(e){ return e.property===p.property; });
+      var opCats=['Rent Income','Late Fees','Utilities','Maintenance','Insurance','Management Fees'];
+      var invCats=['Capital Improvements','Property Purchase'];
+      var finCats=['Loan Payments','Owner Distribution'];
+      var op=0,inv=0,fin=0;
+      entries.forEach(function(e){
+        var amt=parseFloat(e.amount)*(e.type==='expense'?-1:1);
+        var cat=e.category||'';
+        if(finCats.indexOf(cat)>=0) fin+=amt;
+        else if(invCats.indexOf(cat)>=0) inv+=amt;
+        else op+=amt;
+      });
+      return {operating:op, investing:inv, financing:fin, netChange:op+inv+fin};
+    },
+    toCSV: function(data){
+      return 'Section,Amount\nOperating Activities,'+data.operating.toFixed(2)+'\nInvesting Activities,'+data.investing.toFixed(2)+'\nFinancing Activities,'+data.financing.toFixed(2)+'\nNet Change in Cash,'+data.netChange.toFixed(2);
+    },
+    toHTML: function(data,p){
+      var h='<h1>Cash Flow Statement</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Section</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      h+='<tr><td>Operating Activities</td><td class="text-right '+(data.operating>=0?'amt-pos':'amt-neg')+'">'+fmt(data.operating)+'</td></tr>';
+      h+='<tr><td>Investing Activities</td><td class="text-right '+(data.investing>=0?'amt-pos':'amt-neg')+'">'+fmt(data.investing)+'</td></tr>';
+      h+='<tr><td>Financing Activities</td><td class="text-right '+(data.financing>=0?'amt-pos':'amt-neg')+'">'+fmt(data.financing)+'</td></tr>';
+      h+='<tr class="total-row"><td>Net Change in Cash</td><td class="text-right '+(data.netChange>=0?'amt-pos':'amt-neg')+'">'+fmt(data.netChange)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'balance-sheet', name:'Balance Sheet', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Assets, liabilities, and equity snapshot.',
+    frequency:'Monthly', keywords:['balance','sheet','assets','liabilities','equity'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      var totalIncome=0, totalExpenses=0;
+      entries.forEach(function(e){
+        if(e.type==='income') totalIncome+=parseFloat(e.amount);
+        else totalExpenses+=parseFloat(e.amount);
+      });
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      var deposits=0;
+      leases.forEach(function(l){ if(l.status==='active') deposits+=parseFloat(l.deposit||0); });
+      var bank=totalIncome-totalExpenses+15000;
+      var receivables=2400;
+      var propertyValue=285000;
+      var payables=1800;
+      var loanBalance=195000;
+      var retained=bank+receivables+propertyValue-payables-loanBalance-deposits;
+      return {
+        assets:{bank:bank, receivables:receivables, property:propertyValue, totalAssets:bank+receivables+propertyValue},
+        liabilities:{payables:payables, deposits:deposits, loans:loanBalance, totalLiabilities:payables+deposits+loanBalance},
+        equity:{retained:retained, totalEquity:retained}
+      };
+    },
+    toCSV: function(data){
+      return 'Item,Amount\n--- ASSETS ---,\nCash & Bank,'+data.assets.bank.toFixed(2)+'\nAccounts Receivable,'+data.assets.receivables.toFixed(2)+'\nProperty Value,'+data.assets.property.toFixed(2)+'\nTotal Assets,'+data.assets.totalAssets.toFixed(2)+'\n--- LIABILITIES ---,\nAccounts Payable,'+data.liabilities.payables.toFixed(2)+'\nSecurity Deposits Held,'+data.liabilities.deposits.toFixed(2)+'\nLoan Balance,'+data.liabilities.loans.toFixed(2)+'\nTotal Liabilities,'+data.liabilities.totalLiabilities.toFixed(2)+'\n--- EQUITY ---,\nRetained Earnings,'+data.equity.retained.toFixed(2)+'\nTotal Equity,'+data.equity.totalEquity.toFixed(2);
+    },
+    toHTML: function(data,p){
+      var h='<h1>Balance Sheet</h1><div class="meta">As of: '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Item</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      h+='<tr class="section-header"><td colspan="2">Assets</td></tr>';
+      h+='<tr><td>Cash &amp; Bank</td><td class="text-right">'+fmt(data.assets.bank)+'</td></tr>';
+      h+='<tr><td>Accounts Receivable</td><td class="text-right">'+fmt(data.assets.receivables)+'</td></tr>';
+      h+='<tr><td>Property Value</td><td class="text-right">'+fmt(data.assets.property)+'</td></tr>';
+      h+='<tr class="subtotal-row"><td>Total Assets</td><td class="text-right">'+fmt(data.assets.totalAssets)+'</td></tr>';
+      h+='<tr class="section-header"><td colspan="2">Liabilities</td></tr>';
+      h+='<tr><td>Accounts Payable</td><td class="text-right">'+fmt(data.liabilities.payables)+'</td></tr>';
+      h+='<tr><td>Security Deposits Held</td><td class="text-right">'+fmt(data.liabilities.deposits)+'</td></tr>';
+      h+='<tr><td>Loan Balance</td><td class="text-right">'+fmt(data.liabilities.loans)+'</td></tr>';
+      h+='<tr class="subtotal-row"><td>Total Liabilities</td><td class="text-right">'+fmt(data.liabilities.totalLiabilities)+'</td></tr>';
+      h+='<tr class="section-header"><td colspan="2">Equity</td></tr>';
+      h+='<tr><td>Retained Earnings</td><td class="text-right">'+fmt(data.equity.retained)+'</td></tr>';
+      h+='<tr class="total-row"><td>Total Equity</td><td class="text-right">'+fmt(data.equity.totalEquity)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'owner-statement', name:'Owner Statement', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Income, expenses, and net distribution per property.',
+    frequency:'Monthly', keywords:['owner','statement','distribution','net'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      if(p.property) entries = entries.filter(function(e){ return e.property===p.property; });
+      var inc=0,exp=0,mgmt=0;
+      entries.forEach(function(e){
+        var amt=parseFloat(e.amount);
+        if(e.type==='income') inc+=amt;
+        else{
+          exp+=amt;
+          if((e.category||'').toLowerCase().indexOf('management')>=0) mgmt+=amt;
+        }
+      });
+      return {income:inc, expenses:exp, mgmtFee:mgmt, netToOwner:inc-exp};
+    },
+    toCSV: function(data){
+      return 'Item,Amount\nTotal Income,'+data.income.toFixed(2)+'\nTotal Expenses,'+data.expenses.toFixed(2)+'\nManagement Fee,'+data.mgmtFee.toFixed(2)+'\nNet to Owner,'+data.netToOwner.toFixed(2);
+    },
+    toHTML: function(data,p){
+      var h='<h1>Owner Statement</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+(p.property?' | Property: '+esc(p.property):'')+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Item</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      h+='<tr><td>Total Income</td><td class="text-right amt-pos">'+fmt(data.income)+'</td></tr>';
+      h+='<tr><td>Total Expenses</td><td class="text-right amt-neg">'+fmt(data.expenses)+'</td></tr>';
+      h+='<tr><td>Management Fee (included in expenses)</td><td class="text-right">'+fmt(data.mgmtFee)+'</td></tr>';
+      h+='<tr class="total-row"><td>Net to Owner</td><td class="text-right '+(data.netToOwner>=0?'amt-pos':'amt-neg')+'">'+fmt(data.netToOwner)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'general-ledger', name:'General Ledger', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'All transactions with running balance.',
+    frequency:'Monthly', keywords:['ledger','journal','transactions','balance'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      if(p.property) entries = entries.filter(function(e){ return e.property===p.property; });
+      entries.sort(function(a,b){ return new Date(a.entry_date)-new Date(b.entry_date); });
+      var bal=0;
+      entries.forEach(function(e){
+        var amt=parseFloat(e.amount);
+        bal += e.type==='income' ? amt : -amt;
+        e._runningBal=bal;
+      });
+      return {entries:entries, endingBalance:bal};
+    },
+    toCSV: function(data){
+      var lines=['Date,Description,Category,Type,Amount,Running Balance'];
+      data.entries.forEach(function(e){
+        lines.push(e.entry_date+','+e.description+','+e.category+','+e.type+','+parseFloat(e.amount).toFixed(2)+','+e._runningBal.toFixed(2));
+      });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>General Ledger</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th class="text-right">Amount</th><th class="text-right">Balance</th></tr></thead><tbody>';
+      data.entries.forEach(function(e){
+        var cls=e.type==='income'?'amt-pos':'amt-neg';
+        h+='<tr><td>'+fmtDate(e.entry_date)+'</td><td>'+esc(e.description)+'</td><td>'+esc(e.category)+'</td><td>'+esc(e.type)+'</td><td class="text-right '+cls+'">'+fmt(e.amount)+'</td><td class="text-right">'+fmt(e._runningBal)+'</td></tr>';
+      });
+      h+='<tr class="total-row"><td colspan="5">Ending Balance</td><td class="text-right">'+fmt(data.endingBalance)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'budget-vs-actual', name:'Budget vs. Actual', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Compare planned budget to actual results with variance.',
+    frequency:'Quarterly', keywords:['budget','actual','variance','planned'],
+    generate: function(p){
+      var budgets = JSON.parse(localStorage.getItem('rv_budgets')||'[]');
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      if(p.property) entries = entries.filter(function(e){ return e.property===p.property; });
+      var actual={};
+      entries.forEach(function(e){ actual[e.category]=(actual[e.category]||0)+parseFloat(e.amount); });
+      var rows=[];
+      budgets.forEach(function(b){
+        var act=actual[b.category]||0;
+        var variance=b.type==='income'? act-b.planned : b.planned-act;
+        rows.push({category:b.category, type:b.type, planned:b.planned, actual:act, variance:variance, pct:b.planned?((act/b.planned)*100):0});
+      });
+      return {rows:rows};
+    },
+    toCSV: function(data){
+      var lines=['Category,Type,Planned,Actual,Variance,% of Budget'];
+      data.rows.forEach(function(r){ lines.push(r.category+','+r.type+','+r.planned.toFixed(2)+','+r.actual.toFixed(2)+','+r.variance.toFixed(2)+','+r.pct.toFixed(1)+'%'); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Budget vs. Actual</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Category</th><th>Type</th><th class="text-right">Planned</th><th class="text-right">Actual</th><th class="text-right">Variance</th><th class="text-right">% of Budget</th></tr></thead><tbody>';
+      data.rows.forEach(function(r){
+        var cls=r.variance>=0?'amt-pos':'amt-neg';
+        h+='<tr><td>'+esc(r.category)+'</td><td>'+esc(r.type)+'</td><td class="text-right">'+fmt(r.planned)+'</td><td class="text-right">'+fmt(r.actual)+'</td><td class="text-right '+cls+'">'+fmt(r.variance)+'</td><td class="text-right">'+fmtPct(r.pct)+'</td></tr>';
+      });
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'ytd-comparison', name:'YTD Comparison', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Current year vs. prior year P&L side by side.',
+    frequency:'Annual', keywords:['ytd','year','comparison','prior','year-to-date'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      var endDt = new Date(p.endDate||new Date().toISOString().slice(0,10));
+      var curYear = endDt.getFullYear();
+      var prevYear = curYear-1;
+      var curStart=curYear+'-01-01', curEnd=p.endDate||curYear+'-12-31';
+      var prevStart=prevYear+'-01-01', prevEnd=prevYear+'-'+String(endDt.getMonth()+1).padStart(2,'0')+'-'+String(endDt.getDate()).padStart(2,'0');
+      var curEntries=entries.filter(function(e){ return dateInRange(e.entry_date,curStart,curEnd); });
+      var prevEntries=entries.filter(function(e){ return dateInRange(e.entry_date,prevStart,prevEnd); });
+      if(p.property){
+        curEntries=curEntries.filter(function(e){ return e.property===p.property; });
+        prevEntries=prevEntries.filter(function(e){ return e.property===p.property; });
+      }
+      function sumByCat(arr){
+        var inc={},exp={},ti=0,te=0;
+        arr.forEach(function(e){
+          var a=parseFloat(e.amount);
+          if(e.type==='income'){inc[e.category]=(inc[e.category]||0)+a; ti+=a;}
+          else{exp[e.category]=(exp[e.category]||0)+a; te+=a;}
+        });
+        return {income:inc, expenses:exp, totalIncome:ti, totalExpenses:te, net:ti-te};
+      }
+      return {current:sumByCat(curEntries), prior:sumByCat(prevEntries), curYear:curYear, prevYear:prevYear};
+    },
+    toCSV: function(data){
+      var lines=['Category,Current Year,Prior Year,Change'];
+      var allCats={};
+      for(var k in data.current.income) allCats[k]='income';
+      for(var k2 in data.prior.income) allCats[k2]='income';
+      for(var k3 in data.current.expenses) allCats[k3]='expense';
+      for(var k4 in data.prior.expenses) allCats[k4]='expense';
+      for(var cat in allCats){
+        var cur=(allCats[cat]==='income'?(data.current.income[cat]||0):(data.current.expenses[cat]||0));
+        var prev=(allCats[cat]==='income'?(data.prior.income[cat]||0):(data.prior.expenses[cat]||0));
+        lines.push(cat+','+cur.toFixed(2)+','+prev.toFixed(2)+','+(cur-prev).toFixed(2));
+      }
+      lines.push('Net Income,'+data.current.net.toFixed(2)+','+data.prior.net.toFixed(2)+','+(data.current.net-data.prior.net).toFixed(2));
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>YTD Comparison</h1><div class="meta">'+data.curYear+' vs '+data.prevYear+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Category</th><th class="text-right">'+data.curYear+'</th><th class="text-right">'+data.prevYear+'</th><th class="text-right">Change</th></tr></thead><tbody>';
+      var allCats={};
+      for(var k in data.current.income) allCats[k]='income';
+      for(var k2 in data.prior.income) allCats[k2]='income';
+      for(var k3 in data.current.expenses) allCats[k3]='expense';
+      for(var k4 in data.prior.expenses) allCats[k4]='expense';
+      for(var cat in allCats){
+        var cur=(allCats[cat]==='income'?(data.current.income[cat]||0):(data.current.expenses[cat]||0));
+        var prev=(allCats[cat]==='income'?(data.prior.income[cat]||0):(data.prior.expenses[cat]||0));
+        var chg=cur-prev;
+        h+='<tr><td>'+esc(cat)+'</td><td class="text-right">'+fmt(cur)+'</td><td class="text-right">'+fmt(prev)+'</td><td class="text-right '+(chg>=0?'amt-pos':'amt-neg')+'">'+fmt(chg)+'</td></tr>';
+      }
+      h+='<tr class="total-row"><td>Net Income</td><td class="text-right">'+fmt(data.current.net)+'</td><td class="text-right">'+fmt(data.prior.net)+'</td><td class="text-right '+(data.current.net-data.prior.net>=0?'amt-pos':'amt-neg')+'">'+fmt(data.current.net-data.prior.net)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'ar-aging', name:'AR Aging', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Accounts receivable grouped by aging buckets (0-30, 31-60, 61-90, 90+).',
+    frequency:'Monthly', keywords:['ar','aging','receivable','overdue','outstanding'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      var now=new Date();
+      var rows=[];
+      leases.filter(function(l){ return l.status==='active'; }).forEach(function(l){
+        // Simulate unpaid balance based on demo
+        var daysLate=Math.floor(Math.random()*120);
+        var balance=daysLate>0? parseFloat(l.monthly_rent||0)*(daysLate>60?2:1) : 0;
+        if(balance>0){
+          var bucket=daysLate<=30?'0-30':daysLate<=60?'31-60':daysLate<=90?'61-90':'90+';
+          rows.push({tenant:l.tenant_name, unit:l.unit, property:l.property, balance:balance, daysLate:daysLate, bucket:bucket});
+        }
+      });
+      // Ensure at least some demo data
+      if(rows.length===0){
+        rows=[
+          {tenant:'Maria Garcia',unit:'Unit 102',property:'3120 Main St',balance:1350,daysLate:15,bucket:'0-30'},
+          {tenant:'James Wilson',unit:'Unit 201',property:'456 Oak Ave',balance:3600,daysLate:45,bucket:'31-60'}
+        ];
+      }
+      var buckets={'0-30':0,'31-60':0,'61-90':0,'90+':0};
+      rows.forEach(function(r){ buckets[r.bucket]+=r.balance; });
+      return {rows:rows, buckets:buckets, total:rows.reduce(function(s,r){return s+r.balance;},0)};
+    },
+    toCSV: function(data){
+      var lines=['Tenant,Unit,Property,Balance,Days Late,Bucket'];
+      data.rows.forEach(function(r){ lines.push(r.tenant+','+r.unit+','+r.property+','+r.balance.toFixed(2)+','+r.daysLate+','+r.bucket); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>AR Aging Report</h1><div class="meta">As of: '+fmtDate(p.endDate||new Date().toISOString().slice(0,10))+'</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">';
+      ['0-30','31-60','61-90','90+'].forEach(function(b){
+        h+='<div style="background:#f8fafc;border-radius:10px;padding:1rem;text-align:center;border:1px solid #e2e8f0;"><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">'+b+' Days</div><div style="font-size:1.3rem;font-weight:700;color:#1e293b;">'+fmt(data.buckets[b])+'</div></div>';
+      });
+      h+='</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Tenant</th><th>Unit</th><th>Property</th><th class="text-right">Balance</th><th class="text-right">Days Late</th><th>Bucket</th></tr></thead><tbody>';
+      data.rows.forEach(function(r){
+        h+='<tr><td>'+esc(r.tenant)+'</td><td>'+esc(r.unit)+'</td><td>'+esc(r.property)+'</td><td class="text-right amt-neg">'+fmt(r.balance)+'</td><td class="text-right">'+r.daysLate+'</td><td><span class="badge-warn">'+r.bucket+'</span></td></tr>';
+      });
+      h+='<tr class="total-row"><td colspan="3">Total Outstanding</td><td class="text-right amt-neg">'+fmt(data.total)+'</td><td colspan="2"></td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'ap-report', name:'AP Report', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Unpaid expenses and pending payables.',
+    frequency:'Monthly', keywords:['ap','payable','unpaid','pending','bills'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      var rows=entries.filter(function(e){
+        return e.type==='expense' && !e.reconciled && dateInRange(e.entry_date,p.startDate,p.endDate);
+      });
+      if(p.property) rows=rows.filter(function(e){ return e.property===p.property; });
+      var total=rows.reduce(function(s,e){ return s+parseFloat(e.amount); },0);
+      return {rows:rows, total:total};
+    },
+    toCSV: function(data){
+      var lines=['Date,Description,Category,Property,Amount'];
+      data.rows.forEach(function(e){ lines.push(e.entry_date+','+e.description+','+e.category+','+e.property+','+parseFloat(e.amount).toFixed(2)); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>AP Report</h1><div class="meta">Unpaid/Pending Expenses as of '+fmtDate(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Property</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      if(data.rows.length===0) h+='<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">No unpaid expenses found.</td></tr>';
+      data.rows.forEach(function(e){
+        h+='<tr><td>'+fmtDate(e.entry_date)+'</td><td>'+esc(e.description)+'</td><td>'+esc(e.category)+'</td><td>'+esc(e.property)+'</td><td class="text-right amt-neg">'+fmt(e.amount)+'</td></tr>';
+      });
+      if(data.rows.length>0) h+='<tr class="total-row"><td colspan="4">Total Payable</td><td class="text-right amt-neg">'+fmt(data.total)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'mgmt-fee-summary', name:'Management Fee Summary', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Management fees grouped by property.',
+    frequency:'Monthly', keywords:['management','fee','summary','property'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){
+        return (e.category||'').toLowerCase().indexOf('management')>=0 && dateInRange(e.entry_date,p.startDate,p.endDate);
+      });
+      if(p.property) entries=entries.filter(function(e){ return e.property===p.property; });
+      var byProp={};
+      entries.forEach(function(e){
+        byProp[e.property]=(byProp[e.property]||0)+parseFloat(e.amount);
+      });
+      var total=entries.reduce(function(s,e){ return s+parseFloat(e.amount); },0);
+      return {byProperty:byProp, total:total};
+    },
+    toCSV: function(data){
+      var lines=['Property,Management Fees'];
+      for(var k in data.byProperty) lines.push(k+','+data.byProperty[k].toFixed(2));
+      lines.push('Total,'+data.total.toFixed(2));
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Management Fee Summary</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Property</th><th class="text-right">Management Fees</th></tr></thead><tbody>';
+      for(var k in data.byProperty) h+='<tr><td>'+esc(k)+'</td><td class="text-right">'+fmt(data.byProperty[k])+'</td></tr>';
+      h+='<tr class="total-row"><td>Total</td><td class="text-right">'+fmt(data.total)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'owner-distribution', name:'Owner Distribution', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Owner draws and distribution payments.',
+    frequency:'Monthly', keywords:['owner','distribution','draw','payout'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      var rows=entries.filter(function(e){
+        var cat=(e.category||'').toLowerCase();
+        return (cat.indexOf('distribution')>=0||cat.indexOf('owner draw')>=0||cat.indexOf('owner dist')>=0) && dateInRange(e.entry_date,p.startDate,p.endDate);
+      });
+      if(p.property) rows=rows.filter(function(e){ return e.property===p.property; });
+      var total=rows.reduce(function(s,e){ return s+parseFloat(e.amount); },0);
+      return {rows:rows, total:total};
+    },
+    toCSV: function(data){
+      var lines=['Date,Description,Property,Amount'];
+      data.rows.forEach(function(e){ lines.push(e.entry_date+','+e.description+','+e.property+','+parseFloat(e.amount).toFixed(2)); });
+      lines.push('Total,,, '+data.total.toFixed(2));
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Owner Distribution Summary</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Date</th><th>Description</th><th>Property</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      data.rows.forEach(function(e){
+        h+='<tr><td>'+fmtDate(e.entry_date)+'</td><td>'+esc(e.description)+'</td><td>'+esc(e.property)+'</td><td class="text-right">'+fmt(e.amount)+'</td></tr>';
+      });
+      h+='<tr class="total-row"><td colspan="3">Total Distributions</td><td class="text-right">'+fmt(data.total)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'bank-reconciliation', name:'Bank Reconciliation', category:'Financial',
+    icon:'\uD83D\uDCCA', description:'Reconciled vs. unreconciled entries.',
+    frequency:'Monthly', keywords:['bank','reconciliation','reconciled','cleared'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      if(p.property) entries=entries.filter(function(e){ return e.property===p.property; });
+      var reconciled=[], unreconciled=[], recAmt=0, unrecAmt=0;
+      entries.forEach(function(e){
+        var amt=parseFloat(e.amount)*(e.type==='expense'?-1:1);
+        if(e.reconciled){ reconciled.push(e); recAmt+=amt; }
+        else { unreconciled.push(e); unrecAmt+=amt; }
+      });
+      return {reconciled:reconciled, unreconciled:unreconciled, reconciledTotal:recAmt, unreconciledTotal:unrecAmt, difference:recAmt+unrecAmt};
+    },
+    toCSV: function(data){
+      var lines=['Date,Description,Amount,Status'];
+      data.reconciled.forEach(function(e){ lines.push(e.entry_date+','+e.description+','+parseFloat(e.amount).toFixed(2)+',Reconciled'); });
+      data.unreconciled.forEach(function(e){ lines.push(e.entry_date+','+e.description+','+parseFloat(e.amount).toFixed(2)+',Unreconciled'); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Bank Reconciliation</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center;border:1px solid #dcfce7;"><div style="font-size:.75rem;color:#64748b;">Reconciled</div><div style="font-size:1.3rem;font-weight:700;color:#16a34a;">'+fmt(data.reconciledTotal)+'</div></div>';
+      h+='<div style="background:#fef3c7;border-radius:10px;padding:1rem;text-align:center;border:1px solid #fde68a;"><div style="font-size:.75rem;color:#64748b;">Unreconciled</div><div style="font-size:1.3rem;font-weight:700;color:#92400e;">'+fmt(data.unreconciledTotal)+'</div></div>';
+      h+='<div style="background:#f8fafc;border-radius:10px;padding:1rem;text-align:center;border:1px solid #e2e8f0;"><div style="font-size:.75rem;color:#64748b;">Book Balance</div><div style="font-size:1.3rem;font-weight:700;color:#1e293b;">'+fmt(data.difference)+'</div></div>';
+      h+='</div>';
+      h+='<h2 style="font-size:.95rem;color:#1e293b;margin:1rem 0 .5rem;">Unreconciled Items</h2>';
+      h+='<table class="rpt-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      data.unreconciled.forEach(function(e){
+        var cls=e.type==='income'?'amt-pos':'amt-neg';
+        h+='<tr><td>'+fmtDate(e.entry_date)+'</td><td>'+esc(e.description)+'</td><td>'+esc(e.category)+'</td><td class="text-right '+cls+'">'+fmt(e.amount)+'</td></tr>';
+      });
+      if(data.unreconciled.length===0) h+='<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:1.5rem;">All entries reconciled!</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // LEASING & TENANT REPORTS
+  // ═══════════════════════════════════════════════════════
+
+  {
+    id:'rent-roll', name:'Rent Roll', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'Current rent roll with tenant, unit, lease dates, and rent amounts.',
+    frequency:'Monthly', keywords:['rent','roll','tenant','unit','lease','monthly'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      if(p.property) leases=leases.filter(function(l){ return l.property===p.property; });
+      var totalRent=leases.filter(function(l){return l.status==='active';}).reduce(function(s,l){ return s+parseFloat(l.monthly_rent||0); },0);
+      return {leases:leases, totalMonthlyRent:totalRent};
+    },
+    toCSV: function(data){
+      var lines=['Unit,Tenant,Lease Start,Lease End,Monthly Rent,Deposit,Status,Property'];
+      data.leases.forEach(function(l){ lines.push(l.unit+','+l.tenant_name+','+l.start_date+','+l.end_date+','+parseFloat(l.monthly_rent||0).toFixed(2)+','+parseFloat(l.deposit||0).toFixed(2)+','+l.status+','+l.property); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Rent Roll</h1><div class="meta">'+(p.property?'Property: '+esc(p.property):'All Properties')+' | Total Monthly Rent: '+fmt(data.totalMonthlyRent)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Unit</th><th>Tenant</th><th>Lease Start</th><th>Lease End</th><th class="text-right">Monthly Rent</th><th class="text-right">Deposit</th><th>Status</th></tr></thead><tbody>';
+      data.leases.forEach(function(l){
+        var badge=l.status==='active'?'badge-active':l.status==='expired'?'badge-expired':'badge-pending';
+        h+='<tr><td>'+esc(l.unit)+'</td><td>'+esc(l.tenant_name||'\u2014')+'</td><td>'+fmtDate(l.start_date)+'</td><td>'+fmtDate(l.end_date)+'</td><td class="text-right">'+fmt(l.monthly_rent)+'</td><td class="text-right">'+fmt(l.deposit)+'</td><td><span class="'+badge+'">'+esc(l.status)+'</span></td></tr>';
+      });
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'occupancy-vacancy', name:'Occupancy / Vacancy', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'Occupancy rate and vacancy analysis.',
+    frequency:'Monthly', keywords:['occupancy','vacancy','rate','vacant','occupied'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      if(p.property) leases=leases.filter(function(l){ return l.property===p.property; });
+      var total=leases.length;
+      var active=leases.filter(function(l){ return l.status==='active'; }).length;
+      var vacant=leases.filter(function(l){ return l.status==='vacant'||l.status==='expired'; }).length;
+      var rate=total>0?((active/total)*100):0;
+      return {total:total, occupied:active, vacant:vacant, occupancyRate:rate};
+    },
+    toCSV: function(data){
+      return 'Metric,Value\nTotal Units,'+data.total+'\nOccupied,'+data.occupied+'\nVacant,'+data.vacant+'\nOccupancy Rate,'+data.occupancyRate.toFixed(1)+'%';
+    },
+    toHTML: function(data,p){
+      var h='<h1>Occupancy / Vacancy Report</h1><div class="meta">'+(p.property?'Property: '+esc(p.property):'All Properties')+'</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">';
+      h+='<div style="background:#f8fafc;border-radius:10px;padding:1rem;text-align:center;border:1px solid #e2e8f0;"><div style="font-size:.75rem;color:#64748b;">Total Units</div><div style="font-size:1.5rem;font-weight:700;color:#1e293b;">'+data.total+'</div></div>';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center;border:1px solid #dcfce7;"><div style="font-size:.75rem;color:#64748b;">Occupied</div><div style="font-size:1.5rem;font-weight:700;color:#16a34a;">'+data.occupied+'</div></div>';
+      h+='<div style="background:#fef2f2;border-radius:10px;padding:1rem;text-align:center;border:1px solid #fecaca;"><div style="font-size:.75rem;color:#64748b;">Vacant</div><div style="font-size:1.5rem;font-weight:700;color:#dc2626;">'+data.vacant+'</div></div>';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center;border:1px solid #dcfce7;"><div style="font-size:.75rem;color:#64748b;">Occupancy Rate</div><div style="font-size:1.5rem;font-weight:700;color:#00E676;">'+fmtPct(data.occupancyRate)+'</div></div>';
+      h+='</div>';
+      return h;
+    }
+  },
+
+  {
+    id:'lease-expiration', name:'Lease Expiration', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'Leases expiring in 30/60/90 days with renewal status.',
+    frequency:'Monthly', keywords:['lease','expiration','expiring','renewal','ending'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      if(p.property) leases=leases.filter(function(l){ return l.property===p.property; });
+      var now=new Date();
+      var rows=leases.filter(function(l){ return l.end_date && l.status==='active'; }).map(function(l){
+        var end=new Date(l.end_date);
+        var days=Math.ceil((end-now)/(1000*60*60*24));
+        var flag=days<=30?'30 days':days<=60?'60 days':days<=90?'90 days':'90+';
+        return {unit:l.unit, tenant:l.tenant_name, property:l.property, endDate:l.end_date, daysRemaining:days, flag:flag, rent:l.monthly_rent};
+      });
+      rows.sort(function(a,b){ return a.daysRemaining-b.daysRemaining; });
+      return {rows:rows};
+    },
+    toCSV: function(data){
+      var lines=['Unit,Tenant,Property,Lease End,Days Remaining,Flag'];
+      data.rows.forEach(function(r){ lines.push(r.unit+','+r.tenant+','+r.property+','+r.endDate+','+r.daysRemaining+','+r.flag); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Lease Expiration Report</h1><div class="meta">As of today</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Unit</th><th>Tenant</th><th>Property</th><th>Lease End</th><th class="text-right">Days Left</th><th class="text-right">Rent</th><th>Flag</th></tr></thead><tbody>';
+      data.rows.forEach(function(r){
+        var badge=r.daysRemaining<=30?'badge-expired':r.daysRemaining<=60?'badge-warn':'badge-ok';
+        h+='<tr><td>'+esc(r.unit)+'</td><td>'+esc(r.tenant)+'</td><td>'+esc(r.property)+'</td><td>'+fmtDate(r.endDate)+'</td><td class="text-right">'+r.daysRemaining+'</td><td class="text-right">'+fmt(r.rent)+'</td><td><span class="'+badge+'">'+esc(r.flag)+'</span></td></tr>';
+      });
+      if(data.rows.length===0) h+='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:2rem;">No active leases found.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'lease-activity', name:'Lease Activity', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'New, renewed, and terminated leases in a period.',
+    frequency:'Monthly', keywords:['lease','activity','new','renewed','terminated'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      var newL=leases.filter(function(l){ return dateInRange(l.start_date,p.startDate,p.endDate); });
+      var expired=leases.filter(function(l){ return l.status==='expired' && dateInRange(l.end_date,p.startDate,p.endDate); });
+      return {newLeases:newL, terminated:expired, newCount:newL.length, terminatedCount:expired.length};
+    },
+    toCSV: function(data){
+      var lines=['Activity,Unit,Tenant,Date,Rent'];
+      data.newLeases.forEach(function(l){ lines.push('New,'+l.unit+','+l.tenant_name+','+l.start_date+','+(l.monthly_rent||0)); });
+      data.terminated.forEach(function(l){ lines.push('Terminated,'+l.unit+','+l.tenant_name+','+l.end_date+','+(l.monthly_rent||0)); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Lease Activity Report</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center;border:1px solid #dcfce7;"><div style="font-size:.75rem;color:#64748b;">New Leases</div><div style="font-size:1.5rem;font-weight:700;color:#16a34a;">'+data.newCount+'</div></div>';
+      h+='<div style="background:#fef2f2;border-radius:10px;padding:1rem;text-align:center;border:1px solid #fecaca;"><div style="font-size:.75rem;color:#64748b;">Terminated</div><div style="font-size:1.5rem;font-weight:700;color:#dc2626;">'+data.terminatedCount+'</div></div>';
+      h+='</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Activity</th><th>Unit</th><th>Tenant</th><th>Date</th><th class="text-right">Rent</th></tr></thead><tbody>';
+      data.newLeases.forEach(function(l){ h+='<tr><td><span class="badge-active">New</span></td><td>'+esc(l.unit)+'</td><td>'+esc(l.tenant_name)+'</td><td>'+fmtDate(l.start_date)+'</td><td class="text-right">'+fmt(l.monthly_rent)+'</td></tr>'; });
+      data.terminated.forEach(function(l){ h+='<tr><td><span class="badge-expired">Terminated</span></td><td>'+esc(l.unit)+'</td><td>'+esc(l.tenant_name)+'</td><td>'+fmtDate(l.end_date)+'</td><td class="text-right">'+fmt(l.monthly_rent)+'</td></tr>'; });
+      if(data.newCount===0 && data.terminatedCount===0) h+='<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">No lease activity in this period.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'late-payment', name:'Late Payment / Collections', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'Tenants with late or outstanding balances.',
+    frequency:'Monthly', keywords:['late','payment','collections','overdue','delinquent'],
+    generate: function(){
+      // Demo data
+      var rows=[
+        {tenant:'Maria Garcia',unit:'Unit 102',property:'3120 Main St',amountDue:1350,daysLate:18,status:'Late'},
+        {tenant:'James Wilson',unit:'Unit 201',property:'456 Oak Ave',amountDue:1800,daysLate:5,status:'Late'},
+        {tenant:'Sarah Johnson',unit:'Unit 103',property:'3120 Main St',amountDue:2400,daysLate:45,status:'Collections'}
+      ];
+      var total=rows.reduce(function(s,r){ return s+r.amountDue; },0);
+      return {rows:rows, total:total};
+    },
+    toCSV: function(data){
+      var lines=['Tenant,Unit,Property,Amount Due,Days Late,Status'];
+      data.rows.forEach(function(r){ lines.push(r.tenant+','+r.unit+','+r.property+','+r.amountDue.toFixed(2)+','+r.daysLate+','+r.status); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Late Payment / Collections</h1><div class="meta">Total Outstanding: '+fmt(data.total)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Tenant</th><th>Unit</th><th>Property</th><th class="text-right">Amount Due</th><th class="text-right">Days Late</th><th>Status</th></tr></thead><tbody>';
+      data.rows.forEach(function(r){
+        var badge=r.status==='Collections'?'badge-expired':'badge-warn';
+        h+='<tr><td>'+esc(r.tenant)+'</td><td>'+esc(r.unit)+'</td><td>'+esc(r.property)+'</td><td class="text-right amt-neg">'+fmt(r.amountDue)+'</td><td class="text-right">'+r.daysLate+'</td><td><span class="'+badge+'">'+esc(r.status)+'</span></td></tr>';
+      });
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'screening-summary', name:'Screening Summary', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'Applicant screening results and decisions.',
+    frequency:'Monthly', keywords:['screening','applicant','background','check','credit'],
+    generate: function(p){
+      var apps = JSON.parse(localStorage.getItem('rv_applicants')||'[]');
+      apps = apps.filter(function(a){ return dateInRange(a.date,p.startDate,p.endDate); });
+      if(p.property) apps=apps.filter(function(a){ return a.property===p.property; });
+      var approved=apps.filter(function(a){return a.decision==='Approved';}).length;
+      var denied=apps.filter(function(a){return a.decision==='Denied';}).length;
+      var pending=apps.filter(function(a){return a.decision==='Pending';}).length;
+      return {applicants:apps, approved:approved, denied:denied, pending:pending};
+    },
+    toCSV: function(data){
+      var lines=['Name,Date,Score,Decision,Property'];
+      data.applicants.forEach(function(a){ lines.push(a.name+','+a.date+','+a.score+','+a.decision+','+a.property); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Screening Summary</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center;border:1px solid #dcfce7;"><div style="font-size:.75rem;color:#64748b;">Approved</div><div style="font-size:1.5rem;font-weight:700;color:#16a34a;">'+data.approved+'</div></div>';
+      h+='<div style="background:#fef2f2;border-radius:10px;padding:1rem;text-align:center;border:1px solid #fecaca;"><div style="font-size:.75rem;color:#64748b;">Denied</div><div style="font-size:1.5rem;font-weight:700;color:#dc2626;">'+data.denied+'</div></div>';
+      h+='<div style="background:#fef3c7;border-radius:10px;padding:1rem;text-align:center;border:1px solid #fde68a;"><div style="font-size:.75rem;color:#64748b;">Pending</div><div style="font-size:1.5rem;font-weight:700;color:#92400e;">'+data.pending+'</div></div>';
+      h+='</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Name</th><th>Date</th><th class="text-right">Score</th><th>Decision</th><th>Property</th></tr></thead><tbody>';
+      data.applicants.forEach(function(a){
+        var badge=a.decision==='Approved'?'badge-active':a.decision==='Denied'?'badge-expired':'badge-pending';
+        h+='<tr><td>'+esc(a.name)+'</td><td>'+fmtDate(a.date)+'</td><td class="text-right">'+a.score+'</td><td><span class="'+badge+'">'+esc(a.decision)+'</span></td><td>'+esc(a.property)+'</td></tr>';
+      });
+      if(data.applicants.length===0) h+='<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">No screenings in this period.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'move-in-out', name:'Move-In / Move-Out', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'Move-in and move-out activity for a period.',
+    frequency:'Monthly', keywords:['move','in','out','turnover','transition'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      var moveIns=leases.filter(function(l){ return dateInRange(l.move_in_date,p.startDate,p.endDate); });
+      var moveOuts=leases.filter(function(l){ return dateInRange(l.move_out_date,p.startDate,p.endDate); });
+      return {moveIns:moveIns, moveOuts:moveOuts};
+    },
+    toCSV: function(data){
+      var lines=['Type,Unit,Tenant,Date,Property'];
+      data.moveIns.forEach(function(l){ lines.push('Move-In,'+l.unit+','+l.tenant_name+','+l.move_in_date+','+l.property); });
+      data.moveOuts.forEach(function(l){ lines.push('Move-Out,'+l.unit+','+l.tenant_name+','+l.move_out_date+','+l.property); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Move-In / Move-Out Report</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center;border:1px solid #dcfce7;"><div style="font-size:.75rem;color:#64748b;">Move-Ins</div><div style="font-size:1.5rem;font-weight:700;color:#16a34a;">'+data.moveIns.length+'</div></div>';
+      h+='<div style="background:#fef2f2;border-radius:10px;padding:1rem;text-align:center;border:1px solid #fecaca;"><div style="font-size:.75rem;color:#64748b;">Move-Outs</div><div style="font-size:1.5rem;font-weight:700;color:#dc2626;">'+data.moveOuts.length+'</div></div>';
+      h+='</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Type</th><th>Unit</th><th>Tenant</th><th>Date</th><th>Property</th></tr></thead><tbody>';
+      data.moveIns.forEach(function(l){ h+='<tr><td><span class="badge-active">Move-In</span></td><td>'+esc(l.unit)+'</td><td>'+esc(l.tenant_name)+'</td><td>'+fmtDate(l.move_in_date)+'</td><td>'+esc(l.property)+'</td></tr>'; });
+      data.moveOuts.forEach(function(l){ h+='<tr><td><span class="badge-expired">Move-Out</span></td><td>'+esc(l.unit)+'</td><td>'+esc(l.tenant_name)+'</td><td>'+fmtDate(l.move_out_date)+'</td><td>'+esc(l.property)+'</td></tr>'; });
+      if(data.moveIns.length===0 && data.moveOuts.length===0) h+='<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">No move activity in this period.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'security-deposit', name:'Security Deposit Ledger', category:'Leasing & Tenant',
+    icon:'\uD83C\uDFE0', description:'Security deposits held per unit.',
+    frequency:'Monthly', keywords:['security','deposit','ledger','held','escrow'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      if(p.property) leases=leases.filter(function(l){ return l.property===p.property; });
+      var total=leases.reduce(function(s,l){ return s+parseFloat(l.deposit||0); },0);
+      return {leases:leases, totalDeposits:total};
+    },
+    toCSV: function(data){
+      var lines=['Unit,Tenant,Status,Deposit,Property'];
+      data.leases.forEach(function(l){ lines.push(l.unit+','+l.tenant_name+','+l.status+','+parseFloat(l.deposit||0).toFixed(2)+','+l.property); });
+      lines.push('Total,,,'+data.totalDeposits.toFixed(2)+',');
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Security Deposit Ledger</h1><div class="meta">Total Deposits Held: '+fmt(data.totalDeposits)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Unit</th><th>Tenant</th><th>Status</th><th class="text-right">Deposit</th><th>Property</th></tr></thead><tbody>';
+      data.leases.forEach(function(l){
+        var badge=l.status==='active'?'badge-active':l.status==='expired'?'badge-expired':'badge-pending';
+        h+='<tr><td>'+esc(l.unit)+'</td><td>'+esc(l.tenant_name||'\u2014')+'</td><td><span class="'+badge+'">'+esc(l.status)+'</span></td><td class="text-right">'+fmt(l.deposit)+'</td><td>'+esc(l.property)+'</td></tr>';
+      });
+      h+='<tr class="total-row"><td colspan="3">Total</td><td class="text-right">'+fmt(data.totalDeposits)+'</td><td></td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // MAINTENANCE REPORTS
+  // ═══════════════════════════════════════════════════════
+
+  {
+    id:'work-order', name:'Work Order Report', category:'Maintenance',
+    icon:'\uD83D\uDD27', description:'All work orders with status, cost, and vendor.',
+    frequency:'Monthly', keywords:['work','order','maintenance','repair','ticket'],
+    generate: function(p){
+      var maint = JSON.parse(localStorage.getItem('rv_maintenance_requests')||'[]');
+      maint = maint.filter(function(m){ return dateInRange(m.created_at,p.startDate,p.endDate); });
+      if(p.property) maint=maint.filter(function(m){ return m.property===p.property; });
+      var totalCost=maint.reduce(function(s,m){ return s+parseFloat(m.cost||0); },0);
+      var completed=maint.filter(function(m){ return m.status==='completed'; }).length;
+      var open=maint.filter(function(m){ return m.status!=='completed'; }).length;
+      return {orders:maint, totalCost:totalCost, completed:completed, open:open};
+    },
+    toCSV: function(data){
+      var lines=['Date,Title,Unit,Property,Priority,Status,Vendor,Cost'];
+      data.orders.forEach(function(m){ lines.push(m.created_at+','+m.title+','+m.unit+','+m.property+','+m.priority+','+m.status+','+(m.vendor||'')+','+parseFloat(m.cost||0).toFixed(2)); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Work Order Report</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+' | Total Cost: '+fmt(data.totalCost)+'</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">';
+      h+='<div style="background:#f8fafc;border-radius:10px;padding:1rem;text-align:center;border:1px solid #e2e8f0;"><div style="font-size:.75rem;color:#64748b;">Total Orders</div><div style="font-size:1.5rem;font-weight:700;">'+data.orders.length+'</div></div>';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center;border:1px solid #dcfce7;"><div style="font-size:.75rem;color:#64748b;">Completed</div><div style="font-size:1.5rem;font-weight:700;color:#16a34a;">'+data.completed+'</div></div>';
+      h+='<div style="background:#fef3c7;border-radius:10px;padding:1rem;text-align:center;border:1px solid #fde68a;"><div style="font-size:.75rem;color:#64748b;">Open</div><div style="font-size:1.5rem;font-weight:700;color:#92400e;">'+data.open+'</div></div>';
+      h+='</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Date</th><th>Title</th><th>Unit</th><th>Priority</th><th>Status</th><th>Vendor</th><th class="text-right">Cost</th></tr></thead><tbody>';
+      data.orders.forEach(function(m){
+        var badge=m.status==='completed'?'badge-active':m.status==='in_progress'?'badge-warn':'badge-pending';
+        h+='<tr><td>'+fmtDate(m.created_at)+'</td><td>'+esc(m.title)+'</td><td>'+esc(m.unit)+'</td><td>'+esc(m.priority)+'</td><td><span class="'+badge+'">'+esc(m.status)+'</span></td><td>'+esc(m.vendor||'\u2014')+'</td><td class="text-right">'+fmt(m.cost)+'</td></tr>';
+      });
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'preventive-maint', name:'Preventive Maintenance', category:'Maintenance',
+    icon:'\uD83D\uDD27', description:'Scheduled preventive maintenance tasks.',
+    frequency:'Quarterly', keywords:['preventive','scheduled','maintenance','inspection'],
+    generate: function(p){
+      var maint = JSON.parse(localStorage.getItem('rv_maintenance_requests')||'[]');
+      var prev=maint.filter(function(m){ return m.preventive; });
+      if(p.property) prev=prev.filter(function(m){ return m.property===p.property; });
+      return {tasks:prev};
+    },
+    toCSV: function(data){
+      var lines=['Title,Unit,Property,Status,Scheduled Date,Vendor,Cost'];
+      data.tasks.forEach(function(m){ lines.push(m.title+','+m.unit+','+m.property+','+m.status+','+m.created_at+','+(m.vendor||'')+','+parseFloat(m.cost||0).toFixed(2)); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Preventive Maintenance Schedule</h1>';
+      h+='<table class="rpt-table"><thead><tr><th>Task</th><th>Unit</th><th>Property</th><th>Status</th><th>Scheduled</th><th>Vendor</th><th class="text-right">Est. Cost</th></tr></thead><tbody>';
+      data.tasks.forEach(function(m){
+        h+='<tr><td>'+esc(m.title)+'</td><td>'+esc(m.unit)+'</td><td>'+esc(m.property)+'</td><td><span class="badge-pending">'+esc(m.status)+'</span></td><td>'+fmtDate(m.created_at)+'</td><td>'+esc(m.vendor||'\u2014')+'</td><td class="text-right">'+fmt(m.cost)+'</td></tr>';
+      });
+      if(data.tasks.length===0) h+='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:2rem;">No preventive maintenance tasks found.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'vendor-performance', name:'Vendor Performance', category:'Maintenance',
+    icon:'\uD83D\uDD27', description:'Vendor spending, job count, and avg completion time.',
+    frequency:'Quarterly', keywords:['vendor','performance','contractor','spending'],
+    generate: function(p){
+      var maint = JSON.parse(localStorage.getItem('rv_maintenance_requests')||'[]');
+      maint = maint.filter(function(m){ return dateInRange(m.created_at,p.startDate,p.endDate); });
+      if(p.property) maint=maint.filter(function(m){ return m.property===p.property; });
+      var vendors={};
+      maint.forEach(function(m){
+        var v=m.vendor||'Unassigned';
+        if(!vendors[v]) vendors[v]={name:v, jobs:0, totalCost:0, completed:0, totalDays:0};
+        vendors[v].jobs++;
+        vendors[v].totalCost+=parseFloat(m.cost||0);
+        if(m.status==='completed' && m.created_at && m.completed_at){
+          vendors[v].completed++;
+          vendors[v].totalDays+=Math.ceil((new Date(m.completed_at)-new Date(m.created_at))/(1000*60*60*24));
+        }
+      });
+      var rows=Object.values(vendors).map(function(v){
+        v.avgDays=v.completed>0?Math.round(v.totalDays/v.completed):0;
+        return v;
+      });
+      return {vendors:rows};
+    },
+    toCSV: function(data){
+      var lines=['Vendor,Jobs,Total Cost,Completed,Avg Days'];
+      data.vendors.forEach(function(v){ lines.push(v.name+','+v.jobs+','+v.totalCost.toFixed(2)+','+v.completed+','+v.avgDays); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Vendor Performance</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Vendor</th><th class="text-right">Jobs</th><th class="text-right">Total Cost</th><th class="text-right">Completed</th><th class="text-right">Avg Days</th></tr></thead><tbody>';
+      data.vendors.forEach(function(v){
+        h+='<tr><td>'+esc(v.name)+'</td><td class="text-right">'+v.jobs+'</td><td class="text-right">'+fmt(v.totalCost)+'</td><td class="text-right">'+v.completed+'</td><td class="text-right">'+v.avgDays+'</td></tr>';
+      });
+      if(data.vendors.length===0) h+='<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">No vendor data found.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'capex-schedule', name:'CapEx Schedule', category:'Maintenance',
+    icon:'\uD83D\uDD27', description:'Capital expenditure planning and tracking.',
+    frequency:'Annual', keywords:['capex','capital','expenditure','improvement','investment'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      var capex=entries.filter(function(e){
+        return (e.category||'').toLowerCase().indexOf('capital')>=0 && dateInRange(e.entry_date,p.startDate,p.endDate);
+      });
+      if(p.property) capex=capex.filter(function(e){ return e.property===p.property; });
+      var total=capex.reduce(function(s,e){ return s+parseFloat(e.amount); },0);
+      return {items:capex, total:total};
+    },
+    toCSV: function(data){
+      var lines=['Date,Description,Property,Amount'];
+      data.items.forEach(function(e){ lines.push(e.entry_date+','+e.description+','+e.property+','+parseFloat(e.amount).toFixed(2)); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>CapEx Schedule</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+' | Total: '+fmt(data.total)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Date</th><th>Description</th><th>Property</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      data.items.forEach(function(e){
+        h+='<tr><td>'+fmtDate(e.entry_date)+'</td><td>'+esc(e.description)+'</td><td>'+esc(e.property)+'</td><td class="text-right">'+fmt(e.amount)+'</td></tr>';
+      });
+      if(data.items.length===0) h+='<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:2rem;">No capital expenditures found.</td></tr>';
+      h+='<tr class="total-row"><td colspan="3">Total CapEx</td><td class="text-right">'+fmt(data.total)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'maint-cost-analysis', name:'Maintenance Cost Analysis', category:'Maintenance',
+    icon:'\uD83D\uDD27', description:'Maintenance costs broken down by category and property.',
+    frequency:'Quarterly', keywords:['maintenance','cost','analysis','breakdown','category'],
+    generate: function(p){
+      var maint = JSON.parse(localStorage.getItem('rv_maintenance_requests')||'[]');
+      maint = maint.filter(function(m){ return dateInRange(m.created_at,p.startDate,p.endDate); });
+      if(p.property) maint=maint.filter(function(m){ return m.property===p.property; });
+      var byCat={}, byProp={};
+      maint.forEach(function(m){
+        var cost=parseFloat(m.cost||0);
+        byCat[m.category||'General']=(byCat[m.category||'General']||0)+cost;
+        byProp[m.property]=(byProp[m.property]||0)+cost;
+      });
+      var total=maint.reduce(function(s,m){ return s+parseFloat(m.cost||0); },0);
+      return {byCategory:byCat, byProperty:byProp, total:total, count:maint.length};
+    },
+    toCSV: function(data){
+      var lines=['Breakdown,Item,Cost'];
+      for(var c in data.byCategory) lines.push('Category,'+c+','+data.byCategory[c].toFixed(2));
+      for(var p2 in data.byProperty) lines.push('Property,'+p2+','+data.byProperty[p2].toFixed(2));
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Maintenance Cost Analysis</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+' | '+data.count+' work orders | Total: '+fmt(data.total)+'</div>';
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">';
+      h+='<div><h2 style="font-size:.95rem;color:#1e293b;margin-bottom:.75rem;">By Category</h2><table class="rpt-table"><thead><tr><th>Category</th><th class="text-right">Cost</th></tr></thead><tbody>';
+      for(var c in data.byCategory) h+='<tr><td>'+esc(c)+'</td><td class="text-right">'+fmt(data.byCategory[c])+'</td></tr>';
+      h+='</tbody></table></div>';
+      h+='<div><h2 style="font-size:.95rem;color:#1e293b;margin-bottom:.75rem;">By Property</h2><table class="rpt-table"><thead><tr><th>Property</th><th class="text-right">Cost</th></tr></thead><tbody>';
+      for(var p3 in data.byProperty) h+='<tr><td>'+esc(p3)+'</td><td class="text-right">'+fmt(data.byProperty[p3])+'</td></tr>';
+      h+='</tbody></table></div></div>';
+      return h;
+    }
+  },
+
+  {
+    id:'inspection-report', name:'Inspection Report', category:'Maintenance',
+    icon:'\uD83D\uDD27', description:'Property inspection results and findings.',
+    frequency:'Quarterly', keywords:['inspection','property','condition','findings'],
+    generate: function(p){
+      // Demo inspection data
+      var inspections=[
+        {property:'3120 Main St',date:new Date().getFullYear()+'-01-15',inspector:'John Doe',overall:'Good',items:[{area:'Exterior',condition:'Good',notes:'Minor paint peeling on south wall'},{area:'Plumbing',condition:'Fair',notes:'Slow drain in Unit 102'},{area:'Electrical',condition:'Good',notes:'All systems functional'},{area:'HVAC',condition:'Good',notes:'Filters replaced'}]},
+        {property:'456 Oak Ave',date:new Date().getFullYear()+'-02-20',inspector:'Jane Smith',overall:'Fair',items:[{area:'Roof',condition:'Fair',notes:'Needs replacement within 2 years'},{area:'Plumbing',condition:'Good',notes:'No issues'},{area:'Landscaping',condition:'Poor',notes:'Overgrown, needs maintenance'}]}
+      ];
+      if(p.property) inspections=inspections.filter(function(i){ return i.property===p.property; });
+      return {inspections:inspections};
+    },
+    toCSV: function(data){
+      var lines=['Property,Date,Inspector,Area,Condition,Notes'];
+      data.inspections.forEach(function(i){
+        i.items.forEach(function(item){ lines.push(i.property+','+i.date+','+i.inspector+','+item.area+','+item.condition+','+item.notes); });
+      });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Inspection Report</h1>';
+      data.inspections.forEach(function(i){
+        h+='<div style="border:1.5px solid #e2e8f0;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">';
+        h+='<div style="display:flex;justify-content:space-between;margin-bottom:1rem;"><div><strong>'+esc(i.property)+'</strong><br><span style="font-size:.82rem;color:#64748b;">Inspector: '+esc(i.inspector)+' | Date: '+fmtDate(i.date)+'</span></div><span class="'+(i.overall==='Good'?'badge-active':'badge-warn')+'">'+esc(i.overall)+'</span></div>';
+        h+='<table class="rpt-table"><thead><tr><th>Area</th><th>Condition</th><th>Notes</th></tr></thead><tbody>';
+        i.items.forEach(function(item){
+          var badge=item.condition==='Good'?'badge-active':item.condition==='Fair'?'badge-warn':'badge-expired';
+          h+='<tr><td>'+esc(item.area)+'</td><td><span class="'+badge+'">'+esc(item.condition)+'</span></td><td>'+esc(item.notes)+'</td></tr>';
+        });
+        h+='</tbody></table></div>';
+      });
+      if(data.inspections.length===0) h+='<div class="rpt-empty"><div class="icon">&#128270;</div><p>No inspections found.</p></div>';
+      return h;
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // COMPLIANCE & LEGAL REPORTS
+  // ═══════════════════════════════════════════════════════
+
+  {
+    id:'1099-summary', name:'1099 Summary', category:'Compliance & Legal',
+    icon:'\uD83D\uDCCB', description:'1099 reporting summary for vendors and contractors.',
+    frequency:'Annual', keywords:['1099','tax','vendor','contractor','irs'],
+    generate: function(p){
+      // Demo 1099 data from accounting
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return e.type==='expense' && dateInRange(e.entry_date,p.startDate,p.endDate); });
+      var vendors={};
+      entries.forEach(function(e){
+        var vendor=e.description.split(' - ')[0]||e.description;
+        if(!vendors[vendor]) vendors[vendor]={name:vendor,total:0,count:0};
+        vendors[vendor].total+=parseFloat(e.amount);
+        vendors[vendor].count++;
+      });
+      var rows=Object.values(vendors).filter(function(v){ return v.total>=600; });
+      return {vendors:rows, threshold:600};
+    },
+    toCSV: function(data){
+      var lines=['Vendor/Payee,Total Paid,Transaction Count,1099 Required'];
+      data.vendors.forEach(function(v){ lines.push(v.name+','+v.total.toFixed(2)+','+v.count+','+(v.total>=data.threshold?'Yes':'No')); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>1099 Summary</h1><div class="meta">Tax Year: '+esc(p.startDate)+' to '+esc(p.endDate)+' | Threshold: '+fmt(data.threshold)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Vendor / Payee</th><th class="text-right">Total Paid</th><th class="text-right">Transactions</th><th>1099 Required</th></tr></thead><tbody>';
+      data.vendors.forEach(function(v){
+        h+='<tr><td>'+esc(v.name)+'</td><td class="text-right">'+fmt(v.total)+'</td><td class="text-right">'+v.count+'</td><td><span class="badge-warn">Yes</span></td></tr>';
+      });
+      if(data.vendors.length===0) h+='<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:2rem;">No vendors above $600 threshold.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'tax-remittance', name:'Tax Remittance Log', category:'Compliance & Legal',
+    icon:'\uD83D\uDCCB', description:'Property tax and other tax payment log.',
+    frequency:'Quarterly', keywords:['tax','remittance','payment','property tax'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      var taxEntries=entries.filter(function(e){
+        return (e.category||'').toLowerCase().indexOf('tax')>=0 && dateInRange(e.entry_date,p.startDate,p.endDate);
+      });
+      if(p.property) taxEntries=taxEntries.filter(function(e){ return e.property===p.property; });
+      var total=taxEntries.reduce(function(s,e){ return s+parseFloat(e.amount); },0);
+      return {entries:taxEntries, total:total};
+    },
+    toCSV: function(data){
+      var lines=['Date,Description,Property,Amount'];
+      data.entries.forEach(function(e){ lines.push(e.entry_date+','+e.description+','+e.property+','+parseFloat(e.amount).toFixed(2)); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Tax Remittance Log</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+' | Total: '+fmt(data.total)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Date</th><th>Description</th><th>Property</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      data.entries.forEach(function(e){
+        h+='<tr><td>'+fmtDate(e.entry_date)+'</td><td>'+esc(e.description)+'</td><td>'+esc(e.property)+'</td><td class="text-right">'+fmt(e.amount)+'</td></tr>';
+      });
+      if(data.entries.length===0) h+='<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:2rem;">No tax payments found.</td></tr>';
+      h+='<tr class="total-row"><td colspan="3">Total Tax Remitted</td><td class="text-right">'+fmt(data.total)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'insurance-tracker', name:'Insurance / License Tracker', category:'Compliance & Legal',
+    icon:'\uD83D\uDCCB', description:'Insurance policies and business license expiration tracking.',
+    frequency:'Annual', keywords:['insurance','license','policy','expiration','renewal'],
+    generate: function(){
+      // Demo data
+      var items=[
+        {type:'Insurance',name:'General Liability',provider:'State Farm',number:'GL-2024-001',effective:new Date().getFullYear()+'-01-01',expiration:new Date().getFullYear()+'-12-31',premium:2400,status:'Active'},
+        {type:'Insurance',name:'Property Insurance',provider:'Allstate',number:'PI-2024-002',effective:new Date().getFullYear()+'-03-01',expiration:new Date().getFullYear()+'-02-28',premium:3600,status:'Active'},
+        {type:'License',name:'Business License',provider:'City of Springfield',number:'BL-2024-100',effective:new Date().getFullYear()+'-01-01',expiration:new Date().getFullYear()+'-12-31',premium:250,status:'Active'},
+        {type:'License',name:'Property Mgmt License',provider:'State Board',number:'PM-2024-050',effective:(new Date().getFullYear()-1)+'-07-01',expiration:new Date().getFullYear()+'-06-30',premium:500,status:'Expiring Soon'}
+      ];
+      return {items:items};
+    },
+    toCSV: function(data){
+      var lines=['Type,Name,Provider,Number,Effective,Expiration,Cost,Status'];
+      data.items.forEach(function(i){ lines.push(i.type+','+i.name+','+i.provider+','+i.number+','+i.effective+','+i.expiration+','+i.premium+','+i.status); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Insurance / License Tracker</h1>';
+      h+='<table class="rpt-table"><thead><tr><th>Type</th><th>Name</th><th>Provider</th><th>Policy #</th><th>Effective</th><th>Expiration</th><th class="text-right">Cost</th><th>Status</th></tr></thead><tbody>';
+      data.items.forEach(function(i){
+        var badge=i.status==='Active'?'badge-active':'badge-warn';
+        h+='<tr><td>'+esc(i.type)+'</td><td>'+esc(i.name)+'</td><td>'+esc(i.provider)+'</td><td>'+esc(i.number)+'</td><td>'+fmtDate(i.effective)+'</td><td>'+fmtDate(i.expiration)+'</td><td class="text-right">'+fmt(i.premium)+'</td><td><span class="'+badge+'">'+esc(i.status)+'</span></td></tr>';
+      });
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'compliance-checklist', name:'Compliance Checklist', category:'Compliance & Legal',
+    icon:'\uD83D\uDCCB', description:'Regulatory compliance checklist and status.',
+    frequency:'Quarterly', keywords:['compliance','checklist','regulatory','requirement'],
+    generate: function(){
+      var items=[
+        {item:'Fair Housing Compliance',category:'Federal',status:'Compliant',lastReview:new Date().getFullYear()+'-01-15',nextDue:new Date().getFullYear()+'-07-15'},
+        {item:'Lead Paint Disclosure',category:'Federal',status:'Compliant',lastReview:new Date().getFullYear()+'-01-15',nextDue:new Date().getFullYear()+'-07-15'},
+        {item:'Security Deposit Limits',category:'State',status:'Compliant',lastReview:new Date().getFullYear()+'-02-01',nextDue:new Date().getFullYear()+'-08-01'},
+        {item:'Smoke/CO Detector Cert.',category:'Local',status:'Due Soon',lastReview:(new Date().getFullYear()-1)+'-09-01',nextDue:new Date().getFullYear()+'-03-01'},
+        {item:'Habitability Standards',category:'State',status:'Compliant',lastReview:new Date().getFullYear()+'-01-20',nextDue:new Date().getFullYear()+'-07-20'},
+        {item:'Business License Renewal',category:'Local',status:'Compliant',lastReview:new Date().getFullYear()+'-01-01',nextDue:new Date().getFullYear()+'-12-31'},
+        {item:'ADA Accessibility',category:'Federal',status:'Needs Review',lastReview:(new Date().getFullYear()-1)+'-06-01',nextDue:new Date().getFullYear()+'-06-01'}
+      ];
+      return {items:items};
+    },
+    toCSV: function(data){
+      var lines=['Item,Category,Status,Last Review,Next Due'];
+      data.items.forEach(function(i){ lines.push(i.item+','+i.category+','+i.status+','+i.lastReview+','+i.nextDue); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Compliance Checklist</h1>';
+      h+='<table class="rpt-table"><thead><tr><th>Item</th><th>Category</th><th>Status</th><th>Last Review</th><th>Next Due</th></tr></thead><tbody>';
+      data.items.forEach(function(i){
+        var badge=i.status==='Compliant'?'badge-active':i.status==='Due Soon'?'badge-warn':'badge-expired';
+        h+='<tr><td>'+esc(i.item)+'</td><td>'+esc(i.category)+'</td><td><span class="'+badge+'">'+esc(i.status)+'</span></td><td>'+fmtDate(i.lastReview)+'</td><td>'+fmtDate(i.nextDue)+'</td></tr>';
+      });
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'eviction-log', name:'Eviction Activity Log', category:'Compliance & Legal',
+    icon:'\uD83D\uDCCB', description:'Active and historical eviction proceedings.',
+    frequency:'Monthly', keywords:['eviction','legal','proceedings','court','notice'],
+    generate: function(){
+      var items=[
+        {tenant:'Sarah Johnson',unit:'Unit 103',property:'3120 Main St',reason:'Non-payment',noticeDate:new Date().getFullYear()+'-01-05',filingDate:new Date().getFullYear()+'-01-20',status:'Completed',outcome:'Voluntary move-out'},
+        {tenant:'Demo Tenant',unit:'Unit 202',property:'456 Oak Ave',reason:'Lease violation',noticeDate:new Date().getFullYear()+'-02-15',filingDate:'',status:'Notice Served',outcome:'Pending'}
+      ];
+      return {items:items};
+    },
+    toCSV: function(data){
+      var lines=['Tenant,Unit,Property,Reason,Notice Date,Filing Date,Status,Outcome'];
+      data.items.forEach(function(i){ lines.push(i.tenant+','+i.unit+','+i.property+','+i.reason+','+i.noticeDate+','+(i.filingDate||'')+','+i.status+','+(i.outcome||'')); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Eviction Activity Log</h1>';
+      h+='<table class="rpt-table"><thead><tr><th>Tenant</th><th>Unit</th><th>Property</th><th>Reason</th><th>Notice Date</th><th>Status</th><th>Outcome</th></tr></thead><tbody>';
+      data.items.forEach(function(i){
+        var badge=i.status==='Completed'?'badge-active':i.status==='Notice Served'?'badge-warn':'badge-pending';
+        h+='<tr><td>'+esc(i.tenant)+'</td><td>'+esc(i.unit)+'</td><td>'+esc(i.property)+'</td><td>'+esc(i.reason)+'</td><td>'+fmtDate(i.noticeDate)+'</td><td><span class="'+badge+'">'+esc(i.status)+'</span></td><td>'+esc(i.outcome||'\u2014')+'</td></tr>';
+      });
+      if(data.items.length===0) h+='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:2rem;">No eviction activity.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // EXECUTIVE / PORTFOLIO REPORTS
+  // ═══════════════════════════════════════════════════════
+
+  {
+    id:'executive-summary', name:'Executive Summary', category:'Executive / Portfolio',
+    icon:'\uD83D\uDCC8', description:'High-level portfolio overview with key metrics.',
+    frequency:'Monthly', keywords:['executive','summary','overview','kpi','dashboard'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      var income=0,expenses=0;
+      entries.forEach(function(e){
+        if(e.type==='income') income+=parseFloat(e.amount);
+        else expenses+=parseFloat(e.amount);
+      });
+      var activeLeases=leases.filter(function(l){ return l.status==='active'; });
+      var totalUnits=leases.length;
+      var occupancy=totalUnits>0?((activeLeases.length/totalUnits)*100):0;
+      var monthlyRent=activeLeases.reduce(function(s,l){ return s+parseFloat(l.monthly_rent||0); },0);
+      return {income:income, expenses:expenses, noi:income-expenses, occupancy:occupancy, totalUnits:totalUnits, occupied:activeLeases.length, monthlyRent:monthlyRent};
+    },
+    toCSV: function(data){
+      return 'Metric,Value\nTotal Income,'+data.income.toFixed(2)+'\nTotal Expenses,'+data.expenses.toFixed(2)+'\nNOI,'+data.noi.toFixed(2)+'\nOccupancy Rate,'+data.occupancy.toFixed(1)+'%\nTotal Units,'+data.totalUnits+'\nOccupied Units,'+data.occupied+'\nMonthly Rent Roll,'+data.monthlyRent.toFixed(2);
+    },
+    toHTML: function(data,p){
+      var h='<h1>Executive Summary</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;border:1px solid #dcfce7;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;">Revenue</div><div style="font-size:1.3rem;font-weight:700;color:#16a34a;">'+fmt(data.income)+'</div></div>';
+      h+='<div style="background:#fef2f2;border-radius:10px;padding:1rem;border:1px solid #fecaca;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;">Expenses</div><div style="font-size:1.3rem;font-weight:700;color:#dc2626;">'+fmt(data.expenses)+'</div></div>';
+      h+='<div style="background:#eff6ff;border-radius:10px;padding:1rem;border:1px solid #bfdbfe;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;">NOI</div><div style="font-size:1.3rem;font-weight:700;color:#2563eb;">'+fmt(data.noi)+'</div></div>';
+      h+='<div style="background:#f0fdf4;border-radius:10px;padding:1rem;border:1px solid #dcfce7;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;">Occupancy</div><div style="font-size:1.3rem;font-weight:700;color:#00E676;">'+fmtPct(data.occupancy)+'</div></div>';
+      h+='<div style="background:#f8fafc;border-radius:10px;padding:1rem;border:1px solid #e2e8f0;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;">Units</div><div style="font-size:1.3rem;font-weight:700;">'+data.occupied+'/'+data.totalUnits+'</div></div>';
+      h+='<div style="background:#f8fafc;border-radius:10px;padding:1rem;border:1px solid #e2e8f0;"><div style="font-size:.72rem;color:#64748b;text-transform:uppercase;">Rent Roll</div><div style="font-size:1.3rem;font-weight:700;">'+fmt(data.monthlyRent)+'/mo</div></div>';
+      h+='</div>';
+      return h;
+    }
+  },
+
+  {
+    id:'portfolio-performance', name:'Portfolio Performance', category:'Executive / Portfolio',
+    icon:'\uD83D\uDCC8', description:'Performance metrics across all properties.',
+    frequency:'Quarterly', keywords:['portfolio','performance','property','comparison'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      var props={};
+      entries.forEach(function(e){
+        var pr=e.property||'Unknown';
+        if(!props[pr]) props[pr]={name:pr,income:0,expenses:0,units:0,occupied:0};
+        if(e.type==='income') props[pr].income+=parseFloat(e.amount);
+        else props[pr].expenses+=parseFloat(e.amount);
+      });
+      leases.forEach(function(l){
+        var pr=l.property||'Unknown';
+        if(!props[pr]) props[pr]={name:pr,income:0,expenses:0,units:0,occupied:0};
+        props[pr].units++;
+        if(l.status==='active') props[pr].occupied++;
+      });
+      var rows=Object.values(props).map(function(pr){
+        pr.noi=pr.income-pr.expenses;
+        pr.occupancy=pr.units>0?((pr.occupied/pr.units)*100):0;
+        return pr;
+      });
+      return {properties:rows};
+    },
+    toCSV: function(data){
+      var lines=['Property,Income,Expenses,NOI,Units,Occupied,Occupancy'];
+      data.properties.forEach(function(pr){ lines.push(pr.name+','+pr.income.toFixed(2)+','+pr.expenses.toFixed(2)+','+pr.noi.toFixed(2)+','+pr.units+','+pr.occupied+','+pr.occupancy.toFixed(1)+'%'); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Portfolio Performance</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Property</th><th class="text-right">Income</th><th class="text-right">Expenses</th><th class="text-right">NOI</th><th class="text-right">Units</th><th class="text-right">Occupancy</th></tr></thead><tbody>';
+      data.properties.forEach(function(pr){
+        h+='<tr><td>'+esc(pr.name)+'</td><td class="text-right amt-pos">'+fmt(pr.income)+'</td><td class="text-right amt-neg">'+fmt(pr.expenses)+'</td><td class="text-right '+(pr.noi>=0?'amt-pos':'amt-neg')+'">'+fmt(pr.noi)+'</td><td class="text-right">'+pr.occupied+'/'+pr.units+'</td><td class="text-right">'+fmtPct(pr.occupancy)+'</td></tr>';
+      });
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'noi-report', name:'NOI Report', category:'Executive / Portfolio',
+    icon:'\uD83D\uDCC8', description:'Net Operating Income by property.',
+    frequency:'Monthly', keywords:['noi','net','operating','income','property'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      if(p.property) entries=entries.filter(function(e){ return e.property===p.property; });
+      var byProp={};
+      entries.forEach(function(e){
+        var pr=e.property||'Unknown';
+        if(!byProp[pr]) byProp[pr]={property:pr,income:0,opex:0};
+        if(e.type==='income') byProp[pr].income+=parseFloat(e.amount);
+        else{
+          var cat=(e.category||'').toLowerCase();
+          // Exclude non-operating like capital improvements and loan payments for NOI
+          if(cat.indexOf('capital')<0 && cat.indexOf('loan')<0 && cat.indexOf('distribution')<0)
+            byProp[pr].opex+=parseFloat(e.amount);
+        }
+      });
+      var rows=Object.values(byProp).map(function(pr){ pr.noi=pr.income-pr.opex; return pr; });
+      var totalNOI=rows.reduce(function(s,r){ return s+r.noi; },0);
+      return {rows:rows, totalNOI:totalNOI};
+    },
+    toCSV: function(data){
+      var lines=['Property,Income,Operating Expenses,NOI'];
+      data.rows.forEach(function(r){ lines.push(r.property+','+r.income.toFixed(2)+','+r.opex.toFixed(2)+','+r.noi.toFixed(2)); });
+      lines.push('Total,,,'+data.totalNOI.toFixed(2));
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>NOI Report</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+' | Total NOI: '+fmt(data.totalNOI)+'</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Property</th><th class="text-right">Income</th><th class="text-right">Operating Expenses</th><th class="text-right">NOI</th></tr></thead><tbody>';
+      data.rows.forEach(function(r){
+        h+='<tr><td>'+esc(r.property)+'</td><td class="text-right amt-pos">'+fmt(r.income)+'</td><td class="text-right amt-neg">'+fmt(r.opex)+'</td><td class="text-right '+(r.noi>=0?'amt-pos':'amt-neg')+'">'+fmt(r.noi)+'</td></tr>';
+      });
+      h+='<tr class="total-row"><td>Portfolio Total</td><td class="text-right"></td><td class="text-right"></td><td class="text-right '+(data.totalNOI>=0?'amt-pos':'amt-neg')+'">'+fmt(data.totalNOI)+'</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'dscr-report', name:'DSCR Report', category:'Executive / Portfolio',
+    icon:'\uD83D\uDCC8', description:'Debt Service Coverage Ratio analysis.',
+    frequency:'Quarterly', keywords:['dscr','debt','service','coverage','ratio','loan'],
+    generate: function(p){
+      var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+      entries = entries.filter(function(e){ return dateInRange(e.entry_date,p.startDate,p.endDate); });
+      var income=0,opex=0,debtService=0;
+      entries.forEach(function(e){
+        var amt=parseFloat(e.amount);
+        var cat=(e.category||'').toLowerCase();
+        if(e.type==='income') income+=amt;
+        else if(cat.indexOf('loan')>=0) debtService+=amt;
+        else if(cat.indexOf('capital')<0 && cat.indexOf('distribution')<0) opex+=amt;
+      });
+      var noi=income-opex;
+      var dscr=debtService>0?(noi/debtService):0;
+      return {income:income, opex:opex, noi:noi, debtService:debtService, dscr:dscr};
+    },
+    toCSV: function(data){
+      return 'Metric,Value\nGross Income,'+data.income.toFixed(2)+'\nOperating Expenses,'+data.opex.toFixed(2)+'\nNOI,'+data.noi.toFixed(2)+'\nAnnual Debt Service,'+data.debtService.toFixed(2)+'\nDSCR,'+data.dscr.toFixed(2);
+    },
+    toHTML: function(data,p){
+      var h='<h1>DSCR Report</h1><div class="meta">Period: '+esc(p.startDate)+' to '+esc(p.endDate)+'</div>';
+      var dscrColor=data.dscr>=1.25?'#16a34a':data.dscr>=1.0?'#f59e0b':'#dc2626';
+      var dscrLabel=data.dscr>=1.25?'Healthy':data.dscr>=1.0?'Adequate':'Below Threshold';
+      h+='<div style="text-align:center;margin-bottom:2rem;padding:2rem;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">';
+      h+='<div style="font-size:.85rem;color:#64748b;text-transform:uppercase;margin-bottom:.5rem;">Debt Service Coverage Ratio</div>';
+      h+='<div style="font-size:3rem;font-weight:800;color:'+dscrColor+';">'+data.dscr.toFixed(2)+'x</div>';
+      h+='<div style="font-size:.85rem;color:'+dscrColor+';font-weight:600;">'+dscrLabel+'</div>';
+      h+='</div>';
+      h+='<table class="rpt-table"><thead><tr><th>Metric</th><th class="text-right">Amount</th></tr></thead><tbody>';
+      h+='<tr><td>Gross Income</td><td class="text-right amt-pos">'+fmt(data.income)+'</td></tr>';
+      h+='<tr><td>Operating Expenses</td><td class="text-right amt-neg">'+fmt(data.opex)+'</td></tr>';
+      h+='<tr class="subtotal-row"><td>Net Operating Income (NOI)</td><td class="text-right">'+fmt(data.noi)+'</td></tr>';
+      h+='<tr><td>Annual Debt Service</td><td class="text-right">'+fmt(data.debtService)+'</td></tr>';
+      h+='<tr class="total-row"><td>DSCR</td><td class="text-right" style="color:'+dscrColor+';">'+data.dscr.toFixed(2)+'x</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  },
+
+  {
+    id:'tenant-health', name:'Tenant Health Score', category:'Executive / Portfolio',
+    icon:'\uD83D\uDCC8', description:'Composite tenant health scoring across the portfolio.',
+    frequency:'Monthly', keywords:['tenant','health','score','risk','rating'],
+    generate: function(p){
+      var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+      if(p.property) leases=leases.filter(function(l){ return l.property===p.property; });
+      var active=leases.filter(function(l){ return l.status==='active'; });
+      var rows=active.map(function(l){
+        // Simulate health scoring
+        var paymentScore=Math.floor(Math.random()*30)+70;
+        var leaseScore=Math.floor(Math.random()*20)+80;
+        var complianceScore=Math.floor(Math.random()*25)+75;
+        var overall=Math.round((paymentScore+leaseScore+complianceScore)/3);
+        var rating=overall>=90?'Excellent':overall>=75?'Good':overall>=60?'Fair':'At Risk';
+        return {tenant:l.tenant_name, unit:l.unit, property:l.property, paymentScore:paymentScore, leaseScore:leaseScore, complianceScore:complianceScore, overall:overall, rating:rating};
+      });
+      // Use deterministic scores for demo consistency
+      if(rows.length>=1){ rows[0].paymentScore=95; rows[0].leaseScore=90; rows[0].complianceScore=92; rows[0].overall=92; rows[0].rating='Excellent'; }
+      if(rows.length>=2){ rows[1].paymentScore=78; rows[1].leaseScore=85; rows[1].complianceScore=80; rows[1].overall=81; rows[1].rating='Good'; }
+      if(rows.length>=3){ rows[2].paymentScore=88; rows[2].leaseScore=82; rows[2].complianceScore=90; rows[2].overall=87; rows[2].rating='Good'; }
+      return {tenants:rows};
+    },
+    toCSV: function(data){
+      var lines=['Tenant,Unit,Property,Payment,Lease,Compliance,Overall,Rating'];
+      data.tenants.forEach(function(t){ lines.push(t.tenant+','+t.unit+','+t.property+','+t.paymentScore+','+t.leaseScore+','+t.complianceScore+','+t.overall+','+t.rating); });
+      return lines.join('\n');
+    },
+    toHTML: function(data,p){
+      var h='<h1>Tenant Health Score</h1>';
+      h+='<table class="rpt-table"><thead><tr><th>Tenant</th><th>Unit</th><th>Property</th><th class="text-right">Payment</th><th class="text-right">Lease</th><th class="text-right">Compliance</th><th class="text-right">Overall</th><th>Rating</th></tr></thead><tbody>';
+      data.tenants.forEach(function(t){
+        var badge=t.rating==='Excellent'?'badge-active':t.rating==='Good'?'badge-ok':t.rating==='Fair'?'badge-warn':'badge-expired';
+        h+='<tr><td>'+esc(t.tenant)+'</td><td>'+esc(t.unit)+'</td><td>'+esc(t.property)+'</td><td class="text-right">'+t.paymentScore+'</td><td class="text-right">'+t.leaseScore+'</td><td class="text-right">'+t.complianceScore+'</td><td class="text-right"><strong>'+t.overall+'</strong></td><td><span class="'+badge+'">'+esc(t.rating)+'</span></td></tr>';
+      });
+      if(data.tenants.length===0) h+='<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem;">No active tenants found.</td></tr>';
+      h+='</tbody></table>';
+      return h;
+    }
+  }
+
+]; // end REPORT_REGISTRY
+
+// ── State ───────────────────────────────────────────────────────────────────
+
+var currentReportId = null;
+var currentReportData = null;
+
+// ── Catalog Rendering ───────────────────────────────────────────────────────
+
+function renderCatalog(){
+  var grid=document.getElementById('rptCatalogGrid');
+  var html='';
+  REPORT_REGISTRY.forEach(function(r){
+    html+='<div class="rpt-card" onclick="showReport(\''+r.id+'\')">';
+    html+='<div class="rpt-card-icon">'+r.icon+'</div>';
+    html+='<div class="rpt-card-body">';
+    html+='<h4>'+esc(r.name)+'</h4>';
+    html+='<p>'+esc(r.description)+'</p>';
+    html+='<div class="rpt-card-meta"><span class="rpt-freq">'+esc(r.frequency)+'</span></div>';
+    html+='</div>';
+    html+='<button class="rpt-gen-btn">Generate &rarr;</button>';
+    html+='</div>';
+  });
+  grid.innerHTML=html;
+}
+
+function filterCatalogCards(q){
+  q=q.toLowerCase();
+  var cards=document.querySelectorAll('.rpt-card');
+  cards.forEach(function(card,i){
+    var r=REPORT_REGISTRY[i];
+    var match=r.name.toLowerCase().indexOf(q)>=0 || r.description.toLowerCase().indexOf(q)>=0 || r.category.toLowerCase().indexOf(q)>=0 || r.keywords.some(function(kw){ return kw.indexOf(q)>=0; });
+    card.style.display=match?'':'none';
+  });
+}
+
+function filterSidebarReports(q){
+  q=q.toLowerCase();
+  var links=document.querySelectorAll('.rpt-sidebar a[data-report]');
+  links.forEach(function(a){
+    var id=a.getAttribute('data-report');
+    var r=REPORT_REGISTRY.find(function(rr){ return rr.id===id; });
+    if(!r){ a.style.display=''; return; }
+    var match=r.name.toLowerCase().indexOf(q)>=0 || r.keywords.some(function(kw){ return kw.indexOf(q)>=0; });
+    a.style.display=match?'':'none';
+  });
+}
+
+// ── Show/Hide Views ─────────────────────────────────────────────────────────
+
+function showReport(id){
+  var r=REPORT_REGISTRY.find(function(rr){ return rr.id===id; });
+  if(!r){ toast('Report not found','error'); return; }
+
+  currentReportId=id;
+
+  // Update sidebar active state
+  document.querySelectorAll('.rpt-sidebar a').forEach(function(a){ a.classList.remove('active'); });
+  var activeLink=document.querySelector('.rpt-sidebar a[data-report="'+id+'"]');
+  if(activeLink) activeLink.classList.add('active');
+
+  // Switch views
+  document.getElementById('rptCatalogView').style.display='none';
+  document.getElementById('rptDetailView').style.display='block';
+  document.getElementById('rptDetailView').classList.add('active');
+
+  // Fill details
+  document.getElementById('rptDetailTitle').textContent=r.icon+' '+r.name;
+  document.getElementById('rptDetailDesc').textContent=r.description;
+
+  // Set default dates
+  var defaults=getDefaultDates();
+  var sd=document.getElementById('rptStartDate');
+  var ed=document.getElementById('rptEndDate');
+  if(!sd.value) sd.value=defaults.start;
+  if(!ed.value) ed.value=defaults.end;
+
+  // Populate properties
+  populatePropertyFilter();
+
+  // Hide results until generated
+  document.getElementById('rptResults').style.display='none';
+  currentReportData=null;
+
+  // Close mobile sidebar
+  var sidebar=document.getElementById('rptSidebar');
+  if(sidebar.classList.contains('open')) toggleRptSidebar();
+}
+
+function backToCatalog(){
+  document.getElementById('rptCatalogView').style.display='';
+  document.getElementById('rptDetailView').style.display='none';
+  document.getElementById('rptDetailView').classList.remove('active');
+  currentReportId=null;
+  currentReportData=null;
+
+  // Clear sidebar active
+  document.querySelectorAll('.rpt-sidebar a').forEach(function(a){ a.classList.remove('active'); });
+}
+
+function populatePropertyFilter(){
+  var entries = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
+  var leases = JSON.parse(localStorage.getItem('rv_leases')||'[]');
+  var props={};
+  entries.forEach(function(e){ if(e.property) props[e.property]=1; });
+  leases.forEach(function(l){ if(l.property) props[l.property]=1; });
+  var sel=document.getElementById('rptPropertyFilter');
+  var val=sel.value;
+  sel.innerHTML='<option value="">All Properties</option>';
+  Object.keys(props).sort().forEach(function(p){
+    sel.innerHTML+='<option value="'+esc(p)+'">'+esc(p)+'</option>';
+  });
+  sel.value=val;
+}
+
+// ── Generate ────────────────────────────────────────────────────────────────
+
+function generateCurrentReport(){
+  if(!currentReportId){ toast('No report selected','error'); return; }
+  var r=REPORT_REGISTRY.find(function(rr){ return rr.id===currentReportId; });
+  if(!r){ toast('Report not found','error'); return; }
+
+  var params=getConfigParams();
+  try{
+    currentReportData=r.generate(params);
+  }catch(e){
+    toast('Error generating report: '+e.message,'error');
+    return;
+  }
+
+  var fmt2=params.format;
+  if(fmt2==='csv'){
+    var csv=r.toCSV(currentReportData);
+    downloadCSV(csv, r.id+'-'+params.startDate+'-to-'+params.endDate+'.csv');
+    toast('CSV downloaded!');
+    return;
+  }
+  if(fmt2==='print'){
+    var html=r.toHTML(currentReportData,params);
+    printReport(html,r.name);
+    toast('Print dialog opened.');
+    return;
+  }
+
+  // Preview
+  var resultsEl=document.getElementById('rptResults');
+  resultsEl.style.display='';
+  document.getElementById('rptResultsTitle').textContent=r.name;
+  document.getElementById('rptResultsBody').innerHTML=r.toHTML(currentReportData,params);
+  toast('Report generated!');
+}
+
+function exportCurrentCSV(){
+  if(!currentReportId || !currentReportData){ toast('Generate a report first','error'); return; }
+  var r=REPORT_REGISTRY.find(function(rr){ return rr.id===currentReportId; });
+  var params=getConfigParams();
+  var csv=r.toCSV(currentReportData);
+  downloadCSV(csv, r.id+'-export.csv');
+  toast('CSV downloaded!');
+}
+
+function printCurrentReport(){
+  if(!currentReportId || !currentReportData){ toast('Generate a report first','error'); return; }
+  var r=REPORT_REGISTRY.find(function(rr){ return rr.id===currentReportId; });
+  var params=getConfigParams();
+  var html=r.toHTML(currentReportData,params);
+  printReport(html,r.name);
+}
+
+// ── Sidebar Toggle ──────────────────────────────────────────────────────────
+
+function toggleRptSidebar(){
+  var sidebar=document.getElementById('rptSidebar');
+  var backdrop=document.getElementById('rptBackdrop');
+  sidebar.classList.toggle('open');
+  backdrop.classList.toggle('open');
+}
+
+// ── AI Upload Modal ─────────────────────────────────────────────────────────
+
+var _aiUploadFileName = '';
+var _aiUploadMatchedId = null;
+
+function openAIUploadModal(){
+  document.getElementById('aiUploadModal').classList.add('open');
+  document.getElementById('aiUploadStatus').style.display='none';
+  document.getElementById('aiUploadResult').style.display='none';
+  document.getElementById('aiUploadZone').style.display='';
+  document.getElementById('aiUploadFile').value='';
+  document.getElementById('aiUploadProcess').disabled=true;
+  document.getElementById('aiUploadProcess').style.opacity='.5';
+  _aiUploadFileName = '';
+  _aiUploadMatchedId = null;
+}
+
+function closeAIUploadModal(){
+  document.getElementById('aiUploadModal').classList.remove('open');
+}
+
+// Wire up upload zone click
+document.getElementById('aiUploadZone').addEventListener('click', function(){
+  document.getElementById('aiUploadFile').click();
+});
+
+// Wire up drag-and-drop
+(function(){
+  var zone = document.getElementById('aiUploadZone');
+  zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.style.borderColor='#00E676'; });
+  zone.addEventListener('dragleave', function(){ zone.style.borderColor=''; });
+  zone.addEventListener('drop', function(e){
+    e.preventDefault();
+    zone.style.borderColor='';
+    if(e.dataTransfer.files && e.dataTransfer.files.length>0){
+      document.getElementById('aiUploadFile').files = e.dataTransfer.files;
+      handleAIUpload(document.getElementById('aiUploadFile'));
+    }
+  });
+})();
+
+// ── CSV Parser ──────────────────────────────────────────────────────────────
+
+function parseCSVHeaders(text) {
+  var lines = text.split('\n').filter(function(l){return l.trim();});
+  if (!lines.length) return { headers: [], rowCount: 0 };
+  var headers = lines[0].split(',').map(function(h){return h.trim().toLowerCase().replace(/['"]/g,'');});
+  return { headers: headers, rowCount: lines.length - 1 };
+}
+
+// ── Report Identifier ───────────────────────────────────────────────────────
+
+function identifyReport(fileContent) {
+  var parsed = parseCSVHeaders(fileContent);
+  var scores = {};
+
+  REPORT_REGISTRY.forEach(function(r) {
+    var score = 0;
+    var kw = r.keywords || [];
+
+    // Check keywords against CSV headers
+    parsed.headers.forEach(function(h) {
+      kw.forEach(function(k) {
+        if (h.indexOf(k) >= 0) score += 2;
+      });
+    });
+
+    // Check file content for keywords
+    var contentLower = fileContent.toLowerCase();
+    kw.forEach(function(k) {
+      if (contentLower.indexOf(k) >= 0) score += 1;
+    });
+
+    if (score > 0) scores[r.id] = score;
+  });
+
+  // Sort by score descending
+  var ranked = Object.keys(scores).sort(function(a,b){return scores[b]-scores[a];});
+
+  if (!ranked.length) return { match: null, confidence: 0, suggestions: [] };
+
+  var topScore = scores[ranked[0]];
+  var confidence = Math.min(topScore / 10, 1);
+
+  return {
+    match: ranked[0],
+    confidence: confidence,
+    suggestions: ranked.slice(0, 3),
+    scores: scores
+  };
+}
+
+// ── File Upload Handler ─────────────────────────────────────────────────────
+
+function handleAIUpload(input){
+  if(!input.files || !input.files.length) return;
+
+  var file = input.files[0];
+  _aiUploadFileName = file.name;
+
+  document.getElementById('aiUploadZone').style.display='none';
+  document.getElementById('aiUploadStatus').style.display='block';
+  document.getElementById('aiUploadResult').style.display='none';
+
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var content = e.target.result;
+
+    // Small delay to show analyzing state
+    setTimeout(function(){
+      var result = identifyReport(content);
+
+      document.getElementById('aiUploadStatus').style.display='none';
+      document.getElementById('aiUploadResult').style.display='block';
+
+      if(result.match && result.confidence > 0.5){
+        // High-confidence match
+        var rpt = REPORT_REGISTRY.find(function(rr){ return rr.id===result.match; });
+        _aiUploadMatchedId = result.match;
+        document.getElementById('aiResultMatch').style.display='block';
+        document.getElementById('aiResultNoMatch').style.display='none';
+        document.getElementById('aiResultMatchText').textContent='We identified this as: ' + (rpt ? rpt.name : result.match);
+        document.getElementById('aiResultConfidence').textContent=Math.round(result.confidence*100)+'%';
+        document.getElementById('aiUploadProcess').disabled=false;
+        document.getElementById('aiUploadProcess').style.opacity='1';
+      } else {
+        // Low confidence or no match — show dropdown
+        document.getElementById('aiResultMatch').style.display='none';
+        document.getElementById('aiResultNoMatch').style.display='block';
+        var dd = document.getElementById('aiResultDropdown');
+        dd.innerHTML='';
+        REPORT_REGISTRY.forEach(function(r){
+          var opt = document.createElement('option');
+          opt.value = r.id;
+          opt.textContent = r.name + ' (' + r.category + ')';
+          dd.appendChild(opt);
+        });
+        // Pre-select best guess if available
+        if(result.match) dd.value = result.match;
+        _aiUploadMatchedId = dd.value;
+        dd.onchange = function(){ _aiUploadMatchedId = dd.value; };
+        document.getElementById('aiUploadProcess').disabled=false;
+        document.getElementById('aiUploadProcess').style.opacity='1';
+      }
+    }, 600);
+  };
+
+  reader.readAsText(file);
+}
+
+// ── Confirm / Select handlers ───────────────────────────────────────────────
+
+document.getElementById('aiResultConfirmBtn').addEventListener('click', function(){
+  if(_aiUploadMatchedId) saveTemplateAndGenerate(_aiUploadMatchedId);
+});
+
+document.getElementById('aiResultSelectBtn').addEventListener('click', function(){
+  var dd = document.getElementById('aiResultDropdown');
+  if(dd.value) {
+    _aiUploadMatchedId = dd.value;
+    saveTemplateAndGenerate(dd.value);
+  }
+});
+
+document.getElementById('aiUploadProcess').addEventListener('click', function(){
+  if(_aiUploadMatchedId) saveTemplateAndGenerate(_aiUploadMatchedId);
+});
+
+function saveTemplateAndGenerate(reportId){
+  // Save to localStorage
+  var templates = JSON.parse(localStorage.getItem('rv_custom_report_templates')||'[]');
+  templates.push({
+    filename: _aiUploadFileName,
+    reportId: reportId,
+    uploadedAt: new Date().toISOString()
+  });
+  localStorage.setItem('rv_custom_report_templates', JSON.stringify(templates));
+
+  var rpt = REPORT_REGISTRY.find(function(rr){ return rr.id===reportId; });
+  toast('Template saved! Generating ' + (rpt ? rpt.name : reportId) + '...', 'success');
+  closeAIUploadModal();
+  renderMyTemplates();
+  showReport(reportId);
+}
+
+// ── My Templates ────────────────────────────────────────────────────────────
+
+function renderMyTemplates(){
+  var templates = JSON.parse(localStorage.getItem('rv_custom_report_templates')||'[]');
+  var section = document.getElementById('myTemplatesSection');
+  var list = document.getElementById('myTemplatesList');
+  if(!templates.length){
+    section.style.display='none';
+    return;
+  }
+  section.style.display='block';
+  var html='';
+  templates.forEach(function(t, idx){
+    var rpt = REPORT_REGISTRY.find(function(rr){ return rr.id===t.reportId; });
+    var name = rpt ? rpt.name : t.reportId;
+    html+='<a data-report="'+esc(t.reportId)+'" onclick="showReport(\''+t.reportId+'\')" style="display:flex;align-items:center;justify-content:space-between;" title="'+esc(t.filename)+'">';
+    html+='<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(name)+'</span>';
+    html+='<span onclick="event.stopPropagation();removeTemplate('+idx+');" style="cursor:pointer;color:#f87171;font-size:.75rem;margin-left:.5rem;flex-shrink:0;" title="Remove template">&times;</span>';
+    html+='</a>';
+  });
+  list.innerHTML=html;
+}
+
+function removeTemplate(idx){
+  var templates = JSON.parse(localStorage.getItem('rv_custom_report_templates')||'[]');
+  templates.splice(idx,1);
+  localStorage.setItem('rv_custom_report_templates', JSON.stringify(templates));
+  renderMyTemplates();
+  toast('Template removed.');
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', function(){
+  seedDemoData();
+  renderCatalog();
+  renderMyTemplates();
+
+  // Set default dates
+  var defaults=getDefaultDates();
+  document.getElementById('rptStartDate').value=defaults.start;
+  document.getElementById('rptEndDate').value=defaults.end;
+
+  // Check URL hash for direct report link
+  var hash=window.location.hash.replace('#','');
+  if(hash){
+    var r=REPORT_REGISTRY.find(function(rr){ return rr.id===hash; });
+    if(r) showReport(hash);
+  }
+});
+
+</script>
+</body>
+</html>
