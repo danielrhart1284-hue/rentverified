@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg:#0f172a;--surface:#1e293b;--border:rgba(255,255,255,.08);
-      --primary:#3b82f6;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+      --primary:#00E676;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;
       --gray:rgba(255,255,255,.5);--white:#fff;
       --str:#8b5cf6;--str-lt:#c084fc;--str-dk:#6d28d9;
     }
@@ -260,7 +260,7 @@
 <div class="str-overlay" id="strOverlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
 
 <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
-<aside class="sidebar" onclick="if(event.target.closest('.slink')&&window.innerWidth<=768){this.classList.remove('open');document.getElementById('strOverlay').classList.remove('show');}"
+<aside class="sidebar" onclick="if(event.target.closest('.slink')&&window.innerWidth<=768){this.classList.remove('open');document.getElementById('strOverlay').classList.remove('show');}">
   <div class="sb-brand">
     <div class="logo">🏠 3120 Life</div>
     <div class="sub">[Your Business Name]</div>
@@ -623,6 +623,7 @@ if(!localStorage.getItem('rv_str_seeded')){
 
 // ── Utilities ────────────────────────────────────────────────────────
 function uid(){ return 'id_' + Math.random().toString(36).slice(2,9); }
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 function fmt$(n){ return '$'+(+n).toLocaleString(); }
 function fmtDate(s){ if(!s) return '—'; const d=new Date(s+'T00:00:00'); return `${MONTHS[d.getMonth()]} ${d.getDate()}`; }
 function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
@@ -669,8 +670,8 @@ function renderListings(){
         <div class="prop-platform">${plat.map(p=>`<span class="plt-badge">${p}</span>`).join('')}</div>
       </div>
       <div class="prop-body">
-        <div class="prop-name">${l.name}</div>
-        <div class="prop-addr">📍 ${l.addr}</div>
+        <div class="prop-name">${esc(l.name)}</div>
+        <div class="prop-addr">📍 ${esc(l.addr)}</div>
         <div class="prop-chips">
           <span class="chip">🛏 ${l.bed}BR</span>
           <span class="chip">🚿 ${l.bath}BA</span>
@@ -772,8 +773,8 @@ function renderBookings(){
     const platColors={'Airbnb':'#ff385c','VRBO':'#3d67ff','Booking.com':'#003580','Direct':'#10b981','Other':'#6b7280'};
     const pc=platColors[b.platform]||'#6b7280';
     tbody.innerHTML+=`<tr>
-      <td style="font-weight:700;">${b.guest}</td>
-      <td style="font-size:.77rem;color:var(--gray);">${l.name}</td>
+      <td style="font-weight:700;">${esc(b.guest)}</td>
+      <td style="font-size:.77rem;color:var(--gray);">${esc(l.name)}</td>
       <td style="font-size:.78rem;">${fmtDate(b.checkIn)} → ${fmtDate(b.checkOut)}<div style="font-size:.68rem;color:var(--gray);">${nights} nights</div></td>
       <td><span style="background:${pc}22;color:${pc};border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:700;">${b.platform}</span></td>
       <td style="font-weight:700;">${fmt$(b.payout)}</td>
@@ -800,7 +801,7 @@ function deleteBooking(id){ bookings=bookings.filter(b=>b.id!==id); save('rv_str
 
 function populateBookingPropertySelect(){
   const sel=document.getElementById('b-prop');
-  sel.innerHTML=listings.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+  sel.innerHTML=listings.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
 }
 
 // ── Calendar ──────────────────────────────────────────────────────────
@@ -823,9 +824,9 @@ function renderCalendar(){
     let evHtml='';
     bookings.forEach(b=>{
       const l=listings.find(x=>x.id===b.propId)||{name:'?'};
-      if(b.checkIn===ds) evHtml+=`<div class="cal-ev cal-ev-in" title="${l.name}">↓ ${l.name.split(' ')[0]}</div>`;
-      else if(b.checkOut===ds) evHtml+=`<div class="cal-ev cal-ev-out" title="${l.name}">↑ ${l.name.split(' ')[0]}</div>`;
-      else if(ds>b.checkIn && ds<b.checkOut) evHtml+=`<div class="cal-ev cal-ev-book" title="${l.name}">${l.name.split(' ')[0]}</div>`;
+      if(b.checkIn===ds) evHtml+=`<div class="cal-ev cal-ev-in" title="${esc(l.name)}">↓ ${esc(l.name.split(' ')[0])}</div>`;
+      else if(b.checkOut===ds) evHtml+=`<div class="cal-ev cal-ev-out" title="${esc(l.name)}">↑ ${esc(l.name.split(' ')[0])}</div>`;
+      else if(ds>b.checkIn && ds<b.checkOut) evHtml+=`<div class="cal-ev cal-ev-book" title="${esc(l.name)}">${esc(l.name.split(' ')[0])}</div>`;
     });
     grid.innerHTML+=`<div class="cal-cell${isToday?' cal-today':''}"><div class="cal-num">${d}</div>${evHtml}</div>`;
   }
@@ -855,9 +856,9 @@ function renderCleaning(){
     div.innerHTML=`
       <div class="clean-icon ${iconClass}">🧹</div>
       <div class="clean-info">
-        <div class="clean-prop">${l.name}</div>
-        <div class="clean-meta">Guest checkout: ${fmtDate(b.checkOut)} at ${l.cout || '11:00'} · ${b.guest}</div>
-        <div class="clean-crew">👤 ${l.crewName || 'No crew assigned'} ${l.crewPhone?'· '+l.crewPhone:''}</div>
+        <div class="clean-prop">${esc(l.name)}</div>
+        <div class="clean-meta">Guest checkout: ${fmtDate(b.checkOut)} at ${esc(l.cout || '11:00')} · ${esc(b.guest)}</div>
+        <div class="clean-crew">👤 ${esc(l.crewName || 'No crew assigned')} ${l.crewPhone?'· '+esc(l.crewPhone):''}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <span class="badge" style="background:rgba(255,255,255,.06);color:${labelColor};">${label}</span>
@@ -888,10 +889,10 @@ function openNotifModal(bookingId){
   const nights=daysBetween(b.checkIn,b.checkOut);
 
   document.getElementById('notif-body').innerHTML=`
-    <div style="margin-bottom:14px;font-size:.82rem;color:var(--gray);">Sending cleaning notification to <strong style="color:#fff;">${crew.name}</strong> for checkout at <strong style="color:#fff;">${l.name}</strong>.</div>
+    <div style="margin-bottom:14px;font-size:.82rem;color:var(--gray);">Sending cleaning notification to <strong style="color:#fff;">${esc(crew.name)}</strong> for checkout at <strong style="color:#fff;">${esc(l.name)}</strong>.</div>
     <div class="notif-preview">
       <div class="notif-label">📧 Email Preview</div>
-      <div style="color:#fff;font-weight:700;margin-bottom:4px;">Subject: 🧹 Cleaning Needed — ${l.name} | ${fmtDate(b.checkOut)}</div>
+      <div style="color:#fff;font-weight:700;margin-bottom:4px;">Subject: 🧹 Cleaning Needed — ${esc(l.name)} | ${fmtDate(b.checkOut)}</div>
       <div style="color:rgba(255,255,255,.7);line-height:1.7;">Hi ${crew.name},<br><br>
       A guest is checking out of <strong style="color:#fff;">${l.name}</strong> (${l.addr||'see address on file'}) on <strong style="color:#fff;">${fmtDate(b.checkOut)} at ${l.cout||'11:00 AM'}</strong>.<br><br>
       Guests: <strong style="color:#fff;">${b.gcount}</strong> · Stay: <strong style="color:#fff;">${nights} night${nights!==1?'s':''}</strong><br>
@@ -943,9 +944,9 @@ function renderCrewRoster(){
       seen.add(l.crewName);
       const div=document.createElement('div');
       div.style.cssText='background:#1e293b;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;';
-      div.innerHTML=`<div style="font-weight:700;font-size:.83rem;">${l.crewName}</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:3px;">📧 ${l.crewEmail||'—'}</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📱 ${l.crewPhone||'—'}</div>`;
+      div.innerHTML=`<div style="font-weight:700;font-size:.83rem;">${esc(l.crewName)}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:3px;">📧 ${esc(l.crewEmail||'—')}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📱 ${esc(l.crewPhone||'—')}</div>`;
       container.appendChild(div);
     }
   });
@@ -954,9 +955,9 @@ function renderCrewRoster(){
       seen.add(c.name);
       const div=document.createElement('div');
       div.style.cssText='background:#1e293b;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;';
-      div.innerHTML=`<div style="font-weight:700;font-size:.83rem;">${c.name}</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📧 ${c.email}</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📱 ${c.phone}</div>`;
+      div.innerHTML=`<div style="font-weight:700;font-size:.83rem;">${esc(c.name)}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📧 ${esc(c.email)}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);">📱 ${esc(c.phone)}</div>`;
       container.appendChild(div);
     }
   });
@@ -1005,7 +1006,7 @@ function renderRevenue(){
     const occupiedD=bks.reduce((s,b)=>s+Math.max(0,daysBetween(b.checkIn,b.checkOut)),0);
     const occPct=Math.min(100,Math.round((occupiedD/30)*100));
     tbody.innerHTML+=`<tr>
-      <td><div style="font-weight:700;">${l.name}</div><div style="font-size:.7rem;color:var(--gray);">${l.bed}BR · ${fmt$(l.rate)}/night</div></td>
+      <td><div style="font-weight:700;">${esc(l.name)}</div><div style="font-size:.7rem;color:var(--gray);">${l.bed}BR · ${fmt$(l.rate)}/night</div></td>
       <td>${bks.length}</td>
       <td style="font-weight:700;">${fmt$(gross)}</td>
       <td style="color:#fca5a5;">-${fmt$(platformFee)}</td>
@@ -1035,7 +1036,7 @@ let activeCompProp=null;
 
 function renderCompliance(){
   const sel=document.getElementById('comp-prop-sel');
-  sel.innerHTML=listings.map((l,i)=>`<button class="comp-prop-btn${i===0&&!activeCompProp?' active':activeCompProp===l.id?' active':''}" onclick="selectCompProp('${l.id}',this)">${l.name}</button>`).join('');
+  sel.innerHTML=listings.map((l,i)=>`<button class="comp-prop-btn${i===0&&!activeCompProp?' active':activeCompProp===l.id?' active':''}" onclick="selectCompProp('${l.id}',this)">${esc(l.name)}</button>`).join('');
   if(!activeCompProp && listings.length) activeCompProp=listings[0].id;
   renderCompChecklist();
 }
@@ -1139,14 +1140,14 @@ function renderFullCalendar(){
     filteredBookings.forEach(b=>{
       const l=listings.find(x=>x.id===b.propId)||{name:'?'};
       const shortName=l.name.length>12?l.name.slice(0,12)+'…':l.name;
-      if(b.checkIn===ds) evHtml+=`<div class="fcal-ev fcal-ev-in" title="Check-in: ${b.guest} at ${l.name}" onclick="event.stopPropagation();openTurnover('${b.id}')">↓ ${b.guest.split(' ')[0]}</div>`;
+      if(b.checkIn===ds) evHtml+=`<div class="fcal-ev fcal-ev-in" title="Check-in: ${esc(b.guest)} at ${esc(l.name)}" onclick="event.stopPropagation();openTurnover('${b.id}')">↓ ${esc(b.guest.split(' ')[0])}</div>`;
       else if(b.checkOut===ds){
-        evHtml+=`<div class="fcal-ev fcal-ev-out" title="Checkout: ${b.guest} from ${l.name}" onclick="event.stopPropagation();openTurnover('${b.id}')">↑ ${b.guest.split(' ')[0]}</div>`;
-        evHtml+=`<div class="fcal-ev fcal-ev-clean" title="Turnover clean: ${l.name}" onclick="event.stopPropagation();openTurnover('${b.id}')">🧹 Clean</div>`;
+        evHtml+=`<div class="fcal-ev fcal-ev-out" title="Checkout: ${esc(b.guest)} from ${esc(l.name)}" onclick="event.stopPropagation();openTurnover('${b.id}')">↑ ${esc(b.guest.split(' ')[0])}</div>`;
+        evHtml+=`<div class="fcal-ev fcal-ev-clean" title="Turnover clean: ${esc(l.name)}" onclick="event.stopPropagation();openTurnover('${b.id}')">🧹 Clean</div>`;
       }
-      else if(ds>b.checkIn && ds<b.checkOut) evHtml+=`<div class="fcal-ev fcal-ev-book" title="${b.guest} at ${l.name}">${shortName}</div>`;
+      else if(ds>b.checkIn && ds<b.checkOut) evHtml+=`<div class="fcal-ev fcal-ev-book" title="${esc(b.guest)} at ${esc(l.name)}">${esc(shortName)}</div>`;
     });
-    grid.innerHTML+=`<div class="fcal-cell${isToday?' fcal-today':''}""><div class="fcal-num">${d}</div>${evHtml}</div>`;
+    grid.innerHTML+=`<div class="fcal-cell${isToday?' fcal-today':''}"><div class="fcal-num">${d}</div>${evHtml}</div>`;
   }
 
   // Populate property filter
@@ -1193,8 +1194,8 @@ function openTurnover(bookingId) {
 
   let html = `
     <div style="margin-bottom:14px;">
-      <div style="font-size:.82rem;color:var(--gray);">Guest: <strong style="color:#fff;">${b.guest}</strong> · Checkout: <strong style="color:#fff;">${fmtDate(b.checkOut)} at ${l.cout || '11:00'}</strong></div>
-      <div style="font-size:.78rem;color:var(--gray);margin-top:4px;">Crew: <strong style="color:var(--str-lt);">${l.crewName || 'Not assigned'}</strong></div>
+      <div style="font-size:.82rem;color:var(--gray);">Guest: <strong style="color:#fff;">${esc(b.guest)}</strong> · Checkout: <strong style="color:#fff;">${fmtDate(b.checkOut)} at ${esc(l.cout || '11:00')}</strong></div>
+      <div style="font-size:.78rem;color:var(--gray);margin-top:4px;">Crew: <strong style="color:var(--str-lt);">${esc(l.crewName || 'Not assigned')}</strong></div>
     </div>
     <div class="turn-status-bar">
       ${['scheduled','in_progress','completed','inspected'].map(s =>
@@ -1289,7 +1290,7 @@ function init(){
   renderCalendar();
 
   // Populate property selects
-  const opts=listings.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+  const opts=listings.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
   document.getElementById('b-prop').innerHTML=opts;
   document.getElementById('cr-prop').innerHTML=opts;
 

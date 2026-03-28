@@ -507,7 +507,7 @@ function openModal(id) {
       <div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">Status</div>
         <span class="sts sts-${w.status.replace(' ','').toLowerCase()}">${w.status}</span></div>
       <div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">Vendor</div>
-        <strong>${w.vendor||'Unassigned'}</strong></div>
+        <strong>${esc(w.vendor||'Unassigned')}</strong></div>
       <div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;">Last Updated</div>
         <span>${w.updated}</span></div>
     </div>
@@ -526,7 +526,7 @@ function openModal(id) {
       <div style="display:flex;gap:.75rem;">
         <select id="modalVendor" style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:.45rem .75rem;font-size:.88rem;">
           <option value="">— Unassigned —</option>
-          ${vendors.map(v=>`<option value="${v.name}" ${v.name===w.vendor?'selected':''}>${v.name} (${v.trade})</option>`).join('')}
+          ${vendors.map(v=>`<option value="${esc(v.name)}" ${v.name===w.vendor?'selected':''}>${esc(v.name)} (${esc(v.trade)})</option>`).join('')}
         </select>
         <button class="btn btn-success btn-sm" onclick="assignVendorFromModal('${id}')">Assign</button>
       </div>
@@ -535,7 +535,7 @@ function openModal(id) {
       <div style="font-size:.82rem;font-weight:600;color:#374151;margin-bottom:.75rem;">Activity Log</div>
       <ul class="timeline">
         <li><div class="tl-dot tl-submitted">📋</div><div class="tl-body"><strong>Submitted</strong><div class="who">${w.source} · ${w.submitted}</div></div></li>
-        ${w.notes.map(n=>`<li><div class="tl-dot tl-started">💬</div><div class="tl-body"><strong>Note</strong><div class="who">${n}</div></div></li>`).join('')}
+        ${w.notes.map(n=>`<li><div class="tl-dot tl-started">💬</div><div class="tl-body"><strong>Note</strong><div class="who">${esc(n)}</div></div></li>`).join('')}
         ${w.status==='Completed'?`<li><div class="tl-dot tl-completed">✅</div><div class="tl-body"><strong>Completed</strong><div class="who">${w.updated}</div></div></li>`:''}
       </ul>
       <div style="display:flex;gap:.75rem;margin-top:.75rem;">
@@ -549,6 +549,7 @@ function openModal(id) {
 function closeModal() { document.getElementById('woModal').classList.remove('open'); }
 
 function updateStatus(id, status) {
+  if(status==='Closed' && !confirm('Close this work order without a resolution note?')) return;
   const w = workOrders.find(x=>x.id===id);
   if(!w) return;
   w.status = status;

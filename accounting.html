@@ -46,7 +46,7 @@
     .acc-sidebar a:hover, .acc-sidebar a.active {
       background: rgba(255,255,255,.06);
       color: #fff;
-      border-left-color: #3b82f6;
+      border-left-color: #00E676;
     }
     /* ── Main Content ───────────────────────────────────── */
     .acc-main { padding: 2rem; max-width: 1200px; }
@@ -74,7 +74,7 @@
     }
     .stat-card.income  { border-left-color: #10b981; }
     .stat-card.expense { border-left-color: #ef4444; }
-    .stat-card.profit  { border-left-color: #3b82f6; }
+    .stat-card.profit  { border-left-color: #00E676; }
     .stat-card.overdue { border-left-color: #f59e0b; }
     .stat-card .label  { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
     .stat-card .value  { font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-top: .25rem; }
@@ -115,7 +115,7 @@
       background: #fff;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: #3b82f6;
+      border-color: #00E676;
     }
     .form-group textarea { resize: vertical; min-height: 68px; }
     .type-toggle {
@@ -247,11 +247,11 @@
     .prop-bar-row { margin-bottom: .75rem; }
     .prop-bar-label { display: flex; justify-content: space-between; font-size: .82rem; margin-bottom: .25rem; color: #374151; }
     .prop-bar-track { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
-    .prop-bar-fill  { height: 100%; background: #3b82f6; border-radius: 99px; transition: width .5s ease; }
+    .prop-bar-fill  { height: 100%; background: #00E676; border-radius: 99px; transition: width .5s ease; }
     /* ── Buttons ────────────────────────────────────────── */
     .btn { padding: .55rem 1.1rem; border-radius: 8px; border: none; cursor: pointer; font-size: .88rem; font-weight: 600; transition: all .15s; }
     .btn-primary { background: #00E676; color: #fff; }
-    .btn-primary:hover { background: #1e40af; }
+    .btn-primary:hover { background: #00c764; }
     .btn-success { background: #10b981; color: #fff; }
     .btn-success:hover { background: #059669; }
     .btn-danger  { background: #ef4444; color: #fff; font-size: .78rem; padding: .3rem .7rem; border-radius: 6px; }
@@ -1070,6 +1070,7 @@ function loadSampleDataIfEmpty() {
 }
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 
 function setTodayDate() {
   const d = document.getElementById('txDate');
@@ -1322,7 +1323,7 @@ function renderPropertyBreakdown(yearTx) {
   el.innerHTML = totals.map(t => `
     <div class="prop-bar-row">
       <div class="prop-bar-label">
-        <span>🏠 ${t.prop}</span>
+        <span>🏠 ${esc(t.prop)}</span>
         <span style="color:#059669">+${fmt(t.income)} &nbsp;<span style="color:#ef4444">−${fmt(t.expense)}</span> &nbsp; <strong style="color:#1e293b">Net: ${fmt(t.income-t.expense)}</strong></span>
       </div>
       <div class="prop-bar-track"><div class="prop-bar-fill" style="width:${Math.round((t.income/maxInc)*100)}%"></div></div>
@@ -1377,12 +1378,12 @@ function txRow(t, showDelete) {
   const dateStr = new Date(t.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   return `<tr>
     <td>${dateStr}</td>
-    <td>${t.notes||'—'}</td>
-    <td>${t.category}</td>
-    <td style="font-size:.8rem;color:#64748b;">${t.property}</td>
-    ${showDelete?`<td style="font-size:.8rem;">${t.party||'—'}</td><td style="font-size:.8rem;">${t.method||'—'}</td>`:''}
-    <td><span class="badge-${t.type}">${t.type==='income'?'Income':'Expense'}</span></td>
-    <td class="amount-${t.type}" style="${showDelete?'text-align:right;':''}">
+    <td>${esc(t.notes)||'—'}</td>
+    <td>${esc(t.category)}</td>
+    <td style="font-size:.8rem;color:#64748b;">${esc(t.property)}</td>
+    ${showDelete?`<td style="font-size:.8rem;">${esc(t.party)||'—'}</td><td style="font-size:.8rem;">${esc(t.method)||'—'}</td>`:''}
+    <td><span class="badge-${t.type==='income'?'income':'expense'}">${t.type==='income'?'Income':'Expense'}</span></td>
+    <td class="amount-${t.type==='income'?'income':'expense'}" style="${showDelete?'text-align:right;':''}">
       ${t.type==='income'?'+':'-'}${fmt(t.amount)}
     </td>
     ${showDelete?`<td><button class="btn btn-danger" onclick="deleteTransaction('${t.id}')">✕</button></td>`:''}
@@ -1613,13 +1614,13 @@ function buildOwnerCard(owner, monthVal) {
   const net       = grossRent - expenses - mgmtFee;
   const monthLabel = monthVal ? new Date(monthVal+'-02').toLocaleDateString('en-US',{month:'long',year:'numeric'}) : 'All Time';
   const expRows = ownerTx.filter(t=>t.type==='expense').map(t =>
-    `<tr><td class="label" style="padding-left:1.5rem;">↳ ${t.category} — ${t.notes||t.party||''}</td><td class="amount-neg">-${fmt(t.amount)}</td></tr>`
+    `<tr><td class="label" style="padding-left:1.5rem;">↳ ${esc(t.category)} — ${esc(t.notes||t.party||'')}</td><td class="amount-neg">-${fmt(t.amount)}</td></tr>`
   ).join('');
   return `<div class="owner-card">
     <div class="owner-card-header">
       <div>
-        <div class="owner-name">${owner.name}</div>
-        <div class="owner-props">${owner.email} · PM Fee: ${owner.fee}% · Properties: ${owner.props.join(', ')||'All'}</div>
+        <div class="owner-name">${esc(owner.name)}</div>
+        <div class="owner-props">${esc(owner.email)} · PM Fee: ${owner.fee}% · Properties: ${owner.props.map(p=>esc(p)).join(', ')||'All'}</div>
       </div>
       <div style="display:flex;gap:.5rem;">
         <button class="btn btn-outline" onclick="printStatement('${owner.id}','${monthVal}')">🖨 Print Statement</button>
@@ -1658,7 +1659,7 @@ function printStatement(ownerId, monthVal) {
   const net       = grossRent - expenses - mgmtFee;
   const monthLabel = monthVal ? new Date(monthVal+'-02').toLocaleDateString('en-US',{month:'long',year:'numeric'}) : 'All Time';
   const expRows = ownerTx.filter(t=>t.type==='expense').map(t =>
-    `<tr><td style="padding:.4rem .5rem;color:#64748b;font-size:.85rem;">↳ ${t.date} · ${t.category} · ${t.notes||t.party||''}</td><td style="text-align:right;color:#dc2626;font-size:.85rem;">-${fmt(t.amount)}</td></tr>`
+    `<tr><td style="padding:.4rem .5rem;color:#64748b;font-size:.85rem;">↳ ${esc(t.date)} · ${esc(t.category)} · ${esc(t.notes||t.party||'')}</td><td style="text-align:right;color:#dc2626;font-size:.85rem;">-${fmt(t.amount)}</td></tr>`
   ).join('');
   const html = `
     <div class="print-stmt-header">
@@ -1666,9 +1667,9 @@ function printStatement(ownerId, monthVal) {
       <div style="text-align:right;font-size:.85rem;color:#374151;"><strong>Owner Statement</strong><br>${monthLabel}<br>Generated: ${new Date().toLocaleDateString()}</div>
     </div>
     <div style="margin-bottom:1rem;">
-      <strong>Owner:</strong> ${owner.name}<br>
-      <span style="color:#64748b;font-size:.85rem;">${owner.email}</span><br>
-      <span style="color:#64748b;font-size:.85rem;">Properties: ${owner.props.join(', ')||'All'}</span>
+      <strong>Owner:</strong> ${esc(owner.name)}<br>
+      <span style="color:#64748b;font-size:.85rem;">${esc(owner.email)}</span><br>
+      <span style="color:#64748b;font-size:.85rem;">Properties: ${owner.props.map(p=>esc(p)).join(', ')||'All'}</span>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
       <tr style="background:#f8fafc;"><td style="padding:.5rem;font-weight:600;">Gross Rent Collected</td><td style="text-align:right;color:#16a34a;font-weight:600;">+${fmt(grossRent)}</td></tr>
@@ -1728,10 +1729,10 @@ function render1099() {
     const tin = vendorTINs[party] || '';
     const type = vendorTINs[party+'_type'] || 'Individual';
     return `<tr>
-      <td style="font-weight:600;">${party}<br><span style="font-size:.78rem;color:#64748b;">${[...data.categories].join(', ')}</span></td>
+      <td style="font-weight:600;">${esc(party)}<br><span style="font-size:.78rem;color:#64748b;">${[...data.categories].map(c=>esc(c)).join(', ')}</span></td>
       <td style="text-align:right;font-weight:600;${needs1099?'color:#dc2626;':'color:#374151;'}">${fmt(data.total)}</td>
       <td><span class="${needs1099?'nec-flag':'nec-ok'}">${needs1099?'⚠️ YES — File 1099-NEC':'No'}</span></td>
-      <td><input type="text" value="${tin}" placeholder="XX-XXXXXXX" style="width:110px;border:1.5px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.82rem;" onchange="saveTIN('${party}',this.value)"></td>
+      <td><input type="text" value="${esc(tin)}" placeholder="XX-XXXXXXX" style="width:110px;border:1.5px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.82rem;" onchange="saveTIN('${esc(party)}',this.value)"></td>
       <td>
         <select style="border:1.5px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.82rem;" onchange="saveTINType('${party}',this.value)">
           <option ${type==='Individual'?'selected':''}>Individual</option>
@@ -1768,8 +1769,8 @@ function preview1099(party, total, year) {
     <table style="width:100%;border-collapse:collapse;font-size:.88rem;margin-top:.75rem;">
       <tr style="background:#f8fafc;"><th style="padding:.5rem;text-align:left;">Field</th><th style="padding:.5rem;text-align:left;">Value</th></tr>
       <tr><td style="padding:.4rem .5rem;color:#64748b;">Payer (Box — Filer Info)</td><td style="padding:.4rem .5rem;"><strong>[Your Business Name]</strong><br>Daniel Hart · demo@3120life.com</td></tr>
-      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient Name</td><td style="padding:.4rem .5rem;font-weight:600;">${party}</td></tr>
-      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient TIN/EIN</td><td style="padding:.4rem .5rem;">${tin}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient Name</td><td style="padding:.4rem .5rem;font-weight:600;">${esc(party)}</td></tr>
+      <tr><td style="padding:.4rem .5rem;color:#64748b;">Recipient TIN/EIN</td><td style="padding:.4rem .5rem;">${esc(tin)}</td></tr>
       <tr><td style="padding:.4rem .5rem;color:#64748b;">Box 1 — Nonemployee Compensation</td><td style="padding:.4rem .5rem;font-weight:700;font-size:1.1rem;color:#dc2626;">${fmt(total)}</td></tr>
       <tr><td style="padding:.4rem .5rem;color:#64748b;">Tax Year</td><td style="padding:.4rem .5rem;">${year}</td></tr>
       <tr><td style="padding:.4rem .5rem;color:#64748b;">Filing Deadline</td><td style="padding:.4rem .5rem;">January 31, ${year+1}</td></tr>
@@ -1784,7 +1785,7 @@ function preview1099(party, total, year) {
 function renderNECPreview(necParties, year) {
   const rows = necParties.map(([party, data]) => {
     const tin = vendorTINs[party] || 'TIN NEEDED';
-    return `<tr><td style="padding:.4rem .5rem;font-weight:600;">${party}</td><td style="padding:.4rem .5rem;">${tin}</td><td style="padding:.4rem .5rem;font-weight:700;color:#dc2626;">${fmt(data.total)}</td></tr>`;
+    return `<tr><td style="padding:.4rem .5rem;font-weight:600;">${esc(party)}</td><td style="padding:.4rem .5rem;">${esc(tin)}</td><td style="padding:.4rem .5rem;font-weight:700;color:#dc2626;">${fmt(data.total)}</td></tr>`;
   }).join('');
   document.getElementById('necPrintArea').innerHTML = `
     <div class="print-stmt-header">
@@ -2275,11 +2276,11 @@ function renderClients(clients) {
       '<div class="panel-body" style="display:flex;align-items:center;gap:1rem;">' +
         '<div style="width:48px;height:48px;background:#eff6ff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">' + icon + '</div>' +
         '<div style="flex:1;">' +
-          '<div style="font-weight:700;color:#1e293b;">' + c.name + '</div>' +
-          '<div style="font-size:.82rem;color:#64748b;">' + (c.industry || '').replace(/_/g, ' ') + '</div>' +
-          '<div style="font-size:.75rem;color:#94a3b8;margin-top:2px;">Last active: ' + c.last_activity + '</div>' +
+          '<div style="font-weight:700;color:#1e293b;">' + esc(c.name) + '</div>' +
+          '<div style="font-size:.82rem;color:#64748b;">' + esc((c.industry || '').replace(/_/g, ' ')) + '</div>' +
+          '<div style="font-size:.75rem;color:#94a3b8;margin-top:2px;">Last active: ' + esc(c.last_activity) + '</div>' +
         '</div>' +
-        '<div style="color:#3b82f6;font-weight:600;font-size:.88rem;">View →</div>' +
+        '<div style="color:#00E676;font-weight:600;font-size:.88rem;">View →</div>' +
       '</div>' +
     '</div>';
   }).join('');

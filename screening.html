@@ -159,7 +159,7 @@
           <div class="form-grid">
             <div class="fg"><label>Employer</label><input id="aEmployer" placeholder="Company Name"></div>
             <div class="fg"><label>Job Title</label><input id="aTitle" placeholder="e.g. Software Engineer"></div>
-            <div class="fg"><label>Monthly Gross Income ($)</label><input id="aIncome" type="number" placeholder="3600"></div>
+            <div class="fg"><label>Monthly Gross Income ($)</label><input id="aIncome" type="number" placeholder="3600" min="0"></div>
             <div class="fg"><label>Employment Length</label><select id="aEmpLen"><option>Less than 6 months</option><option>6–12 months</option><option>1–2 years</option><option>2–5 years</option><option>5+ years</option></select></div>
           </div>
           <hr style="margin:1.25rem 0;border:none;border-top:1px solid #f1f5f9;">
@@ -324,12 +324,15 @@ function runScreening() {
   const bank  = document.getElementById('aBankrupt').value;
   const empLen= document.getElementById('aEmpLen').value;
   // Try to get rent from property data, fall back to default
+  // TODO: Make rent dynamic per-property selection instead of using first listing
   var propRent = 1200;
   try { var props = JSON.parse(localStorage.getItem('rv_listings_default')||'[]'); if(props.length && props[0].rent) propRent = parseFloat(props[0].rent); } catch(e){}
   const rent = propRent;
 
   if(!name) return toast('⚠️ Enter applicant name.');
   if(income < 0) return toast('⚠️ Income cannot be negative.');
+  const screenDate = new Date().toISOString().slice(0,10);
+  if(!screenDate) return toast('⚠️ Screening date is required.');
 
   // Scoring algorithm
   let score = 0; const checks = [];
@@ -441,7 +444,7 @@ function renderHistory() {
   if(!tbody) return;
   tbody.innerHTML = applicants.length
     ? applicants.map(a=>`<tr>
-        <td><strong>${a.name}</strong><br><span style="font-size:.78rem;color:#64748b;">${a.email}</span></td>
+        <td><strong>${esc(a.name)}</strong><br><span style="font-size:.78rem;color:#64748b;">${esc(a.email)}</span></td>
         <td style="font-size:.82rem;">${esc(a.prop)}</td>
         <td>$${(a.income||0).toLocaleString()}/mo</td>
         <td>${a.creditScore||'—'}</td>

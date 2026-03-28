@@ -859,6 +859,9 @@ const CONTACTS = [
   { id:'c6', name:'James Kim', role:'Property Manager', color:'#0891b2', initials:'JK' },
 ];
 
+// ── XSS Sanitizer ──
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 // ── State ──
 let currentFolder = 'all';
 let currentTypeFilter = '';
@@ -1071,11 +1074,11 @@ function filterDocs() {
     const fi = getFileInfo(doc.name);
     const shared = (doc.sharedWith||[]).length > 0;
     const folder = FOLDERS.find(f => f.id === doc.folder) || FOLDERS[FOLDERS.length-1];
-    const tagsHtml = (doc.tags||[]).slice(0,3).map(t => `<span class="doc-tag">${t}</span>`).join('');
-    return `<div class="doc-card" onclick="previewDoc('${doc.id}')">
+    const tagsHtml = (doc.tags||[]).slice(0,3).map(t => `<span class="doc-tag">${esc(t)}</span>`).join('');
+    return `<div class="doc-card" onclick="previewDoc('${esc(doc.id)}')">
       <div class="doc-card-thumb" style="background:linear-gradient(135deg,${fi.color}18 0%,${fi.color}28 100%)">${fi.icon}</div>
       <div class="doc-card-body">
-        <div class="doc-card-name">${doc.name}</div>
+        <div class="doc-card-name">${esc(doc.name)}</div>
         <div class="doc-card-meta">${folder.icon} ${folder.label} · ${formatSize(doc.size||0)}</div>
         <div class="doc-card-meta">${timeAgo(doc.uploaded)}</div>
         ${tagsHtml ? `<div class="doc-card-tags">${tagsHtml}</div>` : ''}
@@ -1083,9 +1086,9 @@ function filterDocs() {
       <div class="doc-card-footer">
         ${shared ? `<span class="doc-shared-badge">Shared (${doc.sharedWith.length})</span>` : '<span></span>'}
         <div class="doc-actions">
-          <button class="doc-action-btn" onclick="event.stopPropagation();openShareModal('${doc.id}')" title="Share">🔗</button>
-          <button class="doc-action-btn" onclick="event.stopPropagation();downloadDoc('${doc.id}')" title="Download">⬇</button>
-          <button class="doc-action-btn" onclick="event.stopPropagation();deleteDoc('${doc.id}')" title="Delete">🗑</button>
+          <button class="doc-action-btn" onclick="event.stopPropagation();openShareModal('${esc(doc.id)}')" title="Share">🔗</button>
+          <button class="doc-action-btn" onclick="event.stopPropagation();downloadDoc('${esc(doc.id)}')" title="Download">⬇</button>
+          <button class="doc-action-btn" onclick="event.stopPropagation();deleteDoc('${esc(doc.id)}')" title="Delete">🗑</button>
         </div>
       </div>
     </div>`;
@@ -1169,9 +1172,9 @@ function searchShareContacts() {
   const q = document.getElementById('shareSearch').value.toLowerCase();
   const results = q ? CONTACTS.filter(c => c.name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q)).slice(0,5) : CONTACTS.slice(0,5);
   document.getElementById('shareSearchResults').innerHTML = results.map(c => `
-    <div class="contact-result-item" onclick="addShareContact('${c.id}')">
-      <div class="contact-av" style="background:${c.color}">${c.initials}</div>
-      <div><div style="font-weight:700">${c.name}</div><div style="font-size:0.75rem;color:#9ca3af">${c.role}</div></div>
+    <div class="contact-result-item" onclick="addShareContact('${esc(c.id)}')">
+      <div class="contact-av" style="background:${esc(c.color)}">${esc(c.initials)}</div>
+      <div><div style="font-weight:700">${esc(c.name)}</div><div style="font-size:0.75rem;color:#9ca3af">${esc(c.role)}</div></div>
     </div>`).join('');
 }
 function addShareContact(id) {
@@ -1251,8 +1254,8 @@ function previewDoc(id) {
       <div class="preview-info-item"><div class="preview-info-lbl">Uploaded</div><div class="preview-info-val">${new Date(doc.uploaded).toLocaleDateString()}</div></div>
       <div class="preview-info-item"><div class="preview-info-lbl">Shared With</div><div class="preview-info-val">${sharedNames}</div></div>
     </div>
-    ${doc.notes ? `<div style="background:#f9fafb;border-radius:8px;padding:0.75rem;margin-bottom:1rem;font-size:0.85rem;color:#374151"><strong>Notes:</strong> ${doc.notes}</div>` : ''}
-    ${doc.tags?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem">${doc.tags.map(t=>`<span class="doc-tag">${t}</span>`).join('')}</div>` : ''}
+    ${doc.notes ? `<div style="background:#f9fafb;border-radius:8px;padding:0.75rem;margin-bottom:1rem;font-size:0.85rem;color:#374151"><strong>Notes:</strong> ${esc(doc.notes)}</div>` : ''}
+    ${doc.tags?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem">${doc.tags.map(t=>`<span class="doc-tag">${esc(t)}</span>`).join('')}</div>` : ''}
     <div class="preview-activity">
       <div class="preview-activity-title">Recent Activity</div>
       ${docActivity.length ? docActivity.map(a => `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid #f3f4f6;font-size:0.82rem;color:#374151">
@@ -1281,8 +1284,8 @@ function renderSharedWithMe(filter) {
     return `<div class="doc-card" onclick="">
       <div class="doc-card-thumb" style="background:linear-gradient(135deg,${fi.color}18 0%,${fi.color}28 100%)">${fi.icon}</div>
       <div class="doc-card-body">
-        <div class="doc-card-name">${s.docName}</div>
-        <div class="doc-card-meta">From: <strong>${s.sharedBy}</strong></div>
+        <div class="doc-card-name">${esc(s.docName)}</div>
+        <div class="doc-card-meta">From: <strong>${esc(s.sharedBy)}</strong></div>
         <div class="doc-card-meta">${timeAgo(s.date)}</div>
         <div style="margin-top:4px">${permBadge}</div>
       </div>
@@ -1325,8 +1328,8 @@ function renderSharedByMe(filter) {
     return `<div class="share-row">
       <div class="share-doc-icon">${fi.icon}</div>
       <div class="share-doc-info">
-        <div class="share-doc-name">${r.docName}</div>
-        <div class="share-doc-meta">Shared with <strong>${r.contactName}</strong> · ${r.contactRole}</div>
+        <div class="share-doc-name">${esc(r.docName)}</div>
+        <div class="share-doc-meta">Shared with <strong>${esc(r.contactName)}</strong> · ${esc(r.contactRole)}</div>
       </div>
       <span class="share-perm-badge perm-view">👁 View</span>
       <button class="revoke-btn" onclick="revokeShare('${r.docId}','${r.contactId}')">Revoke</button>
@@ -1366,8 +1369,8 @@ function renderRequests() {
     return `<div class="req-card">
       <div class="req-card-header">
         <div>
-          <div class="req-card-title">${req.title}</div>
-          <div class="req-card-meta">Sent to: ${req.recipient} · ${timeAgo(req.date)}</div>
+          <div class="req-card-title">${esc(req.title)}</div>
+          <div class="req-card-meta">Sent to: ${esc(req.recipient)} · ${timeAgo(req.date)}</div>
         </div>
         <span class="req-status-badge ${statusCls}">${statusLabel}</span>
       </div>
@@ -1378,7 +1381,7 @@ function renderRequests() {
           const uploaded = (req.uploaded||[]).includes(item);
           return `<div class="req-item${uploaded?' done':''}">
             <span class="req-item-icon">${uploaded?'✅':'⬜'}</span>
-            <span class="req-item-label">${item}</span>
+            <span class="req-item-label">${esc(item)}</span>
             ${uploaded?'<span class="req-item-status" style="color:#059669">Uploaded</span>':'<span class="req-item-status" style="color:#9ca3af">Waiting</span>'}
           </div>`;
         }).join('')}
@@ -1410,7 +1413,7 @@ function renderReqItems() {
   if (!list) return;
   list.innerHTML = reqItems.map((item, i) => `
     <div class="req-item-entry">
-      <span>•</span><span style="flex:1">${item}</span>
+      <span>•</span><span style="flex:1">${esc(item)}</span>
       <button onclick="removeReqItem(${i})">✕</button>
     </div>`).join('');
 }
@@ -1469,10 +1472,10 @@ function renderActivity() {
     return `<div class="activity-item">
       <div class="activity-icon ${tc.cls}">${tc.icon}</div>
       <div class="activity-info">
-        <div class="activity-text">${a.text}${a.with?' with <strong>'+a.with+'</strong>':''}</div>
+        <div class="activity-text">${esc(a.text)}${a.with?' with <strong>'+esc(a.with)+'</strong>':''}</div>
         <div class="activity-time">${timeAgo(a.time)}</div>
       </div>
-      <span class="activity-doc-ref">${a.doc}</span>
+      <span class="activity-doc-ref">${esc(a.doc)}</span>
     </div>`;
   }).join('');
 }

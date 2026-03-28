@@ -13,8 +13,8 @@
     .btn-comm { padding: 0.55rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
     .btn-comm.primary { background: #00E676; color: #121212; }
     .btn-comm.primary:hover { background: #00C853; }
-    .btn-comm.secondary { background: #7c3aed; color: white; }
-    .btn-comm.secondary:hover { background: #6d28d9; }
+    .btn-comm.secondary { background: #00C853; color: #121212; }
+    .btn-comm.secondary:hover { background: #00E676; }
     .btn-comm.outline { background: white; color: #00E676; border: 2px solid #00E676; }
     .btn-comm.outline:hover { background: rgba(0,230,118,0.12); }
     .btn-comm.sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
@@ -42,7 +42,7 @@
     .group-avatar { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
     .group-name { font-weight: 800; color: #121212; font-size: 0.95rem; }
     .group-type { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; margin-left: 0.5rem; }
-    .group-type.industry { background: rgba(0,230,118,0.12); color: #5b21b6; }
+    .group-type.industry { background: rgba(0,230,118,0.12); color: #065f46; }
     .group-type.location { background: #d1fae5; color: #065f46; }
     .group-type.topic { background: #fef3c7; color: #92400e; }
     .group-desc { font-size: 0.82rem; color: #6b7280; margin-bottom: 0.5rem; line-height: 1.4; }
@@ -73,7 +73,7 @@
     .like-btn.liked { color: #00E676; }
 
     /* Recommendations */
-    .rec-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 1rem; border-left: 3px solid #7c3aed; }
+    .rec-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 1rem; border-left: 3px solid #00E676; }
     .rec-from { font-weight: 700; color: #121212; font-size: 0.92rem; }
     .rec-text { font-size: 0.88rem; color: #374151; line-height: 1.5; margin: 0.5rem 0; font-style: italic; }
     .rec-date { font-size: 0.72rem; color: #9ca3af; }
@@ -84,14 +84,14 @@
     .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
     .activity-dot.post { background: #00E676; }
     .activity-dot.join { background: #059669; }
-    .activity-dot.rec { background: #7c3aed; }
+    .activity-dot.rec { background: #00E676; }
     .activity-text { font-size: 0.85rem; color: #374151; }
     .activity-text strong { color: #121212; }
     .activity-time { font-size: 0.72rem; color: #9ca3af; display: block; margin-top: 2px; }
 
     /* Discover AI suggestion */
-    .ai-suggestion { background: linear-gradient(135deg, rgba(0,230,118,0.12), #dbeafe); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; border: 1px solid #c4b5fd; }
-    .ai-suggestion .ai-label { font-size: 0.72rem; font-weight: 700; color: #5b21b6; text-transform: uppercase; margin-bottom: 0.25rem; }
+    .ai-suggestion { background: linear-gradient(135deg, rgba(0,230,118,0.12), rgba(0,200,83,0.08)); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; border: 1px solid rgba(0,230,118,0.3); }
+    .ai-suggestion .ai-label { font-size: 0.72rem; font-weight: 700; color: #065f46; text-transform: uppercase; margin-bottom: 0.25rem; }
     .ai-suggestion .ai-text { font-size: 0.88rem; color: #374151; }
 
     /* Modal */
@@ -229,10 +229,16 @@ var LS_LIKES = 'rv_community_likes';
 var currentTab = 'groups';
 var currentGroupId = null;
 
+// ─── Safe JSON Parse ──────────────────────────────────────────────────
+function safeParse(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+  catch(e) { console.warn('Bad JSON in ' + key, e); localStorage.removeItem(key); return fallback; }
+}
+
 // ─── Data Methods ─────────────────────────────────────────────────────
 function getGroups() {
   var stored = localStorage.getItem(LS_GROUPS);
-  if (stored) return JSON.parse(stored);
+  if (stored) return safeParse(LS_GROUPS, []);
   localStorage.setItem(LS_GROUPS, JSON.stringify(SEED_GROUPS));
   return JSON.parse(JSON.stringify(SEED_GROUPS));
 }
@@ -248,7 +254,7 @@ function saveGroup(group) {
 
 function getGroupPosts(groupId) {
   var stored = localStorage.getItem(LS_POSTS);
-  var posts = stored ? JSON.parse(stored) : (function() { localStorage.setItem(LS_POSTS, JSON.stringify(SEED_POSTS)); return JSON.parse(JSON.stringify(SEED_POSTS)); })();
+  var posts = stored ? safeParse(LS_POSTS, []) : (function() { localStorage.setItem(LS_POSTS, JSON.stringify(SEED_POSTS)); return JSON.parse(JSON.stringify(SEED_POSTS)); })();
   if (groupId) return posts.filter(function(p) { return p.group_id === groupId; });
   return posts;
 }
@@ -264,7 +270,7 @@ function saveGroupPost(post) {
 
 function getRecommendations() {
   var stored = localStorage.getItem(LS_RECS);
-  if (stored) return JSON.parse(stored);
+  if (stored) return safeParse(LS_RECS, []);
   localStorage.setItem(LS_RECS, JSON.stringify(SEED_RECS));
   return JSON.parse(JSON.stringify(SEED_RECS));
 }
@@ -280,7 +286,7 @@ function saveRecommendation(rec) {
 
 function getJoinedGroups() {
   var stored = localStorage.getItem(LS_JOINED);
-  if (stored) return JSON.parse(stored);
+  if (stored) return safeParse(LS_JOINED, []);
   var defaults = ['grp_1', 'grp_2'];
   localStorage.setItem(LS_JOINED, JSON.stringify(defaults));
   return defaults;
@@ -297,7 +303,7 @@ function toggleJoinGroup(groupId) {
 
 function getLikedPosts() {
   var stored = localStorage.getItem(LS_LIKES);
-  return stored ? JSON.parse(stored) : [];
+  return stored ? safeParse(LS_LIKES, []) : [];
 }
 
 function toggleLike(postId) {
@@ -607,7 +613,7 @@ function createGroup() {
   var name = document.getElementById('grpName').value.trim();
   if (!name) { showToast('Group name is required.'); return; }
 
-  var colors = ['#00E676', '#059669', '#dc2626', '#f59e0b', '#0891b2', '#7c3aed', '#db2777'];
+  var colors = ['#00E676', '#059669', '#dc2626', '#f59e0b', '#0891b2', '#10b981', '#db2777'];
   var group = {
     id: 'grp_' + Date.now(),
     name: name,

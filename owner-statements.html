@@ -13,7 +13,7 @@
     .os-sidebar { background:#1e293b; color:#cbd5e1; padding:1.5rem 0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; }
     .os-sidebar h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:#64748b; padding:.5rem 1.5rem; margin:1rem 0 .25rem; }
     .os-sidebar a { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.5rem; color:#94a3b8; text-decoration:none; font-size:.9rem; border-left:3px solid transparent; transition:all .15s; cursor:pointer; }
-    .os-sidebar a:hover, .os-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#3b82f6; }
+    .os-sidebar a:hover, .os-sidebar a.active { background:rgba(255,255,255,.06); color:#fff; border-left-color:#00E676; }
 
     /* Main */
     .os-main { padding:2rem; max-width:1200px; }
@@ -34,7 +34,7 @@
     /* Buttons */
     .btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1rem; border-radius:8px; font-size:.88rem; font-weight:600; cursor:pointer; border:1.5px solid transparent; transition:all .15s; }
     .btn-primary { background:#00E676; color:#fff; border-color:#00E676; }
-    .btn-primary:hover { background:#1e40af; }
+    .btn-primary:hover { background:#00C853; }
     .btn-outline { background:#fff; color:#374151; border-color:#d1d5db; }
     .btn-outline:hover { background:#f9fafb; }
     .btn-green { background:#16a34a; color:#fff; border-color:#16a34a; }
@@ -48,12 +48,12 @@
     .form-group { display:flex; flex-direction:column; gap:.3rem; }
     .form-group label { font-size:.8rem; font-weight:600; color:#64748b; }
     .form-group input, .form-group select, .form-group textarea { border:1.5px solid #e2e8f0; border-radius:8px; padding:.5rem .75rem; font-size:.9rem; color:#1e293b; outline:none; font-family:inherit; }
-    .form-group input:focus, .form-group select:focus { border-color:#3b82f6; }
+    .form-group input:focus, .form-group select:focus { border-color:#00E676; }
     .form-group.full { grid-column:1/-1; }
 
     /* Owner list */
     .owner-list-item { display:flex; align-items:center; justify-content:space-between; padding:.85rem 1rem; border:1.5px solid #e2e8f0; border-radius:10px; margin-bottom:.6rem; background:#fff; }
-    .owner-list-item:hover { border-color:#3b82f6; }
+    .owner-list-item:hover { border-color:#00E676; }
     .owner-avatar { width:40px; height:40px; background:#dbeafe; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#00E676; font-size:1rem; flex-shrink:0; }
     .owner-info { flex:1; margin-left:.85rem; }
     .owner-name { font-weight:700; font-size:.95rem; color:#1e293b; }
@@ -463,7 +463,7 @@
       <!-- Commercial-only fields -->
       <div id="pm-commercial-fields" style="display:none;grid-column:1/-1;">
         <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:1rem;margin-top:.5rem;">
-          <div style="font-size:.8rem;font-weight:700;color:#1e40af;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;">🏢 Commercial Details</div>
+          <div style="font-size:.8rem;font-weight:700;color:#00C853;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;">🏢 Commercial Details</div>
           <div class="form-grid">
             <div class="form-group"><label>Square Footage</label><input id="pm-sqft" type="number" placeholder="2500" min="0"></div>
             <div class="form-group"><label>Lease Type</label>
@@ -531,6 +531,8 @@ const EXPENSE_CATS = [
   'Insurance','HOA Fee','Mortgage','Business License',
   'Haul Away / Junk Removal','Appliances','Other'
 ];
+
+function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
 
 function loadAll() {
   try { owners = JSON.parse(localStorage.getItem('rv_stmt_owners') || '[]'); } catch(e){ owners=[]; }
@@ -663,13 +665,13 @@ function refreshDashboard() {
   } else {
     ownerList.innerHTML = owners.map(o => `
       <div class="owner-list-item">
-        <div class="owner-avatar">${o.name.charAt(0)}</div>
+        <div class="owner-avatar">${esc(o.name.charAt(0))}</div>
         <div class="owner-info">
-          <div class="owner-name">${o.name}</div>
-          <div class="owner-meta">${o.email||'No email'} · PM Fee: ${o.mgmtFeePercent}%</div>
-          <div style="margin-top:.3rem;">${(o.properties||[]).map(p=>`<span class="prop-tag">🏠 ${p.address.split(',')[0]}</span>`).join('')}</div>
+          <div class="owner-name">${esc(o.name)}</div>
+          <div class="owner-meta">${esc(o.email||'No email')} · PM Fee: ${esc(String(o.mgmtFeePercent))}%</div>
+          <div style="margin-top:.3rem;">${(o.properties||[]).map(p=>`<span class="prop-tag">🏠 ${esc(p.address.split(',')[0])}</span>`).join('')}</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="showSection('monthly', document.querySelector('.os-sidebar a:nth-child(5)')); document.getElementById('stmt-owner').value='${o.id}'; loadStmtPreview();">Generate Statement →</button>
+        <button class="btn btn-outline btn-sm" onclick="showSection('monthly', document.querySelector('.os-sidebar a:nth-child(5)')); document.getElementById('stmt-owner').value='${esc(o.id)}'; loadStmtPreview();">Generate Statement →</button>
       </div>`).join('');
   }
 
@@ -682,7 +684,7 @@ function refreshDashboard() {
     recentEl.innerHTML = recent.map(s => `
       <div class="archive-item">
         <div>
-          <div class="archive-period">${s.ownerName} — ${s.type==='annual' ? s.period+' Annual' : fmtMonth(s.period)}</div>
+          <div class="archive-period">${esc(s.ownerName)} — ${s.type==='annual' ? esc(s.period)+' Annual' : fmtMonth(s.period)}</div>
           <div class="archive-meta">Saved ${new Date(s.savedAt).toLocaleDateString()} · Net: <strong style="color:${s.netDisbursement>=0?'#16a34a':'#dc2626'}">${fmtDollar(s.netDisbursement)}</strong></div>
         </div>
         <span class="badge ${s.sentAt?'badge-sent':'badge-pending'}">${s.sentAt?'Sent':'Ready to Send'}</span>
@@ -733,10 +735,10 @@ function renderOwnerList() {
     <div class="card" style="margin-bottom:1rem;">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem;">
         <div style="display:flex;align-items:center;gap:.85rem;">
-          <div class="owner-avatar" style="width:48px;height:48px;font-size:1.2rem;">${o.name.charAt(0)}</div>
+          <div class="owner-avatar" style="width:48px;height:48px;font-size:1.2rem;">${esc(o.name.charAt(0))}</div>
           <div>
-            <div style="font-weight:700;font-size:1rem;color:#1e293b;">${o.name}</div>
-            <div style="font-size:.82rem;color:#64748b;">${o.email||'No email'} ${o.phone?'· '+o.phone:''} · PM Fee: ${o.mgmtFeePercent}%</div>
+            <div style="font-weight:700;font-size:1rem;color:#1e293b;">${esc(o.name)}</div>
+            <div style="font-size:.82rem;color:#64748b;">${esc(o.email||'No email')} ${o.phone?'· '+esc(o.phone):''} · PM Fee: ${esc(String(o.mgmtFeePercent))}%</div>
           </div>
         </div>
         <div style="display:flex;gap:.5rem;">
@@ -750,8 +752,8 @@ function renderOwnerList() {
           (o.properties||[]).map(p => `
             <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;background:#f8fafc;border-radius:8px;margin-bottom:.4rem;">
               <div>
-                <div style="font-weight:600;font-size:.9rem;">${propTypeIcon(p.type)} ${p.address}${p.unit?' '+p.unit:''}</div>
-                <div style="font-size:.78rem;color:#64748b;">${propTypeBadge(p.type)} Rent: ${fmtDollar(p.rent)}${p.type==='commercial'&&p.camCharges?' + '+fmtDollar(p.camCharges)+' CAM':''} · ${p.type==='commercial'?'Tenant':'Tenant'}: ${p.tenant||'Vacant'}${p.type==='rent-to-own'&&p.purchasePrice?' · Option Price: '+fmtDollar(p.purchasePrice):''}</div>
+                <div style="font-weight:600;font-size:.9rem;">${propTypeIcon(p.type)} ${esc(p.address)}${p.unit?' '+esc(p.unit):''}</div>
+                <div style="font-size:.78rem;color:#64748b;">${propTypeBadge(p.type)} Rent: ${fmtDollar(p.rent)}${p.type==='commercial'&&p.camCharges?' + '+fmtDollar(p.camCharges)+' CAM':''} · ${p.type==='commercial'?'Tenant':'Tenant'}: ${esc(p.tenant||'Vacant')}${p.type==='rent-to-own'&&p.purchasePrice?' · Option Price: '+fmtDollar(p.purchasePrice):''}</div>
               </div>
               <div style="display:flex;gap:.4rem;">
                 <button class="btn btn-outline btn-sm" onclick="openPropModal('${o.id}','${p.id}')">Edit</button>
@@ -1296,7 +1298,7 @@ function propTypeIcon(type) {
 }
 
 function propTypeBadge(type) {
-  if (type === 'commercial') return '<span style="background:#dbeafe;color:#1e40af;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">COMMERCIAL</span>';
+  if (type === 'commercial') return '<span style="background:rgba(0,230,118,0.12);color:#00C853;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">COMMERCIAL</span>';
   if (type === 'rent-to-own') return '<span style="background:#f3e8ff;color:#7e22ce;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">RENT-TO-OWN</span>';
   return '<span style="background:#f0fdf4;color:#166534;font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;">RESIDENTIAL</span>';
 }

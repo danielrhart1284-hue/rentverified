@@ -13,7 +13,7 @@
 
     .inv-tabs { display: flex; gap: 2px; border-bottom: 2px solid #e5e7eb; margin-bottom: 2rem; }
     .inv-tab { padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #6b7280; background: none; border-top: none; border-left: none; border-right: none; }
-    .inv-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+    .inv-tab.active { color: #00E676; border-bottom-color: #00E676; }
 
     .inv-panel { display: none; }
     .inv-panel.active { display: block; }
@@ -25,18 +25,18 @@
     .inv-field label { display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 3px; }
     .inv-field input, .inv-field select, .inv-field textarea { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.88rem; font-family: inherit; }
     .inv-field textarea { min-height: 80px; resize: vertical; }
-    .inv-field input:focus, .inv-field select:focus, .inv-field textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .inv-field input:focus, .inv-field select:focus, .inv-field textarea:focus { outline: none; border-color: #00E676; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 
     .inv-channel-btns { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
     .inv-ch-btn { flex: 1; padding: 0.65rem; border: 2px solid #e5e7eb; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 700; font-size: 0.82rem; background: white; transition: all 0.15s; }
-    .inv-ch-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+    .inv-ch-btn.active { border-color: #00E676; background: #eff6ff; color: #00C853; }
 
-    .inv-send-btn { width: 100%; padding: 0.75rem; background: #2563eb; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
-    .inv-send-btn:hover { background: #1d4ed8; }
+    .inv-send-btn { width: 100%; padding: 0.75rem; background: #00E676; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+    .inv-send-btn:hover { background: #00C853; }
 
     /* Bulk */
     .inv-bulk-area { background: #f8fafc; border: 2px dashed #d1d5db; border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1rem; cursor: pointer; }
-    .inv-bulk-area:hover { border-color: #3b82f6; background: #f0f9ff; }
+    .inv-bulk-area:hover { border-color: #00E676; background: #f0f9ff; }
     .inv-bulk-area p { font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem; }
 
     /* History */
@@ -44,7 +44,7 @@
     .inv-table th { text-align: left; padding: 0.6rem 0.75rem; color: #6b7280; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #e5e7eb; }
     .inv-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
     .inv-status { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
-    .inv-status.sent { background: #dbeafe; color: #1d4ed8; }
+    .inv-status.sent { background: #dbeafe; color: #00C853; }
     .inv-status.delivered { background: #d1fae5; color: #065f46; }
     .inv-status.opened { background: #fef3c7; color: #92400e; }
     .inv-status.accepted { background: #d1fae5; color: #065f46; }
@@ -58,7 +58,7 @@
 
     /* Templates */
     .inv-template { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.15s; }
-    .inv-template:hover { border-color: #3b82f6; background: #f0f9ff; }
+    .inv-template:hover { border-color: #00E676; background: #f0f9ff; }
     .inv-template h4 { font-weight: 700; font-size: 0.88rem; margin-bottom: 0.25rem; }
     .inv-template p { font-size: 0.78rem; color: #6b7280; }
 
@@ -88,7 +88,7 @@
     <a href="index.html">Home</a>
     <a href="crm.html">CRM</a>
     <a href="messages.html">Messages</a>
-    <a href="invite.html" style="color:#2563eb;font-weight:700;">Invite</a>
+    <a href="invite.html" style="color:#00E676;font-weight:700;">Invite</a>
   </div>
 </nav>
 
@@ -272,6 +272,8 @@
 <script>
   RVData._useSupabase = function() { return false; };
 
+  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
   var selectedChannel = 'email';
 
   var TEMPLATES = {
@@ -413,15 +415,15 @@
     tbody.innerHTML = invites.map(function(inv) {
       var contact = inv.recipient_email || inv.recipient_phone || '-';
       var date = inv.sent_at ? new Date(inv.sent_at).toLocaleDateString() : '-';
-      var typeLabel = inv.invite_type.replace(/_/g, ' ');
+      var typeLabel = (inv.invite_type || '').replace(/_/g, ' ');
       return '<tr>' +
-        '<td><strong>' + (inv.recipient_name || '-') + '</strong></td>' +
-        '<td style="font-size:0.78rem;">' + contact + '</td>' +
-        '<td><span style="font-size:0.72rem;text-transform:capitalize;">' + typeLabel + '</span></td>' +
+        '<td><strong>' + esc(inv.recipient_name || '-') + '</strong></td>' +
+        '<td style="font-size:0.78rem;">' + esc(contact) + '</td>' +
+        '<td><span style="font-size:0.72rem;text-transform:capitalize;">' + esc(typeLabel) + '</span></td>' +
         '<td>' + (inv.channel === 'both' ? '📧📱' : inv.channel === 'sms' ? '📱' : '📧') + '</td>' +
-        '<td><span class="inv-status ' + inv.status + '">' + inv.status + '</span></td>' +
-        '<td style="font-size:0.78rem;">' + date + '</td>' +
-        '<td><button onclick="resendInvite(\'' + inv.id + '\')" style="background:#3b82f6;color:white;border:none;border-radius:6px;padding:3px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;">Resend</button></td>' +
+        '<td><span class="inv-status ' + esc(inv.status) + '">' + esc(inv.status) + '</span></td>' +
+        '<td style="font-size:0.78rem;">' + esc(date) + '</td>' +
+        '<td><button onclick="resendInvite(\'' + esc(inv.id) + '\')" style="background:#00E676;color:white;border:none;border-radius:6px;padding:3px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;">Resend</button></td>' +
         '</tr>';
     }).join('');
   }
@@ -446,10 +448,10 @@
     var rate = total > 0 ? Math.round((accepted / total) * 100) : 0;
 
     document.getElementById('invStats').innerHTML =
-      '<div class="inv-stat-card"><div class="num" style="color:#3b82f6;">' + total + '</div><div class="lbl">Total Sent</div></div>' +
+      '<div class="inv-stat-card"><div class="num" style="color:#00E676;">' + total + '</div><div class="lbl">Total Sent</div></div>' +
       '<div class="inv-stat-card"><div class="num" style="color:#f59e0b;">' + sent + '</div><div class="lbl">Pending</div></div>' +
       '<div class="inv-stat-card"><div class="num" style="color:#10b981;">' + accepted + '</div><div class="lbl">Accepted</div></div>' +
-      '<div class="inv-stat-card"><div class="num" style="color:#7c3aed;">' + rate + '%</div><div class="lbl">Conversion</div></div>';
+      '<div class="inv-stat-card"><div class="num" style="color:#00C853;">' + rate + '%</div><div class="lbl">Conversion</div></div>';
   }
 
   function showToast(msg) {

@@ -14,10 +14,10 @@
 
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin-bottom: 1.75rem; }
     .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-left: 4px solid #e2e8f0; }
-    .stat-card.items { border-left-color: #3b82f6; }
+    .stat-card.items { border-left-color: #00E676; }
     .stat-card.value { border-left-color: #10b981; }
     .stat-card.low { border-left-color: #f59e0b; }
-    .stat-card.cats { border-left-color: #8b5cf6; }
+    .stat-card.cats { border-left-color: #00C853; }
     .stat-card .label { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
     .stat-card .value-num { font-size: 1.6rem; font-weight: 700; color: #1e293b; margin-top: .25rem; }
 
@@ -44,7 +44,7 @@
     .btn-add:hover { background: #00C853; }
 
     .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
-    .act-btn.edit { background: #dbeafe; color: #2563eb; }
+    .act-btn.edit { background: rgba(0,230,118,0.12); color: #065f46; }
     .act-btn.del { background: #fee2e2; color: #dc2626; }
     .act-btn.adj { background: #d1fae5; color: #065f46; }
 
@@ -140,7 +140,7 @@
 </div>
 
 <!-- Modal -->
-<div class="modal-overlay" id="modalOverlay">
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <h2 id="modalTitle">Add Item</h2>
     <div class="row2">
@@ -250,17 +250,20 @@ function renderTable() {
       '<td><strong>$' + num(totalVal) + '</strong></td>' +
       '<td><span class="badge '+s+'">' + statusLabel + '</span></td>' +
       '<td>' +
-        '<button class="act-btn adj" onclick="adjustQty('+i+')">Adj</button>' +
-        '<button class="act-btn edit" onclick="editItem('+i+')">Edit</button>' +
-        '<button class="act-btn del" onclick="deleteItem('+i+')">Del</button>' +
+        '<button class="act-btn adj" onclick="adjustQty(\''+esc(String(item.id))+'\')">Adj</button>' +
+        '<button class="act-btn edit" onclick="editItem(\''+esc(String(item.id))+'\')">Edit</button>' +
+        '<button class="act-btn del" onclick="deleteItem(\''+esc(String(item.id))+'\')">Del</button>' +
       '</td></tr>';
   }).join('');
 }
 
-function adjustQty(i) {
+function findById(list, id) { for (var i = 0; i < list.length; i++) { if (String(list[i].id) === String(id)) return i; } return -1; }
+
+function adjustQty(id) {
   var list = getItems();
+  var i = findById(list, id);
+  if (i < 0) return;
   var item = list[i];
-  if (!item) return;
   var adj = prompt('Adjust quantity for "' + item.name + '"\nCurrent: ' + (item.qty||0) + '\nEnter new quantity:');
   if (adj === null) return;
   var n = parseInt(adj);
@@ -283,9 +286,11 @@ function openModal() {
   document.getElementById('modalOverlay').classList.add('show');
 }
 
-function editItem(i) {
+function editItem(id) {
   var list = getItems();
-  var item = list[i]; if (!item) return;
+  var i = findById(list, id);
+  if (i < 0) return;
+  var item = list[i];
   document.getElementById('modalTitle').textContent = 'Edit Item';
   document.getElementById('fName').value = item.name || '';
   document.getElementById('fSku').value = item.sku || '';
@@ -294,7 +299,7 @@ function editItem(i) {
   document.getElementById('fReorder').value = item.reorderPoint || 10;
   document.getElementById('fCost').value = item.unitCost || '';
   document.getElementById('fSupplier').value = item.supplier || '';
-  document.getElementById('fEditIdx').value = i;
+  document.getElementById('fEditIdx').value = id;
   document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -303,35 +308,48 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 function saveItem() {
   var name = document.getElementById('fName').value.trim();
   if (!name) { toast('Enter item name'); return; }
+  var category = document.getElementById('fCategory').value.trim();
+  if (!category) { toast('Enter a category'); return; }
+  var qty = parseInt(document.getElementById('fQty').value) || 0;
+  if (qty < 0) { toast('Quantity cannot be negative'); return; }
+  var cost = parseFloat(document.getElementById('fCost').value) || 0;
+  if (cost < 0) { toast('Unit cost cannot be negative'); return; }
+  var reorder = parseInt(document.getElementById('fReorder').value) || 0;
+  if (reorder < 0) { toast('Reorder point cannot be negative'); return; }
   var item = {
     name: name,
     sku: document.getElementById('fSku').value.trim(),
-    category: document.getElementById('fCategory').value.trim(),
-    qty: parseInt(document.getElementById('fQty').value) || 0,
-    reorderPoint: parseInt(document.getElementById('fReorder').value) || 0,
-    unitCost: parseFloat(document.getElementById('fCost').value) || 0,
+    category: category,
+    qty: qty,
+    reorderPoint: reorder,
+    unitCost: cost,
     supplier: document.getElementById('fSupplier').value.trim(),
-    id: Date.now()
+    id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2,9)
   };
   var list = getItems();
-  var idx = parseInt(document.getElementById('fEditIdx').value);
-  if (idx >= 0 && list[idx]) { item.id = list[idx].id; list[idx] = item; }
+  var editId = document.getElementById('fEditIdx').value;
+  var idx = (editId && editId !== '-1') ? findById(list, editId) : -1;
+  if (idx >= 0) { item.id = list[idx].id; list[idx] = item; }
   else { list.push(item); }
   saveItems(list);
   closeModal(); renderTable(); renderStats();
   toast(idx >= 0 ? 'Item updated' : 'Item added');
 }
 
-function deleteItem(i) {
+function deleteItem(id) {
   if (!confirm('Delete this item?')) return;
-  var list = getItems(); list.splice(i,1); saveItems(list); renderTable(); renderStats(); toast('Item deleted');
+  var list = getItems();
+  var i = findById(list, id);
+  if (i < 0) return;
+  list.splice(i,1); saveItems(list); renderTable(); renderStats(); toast('Item deleted');
 }
 
-function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function num(v) { return (parseFloat(v)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); }, 3500); }
 
 document.addEventListener('DOMContentLoaded', function() { renderStats(); renderTable(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 </script>
 </body>
 </html>

@@ -511,12 +511,12 @@ function offerRenewal(id) {
 function renderESignPanel() {
   const sel = document.getElementById('esignLease');
   if(!sel) return;
-  sel.innerHTML = leases.map(l=>`<option value="${l.id}">${l.tenant} — ${l.prop}</option>`).join('');
+  sel.innerHTML = leases.map(l=>`<option value="${l.id}">${esc(l.tenant)} — ${esc(l.prop)}</option>`).join('');
   const pending = leases.filter(l=>!l.signed);
   const el = document.getElementById('pendingSignatures');
   el.innerHTML = pending.length
     ? pending.map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem;background:#fff7ed;border-radius:8px;margin-bottom:.5rem;border:1px solid #fed7aa;">
-        <div><strong>${l.tenant}</strong> — ${l.prop}<div style="font-size:.78rem;color:#92400e;">Awaiting signature · Sent to ${l.email}</div></div>
+        <div><strong>${esc(l.tenant)}</strong> — ${esc(l.prop)}<div style="font-size:.78rem;color:#92400e;">Awaiting signature · Sent to ${esc(l.email)}</div></div>
         <button class="btn btn-warn btn-sm" onclick="markSigned('${l.id}')">✍️ Mark Signed</button>
       </div>`).join('')
     : '<p style="color:#94a3b8;font-size:.88rem;text-align:center;padding:1.5rem 0;">✅ All leases are signed!</p>';
@@ -547,7 +547,7 @@ function renderRenewals() {
         const days = daysUntil(l.end);
         return `<div class="panel">
           <div class="panel-header">
-            <div><h2>${l.tenant} — ${l.prop}</h2><div style="font-size:.82rem;color:#64748b;">Current lease ends ${l.end} (${days>0?days+' days':Math.abs(days)+' days ago'})</div></div>
+            <div><h2>${esc(l.tenant)} — ${esc(l.prop)}</h2><div style="font-size:.82rem;color:#64748b;">Current lease ends ${l.end} (${days>0?days+' days':Math.abs(days)+' days ago'})</div></div>
             <span class="lsts ${days<=0?'lsts-expired':days<=30?'lsts-expiring':'lsts-pending'}">${days<=0?'Expired':days<=30?'Urgent':'Expiring Soon'}</span>
           </div>
           <div class="panel-body">
@@ -594,10 +594,10 @@ function openLeaseModal(id) {
       <p style="text-align:center;color:#64748b;font-size:.82rem;">3120 Life · [Your Business Name]</p>
       <h3>1. Parties</h3>
       <p><strong>Landlord:</strong> [Your Business Name]<br>
-      <strong>Tenant(s):</strong> <span class="field">${l.tenant}${l.co?' & '+l.co:''}</span><br>
-      <strong>Tenant Email:</strong> ${l.email} &nbsp; <strong>Phone:</strong> ${l.phone||'N/A'}</p>
+      <strong>Tenant(s):</strong> <span class="field">${esc(l.tenant)}${l.co?' & '+esc(l.co):''}</span><br>
+      <strong>Tenant Email:</strong> ${esc(l.email)} &nbsp; <strong>Phone:</strong> ${esc(l.phone||'N/A')}</p>
       <h3>2. Property</h3>
-      <p><span class="field">${l.prop}</span>${l.unit?', <span class="field">'+l.unit+'</span>':''}</p>
+      <p><span class="field">${esc(l.prop)}</span>${l.unit?', <span class="field">'+esc(l.unit)+'</span>':''}</p>
       <h3>3. Term</h3>
       <p>This lease begins <span class="field">${l.start}</span> and ends <span class="field">${l.end}</span>.</p>
       <h3>4. Rent</h3>
@@ -610,11 +610,11 @@ function openLeaseModal(id) {
       <h3>7. Pet Policy</h3>
       <p><span class="field">${l.pets}</span>.</p>
       <h3>8. Additional Terms</h3>
-      <p>${l.notes||'Standard terms apply.'}</p>
+      <p>${esc(l.notes||'Standard terms apply.')}</p>
       <h3>9. Signatures</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem;">
         <div><div style="border-bottom:1px solid #374151;margin-bottom:.5rem;height:40px;display:flex;align-items:flex-end;padding-bottom:.25rem;">
-          ${l.signed?`<em style="color:#10b981;">✍️ ${l.tenant} (signed ${l.signedDate})</em>`:'<span style="color:#94a3b8;font-size:.8rem;">Tenant Signature</span>'}
+          ${l.signed?`<em style="color:#10b981;">✍️ ${esc(l.tenant)} (signed ${l.signedDate})</em>`:'<span style="color:#94a3b8;font-size:.8rem;">Tenant Signature</span>'}
         </div><div style="font-size:.78rem;color:#64748b;">Tenant · Date: ${l.signed?l.signedDate:'___________'}</div></div>
         <div><div style="border-bottom:1px solid #374151;margin-bottom:.5rem;height:40px;display:flex;align-items:flex-end;padding-bottom:.25rem;">
           <em style="color:#10b981;">✍️ [Your Business Name]</em>

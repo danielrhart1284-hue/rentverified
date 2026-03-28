@@ -14,8 +14,8 @@
     .timer-display { font-size: 3.5rem; font-weight: 900; color: #121212; font-variant-numeric: tabular-nums; margin: 1rem 0; }
     .timer-controls { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1rem; }
     .btn-timer { padding: 0.65rem 2rem; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
-    .btn-timer.start { background: #059669; color: white; }
-    .btn-timer.start:hover { background: #047857; }
+    .btn-timer.start { background: #00E676; color: #121212; }
+    .btn-timer.start:hover { background: #00C853; }
     .btn-timer.stop { background: #dc2626; color: white; }
     .btn-timer.stop:hover { background: #b91c1c; }
     .btn-timer.pause { background: #d97706; color: white; }
@@ -39,7 +39,7 @@
     .tt-table tr:hover td { background: #f9fafb; }
     .act-btn { padding: 3px 8px; font-size: 0.72rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; margin-right: 3px; }
     .act-btn.del { background: #fee2e2; color: #dc2626; }
-    .act-btn.inv { background: #dbeafe; color: #2563eb; }
+    .act-btn.inv { background: rgba(0,230,118,0.12); color: #00C853; }
 
     .manual-entry { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 1.25rem; margin-bottom: 1.5rem; }
     .manual-entry h3 { font-size: 1rem; font-weight: 800; color: #121212; margin-bottom: 1rem; }
@@ -137,25 +137,45 @@
   </div>
 </div>
 
+<script src="data-layer.js"></script>
 <script>
 const TT_KEY = 'rv_time_entries';
 var timerInterval = null;
 var timerSeconds = 0;
 var timerRunning = false;
 
+/** Sanitize text for safe HTML insertion — prevents XSS */
+function esc(str) {
+  var d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/** Generate unique ID for each entry */
+function uid() {
+  return 'tt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+}
+
 function getEntries() {
-  var entries = JSON.parse(localStorage.getItem(TT_KEY) || '[]');
-  if (!entries.length) {
-    entries = [
-      { date: '2025-03-18', client: 'Smith v. Jones', category: 'Legal Research', hours: 2.5, rate: 300, amount: 750 },
-      { date: '2025-03-17', client: 'Harris Estate Planning', category: 'Document Review', hours: 1.75, rate: 300, amount: 525 },
-      { date: '2025-03-17', client: 'Acme Corp Tax Filing', category: 'Tax Preparation', hours: 3, rate: 250, amount: 750 },
-      { date: '2025-03-16', client: '[Your Business] - Lease Review', category: 'Client Meeting', hours: 1, rate: 300, amount: 300 },
-      { date: '2025-03-15', client: 'Johnson Property Inspection', category: 'Property Inspection', hours: 0.5, rate: 150, amount: 75 },
-    ];
-    localStorage.setItem(TT_KEY, JSON.stringify(entries));
+  try {
+    var raw = localStorage.getItem(TT_KEY);
+    var entries = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(entries)) entries = [];
+    if (!entries.length) {
+      entries = [
+        { id: uid(), date: '2025-03-18', client: 'Smith v. Jones', category: 'Legal Research', hours: 2.5, rate: 300, amount: 750 },
+        { id: uid(), date: '2025-03-17', client: 'Harris Estate Planning', category: 'Document Review', hours: 1.75, rate: 300, amount: 525 },
+        { id: uid(), date: '2025-03-17', client: 'Acme Corp Tax Filing', category: 'Tax Preparation', hours: 3, rate: 250, amount: 750 },
+        { id: uid(), date: '2025-03-16', client: '[Your Business] - Lease Review', category: 'Client Meeting', hours: 1, rate: 300, amount: 300 },
+        { id: uid(), date: '2025-03-15', client: 'Johnson Property Inspection', category: 'Property Inspection', hours: 0.5, rate: 150, amount: 75 },
+      ];
+      localStorage.setItem(TT_KEY, JSON.stringify(entries));
+    }
+    return entries;
+  } catch (e) {
+    console.error('Failed to parse time entries:', e);
+    return [];
   }
-  return entries;
 }
 
 function renderStats() {
@@ -174,11 +194,11 @@ function renderStats() {
   });
 
   document.getElementById('ttStats').innerHTML = [
-    { val: totalHours.toFixed(1) + 'h', lbl: 'Total Hours' },
-    { val: weekHours.toFixed(1) + 'h', lbl: 'This Week' },
-    { val: monthHours.toFixed(1) + 'h', lbl: 'This Month' },
-    { val: '$' + totalBilled.toLocaleString(), lbl: 'Total Billed' },
-    { val: entries.length, lbl: 'Entries' },
+    { val: esc(totalHours.toFixed(1) + 'h'), lbl: 'Total Hours' },
+    { val: esc(weekHours.toFixed(1) + 'h'), lbl: 'This Week' },
+    { val: esc(monthHours.toFixed(1) + 'h'), lbl: 'This Month' },
+    { val: '$' + esc(totalBilled.toLocaleString()), lbl: 'Total Billed' },
+    { val: esc(String(entries.length)), lbl: 'Entries' },
   ].map(function(s) {
     return '<div class="tt-stat"><div class="val">' + s.val + '</div><div class="lbl">' + s.lbl + '</div></div>';
   }).join('');
@@ -193,12 +213,12 @@ function renderEntries() {
   }
   body.innerHTML = entries.map(function(e, i) {
     return '<tr>' +
-      '<td>' + e.date + '</td>' +
-      '<td><strong>' + (e.client || '') + '</strong></td>' +
-      '<td>' + (e.category || '') + '</td>' +
-      '<td>' + (e.hours || 0) + 'h</td>' +
-      '<td>$' + (e.rate || 0) + '/hr</td>' +
-      '<td><strong>$' + (e.amount || 0).toLocaleString() + '</strong></td>' +
+      '<td>' + esc(e.date || '') + '</td>' +
+      '<td><strong>' + esc(e.client || '') + '</strong></td>' +
+      '<td>' + esc(e.category || '') + '</td>' +
+      '<td>' + esc(String(e.hours || 0)) + 'h</td>' +
+      '<td>$' + esc(String(e.rate || 0)) + '/hr</td>' +
+      '<td><strong>$' + esc((e.amount || 0).toLocaleString()) + '</strong></td>' +
       '<td><button class="act-btn inv" onclick="createInvoiceFromEntry(' + i + ')">Invoice</button><button class="act-btn del" onclick="deleteEntry(' + i + ')">Del</button></td>' +
     '</tr>';
   }).join('');
@@ -230,10 +250,12 @@ function stopTimer() {
   var hours = Math.round((timerSeconds / 3600) * 4) / 4; // Round to nearest 0.25
   if (hours < 0.25) hours = 0.25;
   var rate = parseFloat(document.getElementById('timerRate').value) || 0;
+  if (rate < 0) { alert('Hourly rate cannot be negative.'); return; }
 
   var entry = {
+    id: uid(),
     date: new Date().toISOString().split('T')[0],
-    client: document.getElementById('timerClient').value || 'Unspecified',
+    client: document.getElementById('timerClient').value.trim() || 'Unspecified',
     category: document.getElementById('timerCategory').value,
     hours: hours,
     rate: rate,
@@ -272,9 +294,12 @@ function updateTimerDisplay() {
 function addManualEntry() {
   var hours = parseFloat(document.getElementById('meHours').value) || 0;
   var rate = parseFloat(document.getElementById('meRate').value) || 0;
+  if (hours <= 0) { alert('Hours must be greater than zero.'); return; }
+  if (rate < 0) { alert('Rate cannot be negative.'); return; }
   var entry = {
+    id: uid(),
     date: document.getElementById('meDate').value || new Date().toISOString().split('T')[0],
-    client: document.getElementById('meDesc').value || 'Manual entry',
+    client: document.getElementById('meDesc').value.trim() || 'Manual entry',
     category: 'Admin / Other',
     hours: hours,
     rate: rate,
@@ -305,17 +330,26 @@ function createInvoiceFromEntry(idx) {
   window.location.href = 'invoice-builder.html';
 }
 
+/** Escape a CSV field — prevents CSV injection via =, +, -, @, \t, \r */
+function csvSafe(val) {
+  var s = String(val == null ? '' : val).replace(/"/g, '""');
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return '"' + s + '"';
+}
+
 function exportTimeEntries() {
   var entries = getEntries();
   var csv = 'Date,Client/Matter,Category,Hours,Rate,Amount\n';
   entries.forEach(function(e) {
-    csv += '"' + (e.date||'') + '","' + (e.client||'') + '","' + (e.category||'') + '",' + (e.hours||0) + ',' + (e.rate||0) + ',' + (e.amount||0) + '\n';
+    csv += csvSafe(e.date) + ',' + csvSafe(e.client) + ',' + csvSafe(e.category) + ',' + (e.hours||0) + ',' + (e.rate||0) + ',' + (e.amount||0) + '\n';
   });
   var blob = new Blob([csv], { type: 'text/csv' });
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  var url = URL.createObjectURL(blob);
+  a.href = url;
   a.download = 'rv_time_entries_' + new Date().toISOString().split('T')[0] + '.csv';
   a.click();
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
 
 // Init

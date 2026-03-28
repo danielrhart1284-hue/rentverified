@@ -6,7 +6,7 @@
   <title>Client Portal – 3120 Life</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    :root { --cp-blue:#2563eb; --cp-blue-light:#eff6ff; --cp-blue-dark:#1d4ed8; --cp-gray:#f8fafc; --cp-border:#e2e8f0; --cp-text:#1e293b; --cp-muted:#64748b; --cp-green:#10b981; --cp-red:#ef4444; --cp-amber:#f59e0b; }
+    :root { --cp-blue:#00E676; --cp-blue-light:#eff6ff; --cp-blue-dark:#00C853; --cp-gray:#f8fafc; --cp-border:#e2e8f0; --cp-text:#1e293b; --cp-muted:#64748b; --cp-green:#10b981; --cp-red:#ef4444; --cp-amber:#f59e0b; }
     body { background:var(--cp-gray); margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:var(--cp-text); }
     /* Login Screen */
     .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); }
@@ -50,7 +50,7 @@
     .badge { display:inline-block; padding:.2rem .6rem; border-radius:20px; font-size:.72rem; font-weight:700; text-transform:uppercase; }
     .badge-green { background:#d1fae5; color:#065f46; }
     .badge-gray { background:#f1f5f9; color:#475569; }
-    .badge-blue { background:#dbeafe; color:#1e40af; }
+    .badge-blue { background:#e8f5e9; color:#00C853; }
     .badge-red { background:#fee2e2; color:#991b1b; }
     .badge-amber { background:#fef3c7; color:#92400e; }
     /* Appointment list */
@@ -87,7 +87,7 @@
     .activity-dot { width:8px; height:8px; border-radius:50%; background:var(--cp-blue); margin-top:.4rem; flex-shrink:0; }
     .activity-time { font-size:.72rem; color:var(--cp-muted); }
     /* Next appt card */
-    .next-appt { background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
+    .next-appt { background:linear-gradient(135deg,#00E676 0%,#00C853 100%); color:#fff; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
     .next-appt h3 { color:#fff; margin:0 0 .5rem; font-size:.85rem; text-transform:uppercase; letter-spacing:.05em; opacity:.85; }
     .next-appt .appt-big { font-size:1.15rem; font-weight:700; margin-bottom:.35rem; }
     .next-appt .appt-when { font-size:.9rem; opacity:.9; }
@@ -275,6 +275,8 @@
 <script>
 if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
 
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
 /* ── Seed Data ── */
 var CLIENT_DATA = {
   name: '[Client Name]',
@@ -361,7 +363,7 @@ function renderActivity() {
     { text:'Message received from property manager', time:'3 days ago' }
   ];
   feed.innerHTML = items.map(function(it) {
-    return '<div class="activity-item"><div class="activity-dot"></div><div><div>' + it.text + '</div><div class="activity-time">' + it.time + '</div></div></div>';
+    return '<div class="activity-item"><div class="activity-dot"></div><div><div>' + esc(it.text) + '</div><div class="activity-time">' + esc(it.time) + '</div></div></div>';
   }).join('');
 }
 
@@ -372,7 +374,7 @@ function renderAppointments() {
   el.innerHTML = CLIENT_DATA.appointments.map(function(a) {
     return '<div class="appt-item">' +
       '<div class="appt-icon">' + (iconMap[a.status]||'&#128197;') + '</div>' +
-      '<div class="appt-details"><div class="appt-title">' + a.service + '</div><div class="appt-meta">' + formatDate(a.date) + '</div></div>' +
+      '<div class="appt-details"><div class="appt-title">' + esc(a.service) + '</div><div class="appt-meta">' + formatDate(a.date) + '</div></div>' +
       '<span class="badge ' + (statusMap[a.status]||'badge-gray') + '">' + a.status + '</span>' +
       '</div>';
   }).join('');
@@ -386,7 +388,7 @@ function renderInvoices() {
       ' <button class="btn btn-primary btn-sm" onclick="showPayModal(\'' + inv.number + '\',' + inv.amount + ')">Pay Now</button>' : '';
     return '<div class="inv-item">' +
       '<div class="inv-amount">$' + inv.amount.toLocaleString() + '</div>' +
-      '<div class="inv-details"><div class="inv-num">' + inv.number + ' &mdash; ' + inv.desc + '</div><div class="inv-desc">Issued ' + inv.date + '</div></div>' +
+      '<div class="inv-details"><div class="inv-num">' + esc(inv.number) + ' &mdash; ' + esc(inv.desc) + '</div><div class="inv-desc">Issued ' + esc(inv.date) + '</div></div>' +
       '<span class="badge ' + (statusMap[inv.status]||'badge-gray') + '">' + inv.status + '</span>' +
       payBtn +
       '</div>';
@@ -399,8 +401,8 @@ function renderMessages() {
     var cls = m.from === 'business' ? 'msg-business' : 'msg-client';
     var label = m.from === 'business' ? 'Alpine PM' : CLIENT_DATA.name.split(' ')[0];
     return '<div class="msg-bubble ' + cls + '">' +
-      '<div style="font-size:.72rem;font-weight:700;color:var(--cp-muted);margin-bottom:.25rem;">' + label + '</div>' +
-      '<div>' + m.text + '</div>' +
+      '<div style="font-size:.72rem;font-weight:700;color:var(--cp-muted);margin-bottom:.25rem;">' + esc(label) + '</div>' +
+      '<div>' + esc(m.text) + '</div>' +
       '<div class="msg-time">' + formatTime(m.time) + '</div>' +
       '</div>';
   }).join('');

@@ -178,6 +178,8 @@
 </div>
 
 <script>
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+
 const SIGS_KEY = 'rv_saved_signatures';
 const DOCS_KEY = 'rv_signed_documents';
 var isDrawing = false;
@@ -231,7 +233,7 @@ function saveSignature() {
   if (isCanvasEmpty()) { alert('Please draw your signature first.'); return; }
   var canvas = document.getElementById('sigCanvas');
   var dataUrl = canvas.toDataURL('image/png');
-  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  var sigs; try { sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]'); } catch(e) { sigs = []; }
   sigs.push({
     type: 'drawn',
     data: dataUrl,
@@ -255,7 +257,7 @@ function saveTypedSignature() {
   tCtx.fillText(text, 20, 65);
   var dataUrl = tempCanvas.toDataURL('image/png');
 
-  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  var sigs; try { sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]'); } catch(e) { sigs = []; }
   sigs.push({
     type: 'typed',
     text: text,
@@ -280,6 +282,11 @@ function signDocument() {
   var title = document.getElementById('docTitle').value.trim();
   if (!title) { alert('Please enter a document title.'); return; }
 
+  var signerName = document.getElementById('signerName').value.trim();
+  var signerEmail = document.getElementById('signerEmail').value.trim();
+  if (!signerName) { alert('Please enter the signer name.'); return; }
+  if (!signerEmail) { alert('Please enter the signer email.'); return; }
+
   // Get signature data
   var sigData = null;
   if (!isCanvasEmpty()) {
@@ -292,17 +299,18 @@ function signDocument() {
   }
 
   var doc = {
+    id: 'esig_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
     title: title,
     type: document.getElementById('docType').value,
-    signer: document.getElementById('signerName').value,
-    signerEmail: document.getElementById('signerEmail').value,
+    signer: signerName,
+    signerEmail: signerEmail,
     signedAt: new Date().toISOString(),
     status: 'signed',
     signatureData: sigData,
     hash: 'SHA256-' + Date.now().toString(36).toUpperCase(),
   };
 
-  var docs = JSON.parse(localStorage.getItem(DOCS_KEY) || '[]');
+  var docs; try { docs = JSON.parse(localStorage.getItem(DOCS_KEY) || '[]'); } catch(e) { docs = []; }
   docs.unshift(doc);
   localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
 
@@ -322,7 +330,7 @@ function resetSignForm() {
 }
 
 function renderDocs() {
-  var docs = JSON.parse(localStorage.getItem(DOCS_KEY) || '[]');
+  var docs; try { docs = JSON.parse(localStorage.getItem(DOCS_KEY) || '[]'); } catch(e) { docs = []; }
   var body = document.getElementById('docsBody');
   if (!docs.length) {
     docs = [
@@ -335,18 +343,18 @@ function renderDocs() {
   body.innerHTML = docs.map(function(d) {
     var date = new Date(d.signedAt).toLocaleDateString();
     return '<tr>' +
-      '<td><strong>' + d.title + '</strong></td>' +
-      '<td>' + d.type + '</td>' +
-      '<td>' + (d.signer || '') + '</td>' +
+      '<td><strong>' + esc(d.title) + '</strong></td>' +
+      '<td>' + esc(d.type) + '</td>' +
+      '<td>' + esc(d.signer || '') + '</td>' +
       '<td>' + date + '</td>' +
-      '<td><span class="badge-doc ' + d.status + '">' + d.status.toUpperCase() + '</span></td>' +
-      '<td style="font-size:0.72rem;color:#9ca3af;">' + (d.hash || '') + '</td>' +
+      '<td><span class="badge-doc ' + d.status + '">' + esc(d.status).toUpperCase() + '</span></td>' +
+      '<td style="font-size:0.72rem;color:#9ca3af;">' + esc(d.hash || '') + '</td>' +
     '</tr>';
   }).join('');
 }
 
 function renderSavedSigs() {
-  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  var sigs; try { sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]'); } catch(e) { sigs = []; }
   var container = document.getElementById('savedSigs');
   if (!sigs.length) {
     container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:2rem;grid-column:1/-1;">No saved signatures yet. Draw or type one to get started.</div>';
@@ -355,7 +363,7 @@ function renderSavedSigs() {
   container.innerHTML = sigs.map(function(s, i) {
     return '<div class="saved-sig" onclick="useSavedSig(' + i + ')">' +
       '<img src="' + s.data + '" alt="Signature" />' +
-      '<div class="sig-label">' + (s.name || 'Signature ' + (i+1)) + '</div>' +
+      '<div class="sig-label">' + esc(s.name || 'Signature ' + (i+1)) + '</div>' +
       '<div style="font-size:0.68rem;color:#9ca3af;">' + new Date(s.created).toLocaleDateString() + '</div>' +
       '<button class="btn-sig danger" style="margin-top:0.5rem;font-size:0.7rem;padding:2px 8px;" onclick="event.stopPropagation();deleteSig(' + i + ')">Delete</button>' +
     '</div>';
@@ -363,7 +371,7 @@ function renderSavedSigs() {
 }
 
 function useSavedSig(idx) {
-  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  var sigs; try { sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]'); } catch(e) { sigs = []; }
   var sig = sigs[idx];
   if (!sig) return;
   // Draw on canvas
@@ -379,7 +387,7 @@ function useSavedSig(idx) {
 
 function deleteSig(idx) {
   if (!confirm('Delete this signature?')) return;
-  var sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]');
+  var sigs; try { sigs = JSON.parse(localStorage.getItem(SIGS_KEY) || '[]'); } catch(e) { sigs = []; }
   sigs.splice(idx, 1);
   localStorage.setItem(SIGS_KEY, JSON.stringify(sigs));
   renderSavedSigs();

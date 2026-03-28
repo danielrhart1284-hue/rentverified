@@ -13,7 +13,7 @@
     .bilt-hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.5rem; }
     .bilt-hero p { font-size: 1rem; opacity: 0.75; max-width: 560px; margin: 0 auto 1.5rem; }
     .bilt-hero-stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
-    .bilt-hero-stat .num { font-size: 1.8rem; font-weight: 900; color: #a78bfa; }
+    .bilt-hero-stat .num { font-size: 1.8rem; font-weight: 900; color: #00E676; }
     .bilt-hero-stat .lbl { font-size: 0.72rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.05em; }
 
     .bilt-wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
@@ -56,7 +56,7 @@
     }
     .bilt-status.clicked { background: #e5e7eb; color: #374151; }
     .bilt-status.pending { background: #fef3c7; color: #92400e; }
-    .bilt-status.approved { background: #dbeafe; color: #1e40af; }
+    .bilt-status.approved { background: #e8f5e9; color: #00C853; }
     .bilt-status.paid { background: #d1fae5; color: #065f46; }
     .bilt-status.declined { background: #fee2e2; color: #991b1b; }
 
@@ -98,7 +98,7 @@
       width: 52px; height: 28px; border-radius: 14px; background: #4b5563;
       position: relative; cursor: pointer; flex-shrink: 0; transition: 0.2s;
     }
-    .bilt-opt-in-toggle.active { background: #8b5cf6; }
+    .bilt-opt-in-toggle.active { background: #00E676; }
     .bilt-opt-in-toggle::after {
       content: ''; position: absolute; width: 22px; height: 22px;
       border-radius: 50%; background: white; top: 3px; left: 3px; transition: 0.2s;
@@ -124,7 +124,7 @@
     <a href="index.html">Dashboard</a>
     <a href="landlord-signup.html">Properties</a>
     <a href="tenant-portal.html">Tenants</a>
-    <a href="bilt.html" style="color:#8b5cf6;font-weight:700;">Bilt Alliance</a>
+    <a href="bilt.html" style="color:#00E676;font-weight:700;">Bilt Alliance</a>
   </div>
   <div class="nav-cta">
     <a href="landlord-signup.html" class="btn btn-primary btn-sm">Back to Dashboard</a>
@@ -234,7 +234,7 @@
     <h2>Test / Simulate</h2>
     <div class="bilt-card" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
       <button onclick="simulateBiltClick()" style="padding:0.55rem 1rem;background:#1a1a2e;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Simulate Click</button>
-      <button onclick="simulateBiltApproval()" style="padding:0.55rem 1rem;background:#8b5cf6;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Simulate Approval</button>
+      <button onclick="simulateBiltApproval()" style="padding:0.55rem 1rem;background:#00E676;color:#121212;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Simulate Approval</button>
       <button onclick="simulateBiltPayout()" style="padding:0.55rem 1rem;background:#059669;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Simulate Payout</button>
       <button onclick="clearBiltData()" style="padding:0.55rem 1rem;background:#ef4444;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;">Clear All Data</button>
     </div>
@@ -244,8 +244,8 @@
 
 <div class="bilt-footer">
   &copy; 2026 [Your Business Name] &middot; 3120 Life &middot;
-  <a href="index.html" style="color:#a78bfa;">Home</a> &middot;
-  <a href="landlord-signup.html" style="color:#a78bfa;">Dashboard</a>
+  <a href="index.html" style="color:#00E676;">Home</a> &middot;
+  <a href="landlord-signup.html" style="color:#00E676;">Dashboard</a>
 </div>
 
 <script src="app.js"></script>
@@ -256,9 +256,11 @@
   // Force localStorage for demo
   if (typeof RVData !== 'undefined') RVData._useSupabase = function() { return false; };
 
+  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
   // ── Load & Render ──
   function loadBiltData() {
-    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    var refs; try { refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]'); } catch(e) { refs = []; }
     var clicks = refs.length;
     var conversions = refs.filter(function(r) { return r.converted; }).length;
     var approved = refs.filter(function(r) { return r.status === 'approved' || r.status === 'paid'; }).length;
@@ -310,10 +312,10 @@
       var comm = r.converted ? '$' + parseFloat(r.commission_amount || 45).toFixed(2) : '—';
 
       html += '<tr>' +
-        '<td>' + date + '</td>' +
-        '<td>' + tenant + '</td>' +
-        '<td><span class="bilt-status ' + status + '">' + status.charAt(0).toUpperCase() + status.slice(1) + '</span></td>' +
-        '<td style="font-weight:700;">' + comm + '</td>' +
+        '<td>' + esc(date) + '</td>' +
+        '<td>' + esc(tenant) + '</td>' +
+        '<td><span class="bilt-status ' + esc(status) + '">' + esc(status.charAt(0).toUpperCase() + status.slice(1)) + '</span></td>' +
+        '<td style="font-weight:700;">' + esc(comm) + '</td>' +
         '</tr>';
     });
 
@@ -343,7 +345,7 @@
 
   // ── Simulate Functions (demo/testing) ──
   function simulateBiltClick() {
-    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    var refs; try { refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]'); } catch(e) { refs = []; }
     refs.push({
       id: 'bilt_' + Date.now(),
       tenant_id: 'tenant_' + Math.floor(Math.random() * 999),
@@ -361,7 +363,7 @@
   }
 
   function simulateBiltApproval() {
-    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    var refs; try { refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]'); } catch(e) { refs = []; }
     var pending = refs.filter(function(r) { return !r.converted && r.status === 'clicked'; });
     if (!pending.length) { alert('No pending clicks to convert. Simulate a click first.'); return; }
     var target = pending[pending.length - 1];
@@ -371,7 +373,7 @@
     target.updated_at = new Date().toISOString();
 
     // Log commission payment
-    var payments = JSON.parse(localStorage.getItem('rv_payments') || '[]');
+    var payments; try { payments = JSON.parse(localStorage.getItem('rv_payments') || '[]'); } catch(e) { payments = []; }
     payments.push({
       id: 'pay_bilt_' + Date.now(),
       type: 'commission',
@@ -388,7 +390,7 @@
   }
 
   function simulateBiltPayout() {
-    var refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]');
+    var refs; try { refs = JSON.parse(localStorage.getItem('rv_bilt_referrals') || '[]'); } catch(e) { refs = []; }
     var approved = refs.filter(function(r) { return r.status === 'approved'; });
     if (!approved.length) { alert('No approved referrals to pay out. Simulate an approval first.'); return; }
     approved[approved.length - 1].status = 'paid';

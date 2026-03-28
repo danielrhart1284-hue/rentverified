@@ -36,7 +36,7 @@
     .btn-red { background:#dc2626; color:#fff; border-color:#dc2626; }
     .btn-red:hover { background:#b91c1c; }
     .btn-primary { background:#00E676; color:#fff; border-color:#00E676; }
-    .btn-primary:hover { background:#1e40af; }
+    .btn-primary:hover { background:#00C853; }
     .btn-outline { background:#fff; color:#374151; border-color:#d1d5db; }
     .btn-outline:hover { background:#f9fafb; }
     .btn-green { background:#16a34a; color:#fff; border-color:#16a34a; }
@@ -141,7 +141,7 @@
     .badge-red { background:#fee2e2; color:#991b1b; }
     .badge-amber { background:#fef3c7; color:#92400e; }
     .badge-green { background:#dcfce7; color:#166534; }
-    .badge-blue { background:#dbeafe; color:#1e40af; }
+    .badge-blue { background:rgba(0,230,118,0.12); color:#00C853; }
 
     /* Case list */
     .case-item { display:flex; align-items:center; justify-content:space-between; padding:.85rem 1.25rem; border:1.5px solid #e2e8f0; border-radius:10px; margin-bottom:.6rem; background:#fff; }
@@ -762,6 +762,8 @@ const VIOLATION_LABELS = {
   'other':           { label:'Other Violation',          notice:'3-Day Cure or Quit', statute:'Utah Code § 78B-6-802' }
 };
 
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
 function loadData() {
   try { cases = JSON.parse(localStorage.getItem('rv_ev_cases') || '[]'); } catch(e){ cases=[]; }
   try { savedNotices = JSON.parse(localStorage.getItem('rv_ev_notices') || '[]'); } catch(e){ savedNotices=[]; }
@@ -929,10 +931,10 @@ function generateAISummary() {
 
         <div class="cf-section">
           <div class="cf-section-title">Property &amp; Tenant</div>
-          <div class="cf-row"><span class="cf-label">Property</span><span class="cf-val">${currentCaseData.property}</span></div>
-          <div class="cf-row"><span class="cf-label">Tenant</span><span class="cf-val">${currentCaseData.tenant}</span></div>
-          <div class="cf-row"><span class="cf-label">Monthly Rent</span><span class="cf-val">${currentCaseData.rent?'$'+currentCaseData.rent:'—'}</span></div>
-          ${currentCaseData.amountDue?`<div class="cf-row"><span class="cf-label">Amount Past Due</span><span class="cf-val" style="color:#dc2626;font-weight:700;">$${currentCaseData.amountDue}</span></div>`:''}
+          <div class="cf-row"><span class="cf-label">Property</span><span class="cf-val">${esc(currentCaseData.property)}</span></div>
+          <div class="cf-row"><span class="cf-label">Tenant</span><span class="cf-val">${esc(currentCaseData.tenant)}</span></div>
+          <div class="cf-row"><span class="cf-label">Monthly Rent</span><span class="cf-val">${currentCaseData.rent?'$'+esc(currentCaseData.rent):'—'}</span></div>
+          ${currentCaseData.amountDue?`<div class="cf-row"><span class="cf-label">Amount Past Due</span><span class="cf-val" style="color:#dc2626;font-weight:700;">$${esc(currentCaseData.amountDue)}</span></div>`:''}
           <div class="cf-row"><span class="cf-label">Lease Period</span><span class="cf-val">${currentCaseData.leaseStart||'—'} to ${currentCaseData.leaseEnd||'—'}</span></div>
         </div>
 
@@ -947,10 +949,10 @@ function generateAISummary() {
 
         <div class="cf-ai-box">
           <strong>🤖 AI Case Summary:</strong><br>
-          Tenant <strong>${currentCaseData.tenant}</strong> at <strong>${currentCaseData.property}</strong> is in violation of their rental agreement
+          Tenant <strong>${esc(currentCaseData.tenant)}</strong> at <strong>${esc(currentCaseData.property)}</strong> is in violation of their rental agreement
           for <strong>${info.label||currentCaseData.violationType}</strong>${currentCaseData.incidentDate?' beginning '+currentCaseData.incidentDate:''}.
-          ${currentCaseData.description}
-          ${currentCaseData.amountDue?`The tenant owes a total of <strong>$${currentCaseData.amountDue}</strong> in unpaid rent.`:''}
+          ${esc(currentCaseData.description)}
+          ${currentCaseData.amountDue?`The tenant owes a total of <strong>$${esc(currentCaseData.amountDue)}</strong> in unpaid rent.`:''}
           Prior notices given: <strong>${currentCaseData.priorNotices||'None'}</strong>.
           Recommended action: <strong>${info.notice}</strong>. Desired outcome: <strong>${currentCaseData.desiredOutcome}</strong>.
           ${evidence.length?'Documentation on file: '+evidence.join(', ')+'.'  :''}
@@ -991,7 +993,7 @@ function generateDocuments() {
       <div class="card" style="margin:0;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
           <div style="font-weight:700;">📄 ${info.notice||'3-Day Notice'}</div>
-          <button class="btn btn-outline btn-sm" onclick="showSection('notices',null);document.getElementById('notice-type').value='${noticeType}';document.getElementById('n-tenant').value='${currentCaseData.tenant}';document.getElementById('n-address').value='${currentCaseData.property}';${currentCaseData.amountDue?`document.getElementById('n-amount').value='$${currentCaseData.amountDue}';`:''}updateNoticePreview();">View &amp; Print</button>
+          <button class="btn btn-outline btn-sm" onclick="showSection('notices',null);document.getElementById('notice-type').value='${esc(noticeType)}';document.getElementById('n-tenant').value='${esc(currentCaseData.tenant)}';document.getElementById('n-address').value='${esc(currentCaseData.property)}';${currentCaseData.amountDue?`document.getElementById('n-amount').value='$${esc(currentCaseData.amountDue)}';`:''}updateNoticePreview();">View &amp; Print</button>
         </div>
         <div style="font-size:.82rem;color:#64748b;">Utah Code ${info.statute||'§ 78B-6-802'}<br>Required first step before court filing</div>
       </div>
@@ -1044,11 +1046,11 @@ function startNoticeFlow(type) {
 
 function updateNoticePreview() {
   const type = document.getElementById('notice-type').value;
-  const tenant = document.getElementById('n-tenant').value || '[Tenant Name]';
-  const address = document.getElementById('n-address').value || '[Property Address]';
-  const amount = document.getElementById('n-amount').value || '[Amount Owed]';
+  const tenant = esc(document.getElementById('n-tenant').value || '[Tenant Name]');
+  const address = esc(document.getElementById('n-address').value || '[Property Address]');
+  const amount = esc(document.getElementById('n-amount').value || '[Amount Owed]');
   const date = document.getElementById('n-date').value || new Date().toISOString().slice(0,10);
-  const landlord = document.getElementById('n-landlord').value || '[Your Business Name]';
+  const landlord = esc(document.getElementById('n-landlord').value || '[Your Business Name]');
   const dateFormatted = date ? new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '[Date]';
 
   // Show/hide amount field
@@ -1254,7 +1256,7 @@ function openCaseMessages(id) {
     function sendMsg(){
       const t=document.getElementById('msg-input').value.trim();
       if(!t)return;
-      const msgs=JSON.parse(localStorage.getItem('rv_ev_cases')||'[]');
+      let msgs=[]; try { msgs=JSON.parse(localStorage.getItem('rv_ev_cases')||'[]'); } catch(e){ msgs=[]; }
       const c=msgs.find(c=>c.id==='${id}');
       if(c){
         if(!c.messages)c.messages=[];

@@ -9,8 +9,8 @@
   --green:#10b981; --green-d:#059669; --green-bg:#f0fdf4;
   --amber:#f59e0b; --amber-d:#d97706; --amber-bg:#fffbeb;
   --red:#ef4444; --red-d:#dc2626; --red-bg:#fef2f2;
-  --blue:#2563eb; --blue-d:#1d4ed8; --blue-bg:#eff6ff;
-  --purple:#7c3aed; --purple-bg:#f5f3ff;
+  --blue:#00E676; --blue-d:#00C853; --blue-bg:rgba(0,230,118,0.08);
+  --purple:#00E676; --purple-bg:rgba(0,230,118,0.08);
   --dark:#0f172a; --gray:#6b7280; --light:#f8fafc; --white:#fff;
   --radius:10px;
 }
@@ -185,7 +185,7 @@ tr:hover td{background:#fafbff}
 .nb-urgent{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
 .nb-warn{background:var(--amber-bg);border:1px solid #fde68a;color:#92400e}
 .nb-ok{background:var(--green-bg);border:1px solid #bbf7d0;color:#166534}
-.nb-info{background:var(--blue-bg);border:1px solid #bfdbfe;color:#1e40af}
+.nb-info{background:var(--blue-bg);border:1px solid #a7f3d0;color:#00C853}
 
 /* ── COMPLIANCE SCORE RING ── */
 .score-ring-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
@@ -818,6 +818,8 @@ let currentRole = 'pro';
 let currentProType = 'contractor';
 let myCredentials = [];
 
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
 function setRole(role, btn) {
   currentRole = role;
   document.querySelectorAll('.role-tab').forEach(b => b.classList.remove('active'));
@@ -986,7 +988,7 @@ function renderProDashboard() {
 
   // Upload credential select
   const sel = document.getElementById('upload-cred-select');
-  sel.innerHTML = creds.map(c => `<option value="${c.id}">${c.icon} ${c.name} (${fmt(c.exp)})</option>`).join('');
+  sel.innerHTML = creds.map(c => `<option value="${esc(c.id)}">${esc(c.icon + ' ' + c.name + ' (' + fmt(c.exp) + ')')}</option>`).join('');
 
   // Renewal partners
   renderRenewalPartners();
@@ -1010,8 +1012,8 @@ function renderCredList() {
     return `<div class="cred-card ${cardClass} fade-up">
       <div class="cred-icon">${c.icon}</div>
       <div class="cred-body">
-        <div class="cred-name">${c.name}</div>
-        <div class="cred-issuer">Issued by: ${c.issuer}${c.license ? ' · #'+c.license : ''}</div>
+        <div class="cred-name">${esc(c.name)}</div>
+        <div class="cred-issuer">Issued by: ${esc(c.issuer)}${c.license ? ' · #'+esc(c.license) : ''}</div>
         <div class="cred-meta">
           <span class="cred-date" style="color:var(--gray)">Expires: <strong style="color:${st==='expired'?'var(--red)':st==='urgent'?'var(--red)':st==='warn'?'var(--amber-d)':'var(--dark)'}">${fmt(c.exp)}</strong></span>
           ${daysPill(c)}
@@ -1234,7 +1236,7 @@ function handleFileSelect(input) {
   document.getElementById('upload-preview').innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;background:var(--green-bg);padding:10px 14px;border-radius:8px;border:1px solid #bbf7d0">
       <span style="font-size:1.4rem">📎</span>
-      <div><div style="font-weight:600;font-size:.88rem">${f.name}</div><div style="font-size:.78rem;color:var(--green-d)">✅ Ready to submit</div></div>
+      <div><div style="font-weight:600;font-size:.88rem">${esc(f.name)}</div><div style="font-size:.78rem;color:var(--green-d)">✅ Ready to submit</div></div>
     </div>`;
 }
 

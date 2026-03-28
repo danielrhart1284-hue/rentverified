@@ -89,7 +89,7 @@
       border-radius: 50%;
       transition: transform 0.2s;
     }
-    .toggle input:checked + .slider { background: #2563eb; }
+    .toggle input:checked + .slider { background: #00E676; }
     .toggle input:checked + .slider::before { transform: translateX(20px); }
 
     /* ── Listings Table ── */
@@ -120,7 +120,7 @@
     }
     .synd-table tr:last-child td { border-bottom: none; }
     .synd-table tr:hover td { background: #f8fafc; }
-    .synd-check { width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer; }
+    .synd-check { width: 16px; height: 16px; accent-color: #00E676; cursor: pointer; }
     .badge {
       display: inline-block;
       padding: 0.2rem 0.6rem;
@@ -172,7 +172,7 @@
       white-space: nowrap;
     }
     .btn-blue {
-      background: #2563eb;
+      background: #00E676;
       color: white;
       border: none;
       border-radius: 8px;
@@ -182,11 +182,11 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-blue:hover { background: #1d4ed8; }
+    .btn-blue:hover { background: #00C853; }
     .btn-outline-blue {
       background: white;
-      color: #2563eb;
-      border: 1.5px solid #2563eb;
+      color: #00E676;
+      border: 1.5px solid #00E676;
       border-radius: 8px;
       padding: 0.55rem 1.1rem;
       font-size: 0.85rem;
@@ -501,7 +501,7 @@ function renderTable() {
     const statusClass = l.status === 'active' ? 'badge-active' : l.status === 'draft' ? 'badge-draft' : 'badge-inactive';
     const lastSynced = syndListings[lid]._lastSynced || 'Never';
     return `<tr>
-      <td><strong>${l.address || 'No address'}</strong><br><span style="color:#94a3b8;font-size:0.78rem;">${[l.city, l.state].filter(Boolean).join(', ') || ''}</span></td>
+      <td><strong>${esc(l.address || 'No address')}</strong><br><span style="color:#94a3b8;font-size:0.78rem;">${esc([l.city, l.state].filter(Boolean).join(', ') || '')}</span></td>
       <td>$${Number(l.rent || 0).toLocaleString()}</td>
       <td>${l.beds || 0}bd / ${l.baths || 0}ba</td>
       <td><span class="badge ${statusClass}">${l.status || 'active'}</span></td>
@@ -628,6 +628,7 @@ function generateCSVForListings(items) {
   return headers.join(',') + '\n' + rows.join('\n');
 }
 
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 function escXml(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

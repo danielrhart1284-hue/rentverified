@@ -693,6 +693,7 @@ function fmtDate(d){return new Date(d).toLocaleDateString('en-US',{month:'short'
 function fmtMoney(n){return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function genId(){return 'RV-'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase();}
 function daysUntil(dateStr){return Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24));}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 /* ═══════════════════════════════════════════════
    NAVIGATION
@@ -787,7 +788,7 @@ function renderDashboard(){
   let alertsHTML='';
   pro.forEach(p=>{
     const days=daysUntil(p.expires);
-    if(days<=30) alertsHTML+=`<div class="expiry-banner"><div class="exp-icon">⚠️</div><div class="exp-text"><strong>${p.name} — ${p.coverage} expires in ${days} days</strong>They need to renew to stay on your platform. <a href="#" onclick="showSection('professional',null);return false;" style="color:#fca5a5;">Send renewal alert →</a></div></div>`;
+    if(days<=30) alertsHTML+=`<div class="expiry-banner"><div class="exp-icon">⚠️</div><div class="exp-text"><strong>${esc(p.name)} — ${esc(p.coverage)} expires in ${days} days</strong>They need to renew to stay on your platform. <a href="#" onclick="showSection('professional',null);return false;" style="color:#fca5a5;">Send renewal alert →</a></div></div>`;
   });
   claims.filter(c=>c.status==='filed').forEach(c=>{
     alertsHTML+=`<div style="background:#faf5ff;border:1px solid #ddd6fe;border-radius:8px;padding:.85rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem;"><span style="font-size:1.1rem;">📋</span><div style="flex:1;font-size:.85rem;"><strong>${c.claimNum}</strong> — ${c.party} — ${fmtMoney(c.amount)} — Under review</div><span class="pill filed">Filed</span></div>`;
@@ -805,13 +806,13 @@ function renderDeposit(){
   document.getElementById('dep-coverage').textContent=fmtMoney(active.reduce((s,b)=>s+b.coverage,0));
   document.getElementById('dep-rev').textContent=active.length;
   document.getElementById('deposit-tbody').innerHTML=bonds.map(b=>`<tr>
-    <td><strong>${b.tenant}</strong></td>
-    <td style="font-size:.82rem;">${b.address}</td>
+    <td><strong>${esc(b.tenant)}</strong></td>
+    <td style="font-size:.82rem;">${esc(b.address)}</td>
     <td>${fmtMoney(b.coverage)}</td>
     <td style="font-weight:700;">$${b.monthly}/mo</td>
-    <td>${b.provider}</td>
-    <td><span class="pill ${b.status}">${b.status}</span></td>
-    <td><button class="btn btn-outline btn-sm" onclick="viewBond('${b.id}')">View</button></td>
+    <td>${esc(b.provider)}</td>
+    <td><span class="pill ${esc(b.status)}">${esc(b.status)}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="viewBond('${esc(b.id)}')">View</button></td>
   </tr>`).join('');
 }
 
@@ -869,13 +870,13 @@ function renderRenters(){
   document.getElementById('ri-coverage').textContent=fmtMoney(active.reduce((s,p)=>s+p.coverage,0));
   document.getElementById('ri-rev').textContent=active.length;
   document.getElementById('renters-tbody').innerHTML=ri.map(p=>`<tr>
-    <td><strong>${p.tenant}</strong></td>
-    <td style="font-size:.82rem;">${p.address}</td>
-    <td>${p.provider}</td>
+    <td><strong>${esc(p.tenant)}</strong></td>
+    <td style="font-size:.82rem;">${esc(p.address)}</td>
+    <td>${esc(p.provider)}</td>
     <td>${fmtMoney(p.coverage)}</td>
     <td style="font-weight:700;">$${p.monthly}/mo</td>
     <td>${fmtDate(p.startDate)}</td>
-    <td><span class="pill ${p.status}">${p.status}</span></td>
+    <td><span class="pill ${esc(p.status)}">${esc(p.status)}</span></td>
   </tr>`).join('');
 }
 
@@ -946,14 +947,14 @@ function renderGuarantee(){
   const claims=load('rv_insurance_claims',[]).filter(c=>c.type==='Rent Guarantee'&&c.paidOut);
   document.getElementById('rg-claims-paid').textContent=fmtMoney(claims.reduce((s,c)=>s+c.amount,0));
   document.getElementById('guarantee-tbody').innerHTML=rg.map(g=>`<tr>
-    <td><strong style="font-size:.875rem;">${g.address}</strong></td>
+    <td><strong style="font-size:.875rem;">${esc(g.address)}</strong></td>
     <td>${fmtMoney(g.rent)}/mo</td>
     <td>${fmtMoney(g.coverage)}/yr</td>
     <td style="font-weight:700;">$${g.monthly}/mo</td>
-    <td>${g.provider}</td>
+    <td>${esc(g.provider)}</td>
     <td></td>
-    <td><span class="pill ${g.status}">${g.status}</span></td>
-    <td><button class="btn btn-danger btn-sm" onclick="startClaimFlow('${g.id}')">🚨 File Claim</button></td>
+    <td><span class="pill ${esc(g.status)}">${esc(g.status)}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="startClaimFlow('${esc(g.id)}')">🚨 File Claim</button></td>
   </tr>`).join('');
 }
 
@@ -1068,15 +1069,15 @@ function renderProfessional(){
   const pro=load('rv_pro_insurance',[]);
   const alertsEl=document.getElementById('expiring-alerts');
   const expiring=pro.filter(p=>daysUntil(p.expires)<=30&&p.status!=='cancelled');
-  alertsEl.innerHTML=expiring.map(p=>`<div class="expiry-banner"><div class="exp-icon">⚠️</div><div class="exp-text"><strong>${p.name} — ${p.coverage} expires in ${daysUntil(p.expires)} days</strong>Send them a renewal alert to keep your property protected.</div><button class="btn btn-warning btn-sm" onclick="sendRenewalAlert('${p.id}')">Send Alert</button></div>`).join('');
+  alertsEl.innerHTML=expiring.map(p=>`<div class="expiry-banner"><div class="exp-icon">⚠️</div><div class="exp-text"><strong>${esc(p.name)} — ${esc(p.coverage)} expires in ${daysUntil(p.expires)} days</strong>Send them a renewal alert to keep your property protected.</div><button class="btn btn-warning btn-sm" onclick="sendRenewalAlert('${esc(p.id)}')">Send Alert</button></div>`).join('');
   document.getElementById('pro-tbody').innerHTML=pro.map(p=>{
     const days=daysUntil(p.expires);
     const status=days<=30?'expiring':'active';
     return `<tr>
-      <td><strong>${p.name}</strong></td>
-      <td style="font-size:.82rem;">${p.type}</td>
-      <td style="font-size:.82rem;">${p.coverage}</td>
-      <td>${p.provider}</td>
+      <td><strong>${esc(p.name)}</strong></td>
+      <td style="font-size:.82rem;">${esc(p.type)}</td>
+      <td style="font-size:.82rem;">${esc(p.coverage)}</td>
+      <td>${esc(p.provider)}</td>
       <td style="${days<=30?'color:var(--danger);font-weight:700;':''}">
         ${fmtDate(p.expires)} ${days<=30?'('+days+'d!)':''}
       </td>
@@ -1154,27 +1155,27 @@ function renderClaims(){
   document.getElementById('cl-approved').textContent=claims.filter(c=>c.status==='approved').length;
   document.getElementById('cl-paid').textContent=fmtMoney(claims.filter(c=>c.paidOut).reduce((s,c)=>s+c.amount,0));
   document.getElementById('claims-tbody').innerHTML=claims.map(c=>`<tr>
-    <td><strong style="font-family:monospace;font-size:.82rem;">${c.claimNum}</strong></td>
-    <td><span class="pill ${c.type==='Rent Guarantee'?'filed':'active'}" style="font-size:.72rem;">${c.type}</span></td>
-    <td style="font-size:.82rem;">${c.party}</td>
+    <td><strong style="font-family:monospace;font-size:.82rem;">${esc(c.claimNum)}</strong></td>
+    <td><span class="pill ${c.type==='Rent Guarantee'?'filed':'active'}" style="font-size:.72rem;">${esc(c.type)}</span></td>
+    <td style="font-size:.82rem;">${esc(c.party)}</td>
     <td style="font-weight:700;">${fmtMoney(c.amount)}</td>
     <td style="font-size:.82rem;">${fmtDate(c.filed)}</td>
-    <td><span class="pill ${c.paidOut?'paid':c.status}">${c.paidOut?'Paid Out':c.status}</span></td>
+    <td><span class="pill ${c.paidOut?'paid':esc(c.status)}">${c.paidOut?'Paid Out':esc(c.status)}</span></td>
     <td>
       <div class="timeline" style="padding-left:1.25rem;font-size:.72rem;">
-        ${(c.timeline||[]).slice(-2).map(t=>`<div class="tl-item" style="margin-bottom:.35rem;"><div class="tl-text">${t.text}</div></div>`).join('')}
+        ${(c.timeline||[]).slice(-2).map(t=>`<div class="tl-item" style="margin-bottom:.35rem;"><div class="tl-text">${esc(t.text)}</div></div>`).join('')}
       </div>
     </td>
-    <td><button class="btn btn-outline btn-sm" onclick="viewClaim('${c.id}')">Details</button></td>
+    <td><button class="btn btn-outline btn-sm" onclick="viewClaim('${esc(c.id)}')">Details</button></td>
   </tr>`).join('');
 }
 
 function viewClaim(id){
   const claims=load('rv_insurance_claims',[]);
   const c=claims.find(x=>x.id===id); if(!c) return;
-  openModal(`<h2 style="font-weight:800;margin-bottom:1rem;">📋 ${c.claimNum}</h2>
+  openModal(`<h2 style="font-weight:800;margin-bottom:1rem;">📋 ${esc(c.claimNum)}</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;">
-      ${[['Type',c.type],['Party',c.party],['Amount',fmtMoney(c.amount)],['Status',c.paidOut?'✅ Paid Out':c.status],['Filed',fmtDate(c.filed)]].map(([l,v])=>`<div><div style="font-size:.72rem;font-weight:700;color:var(--gray-500);margin-bottom:.2rem;">${l}</div><div style="font-weight:600;">${v}</div></div>`).join('')}
+      ${[['Type',esc(c.type)],['Party',esc(c.party)],['Amount',fmtMoney(c.amount)],['Status',c.paidOut?'✅ Paid Out':esc(c.status)],['Filed',fmtDate(c.filed)]].map(([l,v])=>`<div><div style="font-size:.72rem;font-weight:700;color:var(--gray-500);margin-bottom:.2rem;">${l}</div><div style="font-weight:600;">${v}</div></div>`).join('')}
     </div>
     <h3 style="font-size:.875rem;font-weight:700;margin-bottom:.75rem;">Timeline</h3>
     <div class="timeline">

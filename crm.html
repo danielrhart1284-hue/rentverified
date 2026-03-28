@@ -18,7 +18,7 @@
     .btn-crm.primary { background: #00E676; color: #121212; }
     .btn-crm.primary:hover { background: #00C853; }
     .btn-crm.outline { background: #fff; color: #00E676; border: 2px solid #00E676; }
-    .btn-crm.outline:hover { background: #eef2ff; }
+    .btn-crm.outline:hover { background: rgba(0,230,118,0.08); }
     .btn-crm.danger { background: #fee2e2; color: #dc2626; }
     .btn-crm.danger:hover { background: #fecaca; }
     .btn-crm.sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
@@ -40,7 +40,7 @@
     /* ─── Kanban Pipeline ─────────────────────────────────── */
     .kanban { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; min-height: 400px; }
     .kanban-col { background: #f9fafb; border-radius: 12px; padding: 0.75rem; display: flex; flex-direction: column; min-width: 0; }
-    .kanban-col.drag-over { background: #eef2ff; outline: 2px dashed #00E676; }
+    .kanban-col.drag-over { background: rgba(0,230,118,0.06); outline: 2px dashed #00E676; }
     .kanban-col-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--col-color, #e5e7eb); }
     .kanban-col-title { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #374151; }
     .kanban-col-count { font-size: 0.7rem; font-weight: 700; color: #6b7280; }
@@ -53,7 +53,7 @@
     .k-card-name { font-size: 0.85rem; font-weight: 700; color: #121212; margin-bottom: 4px; }
     .k-card-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: #6b7280; margin-top: 3px; }
     .k-card-val { font-weight: 800; color: #00E676; }
-    .source-badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: 0.65rem; font-weight: 700; background: rgba(0,230,118,0.12); color: #5b21b6; }
+    .source-badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: 0.65rem; font-weight: 700; background: rgba(0,230,118,0.12); color: #00C853; }
 
     /* ─── List View ────────────────────────────────────────── */
     .list-wrap { display: none; }
@@ -380,12 +380,16 @@ async function seedIfEmpty() {
 function populateFilterDropdowns() {
   var statusSel = document.getElementById('listStatusFilter');
   var sourceSel = document.getElementById('listSourceFilter');
+  var statusHtml = statusSel.innerHTML;
   STATUSES.forEach(function(s) {
-    statusSel.innerHTML += '<option value="' + s + '">' + STATUS_LABELS[s] + '</option>';
+    statusHtml += '<option value="' + s + '">' + STATUS_LABELS[s] + '</option>';
   });
+  statusSel.innerHTML = statusHtml;
+  var sourceHtml = sourceSel.innerHTML;
   Object.keys(SOURCE_LABELS).forEach(function(s) {
-    sourceSel.innerHTML += '<option value="' + s + '">' + SOURCE_LABELS[s] + '</option>';
+    sourceHtml += '<option value="' + s + '">' + SOURCE_LABELS[s] + '</option>';
   });
+  sourceSel.innerHTML = sourceHtml;
 }
 
 /* ── Stats ─────────────────────────────────────────────────── */
@@ -692,16 +696,17 @@ async function renderTimeline(leadId) {
     tl.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;">No activities logged yet.</p>';
     return;
   }
-  tl.innerHTML = '';
+  var icons = { call:'&#128222;', email:'&#9993;', sms:'&#128172;', meeting:'&#128197;', note:'&#128221;' };
+  var html = '';
   activities.forEach(function(a) {
     var iconClass = a.type || 'note';
-    var icons = { call:'&#128222;', email:'&#9993;', sms:'&#128172;', meeting:'&#128197;', note:'&#128221;' };
-    tl.innerHTML += '<div class="tl-item">' +
+    html += '<div class="tl-item">' +
       '<div class="tl-icon ' + iconClass + '">' + (icons[iconClass] || '&#128221;') + '</div>' +
       '<div class="tl-body"><div class="tl-type">' + esc(a.type || 'note') + '</div>' +
       '<div class="tl-note">' + esc(a.note || '') + '</div>' +
       '<div class="tl-date">' + formatDateTime(a.created_at) + '</div></div></div>';
   });
+  tl.innerHTML = html;
 }
 
 async function changeDetailStatus(id, newStatus) {

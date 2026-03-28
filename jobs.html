@@ -52,8 +52,8 @@
       font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
     }
     .status-draft      { background: #f3f4f6; color: #6b7280; }
-    .status-quoted     { background: rgba(0,230,118,0.12); color: #7c3aed; }
-    .status-approved   { background: #dbeafe; color: #2563eb; }
+    .status-quoted     { background: rgba(0,230,118,0.12); color: #00C853; }
+    .status-approved   { background: rgba(0,230,118,0.12); color: #00C853; }
     .status-in_progress { background: #fef3c7; color: #92400e; }
     .status-on_hold    { background: #fee2e2; color: #dc2626; }
     .status-completed  { background: #d1fae5; color: #065f46; }
@@ -305,25 +305,25 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #f3f4f6;
       display: flex; align-items: center; gap: 1rem; cursor: pointer; transition: 0.15s;
     }
-    .quote-card:hover { border-color: #7c3aed; box-shadow: 0 2px 8px rgba(124,58,237,0.1); }
+    .quote-card:hover { border-color: #00C853; box-shadow: 0 2px 8px rgba(0,200,83,0.1); }
     .quote-card-icon {
       width: 44px; height: 44px; border-radius: 10px; display: flex;
       align-items: center; justify-content: center; font-size: 1.3rem;
-      background: rgba(0,230,118,0.12); color: #7c3aed; flex-shrink: 0;
+      background: rgba(0,230,118,0.12); color: #00C853; flex-shrink: 0;
     }
     .quote-card-info { flex: 1; min-width: 0; }
     .quote-card-name { font-weight: 700; font-size: 0.92rem; color: #1f2937; }
     .quote-card-meta { font-size: 0.78rem; color: #6b7280; }
     .quote-card-right { text-align: right; flex-shrink: 0; }
-    .quote-card-amount { font-weight: 800; font-size: 1rem; color: #7c3aed; }
+    .quote-card-amount { font-weight: 800; font-size: 1rem; color: #00C853; }
     .quote-card-status { font-size: 0.72rem; margin-top: 0.15rem; }
 
     .quote-status-pill { padding: 0.15rem 0.55rem; border-radius: 99px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
     .qs-draft    { background: #f3f4f6; color: #6b7280; }
-    .qs-sent     { background: #dbeafe; color: #2563eb; }
+    .qs-sent     { background: rgba(0,230,118,0.12); color: #00C853; }
     .qs-accepted { background: #d1fae5; color: #059669; }
     .qs-declined { background: #fee2e2; color: #dc2626; }
-    .qs-invoiced { background: rgba(0,230,118,0.12); color: #7c3aed; }
+    .qs-invoiced { background: rgba(0,230,118,0.12); color: #00C853; }
 
     /* Print styles for quote preview */
     @media print {
@@ -358,7 +358,7 @@
     }
     .rv-toast.success { background: #059669; }
     .rv-toast.error   { background: #dc2626; }
-    .rv-toast.info    { background: #2563eb; }
+    .rv-toast.info    { background: #00C853; }
     .rv-toast.warning { background: #d97706; }
     .rv-toast.fade-out { animation: rvToastOut 0.25s ease-in forwards; }
     @keyframes rvToastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -699,7 +699,7 @@
       <div class="jobs-modal-footer">
         <button class="jobs-btn jobs-btn-danger jobs-btn-sm" id="detailDeleteBtn" onclick="deleteCurrentJob()" data-permission="projects_delete">Delete</button>
         <button class="jobs-btn jobs-btn-outline jobs-btn-sm" onclick="editCurrentJob()" data-permission="projects_edit">Edit</button>
-        <button class="jobs-btn jobs-btn-outline jobs-btn-sm" style="background:rgba(0,230,118,0.12);color:#7c3aed;border-color:#c4b5fd;" onclick="generateQuoteFromJob()" data-permission="quotes_create">&#128221; Quote</button>
+        <button class="jobs-btn jobs-btn-outline jobs-btn-sm" style="background:rgba(0,230,118,0.12);color:#00C853;border-color:#00E676;" onclick="generateQuoteFromJob()" data-permission="quotes_create">&#128221; Quote</button>
         <button class="jobs-btn jobs-btn-outline" onclick="closeDetailModal()">Close</button>
       </div>
     </div>
@@ -787,7 +787,7 @@
     var toast = document.createElement('div');
     toast.className = 'rv-toast ' + type;
     var icons = { success: '\u2705', error: '\u274c', info: '\u2139\ufe0f', warning: '\u26a0\ufe0f' };
-    toast.innerHTML = '<span>' + (icons[type] || '') + '</span><span>' + message + '</span>';
+    toast.innerHTML = '<span>' + (icons[type] || '') + '</span><span>' + esc(message) + '</span>';
     container.appendChild(toast);
     setTimeout(function() {
       toast.classList.add('fade-out');
@@ -864,7 +864,7 @@
   }
 
   function exportTimesheetCSV() {
-    var entries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]');
+    var entries; try { entries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]'); } catch(e) { entries = []; }
     var rows = [['Project','Clock In','Clock Out','Duration (min)','Note','Billable','Rate']];
     entries.forEach(function(e) {
       var proj = allProjects.find(function(p) { return p.id === e.project_id; });
@@ -930,8 +930,8 @@
 
   var TRADE_COLORS = {
     general: { bg: '#fef3c7', color: '#92400e' },
-    hvac: { bg: '#dbeafe', color: '#1e40af' },
-    plumbing: { bg: 'rgba(0,230,118,0.12)', color: '#5b21b6' },
+    hvac: { bg: 'rgba(0,230,118,0.12)', color: '#00C853' },
+    plumbing: { bg: 'rgba(0,230,118,0.12)', color: '#00C853' },
     electrical: { bg: '#fef9c3', color: '#854d0e' },
     roofing: { bg: '#fee2e2', color: '#991b1b' },
     painting: { bg: '#fce7f3', color: '#9d174d' },
@@ -944,8 +944,8 @@
 
   var KANBAN_COLUMNS = [
     { key: 'draft',       label: 'Draft',       color: '#6b7280' },
-    { key: 'quoted',      label: 'Quoted',      color: '#7c3aed' },
-    { key: 'approved',    label: 'Approved',     color: '#2563eb' },
+    { key: 'quoted',      label: 'Quoted',      color: '#00C853' },
+    { key: 'approved',    label: 'Approved',     color: '#00E676' },
     { key: 'in_progress', label: 'In Progress',  color: '#d97706' },
     { key: 'completed',   label: 'Completed',    color: '#059669' }
   ];
@@ -956,7 +956,7 @@
     try {
       allProjects = await RVData.getProjects();
     } catch(e) {
-      allProjects = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+      try { allProjects = JSON.parse(localStorage.getItem('rv_projects') || '[]'); } catch(e) { allProjects = []; }
     }
     renderStats();
     filterJobs();
@@ -1667,7 +1667,7 @@
 
   /** Restore timer from localStorage on page load */
   async function restoreTimer() {
-    var entries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]');
+    var entries; try { entries = JSON.parse(localStorage.getItem('rv_time_entries') || '[]'); } catch(e) { entries = []; }
     var running = entries.find(function(e) { return !e.clock_out; });
     if (!running) return;
 
@@ -1694,7 +1694,7 @@
   var currentPreviewQuote = null;
 
   function getQuotes() {
-    return JSON.parse(localStorage.getItem('rv_quotes') || '[]');
+    try { return JSON.parse(localStorage.getItem('rv_quotes') || '[]'); } catch(e) { return []; }
   }
 
   function saveQuotes(quotes) {
@@ -1847,7 +1847,7 @@
 
     // If linked to a project, update project's quoted_amount
     if (quote.project_id) {
-      var projects = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+      var projects; try { projects = JSON.parse(localStorage.getItem('rv_projects') || '[]'); } catch(e) { projects = []; }
       var proj = projects.find(function(p) { return p.id === quote.project_id; });
       if (proj) {
         proj.quoted_amount = total;
@@ -1883,8 +1883,8 @@
     }
 
     // Build line items from project tasks
-    var tasks = JSON.parse(localStorage.getItem('rv_project_tasks') || '[]')
-      .filter(function(t) { return t.project_id === currentDetailId; });
+    var tasks; try { tasks = JSON.parse(localStorage.getItem('rv_project_tasks') || '[]'); } catch(e) { tasks = []; }
+    tasks = tasks.filter(function(t) { return t.project_id === currentDetailId; });
 
     var quote = {
       project_id: proj.id,
@@ -1998,7 +1998,7 @@
     if (!_hasPerm('quotes_convert')) { showToast('You do not have permission to convert quotes to invoices.', 'error'); return; }
     if (!confirm('Convert this quote to an invoice? This will create a new invoice in the Invoice Builder.')) return;
 
-    var invoices = JSON.parse(localStorage.getItem('rv_invoices') || '[]');
+    var invoices; try { invoices = JSON.parse(localStorage.getItem('rv_invoices') || '[]'); } catch(e) { invoices = []; }
 
     // Generate invoice number
     var maxInv = 0;
@@ -2042,7 +2042,7 @@
 
     // Update project status
     if (currentPreviewQuote.project_id) {
-      var projects = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+      var projects; try { projects = JSON.parse(localStorage.getItem('rv_projects') || '[]'); } catch(e) { projects = []; }
       var proj = projects.find(function(p) { return p.id === currentPreviewQuote.project_id; });
       if (proj && proj.status === 'quoted') {
         proj.approved_amount = currentPreviewQuote.total;
@@ -2154,7 +2154,7 @@
   // ── Seed Demo Data ─────────────────────────────────────────────────────
 
   function seedDemoProjects() {
-    var existing = JSON.parse(localStorage.getItem('rv_projects') || '[]');
+    var existing; try { existing = JSON.parse(localStorage.getItem('rv_projects') || '[]'); } catch(e) { existing = []; }
     if (existing.length > 0) return; // Only seed if empty
 
     var demos = [
@@ -2244,7 +2244,7 @@
 
   // Seed demo time entries
   function seedDemoTimeEntries() {
-    var existing = JSON.parse(localStorage.getItem('rv_time_entries') || '[]');
+    var existing; try { existing = JSON.parse(localStorage.getItem('rv_time_entries') || '[]'); } catch(e) { existing = []; }
     if (existing.length > 0) return;
 
     var demos = [
@@ -2285,7 +2285,7 @@
 
   // Seed demo quotes
   function seedDemoQuotes() {
-    var existing = JSON.parse(localStorage.getItem('rv_quotes') || '[]');
+    var existing; try { existing = JSON.parse(localStorage.getItem('rv_quotes') || '[]'); } catch(e) { existing = []; }
     if (existing.length > 0) return;
 
     var demos = [

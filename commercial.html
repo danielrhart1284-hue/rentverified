@@ -158,7 +158,7 @@
       margin-top: 0.75rem;
       padding: 1.25rem;
       background: #EFF6FF;
-      border-left: 3px solid #3B82F6;
+      border-left: 3px solid #00E676;
       border-radius: 8px;
     }
     .edu-card.open { display: block; }
@@ -275,7 +275,7 @@
 
     /* Funding summary card */
     .funding-summary {
-      background: linear-gradient(135deg, #1e3a5f, #1e40af);
+      background: linear-gradient(135deg, #1e3a5f, #064e3b);
       border-radius: 14px;
       padding: 1.5rem 2rem;
       color: white;
@@ -320,7 +320,7 @@
     }
     .status-badge.pending { background: #fef3c7; color: #92400e; }
     .status-badge.approved { background: #d1fae5; color: #065f46; }
-    .status-badge.funded { background: #dbeafe; color: #1e40af; }
+    .status-badge.funded { background: rgba(0,230,118,0.12); color: #00C853; }
     .status-badge.declined { background: #fee2e2; color: #991b1b; }
 
     /* Page header */
@@ -787,7 +787,7 @@
         <!-- GoKapital -->
         <div class="partner-card">
           <div class="partner-card-top">
-            <div class="partner-logo" style="background:#1e40af;">GK</div>
+            <div class="partner-logo" style="background:#00C853;">GK</div>
             <div>
               <h4>GoKapital</h4>
               <p>Business Lending Specialists</p>
@@ -831,7 +831,7 @@
         <!-- SBA Loan Referrals -->
         <div class="partner-card">
           <div class="partner-card-top">
-            <div class="partner-logo" style="background:#7c3aed;">SBA</div>
+            <div class="partner-logo" style="background:#00E676;">SBA</div>
             <div>
               <h4>SBA Loan Referrals</h4>
               <p>Government-Backed, Lowest Rates</p>
@@ -1369,7 +1369,7 @@ function escHtml(s) {
 /* ── Management Profile (A6) ── */
 function getCompanyId() {
   try {
-    var accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]');
+    var accts = []; try { accts = JSON.parse(localStorage.getItem('rv_landlord_accounts') || '[]'); } catch(e) {}
     if (accts.length) return accts[0].company ? accts[0].company.replace(/\s+/g, '_').toLowerCase() : 'default';
   } catch(e) {}
   return 'default';
@@ -1469,7 +1469,7 @@ function toggleSidebarGroup(label) {
 // Restore collapsed state
 (function() {
   try {
-    var collapsed = JSON.parse(localStorage.getItem('rv_comm_sidebar_collapsed') || '[]');
+    var collapsed = []; try { collapsed = JSON.parse(localStorage.getItem('rv_comm_sidebar_collapsed') || '[]'); } catch(ee) { collapsed = []; }
     document.querySelectorAll('.sidebar-group-label span').forEach(function(span) {
       if (collapsed.indexOf(span.textContent) !== -1) {
         span.closest('.sidebar-group').classList.add('collapsed');
@@ -1532,8 +1532,8 @@ document.addEventListener('keydown', function(e) {
 /* ══ DEAL PIPELINE ══ */
 var DEAL_STAGES = [
   { key: 'prospect', label: 'Prospect', color: '#6b7280' },
-  { key: 'qualifying', label: 'Qualifying', color: '#8b5cf6' },
-  { key: 'proposal', label: 'Proposal', color: '#2563eb' },
+  { key: 'qualifying', label: 'Qualifying', color: '#00E676' },
+  { key: 'proposal', label: 'Proposal', color: '#00C853' },
   { key: 'negotiation', label: 'Negotiation', color: '#d97706' },
   { key: 'due_diligence', label: 'Due Diligence', color: '#0891b2' },
   { key: 'closed_won', label: 'Closed Won', color: '#059669' },
@@ -1550,7 +1550,7 @@ if (typeof RVData !== 'undefined' && RVData._useSupabase && RVData._useSupabase(
 
 async function loadDeals() {
   try { allDeals = await RVData.getCommercialDeals({}); } catch(e) {
-    allDeals = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]');
+    try { allDeals = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]'); } catch(e2) { allDeals = []; }
   }
   renderDealSummary();
   renderDeals();
@@ -1756,7 +1756,7 @@ async function saveDeal() {
   if (id) deal.id = id;
 
   try { await RVData.saveCommercialDeal(deal); } catch(e) {
-    var rows = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]');
+    var rows = []; try { rows = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]'); } catch(e3) {}
     if (deal.id) {
       if (deal.commission_rate && deal.asking_price) deal.commission_amount = parseFloat(((deal.asking_price * deal.commission_rate) / 100).toFixed(2));
       rows = rows.map(function(r) { return r.id === deal.id ? Object.assign(r, deal) : r; });
@@ -1777,7 +1777,7 @@ async function deleteDeal() {
   var id = document.getElementById('deal-id').value;
   if (!id || !confirm('Delete this deal?')) return;
   try { await RVData.deleteCommercialDeal(id); } catch(e) {
-    var rows = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]');
+    var rows = []; try { rows = JSON.parse(localStorage.getItem('rv_commercial_deals') || '[]'); } catch(e4) {}
     rows = rows.filter(function(r) { return r.id !== id; });
     localStorage.setItem('rv_commercial_deals', JSON.stringify(rows));
   }

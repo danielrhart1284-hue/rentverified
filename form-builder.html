@@ -121,8 +121,8 @@
   .fb-form-field select:focus,
   .fb-form-field textarea:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    border-color: #00E676;
+    box-shadow: 0 0 0 3px rgba(0,230,118,0.15);
   }
   .fb-form-field .hint {
     font-size: 0.72rem;
@@ -142,7 +142,7 @@
     color: #121212;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #dbeafe;
+    border-bottom: 2px solid rgba(0,230,118,0.25);
   }
 
   /* Checkbox / radio groups */
@@ -155,7 +155,7 @@
     font-weight: 400;
     cursor: pointer;
   }
-  .fb-check-group input { width: 16px; height: 16px; accent-color: #2563eb; }
+  .fb-check-group input { width: 16px; height: 16px; accent-color: #00E676; }
 
   /* Signature area */
   .fb-signature-area {
@@ -170,7 +170,7 @@
     cursor: pointer;
     transition: border-color 0.2s;
   }
-  .fb-signature-area:hover { border-color: #2563eb; }
+  .fb-signature-area:hover { border-color: #00E676; }
 
   /* Status chip */
   .fb-status {
@@ -206,8 +206,8 @@
     align-items: center;
     gap: 6px;
   }
-  .fb-toolbar button:hover { border-color: #2563eb; color: #2563eb; }
-  .fb-toolbar button.active { background: #2563eb; color: white; border-color: #2563eb; }
+  .fb-toolbar button:hover { border-color: #00E676; color: #00E676; }
+  .fb-toolbar button.active { background: #00E676; color: #121212; border-color: #00E676; }
 
   /* Add field panel */
   .fb-add-panel {
@@ -358,7 +358,7 @@
 
     <!-- Actions -->
     <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:auto;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.1);">
-      <button onclick="saveForm()" style="width:100%;padding:0.65rem;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.88rem;cursor:pointer;">Save Form</button>
+      <button onclick="saveForm()" style="width:100%;padding:0.65rem;background:#00E676;color:#121212;border:none;border-radius:8px;font-weight:700;font-size:0.88rem;cursor:pointer;">Save Form</button>
       <button onclick="exportFormHTML()" style="width:100%;padding:0.65rem;background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-weight:600;font-size:0.82rem;cursor:pointer;">Export as HTML</button>
     </div>
 
@@ -838,7 +838,7 @@
     // Add submit button in fill mode
     if (currentPreviewMode === 'fill') {
       body.innerHTML += '<div style="padding-top:1rem;border-top:2px solid #e5e7eb;margin-top:1rem;text-align:center;">' +
-        '<button onclick="submitFilledForm()" style="padding:0.75rem 2rem;background:#2563eb;color:white;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">Submit Form</button></div>';
+        '<button onclick="submitFilledForm()" style="padding:0.75rem 2rem;background:#00E676;color:#121212;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">Submit Form</button></div>';
     }
   }
 
@@ -861,7 +861,7 @@
   function saveForm() {
     var title = document.getElementById('fbFormTitle').value || 'Untitled Form';
     var desc = document.getElementById('fbFormDesc').value || '';
-    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+    var forms = (function(){try{return JSON.parse(localStorage.getItem('rv_custom_forms')||'[]');}catch(e){return [];}})();
 
     var form = {
       id: formId || 'form_' + Date.now(),
@@ -886,7 +886,7 @@
   }
 
   function loadForm(id) {
-    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+    var forms = (function(){try{return JSON.parse(localStorage.getItem('rv_custom_forms')||'[]');}catch(e){return [];}})();
     var form = forms.find(function(f) { return f.id === id; });
     if (!form) return;
 
@@ -900,7 +900,7 @@
 
   function deleteForm(id) {
     if (!confirm('Delete this form?')) return;
-    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+    var forms = (function(){try{return JSON.parse(localStorage.getItem('rv_custom_forms')||'[]');}catch(e){return [];}})();
     forms = forms.filter(function(f) { return f.id !== id; });
     localStorage.setItem('rv_custom_forms', JSON.stringify(forms));
     if (formId === id) {
@@ -923,7 +923,7 @@
   }
 
   function renderSavedForms() {
-    var forms = JSON.parse(localStorage.getItem('rv_custom_forms') || '[]');
+    var forms = (function(){try{return JSON.parse(localStorage.getItem('rv_custom_forms')||'[]');}catch(e){return [];}})();
     var container = document.getElementById('fbSavedList');
     if (!container) return;
 

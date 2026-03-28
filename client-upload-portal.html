@@ -9,7 +9,7 @@
     body { background: #f5f3ff; min-height: 100vh; }
     /* ── Portal Header ── */
     .cup-header {
-      background: linear-gradient(135deg, #00E676 0%, #7c3aed 100%);
+      background: linear-gradient(135deg, #00E676 0%, #00C853 100%);
       color: #121212; padding: 2.5rem 1.5rem 2rem;
       text-align: center;
     }
@@ -30,7 +30,7 @@
       display: flex; align-items: center; gap: 1rem;
     }
     .cup-progress-bar { flex: 1; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
-    .cup-progress-fill { height: 100%; background: linear-gradient(90deg,#00E676,#7c3aed); border-radius: 999px; transition: width 0.4s ease; }
+    .cup-progress-fill { height: 100%; background: linear-gradient(90deg,#00E676,#00C853); border-radius: 999px; transition: width 0.4s ease; }
     .cup-progress-label { font-size: 0.82rem; font-weight: 700; color: #6b7280; white-space: nowrap; }
     /* ── Checklist ── */
     .cup-checklist { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
@@ -85,7 +85,7 @@
     .cup-submit-title { font-size: 1rem; font-weight: 700; color: #111827; margin-bottom: 0.35rem; }
     .cup-submit-sub { font-size: 0.85rem; color: #6b7280; margin-bottom: 1.25rem; }
     .cup-submit-btn {
-      background: linear-gradient(135deg,#00E676,#7c3aed); color: #121212;
+      background: linear-gradient(135deg,#00E676,#00C853); color: #121212;
       border: none; border-radius: 10px; padding: 0.75rem 2.5rem;
       font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.15s;
       box-shadow: 0 4px 14px rgba(99,102,241,0.35);
@@ -204,6 +204,7 @@ const DEMO_REQUEST = {
 // ── State ──
 let uploadedItems = {};   // itemIndex -> [filename, ...]
 let openItem = null;
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
@@ -232,7 +233,7 @@ function renderChecklist(items) {
     <div class="cup-item" id="cup-item-${i}">
       <div class="cup-item-header" onclick="toggleItem(${i})">
         <div class="cup-item-check" id="check-${i}"></div>
-        <div class="cup-item-label">${item}</div>
+        <div class="cup-item-label">${esc(item)}</div>
         <span class="cup-item-status" id="status-${i}">Tap to upload</span>
       </div>
       <div class="cup-item-body" id="body-${i}">
@@ -286,7 +287,7 @@ function markUploaded(i, filenames) {
 
   const ul = document.getElementById(`uploaded-list-${i}`);
   ul.innerHTML = uploadedItems[i].map(fn =>
-    `<div class="cup-uploaded-file">✅ ${fn}</div>`).join('');
+    `<div class="cup-uploaded-file">✅ ${esc(fn)}</div>`).join('');
 
   const totalItems = document.querySelectorAll('[id^="cup-item-"]').length;
   updateProgress(totalItems);

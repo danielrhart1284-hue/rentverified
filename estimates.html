@@ -40,7 +40,7 @@
     .stat-card-lbl { font-size: 0.75rem; color: #6b7280; font-weight: 600; margin-top: 2px; }
     .stat-card.amber .stat-card-val { color: #d97706; }
     .stat-card.green .stat-card-val { color: #059669; }
-    .stat-card.blue .stat-card-val { color: #2563eb; }
+    .stat-card.blue .stat-card-val { color: #00E676; }
     .stat-card.red .stat-card-val { color: #dc2626; }
 
     /* ── Quick Bar ── */
@@ -62,11 +62,11 @@
     /* ── Status Badges ── */
     .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; }
     .status-draft { background: #f3f4f6; color: #6b7280; }
-    .status-sent { background: #dbeafe; color: #1d4ed8; }
+    .status-sent { background: rgba(0,230,118,0.12); color: #065f46; }
     .status-approved { background: #d1fae5; color: #065f46; }
     .status-declined { background: #fee2e2; color: #991b1b; }
     .status-expired { background: #fef3c7; color: #92400e; }
-    .status-invoiced { background: rgba(0,230,118,0.12); color: #4c1d95; }
+    .status-invoiced { background: rgba(0,230,118,0.12); color: #065f46; }
 
     /* ── Drawer ── */
     .est-drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; backdrop-filter: blur(2px); }
@@ -129,11 +129,11 @@
     .etp-row.grand { font-size: 1rem; font-weight: 800; color: #111827; border-top: 1px solid #fde68a; padding-top: 6px; margin-top: 4px; }
 
     /* ── Convert banner ── */
-    .convert-banner { background: linear-gradient(135deg,rgba(0,230,118,0.12),#f5f3ff); border: 1px solid #c4b5fd; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+    .convert-banner { background: linear-gradient(135deg,rgba(0,230,118,0.12),#f0fdf4); border: 1px solid #86efac; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
     .convert-banner-icon { font-size: 1.5rem; flex-shrink: 0; }
     .convert-banner-text { flex: 1; }
-    .convert-banner-title { font-size: 0.92rem; font-weight: 700; color: #4c1d95; margin-bottom: 2px; }
-    .convert-banner-sub { font-size: 0.8rem; color: #6d28d9; }
+    .convert-banner-title { font-size: 0.92rem; font-weight: 700; color: #065f46; margin-bottom: 2px; }
+    .convert-banner-sub { font-size: 0.8rem; color: #059669; }
 
     /* ── Toast ── */
     .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -141,7 +141,7 @@
     .toast.success { background: #059669; }
     .toast.error { background: #dc2626; }
     .toast.info { background: #d97706; }
-    .toast.purple { background: #7c3aed; }
+    .toast.purple { background: #059669; }
     @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
     /* ── Empty State ── */
@@ -267,7 +267,7 @@
   </div>
 
   <div id="estpanel-sent" class="est-panel">
-    <div class="quick-bar"><span style="font-size:0.9rem;font-weight:700;color:#1d4ed8;">Sent — Awaiting Response</span></div>
+    <div class="quick-bar"><span style="font-size:0.9rem;font-weight:700;color:#059669;">Sent — Awaiting Response</span></div>
     <div class="est-table-wrap"><table class="est-table"><thead><tr><th>Estimate #</th><th>Client</th><th>Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="sent-tbody"></tbody></table><div id="sent-empty" class="empty-state" style="display:none;"><div class="icon">📤</div><h3>No sent estimates</h3></div></div>
   </div>
 
@@ -408,6 +408,7 @@ function estSeed() {
 }
 
 // ── Helpers ──
+function escH(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 function calcLines(lines) {
   let sub=0, tax=0;
   lines.forEach(l=>{ const a=(parseFloat(l.qty)||0)*(parseFloat(l.rate)||0); sub+=a; tax+=a*((parseFloat(l.tax)||0)/100); });
@@ -454,8 +455,8 @@ function buildRow(est, tbody) {
   const isExpired = status==='expired';
   const tr = document.createElement('tr');
   tr.innerHTML=`
-    <td><span style="font-weight:700;color:#d97706;">${est.num}</span>${est.project?`<div style="font-size:0.74rem;color:#9ca3af;">${est.project}</div>`:''}</td>
-    <td><div style="font-weight:600;font-size:0.86rem;">${est.clientName}</div><div style="font-size:0.75rem;color:#9ca3af;">${est.clientEmail||''}</div></td>
+    <td><span style="font-weight:700;color:#d97706;">${escH(est.num)}</span>${est.project?`<div style="font-size:0.74rem;color:#9ca3af;">${escH(est.project)}</div>`:''}</td>
+    <td><div style="font-weight:600;font-size:0.86rem;">${escH(est.clientName)}</div><div style="font-size:0.75rem;color:#9ca3af;">${escH(est.clientEmail||'')}</div></td>
     <td style="font-size:0.84rem;color:#6b7280;">${fmtDate(est.date)}</td>
     <td style="font-size:0.84rem;color:${isExpired?'#dc2626':'#6b7280'};">${fmtDate(est.validUntil)}</td>
     <td style="font-weight:700;">${fmtM(totals.total)}</td>
@@ -466,8 +467,8 @@ function buildRow(est, tbody) {
           <button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#d1fae5;color:#065f46;border:none;" onclick="changeEstStatus('${est.id}','approved')">✓ Approve</button>
           <button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#fee2e2;color:#991b1b;border:none;" onclick="changeEstStatus('${est.id}','declined')">✕ Decline</button>
         `:''}
-        ${status==='approved'?`<button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:rgba(0,230,118,0.12);color:#4c1d95;border:none;" onclick="convertToInvoice('${est.id}')">→ Invoice</button>`:''}
-        ${status==='draft'?`<button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#dbeafe;color:#1d4ed8;border:none;" onclick="changeEstStatus('${est.id}','sent')">Send</button>`:''}
+        ${status==='approved'?`<button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:rgba(0,230,118,0.12);color:#065f46;border:none;" onclick="convertToInvoice('${est.id}')">→ Invoice</button>`:''}
+        ${status==='draft'?`<button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:rgba(0,230,118,0.12);color:#065f46;border:none;" onclick="changeEstStatus('${est.id}','sent')">Send</button>`:''}
         <button class="btn btn-sm" style="padding:3px 8px;font-size:0.74rem;background:#f3f4f6;color:#374151;border:none;" onclick="openEstDrawer('${est.id}')">View</button>
       </div>
     </td>
@@ -585,7 +586,7 @@ function openEstDrawer(id) {
   const linesHtml = (est.lines||[]).map(l=>{
     const amt=(parseFloat(l.qty)||0)*(parseFloat(l.rate)||0);
     const taxAmt=amt*((parseFloat(l.tax)||0)/100);
-    return `<tr><td>${l.desc}</td><td>${l.qty}</td><td>${fmtM(l.rate)}</td><td>${l.tax||0}%</td><td style="text-align:right;font-weight:600;">${fmtM(amt+taxAmt)}</td></tr>`;
+    return `<tr><td>${escH(l.desc)}</td><td>${escH(String(l.qty))}</td><td>${fmtM(l.rate)}</td><td>${parseFloat(l.tax)||0}%</td><td style="text-align:right;font-weight:600;">${fmtM(amt+taxAmt)}</td></tr>`;
   }).join('');
 
   const convertBanner = status==='approved' ? `
@@ -595,7 +596,7 @@ function openEstDrawer(id) {
         <div class="convert-banner-title">Ready to Convert to Invoice?</div>
         <div class="convert-banner-sub">This estimate is approved. Convert it to an invoice to collect payment.</div>
       </div>
-      <button class="btn btn-sm" style="background:#7c3aed;color:white;border:none;white-space:nowrap;" onclick="convertToInvoice('${id}')">→ Convert to Invoice</button>
+      <button class="btn btn-sm" style="background:#059669;color:white;border:none;white-space:nowrap;" onclick="convertToInvoice('${id}')">→ Convert to Invoice</button>
     </div>` : '';
 
   document.getElementById('est-drawer-body').innerHTML = `
@@ -603,13 +604,13 @@ function openEstDrawer(id) {
     ${convertBanner}
     <div class="est-preview">
       <div class="est-preview-header">
-        <div><div class="est-preview-logo">${est.fromName}</div><div class="est-preview-biz">${est.fromEmail}</div></div>
-        <div><div class="est-preview-num">ESTIMATE ${est.num}</div><div class="est-preview-date">Issued: ${fmtDate(est.date)}<br>Valid Until: ${fmtDate(est.validUntil)}</div></div>
+        <div><div class="est-preview-logo">${escH(est.fromName)}</div><div class="est-preview-biz">${escH(est.fromEmail)}</div></div>
+        <div><div class="est-preview-num">ESTIMATE ${escH(est.num)}</div><div class="est-preview-date">Issued: ${fmtDate(est.date)}<br>Valid Until: ${fmtDate(est.validUntil)}</div></div>
       </div>
-      ${est.project?`<div style="background:rgba(255,255,255,0.6);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:1rem;font-size:0.84rem;"><strong>Project:</strong> ${est.project}</div>`:''}
+      ${est.project?`<div style="background:rgba(255,255,255,0.6);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:1rem;font-size:0.84rem;"><strong>Project:</strong> ${escH(est.project)}</div>`:''}
       <div class="est-preview-parties">
-        <div><div class="est-party-label">From</div><div class="est-party-name">${est.fromName}</div><div class="est-party-info">${est.fromEmail}</div></div>
-        <div><div class="est-party-label">Prepared For</div><div class="est-party-name">${est.clientName}</div><div class="est-party-info">${est.clientEmail}</div></div>
+        <div><div class="est-party-label">From</div><div class="est-party-name">${escH(est.fromName)}</div><div class="est-party-info">${escH(est.fromEmail)}</div></div>
+        <div><div class="est-party-label">Prepared For</div><div class="est-party-name">${escH(est.clientName)}</div><div class="est-party-info">${escH(est.clientEmail)}</div></div>
       </div>
       <table class="est-line-table">
         <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th style="text-align:right;">Total</th></tr></thead>
@@ -620,8 +621,8 @@ function openEstDrawer(id) {
         <div class="est-total-row"><span style="color:#6b7280;">Tax</span><span>${fmtM(totals.tax)}</span></div>
         <div class="est-total-row grand"><span>Estimate Total</span><span>${fmtM(totals.total)}</span></div>
       </div>
-      ${est.notes?`<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #fde68a;font-size:0.8rem;color:#6b7280;">${est.notes}</div>`:''}
-      ${est.terms?`<div style="margin-top:0.5rem;font-size:0.78rem;color:#92400e;font-weight:600;">Terms: ${est.terms}</div>`:''}
+      ${est.notes?`<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #fde68a;font-size:0.8rem;color:#6b7280;">${escH(est.notes)}</div>`:''}
+      ${est.terms?`<div style="margin-top:0.5rem;font-size:0.78rem;color:#92400e;font-weight:600;">Terms: ${escH(est.terms)}</div>`:''}
     </div>
   `;
 
@@ -636,12 +637,12 @@ function openEstDrawer(id) {
     footer.appendChild(b2);
   }
   if (status==='approved') {
-    const b=document.createElement('button'); b.className='btn btn-sm'; b.style.cssText='background:#7c3aed;color:white;border:none;';
+    const b=document.createElement('button'); b.className='btn btn-sm'; b.style.cssText='background:#059669;color:white;border:none;';
     b.textContent='→ Convert to Invoice'; b.onclick=()=>convertToInvoice(id);
     footer.appendChild(b);
   }
   if (status==='draft') {
-    const b=document.createElement('button'); b.className='btn btn-sm'; b.style.cssText='background:#dbeafe;color:#1d4ed8;border:none;';
+    const b=document.createElement('button'); b.className='btn btn-sm'; b.style.cssText='background:rgba(0,230,118,0.12);color:#065f46;border:none;';
     b.textContent='Send Estimate'; b.onclick=()=>{changeEstStatus(id,'sent');closeEstDrawer();};
     footer.appendChild(b);
   }
@@ -691,7 +692,7 @@ function renderEstLineItems() {
   estLineItems.forEach((li,i)=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`
-      <td class="li-desc"><input type="text" value="${li.desc}" placeholder="Service or item" oninput="estLineItems[${i}].desc=this.value" /></td>
+      <td class="li-desc"><input type="text" value="${escH(li.desc)}" placeholder="Service or item" oninput="estLineItems[${i}].desc=this.value" /></td>
       <td class="li-qty"><input type="number" value="${li.qty}" min="0" step="0.01" oninput="estLineItems[${i}].qty=this.value;calcEstTotals()" /></td>
       <td class="li-rate"><input type="number" value="${li.rate}" min="0" step="0.01" oninput="estLineItems[${i}].rate=this.value;calcEstTotals()" /></td>
       <td class="li-tax"><input type="number" value="${li.tax}" min="0" max="100" step="0.01" oninput="estLineItems[${i}].tax=this.value;calcEstTotals()" /></td>
@@ -745,7 +746,7 @@ function saveEstimate(status) {
 // ── Toast ──
 function estToast(msg, type='success') {
   const el=document.createElement('div'); el.className=`toast ${type}`;
-  el.innerHTML=`<span>${{success:'✓',error:'✕',info:'ℹ',purple:'🚀'}[type]||'•'}</span> ${msg}`;
+  el.innerHTML=`<span>${{success:'✓',error:'✕',info:'ℹ',purple:'🚀'}[type]||'•'}</span> ${escH(msg)}`;
   document.getElementById('toast-container').appendChild(el);
   setTimeout(()=>{el.style.opacity='0';el.style.transition='all 0.3s';setTimeout(()=>el.remove(),300);},4000);
 }

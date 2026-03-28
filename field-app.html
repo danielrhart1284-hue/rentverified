@@ -12,25 +12,25 @@
       --text: #1e293b;
       --text-secondary: #64748b;
       --border: #e2e8f0;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
+      --blue: #00E676;
+      --purple: #00E676;
       --amber: #f59e0b;
-      --green: #10b981;
+      --green: #00E676;
       --red: #ef4444;
       --nav-bg: #ffffff;
       --shadow: 0 2px 8px rgba(0,0,0,.08);
-      --top-bar: #1e293b;
+      --top-bar: #121212;
     }
     @media(prefers-color-scheme:dark){
       :root {
-        --bg: #0f172a;
-        --card: #1e293b;
+        --bg: #121212;
+        --card: #1e1e1e;
         --text: #f1f5f9;
         --text-secondary: #94a3b8;
-        --border: #334155;
-        --nav-bg: #1e293b;
+        --border: #333333;
+        --nav-bg: #1e1e1e;
         --shadow: 0 2px 8px rgba(0,0,0,.3);
-        --top-bar: #0f172a;
+        --top-bar: #121212;
       }
     }
     * { box-sizing:border-box; margin:0; padding:0; }
@@ -55,7 +55,7 @@
     .top-bar-left { display:flex; align-items:center; gap:10px; }
     .top-bar-logo {
       width:32px; height:32px; border-radius:8px;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      background: linear-gradient(135deg, #00E676, #00C853);
       display:flex; align-items:center; justify-content:center;
       font-weight:800; color:#fff; font-size:14px;
     }
@@ -73,7 +73,7 @@
     }
     .avatar {
       width:32px; height:32px; border-radius:50%;
-      background: linear-gradient(135deg, #10b981, #3b82f6);
+      background: linear-gradient(135deg, #00E676, #00C853);
       display:flex; align-items:center; justify-content:center;
       color:#fff; font-weight:700; font-size:13px;
     }
@@ -137,8 +137,8 @@
       display:inline-block; padding:3px 10px; border-radius:99px;
       font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
     }
-    .pill-scheduled   { background:#dbeafe; color:#1d4ed8; }
-    .pill-en_route    { background:rgba(0,230,118,0.12); color:#7c3aed; }
+    .pill-scheduled   { background:rgba(0,230,118,0.12); color:#00C853; }
+    .pill-en_route    { background:rgba(0,230,118,0.12); color:#00C853; }
     .pill-in_progress { background:#fef3c7; color:#b45309; }
     .pill-completed   { background:#dcfce7; color:#15803d; }
 
@@ -586,17 +586,43 @@ if(typeof RVData!=='undefined'){RVData._useSupabase=function(){return false;};}
 <script src="supabase-config.js"></script>
 <script src="data-layer.js"></script>
 <script>
-/* ============ SEED DATA ============ */
-var TODAY_JOBS = [];
+/* ============ XSS SANITIZER ============ */
+function esc(str) {
+  if (str == null) return '';
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(String(str)));
+  return d.innerHTML;
+}
 
-var savedPhotos = [];
-var savedNotes = [];
-var recentPayments = [];
+/* ============ UNIQUE ID ============ */
+function uid() { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9); }
+
+/* ============ SAFE JSON PARSE ============ */
+function safeParse(key, fallback) {
+  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e) { console.warn('JSON parse error for ' + key, e); return fallback; }
+}
+
+/* ============ SEED DATA ============ */
+var TODAY_JOBS = safeParse('rv_field_jobs', []);
+
+var savedPhotos = safeParse('rv_field_photos', []);
+var savedNotes = safeParse('rv_field_notes', []);
+var recentPayments = safeParse('rv_field_payments', []);
 var selectedPayMethod = '';
 var currentDetailJob = null;
-var jobPhotos = {};
-var jobNotes = {};
+var jobPhotos = safeParse('rv_field_job_photos', {});
+var jobNotes = safeParse('rv_field_job_notes', {});
 var signatureData = null;
+
+function persistAll() {
+  localStorage.setItem('rv_field_jobs', JSON.stringify(TODAY_JOBS));
+  localStorage.setItem('rv_field_photos', JSON.stringify(savedPhotos));
+  localStorage.setItem('rv_field_notes', JSON.stringify(savedNotes));
+  localStorage.setItem('rv_field_payments', JSON.stringify(recentPayments));
+  localStorage.setItem('rv_field_job_photos', JSON.stringify(jobPhotos));
+  localStorage.setItem('rv_field_job_notes', JSON.stringify(jobNotes));
+}
 
 /* ============ TAB SWITCHING ============ */
 function switchTab(tab) {
@@ -631,15 +657,15 @@ function buildJobCard(job) {
     actionBtn = '<button class="job-action-btn" style="opacity:.5;" disabled>Done</button>';
   }
   var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(job.address);
-  return '<div class="job-card status-'+job.status+'" onclick="openJobDetail(\''+job.id+'\')">'
-    + '<div class="job-time">'+job.time+' <span class="job-duration">· '+job.duration+'</span></div>'
-    + '<div class="job-title">'+job.title+'</div>'
-    + '<div class="job-address">📍 '+job.address+'</div>'
-    + '<div class="job-customer">👤 '+job.customer+'</div>'
-    + '<div style="margin-top:8px;"><span class="status-pill pill-'+job.status+'">'+statusLabel+'</span></div>'
+  return '<div class="job-card status-'+esc(job.status)+'" onclick="openJobDetail(\''+esc(job.id)+'\')">'
+    + '<div class="job-time">'+esc(job.time)+' <span class="job-duration">· '+esc(job.duration)+'</span></div>'
+    + '<div class="job-title">'+esc(job.title)+'</div>'
+    + '<div class="job-address">📍 '+esc(job.address)+'</div>'
+    + '<div class="job-customer">👤 '+esc(job.customer)+'</div>'
+    + '<div style="margin-top:8px;"><span class="status-pill pill-'+esc(job.status)+'">'+esc(statusLabel)+'</span></div>'
     + '<div class="job-actions">'
     + '<a class="job-action-btn" href="'+mapsUrl+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">📍 Navigate</a>'
-    + '<a class="job-action-btn" href="tel:'+job.phone+'" onclick="event.stopPropagation()">📞 Call</a>'
+    + '<a class="job-action-btn" href="tel:'+esc(job.phone)+'" onclick="event.stopPropagation()">📞 Call</a>'
     + actionBtn
     + '</div>'
     + '</div>';
@@ -647,11 +673,11 @@ function buildJobCard(job) {
 
 function startJob(id) {
   var job = TODAY_JOBS.find(function(j){ return j.id === id; });
-  if (job) { job.status = 'in_progress'; renderJobs(); toast('Job started'); }
+  if (job) { job.status = 'in_progress'; persistAll(); renderJobs(); toast('Job started'); }
 }
 function completeJob(id) {
   var job = TODAY_JOBS.find(function(j){ return j.id === id; });
-  if (job) { job.status = 'completed'; renderJobs(); toast('Job completed!'); }
+  if (job) { job.status = 'completed'; persistAll(); renderJobs(); toast('Job completed!'); }
 }
 
 /* ============ JOB DETAIL ============ */
@@ -662,11 +688,11 @@ function openJobDetail(id) {
   document.getElementById('jdTitle').textContent = job.title;
   var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(job.address);
   document.getElementById('jdInfo').innerHTML =
-    '<div class="jd-info-row"><span class="jd-info-icon">📍</span><div><div class="jd-info-label">Address</div><a class="jd-info-link" href="'+mapsUrl+'" target="_blank" rel="noopener">'+job.address+'</a></div></div>'
-    + '<div class="jd-info-row"><span class="jd-info-icon">👤</span><div><div class="jd-info-label">Customer</div><div class="jd-info-value">'+job.customer+'</div></div></div>'
-    + '<div class="jd-info-row"><span class="jd-info-icon">📞</span><div><div class="jd-info-label">Phone</div><a class="jd-info-link" href="tel:'+job.phone+'">'+job.phone+'</a></div></div>'
-    + '<div class="jd-info-row"><span class="jd-info-icon">🕐</span><div><div class="jd-info-label">Scheduled</div><div class="jd-info-value">'+job.time+' ('+job.duration+')</div></div></div>'
-    + '<div class="jd-info-row"><span class="jd-info-icon">📝</span><div><div class="jd-info-label">Description</div><div class="jd-info-value">'+job.notes+'</div></div></div>';
+    '<div class="jd-info-row"><span class="jd-info-icon">📍</span><div><div class="jd-info-label">Address</div><a class="jd-info-link" href="'+mapsUrl+'" target="_blank" rel="noopener">'+esc(job.address)+'</a></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">👤</span><div><div class="jd-info-label">Customer</div><div class="jd-info-value">'+esc(job.customer)+'</div></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">📞</span><div><div class="jd-info-label">Phone</div><a class="jd-info-link" href="tel:'+esc(job.phone)+'">'+esc(job.phone)+'</a></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">🕐</span><div><div class="jd-info-label">Scheduled</div><div class="jd-info-value">'+esc(job.time)+' ('+esc(job.duration)+')</div></div></div>'
+    + '<div class="jd-info-row"><span class="jd-info-icon">📝</span><div><div class="jd-info-label">Description</div><div class="jd-info-value">'+esc(job.notes)+'</div></div></div>';
 
   // Status buttons
   document.querySelectorAll('.jd-status-btn').forEach(function(btn){
@@ -696,6 +722,7 @@ function updateJobStatus(status) {
     btn.classList.remove('active-status');
     if (btn.getAttribute('data-status') === status) btn.classList.add('active-status');
   });
+  persistAll();
   toast('Status updated to ' + status.replace('_',' '));
 }
 
@@ -709,7 +736,8 @@ function handlePhotoCapture(e) {
   var reader = new FileReader();
   reader.onload = function(ev) {
     var tag = document.getElementById('photoJobTag').value || 'General';
-    savedPhotos.unshift({ src:ev.target.result, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), tag:tag });
+    savedPhotos.unshift({ id:uid(), src:ev.target.result, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), tag:tag });
+    persistAll();
     renderPhotos();
     toast('Photo saved');
   };
@@ -719,7 +747,7 @@ function handlePhotoCapture(e) {
 function renderPhotos() {
   var html = '';
   savedPhotos.forEach(function(p){
-    html += '<div class="photo-thumb"><img src="'+p.src+'" alt="Photo"><span class="photo-time">'+p.time+'</span><span class="photo-tag">'+p.tag+'</span></div>';
+    html += '<div class="photo-thumb"><img src="'+esc(p.src)+'" alt="Photo"><span class="photo-time">'+esc(p.time)+'</span><span class="photo-tag">'+esc(p.tag)+'</span></div>';
   });
   document.getElementById('photoGrid').innerHTML = html || '<p style="color:var(--text-secondary);text-align:center;padding:20px;grid-column:1/-1;">No photos yet. Tap the button above to capture.</p>';
 }
@@ -734,7 +762,8 @@ function handleJobPhoto(e) {
   var reader = new FileReader();
   reader.onload = function(ev) {
     if (!jobPhotos[currentDetailJob.id]) jobPhotos[currentDetailJob.id] = [];
-    jobPhotos[currentDetailJob.id].push({ src:ev.target.result, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+    jobPhotos[currentDetailJob.id].push({ id:uid(), src:ev.target.result, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+    persistAll();
     renderJobPhotos(currentDetailJob.id);
     toast('Job photo saved');
   };
@@ -745,7 +774,7 @@ function renderJobPhotos(id) {
   var photos = jobPhotos[id] || [];
   var html = '';
   photos.forEach(function(p){
-    html += '<div class="photo-thumb"><img src="'+p.src+'" alt="Photo"><span class="photo-time">'+p.time+'</span></div>';
+    html += '<div class="photo-thumb"><img src="'+esc(p.src)+'" alt="Photo"><span class="photo-time">'+esc(p.time)+'</span></div>';
   });
   document.getElementById('jdPhotos').innerHTML = html || '<p style="color:var(--text-secondary);font-size:.82rem;">No photos for this job yet.</p>';
 }
@@ -774,14 +803,16 @@ function collectPayment() {
   var matchJob = TODAY_JOBS.find(function(j){ return j.title === jobName; });
   if (matchJob) payment.customer = matchJob.customer;
 
+  payment.id = uid();
   recentPayments.unshift(payment);
+  persistAll();
   renderRecentPayments();
 
   // Show receipt
   document.getElementById('receiptBody').innerHTML =
-    '<div class="receipt-row"><span>Job</span><span>'+payment.job+'</span></div>'
-    + '<div class="receipt-row"><span>Customer</span><span>'+(payment.customer||'—')+'</span></div>'
-    + '<div class="receipt-row"><span>Method</span><span>'+payment.method+'</span></div>'
+    '<div class="receipt-row"><span>Job</span><span>'+esc(payment.job)+'</span></div>'
+    + '<div class="receipt-row"><span>Customer</span><span>'+esc(payment.customer||'—')+'</span></div>'
+    + '<div class="receipt-row"><span>Method</span><span>'+esc(payment.method)+'</span></div>'
     + '<div class="receipt-total">$'+amount.toFixed(2)+'</div>';
   document.getElementById('receiptModal').classList.add('open');
 
@@ -795,7 +826,7 @@ function closeReceipt() {
 function renderRecentPayments() {
   var html = '';
   recentPayments.forEach(function(p){
-    html += '<div class="recent-payment-item"><div><div class="rp-title">'+p.job+'</div><div class="rp-detail">'+p.method+' · '+(p.customer||'—')+' · '+p.date+'</div></div><div class="rp-amount">$'+p.amount.toFixed(2)+'</div></div>';
+    html += '<div class="recent-payment-item"><div><div class="rp-title">'+esc(p.job)+'</div><div class="rp-detail">'+esc(p.method)+' · '+esc(p.customer||'—')+' · '+esc(p.date)+'</div></div><div class="rp-amount">$'+p.amount.toFixed(2)+'</div></div>';
   });
   document.getElementById('recentPayments').innerHTML = html;
 }
@@ -805,15 +836,16 @@ function saveNote() {
   var text = document.getElementById('noteInput').value.trim();
   if (!text) { toast('Write something first'); return; }
   var tag = document.getElementById('noteJobTag').value || 'General';
-  savedNotes.unshift({ text:text, tag:tag, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+  savedNotes.unshift({ id:uid(), text:text, tag:tag, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
   document.getElementById('noteInput').value = '';
+  persistAll();
   renderSavedNotes();
   toast('Note saved');
 }
 function renderSavedNotes() {
   var html = '';
   savedNotes.forEach(function(n){
-    html += '<div class="saved-note"><div class="note-header"><span class="note-job-tag">'+n.tag+'</span><span class="note-time">'+n.time+'</span></div><div class="note-text">'+n.text+'</div></div>';
+    html += '<div class="saved-note"><div class="note-header"><span class="note-job-tag">'+esc(n.tag)+'</span><span class="note-time">'+esc(n.time)+'</span></div><div class="note-text">'+esc(n.text)+'</div></div>';
   });
   document.getElementById('savedNotes').innerHTML = html || '<p style="color:var(--text-secondary);text-align:center;padding:20px;">No notes yet.</p>';
 }
@@ -823,8 +855,9 @@ function saveJobNote() {
   var text = document.getElementById('jdNoteInput').value.trim();
   if (!text) { toast('Write something first'); return; }
   if (!jobNotes[currentDetailJob.id]) jobNotes[currentDetailJob.id] = [];
-  jobNotes[currentDetailJob.id].push({ text:text, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+  jobNotes[currentDetailJob.id].push({ id:uid(), text:text, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
   document.getElementById('jdNoteInput').value = '';
+  persistAll();
   renderJobNotes(currentDetailJob.id);
   toast('Job note saved');
 }
@@ -832,7 +865,7 @@ function renderJobNotes(id) {
   var notes = jobNotes[id] || [];
   var html = '';
   notes.forEach(function(n){
-    html += '<div class="saved-note"><div class="note-header"><span class="note-time">'+n.time+'</span></div><div class="note-text">'+n.text+'</div></div>';
+    html += '<div class="saved-note"><div class="note-header"><span class="note-time">'+esc(n.time)+'</span></div><div class="note-text">'+esc(n.text)+'</div></div>';
   });
   document.getElementById('jdNotes').innerHTML = html;
 }
@@ -893,7 +926,7 @@ function sendInvoice() {
 function populateJobSelects() {
   var opts = '<option value="">— Select Job —</option>';
   TODAY_JOBS.forEach(function(j){
-    opts += '<option value="'+j.id+'">'+j.title+'</option>';
+    opts += '<option value="'+esc(j.id)+'">'+esc(j.title)+'</option>';
   });
   document.getElementById('photoJobTag').innerHTML = opts;
   document.getElementById('payJobSelect').innerHTML = opts;

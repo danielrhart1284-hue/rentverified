@@ -346,7 +346,7 @@ function esc(s) { const d=document.createElement('div'); d.textContent=s||''; re
 // ── Storage ──
 const BK_KEY = 'rv_bookkeeping';
 function loadEntries() { try { return JSON.parse(localStorage.getItem(BK_KEY))||[]; } catch { return []; } }
-function saveEntries(d) { localStorage.setItem(BK_KEY, JSON.stringify(d)); }
+function saveEntries(d) { try { localStorage.setItem(BK_KEY, JSON.stringify(d)); } catch(e) { bkToast('Storage full. Delete some entries.','error'); } }
 
 // ── Categories ──
 const INCOME_CATS = ['Rent Payments','Service Revenue','Consulting Fees','Referral Income','Late Fees','Other Income'];
@@ -518,7 +518,7 @@ function renderPL() {
 
   const buildRows = (groups, isIncome) => groups.map(([cat,amt])=>`
     <div class="pl-row">
-      <span class="pl-row-cat">${cat}</span>
+      <span class="pl-row-cat">${esc(cat)}</span>
       <span class="pl-row-amt" style="color:${isIncome?'#059669':'#dc2626'}">${fmtM(amt)}</span>
     </div>`).join('');
 
@@ -600,7 +600,7 @@ function renderCategories() {
     const count = catEntries.length;
     return `<div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:1rem 1.25rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-        <span style="font-size:0.88rem;font-weight:700;color:#374151;">${cat}</span>
+        <span style="font-size:0.88rem;font-weight:700;color:#374151;">${esc(cat)}</span>
         <span style="font-size:0.82rem;font-weight:700;color:${isIncome?'#059669':'#dc2626'}">${isIncome?'+':''}${fmtM(Math.abs(total))}</span>
       </div>
       <div style="font-size:0.76rem;color:#9ca3af;">${count} transaction${count!==1?'s':''}</div>

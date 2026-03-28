@@ -12,7 +12,7 @@
   /* NAV */
   .lc-nav{background:#0f172a;padding:.75rem 1.5rem;display:flex;align-items:center;gap:2rem;position:sticky;top:0;z-index:100;}
   .lc-nav .logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:white;font-weight:700;font-size:1.1rem;}
-  .lc-nav .logo span{color:#3b82f6;}
+  .lc-nav .logo span{color:#00E676;}
   .lc-nav .links{display:flex;gap:.25rem;margin-left:auto;}
   .lc-nav .links a{color:#94a3b8;text-decoration:none;font-size:.875rem;padding:.4rem .75rem;border-radius:6px;transition:.15s;}
   .lc-nav .links a:hover{color:white;background:rgba(255,255,255,.07);}
@@ -54,7 +54,7 @@
   /* OFFICER GRID */
   .officer-grid{display:grid;gap:1rem;}
   .officer-card{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:1.25rem;display:flex;gap:1rem;align-items:flex-start;transition:.2s;cursor:pointer;}
-  .officer-card:hover{border-color:#3b82f6;box-shadow:0 2px 12px rgba(26,86,219,.1);}
+  .officer-card:hover{border-color:#00E676;box-shadow:0 2px 12px rgba(0,230,118,.12);}
   .officer-card.selected{border-color:#00E676;box-shadow:0 0 0 3px rgba(26,86,219,.15);}
   .avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.95rem;flex-shrink:0;}
   .officer-info{flex:1;min-width:0;}
@@ -64,10 +64,10 @@
   .officer-info .rating{font-size:.8rem;color:#f59e0b;margin-bottom:.5rem;}
   .officer-info .rating span{color:#64748b;margin-left:.25rem;}
   .specialties{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.6rem;}
-  .specialties .tag{font-size:.7rem;background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:4px;font-weight:500;}
+  .specialties .tag{font-size:.7rem;background:rgba(0,230,118,0.12);color:#065f46;padding:2px 8px;border-radius:4px;font-weight:500;}
   .officer-meta{font-size:.75rem;color:#94a3b8;display:flex;gap:1rem;}
   .btn-select{padding:.45rem 1rem;background:#00E676;color:white;border:none;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;align-self:center;}
-  .btn-select:hover{background:#1e40af;}
+  .btn-select:hover{background:#00C853;}
 
   /* PERMISSIONS STEP */
   .perm-screen{display:none;}
@@ -98,7 +98,7 @@
   .metric .value{font-size:1.15rem;font-weight:800;color:#0f172a;margin-top:.15rem;}
   .metric .value.green{color:#059669;}
   .btn-submit-pkg{display:block;width:100%;padding:.85rem;background:#00E676;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;display:none;}
-  .btn-submit-pkg:hover{background:#1e40af;}
+  .btn-submit-pkg:hover{background:#00C853;}
 
   /* TRACKING STEP */
   .track-screen{display:none;}
@@ -119,7 +119,7 @@
   .pkg-list-item .pkg-date{font-size:.72rem;color:#94a3b8;}
   .status-badge{font-size:.68rem;padding:2px 8px;border-radius:4px;font-weight:600;text-transform:capitalize;}
   .status-badge.draft{background:#f1f5f9;color:#64748b;}
-  .status-badge.submitted{background:#dbeafe;color:#1d4ed8;}
+  .status-badge.submitted{background:rgba(0,230,118,0.12);color:#065f46;}
   .status-badge.under_review{background:#fef3c7;color:#92400e;}
   .status-badge.pre_approved{background:#dcfce7;color:#15803d;}
   .status-badge.funded{background:#d1fae5;color:#065f46;}
@@ -331,7 +331,14 @@
 // Loan Connect — 3120 Life
 // ════════════════════════════════════════════════════════════════════
 
-var LOAN_OFFICERS = [];
+function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+var LOAN_OFFICERS = [
+  { id: 'lo1', name: 'Marcus Chen', initials: 'MC', company: 'Summit Lending Group', color: '#059669', email: 'marcus@summitlendinggroup.com', phone: '(801) 555-0142', specialties: ['Commercial','Bridge','SBA'], rating: 4.8, reviews: 47, verified: true, funded: '$12.5M', minLoan: '$50K', maxLoan: '$2M', photo: '' },
+  { id: 'lo2', name: 'Sarah Whitfield', initials: 'SW', company: 'Pinnacle Mortgage', color: '#2563eb', email: 'sarah@pinnaclemortgage.com', phone: '(801) 555-0198', specialties: ['Residential','FHA','Conventional'], rating: 4.9, reviews: 63, verified: true, funded: '$28M', minLoan: '$100K', maxLoan: '$5M', photo: '' },
+  { id: 'lo3', name: 'David Ramirez', initials: 'DR', company: 'Western Capital Finance', color: '#7c3aed', email: 'david@westerncapital.com', phone: '(801) 555-0177', specialties: ['Hard Money','Fix and Flip','Bridge'], rating: 4.6, reviews: 31, verified: true, funded: '$8.2M', minLoan: '$25K', maxLoan: '$1.5M', photo: '' },
+  { id: 'lo4', name: 'Jennifer Park', initials: 'JP', company: 'Utah First Lending', color: '#dc2626', email: 'jennifer@utahfirstlending.com', phone: '(801) 555-0165', specialties: ['Commercial','Conventional','SBA'], rating: 4.7, reviews: 52, verified: false, funded: '$19M', minLoan: '$75K', maxLoan: '$3M', photo: '' }
+];
 
 var selectedOfficer = null;
 var currentStep = 1;
@@ -397,12 +404,12 @@ function renderOfficers(officers) {
   grid.innerHTML = officers.map(function(o) {
     var stars = '';
     for (var i = 0; i < 5; i++) { stars += i < Math.round(o.rating) ? '\u2605' : '\u2606'; }
-    var tags = o.specialties.map(function(s) { return '<span class="tag">' + s + '</span>'; }).join('');
-    return '<div class="officer-card" id="card_' + o.id + '">' +
-      '<div class="avatar" style="background:' + o.color + '">' + o.initials + '</div>' +
+    var tags = o.specialties.map(function(s) { return '<span class="tag">' + esc(s) + '</span>'; }).join('');
+    return '<div class="officer-card" id="card_' + esc(o.id) + '">' +
+      '<div class="avatar" style="background:' + esc(o.color) + '">' + esc(o.initials) + '</div>' +
       '<div class="officer-info">' +
-        '<h4>' + o.name + (o.verified ? ' <span class="verified-badge">\u2705 Verified</span>' : '') + '</h4>' +
-        '<div class="company">' + o.company + '</div>' +
+        '<h4>' + esc(o.name) + (o.verified ? ' <span class="verified-badge">\u2705 Verified</span>' : '') + '</h4>' +
+        '<div class="company">' + esc(o.company) + '</div>' +
         '<div class="rating">' + stars + ' ' + o.rating + '<span>(' + o.reviews + ' reviews)</span></div>' +
         '<div class="specialties">' + tags + '</div>' +
         '<div class="officer-meta"><span>Funded: ' + o.funded + '</span><span>Range: ' + o.minLoan + ' - ' + o.maxLoan + '</span></div>' +
@@ -419,8 +426,8 @@ function selectOfficer(id) {
 
   // Show permissions
   var ph = document.getElementById('permHeader');
-  ph.innerHTML = '<div class="avatar" style="background:' + selectedOfficer.color + '">' + selectedOfficer.initials + '</div>' +
-    '<div><h3>' + selectedOfficer.name + '</h3><p>' + selectedOfficer.company + '</p></div>';
+  ph.innerHTML = '<div class="avatar" style="background:' + esc(selectedOfficer.color) + '">' + esc(selectedOfficer.initials) + '</div>' +
+    '<div><h3>' + esc(selectedOfficer.name) + '</h3><p>' + esc(selectedOfficer.company) + '</p></div>';
 
   goToStep(2);
   showToast('Selected ' + selectedOfficer.name, 'info');
@@ -522,6 +529,8 @@ function generatePackage() {
 // ─── Submit Package ───────────────────────────────────────────────
 async function submitPackage() {
   if (!selectedOfficer || !computedData.revenue_12mo) return;
+  var btn = document.getElementById('btnSubmitPkg') || document.querySelector('.btn-submit-pkg');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
 
   var pkg = {
     business_id: 'demo_biz',
@@ -547,8 +556,10 @@ async function submitPackage() {
       subject: 'Loan Package Submitted',
       body: 'Your loan package has been submitted to ' + selectedOfficer.name + ' at ' + selectedOfficer.company + '. Revenue: $' + computedData.revenue_12mo.toLocaleString() + ', Expenses: $' + computedData.expense_12mo.toLocaleString() + ', Cash Flow: $' + Math.round(computedData.cashflow_avg).toLocaleString() + '/mo.'
     });
-  } catch (e) { /* continue */ }
+  } catch (e) { console.error('Save failed:', e); showToast('Error saving package', 'error'); }
 
+  document.getElementById('btnSubmitPkg').disabled = true;
+  document.getElementById('btnSubmitPkg').textContent = 'Submitted';
   showToast('Package submitted to ' + selectedOfficer.name + '!', 'success');
   loadPackages();
   showTracking('submitted');
@@ -580,7 +591,8 @@ function showTracking(currentStatus) {
 
 // ─── Load Packages (right column) ─────────────────────────────────
 function loadPackages() {
-  var items = JSON.parse(localStorage.getItem('rv_loan_packages') || '[]');
+  var items;
+  try { items = JSON.parse(localStorage.getItem('rv_loan_packages') || '[]'); } catch(e) { items = []; }
   var body = document.getElementById('pkgListBody');
 
   if (!items.length) {
@@ -597,7 +609,7 @@ function loadPackages() {
     var date = p.shared_at ? new Date(p.shared_at).toLocaleDateString() : '';
     var statusLabel = (p.status || 'draft').replace(/_/g, ' ');
     return '<div class="pkg-list-item" onclick="viewPackage(\'' + p.id + '\')">' +
-      '<div><div class="pkg-name">' + name + '</div><div class="pkg-date">' + date + '</div></div>' +
+      '<div><div class="pkg-name">' + esc(name) + '</div><div class="pkg-date">' + esc(date) + '</div></div>' +
       '<span class="status-badge ' + (p.status || 'draft') + '">' + statusLabel + '</span>' +
     '</div>';
   }).join('');
@@ -615,7 +627,8 @@ function loadPackages() {
 
 // ─── View Package ─────────────────────────────────────────────────
 function viewPackage(id) {
-  var items = JSON.parse(localStorage.getItem('rv_loan_packages') || '[]');
+  var items;
+  try { items = JSON.parse(localStorage.getItem('rv_loan_packages') || '[]'); } catch(e) { items = []; }
   var pkg = items.find(function(p) { return p.id === id; });
   if (!pkg) return;
 

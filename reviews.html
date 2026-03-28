@@ -37,8 +37,8 @@
     .rev-stars { color: #f59e0b; font-size: 1.1rem; letter-spacing: 1px; }
     .rev-stars .empty { color: #d1d5db; }
     .rev-comment { color: #374151; font-size: 0.88rem; line-height: 1.5; margin: 0.5rem 0; }
-    .rev-source { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; background: rgba(0,230,118,0.12); color: #5b21b6; }
-    .rev-source.google_link { background: #dbeafe; color: #1e40af; }
+    .rev-source { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; background: rgba(0,230,118,0.12); color: #065f46; }
+    .rev-source.google_link { background: rgba(0,230,118,0.12); color: #065f46; }
     .rev-actions { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.75rem; flex-wrap: wrap; }
     .rev-toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 600; color: #6b7280; cursor: pointer; }
     .rev-toggle input[type="checkbox"] { accent-color: #f59e0b; width: 16px; height: 16px; }
@@ -210,7 +210,7 @@ var currentTab = 'all';
 // ─── Data Methods ─────────────────────────────────────────────────────
 function getReviews() {
   var stored = localStorage.getItem(LS_KEY);
-  if (stored) return JSON.parse(stored);
+  if (stored) { try { return JSON.parse(stored); } catch(e) { /* corrupted */ } }
   localStorage.setItem(LS_KEY, JSON.stringify(SEED_REVIEWS));
   return JSON.parse(JSON.stringify(SEED_REVIEWS));
 }
@@ -232,7 +232,8 @@ function deleteReview(id) {
 
 function getRequests() {
   var stored = localStorage.getItem(LS_REQ_KEY);
-  return stored ? JSON.parse(stored) : [];
+  if (stored) { try { return JSON.parse(stored); } catch(e) { return []; } }
+  return [];
 }
 
 function saveRequest(req) {

@@ -55,7 +55,7 @@
       border-left: 3px solid transparent;
     }
     .dc-industry-btn:hover { background: #f3f4f6; }
-    .dc-industry-btn.active { background: #eff6ff; color: #1d4ed8; border-left-color: #1d4ed8; }
+    .dc-industry-btn.active { background: #eff6ff; color: #00C853; border-left-color: #00C853; }
     .dc-industry-btn .btn-icon { font-size: 1.1rem; width: 24px; text-align: center; }
 
     /* ── Header ── */
@@ -106,7 +106,7 @@
       transition: all 0.12s;
       user-select: none;
     }
-    .widget-chip:hover { border-color: #3b82f6; color: #1d4ed8; }
+    .widget-chip:hover { border-color: #00E676; color: #00C853; }
     .widget-chip.in-layout { border-color: #a7f3d0; background: #ecfdf5; color: #065f46; }
     .widget-chip .wc-icon { font-size: 1rem; }
 
@@ -195,11 +195,11 @@
       cursor: pointer;
       transition: all 0.12s;
     }
-    .saved-config-card:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .saved-config-card.active { border-color: #1d4ed8; background: #eff6ff; }
+    .saved-config-card:hover { border-color: #00E676; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .saved-config-card.active { border-color: #00C853; background: #eff6ff; }
     .saved-config-name { font-size: 0.9rem; font-weight: 800; color: #111827; margin-bottom: 3px; }
     .saved-config-meta { font-size: 0.75rem; color: #6b7280; }
-    .saved-config-count { font-size: 0.78rem; font-weight: 700; color: #3b82f6; margin-top: 4px; }
+    .saved-config-count { font-size: 0.78rem; font-weight: 700; color: #00E676; margin-top: 4px; }
 
     /* ── Toast ── */
     .dc-toast {
@@ -312,7 +312,7 @@
           <h3>Active Layout</h3>
           <p style="font-size:0.8rem;color:#6b7280;margin:2px 0 0;">Use ↑↓ to reorder. Click ✕ to remove.</p>
         </div>
-        <span id="widgetCount" style="font-size:0.82rem;font-weight:700;color:#3b82f6;"></span>
+        <span id="widgetCount" style="font-size:0.82rem;font-weight:700;color:#00E676;"></span>
       </div>
       <div class="layout-list" id="layoutList"></div>
     </div>
@@ -387,6 +387,9 @@ function init() {
   activeLayout = lsGet('rv_dashcfg_layout_' + currentIndustry) || [...INDUSTRY_DEFAULTS[currentIndustry]];
   renderAll();
   renderSavedConfigs();
+}
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML;
 }
 
 function setIndustry(ind, btn) {
@@ -523,9 +526,9 @@ function renderSavedConfigs() {
     el.innerHTML = '<p style="font-size:0.78rem;color:#9ca3af;padding:0.25rem 0;">No saved layouts yet.</p>';
     return;
   }
-  el.innerHTML = configs.map(c => `<div style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid #e5e7eb;background:white;transition:all .1s;" onclick="loadSavedConfig(${c.id})" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e5e7eb'">
+  el.innerHTML = configs.map(c => `<div style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid #e5e7eb;background:white;transition:all .1s;" onclick="loadSavedConfig(${c.id})" onmouseover="this.style.borderColor='#00E676'" onmouseout="this.style.borderColor='#e5e7eb'">
     <div style="flex:1;min-width:0;">
-      <div style="font-size:0.8rem;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+      <div style="font-size:0.8rem;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.name)}</div>
       <div style="font-size:0.7rem;color:#9ca3af;">${c.layout.length} widgets</div>
     </div>
     <button onclick="deleteSavedConfig(${c.id},event)" style="background:none;border:none;font-size:0.75rem;color:#9ca3af;cursor:pointer;padding:2px;" title="Delete">✕</button>

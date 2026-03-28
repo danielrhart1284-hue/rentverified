@@ -55,8 +55,8 @@
     }
     .search-bar button {
       padding: 1rem 2rem;
-      background: #3b82f6;
-      color: white;
+      background: #00E676;
+      color: #121212;
       border: none;
       font-weight: 700;
       font-size: 1rem;
@@ -64,7 +64,7 @@
       transition: background 0.15s;
       white-space: nowrap;
     }
-    .search-bar button:hover { background: #2563eb; }
+    .search-bar button:hover { background: #00C853; }
 
     /* Category pills */
     .categories-wrap {
@@ -88,8 +88,8 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .cat-pill:hover { border-color: #3b82f6; color: #3b82f6; }
-    .cat-pill.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .cat-pill:hover { border-color: #00E676; color: #00E676; }
+    .cat-pill.active { background: #00E676; color: #121212; border-color: #00E676; }
 
     /* Controls bar */
     .controls-bar {
@@ -184,8 +184,8 @@
     .review-count { font-size: 0.8rem; color: #9ca3af; }
     .pro-card-trade {
       display: inline-block;
-      background: #eff6ff;
-      color: #1d4ed8;
+      background: rgba(0,230,118,0.12);
+      color: #065f46;
       font-size: 0.78rem;
       font-weight: 600;
       padding: 2px 8px;
@@ -232,15 +232,15 @@
       border: none;
       transition: all 0.15s;
     }
-    .btn-view { background: #3b82f6; color: white; }
-    .btn-view:hover { background: #2563eb; }
+    .btn-view { background: #00E676; color: #121212; }
+    .btn-view:hover { background: #00C853; }
     .btn-contact { background: #10b981; color: white; }
     .btn-contact:hover { background: #059669; }
     .btn-save { background: white; color: #6b7280; border: 2px solid #e5e7eb !important; }
     .btn-save:hover { border-color: #f59e0b !important; color: #f59e0b; }
     .btn-save.saved { background: #fef3c7; color: #d97706; border-color: #f59e0b !important; }
-    .btn-book { background: white; color: #7c3aed; border: 2px solid #e5e7eb !important; }
-    .btn-book:hover { border-color: #7c3aed !important; }
+    .btn-book { background: white; color: #00E676; border: 2px solid #e5e7eb !important; }
+    .btn-book:hover { border-color: #00E676 !important; }
 
     /* CTA section */
     .list-cta {
@@ -343,7 +343,7 @@
       font-size: 0.9rem;
     }
     .service-row span:first-child { color: #374151; }
-    .service-row span:last-child { color: #1d4ed8; font-weight: 600; }
+    .service-row span:last-child { color: #059669; font-weight: 600; }
     .cred-badges {
       display: flex;
       flex-wrap: wrap;
@@ -405,15 +405,15 @@
       transition: border-color 0.15s;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: #3b82f6;
+      border-color: #00E676;
     }
     .form-group textarea { resize: vertical; min-height: 100px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-submit {
       width: 100%;
       padding: 0.75rem;
-      background: #3b82f6;
-      color: white;
+      background: #00E676;
+      color: #121212;
       border: none;
       border-radius: 8px;
       font-weight: 700;
@@ -421,7 +421,7 @@
       cursor: pointer;
       margin-top: 0.5rem;
     }
-    .form-submit:hover { background: #2563eb; }
+    .form-submit:hover { background: #00C853; }
 
     /* No results */
     .no-results {
@@ -908,7 +908,12 @@ function _seedProfessionals_original() {
 
 // ── INIT ──
 let currentCategory = 'All';
-let savedPros = JSON.parse(localStorage.getItem('rv_saved_pros') || '[]');
+function safeParse(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+  catch(e) { console.warn('Bad JSON in ' + key, e); localStorage.removeItem(key); return fallback; }
+}
+
+let savedPros = safeParse('rv_saved_pros', []);
 
 function getProfessionals() {
   let data = localStorage.getItem('rv_network_professionals');
@@ -917,7 +922,13 @@ function getProfessionals() {
     localStorage.setItem('rv_network_professionals', JSON.stringify(pros));
     return pros;
   }
-  return JSON.parse(data);
+  return safeParse('rv_network_professionals', []);
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
 }
 
 function getInitials(name) {
@@ -987,26 +998,26 @@ function renderCards(pros) {
   }
   grid.innerHTML = pros.map(p => {
     const isSaved = savedPros.includes(p.id);
-    const serviceTags = p.services.slice(0, 3).map(s => `<span class="service-tag">${s.name}</span>`).join('');
+    const serviceTags = p.services.slice(0, 3).map(s => `<span class="service-tag">${esc(s.name)}</span>`).join('');
     return `
       <div class="pro-card">
         <div class="pro-card-header">
-          <div class="pro-avatar" style="background:${p.avatarColor}">${getInitials(p.name)}</div>
+          <div class="pro-avatar" style="background:${esc(p.avatarColor)}">${esc(getInitials(p.name))}</div>
           <div class="pro-card-info">
             <div class="pro-card-name">
-              ${p.name}
+              ${esc(p.name)}
               ${p.credentials.verified ? '<span class="verified-badge"><svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Verified</span>' : ''}
             </div>
             <div class="pro-card-rating">
               <span class="stars">${renderStars(p.rating)}</span>
-              <span class="rating-num">${p.rating}</span>
-              <span class="review-count">(${p.reviewCount} reviews)</span>
+              <span class="rating-num">${esc(String(p.rating))}</span>
+              <span class="review-count">(${esc(String(p.reviewCount))} reviews)</span>
             </div>
           </div>
         </div>
-        <span class="pro-card-trade">${p.trade}</span>
-        <div class="pro-card-location">${p.location}</div>
-        <div class="pro-card-tagline">${p.tagline}</div>
+        <span class="pro-card-trade">${esc(p.trade)}</span>
+        <div class="pro-card-location">${esc(p.location)}</div>
+        <div class="pro-card-tagline">${esc(p.tagline)}</div>
         <div class="pro-card-tags">${serviceTags}</div>
         <div class="pro-card-actions">
           <button class="btn-view" onclick="openProfile('${p.id}')">View Profile</button>
@@ -1046,24 +1057,24 @@ function openProfile(id) {
     {label:'Background Checked', active:p.credentials.backgroundChecked},
     {label:'3120 Life', active:p.credentials.verified}
   ];
-  const credsHtml = creds.map(c => `<span class="cred-badge${c.active ? '' : ' inactive'}">${c.active ? '\u2713' : '\u2717'} ${c.label}</span>`).join('');
-  const servicesHtml = p.services.map(s => `<div class="service-row"><span>${s.name}</span><span>${s.rate}</span></div>`).join('');
+  const credsHtml = creds.map(c => `<span class="cred-badge${c.active ? '' : ' inactive'}">${c.active ? '\u2713' : '\u2717'} ${esc(c.label)}</span>`).join('');
+  const servicesHtml = p.services.map(s => `<div class="service-row"><span>${esc(s.name)}</span><span>${esc(s.rate)}</span></div>`).join('');
   const reviewsHtml = p.reviews.map(r => `
     <div class="review-card">
       <div class="review-card-header">
-        <div><span class="review-author">${r.author}</span> <span class="stars" style="font-size:0.8rem;">${renderStars(r.rating)}</span></div>
-        <span class="review-date">${r.date}</span>
+        <div><span class="review-author">${esc(r.author)}</span> <span class="stars" style="font-size:0.8rem;">${renderStars(r.rating)}</span></div>
+        <span class="review-date">${esc(r.date)}</span>
       </div>
-      <div class="review-text">${r.text}</div>
+      <div class="review-text">${esc(r.text)}</div>
     </div>`).join('');
 
   document.getElementById('profileContent').innerHTML = `
     <div class="profile-header">
       <div class="profile-avatar" style="background:${p.avatarColor}">${getInitials(p.name)}</div>
       <div>
-        <div class="profile-name">${p.name} ${p.credentials.verified ? '<span class="verified-badge" style="font-size:0.75rem;vertical-align:middle;"><svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Verified</span>' : ''}</div>
-        <div style="margin-top:4px;"><span class="pro-card-trade">${p.trade}</span></div>
-        <div style="margin-top:4px;color:#6b7280;font-size:0.88rem;">${p.location}</div>
+        <div class="profile-name">${esc(p.name)} ${p.credentials.verified ? '<span class="verified-badge" style="font-size:0.75rem;vertical-align:middle;"><svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Verified</span>' : ''}</div>
+        <div style="margin-top:4px;"><span class="pro-card-trade">${esc(p.trade)}</span></div>
+        <div style="margin-top:4px;color:#6b7280;font-size:0.88rem;">${esc(p.location)}</div>
         <div class="pro-card-rating" style="margin-top:4px;">
           <span class="stars">${renderStars(p.rating)}</span>
           <span class="rating-num">${p.rating}</span>
@@ -1074,7 +1085,7 @@ function openProfile(id) {
 
     <div class="profile-section">
       <h3>About</h3>
-      <p>${p.bio}</p>
+      <p>${esc(p.bio)}</p>
     </div>
 
     <div class="profile-section">
@@ -1089,7 +1100,7 @@ function openProfile(id) {
 
     <div class="profile-section">
       <h3>Service Area</h3>
-      <p>${p.serviceAreas.join(' &bull; ')}</p>
+      <p>${p.serviceAreas.map(a => esc(a)).join(' &bull; ')}</p>
     </div>
 
     <div class="profile-section">
@@ -1100,15 +1111,15 @@ function openProfile(id) {
     <div class="profile-section">
       <h3>Contact Information</h3>
       <div class="profile-contact-info">
-        <div class="contact-item"><strong>Phone</strong>${p.phone}</div>
-        <div class="contact-item"><strong>Email</strong>${p.email}</div>
-        ${p.website ? '<div class="contact-item"><strong>Website</strong><a href="https://' + p.website + '" target="_blank">' + p.website + '</a></div>' : ''}
-        <div class="contact-item"><strong>Trade</strong>${p.trade}</div>
+        <div class="contact-item"><strong>Phone</strong>${esc(p.phone)}</div>
+        <div class="contact-item"><strong>Email</strong>${esc(p.email)}</div>
+        ${p.website ? '<div class="contact-item"><strong>Website</strong><a href="https://' + esc(p.website) + '" target="_blank">' + esc(p.website) + '</a></div>' : ''}
+        <div class="contact-item"><strong>Trade</strong>${esc(p.trade)}</div>
       </div>
     </div>
 
     <div style="display:flex;gap:0.75rem;margin-top:1rem;">
-      <button style="flex:1;padding:0.75rem;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="closeModal('profileModal');openContact('${p.id}')">Send Message</button>
+      <button style="flex:1;padding:0.75rem;background:#00E676;color:#121212;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="closeModal('profileModal');openContact('${p.id}')">Send Message</button>
       <button style="flex:1;padding:0.75rem;background:#10b981;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="window.open('tel:${p.phone}')">Call Now</button>
     </div>`;
   openModal('profileModal');
@@ -1120,7 +1131,7 @@ function openContact(id) {
   const p = pros.find(x => x.id === id);
   if (!p) return;
   document.getElementById('contactProId').value = p.id;
-  document.getElementById('contactSubtitle').textContent = `to ${p.name}`;
+  document.getElementById('contactSubtitle').textContent = 'to ' + p.name;
   document.getElementById('contactForm').reset();
   document.getElementById('contactProId').value = p.id;
   openModal('contactModal');
@@ -1138,7 +1149,7 @@ function submitContact(e) {
     message: document.getElementById('contactMessage').value,
     date: new Date().toISOString()
   };
-  const inquiries = JSON.parse(localStorage.getItem('rv_network_inquiries') || '[]');
+  const inquiries = safeParse('rv_network_inquiries', []);
   inquiries.push(inquiry);
   localStorage.setItem('rv_network_inquiries', JSON.stringify(inquiries));
   closeModal('contactModal');
@@ -1189,7 +1200,7 @@ document.getElementById('searchLocation').addEventListener('keydown', e => { if 
 const QA_KEY = 'rv_community_qa';
 
 function getQAThreads() {
-  var threads = JSON.parse(localStorage.getItem(QA_KEY) || '[]');
+  var threads = safeParse(QA_KEY, []);
   if (!threads.length) {
     threads = [
       {
@@ -1234,25 +1245,25 @@ function renderQAThreads() {
   container.innerHTML = threads.map(function(t, ti) {
     var answersHtml = (t.answers || []).map(function(a) {
       return '<div class="qa-answer">' +
-        '<div class="qa-answer-header"><span class="qa-answer-name">' + a.author + '</span>' +
-        (a.badge ? '<span class="qa-answer-badge">' + a.badge + '</span>' : '') +
+        '<div class="qa-answer-header"><span class="qa-answer-name">' + escQA(a.author) + '</span>' +
+        (a.badge ? '<span class="qa-answer-badge">' + escQA(a.badge) + '</span>' : '') +
         '</div>' +
-        '<div class="qa-answer-text">' + a.text + '</div>' +
+        '<div class="qa-answer-text">' + escQA(a.text) + '</div>' +
         '<div class="qa-answer-time">' + timeAgoQA(new Date(a.date)) + '</div>' +
       '</div>';
     }).join('');
 
     var tagsHtml = (t.tags || []).map(function(tag) {
-      return '<span class="qa-tag">' + tag + '</span>';
+      return '<span class="qa-tag">' + escQA(tag) + '</span>';
     }).join('');
 
     return '<div class="qa-thread">' +
       '<div class="qa-thread-header">' +
-        '<div class="qa-avatar">' + (t.avatar || '?') + '</div>' +
-        '<div><div class="qa-thread-q">' + t.question + '</div>' +
-        '<div class="qa-thread-meta">' + t.author + ' &bull; ' + timeAgoQA(new Date(t.date)) + ' &bull; ' + (t.answers || []).length + ' answers</div></div>' +
+        '<div class="qa-avatar">' + escQA(t.avatar || '?') + '</div>' +
+        '<div><div class="qa-thread-q">' + escQA(t.question) + '</div>' +
+        '<div class="qa-thread-meta">' + escQA(t.author) + ' &bull; ' + timeAgoQA(new Date(t.date)) + ' &bull; ' + (t.answers || []).length + ' answers</div></div>' +
       '</div>' +
-      '<div class="qa-thread-body">' + (t.body || '') + '</div>' +
+      '<div class="qa-thread-body">' + escQA(t.body || '') + '</div>' +
       '<div class="qa-tags">' + tagsHtml + '</div>' +
       '<div class="qa-vote"><button onclick="voteQuestion(' + ti + ')">&#9650;</button><span>' + (t.votes || 0) + ' votes</span></div>' +
       '<div class="qa-answers">' + answersHtml + '</div>' +
@@ -1308,6 +1319,12 @@ function voteQuestion(threadIdx) {
   threads[threadIdx].votes = (threads[threadIdx].votes || 0) + 1;
   localStorage.setItem(QA_KEY, JSON.stringify(threads));
   renderQAThreads();
+}
+
+function escQA(str) {
+  var div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
 }
 
 function timeAgoQA(date) {
