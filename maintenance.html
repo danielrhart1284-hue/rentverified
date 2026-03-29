@@ -218,7 +218,7 @@
             <div class="fg">
               <label>Property *</label>
               <select id="nrProp">
-                <option value="119 E 600 S #119, Orem UT">119 E 600 S #119, Orem UT</option>
+                <option value="">— Select Property —</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -380,6 +380,7 @@ function uid() { return 'WO-' + Date.now().toString(36).toUpperCase(); }
 
 function loadSampleData() {
   if(workOrders.length) return;
+  if(!localStorage.getItem('rv_demo_mode')) return;
   workOrders = [
     { id:'WO-A1B2C', prop:'119 E 600 S #119, Orem UT', cat:'Plumbing',   priority:'High',      status:'In Progress', desc:'Bathroom faucet dripping constantly — wasting water.',            source:'Tenant',   vendor:'Mike\'s Plumbing',  submitted:'2026-02-28', updated:'2026-03-01', notes:[] },
     { id:'WO-D3E4F', prop:'119 E 600 S #119, Orem UT', cat:'Electrical', priority:'Medium',     status:'Open',        desc:'Kitchen outlet near sink stopped working.',                       source:'Tenant',   vendor:'',                  submitted:'2026-03-02', updated:'2026-03-02', notes:[] },
@@ -399,6 +400,25 @@ function loadSampleData() {
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   loadSampleData();
+  // Populate property dropdown from localStorage
+  (function() {
+    var sel = document.getElementById('nrProp');
+    var props = [];
+    try { props = JSON.parse(localStorage.getItem('rv_properties') || '[]'); } catch(e) {}
+    if (!props.length) try { var listings = JSON.parse(localStorage.getItem('rv_listings') || '[]'); props = listings.map(function(l){ return l.address || l.prop; }).filter(Boolean); } catch(e) {}
+    if (!props.length) try { var leases = JSON.parse(localStorage.getItem('rv_leases') || '[]'); props = leases.map(function(l){ return l.prop; }).filter(Boolean); } catch(e) {}
+    var otherOpt = sel.querySelector('option[value="Other"]');
+    props.forEach(function(p) {
+      var opt = document.createElement('option');
+      opt.value = p; opt.textContent = p;
+      sel.insertBefore(opt, otherOpt);
+    });
+    if (!props.length) {
+      var hint = document.createElement('option');
+      hint.value = ''; hint.textContent = 'No properties yet — add one first'; hint.disabled = true;
+      sel.insertBefore(hint, otherOpt);
+    }
+  })();
   renderAll();
   populateVendorSelect();
   populatePropFilter();
@@ -641,7 +661,7 @@ function submitRequest() {
     description: wo.desc,
     submitted:   wo.submitted,
     status:      'open',
-    landlord:    '[Your Business Name]',
+    landlord:    '3120Life LLC',
     contact:     'Daniel Hart — (801) 555-0199',
   };
   try {

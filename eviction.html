@@ -337,9 +337,6 @@
             <label>Property Address</label>
             <select id="ev-property">
               <option value="">— Select Property —</option>
-              <option value="119 E 600 S #119, Orem, UT">119 E 600 S #119, Orem, UT</option>
-              <option value="5041 Doren Dr. S. Ogden, UT">5041 Doren Dr. S. Ogden, UT</option>
-              <option value="268 Highland Dr. Tooele, UT">268 Highland Dr. Tooele, UT</option>
               <option value="other">+ Enter address manually</option>
             </select>
           </div>
@@ -555,7 +552,7 @@
           </div>
           <div class="form-group">
             <label>Property Address</label>
-            <input type="text" id="n-address" placeholder="119 E 600 S #119, Orem, UT" oninput="updateNoticePreview()">
+            <input type="text" id="n-address" placeholder="Property address" oninput="updateNoticePreview()">
           </div>
           <div class="form-group" id="n-amount-group">
             <label>Amount Owed ($)</label>
@@ -567,7 +564,7 @@
           </div>
           <div class="form-group">
             <label>Landlord / Agent Name</label>
-            <input type="text" id="n-landlord" value="Daniel Hart — [Your Business Name]" oninput="updateNoticePreview()">
+            <input type="text" id="n-landlord" value="Daniel Hart — 3120Life LLC" oninput="updateNoticePreview()">
           </div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:.75rem;" class="no-print">
@@ -1050,7 +1047,7 @@ function updateNoticePreview() {
   const address = esc(document.getElementById('n-address').value || '[Property Address]');
   const amount = esc(document.getElementById('n-amount').value || '[Amount Owed]');
   const date = document.getElementById('n-date').value || new Date().toISOString().slice(0,10);
-  const landlord = esc(document.getElementById('n-landlord').value || '[Your Business Name]');
+  const landlord = esc(document.getElementById('n-landlord').value || '3120Life LLC');
   const dateFormatted = date ? new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '[Date]';
 
   // Show/hide amount field
@@ -1391,8 +1388,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('ev-property').addEventListener('change', function() {
     document.getElementById('ev-manual-addr-group').style.display = this.value==='other' ? 'block' : 'none';
   });
-  // Load sample case
-  if (!cases.length) {
+  // Load sample case only in demo mode
+  if (!cases.length && localStorage.getItem('rv_demo_mode')) {
     cases.push({
       id: uid(), property: '119 E 600 S #119, Orem, UT', tenant: 'Sample Tenant',
       violationType: 'nonpayment', status: 'Notice Sent', urgency: 'standard',
@@ -1403,6 +1400,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     saveData();
   }
+  // Populate property dropdown from localStorage
+  (function() {
+    var sel = document.getElementById('ev-property');
+    var props = [];
+    try { props = JSON.parse(localStorage.getItem('rv_properties') || '[]'); } catch(e) {}
+    if (!props.length) try { var listings = JSON.parse(localStorage.getItem('rv_listings') || '[]'); props = listings.map(function(l){ return l.address || l.prop; }).filter(Boolean); } catch(e) {}
+    if (!props.length) try { var leases = JSON.parse(localStorage.getItem('rv_leases') || '[]'); props = leases.map(function(l){ return l.prop; }).filter(Boolean); } catch(e) {}
+    var otherOpt = sel.querySelector('option[value="other"]');
+    props.forEach(function(p) {
+      var opt = document.createElement('option');
+      opt.value = p; opt.textContent = p;
+      sel.insertBefore(opt, otherOpt);
+    });
+    if (!props.length) {
+      var hint = document.createElement('option');
+      hint.value = ''; hint.textContent = 'No properties yet — add one first'; hint.disabled = true;
+      sel.insertBefore(hint, otherOpt);
+    }
+  })();
   refreshDashboard();
 });
 </script>
