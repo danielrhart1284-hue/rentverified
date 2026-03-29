@@ -3389,7 +3389,7 @@ function renderAccountsTable() {
     var statusClass = a.status === 'active' ? 'active' : a.status === 'suspended' ? 'suspended' : 'pending';
     var suspendLabel = a.status === 'suspended' ? 'Activate' : 'Suspend';
     return '<tr>' +
-      '<td><strong>' + a.name + '</strong></td>' +
+      '<td><strong style="cursor:pointer;color:#00E676;text-decoration:underline;" onclick="impersonateUser(\'' + a.id + '\')">' + a.name + '</strong></td>' +
       '<td>' + a.email + '</td>' +
       '<td><span class="status-badge ' + (a.role === 'admin' ? 'submitted' : 'occupied') + '">' + a.role + '</span></td>' +
       '<td>' + (a.business_type || '-') + '</td>' +
@@ -3615,9 +3615,27 @@ function impersonateUser(id) {
   var a = getAccounts().find(function(x) { return x.id === id; });
   if (!a) return;
   localStorage.setItem('rv_impersonate_as', a.email);
+  localStorage.setItem('rv_impersonate_role', a.role || 'owner');
+  localStorage.setItem('rv_impersonate_name', a.name);
   logAuditEvent('admin@3120life.com', 'impersonate', 'user', id, 'Impersonating ' + a.email);
-  checkImpersonation();
-  showToast('Now impersonating ' + a.name);
+
+  // Route to the correct dashboard based on role/business type
+  var dest = 'landlord-signup.html'; // default PM dashboard
+  var role = (a.role || '').toLowerCase();
+  var biz = (a.business_type || '').toLowerCase();
+
+  if (role === 'tenant') dest = 'tenant-portal.html';
+  else if (role === 'agent') dest = 'agent-portal.html';
+  else if (biz.indexOf('vendor') >= 0 || biz.indexOf('contractor') >= 0) dest = 'vendor-portal.html';
+  else if (biz.indexOf('attorney') >= 0 || biz.indexOf('legal') >= 0) dest = 'matters.html';
+  else if (biz.indexOf('insurance') >= 0) dest = 'insurance-agents.html';
+  else if (biz.indexOf('loan') >= 0) dest = 'loan-officer-portal.html';
+  else if (biz.indexOf('salon') >= 0 || biz.indexOf('wellness') >= 0) dest = 'wellness.html';
+  else if (biz.indexOf('nonprofit') >= 0) dest = 'nonprofit.html';
+  else if (biz.indexOf('str') >= 0 || biz.indexOf('short') >= 0) dest = 'str-manager.html';
+  else if (biz.indexOf('accounting') >= 0 || biz.indexOf('cpa') >= 0) dest = 'accounting.html';
+
+  window.location.href = dest;
 }
 
 function deleteAccount(id) {
