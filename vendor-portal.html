@@ -1895,6 +1895,396 @@ function loadVendorSettings() {
     }
   } catch(e) {}
 }
+
+/* ══════════════════════════════
+   INVOICES
+══════════════════════════════ */
+let vendorInvoices = JSON.parse(localStorage.getItem('rv_vendor_invoices') || '[]');
+function saveVendorInvoices() { localStorage.setItem('rv_vendor_invoices', JSON.stringify(vendorInvoices)); }
+
+function openInvoiceModal(editId) {
+  document.getElementById('inv-edit-id').value = editId || '';
+  document.getElementById('inv-modal-title').textContent = editId ? 'Edit Invoice' : 'Create Invoice';
+  if (editId) {
+    var inv = vendorInvoices.find(function(i) { return i.id === editId; });
+    if (inv) {
+      document.getElementById('inv-client').value = inv.client || '';
+      document.getElementById('inv-number').value = inv.number || '';
+      document.getElementById('inv-date').value = inv.date || '';
+      document.getElementById('inv-due').value = inv.due || '';
+      document.getElementById('inv-status').value = inv.status || 'draft';
+      document.getElementById('inv-notes').value = inv.notes || '';
+      var container = document.getElementById('inv-line-items');
+      container.innerHTML = '';
+      (inv.items || []).forEach(function(li) {
+        var row = document.createElement('div');
+        row.className = 'li-row';
+        row.innerHTML = '<input type="text" placeholder="Description" value="' + (li.desc||'') + '"><input type="number" placeholder="Qty" value="' + (li.qty||1) + '"><input type="number" placeholder="Price" step="0.01" value="' + (li.price||0) + '"><button class="li-del" onclick="this.parentElement.remove();calcInvTotal()">&times;</button>';
+        container.appendChild(row);
+      });
+      calcInvTotal();
+    }
+  } else {
+    document.getElementById('inv-client').value = '';
+    document.getElementById('inv-number').value = 'INV-' + (vendorInvoices.length + 1).toString().padStart(3,'0');
+    document.getElementById('inv-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('inv-due').value = '';
+    document.getElementById('inv-status').value = 'draft';
+    document.getElementById('inv-notes').value = '';
+    document.getElementById('inv-line-items').innerHTML = '<div class="li-row"><input type="text" placeholder="Description"><input type="number" placeholder="Qty" value="1"><input type="number" placeholder="Price" step="0.01"><button class="li-del" onclick="this.parentElement.remove();calcInvTotal()">&times;</button></div>';
+    document.getElementById('inv-total-display').textContent = 'Total: $0.00';
+  }
+  document.getElementById('invoice-modal').style.display = 'flex';
+}
+
+function closeInvoiceModal() { document.getElementById('invoice-modal').style.display = 'none'; }
+
+function addInvLineItem() {
+  var row = document.createElement('div');
+  row.className = 'li-row';
+  row.innerHTML = '<input type="text" placeholder="Description"><input type="number" placeholder="Qty" value="1"><input type="number" placeholder="Price" step="0.01"><button class="li-del" onclick="this.parentElement.remove();calcInvTotal()">&times;</button>';
+  document.getElementById('inv-line-items').appendChild(row);
+}
+
+function calcInvTotal() {
+  var total = 0;
+  document.querySelectorAll('#inv-line-items .li-row').forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    var qty = parseFloat(inputs[1].value) || 0;
+    var price = parseFloat(inputs[2].value) || 0;
+    total += qty * price;
+  });
+  document.getElementById('inv-total-display').textContent = 'Total: $' + total.toFixed(2);
+  return total;
+}
+
+function saveInvoice() {
+  var client = document.getElementById('inv-client').value.trim();
+  if (!client) { alert('Please enter a client name.'); return; }
+  var items = [];
+  document.querySelectorAll('#inv-line-items .li-row').forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    items.push({ desc: inputs[0].value, qty: parseFloat(inputs[1].value)||1, price: parseFloat(inputs[2].value)||0 });
+  });
+  var total = calcInvTotal();
+  var editId = document.getElementById('inv-edit-id').value;
+  var inv = {
+    id: editId || 'inv-' + Date.now(),
+    client: client,
+    number: document.getElementById('inv-number').value || 'INV-' + Date.now(),
+    date: document.getElementById('inv-date').value,
+    due: document.getElementById('inv-due').value,
+    status: document.getElementById('inv-status').value,
+    notes: document.getElementById('inv-notes').value,
+    items: items,
+    total: total
+  };
+  if (editId) {
+    vendorInvoices = vendorInvoices.map(function(i) { return i.id === editId ? inv : i; });
+  } else {
+    vendorInvoices.unshift(inv);
+  }
+  saveVendorInvoices();
+  closeInvoiceModal();
+  renderInvoices();
+  refreshInvoiceStats();
+}
+
+function renderInvoices(filter) {
+  var list = filter && filter !== 'all' ? vendorInvoices.filter(function(i){ return i.status === filter; }) : vendorInvoices;
+  var tbody = document.getElementById('vendorInvoiceTable');
+  var empty = document.getElementById('inv-empty');
+  if (!list.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(function(inv) {
+    var cls = inv.status === 'paid' ? 'inv-paid' : inv.status === 'sent' ? 'inv-sent' : inv.status === 'overdue' ? 'inv-overdue' : 'inv-draft';
+    return '<tr>' +
+      '<td style="font-weight:600;">' + (inv.number||'') + '</td>' +
+      '<td>' + (inv.client||'') + '</td>' +
+      '<td style="font-weight:700;">$' + (inv.total||0).toFixed(2) + '</td>' +
+      '<td>' + (inv.date||'') + '</td>' +
+      '<td>' + (inv.due||'—') + '</td>' +
+      '<td><span class="inv-badge ' + cls + '">' + (inv.status||'draft') + '</span></td>' +
+      '<td style="display:flex;gap:4px;"><button onclick="openInvoiceModal(\'' + inv.id + '\')" style="padding:3px 8px;font-size:.78rem;border:1px solid #e2e8f0;border-radius:4px;background:white;cursor:pointer;">Edit</button>' +
+      '<button onclick="viewInvoice(\'' + inv.id + '\')" style="padding:3px 8px;font-size:.78rem;border:1px solid #e2e8f0;border-radius:4px;background:white;cursor:pointer;">View</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function filterInvoices(status) {
+  document.querySelectorAll('#inv-filters button').forEach(function(b) {
+    b.style.background = '#f3f4f6'; b.style.color = '#374151';
+  });
+  event.target.style.background = 'var(--amber)'; event.target.style.color = '#fff';
+  renderInvoices(status);
+}
+
+function viewInvoice(id) {
+  var inv = vendorInvoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  var content = document.getElementById('invoice-view-content');
+  content.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
+    '<h2 style="margin:0;">Invoice ' + (inv.number||'') + '</h2>' +
+    '<button onclick="closeInvoiceView()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8;">&times;</button></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;font-size:.88rem;">' +
+    '<div><strong>Client:</strong> ' + (inv.client||'') + '</div>' +
+    '<div><strong>Date:</strong> ' + (inv.date||'') + '</div>' +
+    '<div><strong>Due:</strong> ' + (inv.due||'—') + '</div>' +
+    '<div><strong>Status:</strong> ' + (inv.status||'draft') + '</div></div>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:1rem;"><thead><tr><th style="text-align:left;padding:.5rem;border-bottom:2px solid #e2e8f0;">Description</th><th style="padding:.5rem;border-bottom:2px solid #e2e8f0;">Qty</th><th style="padding:.5rem;border-bottom:2px solid #e2e8f0;">Price</th><th style="padding:.5rem;border-bottom:2px solid #e2e8f0;">Subtotal</th></tr></thead><tbody>' +
+    (inv.items||[]).map(function(li){ return '<tr><td style="padding:.4rem .5rem;">' + (li.desc||'') + '</td><td style="text-align:center;padding:.4rem;">' + (li.qty||1) + '</td><td style="text-align:right;padding:.4rem;">$' + (li.price||0).toFixed(2) + '</td><td style="text-align:right;padding:.4rem;font-weight:600;">$' + ((li.qty||1)*(li.price||0)).toFixed(2) + '</td></tr>'; }).join('') +
+    '</tbody></table>' +
+    '<div style="text-align:right;font-size:1.1rem;font-weight:800;color:var(--dark);margin-bottom:1rem;">Total: $' + (inv.total||0).toFixed(2) + '</div>' +
+    (inv.notes ? '<div style="font-size:.85rem;color:var(--gray);border-top:1px solid #e2e8f0;padding-top:.75rem;">' + inv.notes + '</div>' : '');
+  document.getElementById('invoice-view-modal').style.display = 'flex';
+}
+
+function closeInvoiceView() { document.getElementById('invoice-view-modal').style.display = 'none'; }
+
+function refreshInvoiceStats() {
+  var total = vendorInvoices.reduce(function(s,i){ return s + (i.total||0); }, 0);
+  var paid = vendorInvoices.filter(function(i){ return i.status==='paid'; }).reduce(function(s,i){ return s+(i.total||0); }, 0);
+  var outstanding = vendorInvoices.filter(function(i){ return i.status==='sent'||i.status==='overdue'; }).reduce(function(s,i){ return s+(i.total||0); }, 0);
+  var drafts = vendorInvoices.filter(function(i){ return i.status==='draft'; }).length;
+  document.getElementById('inv-stat-total').textContent = '$' + total.toFixed(0);
+  document.getElementById('inv-stat-paid').textContent = '$' + paid.toFixed(0);
+  document.getElementById('inv-stat-outstanding').textContent = '$' + outstanding.toFixed(0);
+  document.getElementById('inv-stat-drafts').textContent = drafts;
+}
+
+/* ══════════════════════════════
+   LEAD MANAGER (CRM)
+══════════════════════════════ */
+let crmLeads = JSON.parse(localStorage.getItem('rv_vendor_crm_leads') || '[]');
+function saveCRMLeads() { localStorage.setItem('rv_vendor_crm_leads', JSON.stringify(crmLeads)); }
+
+function openLeadModal(editId) {
+  document.getElementById('crm-edit-id').value = editId || '';
+  document.getElementById('lead-modal-title').textContent = editId ? 'Edit Lead' : 'Add Lead';
+  if (editId) {
+    var lead = crmLeads.find(function(l){ return l.id === editId; });
+    if (lead) {
+      document.getElementById('crm-name').value = lead.name || '';
+      document.getElementById('crm-company').value = lead.company || '';
+      document.getElementById('crm-phone').value = lead.phone || '';
+      document.getElementById('crm-email').value = lead.email || '';
+      document.getElementById('crm-stage').value = lead.stage || 'new';
+      document.getElementById('crm-value').value = lead.value || '';
+      document.getElementById('crm-service').value = lead.service || '';
+      document.getElementById('crm-notes').value = lead.notes || '';
+    }
+  } else {
+    ['crm-name','crm-company','crm-phone','crm-email','crm-service','crm-notes'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('crm-stage').value = 'new';
+    document.getElementById('crm-value').value = '';
+  }
+  document.getElementById('lead-crm-modal').style.display = 'flex';
+}
+
+function closeLeadModal() { document.getElementById('lead-crm-modal').style.display = 'none'; }
+
+function saveCRMLead() {
+  var name = document.getElementById('crm-name').value.trim();
+  if (!name) { alert('Please enter a contact name.'); return; }
+  var editId = document.getElementById('crm-edit-id').value;
+  var lead = {
+    id: editId || 'crm-' + Date.now(),
+    name: name,
+    company: document.getElementById('crm-company').value.trim(),
+    phone: document.getElementById('crm-phone').value.trim(),
+    email: document.getElementById('crm-email').value.trim(),
+    stage: document.getElementById('crm-stage').value,
+    value: parseFloat(document.getElementById('crm-value').value) || 0,
+    service: document.getElementById('crm-service').value.trim(),
+    notes: document.getElementById('crm-notes').value.trim(),
+    created: editId ? (crmLeads.find(function(l){ return l.id===editId; })||{}).created : new Date().toISOString().split('T')[0]
+  };
+  if (editId) {
+    crmLeads = crmLeads.map(function(l){ return l.id === editId ? lead : l; });
+  } else {
+    crmLeads.unshift(lead);
+  }
+  saveCRMLeads();
+  closeLeadModal();
+  renderCRMKanban();
+  refreshCRMStats();
+}
+
+function renderCRMKanban() {
+  var stages = ['new','contacted','quoted','won','lost'];
+  stages.forEach(function(stage) {
+    var col = document.getElementById('kanban-' + stage);
+    if (!col) return;
+    var items = crmLeads.filter(function(l){ return l.stage === stage; });
+    if (!items.length) { col.innerHTML = '<div style="font-size:.82rem;color:#94a3b8;text-align:center;padding:.75rem;">No leads</div>'; return; }
+    col.innerHTML = items.map(function(l) {
+      return '<div class="kanban-card" onclick="openLeadModal(\'' + l.id + '\')">' +
+        '<div class="kc-name">' + l.name + '</div>' +
+        '<div class="kc-meta">' + (l.company||'') + (l.service ? ' · ' + l.service : '') + '</div>' +
+        (l.value ? '<div class="kc-val">$' + l.value.toLocaleString() + '</div>' : '') +
+        '<div class="kanban-actions">' +
+        (stage !== 'won' && stage !== 'lost' ? '<button onclick="event.stopPropagation();moveCRMLead(\'' + l.id + '\',\'next\')">Next &rarr;</button>' : '') +
+        (stage !== 'new' && stage !== 'lost' ? '<button onclick="event.stopPropagation();moveCRMLead(\'' + l.id + '\',\'prev\')">&larr; Back</button>' : '') +
+        '</div></div>';
+    }).join('');
+  });
+}
+
+function moveCRMLead(id, dir) {
+  var stages = ['new','contacted','quoted','won','lost'];
+  var lead = crmLeads.find(function(l){ return l.id === id; });
+  if (!lead) return;
+  var idx = stages.indexOf(lead.stage);
+  if (dir === 'next' && idx < stages.length - 2) lead.stage = stages[idx+1];
+  else if (dir === 'prev' && idx > 0) lead.stage = stages[idx-1];
+  saveCRMLeads(); renderCRMKanban(); refreshCRMStats();
+}
+
+function refreshCRMStats() {
+  document.getElementById('crm-stat-total').textContent = crmLeads.length;
+  document.getElementById('crm-stat-open').textContent = crmLeads.filter(function(l){ return l.stage !== 'won' && l.stage !== 'lost'; }).length;
+  var wonVal = crmLeads.filter(function(l){ return l.stage === 'won'; }).reduce(function(s,l){ return s + (l.value||0); }, 0);
+  document.getElementById('crm-stat-won').textContent = '$' + wonVal.toLocaleString();
+  var closed = crmLeads.filter(function(l){ return l.stage === 'won' || l.stage === 'lost'; }).length;
+  var won = crmLeads.filter(function(l){ return l.stage === 'won'; }).length;
+  document.getElementById('crm-stat-rate').textContent = closed > 0 ? Math.round(won/closed*100)+'%' : '0%';
+}
+
+/* ══════════════════════════════
+   MY NETWORK
+══════════════════════════════ */
+let vendorConnections = JSON.parse(localStorage.getItem('rv_vendor_connections') || '[]');
+function saveConnections() { localStorage.setItem('rv_vendor_connections', JSON.stringify(vendorConnections)); }
+
+function renderNetwork() {
+  var grid = document.getElementById('net-connections-grid');
+  var feed = document.getElementById('net-referrals-feed');
+  document.getElementById('net-stat-conn').textContent = vendorConnections.length;
+  document.getElementById('net-stat-sent').textContent = '0';
+  document.getElementById('net-stat-recv').textContent = '0';
+  document.getElementById('net-stat-views').textContent = Math.floor(Math.random()*20)+5;
+  if (!vendorConnections.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--gray);padding:2rem;">No connections yet. Visit the <a href="network.html">Network page</a> to connect.</div>';
+    feed.innerHTML = '<div style="color:var(--gray);font-size:.88rem;">No referrals yet.</div>';
+    return;
+  }
+  grid.innerHTML = vendorConnections.map(function(c) {
+    var colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6'];
+    var bg = colors[Math.abs(c.name.charCodeAt(0)) % colors.length];
+    return '<div class="net-card"><div class="net-avatar" style="background:' + bg + ';">' + c.name.charAt(0) + '</div><div style="font-weight:700;font-size:.9rem;">' + c.name + '</div><div style="font-size:.78rem;color:var(--gray);">' + (c.trade||'General') + '</div></div>';
+  }).join('');
+  feed.innerHTML = '<div style="color:var(--gray);font-size:.88rem;">No referrals yet.</div>';
+}
+
+/* ══════════════════════════════
+   MY PROFILE
+══════════════════════════════ */
+let vendorProfileServices = JSON.parse(localStorage.getItem('rv_vendor_profile_services') || '[]');
+function saveProfileServices() { localStorage.setItem('rv_vendor_profile_services', JSON.stringify(vendorProfileServices)); }
+
+function addProfileService() {
+  vendorProfileServices.push({ name: '', rate: '' });
+  saveProfileServices();
+  renderProfileServices();
+}
+
+function renderProfileServices() {
+  var container = document.getElementById('prof-services-list');
+  if (!vendorProfileServices.length) {
+    container.innerHTML = '<div style="font-size:.85rem;color:var(--gray);padding:.5rem 0;">No services listed yet.</div>';
+    return;
+  }
+  container.innerHTML = vendorProfileServices.map(function(s, i) {
+    return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">' +
+      '<input type="text" value="' + (s.name||'') + '" placeholder="Service name" oninput="vendorProfileServices[' + i + '].name=this.value;saveProfileServices();" style="flex:1;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:.85rem;">' +
+      '<input type="text" value="' + (s.rate||'') + '" placeholder="Rate" oninput="vendorProfileServices[' + i + '].rate=this.value;saveProfileServices();" style="width:100px;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:.85rem;">' +
+      '<button onclick="vendorProfileServices.splice(' + i + ',1);saveProfileServices();renderProfileServices();" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:1rem;">&times;</button>' +
+    '</div>';
+  }).join('');
+}
+
+function saveVendorProfile() {
+  var profile = {
+    biz: document.getElementById('prof-biz').value,
+    trade: document.getElementById('prof-trade').value,
+    tagline: document.getElementById('prof-tagline').value,
+    bio: document.getElementById('prof-bio').value,
+    phone: document.getElementById('prof-phone').value,
+    email: document.getElementById('prof-email').value,
+    website: document.getElementById('prof-website').value,
+    scheduling: document.getElementById('prof-scheduling').value,
+    zips: document.getElementById('prof-zips').value,
+    cities: document.getElementById('prof-cities').value,
+    licensed: document.getElementById('prof-cred-licensed').checked,
+    insured: document.getElementById('prof-cred-insured').checked,
+    bgcheck: document.getElementById('prof-cred-bgcheck').checked,
+    bonded: document.getElementById('prof-cred-bonded').checked,
+    licNum: document.getElementById('prof-lic-num').value,
+    insAmt: document.getElementById('prof-ins-amt').value,
+    bondAmt: document.getElementById('prof-bond-amt').value,
+    services: vendorProfileServices
+  };
+  localStorage.setItem('rv_vendor_profile', JSON.stringify(profile));
+  alert('Profile saved!');
+}
+
+function loadVendorProfile() {
+  try {
+    var p = JSON.parse(localStorage.getItem('rv_vendor_profile'));
+    if (!p) return;
+    if (p.biz) document.getElementById('prof-biz').value = p.biz;
+    if (p.trade) document.getElementById('prof-trade').value = p.trade;
+    if (p.tagline) document.getElementById('prof-tagline').value = p.tagline;
+    if (p.bio) document.getElementById('prof-bio').value = p.bio;
+    if (p.phone) document.getElementById('prof-phone').value = p.phone;
+    if (p.email) document.getElementById('prof-email').value = p.email;
+    if (p.website) document.getElementById('prof-website').value = p.website;
+    if (p.scheduling) document.getElementById('prof-scheduling').value = p.scheduling;
+    if (p.zips) document.getElementById('prof-zips').value = p.zips;
+    if (p.cities) document.getElementById('prof-cities').value = p.cities;
+    if (p.licensed) document.getElementById('prof-cred-licensed').checked = true;
+    if (p.insured) document.getElementById('prof-cred-insured').checked = true;
+    if (p.bgcheck) document.getElementById('prof-cred-bgcheck').checked = true;
+    if (p.bonded) document.getElementById('prof-cred-bonded').checked = true;
+    if (p.licNum) document.getElementById('prof-lic-num').value = p.licNum;
+    if (p.insAmt) document.getElementById('prof-ins-amt').value = p.insAmt;
+    if (p.bondAmt) document.getElementById('prof-bond-amt').value = p.bondAmt;
+    if (p.services) { vendorProfileServices = p.services; }
+  } catch(e) {}
+}
+
+/* ── Wire credential checkboxes to show/hide detail fields ── */
+document.addEventListener('DOMContentLoaded', function() {
+  var pairs = [
+    ['prof-cred-licensed', 'prof-cred-lic-detail'],
+    ['prof-cred-insured', 'prof-cred-ins-detail'],
+    ['prof-cred-bonded', 'prof-cred-bond-detail']
+  ];
+  pairs.forEach(function(pair) {
+    var cb = document.getElementById(pair[0]);
+    var detail = document.getElementById(pair[1]);
+    if (cb && detail) {
+      cb.addEventListener('change', function() { detail.style.display = cb.checked ? 'block' : 'none'; });
+    }
+  });
+});
+
+/* ── Extend launchApp to init new sections ── */
+var _origLaunchApp = launchApp;
+launchApp = function() {
+  _origLaunchApp();
+  renderInvoices();
+  refreshInvoiceStats();
+  renderCRMKanban();
+  refreshCRMStats();
+  renderNetwork();
+  renderProfileServices();
+  loadVendorProfile();
+};
 </script>
 <script src="recommended-supplies.js" data-industry="construction"></script>
 <script src="business-advisor.js" data-industry="construction"></script>

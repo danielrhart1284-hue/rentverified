@@ -565,6 +565,9 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script>
+// ── Utilities ──
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
 // ── Data Layer ──
 const STORAGE_KEY = 'rv_invoices';
 const CLIENTS_KEY = 'rv_inv_clients';
@@ -660,8 +663,8 @@ function renderRow(inv, tbody) {
   const totals = calcLines(inv.lines||[]);
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><span style="font-weight:700;color:#0891b2;">${inv.num}</span></td>
-    <td><div style="font-weight:600;font-size:0.86rem;">${inv.clientName}</div><div style="font-size:0.75rem;color:#9ca3af;">${inv.clientEmail||''}</div></td>
+    <td><span style="font-weight:700;color:#0891b2;">${esc(inv.num)}</span></td>
+    <td><div style="font-weight:600;font-size:0.86rem;">${esc(inv.clientName)}</div><div style="font-size:0.75rem;color:#9ca3af;">${esc(inv.clientEmail||'')}</div></td>
     <td style="font-size:0.84rem;color:#6b7280;">${fmtDate(inv.date)}</td>
     <td style="font-size:0.84rem;color:${status==='overdue'?'#dc2626':'#6b7280'};">${fmtDate(inv.dueDate)}</td>
     <td style="font-weight:700;">${fmtMoney(totals.total)}</td>
@@ -794,18 +797,18 @@ function buildInvPreview(inv, totals, status) {
   const linesHtml = (inv.lines||[]).map(l => {
     const amt = (parseFloat(l.qty)||0)*(parseFloat(l.rate)||0);
     const taxAmt = amt*((parseFloat(l.tax)||0)/100);
-    return `<tr><td>${l.desc}</td><td>${l.qty}</td><td>${fmtMoney(l.rate)}</td><td>${l.tax||0}%</td><td style="text-align:right;font-weight:600;">${fmtMoney(amt+taxAmt)}</td></tr>`;
+    return `<tr><td>${esc(l.desc)}</td><td>${l.qty}</td><td>${fmtMoney(l.rate)}</td><td>${l.tax||0}%</td><td style="text-align:right;font-weight:600;">${fmtMoney(amt+taxAmt)}</td></tr>`;
   }).join('');
   return `
     <div style="margin-bottom:1rem;">${statusBadge(status)}</div>
     <div class="inv-preview">
       <div class="inv-preview-header">
-        <div><div class="inv-preview-logo">${inv.fromName}</div><div class="inv-preview-biz">${inv.fromEmail}</div></div>
+        <div><div class="inv-preview-logo">${esc(inv.fromName)}</div><div class="inv-preview-biz">${esc(inv.fromEmail)}</div></div>
         <div><div class="inv-preview-num">INVOICE ${inv.num}</div><div class="inv-preview-date">Date: ${fmtDate(inv.date)}<br>Due: ${fmtDate(inv.dueDate)}</div></div>
       </div>
       <div class="inv-preview-parties">
-        <div><div class="inv-party-label">Bill From</div><div class="inv-party-name">${inv.fromName}</div><div class="inv-party-info">${inv.fromEmail}</div></div>
-        <div><div class="inv-party-label">Bill To</div><div class="inv-party-name">${inv.clientName}</div><div class="inv-party-info">${inv.clientEmail}</div></div>
+        <div><div class="inv-party-label">Bill From</div><div class="inv-party-name">${esc(inv.fromName)}</div><div class="inv-party-info">${esc(inv.fromEmail)}</div></div>
+        <div><div class="inv-party-label">Bill To</div><div class="inv-party-name">${esc(inv.clientName)}</div><div class="inv-party-info">${esc(inv.clientEmail)}</div></div>
       </div>
       <table class="inv-line-table">
         <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Tax</th><th style="text-align:right;">Total</th></tr></thead>
@@ -816,7 +819,7 @@ function buildInvPreview(inv, totals, status) {
         <div class="inv-total-row"><span class="inv-total-lbl">Tax</span><span class="inv-total-amt">${fmtMoney(totals.tax)}</span></div>
         <div class="inv-total-row grand"><span>Total Due</span><span>${fmtMoney(totals.total)}</span></div>
       </div>
-      ${inv.notes ? `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e5e7eb;font-size:0.8rem;color:#6b7280;">${inv.notes}</div>` : ''}
+      ${inv.notes ? `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e5e7eb;font-size:0.8rem;color:#6b7280;">${esc(inv.notes)}</div>` : ''}
     </div>
   `;
 }
@@ -873,7 +876,7 @@ function renderLineItems() {
   lineItems.forEach((li, i) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="li-desc"><input type="text" value="${li.desc}" placeholder="Service or item description" oninput="lineItems[${i}].desc=this.value" /></td>
+      <td class="li-desc"><input type="text" value="${esc(li.desc)}" placeholder="Service or item description" oninput="lineItems[${i}].desc=this.value" /></td>
       <td class="li-qty"><input type="number" value="${li.qty}" min="0" step="0.01" oninput="lineItems[${i}].qty=this.value;calcTotals()" /></td>
       <td class="li-rate"><input type="number" value="${li.rate}" min="0" step="0.01" placeholder="0.00" oninput="lineItems[${i}].rate=this.value;calcTotals()" /></td>
       <td class="li-tax"><input type="number" value="${li.tax}" min="0" max="100" step="0.01" placeholder="0" oninput="lineItems[${i}].tax=this.value;calcTotals()" /></td>

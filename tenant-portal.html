@@ -544,7 +544,7 @@
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 1.25rem;" id="fee-row">
                 <span style="font-size:.875rem;" id="fee-label">Convenience Fee</span>
-                <span style="font-weight:600;" id="fee-amount" style="color:var(--success);">$0.00</span>
+                <span style="font-weight:600;color:var(--success);" id="fee-amount">$0.00</span>
               </div>
               <div id="landlord-absorb-note" style="display:none;padding:0 1.25rem .4rem;font-size:.78rem;color:#2563eb;">
                 ✓ Your property manager has agreed to cover card processing fees.
@@ -1616,7 +1616,7 @@
     } catch(e) {}
     const div = document.createElement('div');
     div.style.cssText='display:flex;align-items:center;gap:1rem;padding:.75rem;background:#fffbeb;border-radius:8px;border:1.5px solid #f59e0b;margin-bottom:.5rem;';
-    div.innerHTML=`<div style="font-size:1.25rem;">${icons[cat]||'🔧'}</div><div style="flex:1;"><div style="font-weight:600;font-size:.9rem;">${cat} — ${desc.slice(0,60)}</div><div style="font-size:.78rem;color:#64748b;">Submitted today · Priority: ${pri}</div></div><span style="background:#fef9c3;color:#854d0e;border-radius:99px;padding:.2rem .65rem;font-size:.75rem;font-weight:600;">Open</span>`;
+    div.innerHTML=`<div style="font-size:1.25rem;">${icons[cat]||'🔧'}</div><div style="flex:1;"><div style="font-weight:600;font-size:.9rem;">${escTP(cat)} — ${escTP(desc.slice(0,60))}</div><div style="font-size:.78rem;color:#64748b;">Submitted today · Priority: ${escTP(pri)}</div></div><span style="background:#fef9c3;color:#854d0e;border-radius:99px;padding:.2rem .65rem;font-size:.75rem;font-weight:600;">Open</span>`;
     el.prepend(div);
     document.getElementById('tMDesc').value='';
     alert('Maintenance request submitted! Your landlord will be notified.');
@@ -1627,6 +1627,7 @@
     document.getElementById('activeThreadTitle').textContent = titles[name]||'Messages';
   }
 
+  function escTP(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
   function sendTenantMsg() {
     const input = document.getElementById('msgInput');
     const txt = input.value.trim();
@@ -1634,7 +1635,7 @@
     const body = document.getElementById('msgBody');
     const div = document.createElement('div');
     div.style.cssText='display:flex;justify-content:flex-end;';
-    div.innerHTML=`<div style="background:#00E676;color:#fff;border-radius:10px 10px 0 10px;padding:.65rem .9rem;max-width:75%;font-size:.88rem;">${txt}<div style="font-size:.72rem;opacity:.7;margin-top:.3rem;text-align:right;">You · just now</div></div>`;
+    div.innerHTML=`<div style="background:#00E676;color:#fff;border-radius:10px 10px 0 10px;padding:.65rem .9rem;max-width:75%;font-size:.88rem;">${escTP(txt)}<div style="font-size:.72rem;opacity:.7;margin-top:.3rem;text-align:right;">You · just now</div></div>`;
     body.appendChild(div);
     input.value='';
     body.scrollTop=body.scrollHeight;
