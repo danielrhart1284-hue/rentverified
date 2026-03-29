@@ -2557,6 +2557,145 @@ const RVData = {
     return { data: prefs, error: null };
   },
 
+  // ─── BUSINESS PROFILES ──────────────────────────────────────────────
+
+  async getBusinessProfile() {
+    if (this._useSupabase()) {
+      var sb = getSupabase();
+      var uid = await this._userId();
+      var { data, error } = await sb.from('business_profiles').select('*').eq('owner_id', uid).single();
+      if (error || !data) return null;
+      return data;
+    }
+    // localStorage fallback
+    try { return JSON.parse(localStorage.getItem('rv_business_profile')) || null; } catch(e) { return null; }
+  },
+
+  async saveBusinessProfile(profile) {
+    if (this._useSupabase()) {
+      var sb = getSupabase();
+      var uid = await this._userId();
+      profile.owner_id = uid;
+      profile.updated_at = new Date().toISOString();
+      var { data, error } = await sb.from('business_profiles').upsert(profile, { onConflict: 'owner_id' }).select().single();
+      return { data: data, error: error };
+    }
+    profile.updated_at = new Date().toISOString();
+    if (!profile.id) profile.id = 'bp_' + Date.now();
+    if (!profile.created_at) profile.created_at = new Date().toISOString();
+    localStorage.setItem('rv_business_profile', JSON.stringify(profile));
+    return { data: profile, error: null };
+  },
+
+  async getBusinessModules() {
+    var profile = await this.getBusinessProfile();
+    if (!profile) return { crm: true, accounting: true, jobs: true, documents: true, payments: true, notifications: true, ai_assistant: true, team: true };
+    return profile.modules_enabled || { crm: true, accounting: true, jobs: true, documents: true, payments: true, notifications: true, ai_assistant: true, team: true };
+  },
+
+  // ─── CUSTOM REPORTS ────────────────────────────────────────────────
+
+  async getCustomReports(filters) {
+    filters = filters || {};
+    if (this._useSupabase()) {
+      var sb = getSupabase();
+      var uid = await this._userId();
+      var q = sb.from('custom_reports').select('*').eq('owner_id', uid);
+      if (filters.category) q = q.eq('report_category', filters.category);
+      if (filters.placement) q = q.eq('placement', filters.placement);
+      if (filters.builtin !== undefined) q = q.eq('is_builtin', filters.builtin);
+      q = q.order('report_name');
+      var { data, error } = await q;
+      return data || [];
+    }
+    // localStorage fallback
+    try {
+      var all = JSON.parse(localStorage.getItem('rv_custom_reports') || '[]');
+      if (filters.category) all = all.filter(function(r) { return r.report_category === filters.category; });
+      if (filters.placement) all = all.filter(function(r) { return r.placement === filters.placement; });
+      if (filters.builtin !== undefined) all = all.filter(function(r) { return r.is_builtin === filters.builtin; });
+      return all;
+    } catch(e) { return []; }
+  },
+
+  async saveCustomReport(report) {
+    if (this._useSupabase()) {
+      var sb = getSupabase();
+      report.owner_id = await this._userId();
+      report.updated_at = new Date().toISOString();
+      if (report.id) {
+        var { data, error } = await sb.from('custom_reports').update(report).eq('id', report.id).select().single();
+      } else {
+        var { data, error } = await sb.from('custom_reports').insert(report).select().single();
+      }
+      return { data: data, error: error };
+    }
+    // localStorage fallback
+    var all = [];
+    try { all = JSON.parse(localStorage.getItem('rv_custom_reports') || '[]'); } catch(e) { all = []; }
+    report.updated_at = new Date().toISOString();
+    if (!report.id) {
+      report.id = 'cr_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      report.created_at = new Date().toISOString();
+      all.push(report);
+    } else {
+      var idx = all.findIndex(function(r) { return r.id === report.id; });
+      if (idx >= 0) all[idx] = report; else all.push(report);
+    }
+    localStorage.setItem('rv_custom_reports', JSON.stringify(all));
+    return { data: report, error: null };
+  },
+
+  async deleteCustomReport(id) {
+    if (this._useSupabase()) {
+      var sb = getSupabase();
+      var uid = await this._userId();
+      return await sb.from('custom_reports').delete().eq('id', id).eq('owner_id', uid);
+    }
+    var all = [];
+    try { all = JSON.parse(localStorage.getItem('rv_custom_reports') || '[]'); } catch(e) { all = []; }
+    all = all.filter(function(r) { return r.id !== id; });
+    localStorage.setItem('rv_custom_reports', JSON.stringify(all));
+    return { error: null };
+  },
+
+  async seedBuiltinReports(businessType) {
+    businessType = businessType || 'generic_service';
+    var existing = await this.getCustomReports({ builtin: true });
+    if (existing.length > 0) return; // already seeded
+
+    var universal = [
+      { report_name: 'Client / Contact List', report_category: 'clients', description: 'All clients with contact info and status', query_template: 'REPORT:CLIENT_LIST', placement: 'clients' },
+      { report_name: 'Income & Expense Report', report_category: 'financial', description: 'Revenue and expenses by date range', query_template: 'REPORT:INCOME_EXPENSE', placement: 'financial' },
+      { report_name: 'Cash Flow Summary', report_category: 'financial', description: 'Cash inflows and outflows over time', query_template: 'REPORT:CASH_FLOW', placement: 'financial' },
+      { report_name: 'Open Invoices / AR Aging', report_category: 'financial', description: 'Outstanding invoices grouped by age', query_template: 'REPORT:AR_AGING', placement: 'financial' },
+      { report_name: 'Payments Received', report_category: 'financial', description: 'All payments received in date range', query_template: 'REPORT:PAYMENTS_RECEIVED', placement: 'financial' },
+      { report_name: 'Job / Work Order Summary', report_category: 'jobs', description: 'All jobs with status, cost, and assignment', query_template: 'REPORT:JOB_SUMMARY', placement: 'jobs' },
+      { report_name: 'Document List', report_category: 'clients', description: 'Documents organized by client or project', query_template: 'REPORT:DOCUMENT_LIST', placement: 'clients' },
+      { report_name: 'KPI Snapshot', report_category: 'executive', description: 'Revenue, active clients, open jobs at a glance', query_template: 'REPORT:KPI_SNAPSHOT', placement: 'executive' }
+    ];
+
+    var pmSpecific = [
+      { report_name: 'Rent Roll', report_category: 'leasing', description: 'All tenants, units, rent amounts, payment status', query_template: 'REPORT:RENT_ROLL', placement: 'leasing' },
+      { report_name: 'Owner Statement (EOM)', report_category: 'financial', description: 'Monthly income, expenses, distributions per owner', query_template: 'REPORT:OWNER_STATEMENT', placement: 'financial' },
+      { report_name: 'Lease Expiration 30/60/90', report_category: 'leasing', description: 'Leases expiring within 30, 60, or 90 days', query_template: 'REPORT:LEASE_EXPIRATION', placement: 'leasing' },
+      { report_name: 'Maintenance Cost by Property', report_category: 'maintenance', description: 'Maintenance spend breakdown per property', query_template: 'REPORT:MAINTENANCE_COST', placement: 'maintenance' },
+      { report_name: 'Eviction Activity Log', report_category: 'compliance', description: 'All eviction notices, filings, and outcomes', query_template: 'REPORT:EVICTION_LOG', placement: 'compliance' },
+      { report_name: 'Screening Summary', report_category: 'leasing', description: 'Applicant screening results and decisions', query_template: 'REPORT:SCREENING_SUMMARY', placement: 'leasing' }
+    ];
+
+    var reports = universal;
+    if (businessType === 'property_manager') reports = reports.concat(pmSpecific);
+
+    for (var i = 0; i < reports.length; i++) {
+      reports[i].is_builtin = true;
+      reports[i].business_type = businessType;
+      reports[i].file_format_default = 'csv';
+      reports[i].frequency = 'on_demand';
+      await this.saveCustomReport(reports[i]);
+    }
+  },
+
   // ─── ADMIN: Platform-wide queries ───────────────────────────────────
 
   admin: {
