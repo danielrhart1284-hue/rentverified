@@ -850,14 +850,7 @@ const DOC_REQUEST_TEMPLATES = {
     items:['W-2s for all employers','1099s (self-employment, freelance)','Prior year tax return','Social Security numbers (self + dependents)','Mortgage interest statements (1098)','Charitable donation receipts','Medical expense records','Business expense receipts']
   }
 };
-const CONTACTS = [
-  { id:'c1', name:'Sarah Johnson', role:'Loan Officer', color:'#059669', initials:'SJ' },
-  { id:'c2', name:'Marcus Lee', role:'Real Estate Agent', color:'#2563eb', initials:'ML' },
-  { id:'c3', name:'Patricia Chen', role:'CPA / Tax Advisor', color:'#7c3aed', initials:'PC' },
-  { id:'c4', name:'David Williams', role:'Attorney', color:'#dc2626', initials:'DW' },
-  { id:'c5', name:'Emma Rodriguez', role:'Insurance Agent', color:'#d97706', initials:'ER' },
-  { id:'c6', name:'James Kim', role:'Property Manager', color:'#0891b2', initials:'JK' },
-];
+const CONTACTS = [];
 
 // ── XSS Sanitizer ──
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -878,6 +871,7 @@ const LS = {
 
 // ── Demo seed ──
 function seedDemoData() {
+  if (!localStorage.getItem('rv_demo_mode')) return;
   if (LS.get('rv_dh_seeded')) return;
   const now = Date.now();
   const docs = [
@@ -890,26 +884,22 @@ function seedDemoData() {
     { id:'d7', name:'Purchase_Agreement_Signed.pdf', folder:'contracts', size:950000, tags:['contract','signed'], notes:'Accepted offer', uploaded: now - 3600000*5, sharedWith:['c1','c2','c4'] },
     { id:'d8', name:'Pay_Stub_Feb2024.pdf', folder:'financial', size:210000, tags:['income','2024'], notes:'Employer: Acme Corp', uploaded: now - 3600000*2, sharedWith:['c1'] },
   ];
-  const shares = [
-    { id:'sh1', docId:'d1', docName:'2023_Tax_Return.pdf', sharedBy:'Patricia Chen (PC)', sharedWith:'me', permission:'view', date: now - 86400000*10, status:'active' },
-    { id:'sh2', docId:'d2', docName:'Insurance_Quote_Smith.pdf', sharedBy:'Emma Rodriguez (ER)', sharedWith:'me', permission:'download', date: now - 86400000*3, status:'active' },
-    { id:'sh3', docId:'d3', docName:'Loan_Pre-Approval_Letter.pdf', sharedBy:'Sarah Johnson (SJ)', sharedWith:'me', permission:'view', date: now - 86400000*1, status:'active' },
-  ];
+  const shares = [];
   const requests = [
-    { id:'r1', title:'Smith Home Purchase — Documents Needed', recipient:'john.smith@email.com', items:['Last 2 years tax returns','Pay stubs (2 months)','Bank statements (2 months)','Photo ID'], uploaded:['Last 2 years tax returns'], date: now - 86400000*2, status:'partial' },
-    { id:'r2', title:'Johnson Rental Application', recipient:'amy.johnson@email.com', items:['Photo ID','Proof of income','Bank statements'], uploaded:[], date: now - 86400000*5, status:'pending' },
-    { id:'r3', title:'Q1 Tax Prep — Martinez Business', recipient:'carlos.martinez@biz.com', items:['Business tax returns','P&L statement','Bank statements 6mo','Business license'], uploaded:['Business tax returns','P&L statement','Bank statements 6mo','Business license'], date: now - 86400000*9, status:'complete' },
+    { id:'r1', title:'Sample Document Request', recipient:'', items:['Last 2 years tax returns','Pay stubs (2 months)','Bank statements (2 months)','Photo ID'], uploaded:['Last 2 years tax returns'], date: now - 86400000*2, status:'partial' },
+    { id:'r2', title:'Rental Application Documents', recipient:'', items:['Photo ID','Proof of income','Bank statements'], uploaded:[], date: now - 86400000*5, status:'pending' },
+    { id:'r3', title:'Q1 Tax Prep — Documents', recipient:'', items:['Business tax returns','P&L statement','Bank statements 6mo','Business license'], uploaded:['Business tax returns','P&L statement','Bank statements 6mo','Business license'], date: now - 86400000*9, status:'complete' },
   ];
   const activity = [
     { id:'a1', type:'upload', text:'You uploaded', doc:'2023_Tax_Return.pdf', time: now - 86400000*15 },
-    { id:'a2', type:'share', text:'You shared', doc:'2023_Tax_Return.pdf', with:'Sarah Johnson', time: now - 86400000*14 },
-    { id:'a3', type:'view', text:'Sarah Johnson viewed', doc:'2023_Tax_Return.pdf', time: now - 86400000*13 },
+    { id:'a2', type:'share', text:'You shared', doc:'2023_Tax_Return.pdf', with:'[Recipient]', time: now - 86400000*14 },
+    { id:'a3', type:'view', text:'[Recipient] viewed', doc:'2023_Tax_Return.pdf', time: now - 86400000*13 },
     { id:'a4', type:'upload', text:'You uploaded', doc:'Lease_Agreement_Unit4B.pdf', time: now - 86400000*8 },
-    { id:'a5', type:'share', text:'You shared', doc:'Lease_Agreement_Unit4B.pdf', with:'David Williams', time: now - 86400000*7 },
-    { id:'a6', type:'download', text:'David Williams downloaded', doc:'Lease_Agreement_Unit4B.pdf', time: now - 86400000*6 },
-    { id:'a7', type:'request', text:'You sent a document request to', doc:'john.smith@email.com', time: now - 86400000*2 },
+    { id:'a5', type:'share', text:'You shared', doc:'Lease_Agreement_Unit4B.pdf', with:'[Recipient]', time: now - 86400000*7 },
+    { id:'a6', type:'download', text:'[Recipient] downloaded', doc:'Lease_Agreement_Unit4B.pdf', time: now - 86400000*6 },
+    { id:'a7', type:'request', text:'You sent a document request to', doc:'[Recipient]', time: now - 86400000*2 },
     { id:'a8', type:'upload', text:'You uploaded', doc:'Photo_ID_Front.jpg', time: now - 86400000*2 },
-    { id:'a9', type:'view', text:'Marcus Lee viewed', doc:'Purchase_Agreement_Signed.pdf', time: now - 3600000*3 },
+    { id:'a9', type:'view', text:'[Recipient] viewed', doc:'Purchase_Agreement_Signed.pdf', time: now - 3600000*3 },
   ];
   LS.set('rv_documents', docs);
   LS.set('rv_doc_shares', shares);
@@ -1281,7 +1271,7 @@ function renderSharedWithMe(filter) {
   grid.innerHTML = filtered.map(s => {
     const fi = getFileInfo(s.docName);
     const permBadge = `<span class="share-perm-badge perm-${s.permission}">${s.permission==='view'?'👁 View':s.permission==='download'?'⬇ Download':'✏️ Edit'}</span>`;
-    return `<div class="doc-card" onclick="">
+    return `<div class="doc-card">
       <div class="doc-card-thumb" style="background:linear-gradient(135deg,${fi.color}18 0%,${fi.color}28 100%)">${fi.icon}</div>
       <div class="doc-card-body">
         <div class="doc-card-name">${esc(s.docName)}</div>

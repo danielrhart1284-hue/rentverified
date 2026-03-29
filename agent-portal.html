@@ -491,7 +491,7 @@
         <div class="panel-body">
           <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1.5rem;">
             <div style="width:80px;height:80px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px dashed #cbd5e1;">📷</div>
-            <div><div style="font-size:.85rem;color:#64748b;">Profile photo</div><button class="btn btn-outline btn-sm" onclick="toast('Photo upload coming soon')">Upload Photo</button></div>
+            <div><div style="font-size:.85rem;color:#64748b;">Profile photo</div><button class="btn btn-outline btn-sm" style="opacity:0.6;cursor:not-allowed;" disabled title="Photo upload coming soon">Upload Photo (Coming Soon)</button></div>
           </div>
           <div class="form-grid">
             <div class="fg"><label>Full Name</label><input id="profName" placeholder=""></div>
@@ -784,25 +784,7 @@ function uid() { return 'AG-'+Date.now().toString(36).toUpperCase(); }
 
 function loadSample() {
   if (clients.length) return;
-  clients = [
-    { id:'AG-DEMO1', name:'Robert & Linda Mays', email:'rmays@email.com', phone:'(801)555-0101', prop:'245 N 500 W, Provo UT', rent:1450, commType:'flat', notes:'Great landlords, flexible on move-in date', status:'active', listed:'2026-02-10', views:128, leads:7 },
-    { id:'AG-DEMO2', name:'Tom Keller', email:'tom@email.com', phone:'(801)555-0202', prop:'890 Center St #3, Orem UT', rent:1100, commType:'flat', notes:'Studio unit, prefers single occupant', status:'active', listed:'2026-02-28', views:54, leads:3 },
-    { id:'AG-DEMO3', name:'Sarah Park', email:'spark@email.com', phone:'(801)555-0303', prop:'12 Elm Ave, Lehi UT', rent:1800, commType:'pct', notes:'3 bed/2 bath, garage included', status:'rented', listed:'2026-01-05', views:210, leads:18 },
-  ];
-  commissions = [
-    { id:'CM-1', prop:'12 Elm Ave, Lehi UT', amount:1800, date:'2026-02-01', note:"One month's rent — Sarah Park" },
-  ];
-  saveClients(); saveComm();
-  if (!pipelineLeads.length) {
-    pipelineLeads = [
-      { id:'PL-1', name:'Alex Torres',    prop:'245 N 500 W, Provo',    stage:0 },
-      { id:'PL-2', name:'Maria Chen',     prop:'245 N 500 W, Provo',    stage:1 },
-      { id:'PL-3', name:'James Williams', prop:'890 Center St #3, Orem', stage:2 },
-      { id:'PL-4', name:'Priya Patel',    prop:'890 Center St #3, Orem', stage:3 },
-      { id:'PL-5', name:'Carlos Ruiz',    prop:'12 Elm Ave, Lehi',       stage:4 },
-    ];
-    savePipeline();
-  }
+  if (!localStorage.getItem('rv_demo_mode')) return;
 }
 
 // ── AUTH ─────────────────────────────────────────────
@@ -973,12 +955,7 @@ function renderStats() {
 // ── ACTIVITY FEED ─────────────────────────────────────
 function renderActivityFeed() {
   const el = document.getElementById('activityFeed');
-  const items = [
-    { icon:'👤', text:'New applicant inquiry — 245 N 500 W, Provo', time:'2 hours ago' },
-    { icon:'📋', text:'Lease signed — 12 Elm Ave, Lehi UT', time:'3 days ago' },
-    { icon:'👁', text:'Listing viewed 12 times today — 890 Center St #3', time:'Today' },
-    { icon:'🤖', text:'AI answered 3 tenant questions overnight', time:'Last night' },
-  ];
+  const items = [];
   el.innerHTML = items.map(i=>`
     <div style="display:flex;gap:.75rem;align-items:flex-start;padding:.65rem 0;border-bottom:1px solid #f1f5f9;">
       <div style="font-size:1.2rem;">${i.icon}</div>
@@ -1089,7 +1066,7 @@ function renderListingTable() {
       <td>${esc(c.listed)}</td>
       <td>${c.views||0}</td>
       <td>${c.leads||0}</td>
-      <td><button class="btn btn-outline btn-sm" onclick="toast('Opening listing…')">View</button></td>
+      <td><button class="btn btn-outline btn-sm" onclick="window.location.href='listings.html'">View</button></td>
     </tr>`;
   }).join('')
   : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#94a3b8;">No listings yet.</td></tr>';
@@ -1271,13 +1248,7 @@ function loadAgentSettings() {
 
 // ── INVOICES ──────────────────────────────────────────
 function seedInvoices() {
-  if (agentInvoices.length) return;
-  agentInvoices = [
-    { id:'AGT-001', client:'Home Realty LLC', property:'123 Main St, SLC', commType:'Listing Agent', ref:'MLS-445521', split:70, status:'Paid', date:'2026-03-08', lineItems:[{desc:'Listing Commission (3%)',qty:1,rate:4500}], notes:'Closed 3/8', total:4500, createdAt:'2026-03-08' },
-    { id:'AGT-002', client:'3120Life LLC', property:'456 Oak Ave, Sandy', commType:'Buyer Agent', ref:'MLS-445890', split:70, status:'Sent', date:'2026-03-14', lineItems:[{desc:'Buyer Commission (2.5%)',qty:1,rate:3200}], notes:'Closing scheduled 3/20', total:3200, createdAt:'2026-03-14' },
-    { id:'AGT-003', client:'Direct Client', property:'789 Elm Dr, Provo', commType:'Referral Fee', ref:'REF-2026-03', split:100, status:'Draft', date:'2026-03-16', lineItems:[{desc:'Referral fee',qty:1,rate:2800}], notes:'', total:2800, createdAt:'2026-03-16' }
-  ];
-  saveInvoices();
+  // No fake seed data — invoices come from real usage
 }
 
 function renderInvoiceTable() {
@@ -1438,22 +1409,7 @@ function viewInvoice(idx) {
 
 // ── FOLLOW-UPS ──────────────────────────────────────
 function seedFollowUps() {
-  if (agentFollowups.length) return;
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now()+86400000).toISOString().split('T')[0];
-  const in3days = new Date(Date.now()+259200000).toISOString().split('T')[0];
-  const in5days = new Date(Date.now()+432000000).toISOString().split('T')[0];
-  agentFollowups = [
-    { id:'fu1', name:'[Client Name]', phone:'(801) 555-1234', email:'maria@email.com', date:yesterday, time:'14:00', type:'Call', regarding:'Lease renewal discussion', property:'789 Elm Dr', priority:'High', notes:'Wants to discuss rent increase', status:'pending', createdAt:yesterday },
-    { id:'fu2', name:'[Tenant Name]', phone:'(801) 555-5678', email:'robert@email.com', date:today, time:'10:00', type:'Showing', regarding:'Property showing at 456 Oak Ave', property:'456 Oak Ave', priority:'Medium', notes:'First-time buyer', status:'pending', createdAt:today },
-    { id:'fu3', name:'[Tenant Name]', phone:'', email:'jane@email.com', date:today, time:'15:00', type:'Email', regarding:'Check on application status', property:'', priority:'Low', notes:'', status:'pending', createdAt:today },
-    { id:'fu4', name:'Tom Wilson', phone:'(801) 555-9012', email:'tom@email.com', date:tomorrow, time:'09:00', type:'Call', regarding:'Investment property interest', property:'', priority:'Medium', notes:'Referred by Mike', status:'pending', createdAt:today },
-    { id:'fu5', name:'Lisa Park', phone:'(801) 555-3456', email:'lisa@email.com', date:in3days, time:'11:00', type:'Meeting', regarding:'Listing presentation', property:'321 Pine St', priority:'High', notes:'Luxury listing potential', status:'pending', createdAt:today },
-    { id:'fu6', name:'[User Name]', phone:'(801) 555-7890', email:'', date:in5days, time:'13:00', type:'Check-in', regarding:'Post-closing follow up', property:'555 Cedar Ln', priority:'Low', notes:'Closed last week', status:'pending', createdAt:today },
-    { id:'fu7', name:'Dave Brown', phone:'(801) 555-2222', email:'dave@email.com', date:new Date(Date.now()-604800000).toISOString().split('T')[0], time:'10:00', type:'Call', regarding:'Referred buyer consultation', property:'', priority:'Medium', notes:'Great call, setting up showings next week', status:'completed', completedAt:new Date(Date.now()-518400000).toISOString(), outcome:'Scheduled 3 showings' }
-  ];
-  localStorage.setItem('rv_agent_followups', JSON.stringify(agentFollowups));
+  // No fake seed data — follow-ups come from real usage
 }
 
 function saveFollowUps() { localStorage.setItem('rv_agent_followups', JSON.stringify(agentFollowups)); }
@@ -1626,15 +1582,7 @@ function completeDone() {
 
 // ── NETWORK TAB ──────────────────────────────────────
 function seedConnections() {
-  if (agentConnections.length) return;
-  agentConnections = [
-    { name:"Mike's Plumbing", trade:'Plumber', rating:4.8, location:'SLC', color:'#3b82f6', referralsSent:2, referralsRecv:1 },
-    { name:'Bright Electric', trade:'Electrician', rating:4.9, location:'Sandy', color:'#f59e0b', referralsSent:1, referralsRecv:2 },
-    { name:'CleanSlate Turnovers', trade:'Cleaner', rating:5.0, location:'Provo', color:'#10b981', referralsSent:0, referralsRecv:1 },
-    { name:'Utah Property Law', trade:'Attorney', rating:4.7, location:'SLC', color:'#00E676', referralsSent:1, referralsRecv:0 },
-    { name:'Summit Roofing', trade:'Roofer', rating:4.6, location:'Sandy', color:'#ef4444', referralsSent:1, referralsRecv:0 }
-  ];
-  localStorage.setItem('rv_agent_connections', JSON.stringify(agentConnections));
+  // No fake seed data — connections come from real usage
 }
 
 function renderNetworkTab() {
@@ -1649,29 +1597,32 @@ function renderNetworkTab() {
   document.getElementById('netStatConn').textContent = agentConnections.length;
   document.getElementById('netStatSent').textContent = totalSent;
   document.getElementById('netStatRecv').textContent = totalRecv;
-  document.getElementById('netStatViews').textContent = Math.floor(Math.random()*20)+5;
+  document.getElementById('netStatViews').textContent = 0;
 
-  grid.innerHTML = agentConnections.map(c => {
-    const initials = c.name.split(' ').map(w=>w[0]).join('').substring(0,2);
-    return `<div class="net-card">
-      <div class="net-avatar" style="background:${esc(c.color)};color:white;font-weight:700;">${esc(initials)}</div>
-      <div style="font-weight:600;font-size:.9rem;">${esc(c.name)}</div>
-      <div style="font-size:.8rem;color:#64748b;">${esc(c.trade)} · ${esc(c.location)}</div>
-      <div style="font-size:.8rem;color:#f59e0b;">⭐ ${c.rating}</div>
-      <button class="btn btn-outline btn-sm" style="margin-top:.5rem;" onclick="toast('Message sent!')">📨 Message</button>
-    </div>`;
-  }).join('');
+  if (!agentConnections.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem;font-size:.88rem;">No connections yet. They will appear here as you build your network.</div>';
+  } else {
+    grid.innerHTML = agentConnections.map(c => {
+      const initials = c.name.split(' ').map(w=>w[0]).join('').substring(0,2);
+      return `<div class="net-card">
+        <div class="net-avatar" style="background:${esc(c.color)};color:white;font-weight:700;">${esc(initials)}</div>
+        <div style="font-weight:600;font-size:.9rem;">${esc(c.name)}</div>
+        <div style="font-size:.8rem;color:#64748b;">${esc(c.trade)} · ${esc(c.location)}</div>
+        <div style="font-size:.8rem;color:#f59e0b;">⭐ ${c.rating}</div>
+        <button class="btn btn-outline btn-sm" style="margin-top:.5rem;" onclick="window.location.href='messages.html'">📨 Message</button>
+      </div>`;
+    }).join('');
+  }
 
-  const referrals = [
-    { text:"You referred 3120Life LLC to Mike's Plumbing", date:'Mar 14' },
-    { text:'Bright Electric referred you a new client — Hart Properties', date:'Mar 12' },
-    { text:'You referred Valley Rentals to Premier Painting', date:'Mar 10' },
-    { text:'Utah Property Law referred you a buyer lead', date:'Mar 5' }
-  ];
-  feed.innerHTML = referrals.map(r => `<div class="ref-item">
-    <span style="font-size:1.1rem;">🔄</span>
-    <div><div style="font-size:.85rem;">${r.text}</div><div style="font-size:.75rem;color:#94a3b8;">${r.date}</div></div>
-  </div>`).join('');
+  const referrals = [];
+  if (!referrals.length) {
+    feed.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:1.5rem;font-size:.88rem;">No referral activity yet.</div>';
+  } else {
+    feed.innerHTML = referrals.map(r => `<div class="ref-item">
+      <span style="font-size:1.1rem;">🔄</span>
+      <div><div style="font-size:.85rem;">${r.text}</div><div style="font-size:.75rem;color:#94a3b8;">${r.date}</div></div>
+    </div>`).join('');
+  }
 }
 
 // ── PROFILE TAB ──────────────────────────────────────

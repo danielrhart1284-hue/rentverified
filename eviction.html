@@ -696,7 +696,7 @@
         </div>
         <h3>🆘 Emergency Situations</h3>
         <div class="workflow-grid">
-          <div class="wf-card" onclick="alert('Emergency workflow: Contact law enforcement for illegal lockout, then file an emergency motion. Call a Utah attorney immediately.')"><div class="wf-icon">🔐</div><div class="wf-title">Tenant Illegally Locked Out Property</div></div>
+          <div class="wf-card" onclick="toast('Emergency: Contact law enforcement for illegal lockout, then file an emergency motion. Go to Attorneys tab for help.');showSection('attorneys',null);"><div class="wf-icon">🔐</div><div class="wf-title">Tenant Illegally Locked Out Property</div></div>
           <div class="wf-card" onclick="startNoticeFlow('abandonment-notice')"><div class="wf-icon">🚪</div><div class="wf-title">Abandoned Property Handling</div></div>
           <div class="wf-card" onclick="showSection('attorneys',null)"><div class="wf-icon">🆘</div><div class="wf-title">Emergency — Need Attorney Now</div></div>
         </div>
@@ -717,35 +717,7 @@ let savedNotices = [];
 let currentViolationType = '';
 let currentCaseData = {};
 
-const ATTORNEYS = [
-  {
-    id:'atty1', name:'Johnson & Associates', rating:4.9, responseTime:'~2 hrs',
-    specialties:['Lease Violations','Non-Payment','Emergency Evictions'],
-    location:'Provo, UT — Serving Utah County',
-    bio:'15 years Utah landlord-tenant law. Over 800 evictions handled. Flat fee pricing available.',
-    fees:{ consult:'Free', uncontested:'$550–$750', contested:'$1,500–$2,800', emergency:'$800+' },
-    available:true, featured:true, phone:'801-555-2100', email:'johnson@utaheviction.law',
-    zips:['84601','84602','84603','84604','84043','84058','84057']
-  },
-  {
-    id:'atty2', name:'Smith Legal Group', rating:4.7, responseTime:'~4 hrs',
-    specialties:['Non-Payment','Property Damage','Small Claims'],
-    location:'Orem, UT — Serving Utah &amp; Salt Lake Counties',
-    bio:'Top-rated eviction attorney Utah County. No hidden fees. Online case tracking.',
-    fees:{ consult:'Free 30 min', uncontested:'$500–$700', contested:'$1,400–$2,500', emergency:'$900+' },
-    available:true, featured:false, phone:'801-555-3300', email:'smith@smithlegalut.com',
-    zips:['84058','84097','84604','84043','84020','84101','84102']
-  },
-  {
-    id:'atty3', name:'Utah Eviction Pros', rating:4.8, responseTime:'~1 hr',
-    specialties:['Emergency Evictions','Lease Violations','Illegal Activity'],
-    location:'Salt Lake City — Serving All of Utah',
-    bio:'Emergency evictions available 7 days/week. Fastest response time in Utah.',
-    fees:{ consult:'$150', uncontested:'$600–$800', contested:'$1,600–$3,000', emergency:'$750 flat' },
-    available:true, featured:false, phone:'801-555-4400', email:'help@utahevictionpros.com',
-    zips:['all']
-  }
-];
+const ATTORNEYS = [];
 
 const VIOLATION_LABELS = {
   'nonpayment':      { label:'Non-Payment of Rent',     notice:'3-Day Pay or Quit',  statute:'Utah Code § 78B-6-802' },
@@ -1011,7 +983,7 @@ function generateDocuments() {
       <div class="card" style="margin:0;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
           <div style="font-weight:700;">💰 Payment History Export</div>
-          <button class="btn btn-outline btn-sm" onclick="toast('📥 Payment history exported!')">Export CSV</button>
+          <button class="btn btn-outline btn-sm" onclick="toast('CSV export coming soon')">Export CSV</button>
         </div>
         <div style="font-size:.82rem;color:#64748b;">Full rent payment record for this tenant pulled from accounting</div>
       </div>
@@ -1027,6 +999,10 @@ function renderMatchedAttorneys() {
     if (urgency === 'emergency') return (a.responseTime < b.responseTime ? -1 : 1);
     return b.rating - a.rating;
   });
+  if (!sorted.length) {
+    container.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">No attorneys yet. They will appear here as they join the platform.</p>';
+    return;
+  }
   container.innerHTML = sorted.map(a => attorneyCardHTML(a, true)).join('');
 }
 
@@ -1296,7 +1272,12 @@ function printCaseFile() {
 // ════════════════════════════════════════════════
 function renderAttorneys() {
   const container = document.getElementById('attorney-list-section');
-  if (container) container.innerHTML = ATTORNEYS.map(a => attorneyCardHTML(a, false)).join('');
+  if (!container) return;
+  if (!ATTORNEYS.length) {
+    container.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">No attorneys yet. They will appear here as they join the platform.</p>';
+    return;
+  }
+  container.innerHTML = ATTORNEYS.map(a => attorneyCardHTML(a, false)).join('');
 }
 
 function attorneyCardHTML(a, showRetain) {
@@ -1326,7 +1307,7 @@ function attorneyCardHTML(a, showRetain) {
       <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
         <button class="btn btn-outline btn-sm" onclick="toast('📧 Profile request sent to ${a.name}!')">View Full Profile</button>
         ${showRetain ? `<button class="btn btn-primary btn-sm" onclick="retainAttorney('${a.id}')">📁 Send Case File &amp; Retain</button>` : `<button class="btn btn-primary btn-sm" onclick="toast('📁 Opening retain flow for ${a.name}...')">Retain Attorney</button>`}
-        <button class="btn btn-green btn-sm" onclick="toast('📞 Calling ${a.phone}...')">Call Now</button>
+        <a class="btn btn-green btn-sm" href="tel:${a.phone}" style="text-decoration:none;">Call Now</a>
       </div>
     </div>`;
 }
@@ -1358,7 +1339,7 @@ function retainAttorney(attyId) {
       <strong>💳 Payment via 3120 Life</strong><br>
       <div style="font-size:.85rem;color:#92400e;margin-top:.5rem;">Stripe payment integration coming soon. For now, contact the attorney directly at <strong>${a.email}</strong></div>
     </div>
-    <button class="btn btn-green" onclick="alert('✅ Case file sent to ${a.name}! They will respond within ${a.responseTime}. Check your messages.');window.close();">✅ Send Case File &amp; Retain Attorney</button>
+    <button class="btn btn-green" onclick="this.textContent='✅ Case file sent to ${a.name}! They will respond within ${a.responseTime}.';this.disabled=true;this.style.opacity='0.7';setTimeout(function(){window.close();},3000);">✅ Send Case File &amp; Retain Attorney</button>
     </body></html>`);
   w.document.close();
 }

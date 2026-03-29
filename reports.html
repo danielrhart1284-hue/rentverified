@@ -649,6 +649,7 @@ function getConfigParams(){
 // ── Seed / Demo Data ────────────────────────────────────────────────────────
 
 function seedDemoData(){
+  if (!localStorage.getItem('rv_demo_mode')) return;
   // Only seed if data is empty
   var acct = JSON.parse(localStorage.getItem('rv_accounting')||'[]');
   if(acct.length === 0){
@@ -1676,10 +1677,7 @@ var REPORT_REGISTRY = [
     frequency:'Quarterly', keywords:['inspection','property','condition','findings'],
     generate: function(p){
       // Demo inspection data
-      var inspections=[
-        {property:'3120 Main St',date:new Date().getFullYear()+'-01-15',inspector:'John Doe',overall:'Good',items:[{area:'Exterior',condition:'Good',notes:'Minor paint peeling on south wall'},{area:'Plumbing',condition:'Fair',notes:'Slow drain in Unit 102'},{area:'Electrical',condition:'Good',notes:'All systems functional'},{area:'HVAC',condition:'Good',notes:'Filters replaced'}]},
-        {property:'456 Oak Ave',date:new Date().getFullYear()+'-02-20',inspector:'Jane Smith',overall:'Fair',items:[{area:'Roof',condition:'Fair',notes:'Needs replacement within 2 years'},{area:'Plumbing',condition:'Good',notes:'No issues'},{area:'Landscaping',condition:'Poor',notes:'Overgrown, needs maintenance'}]}
-      ];
+      var inspections=[];
       if(p.property) inspections=inspections.filter(function(i){ return i.property===p.property; });
       return {inspections:inspections};
     },

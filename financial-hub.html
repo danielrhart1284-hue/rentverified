@@ -717,6 +717,7 @@ function openModal(html){
    SAMPLE DATA SEED
    ═══════════════════════════════════════════════ */
 function seedData(){
+  if(!localStorage.getItem('rv_demo_mode')) return;
   if(load('rv_deposit_bonds',[]).length) return;
 
   save('rv_deposit_bonds',[
@@ -1006,7 +1007,7 @@ function fileClaimDemo(){
     const claims=load('rv_insurance_claims',[]);
     const existing=claims.find(c=>c.claimNum==='TG-2026-08847');
     if(!existing){
-      claims.push({id:genId(),claimNum:'TG-2026-08847',type:'Rent Guarantee',party:'Demo Property — Tenant',amount:1200,filed:new Date().toISOString(),status:'filed',paidOut:false,timeline:[{ts:new Date().toISOString(),text:'Claim submitted via 3120 Life auto-package'}]});
+      claims.push({id:genId(),claimNum:'TG-'+Date.now(),type:'Rent Guarantee',party:'[Property] — [Tenant]',amount:1200,filed:new Date().toISOString(),status:'filed',paidOut:false,timeline:[{ts:new Date().toISOString(),text:'Claim submitted via 3120 Life auto-package'}]});
       save('rv_insurance_claims',claims);
     }
     renderDashboard();

@@ -244,7 +244,7 @@ tr:hover td{background:#fafbff}
       </div>
       <div class="form-group">
         <label>Name / Business</label>
-        <input type="text" id="pro-name" placeholder="Mike's Plumbing LLC" value="Mike's Plumbing LLC"/>
+        <input type="text" id="pro-name" placeholder="Business name" value=""/>
       </div>
       <div class="form-group">
         <label>Email</label>
@@ -755,60 +755,10 @@ const CREDS_BY_TYPE = {
 };
 
 // ── CONTRACTOR COMPLIANCE DATA (Landlord view) ─────────
-const CONTRACTORS = [
-  { name:"Mike's Plumbing LLC", type:'Plumbing', avatar:'🔧',
-    credentials:[
-      { name:'DOPL License', exp:'2026-08-15', cat:'license' },
-      { name:'General Liability', exp:'2026-04-30', cat:'insurance' },
-      { name:'Workers Comp', exp:'2026-11-20', cat:'insurance' },
-    ]},
-  { name:'Elite Electric', type:'Electrical', avatar:'⚡',
-    credentials:[
-      { name:'DOPL License', exp:'2026-12-01', cat:'license' },
-      { name:'General Liability', exp:'2026-10-15', cat:'insurance' },
-      { name:'Workers Comp', exp:'2026-09-30', cat:'insurance' },
-    ]},
-  { name:'Handyman Dave LLC', type:'General Handyman', avatar:'🔨',
-    credentials:[
-      { name:'Business License', exp:'2026-03-25', cat:'license' },
-      { name:'General Liability', exp:'2026-11-01', cat:'insurance' },
-    ]},
-  { name:'ComfortPro HVAC', type:'HVAC', avatar:'❄️',
-    credentials:[
-      { name:'DOPL License', exp:'2026-07-31', cat:'license' },
-      { name:'General Liability', exp:'2026-02-28', cat:'insurance' },
-      { name:'EPA 608 Cert', exp:'2026-06-30', cat:'certification' },
-    ]},
-  { name:'FastFix Appliance', type:'Appliance Repair', avatar:'🏠',
-    credentials:[
-      { name:'Business License', exp:'2026-12-31', cat:'license' },
-      { name:'General Liability', exp:'2026-12-01', cat:'insurance' },
-    ]},
-  { name:'ProPaint Utah', type:'Painting', avatar:'🎨',
-    credentials:[
-      { name:'Business License', exp:'2026-11-30', cat:'license' },
-      { name:'General Liability', exp:'2025-12-31', cat:'insurance' },
-    ]},
-];
+const CONTRACTORS = [];
 
 // ── ALL PROFESSIONALS (Landlord view) ─────────────────
-const ALL_PROS = [
-  { name:'Sarah Johnson', type:'Insurance Agent', avatar:'🛡️',
-    credentials:[
-      { name:'NIPR License', exp:'2026-10-31', cat:'license' },
-      { name:'E&O Insurance', exp:'2026-04-20', cat:'insurance' },
-    ]},
-  { name:'Jake Wilson — Eviction Atty', type:'Attorney', avatar:'⚖️',
-    credentials:[
-      { name:'Utah State Bar', exp:'2026-12-31', cat:'license' },
-      { name:'Malpractice Ins.', exp:'2026-04-15', cat:'insurance' },
-    ]},
-  { name:'Provo Realty — Lisa Chen', type:'Listing Agent', avatar:'🏡',
-    credentials:[
-      { name:'DRE License', exp:'2027-05-31', cat:'license' },
-      { name:'E&O Insurance', exp:'2026-05-01', cat:'insurance' },
-    ]},
-];
+const ALL_PROS = [];
 
 // ═══════════════════════════════════════════════
 // UI FUNCTIONS
@@ -1136,6 +1086,7 @@ function credRow(cred) {
 
 function renderSummaryTable() {
   const tbody = document.getElementById('summary-table-body');
+  if (!CONTRACTORS.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">No contractors yet. They will appear here as they join the platform.</td></tr>'; return; }
   tbody.innerHTML = CONTRACTORS.map(c => {
     const lic = c.credentials.filter(x => x.cat === 'license')[0];
     const ins = c.credentials.filter(x => x.cat === 'insurance')[0];

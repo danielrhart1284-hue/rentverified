@@ -174,9 +174,9 @@
   <h1>&#127974; Loan Connect</h1>
   <p>Get funded faster. Our AI packages your financials and connects you with verified loan officers.</p>
   <div class="stat-bar">
-    <div class="stat"><div class="num" id="stat-officers">4</div><div class="lbl">Loan Officers Available</div></div>
+    <div class="stat"><div class="num" id="stat-officers">0</div><div class="lbl">Loan Officers Available</div></div>
     <div class="stat"><div class="num" id="stat-packages">0</div><div class="lbl">Packages Submitted</div></div>
-    <div class="stat"><div class="num" id="stat-time">~7 days</div><div class="lbl">Avg Funding Time</div></div>
+    <div class="stat"><div class="num" id="stat-time">--</div><div class="lbl">Avg Funding Time</div></div>
   </div>
 </section>
 
@@ -333,12 +333,7 @@
 
 function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
 
-var LOAN_OFFICERS = [
-  { id: 'lo1', name: 'Marcus Chen', initials: 'MC', company: 'Summit Lending Group', color: '#059669', email: 'marcus@summitlendinggroup.com', phone: '(801) 555-0142', specialties: ['Commercial','Bridge','SBA'], rating: 4.8, reviews: 47, verified: true, funded: '$12.5M', minLoan: '$50K', maxLoan: '$2M', photo: '' },
-  { id: 'lo2', name: 'Sarah Whitfield', initials: 'SW', company: 'Pinnacle Mortgage', color: '#2563eb', email: 'sarah@pinnaclemortgage.com', phone: '(801) 555-0198', specialties: ['Residential','FHA','Conventional'], rating: 4.9, reviews: 63, verified: true, funded: '$28M', minLoan: '$100K', maxLoan: '$5M', photo: '' },
-  { id: 'lo3', name: 'David Ramirez', initials: 'DR', company: 'Western Capital Finance', color: '#7c3aed', email: 'david@westerncapital.com', phone: '(801) 555-0177', specialties: ['Hard Money','Fix and Flip','Bridge'], rating: 4.6, reviews: 31, verified: true, funded: '$8.2M', minLoan: '$25K', maxLoan: '$1.5M', photo: '' },
-  { id: 'lo4', name: 'Jennifer Park', initials: 'JP', company: 'Utah First Lending', color: '#dc2626', email: 'jennifer@utahfirstlending.com', phone: '(801) 555-0165', specialties: ['Commercial','Conventional','SBA'], rating: 4.7, reviews: 52, verified: false, funded: '$19M', minLoan: '$75K', maxLoan: '$3M', photo: '' }
-];
+var LOAN_OFFICERS = [];
 
 var selectedOfficer = null;
 var currentStep = 1;
@@ -400,7 +395,7 @@ function filterOfficers() {
 // ─── Render Officers ──────────────────────────────────────────────
 function renderOfficers(officers) {
   var grid = document.getElementById('officerGrid');
-  if (!officers.length) { grid.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">No matching loan officers found.</p>'; return; }
+  if (!officers.length) { grid.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">No loan officers yet. They will appear here as they join the platform.</p>'; return; }
   grid.innerHTML = officers.map(function(o) {
     var stars = '';
     for (var i = 0; i < 5; i++) { stars += i < Math.round(o.rating) ? '\u2605' : '\u2606'; }

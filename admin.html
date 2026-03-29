@@ -1373,7 +1373,7 @@
         <h1 class="admin-page-title">Account Type Demos</h1>
         <p class="admin-page-sub">Preview each account type as a user would see it.</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;">
-          <a href="listings.html" style="text-decoration:none;" class="demo-card-link">
+          <a href="landlord-signup.html" style="text-decoration:none;" class="demo-card-link">
             <div class="admin-card" style="text-align:center;padding:1.5rem;cursor:pointer;transition:all 0.2s;border:2px solid transparent;" onmouseover="this.style.borderColor='#00E676';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='transparent';this.style.transform='none'">
               <div style="font-size:2rem;margin-bottom:0.5rem;">&#127968;</div>
               <div style="font-weight:800;font-size:0.95rem;color:#121212;">Landlord / PM</div>
@@ -2639,16 +2639,7 @@ async function loadActivityFeed() {
     console.warn('Activity feed Supabase failed:', e);
   }
 
-  // Fallback demo data
-  if (!items.length) {
-    items = [
-      { dot: 'green', text: 'New landlord signup: 3120Life LLC', time: '2 hours ago' },
-      { dot: 'purple', text: "Funding application: Joe's Pizza &mdash; $50,000 Working Capital", time: '5 hours ago' },
-      { dot: 'blue', text: 'New tenant: Tenant &mdash; 123 Maple St', time: '1 day ago' },
-      { dot: 'amber', text: 'Deposit bond enrolled: Unit 4B &mdash; $2.55/mo commission', time: '1 day ago' },
-      { dot: 'green', text: 'Payment received: $1,200 from Michael Chen', time: '2 days ago' },
-    ];
-  }
+  // No fallback demo data — activity feed starts empty
 
   feed.innerHTML = items.slice(0, 10).map(function(item) {
     return '<div class="af-item"><div class="af-dot ' + item.dot + '"></div><div><div class="af-text">' + item.text + '</div><div class="af-time">' + item.time + '</div></div></div>';
@@ -2935,16 +2926,7 @@ function loadChurnData() {
 
 function getCrossReferrals() {
   var refs = safeGet('rv_cross_referrals', []);
-  if (!refs.length) {
-    refs = [
-      { date: '2025-03-18', referrer: 'Sarah Johnson (PM)', referredTo: 'Tom Rivera (Contractor)', client: 'Tenant 4B - Leak Repair', service: 'Plumbing', fee: 150, status: 'paid', windowEnd: '2025-06-18' },
-      { date: '2025-03-15', referrer: 'Lisa Park (Attorney)', referredTo: 'David Hart (Insurance)', client: '3120Life LLC - Policy Review', service: 'Commercial Insurance', fee: 200, status: 'pending', windowEnd: '2025-06-15' },
-      { date: '2025-03-10', referrer: 'Amy Williams (Realtor)', referredTo: 'Mike Chen (Lender)', client: 'Green Lawn Co - Business Loan', service: 'Business Funding', fee: 500, status: 'pending', windowEnd: '2025-06-10' },
-      { date: '2025-03-05', referrer: 'Tom Rivera (Contractor)', referredTo: 'Sarah Johnson (PM)', client: 'New Client - 8 units', service: 'Property Management', fee: 300, status: 'paid', windowEnd: '2025-06-05' },
-      { date: '2025-02-28', referrer: 'David Hart (Insurance)', referredTo: 'Lisa Park (Attorney)', client: 'Maple Realty - Lease Dispute', service: 'Legal Services', fee: 250, status: 'expired', windowEnd: '2025-05-28' },
-    ];
-    localStorage.setItem('rv_cross_referrals', JSON.stringify(refs));
-  }
+  // No fake seed data — referrals come from real usage
   return refs;
 }
 
@@ -3344,7 +3326,7 @@ document.addEventListener('DOMContentLoaded', checkImpersonation);
 function seedAccounts() {
   if (localStorage.getItem('rv_admin_accounts')) return;
   var accounts = [
-    { id:'ACC-001', name:'Daniel Hart', email:'daniel@3120life.com', phone:'801-555-0001', role:'admin', business_type:'property_management', plan:'enterprise', status:'active', notes:'Founder — 3120Life LLC', company:'3120Life LLC', created:'2024-08-15', comped:true }
+    { id:'ACC-001', name:'Daniel Hart', email:'daniel@3120life.com', phone:'', role:'admin', business_type:'property_management', plan:'enterprise', status:'active', notes:'Founder — 3120Life LLC', company:'3120Life LLC', created:'2024-08-15', comped:true }
   ];
   localStorage.setItem('rv_admin_accounts', JSON.stringify(accounts));
 }
@@ -4165,24 +4147,9 @@ function saveNotifSettings() { showToast('Notification settings saved.'); }
 function seedModeration() {
   if (localStorage.getItem('rv_admin_moderation')) return;
   var mod = {
-    pros: [
-      { id:'PRO-001', name:'Mike Torres', category:'Plumbing', credentials:'Licensed Master Plumber', rating:4.8, status:'pending', bio:'15 years experience in residential and commercial plumbing.' },
-      { id:'PRO-002', name:'Jennifer Blake', category:'Electrical', credentials:'Master Electrician, OSHA Cert', rating:4.6, status:'pending', bio:'Specializing in smart home installations.' },
-      { id:'PRO-003', name:'David Nguyen', category:'HVAC', credentials:'EPA 608 Certified', rating:4.9, status:'pending', bio:'Full HVAC system install and repair.' },
-      { id:'PRO-004', name:'Amanda Cole', category:'Property Inspection', credentials:'ASHI Certified', rating:4.7, status:'pending', bio:'Thorough home and commercial inspections.' },
-      { id:'PRO-005', name:'Carlos Rivera', category:'Landscaping', credentials:'Certified Arborist', rating:4.5, status:'pending', bio:'Full-service landscaping and tree care.' }
-    ],
-    reviews: [
-      { id:'REV-001', author:'John S.', rating:1, text:'Terrible service, never showed up. Avoid!', target:'Mike Torres', status:'flagged', reason:'Potentially defamatory' },
-      { id:'REV-002', author:'Linda M.', rating:5, text:'Best plumber in town! Highly recommended.', target:'Mike Torres', status:'pending', reason:'' },
-      { id:'REV-003', author:'Anonymous', rating:2, text:'Overcharged for simple work. Contains spam link: http://spam.example.com', target:'Jennifer Blake', status:'flagged', reason:'Contains spam' },
-      { id:'REV-004', author:'Bob K.', rating:4, text:'Good work but arrived late.', target:'David Nguyen', status:'pending', reason:'' }
-    ],
-    reports: [
-      { id:'RPT-001', reporter:'sarah@acmeproperties.com', item:'PRO-002 listing', reason:'Fake credentials', status:'open' },
-      { id:'RPT-002', reporter:'marcus@gmail.com', item:'REV-003', reason:'Spam content', status:'open' },
-      { id:'RPT-003', reporter:'james@realtypros.com', item:'PRO-005 profile photo', reason:'Inappropriate image', status:'investigating' }
-    ]
+    pros: [],
+    reviews: [],
+    reports: []
   };
   localStorage.setItem('rv_admin_moderation', JSON.stringify(mod));
 }

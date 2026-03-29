@@ -265,7 +265,7 @@
             </div>
             <div class="fg" style="grid-column:1/-1;">
               <label>Photos / Attachments</label>
-              <div class="upload-zone" onclick="toast('📷 Photo upload ready — connect storage to enable.')">📷 Click to attach photos or drag files here</div>
+              <div class="upload-zone" style="opacity:0.6;cursor:not-allowed;" title="Photo upload — connect storage to enable">📷 Photo upload (connect storage to enable)</div>
             </div>
           </div>
           <div style="display:flex;gap:.75rem;margin-top:1.25rem;">
@@ -381,18 +381,8 @@ function uid() { return 'WO-' + Date.now().toString(36).toUpperCase(); }
 function loadSampleData() {
   if(workOrders.length) return;
   if(!localStorage.getItem('rv_demo_mode')) return;
-  workOrders = [
-    { id:'WO-A1B2C', prop:'119 E 600 S #119, Orem UT', cat:'Plumbing',   priority:'High',      status:'In Progress', desc:'Bathroom faucet dripping constantly — wasting water.',            source:'Tenant',   vendor:'Mike\'s Plumbing',  submitted:'2026-02-28', updated:'2026-03-01', notes:[] },
-    { id:'WO-D3E4F', prop:'119 E 600 S #119, Orem UT', cat:'Electrical', priority:'Medium',     status:'Open',        desc:'Kitchen outlet near sink stopped working.',                       source:'Tenant',   vendor:'',                  submitted:'2026-03-02', updated:'2026-03-02', notes:[] },
-    { id:'WO-G5H6I', prop:'119 E 600 S #119, Orem UT', cat:'HVAC / Heating', priority:'Low',   status:'Completed',   desc:'Furnace filter replacement — routine maintenance.',               source:'Landlord', vendor:'ComfortPro HVAC',   submitted:'2026-01-15', updated:'2026-01-20', notes:['Filter replaced, unit running well.'] },
-    { id:'WO-J7K8L', prop:'119 E 600 S #119, Orem UT', cat:'Appliance',  priority:'Emergency', status:'Assigned',    desc:'Refrigerator not cooling — food at risk.',                        source:'Tenant',   vendor:'Appliance Express',  submitted:'2026-03-04', updated:'2026-03-04', notes:[] },
-  ];
-  vendors = [
-    { id:'V001', name:"Mike's Plumbing", trade:'Plumbing',   phone:'(801) 555-0101', email:'mike@mikesplumbing.com', lic:'UT-PL-4421', rate:95,  rating:4.8, jobs:12, notes:'Reliable, 24/7 emergency available' },
-    { id:'V002', name:'ComfortPro HVAC', trade:'HVAC',       phone:'(801) 555-0202', email:'info@comfortpro.com',    lic:'UT-HVAC-881', rate:110, rating:4.6, jobs:7,  notes:'Annual service contracts available' },
-    { id:'V003', name:'Bright Spark Electric', trade:'Electrical', phone:'(801) 555-0303', email:'bill@brightspark.com', lic:'UT-EL-2291', rate:120, rating:4.9, jobs:5, notes:'Licensed master electrician' },
-    { id:'V004', name:'Appliance Express', trade:'Appliance Repair', phone:'(801) 555-0404', email:'fix@applianceexpress.com', lic:'', rate:75, rating:4.3, jobs:9, notes:'Same-day service most appliances' },
-  ];
+  workOrders = [];
+  vendors = [];
   saveOrders(); saveVendors();
 }
 
@@ -662,7 +652,7 @@ function submitRequest() {
     submitted:   wo.submitted,
     status:      'open',
     landlord:    '3120Life LLC',
-    contact:     'Daniel Hart — (801) 555-0199',
+    contact:     'Daniel Hart',
   };
   try {
     const existingLeads = JSON.parse(localStorage.getItem('rv_vendor_leads') || '[]');

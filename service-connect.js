@@ -31,17 +31,7 @@
 
   // ── Seed Providers (localStorage demo mode) ────────────────────────────
 
-  var SEED_PROVIDERS = [
-    { id: 'lo_1', name: '[Loan Officer Name]',      role: 'loan_officer',     company: '[Loan Officer]',   verified: true, rating: 4.9, initials: 'MT', color: '#1a56db', specialties: ['SBA 7(a)', 'Business Line of Credit', 'Equipment Financing'] },
-    { id: 'lo_2', name: '[Loan Officer Name]',       role: 'loan_officer',     company: 'Valley Business Lending', verified: true, rating: 4.7, initials: 'JP', color: '#7c3aed', specialties: ['Commercial Real Estate', 'Bridge Loans', 'Startup Funding'] },
-    { id: 'ia_1', name: 'Rachel Adams',        role: 'insurance_agent',  company: 'Shield Insurance Group',  verified: true, rating: 4.8, initials: 'RA', color: '#f59e0b', specialties: ['Commercial Property', 'General Liability', 'Workers Comp'] },
-    { id: 'ia_2', name: 'Kevin Blake',         role: 'insurance_agent',  company: 'Wasatch Insurance',       verified: true, rating: 4.6, initials: 'KB', color: '#059669', specialties: ['Landlord Insurance', 'Umbrella', 'E&O'] },
-    { id: 'ac_1', name: 'Sarah Mitchell, CPA', role: 'accountant',       company: 'Mitchell & Associates',   verified: true, rating: 4.9, initials: 'SM', color: '#2563eb', specialties: ['Real Estate Tax', '1031 Exchange', 'Entity Structuring'] },
-    { id: 'ac_2', name: 'David Torres, EA',    role: 'accountant',       company: 'Torres Tax Group',        verified: true, rating: 4.7, initials: 'DT', color: '#dc2626', specialties: ['Schedule E', 'Cost Segregation', 'IRS Representation'] },
-    { id: 'at_1', name: '[User Name], Esq.', role: 'attorney',        company: 'Johnson Legal Group',     verified: true, rating: 4.8, initials: 'MJ', color: '#7c3aed', specialties: ['Evictions', 'Lease Disputes', 'Fair Housing'] },
-    { id: 'mk_1', name: 'Ashley Rivera',       role: 'marketing_agency', company: 'Elevate Digital',         verified: true, rating: 4.9, initials: 'AR', color: '#ec4899', specialties: ['Social Media', 'Google Ads', 'Brand Strategy'] },
-    { id: 'bk_1', name: 'Lisa Chen',           role: 'bookkeeper',       company: 'Chen Bookkeeping',        verified: true, rating: 4.9, initials: 'LC', color: '#059669', specialties: ['QuickBooks', 'Rent Reconciliation', '1099 Prep'] }
-  ];
+  var SEED_PROVIDERS = [];
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 

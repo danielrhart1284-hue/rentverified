@@ -24,7 +24,7 @@ var BRAND = {
     name: 'Daniel Hart',
     company: '[Your Business Name]',
     email: 'daniel@3120life.com',
-    phone: '(801) 555-3120',
+    phone: '',
     title: 'Founder & CEO'
   },
 
