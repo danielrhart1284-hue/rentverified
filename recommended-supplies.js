@@ -210,25 +210,40 @@
   // ── Log click ──
   function logClick(product, sourcePage) {
     var click = {
-      product_name: product.name,
-      product_url: product.url,
-      retailer: product.retailer,
-      category: product.category,
-      industry: detectIndustry(),
-      source_page: sourcePage || window.location.pathname,
+      product_name:   product.name,
+      product_url:    product.url,
+      retailer:       product.retailer,
+      category:       product.category,
+      industry:       detectIndustry(),
+      source_page:    sourcePage || window.location.pathname,
       source_context: config.context || '',
-      event_type: 'click'
+      user_id:        null,  // filled below if user is signed in
     };
 
-    // Log to data layer if available
+    // Pull user_id from Supabase session if available
+    try {
+      var session = JSON.parse(localStorage.getItem('sb-njbgotdtpcabqxbkdfdc-auth-token') || 'null');
+      if (session && session.user) click.user_id = session.user.id;
+    } catch (_) {}
+
+    // ── 1. Server-side log → Supabase (fire-and-forget) ──
+    try {
+      fetch('/api/log-affiliate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(click),
+      }).catch(function() {}); // silently ignore network errors
+    } catch (_) {}
+
+    // ── 2. Local fallback (always keep for offline / demo mode) ──
     if (typeof RVData !== 'undefined' && RVData.logAffiliateClick) {
       RVData.logAffiliateClick(click);
     } else {
-      // Fallback direct localStorage
       var clicks = JSON.parse(localStorage.getItem('rv_affiliate_clicks') || '[]');
-      click.id = 'aff_' + Date.now();
+      click.id         = 'aff_' + Date.now();
       click.created_at = new Date().toISOString();
       clicks.push(click);
+      if (clicks.length > 500) clicks = clicks.slice(-500); // cap at 500
       localStorage.setItem('rv_affiliate_clicks', JSON.stringify(clicks));
     }
   }
