@@ -195,10 +195,11 @@
   </div>
 
   <!-- ── View Toggle ────────────────────────────────────── -->
-  <div class="view-tabs">
+  <div class="view-tabs" style="display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;">
     <button class="view-tab active" data-view="pipeline" onclick="switchView('pipeline')">&#9654; Pipeline</button>
     <button class="view-tab" data-view="list" onclick="switchView('list')">&#9776; List</button>
     <button class="view-tab" data-view="analytics" onclick="switchView('analytics')">&#128202; Analytics</button>
+    <span id="crm-pipeline-label" style="margin-left:auto;font-size:.72rem;font-weight:600;color:#6b7280;padding:.2rem .6rem;background:#f1f5f9;border-radius:6px;white-space:nowrap;"></span>
   </div>
 
   <!-- ── Pipeline (Kanban) View ─────────────────────────── -->
@@ -335,6 +336,8 @@
 
 <script src="data-layer.js"></script>
 <script src="supabase-config.js"></script>
+<script src="workspace.js"></script>
+<script src="crm-pipeline-config.js"></script>
 <script src="share-widget.js"></script>
 <script src="service-connect.js"></script>
 <script src="business-advisor.js"></script>
@@ -358,6 +361,8 @@ var listSortAsc = false;
 
 /* ── Init ─────────────────────────────────────────────────── */
 async function init() {
+  // Apply industry-specific pipeline stages before any rendering
+  if (typeof CRMPipeline !== 'undefined') CRMPipeline.autoApply();
   await seedIfEmpty();
   leads = await RVData.getLeads();
   populateFilterDropdowns();
