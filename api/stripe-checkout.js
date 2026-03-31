@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     lineItems = [{
       price_data: {
         currency:       'usd',
-        product_data:   { name: `RentVerified ${planConfig.name}`, description: planConfig.description },
+        product_data:   { name: `3120 ${planConfig.name}`, description: planConfig.description },
         unit_amount:    planConfig.amount,
         recurring:      { interval: planConfig.interval },
       },
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
         // Use inline price if no priceId set
         ...(planConfig.priceId ? {} : {
           'line_items[0][price_data][currency]':                   'usd',
-          'line_items[0][price_data][product_data][name]':         `RentVerified ${planConfig.name}`,
+          'line_items[0][price_data][product_data][name]':         `3120 ${planConfig.name}`,
           'line_items[0][price_data][product_data][description]':  planConfig.description,
           'line_items[0][price_data][unit_amount]':                String(planConfig.amount),
           'line_items[0][price_data][recurring][interval]':        planConfig.interval,
