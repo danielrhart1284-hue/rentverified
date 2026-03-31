@@ -123,10 +123,10 @@
     var existing = document.getElementById('rv-funding-banner');
     if (existing) existing.remove();
 
-    // Never show on pre-login screen
+    // Only show when the dashboard is actually visible (user is logged in)
+    var dashScreen = document.getElementById('dashboard-screen');
+    if (dashScreen && dashScreen.style.display !== 'block') return;
     if (!localStorage.getItem('rv_account')) return;
-    var signupScreen = document.getElementById('signup-screen');
-    if (signupScreen && signupScreen.style.display !== 'none') return;
 
     if (isDismissed()) return;
 
