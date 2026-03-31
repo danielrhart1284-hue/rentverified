@@ -269,6 +269,20 @@
               <div class="metric"><div class="label">License Status</div><div class="value" id="mLicense">--</div></div>
             </div>
           </div>
+          <!-- Loan Amount + Referral Fee Preview -->
+          <div id="loanAmountBox" style="display:none;margin-top:1.25rem;padding:1rem;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
+            <label style="font-weight:700;font-size:.85rem;color:#065f46;display:block;margin-bottom:.5rem;">💰 Requested Loan Amount</label>
+            <div style="display:flex;gap:.5rem;align-items:center;">
+              <span style="font-size:1rem;color:#374151;font-weight:600;">$</span>
+              <input type="number" id="requestedLoanAmount" min="1000" step="1000"
+                placeholder="e.g. 250000"
+                style="flex:1;padding:.5rem .75rem;border:1px solid #86efac;border-radius:8px;font-size:.95rem;font-weight:600;color:#1e293b;background:white;"
+                oninput="updateFeePreview()">
+            </div>
+            <div id="feePreviewLine" style="display:none;margin-top:.6rem;font-size:.8rem;color:#065f46;">
+              Estimated referral fee: <strong id="feePreviewAmt"></strong> &middot; <span style="opacity:.75;">1% of funded amount · paid at closing</span>
+            </div>
+          </div>
           <button class="btn-submit-pkg" id="btnSubmitPkg" onclick="submitPackage()">Submit to Loan Officer</button>
         </div>
       </div>
@@ -280,6 +294,25 @@
         <div class="card-header">Track Status</div>
         <div class="card-body">
           <div class="timeline-v" id="statusTimeline"></div>
+
+          <!-- Referral Fee Card -->
+          <div id="referralFeeCard" style="display:none;margin-top:1.25rem;padding:1rem 1.25rem;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:10px;border:1px solid #86efac;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+              <div>
+                <div style="font-size:.75rem;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.04em;">Estimated Referral Fee</div>
+                <div id="referralFeeDisplay" style="font-size:1.6rem;font-weight:900;color:#059669;margin:.15rem 0;">TBD</div>
+                <div style="font-size:.75rem;color:#64748b;">1% of funded loan amount · Paid by loan officer at closing</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:.7rem;color:#94a3b8;margin-bottom:.25rem;">Status</div>
+                <span id="referralStatusBadge" style="font-size:.78rem;font-weight:700;background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:20px;">Submitted</span>
+              </div>
+            </div>
+            <div style="margin-top:.75rem;font-size:.78rem;color:#64748b;padding-top:.75rem;border-top:1px solid #bbf7d0;">
+              📋 This referral is tracked in your earnings dashboard. You'll be notified when the loan status updates.
+            </div>
+          </div>
+
           <button class="btn-select" style="margin-top:.5rem;" onclick="startNew()">Start New Package</button>
         </div>
       </div>
@@ -513,6 +546,7 @@ function generatePackage() {
           document.getElementById('mLicense').textContent = data.license_verified ? '\u2705 Verified' : '\u274C Not Verified';
           document.getElementById('mLicense').style.color = data.license_verified ? '#059669' : '#dc2626';
           document.getElementById('pkgSummary').style.display = 'block';
+          document.getElementById('loanAmountBox').style.display = 'block';
           document.getElementById('btnSubmitPkg').style.display = 'block';
           showToast('Package ready for review', 'success');
         }, 400);
@@ -521,11 +555,30 @@ function generatePackage() {
   });
 }
 
+// ─── Fee Preview (loan amount input) ─────────────────────────────
+function updateFeePreview() {
+  var amt = parseFloat(document.getElementById('requestedLoanAmount').value) || 0;
+  var fee = Math.round(amt * 0.01);
+  var line = document.getElementById('feePreviewLine');
+  var feeAmt = document.getElementById('feePreviewAmt');
+  if (amt > 0) {
+    line.style.display = 'block';
+    feeAmt.textContent = '$' + fee.toLocaleString('en-US', { minimumFractionDigits: 2 });
+  } else {
+    line.style.display = 'none';
+  }
+}
+
 // ─── Submit Package ───────────────────────────────────────────────
 async function submitPackage() {
   if (!selectedOfficer || !computedData.revenue_12mo) return;
   var btn = document.getElementById('btnSubmitPkg') || document.querySelector('.btn-submit-pkg');
   if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+
+  // Loan amount in dollars (from input), convert to cents for consistency
+  var loanDollars  = parseFloat(document.getElementById('requestedLoanAmount').value) || 0;
+  var loanCents    = Math.round(loanDollars * 100);
+  var estimatedFee = Math.round(loanDollars * 0.01);
 
   var pkg = {
     business_id: 'demo_biz',
@@ -552,6 +605,35 @@ async function submitPackage() {
       body: 'Your loan package has been submitted to ' + selectedOfficer.name + ' at ' + selectedOfficer.company + '. Revenue: $' + computedData.revenue_12mo.toLocaleString() + ', Expenses: $' + computedData.expense_12mo.toLocaleString() + ', Cash Flow: $' + Math.round(computedData.cashflow_avg).toLocaleString() + '/mo.'
     });
   } catch (e) { console.error('Save failed:', e); showToast('Error saving package', 'error'); }
+
+  // ── Log referral to Supabase ──────────────────────────────────────────────
+  try {
+    fetch('/api/log-loan-referral', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        loan_officer_id:      selectedOfficer.id,
+        loan_officer_name:    selectedOfficer.name,
+        loan_officer_company: selectedOfficer.company,
+        loan_type:            selectedOfficer.types ? selectedOfficer.types[0] : 'general',
+        loan_amount:          loanCents,
+        revenue_12mo:         Math.round(computedData.revenue_12mo * 100),
+        expense_12mo:         Math.round(computedData.expense_12mo * 100),
+        cashflow_avg:         Math.round(computedData.cashflow_avg * 100),
+        source_page:          window.location.pathname,
+      }),
+    }).catch(function() {}); // fire-and-forget
+  } catch (_) {}
+
+  // ── Show step 4 referral fee card ─────────────────────────────────────────
+  var feeCard = document.getElementById('referralFeeCard');
+  var feeDisplay = document.getElementById('referralFeeDisplay');
+  if (feeCard && feeDisplay) {
+    feeCard.style.display = 'block';
+    feeDisplay.textContent = loanDollars > 0
+      ? '$' + estimatedFee.toLocaleString('en-US', { minimumFractionDigits: 2 })
+      : 'TBD at closing';
+  }
 
   document.getElementById('btnSubmitPkg').disabled = true;
   document.getElementById('btnSubmitPkg').textContent = 'Submitted';
