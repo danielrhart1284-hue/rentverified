@@ -153,11 +153,84 @@
     <button class="ac-tab active" onclick="switchTab('active')">Active Grants</button>
     <button class="ac-tab" onclick="switchTab('revoked')">Revoked</button>
     <button class="ac-tab" onclick="switchTab('audit')">Audit Log</button>
+    <button class="ac-tab" onclick="switchTab('team')">👥 Team Members</button>
   </div>
 
   <div class="ac-panel active" id="panel-active" style="padding-top:1rem;"></div>
   <div class="ac-panel" id="panel-revoked" style="padding-top:1rem;"></div>
   <div class="ac-panel" id="panel-audit" style="padding-top:1rem;"></div>
+
+  <!-- TEAM MEMBERS PANEL -->
+  <div class="ac-panel" id="panel-team" style="padding-top:1.25rem;">
+
+    <!-- Invite Form -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--ac-border);padding:1.5rem;margin-bottom:1.5rem;">
+      <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.1rem;display:flex;align-items:center;gap:.5rem;">✉️ Invite a Team Member</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;" class="team-invite-grid">
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:.3rem;">Name</label>
+          <input id="inv-name" type="text" placeholder="Jane Smith" style="width:100%;padding:.5rem .75rem;border:1px solid #d1d5db;border-radius:8px;font-size:.9rem;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:.3rem;">Email *</label>
+          <input id="inv-email" type="email" placeholder="jane@example.com" style="width:100%;padding:.5rem .75rem;border:1px solid #d1d5db;border-radius:8px;font-size:.9rem;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:.3rem;">Role *</label>
+          <select id="inv-role" style="width:100%;padding:.5rem .75rem;border:1px solid #d1d5db;border-radius:8px;font-size:.9rem;background:#fff;box-sizing:border-box;" onchange="updateRolePreview()">
+            <option value="staff">👤 Staff — CRM, jobs, bookings, messaging</option>
+            <option value="agent">🏘️ Agent — Leasing, CRM, listings, calendar</option>
+            <option value="vendor">🔧 Vendor — Assigned jobs &amp; invoices only</option>
+            <option value="admin">🔑 Admin — Full access except billing</option>
+            <option value="owner">👑 Owner — Full access including billing</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button onclick="sendTeamInvite()" style="width:100%;background:#00E676;color:#0f172a;border:none;border-radius:8px;padding:.55rem 1rem;font-weight:700;font-size:.9rem;cursor:pointer;">Send Invite →</button>
+        </div>
+      </div>
+
+      <!-- Role preview -->
+      <div id="role-preview-box" style="background:#f8fafc;border-radius:8px;padding:.75rem 1rem;border:1px solid #e2e8f0;">
+        <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;">Role Permissions Preview</div>
+        <div id="role-preview-content" style="font-size:.83rem;color:#374151;line-height:1.7;"></div>
+      </div>
+    </div>
+
+    <!-- Permissions Matrix -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--ac-border);padding:1.5rem;margin-bottom:1.5rem;overflow-x:auto;">
+      <h3 style="font-size:1rem;font-weight:700;margin:0 0 1rem;">Permissions Matrix</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:520px;">
+        <thead>
+          <tr style="border-bottom:2px solid #e2e8f0;">
+            <th style="text-align:left;padding:.5rem .75rem;color:#374151;font-weight:700;">Feature</th>
+            <th style="text-align:center;padding:.5rem;color:#7c3aed;">👑 Owner</th>
+            <th style="text-align:center;padding:.5rem;color:#1d4ed8;">🔑 Admin</th>
+            <th style="text-align:center;padding:.5rem;color:#059669;">👤 Staff</th>
+            <th style="text-align:center;padding:.5rem;color:#0891b2;">🏘️ Agent</th>
+            <th style="text-align:center;padding:.5rem;color:#d97706;">🔧 Vendor</th>
+          </tr>
+        </thead>
+        <tbody id="perms-matrix-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Team Member List -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--ac-border);padding:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin:0;">Current Team</h3>
+        <span id="team-count-badge" style="font-size:.75rem;background:#f1f5f9;color:#475569;padding:.2rem .6rem;border-radius:6px;font-weight:600;">0 members</span>
+      </div>
+      <div id="team-member-list">
+        <div style="text-align:center;padding:2rem;color:#94a3b8;font-size:.88rem;">
+          <div style="font-size:2rem;margin-bottom:.5rem;">👥</div>
+          No team members yet. Invite someone above to get started.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-team -->
+
 </div>
 
 <!-- Confirm Revoke Dialog -->
@@ -176,6 +249,7 @@
 
 <script src="supabase-config.js"></script>
 <script src="data-layer.js"></script>
+<script src="role-access-config.js"></script>
 <script src="share-widget.js" data-share-title="Access Control" data-share-text="Manage data access on 3120 Life"></script>
 <script>
 /* ── State ── */
@@ -239,8 +313,9 @@ function switchTab(tab) {
   document.querySelectorAll('.ac-panel').forEach(function(el){el.classList.remove('active');});
   document.querySelectorAll('.ac-tab').forEach(function(el){el.classList.remove('active');});
   document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'team') { renderTeamPanel(); }
   var btns = document.querySelectorAll('.ac-tab');
-  var tabs = ['active','revoked','audit'];
+  var tabs = ['active','revoked','audit','team'];
   var idx = tabs.indexOf(tab);
   if (idx >= 0 && btns[idx]) btns[idx].classList.add('active');
 }
@@ -498,6 +573,187 @@ document.getElementById('confirmRevoke').addEventListener('click', function(e) {
 
 /* Init */
 init();
+
+// ══════════════════════════════════════════════════════════════════════════
+// TEAM MEMBERS — Role-Based Access
+// ══════════════════════════════════════════════════════════════════════════
+
+var TEAM_ROLES = {
+  owner:  { label:'Owner',  icon:'👑', color:'#7c3aed', desc:'Full access including billing & team management.' },
+  admin:  { label:'Admin',  icon:'🔑', color:'#1d4ed8', desc:'Full operational access. No billing management.' },
+  staff:  { label:'Staff',  icon:'👤', color:'#059669', desc:'CRM, jobs, bookings, calendar, messaging.' },
+  agent:  { label:'Agent',  icon:'🏘️', color:'#0891b2', desc:'Leasing, CRM, listings, calendar, documents.' },
+  vendor: { label:'Vendor', icon:'🔧', color:'#d97706', desc:'Assigned jobs and invoice submission only.' },
+};
+
+var PERM_ROWS = [
+  { label:'Dashboard',        key:'view_dashboard' },
+  { label:'CRM & Leads',      key:'view_crm' },
+  { label:'Jobs & Work Orders', key:'view_jobs' },
+  { label:'Bookings & Calendar', key:'view_bookings' },
+  { label:'Listings',         key:'view_listings' },
+  { label:'Tenants / Clients', key:'view_tenants' },
+  { label:'Documents',        key:'view_documents' },
+  { label:'Messages',         key:'view_messages' },
+  { label:'Reviews',          key:'view_reviews' },
+  { label:'Field App',        key:'view_field_app' },
+  { label:'Financials',       key:'view_financials' },
+  { label:'Accounting',       key:'view_accounting' },
+  { label:'Owner Statements', key:'view_owner_stmts' },
+  { label:'Billing / Plan',   key:'view_billing' },
+  { label:'Team Management',  key:'manage_team' },
+  { label:'Access Control',   key:'manage_access' },
+  { label:'Settings',         key:'edit_settings' },
+];
+
+var ROLE_PERMS = {
+  owner:  { view_dashboard:true,  view_crm:true,  view_jobs:true,  view_bookings:true,  view_listings:true,  view_tenants:true,  view_documents:true,  view_messages:true,  view_reviews:true,  view_field_app:true,  view_financials:true,  view_accounting:true,  view_owner_stmts:true,  view_billing:true,  manage_team:true,  manage_access:true,  edit_settings:true },
+  admin:  { view_dashboard:true,  view_crm:true,  view_jobs:true,  view_bookings:true,  view_listings:true,  view_tenants:true,  view_documents:true,  view_messages:true,  view_reviews:true,  view_field_app:true,  view_financials:true,  view_accounting:true,  view_owner_stmts:true,  view_billing:false, manage_team:true,  manage_access:true,  edit_settings:true },
+  staff:  { view_dashboard:true,  view_crm:true,  view_jobs:true,  view_bookings:true,  view_listings:true,  view_tenants:true,  view_documents:true,  view_messages:true,  view_reviews:true,  view_field_app:true,  view_financials:false, view_accounting:false, view_owner_stmts:false, view_billing:false, manage_team:false, manage_access:false, edit_settings:false },
+  agent:  { view_dashboard:true,  view_crm:true,  view_jobs:false, view_bookings:true,  view_listings:true,  view_tenants:true,  view_documents:true,  view_messages:true,  view_reviews:true,  view_field_app:false, view_financials:false, view_accounting:false, view_owner_stmts:false, view_billing:false, manage_team:false, manage_access:false, edit_settings:false },
+  vendor: { view_dashboard:false, view_crm:false, view_jobs:true,  view_bookings:false, view_listings:false, view_tenants:false, view_documents:false, view_messages:true,  view_reviews:false, view_field_app:true,  view_financials:false, view_accounting:false, view_owner_stmts:false, view_billing:false, manage_team:false, manage_access:false, edit_settings:false },
+};
+
+function renderTeamPanel() {
+  renderPermMatrix();
+  renderRolePreview();
+  loadTeamMembers();
+}
+
+function renderPermMatrix() {
+  var roleKeys = ['owner','admin','staff','agent','vendor'];
+  var html = '';
+  PERM_ROWS.forEach(function(row, i) {
+    html += '<tr style="border-bottom:1px solid #f1f5f9;' + (i % 2 === 0 ? 'background:#fafafa;' : '') + '">';
+    html += '<td style="padding:.5rem .75rem;font-weight:600;color:#374151;">' + row.label + '</td>';
+    roleKeys.forEach(function(r) {
+      var allowed = ROLE_PERMS[r] && ROLE_PERMS[r][row.key];
+      html += '<td style="text-align:center;padding:.5rem;">' +
+        (allowed ? '<span style="color:#10b981;font-size:.9rem;">✓</span>' : '<span style="color:#e2e8f0;font-size:.9rem;">—</span>') +
+        '</td>';
+    });
+    html += '</tr>';
+  });
+  document.getElementById('perms-matrix-body').innerHTML = html;
+}
+
+function updateRolePreview() {
+  renderRolePreview();
+}
+
+function renderRolePreview() {
+  var role = document.getElementById('inv-role').value;
+  var meta = TEAM_ROLES[role];
+  var perms = ROLE_PERMS[role] || {};
+  if (!meta) return;
+
+  var allowed = PERM_ROWS.filter(function(r) { return perms[r.key]; }).map(function(r) { return r.label; });
+  var blocked  = PERM_ROWS.filter(function(r) { return !perms[r.key]; }).map(function(r) { return r.label; });
+
+  var html = '<span style="background:' + meta.color + '22;color:' + meta.color + ';padding:2px 8px;border-radius:4px;font-weight:700;font-size:.78rem;">' + meta.icon + ' ' + meta.label + '</span> ' + meta.desc;
+  if (blocked.length) {
+    html += '<div style="margin-top:.4rem;font-size:.78rem;color:#94a3b8;"><strong style="color:#ef4444;">Blocked:</strong> ' + blocked.join(', ') + '</div>';
+  }
+  document.getElementById('role-preview-content').innerHTML = html;
+}
+
+function loadTeamMembers() {
+  var members = [];
+  try { members = JSON.parse(localStorage.getItem('rv_team_members') || '[]'); } catch(_) {}
+
+  var listEl = document.getElementById('team-member-list');
+  var badge  = document.getElementById('team-count-badge');
+  badge.textContent = members.length + ' member' + (members.length !== 1 ? 's' : '');
+
+  if (!members.length) {
+    listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:.88rem;"><div style="font-size:2rem;margin-bottom:.5rem;">👥</div>No team members yet. Invite someone above to get started.</div>';
+    return;
+  }
+
+  listEl.innerHTML = members.map(function(m) {
+    var meta = TEAM_ROLES[m.role] || TEAM_ROLES.staff;
+    return '<div style="display:flex;align-items:center;gap:1rem;padding:.85rem 0;border-bottom:1px solid #f1f5f9;">' +
+      '<div style="width:40px;height:40px;border-radius:50%;background:' + meta.color + '22;color:' + meta.color + ';display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">' + meta.icon + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-weight:700;font-size:.9rem;">' + escHtml(m.name || m.email) + '</div>' +
+        '<div style="font-size:.78rem;color:#64748b;">' + escHtml(m.email) + ' · Invited ' + (m.invited_at ? new Date(m.invited_at).toLocaleDateString() : 'recently') + '</div>' +
+      '</div>' +
+      '<span style="background:' + meta.color + '22;color:' + meta.color + ';padding:.2rem .6rem;border-radius:5px;font-size:.72rem;font-weight:700;">' + meta.label + '</span>' +
+      '<button onclick="removeTeamMember(\'' + escHtml(m.email) + '\')" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:6px;padding:.3rem .6rem;font-size:.75rem;cursor:pointer;">Remove</button>' +
+    '</div>';
+  }).join('');
+}
+
+async function sendTeamInvite() {
+  var name  = document.getElementById('inv-name').value.trim();
+  var email = document.getElementById('inv-email').value.trim();
+  var role  = document.getElementById('inv-role').value;
+
+  if (!email) { showACToast('Email is required', 'error'); return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { showACToast('Invalid email address', 'error'); return; }
+
+  var btn = document.querySelector('#panel-team button[onclick="sendTeamInvite()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+  // Save to localStorage team list
+  var members = [];
+  try { members = JSON.parse(localStorage.getItem('rv_team_members') || '[]'); } catch(_) {}
+  var existing = members.find(function(m) { return m.email === email; });
+  if (!existing) {
+    members.push({ name: name, email: email, role: role, invited_at: new Date().toISOString(), status: 'invited' });
+    localStorage.setItem('rv_team_members', JSON.stringify(members));
+  }
+
+  // Fire invite API (fire-and-forget)
+  try {
+    var acct = JSON.parse(localStorage.getItem('rv_account') || '{}');
+    fetch('/api/invite-member', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        invitee_name:  name,
+        invitee_email: email,
+        role:          role,
+        invited_by:    (acct.name || acct.email || 'Your team owner'),
+        business_name: (acct.companyName || '3120 Life'),
+      }),
+    }).catch(function() {});
+  } catch(_) {}
+
+  document.getElementById('inv-name').value  = '';
+  document.getElementById('inv-email').value = '';
+  if (btn) { btn.disabled = false; btn.textContent = 'Send Invite →'; }
+
+  var meta = TEAM_ROLES[role] || {};
+  showACToast('Invite sent to ' + email + ' as ' + (meta.label || role), 'success');
+  loadTeamMembers();
+}
+
+function removeTeamMember(email) {
+  var members = [];
+  try { members = JSON.parse(localStorage.getItem('rv_team_members') || '[]'); } catch(_) {}
+  members = members.filter(function(m) { return m.email !== email; });
+  localStorage.setItem('rv_team_members', JSON.stringify(members));
+  showACToast('Team member removed', 'success');
+  loadTeamMembers();
+}
+
+function showACToast(msg, type) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;background:' +
+    (type === 'error' ? '#ef4444' : '#10b981') + ';color:#fff;padding:.7rem 1.25rem;border-radius:8px;font-weight:700;font-size:.88rem;box-shadow:0 4px 12px rgba(0,0,0,.15);';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 3500);
+}
+
+// Responsive grid for invite form
+var style = document.createElement('style');
+style.textContent = '@media(max-width:600px){.team-invite-grid{grid-template-columns:1fr!important;}}';
+document.head.appendChild(style);
+
+// Init role preview
+document.addEventListener('DOMContentLoaded', function() { renderRolePreview(); });
 </script>
 </body>
 </html>
