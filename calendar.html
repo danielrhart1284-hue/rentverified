@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3120 Life – Business Calendar</title>
+<style>
+:root {
+  --green:#10b981; --green-d:#059669; --green-bg:#f0fdf4;
+  --amber:#f59e0b; --amber-d:#d97706; --amber-bg:#fffbeb;
+  --red:#ef4444; --red-d:#dc2626; --red-bg:#fef2f2;
+  --blue:#00E676; --blue-d:#00C853; --blue-bg:rgba(0,230,118,0.08);
+  --dark:#0f172a; --gray:#6b7280; --light:#f8fafc; --white:#fff;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:var(--light);color:#1f2937}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#064e3b 100%)}
+.login-box{background:var(--white);border-radius:18px;padding:44px 40px;width:480px;
+  max-width:96vw;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.login-logo{text-align:center;margin-bottom:26px}
+.login-logo h1{font-size:1.85rem;font-weight:900;color:var(--dark)}
+.login-logo p{color:var(--gray);font-size:.9rem;margin-top:4px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.83rem;font-weight:600;color:#374151;margin-bottom:5px}
+.form-group input,.form-group select{width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;
+  border-radius:8px;font-size:.93rem;transition:border .2s}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--blue)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:none;
+  border-radius:8px;cursor:pointer;font-weight:700;font-size:.88rem;transition:all .2s;text-decoration:none}
+.btn-primary{background:var(--blue);color:white}.btn-primary:hover{background:var(--blue-d)}
+.btn-green{background:var(--green);color:white}.btn-green:hover{background:var(--green-d)}
+.btn-amber{background:var(--amber);color:white}.btn-amber:hover{background:var(--amber-d)}
+.btn-red{background:var(--red);color:white}.btn-red:hover{background:var(--red-d)}
+.btn-outline{background:white;color:var(--blue);border:2px solid var(--blue)}
+.btn-ghost{background:transparent;color:var(--gray);border:1.5px solid #e2e8f0}
+.btn-ghost:hover{background:#f1f5f9}
+.btn-sm{padding:6px 14px;font-size:.78rem}
+.btn-lg{width:100%;justify-content:center;padding:13px;font-size:1rem}
+
+/* ── APP ── */
+#app-screen{display:none;min-height:100vh}
+.app-layout{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.co-sidebar{width:240px;min-height:100vh;background:var(--dark);padding:24px 16px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:white;font-size:1.1rem;font-weight:800;margin-bottom:3px}
+.brand span{color:#6ee7b7}
+.sub-brand{color:#475569;font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:26px}
+.sl{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;
+  color:#94a3b8;font-size:.87rem;font-weight:600;cursor:pointer;transition:all .2s;
+  text-decoration:none;margin-bottom:2px}
+.sl:hover{background:rgba(255,255,255,.06);color:#e2e8f0}
+.sl.active{background:rgba(16,185,129,.15);color:#6ee7b7;border-left:3px solid #10b981}
+.sl svg{width:17px;height:17px;flex-shrink:0}
+.sl-label{color:#475569;font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;margin:16px 0 6px 8px}
+.notif-dot{background:#ef4444;color:white;font-size:.62rem;font-weight:800;
+  padding:1px 5px;border-radius:20px;margin-left:auto}
+
+/* ── MAIN ── */
+.co-main{flex:1;padding:30px 34px;overflow-x:hidden}
+@media(max-width:700px){.co-main{padding:18px 14px}}
+
+/* ── PAGE HEADER ── */
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.page-hdr h1{font-size:1.6rem;font-weight:900;color:var(--dark)}
+.page-hdr p{color:var(--gray);font-size:.88rem;margin-top:4px}
+
+/* ── ALERT BANNERS ── */
+.alert-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:24px}
+.alert-strip::-webkit-scrollbar{height:4px}
+.alert-strip::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:4px}
+.alert-chip{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;
+  font-size:.82rem;font-weight:700;white-space:nowrap;flex-shrink:0;cursor:pointer}
+.ac-red{background:var(--red-bg);color:var(--red-d);border:1.5px solid #fecaca}
+.ac-amber{background:var(--amber-bg);color:var(--amber-d);border:1.5px solid #fde68a}
+.ac-green{background:var(--green-bg);color:#166534;border:1.5px solid #bbf7d0}
+.ac-blue{background:var(--blue-bg);color:var(--blue-d);border:1.5px solid #6ee7b7}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:1000px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:white;border-radius:var(--radius);border:1px solid #e2e8f0;padding:16px 18px}
+.stat-val{font-size:2rem;font-weight:900}
+.stat-lbl{font-size:.78rem;color:var(--gray);margin-top:3px}
+.stat-urgent{color:var(--red-d)}
+.stat-warn{color:var(--amber-d)}
+.stat-ok{color:var(--green)}
+.stat-blue{color:var(--blue-d)}
+
+/* ── VIEW TOGGLE ── */
+.view-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.view-tabs{display:flex;background:#f1f5f9;border-radius:8px;padding:3px;gap:3px}
+.view-tab{padding:7px 16px;border-radius:6px;font-size:.82rem;font-weight:700;
+  color:var(--gray);cursor:pointer;transition:all .2s;border:none;background:transparent}
+.view-tab.active{background:white;color:var(--dark);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.month-nav{display:flex;align-items:center;gap:10px}
+.month-nav button{width:32px;height:32px;border-radius:8px;border:1.5px solid #e2e8f0;
+  background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;transition:all .2s}
+.month-nav button:hover{border-color:var(--blue);color:var(--blue)}
+.month-label{font-size:1rem;font-weight:800;color:var(--dark);min-width:160px;text-align:center}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.cat-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;
+  font-size:.75rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .2s;opacity:.5}
+.cat-chip.on{opacity:1;border-color:currentColor}
+
+/* ── CALENDAR GRID ── */
+.cal-wrap{background:white;border-radius:var(--radius);border:1px solid #e2e8f0;overflow:hidden;margin-bottom:24px}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);background:#f8fafc;border-bottom:2px solid #e2e8f0}
+.cal-dow{padding:10px;text-align:center;font-size:.72rem;font-weight:800;color:#64748b;text-transform:uppercase}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-cell{min-height:96px;padding:6px;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;
+  cursor:pointer;transition:background .15s;position:relative}
+.cal-cell:nth-child(7n){border-right:none}
+.cal-cell:hover{background:#fafbff}
+.cal-cell.today{background:#f0fdf4}
+.cal-cell.other-month .cal-day{color:#cbd5e1}
+.cal-cell.other-month{background:#fafbfc}
+.cal-day{font-size:.78rem;font-weight:700;color:#374151;margin-bottom:4px}
+.cal-cell.today .cal-day{width:22px;height:22px;background:var(--green);color:white;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem}
+.cal-event{font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:4px;
+  margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.more-events{font-size:.67rem;color:var(--gray);font-weight:600;padding:2px 4px}
+
+/* ── LIST VIEW ── */
+.list-section{margin-bottom:28px}
+.list-month-hdr{font-size:.8rem;font-weight:800;color:#64748b;text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}
+.event-row{background:white;border-radius:var(--radius);border:1.5px solid #e2e8f0;
+  padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;
+  transition:all .2s;cursor:pointer}
+.event-row:hover{border-color:#bfdbfe;box-shadow:0 3px 12px rgba(0,0,0,.07)}
+.event-row.urgent{border-left:4px solid var(--red)}
+.event-row.warning{border-left:4px solid var(--amber)}
+.event-row.ok{border-left:4px solid var(--green)}
+.event-row.info{border-left:4px solid var(--blue-d)}
+.event-date-box{text-align:center;min-width:44px}
+.edb-month{font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--gray)}
+.edb-day{font-size:1.4rem;font-weight:900;color:var(--dark);line-height:1}
+.event-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.event-body{flex:1}
+.event-title{font-weight:700;font-size:.93rem;color:var(--dark)}
+.event-sub{font-size:.78rem;color:var(--gray);margin-top:2px}
+.event-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.e-pill{font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:12px}
+.ep-red{background:var(--red-bg);color:var(--red-d)}
+.ep-amber{background:var(--amber-bg);color:var(--amber-d)}
+.ep-green{background:var(--green-bg);color:#166534}
+.ep-blue{background:var(--blue-bg);color:var(--blue-d)}
+.ep-gray{background:#f1f5f9;color:#374151}
+.event-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-box{background:white;border-radius:16px;padding:28px;max-width:540px;
+  width:95vw;max-height:90vh;overflow-y:auto}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-hdr h2{font-size:1.2rem;font-weight:800;color:var(--dark)}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:#f1f5f9;
+  cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:#e2e8f0}
+
+/* ── FORM ── */
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.82rem;font-weight:600;color:#374151;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;
+  border-radius:8px;font-size:.9rem;font-family:inherit;transition:border .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue)}
+.fg textarea{resize:vertical;min-height:70px}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.fg-row{grid-template-columns:1fr}}
+.reminder-checks{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.rem-opt{display:flex;align-items:center;gap:5px;font-size:.82rem;cursor:pointer}
+
+/* ── CAT COLORS ── */
+.cat-leasing   { background:#dbeafe; color:#1d4ed8; }
+.cat-compliance{ background:#fef3c7; color:#92400e; }
+.cat-insurance { background:#ede9fe; color:#5b21b6; }
+.cat-financial { background:#d1fae5; color:#065f46; }
+.cat-maintenance{background:#fee2e2; color:#991b1b; }
+.cat-legal     { background:#fce7f3; color:#9d174d; }
+.cat-tours     { background:#e0f2fe; color:#0369a1; }
+.cat-other     { background:#f1f5f9; color:#374151; }
+
+.dot-leasing   { background:#1d4ed8; }
+.dot-compliance{ background:#92400e; }
+.dot-insurance { background:#5b21b6; }
+.dot-financial { background:#065f46; }
+.dot-maintenance{background:#991b1b; }
+.dot-legal     { background:#9d174d; }
+.dot-tours     { background:#0369a1; }
+.dot-other     { background:#374151; }
+
+/* ── CARD ── */
+.card{background:white;border-radius:var(--radius);border:1px solid #e2e8f0;margin-bottom:20px}
+.card-hdr{padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}
+.card-hdr h3{font-size:.95rem;font-weight:800;color:var(--dark)}
+.card-body{padding:18px 20px}
+
+/* ── REMINDER SETTINGS ── */
+.rem-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;
+  border-bottom:1px solid #f1f5f9}
+.rem-row:last-child{border-bottom:none}
+.rem-label{font-size:.88rem;font-weight:600;color:var(--dark)}
+.rem-sub{font-size:.75rem;color:var(--gray);margin-top:2px}
+
+/* ── SCHEDULING ── */
+.avail-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:600px){.avail-grid{grid-template-columns:repeat(4,1fr)}}
+.avail-day{border:2px solid #e2e8f0;border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s}
+.avail-day.on{border-color:var(--green);background:var(--green-bg)}
+.avail-day .ad-name{font-size:.75rem;font-weight:700;color:var(--gray)}
+.avail-day.on .ad-name{color:#166534}
+.avail-day .ad-check{font-size:1.1rem;margin-bottom:4px}
+.time-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.time-row label{font-size:.82rem;font-weight:600;color:#374151;min-width:60px}
+.time-row input{padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.88rem}
+.booking-link-box{background:var(--green-bg);border:1.5px solid #bbf7d0;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.booking-link-url{flex:1;font-size:.82rem;color:#166534;font-weight:600;word-break:break-all}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:12px}
+.time-slot{padding:9px 6px;border:1.5px solid #e2e8f0;border-radius:8px;text-align:center;
+  font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s}
+.time-slot:hover{border-color:var(--green);background:var(--green-bg)}
+.time-slot.booked{background:#f1f5f9;color:#94a3b8;cursor:default;border-color:#e2e8f0}
+.booking-form-wrap{background:white;border-radius:var(--radius);border:1px solid #e2e8f0;padding:20px;max-width:480px;margin:0 auto}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .co-sidebar{display:none}
+  .co-main{padding:16px 14px}
+  .cal-cell{min-height:60px;padding:4px}
+  .cal-event{display:none}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>3120 <span style="color:#00E676">Life</span></h1>
+      <p>Business Operations Calendar</p>
+    </div>
+    <div class="fg">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="you@example.com" value="demo@3120life.com">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="login-pw" placeholder="••••••••" value="demo123">
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="doLogin()">Sign In →</button>
+    <p style="text-align:center;margin-top:12px;font-size:.78rem;color:var(--gray)">
+      Demo mode active — all data stored locally
+    </p>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app-screen">
+<div class="app-layout">
+
+<!-- SIDEBAR -->
+<nav class="co-sidebar">
+  <div class="brand">3120 <span>Life</span></div>
+  <div class="sub-brand">Business OS</div>
+
+  <div class="sl-label">Main</div>
+  <a href="landlord-signup.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    Dashboard
+  </a>
+  <a href="calendar.html" class="sl active">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    Business Calendar
+  </a>
+  <a href="compliance.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    License &amp; Compliance
+  </a>
+  <a href="crm.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    CRM
+  </a>
+
+  <div class="sl-label">Properties</div>
+  <a href="landlord-signup.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+    Properties
+  </a>
+  <a href="tenant-portal.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    Tenant Portal
+  </a>
+  <a href="leases.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    Leases
+  </a>
+
+  <div class="sl-label">Business</div>
+  <a href="accounting.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    Accounting
+  </a>
+  <a href="messages.html" class="sl">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+    Messages
+  </a>
+</nav>
+
+<!-- MAIN -->
+<main class="co-main">
+
+  <!-- Header -->
+  <div class="page-hdr">
+    <div>
+      <h1>📅 Business Calendar</h1>
+      <p>All deadlines, renewals, tours, and business events in one place</p>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add Event
+    </button>
+  </div>
+
+  <!-- Alert Strip -->
+  <div class="alert-strip" id="alert-strip"></div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val stat-urgent" id="stat-overdue">0</div>
+      <div class="stat-lbl">🔴 Overdue</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val stat-warn" id="stat-7days">0</div>
+      <div class="stat-lbl">⚠️ Due in 7 Days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val stat-blue" id="stat-30days">0</div>
+      <div class="stat-lbl">📅 Due in 30 Days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val stat-ok" id="stat-total">0</div>
+      <div class="stat-lbl">✅ Total Events</div>
+    </div>
+  </div>
+
+  <!-- View Bar -->
+  <div class="view-bar">
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="setView('month',this)">Month</button>
+      <button class="view-tab" onclick="setView('list',this)">List</button>
+      <button class="view-tab" onclick="setView('upcoming',this)">Upcoming</button>
+      <button class="view-tab" onclick="setView('scheduling',this)">📍 Scheduling</button>
+    </div>
+    <div class="month-nav" id="month-nav">
+      <button onclick="changeMonth(-1)">‹</button>
+      <span class="month-label" id="month-label">March 2026</span>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="filter-chips" id="filter-chips"></div>
+  </div>
+
+  <!-- Calendar Views -->
+  <div id="view-month">
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div>
+        <div class="cal-dow">Tue</div><div class="cal-dow">Wed</div>
+        <div class="cal-dow">Thu</div><div class="cal-dow">Fri</div>
+        <div class="cal-dow">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </div>
+
+  <div id="view-list" style="display:none">
+    <div id="list-container"></div>
+  </div>
+
+  <div id="view-upcoming" style="display:none">
+    <div id="upcoming-container"></div>
+  </div>
+
+  <!-- SCHEDULING VIEW -->
+  <div id="view-scheduling" style="display:none">
+
+    <!-- Shareable Booking Link -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr">
+        <h3>🔗 Your Booking Link</h3>
+        <button class="btn btn-green btn-sm" onclick="copyBookingLink()">Copy Link</button>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:var(--gray);margin-bottom:12px">Share this link with prospects and tenants. They'll see your available time slots and book directly — no back-and-forth.</p>
+        <div class="booking-link-box">
+          <span style="font-size:1.4rem">📍</span>
+          <span class="booking-link-url" id="booking-link-display">rentverified.com/book/your-name</span>
+          <button class="btn btn-green btn-sm" onclick="copyBookingLink()">📋 Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Availability Settings -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr">
+        <h3>📅 My Availability</h3>
+        <button class="btn btn-primary btn-sm" onclick="saveAvailability()">Save</button>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:var(--gray);margin-bottom:14px">Select which days and hours you're available for tours and appointments.</p>
+        <div class="avail-grid" id="avail-days">
+          <div class="avail-day on" data-day="0" onclick="toggleDay(this)"><div class="ad-check">☑</div><div class="ad-name">Sun</div></div>
+          <div class="avail-day on" data-day="1" onclick="toggleDay(this)"><div class="ad-check">☑</div><div class="ad-name">Mon</div></div>
+          <div class="avail-day on" data-day="2" onclick="toggleDay(this)"><div class="ad-check">☑</div><div class="ad-name">Tue</div></div>
+          <div class="avail-day on" data-day="3" onclick="toggleDay(this)"><div class="ad-check">☑</div><div class="ad-name">Wed</div></div>
+          <div class="avail-day on" data-day="4" onclick="toggleDay(this)"><div class="ad-check">☑</div><div class="ad-name">Thu</div></div>
+          <div class="avail-day on" data-day="5" onclick="toggleDay(this)"><div class="ad-check">☑</div><div class="ad-name">Fri</div></div>
+          <div class="avail-day" data-day="6" onclick="toggleDay(this)"><div class="ad-check">☐</div><div class="ad-name">Sat</div></div>
+        </div>
+        <div class="time-row">
+          <label>Start</label>
+          <input type="time" id="avail-start" value="09:00">
+          <label>End</label>
+          <input type="time" id="avail-end" value="17:00">
+          <label>Duration</label>
+          <select id="avail-duration" style="padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.88rem">
+            <option value="30">30 min</option>
+            <option value="45">45 min</option>
+            <option value="60" selected>1 hour</option>
+            <option value="90">1.5 hours</option>
+          </select>
+        </div>
+        <div style="font-size:.82rem;color:var(--gray)">
+          ⚙️ Buffer between appointments:
+          <select id="avail-buffer" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:.82rem">
+            <option value="0">None</option>
+            <option value="15" selected>15 min</option>
+            <option value="30">30 min</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appointment Types -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr">
+        <h3>📋 Appointment Types</h3>
+        <button class="btn btn-primary btn-sm" onclick="addApptType()">+ Add Type</button>
+      </div>
+      <div class="card-body" id="appt-types-list">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Upcoming Bookings Queue -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr">
+        <h3>📬 Booking Requests</h3>
+        <span id="booking-count" style="font-size:.78rem;color:var(--gray)">0 pending</span>
+      </div>
+      <div class="card-body" id="bookings-list">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Reminder Settings -->
+  <div class="card">
+    <div class="card-hdr">
+      <h3>🔔 Reminder Settings</h3>
+      <span style="font-size:.78rem;color:var(--gray)">Auto-sends email + SMS</span>
+    </div>
+    <div class="card-body">
+      <div class="rem-row">
+        <div>
+          <div class="rem-label">90 Days Before</div>
+          <div class="rem-sub">Early heads-up for license renewals, insurance, registrations</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="rem-90" checked onchange="saveReminderSettings()"> Enable
+        </label>
+      </div>
+      <div class="rem-row">
+        <div>
+          <div class="rem-label">30 Days Before</div>
+          <div class="rem-sub">Time to act — start renewal process</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="rem-30" checked onchange="saveReminderSettings()"> Enable
+        </label>
+      </div>
+      <div class="rem-row">
+        <div>
+          <div class="rem-label">7 Days Before</div>
+          <div class="rem-sub">Urgent — action required this week</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="rem-7" checked onchange="saveReminderSettings()"> Enable
+        </label>
+      </div>
+      <div class="rem-row">
+        <div>
+          <div class="rem-label">Day Of</div>
+          <div class="rem-sub">Final reminder on the deadline date</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="rem-0" checked onchange="saveReminderSettings()"> Enable
+        </label>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</div>
+
+<!-- ── ADD/EDIT EVENT MODAL ── -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2 id="modal-title">Add Business Event</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg">
+      <label>Event Title *</label>
+      <input type="text" id="ev-title" placeholder="e.g. Utah Business License Renewal">
+    </div>
+    <div class="fg-row">
+      <div class="fg">
+        <label>Category *</label>
+        <select id="ev-cat">
+          <option value="compliance">⚖️ Compliance / License</option>
+          <option value="insurance">🛡️ Insurance Renewal</option>
+          <option value="financial">💰 Financial / Tax</option>
+          <option value="leasing">🏠 Leasing</option>
+          <option value="tours">📍 Property Tour</option>
+          <option value="maintenance">🔧 Maintenance</option>
+          <option value="legal">📋 Legal</option>
+          <option value="other">📌 Other</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Due Date *</label>
+        <input type="date" id="ev-date">
+      </div>
+      <div class="fg">
+        <label>Time (optional)</label>
+        <input type="time" id="ev-time">
+      </div>
+    </div>
+    <div class="fg">
+      <label>Notes</label>
+      <textarea id="ev-notes" placeholder="Renewal link, contact info, instructions..."></textarea>
+    </div>
+    <div class="fg-row">
+      <div class="fg">
+        <label>Linked Property (optional)</label>
+        <input type="text" id="ev-property" placeholder="123 Main St">
+      </div>
+      <div class="fg">
+        <label>Recurrence</label>
+        <select id="ev-recur">
+          <option value="none">No recurrence</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Send Reminders</label>
+      <div class="reminder-checks">
+        <label class="rem-opt"><input type="checkbox" id="ev-rem-90" checked> 90 days</label>
+        <label class="rem-opt"><input type="checkbox" id="ev-rem-30" checked> 30 days</label>
+        <label class="rem-opt"><input type="checkbox" id="ev-rem-7" checked> 7 days</label>
+        <label class="rem-opt"><input type="checkbox" id="ev-rem-0" checked> Day of</label>
+      </div>
+    </div>
+    <input type="hidden" id="ev-id">
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveEvent()">Save Event</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EVENT DETAIL MODAL ── -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2 id="detail-title">Event Detail</h2>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div id="detail-body"></div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-outline btn-sm" onclick="editFromDetail()">✏️ Edit</button>
+      <button class="btn btn-red btn-sm" onclick="deleteFromDetail()">🗑️ Delete</button>
+      <button class="btn btn-green btn-sm" onclick="markDoneFromDetail()">✅ Mark Complete</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeDetailModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CATEGORY CONFIG ──
+const CATS = {
+  compliance:  { label:'Compliance',   icon:'⚖️',  color:'#92400e', bg:'#fef3c7' },
+  insurance:   { label:'Insurance',    icon:'🛡️',  color:'#5b21b6', bg:'#ede9fe' },
+  financial:   { label:'Financial',    icon:'💰',  color:'#065f46', bg:'#d1fae5' },
+  leasing:     { label:'Leasing',      icon:'🏠',  color:'#1e40af', bg:'#dbeafe' },
+  tours:       { label:'Tour',         icon:'📍',  color:'#0369a1', bg:'#e0f2fe' },
+  maintenance: { label:'Maintenance',  icon:'🔧',  color:'#991b1b', bg:'#fee2e2' },
+  legal:       { label:'Legal',        icon:'📋',  color:'#9d174d', bg:'#fce7f3' },
+  other:       { label:'Other',        icon:'📌',  color:'#374151', bg:'#f1f5f9' }
+};
+
+// ── STATE ──
+let events = [];
+let currentView = 'month';
+let currentDate = new Date();
+let activeFilters = new Set(Object.keys(CATS));
+let editingId = null;
+let detailId = null;
+
+// ── INIT ──
+function doLogin() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  loadEvents();
+  renderAll();
+}
+
+function loadEvents() {
+  const saved = localStorage.getItem('rv_cal_events');
+  if (saved) {
+    events = JSON.parse(saved);
+  } else {
+    // Seed with demo events
+    events = [
+      { id:'e1', title:'Utah Business License Renewal', cat:'compliance', date:'2026-05-15', notes:'Renew at utah.gov/business', recur:'yearly', reminders:[90,30,7,0], done:false },
+      { id:'e2', title:'LLC Annual Report — State of Utah', cat:'compliance', date:'2026-06-01', notes:'File with Utah Division of Corporations', recur:'yearly', reminders:[90,30,7,0], done:false },
+      { id:'e3', title:'General Liability Insurance Renewal', cat:'insurance', date:'2026-04-20', notes:'Contact Alpine Insurance', recur:'yearly', reminders:[90,30,7,0], done:false },
+      { id:'e4', title:'Q1 Estimated Tax Payment', cat:'financial', date:'2026-04-15', notes:'IRS Form 1040-ES', recur:'quarterly', reminders:[30,7,0], done:false },
+      { id:'e5', title:'Property Tour — 245 Oak Ave', cat:'tours', date:'2026-04-02', notes:'Prospect: Sarah M. 3pm', recur:'none', reminders:[0], done:false },
+      { id:'e6', title:'HVAC Inspection — 123 Main St', cat:'maintenance', date:'2026-04-10', notes:'Annual service — Callahan HVAC', recur:'yearly', reminders:[7,0], done:false },
+      { id:'e7', title:'Lease Renewal — Johnson (Apt 4B)', cat:'leasing', date:'2026-04-30', notes:'60-day notice already sent', recur:'none', reminders:[30,7,0], done:false },
+      { id:'e8', title:'Vehicle Registration Renewal', cat:'compliance', date:'2026-03-28', notes:'DMV — plate #UTR-4421', recur:'yearly', reminders:[30,7,0], done:false },
+      { id:'e9', title:'E&O Insurance Renewal', cat:'insurance', date:'2026-07-01', notes:'Professional liability', recur:'yearly', reminders:[90,30,7,0], done:false },
+      { id:'e10', title:'Q2 Estimated Tax Payment', cat:'financial', date:'2026-06-15', notes:'IRS Form 1040-ES', recur:'quarterly', reminders:[30,7,0], done:false },
+    ];
+    saveEvents();
+  }
+}
+
+function saveEvents() {
+  localStorage.setItem('rv_cal_events', JSON.stringify(events));
+}
+
+function saveReminderSettings() {
+  const settings = {
+    r90: document.getElementById('rem-90').checked,
+    r30: document.getElementById('rem-30').checked,
+    r7:  document.getElementById('rem-7').checked,
+    r0:  document.getElementById('rem-0').checked
+  };
+  localStorage.setItem('rv_cal_reminders', JSON.stringify(settings));
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  renderStats();
+  renderAlerts();
+  renderFilters();
+  renderCurrentView();
+}
+
+function renderStats() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d7  = new Date(today); d7.setDate(d7.getDate()+7);
+  const d30 = new Date(today); d30.setDate(d30.getDate()+30);
+
+  let overdue=0, in7=0, in30=0;
+  const active = events.filter(e=>!e.done);
+
+  active.forEach(e => {
+    const d = new Date(e.date);
+    if(d < today) overdue++;
+    else if(d <= d7) in7++;
+    else if(d <= d30) in30++;
+  });
+
+  document.getElementById('stat-overdue').textContent = overdue;
+  document.getElementById('stat-7days').textContent   = in7;
+  document.getElementById('stat-30days').textContent  = in30;
+  document.getElementById('stat-total').textContent   = active.length;
+}
+
+function renderAlerts() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d7  = new Date(today); d7.setDate(d7.getDate()+7);
+  const strip = document.getElementById('alert-strip');
+  strip.innerHTML = '';
+
+  const urgent = events.filter(e => !e.done && new Date(e.date) < today);
+  const warn   = events.filter(e => !e.done && new Date(e.date) >= today && new Date(e.date) <= d7);
+
+  if(urgent.length === 0 && warn.length === 0) {
+    strip.innerHTML = '<div class="alert-chip ac-green">✅ All caught up — no overdue items</div>';
+    return;
+  }
+
+  urgent.forEach(e => {
+    const days = Math.floor((today - new Date(e.date)) / 86400000);
+    strip.innerHTML += `<div class="alert-chip ac-red" onclick="openDetailModal('${e.id}')">🔴 ${e.title} — ${days}d overdue</div>`;
+  });
+  warn.forEach(e => {
+    const days = Math.ceil((new Date(e.date) - today) / 86400000);
+    strip.innerHTML += `<div class="alert-chip ac-amber" onclick="openDetailModal('${e.id}')">⚠️ ${e.title} — ${days}d left</div>`;
+  });
+}
+
+function renderFilters() {
+  const wrap = document.getElementById('filter-chips');
+  wrap.innerHTML = '';
+  Object.entries(CATS).forEach(([key, cat]) => {
+    const on = activeFilters.has(key) ? 'on' : '';
+    wrap.innerHTML += `<span class="cat-chip ${on}" style="color:${cat.color};background:${cat.bg}"
+      onclick="toggleFilter('${key}',this)">${cat.icon} ${cat.label}</span>`;
+  });
+}
+
+function toggleFilter(key, el) {
+  if(activeFilters.has(key)) activeFilters.delete(key);
+  else activeFilters.add(key);
+  el.classList.toggle('on');
+  renderCurrentView();
+}
+
+// ── VIEWS ──
+function setView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-month').style.display      = v==='month'      ? 'block':'none';
+  document.getElementById('view-list').style.display       = v==='list'       ? 'block':'none';
+  document.getElementById('view-upcoming').style.display   = v==='upcoming'   ? 'block':'none';
+  document.getElementById('view-scheduling').style.display = v==='scheduling' ? 'block':'none';
+  document.getElementById('month-nav').style.display       = v==='month'      ? 'flex' :'none';
+  // Hide filter chips on scheduling view
+  document.getElementById('filter-chips').style.display    = v==='scheduling' ? 'none' : 'flex';
+  if(v==='scheduling') loadSchedulingData();
+  else renderCurrentView();
+}
+
+function renderCurrentView() {
+  if(currentView === 'month')    renderMonthView();
+  if(currentView === 'list')     renderListView();
+  if(currentView === 'upcoming') renderUpcomingView();
+}
+
+// ── MONTH VIEW ──
+function changeMonth(delta) {
+  currentDate.setMonth(currentDate.getMonth() + delta);
+  renderMonthView();
+}
+
+function renderMonthView() {
+  const year  = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  document.getElementById('month-label').textContent = `${months[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrev  = new Date(year, month, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  const filtered = events.filter(e => activeFilters.has(e.cat) && !e.done);
+
+  // Build a map: date string → events
+  const evMap = {};
+  filtered.forEach(e => {
+    const d = e.date.substring(0,10);
+    if(!evMap[d]) evMap[d] = [];
+    evMap[d].push(e);
+  });
+
+  let cells = [];
+  // Prev month days
+  for(let i = firstDay-1; i >= 0; i--) {
+    cells.push({ day: daysInPrev-i, month: month-1, year, other:true });
+  }
+  // Current month days
+  for(let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day:d, month, year, other:false });
+  }
+  // Next month days to fill grid
+  const remaining = 42 - cells.length;
+  for(let d = 1; d <= remaining; d++) {
+    cells.push({ day:d, month: month+1, year, other:true });
+  }
+
+  cells.forEach(c => {
+    const m = ((c.month % 12) + 12) % 12;
+    const y = c.year + Math.floor(c.month/12);
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(c.day).padStart(2,'0')}`;
+    const cellDate = new Date(y, m, c.day);
+    const isToday = cellDate.getTime() === today.getTime();
+    const dayEvs = evMap[dateStr] || [];
+
+    const cell = document.createElement('div');
+    cell.className = `cal-cell${c.other?' other-month':''}${isToday?' today':''}`;
+
+    let evHtml = '';
+    const show = dayEvs.slice(0,3);
+    const more = dayEvs.length - 3;
+    show.forEach(e => {
+      const cat = CATS[e.cat];
+      evHtml += `<div class="cal-event cat-${e.cat}" title="${e.title}"
+        onclick="openDetailModal('${e.id}');event.stopPropagation()">${cat.icon} ${e.title}</div>`;
+    });
+    if(more > 0) evHtml += `<div class="more-events">+${more} more</div>`;
+
+    cell.innerHTML = `<div class="cal-day">${c.day}</div>${evHtml}`;
+    cell.onclick = () => { if(!c.other) openAddModalOnDate(dateStr); };
+    grid.appendChild(cell);
+  });
+}
+
+// ── LIST VIEW ──
+function renderListView() {
+  const container = document.getElementById('list-container');
+  const filtered  = events.filter(e => activeFilters.has(e.cat) && !e.done);
+  filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  if(filtered.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray)">No events found</div>';
+    return;
+  }
+
+  // Group by month
+  const groups = {};
+  filtered.forEach(e => {
+    const d = new Date(e.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleString('default',{month:'long', year:'numeric'});
+    if(!groups[key]) groups[key] = { label, events:[] };
+    groups[key].events.push(e);
+  });
+
+  container.innerHTML = Object.values(groups).map(g => `
+    <div class="list-section">
+      <div class="list-month-hdr">${g.label}</div>
+      ${g.events.map(e => renderEventRow(e)).join('')}
+    </div>
+  `).join('');
+}
+
+// ── UPCOMING VIEW ──
+function renderUpcomingView() {
+  const container = document.getElementById('upcoming-container');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d30 = new Date(today); d30.setDate(d30.getDate()+30);
+
+  const filtered = events.filter(e => !e.done && activeFilters.has(e.cat));
+  const overdue  = filtered.filter(e => new Date(e.date) < today).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const upcoming = filtered.filter(e => new Date(e.date) >= today).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,20);
+  const done     = events.filter(e => e.done).slice(0,5);
+
+  let html = '';
+  if(overdue.length) {
+    html += `<div class="list-section"><div class="list-month-hdr" style="color:var(--red-d)">🔴 Overdue</div>
+      ${overdue.map(e=>renderEventRow(e)).join('')}</div>`;
+  }
+  if(upcoming.length) {
+    html += `<div class="list-section"><div class="list-month-hdr">📅 Coming Up</div>
+      ${upcoming.map(e=>renderEventRow(e)).join('')}</div>`;
+  }
+  if(done.length) {
+    html += `<div class="list-section"><div class="list-month-hdr" style="color:#94a3b8">✅ Recently Completed</div>
+      ${done.map(e=>renderEventRow(e,true)).join('')}</div>`;
+  }
+  if(!html) html = '<div style="text-align:center;padding:40px;color:var(--gray)">No upcoming events</div>';
+  container.innerHTML = html;
+}
+
+function renderEventRow(e, done=false) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const eDate = new Date(e.date);
+  const days = Math.ceil((eDate - today) / 86400000);
+  const cat = CATS[e.cat];
+  const d = new Date(e.date);
+  const mo = d.toLocaleString('default',{month:'short'}).toUpperCase();
+  const dy = d.getDate();
+
+  let urgency = 'ok', pillHtml = '';
+  if(done) { urgency = 'info'; pillHtml = `<span class="e-pill ep-green">✅ Done</span>`; }
+  else if(days < 0)  { urgency='urgent'; pillHtml=`<span class="e-pill ep-red">⚠️ ${Math.abs(days)}d overdue</span>`; }
+  else if(days === 0){ urgency='urgent'; pillHtml=`<span class="e-pill ep-red">🔴 Due today</span>`; }
+  else if(days <= 7) { urgency='warning';pillHtml=`<span class="e-pill ep-amber">⏰ ${days}d left</span>`; }
+  else if(days <= 30){ urgency='warning';pillHtml=`<span class="e-pill ep-amber">${days}d away</span>`; }
+  else               { pillHtml=`<span class="e-pill ep-gray">${days}d away</span>`; }
+
+  if(e.recur && e.recur !== 'none') pillHtml += `<span class="e-pill ep-blue">🔄 ${e.recur}</span>`;
+
+  return `
+  <div class="event-row ${urgency}" onclick="openDetailModal('${e.id}')">
+    <div class="event-date-box">
+      <div class="edb-month">${mo}</div>
+      <div class="edb-day">${dy}</div>
+    </div>
+    <div class="event-cat-dot dot-${e.cat}"></div>
+    <div class="event-body">
+      <div class="event-title">${cat.icon} ${e.title}</div>
+      <div class="event-sub">${e.notes ? e.notes.substring(0,80) + (e.notes.length>80?'…':'') : cat.label}</div>
+      <div class="event-badges">${pillHtml}</div>
+    </div>
+    <div class="event-actions">
+      <button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}');event.stopPropagation()">✏️</button>
+      <button class="btn btn-green btn-sm" onclick="markDone('${e.id}');event.stopPropagation()">✅</button>
+    </div>
+  </div>`;
+}
+
+// ── MODALS ──
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Add Business Event';
+  document.getElementById('ev-id').value = '';
+  document.getElementById('ev-title').value = '';
+  document.getElementById('ev-cat').value = 'compliance';
+  document.getElementById('ev-date').value = '';
+  document.getElementById('ev-notes').value = '';
+  document.getElementById('ev-property').value = '';
+  document.getElementById('ev-recur').value = 'none';
+  document.getElementById('ev-rem-90').checked = true;
+  document.getElementById('ev-rem-30').checked = true;
+  document.getElementById('ev-rem-7').checked  = true;
+  document.getElementById('ev-rem-0').checked  = true;
+  document.getElementById('event-modal').classList.add('show');
+}
+
+function openAddModalOnDate(dateStr) {
+  openAddModal();
+  document.getElementById('ev-date').value = dateStr;
+}
+
+function closeModal() {
+  document.getElementById('event-modal').classList.remove('show');
+  editingId = null;
+}
+
+function editEvent(id) {
+  const e = events.find(x=>x.id===id);
+  if(!e) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'Edit Event';
+  document.getElementById('ev-id').value    = e.id;
+  document.getElementById('ev-title').value = e.title;
+  document.getElementById('ev-cat').value   = e.cat;
+  document.getElementById('ev-date').value  = e.date;
+  document.getElementById('ev-notes').value = e.notes || '';
+  document.getElementById('ev-property').value = e.property || '';
+  document.getElementById('ev-recur').value    = e.recur || 'none';
+  document.getElementById('ev-rem-90').checked = e.reminders?.includes(90)??true;
+  document.getElementById('ev-rem-30').checked = e.reminders?.includes(30)??true;
+  document.getElementById('ev-rem-7').checked  = e.reminders?.includes(7)??true;
+  document.getElementById('ev-rem-0').checked  = e.reminders?.includes(0)??true;
+  document.getElementById('event-modal').classList.add('show');
+  closeDetailModal();
+}
+
+function saveEvent() {
+  const title = document.getElementById('ev-title').value.trim();
+  const date  = document.getElementById('ev-date').value;
+  if(!title || !date) { alert('Title and date are required.'); return; }
+
+  const reminders = [];
+  if(document.getElementById('ev-rem-90').checked) reminders.push(90);
+  if(document.getElementById('ev-rem-30').checked) reminders.push(30);
+  if(document.getElementById('ev-rem-7').checked)  reminders.push(7);
+  if(document.getElementById('ev-rem-0').checked)  reminders.push(0);
+
+  const evObj = {
+    id:       editingId || 'ev_' + Date.now(),
+    title,
+    cat:      document.getElementById('ev-cat').value,
+    date,
+    notes:    document.getElementById('ev-notes').value.trim(),
+    property: document.getElementById('ev-property').value.trim(),
+    recur:    document.getElementById('ev-recur').value,
+    reminders,
+    done:     false
+  };
+
+  if(editingId) {
+    const idx = events.findIndex(x=>x.id===editingId);
+    if(idx>-1) events[idx] = evObj;
+  } else {
+    events.push(evObj);
+  }
+
+  saveEvents();
+  closeModal();
+  renderAll();
+}
+
+function deleteEvent(id) {
+  if(!confirm('Delete this event?')) return;
+  events = events.filter(e=>e.id!==id);
+  saveEvents();
+  closeDetailModal();
+  renderAll();
+}
+
+function markDone(id) {
+  const e = events.find(x=>x.id===id);
+  if(e) { e.done = true; saveEvents(); renderAll(); }
+}
+
+// ── DETAIL MODAL ──
+function openDetailModal(id) {
+  const e = events.find(x=>x.id===id);
+  if(!e) return;
+  detailId = id;
+  const cat = CATS[e.cat];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const eDate = new Date(e.date);
+  const days  = Math.ceil((eDate - today) / 86400000);
+  let status = '';
+  if(e.done) status = '<span class="e-pill ep-green" style="font-size:.85rem">✅ Completed</span>';
+  else if(days < 0)  status = `<span class="e-pill ep-red" style="font-size:.85rem">🔴 ${Math.abs(days)} days overdue</span>`;
+  else if(days === 0) status = `<span class="e-pill ep-red" style="font-size:.85rem">🔴 Due TODAY</span>`;
+  else if(days <= 7) status = `<span class="e-pill ep-amber" style="font-size:.85rem">⏰ ${days} days left</span>`;
+  else status = `<span class="e-pill ep-gray" style="font-size:.85rem">📅 ${days} days away</span>`;
+
+  document.getElementById('detail-title').textContent = e.title;
+  document.getElementById('detail-body').innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:1.5rem">${cat.icon}</span>
+      <span class="e-pill" style="background:${cat.bg};color:${cat.color};font-size:.85rem">${cat.label}</span>
+      ${status}
+    </div>
+    <table style="width:100%;font-size:.88rem;border-collapse:collapse">
+      <tr><td style="padding:8px 0;color:var(--gray);font-weight:600;width:120px">Due Date</td>
+          <td style="padding:8px 0;font-weight:700">${new Date(e.date).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</td></tr>
+      ${e.property ? `<tr><td style="padding:8px 0;color:var(--gray);font-weight:600">Property</td>
+          <td style="padding:8px 0">${e.property}</td></tr>` : ''}
+      <tr><td style="padding:8px 0;color:var(--gray);font-weight:600">Recurrence</td>
+          <td style="padding:8px 0">${e.recur==='none'?'One-time':e.recur.charAt(0).toUpperCase()+e.recur.slice(1)}</td></tr>
+      <tr><td style="padding:8px 0;color:var(--gray);font-weight:600;vertical-align:top">Reminders</td>
+          <td style="padding:8px 0">${(e.reminders||[]).map(r=>r===0?'Day of':`${r} days before`).join(', ') || 'None'}</td></tr>
+      ${e.notes ? `<tr><td style="padding:8px 0;color:var(--gray);font-weight:600;vertical-align:top">Notes</td>
+          <td style="padding:8px 0">${e.notes}</td></tr>` : ''}
+    </table>
+  `;
+  document.getElementById('detail-modal').classList.add('show');
+}
+
+function closeDetailModal() {
+  document.getElementById('detail-modal').classList.remove('show');
+  detailId = null;
+}
+
+function editFromDetail()       { if(detailId) editEvent(detailId); }
+function deleteFromDetail()     { if(detailId) deleteEvent(detailId); }
+function markDoneFromDetail()   { if(detailId) { markDone(detailId); closeDetailModal(); } }
+
+// ── SCHEDULING ──
+let apptTypes = [];
+let bookings  = [];
+
+function loadSchedulingData() {
+  const at = localStorage.getItem('rv_cal_appt_types');
+  const bk = localStorage.getItem('rv_cal_bookings');
+  const av = localStorage.getItem('rv_cal_availability');
+
+  apptTypes = at ? JSON.parse(at) : [
+    { id:'at1', name:'Property Tour', duration:60, color:'#0369a1', desc:'In-person tour of the property', active:true },
+    { id:'at2', name:'Lease Signing', duration:30, color:'#065f46', desc:'Sign your new lease agreement', active:true },
+    { id:'at3', name:'Move-In Walkthrough', duration:45, color:'#5b21b6', desc:'Property condition review', active:true },
+  ];
+
+  bookings = bk ? JSON.parse(bk) : [
+    { id:'bk1', name:'Sarah M.',  email:'sarah@email.com', phone:'801-555-0101', type:'Property Tour',     date:'2026-04-02', time:'3:00 PM', property:'245 Oak Ave',    status:'confirmed', notes:'' },
+    { id:'bk2', name:'James L.',  email:'james@email.com', phone:'801-555-0202', type:'Property Tour',     date:'2026-04-05', time:'10:00 AM',property:'88 Birch Lane',  status:'pending',   notes:'First time renter' },
+    { id:'bk3', name:'Maria G.',  email:'maria@email.com', phone:'801-555-0303', type:'Lease Signing',     date:'2026-04-08', time:'2:00 PM', property:'14 Elm Circle',   status:'confirmed', notes:'' },
+  ];
+
+  if(av) {
+    const a = JSON.parse(av);
+    if(a.start)    document.getElementById('avail-start').value    = a.start;
+    if(a.end)      document.getElementById('avail-end').value      = a.end;
+    if(a.duration) document.getElementById('avail-duration').value = a.duration;
+    if(a.buffer)   document.getElementById('avail-buffer').value   = a.buffer;
+    if(a.days) {
+      document.querySelectorAll('.avail-day').forEach(el => {
+        const d = parseInt(el.dataset.day);
+        const on = a.days.includes(d);
+        el.classList.toggle('on', on);
+        el.querySelector('.ad-check').textContent = on ? '☑' : '☐';
+      });
+    }
+  }
+
+  renderApptTypes();
+  renderBookings();
+  updateBookingLink();
+}
+
+function toggleDay(el) {
+  el.classList.toggle('on');
+  el.querySelector('.ad-check').textContent = el.classList.contains('on') ? '☑' : '☐';
+}
+
+function saveAvailability() {
+  const days = [];
+  document.querySelectorAll('.avail-day.on').forEach(el => days.push(parseInt(el.dataset.day)));
+  const av = {
+    days,
+    start:    document.getElementById('avail-start').value,
+    end:      document.getElementById('avail-end').value,
+    duration: document.getElementById('avail-duration').value,
+    buffer:   document.getElementById('avail-buffer').value
+  };
+  localStorage.setItem('rv_cal_availability', JSON.stringify(av));
+  showToast('✅ Availability saved!');
+}
+
+function updateBookingLink() {
+  const slug = (localStorage.getItem('rv_user_name') || 'daniel-hart').toLowerCase().replace(/\s+/g,'-');
+  document.getElementById('booking-link-display').textContent = `rentverified.com/book/${slug}`;
+}
+
+function copyBookingLink() {
+  const link = document.getElementById('booking-link-display').textContent;
+  navigator.clipboard.writeText('https://' + link).then(() => showToast('📋 Link copied!'));
+}
+
+function renderApptTypes() {
+  const el = document.getElementById('appt-types-list');
+  if(!apptTypes.length) {
+    el.innerHTML = '<p style="color:var(--gray);font-size:.85rem">No appointment types yet.</p>';
+    return;
+  }
+  el.innerHTML = apptTypes.map(t => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9">
+      <div style="width:12px;height:12px;border-radius:50%;background:${t.color};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:.9rem">${t.name}</div>
+        <div style="font-size:.75rem;color:var(--gray)">${t.duration} min · ${t.desc}</div>
+      </div>
+      <label style="font-size:.78rem;display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" ${t.active?'checked':''} onchange="toggleApptType('${t.id}',this)"> Active
+      </label>
+      <button class="btn btn-ghost btn-sm" onclick="deleteApptType('${t.id}')">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function toggleApptType(id, cb) {
+  const t = apptTypes.find(x=>x.id===id);
+  if(t) { t.active = cb.checked; localStorage.setItem('rv_cal_appt_types', JSON.stringify(apptTypes)); }
+}
+
+function deleteApptType(id) {
+  if(!confirm('Remove this appointment type?')) return;
+  apptTypes = apptTypes.filter(t=>t.id!==id);
+  localStorage.setItem('rv_cal_appt_types', JSON.stringify(apptTypes));
+  renderApptTypes();
+}
+
+function addApptType() {
+  const name = prompt('Appointment type name:');
+  if(!name) return;
+  const dur = prompt('Duration in minutes:', '60');
+  apptTypes.push({ id:'at'+Date.now(), name, duration:parseInt(dur)||60, color:'#00C853', desc:'', active:true });
+  localStorage.setItem('rv_cal_appt_types', JSON.stringify(apptTypes));
+  renderApptTypes();
+}
+
+function renderBookings() {
+  const el = document.getElementById('bookings-list');
+  const pending   = bookings.filter(b=>b.status==='pending');
+  const confirmed = bookings.filter(b=>b.status==='confirmed');
+  document.getElementById('booking-count').textContent = `${pending.length} pending`;
+
+  if(!bookings.length) {
+    el.innerHTML = '<p style="color:var(--gray);font-size:.85rem">No bookings yet. Share your booking link to get started.</p>';
+    return;
+  }
+
+  const renderGroup = (list, label) => {
+    if(!list.length) return '';
+    return `<div style="margin-bottom:16px">
+      <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;color:var(--gray);letter-spacing:.08em;margin-bottom:8px">${label}</div>
+      ${list.map(b => `
+        <div style="background:${b.status==='pending'?'#fffbeb':'#f0fdf4'};border:1.5px solid ${b.status==='pending'?'#fde68a':'#bbf7d0'};border-radius:10px;padding:14px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div>
+              <div style="font-weight:700;font-size:.92rem">${b.name} — ${b.type}</div>
+              <div style="font-size:.78rem;color:var(--gray);margin-top:2px">
+                📅 ${b.date} at ${b.time} &nbsp;·&nbsp; 🏠 ${b.property}
+              </div>
+              <div style="font-size:.75rem;color:var(--gray);margin-top:2px">
+                📧 ${b.email} &nbsp;·&nbsp; 📞 ${b.phone}
+              </div>
+              ${b.notes ? `<div style="font-size:.75rem;color:#374151;margin-top:4px">💬 "${b.notes}"</div>` : ''}
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${b.status==='pending' ? `
+                <button class="btn btn-green btn-sm" onclick="confirmBooking('${b.id}')">✅ Confirm</button>
+                <button class="btn btn-red btn-sm" onclick="declineBooking('${b.id}')">✕ Decline</button>
+              ` : `
+                <span class="e-pill ep-green">✅ Confirmed</span>
+                <button class="btn btn-ghost btn-sm" onclick="cancelBooking('${b.id}')">Cancel</button>
+              `}
+              <button class="btn btn-ghost btn-sm" onclick="addToCalendar('${b.id}')">📅 Add to Cal</button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+  };
+
+  el.innerHTML = renderGroup(pending,'⏳ Pending Confirmation') + renderGroup(confirmed,'✅ Confirmed');
+}
+
+function confirmBooking(id) {
+  const b = bookings.find(x=>x.id===id);
+  if(b) {
+    b.status = 'confirmed';
+    localStorage.setItem('rv_cal_bookings', JSON.stringify(bookings));
+    renderBookings();
+    showToast(`✅ Confirmed: ${b.name}`);
+    // Auto-add to calendar
+    events.push({
+      id:'ev_bk'+Date.now(), title:`${b.type} — ${b.name}`,
+      cat:'tours', date:b.date, notes:`${b.property} at ${b.time}\n${b.email} · ${b.phone}`,
+      recur:'none', reminders:[0], done:false
+    });
+    saveEvents();
+    renderStats();
+    renderAlerts();
+  }
+}
+
+function declineBooking(id) {
+  if(!confirm('Decline this booking?')) return;
+  bookings = bookings.filter(x=>x.id!==id);
+  localStorage.setItem('rv_cal_bookings', JSON.stringify(bookings));
+  renderBookings();
+  showToast('Booking declined');
+}
+
+function cancelBooking(id) {
+  if(!confirm('Cancel this confirmed booking?')) return;
+  bookings = bookings.filter(x=>x.id!==id);
+  localStorage.setItem('rv_cal_bookings', JSON.stringify(bookings));
+  renderBookings();
+}
+
+function addToCalendar(id) {
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  const already = events.find(e=>e.title.includes(b.name) && e.date===b.date);
+  if(already) { showToast('Already on calendar'); return; }
+  events.push({
+    id:'ev_bk'+Date.now(), title:`${b.type} — ${b.name}`,
+    cat:'tours', date:b.date, notes:`${b.property} at ${b.time}\n${b.email} · ${b.phone}`,
+    recur:'none', reminders:[0], done:false
+  });
+  saveEvents(); renderStats(); renderAlerts();
+  showToast('📅 Added to calendar!');
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0f172a;color:white;padding:12px 20px;border-radius:10px;font-weight:700;font-size:.88rem;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3)';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ── CLOSE ON OVERLAY CLICK ──
+document.getElementById('event-modal').addEventListener('click', function(e) {
+  if(e.target === this) closeModal();
+});
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+  if(e.target === this) closeDetailModal();
+});
+
+// ── AUTO LOGIN (demo mode) ──
+window.addEventListener('DOMContentLoaded', () => {
+  doLogin();
+});
+</script>
+</body>
+</html>

@@ -53,23 +53,29 @@ const RVMessages = {
     return '+' + digits;
   },
 
-  // Client-side: Request SMS send via Supabase Edge Function
+  // Client-side: Send SMS via Vercel API route
   async send(to, messageType, templateData) {
-    if (!isSupabaseConfigured()) {
-      console.log('[SMS Preview]', messageType, templateData);
-      return { success: false, reason: 'Supabase not configured' };
-    }
-
-    const sb = getSupabase();
-    const { data, error } = await sb.functions.invoke('send-sms', {
-      body: {
-        to: this.formatPhone(to),
-        messageType,
-        templateData
+    try {
+      const res = await fetch('/api/send-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: messageType,
+          to: this.formatPhone(to),
+          data: templateData
+        })
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        console.warn(`[SMS] Failed to send "${messageType}"`, result);
+        return { success: false, error: result.error };
       }
-    });
-
-    return { success: !error, data, error };
+      console.log(`[SMS] Sent "${messageType}" to ${this.formatPhone(to)}`);
+      return { success: true, ...result };
+    } catch (e) {
+      console.warn('[SMS] Network error:', e.message);
+      return { success: false, error: e.message };
+    }
   },
 
   // Client-side: Send verification code

@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rental Application | RentVerified</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .app-wrap { min-height: calc(100vh - 120px); background: var(--gray-100); padding: 2rem 1rem; }
+    .app-container { max-width: 720px; margin: 0 auto; }
+    .app-header { text-align: center; margin-bottom: 2rem; }
+    .app-header h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .app-header p { color: var(--gray-600); font-size: 0.95rem; }
+
+    .property-banner {
+      background: white; border-radius: var(--radius); padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;
+      border-left: 4px solid var(--primary); box-shadow: var(--shadow);
+    }
+    .property-banner-icon { font-size: 2rem; }
+    .property-banner h3 { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+    .property-banner p { font-size: 0.85rem; color: var(--gray-600); }
+
+    .progress-wrap { background: white; border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+    .progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .progress-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-600); }
+    .progress-count { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+    .progress-bar-track { height: 6px; background: var(--gray-200); border-radius: 99px; overflow: hidden; margin-bottom: 1.25rem; }
+    .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.4s ease; }
+    .steps-row { display: flex; gap: 4px; align-items: center; overflow-x: auto; padding-bottom: 4px; }
+    .step-pill {
+      flex-shrink: 0; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem;
+      font-weight: 600; background: var(--gray-200); color: var(--gray-600); white-space: nowrap;
+    }
+    .step-pill.active { background: var(--primary); color: #121212; }
+    .step-pill.done { background: var(--success); color: white; }
+
+    .form-card { background: white; border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .section-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .section-subtitle { font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1.75rem; }
+    .section-divider { border: none; border-top: 1px solid var(--gray-200); margin: 1.5rem 0; }
+    .subsection-label { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+    .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.82rem; font-weight: 600; color: #1f2937; }
+    .form-group label .req { color: var(--danger); margin-left: 2px; }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 0.6rem 0.75rem; border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-size: 0.9rem; font-family: inherit; background: white; transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+    .form-group input.error, .form-group select.error, .form-group textarea.error { border-color: var(--danger); background: #fef2f2; }
+    .field-error { font-size: 0.78rem; color: var(--danger); font-weight: 500; display: none; }
+    .field-error.show { display: block; }
+
+    .yn-group { display: flex; gap: 0.75rem; margin-top: 0.25rem; }
+    .yn-option { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; }
+    .yn-option input[type=radio] { accent-color: var(--primary); width: 16px; height: 16px; }
+
+    .detail-block { background: var(--gray-100); border-radius: 8px; padding: 1rem; margin-top: 0.5rem; display: none; }
+    .detail-block.show { display: block; }
+
+    .repeater-item { border: 1.5px solid var(--gray-200); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; position: relative; }
+    .repeater-item-title { font-size: 0.85rem; font-weight: 700; color: var(--gray-600); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .btn-remove { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; padding: 2px 6px; border-radius: 6px; }
+    .btn-remove:hover { background: #fef2f2; }
+    .btn-add-item {
+      display: flex; align-items: center; gap: 8px; padding: 0.6rem 1rem;
+      background: var(--gray-100); border: 1.5px dashed var(--gray-200); border-radius: 8px;
+      font-size: 0.875rem; font-weight: 600; color: var(--gray-600); cursor: pointer;
+      width: 100%; justify-content: center; transition: all 0.15s;
+    }
+    .btn-add-item:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+    .toggle-section { border: 2px solid var(--gray-200); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .toggle-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .toggle-header h4 { font-size: 1rem; font-weight: 700; }
+    .toggle-header p { font-size: 0.82rem; color: var(--gray-600); margin-top: 2px; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--gray-200); border-radius: 99px; cursor: pointer; transition: 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    input:checked + .toggle-slider { background: var(--primary); }
+    input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .toggle-body { margin-top: 1rem; display: none; }
+    .toggle-body.open { display: block; }
+
+    .sig-pad-wrap { border: 2px solid var(--gray-200); border-radius: 8px; overflow: hidden; }
+    .sig-pad-wrap canvas { display: block; width: 100%; background: #fafafa; cursor: crosshair; touch-action: none; }
+    .sig-actions { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.5rem; }
+    .sig-btn { font-size: 0.8rem; color: var(--gray-600); background: none; border: 1px solid var(--gray-200); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+    .sig-btn:hover { background: var(--gray-100); }
+    .sig-btn.active { background: var(--primary); color: #121212; border-color: var(--primary); }
+
+    .consent-item { display: flex; align-items: flex-start; gap: 10px; padding: 0.75rem; background: var(--gray-100); border-radius: 8px; margin-bottom: 0.75rem; cursor: pointer; }
+    .consent-item input[type=checkbox] { accent-color: var(--primary); width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    .consent-item span { font-size: 0.85rem; line-height: 1.5; }
+
+    .form-nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+    .btn-back { background: none; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 0.7rem 1.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; color: var(--gray-600); transition: all 0.15s; }
+    .btn-back:hover { border-color: var(--gray-600); color: #111; }
+    .btn-next { background: var(--primary); border: none; border-radius: 8px; padding: 0.7rem 2rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; color: #121212; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
+    .btn-next:hover { background: var(--primary-dark); }
+    .btn-submit { background: var(--success); border: none; border-radius: 8px; padding: 0.85rem 2.5rem; font-size: 1rem; font-weight: 700; cursor: pointer; color: white; display: flex; align-items: center; gap: 8px; transition: opacity 0.15s; }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .save-banner { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--gray-600); }
+    .save-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+
+    .fee-notice { background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 8px; padding: 1rem; font-size: 0.875rem; margin-bottom: 1.25rem; }
+    .fee-notice strong { color: #c2410c; }
+
+    .success-screen { display: none; text-align: center; padding: 3rem 2rem; }
+    .success-screen.show { display: block; }
+    .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .success-screen h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.75rem; }
+    .success-screen p { color: var(--gray-600); font-size: 0.95rem; max-width: 480px; margin: 0 auto 1.5rem; }
+    .app-id-badge { display: inline-block; padding: 0.5rem 1.25rem; background: var(--primary-light); border: 2px solid var(--primary); border-radius: 99px; font-size: 1rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 2rem; letter-spacing: 0.05em; }
+
+    @media (max-width: 640px) {
+      .form-card { padding: 1.25rem; }
+      .form-row.cols-2 { grid-template-columns: 1fr; }
+      .form-row.cols-3 { grid-template-columns: 1fr; }
+      .app-header h1 { font-size: 1.4rem; }
+      .form-nav { flex-direction: column-reverse; }
+      .btn-next, .btn-submit { width: 100%; justify-content: center; }
+      .btn-back { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#94a3b8;padding:0.4rem 1rem;font-size:0.8rem;font-weight:600;text-align:center;">
+  RentVerified · Rental Application · <a href="listings.html" style="color:#93c5fd;">Browse Listings</a>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#00E676"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    3120 Life
+  </a>
+  <div class="nav-links">
+    <a href="listings.html">Listings</a>
+    <a href="tenant-portal.html">Tenant Portal</a>
+  </div>
+  <div class="nav-cta">
+    <span style="font-size:0.85rem;color:var(--gray-600);">🔒 Secure Application</span>
+  </div>
+</nav>
+
+<div class="app-wrap">
+  <div class="app-container">
+
+    <div class="app-header">
+      <h1>🏠 Rental Application</h1>
+      <p>All information is encrypted and securely stored. Typical completion time: 10–15 minutes.</p>
+    </div>
+
+    <div class="property-banner" id="property-banner" style="display:none;">
+      <div class="property-banner-icon">🏡</div>
+      <div>
+        <h3 id="prop-name">Property</h3>
+        <p id="prop-details">Loading property details…</p>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Application Progress</span>
+        <span class="progress-count" id="step-count">Step 1 of 9</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:11%"></div>
+      </div>
+      <div class="steps-row" id="steps-row"></div>
+    </div>
+
+    <!-- ══ SECTION 1: Primary Applicant ══ -->
+    <div class="form-card" id="section-1">
+      <div class="section-title">👤 Primary Applicant</div>
+      <div class="section-subtitle">Your full legal name and contact info as it appears on your government-issued ID.</div>
+
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>First Name <span class="req">*</span></label>
+          <input type="text" id="firstName" placeholder="Jane" autocomplete="given-name" />
+          <span class="field-error" id="err-firstName">Please enter your first name.</span>
+        </div>
+        <div class="form-group">
+          <label>Last Name <span class="req">*</span></label>
+          <input type="text" id="lastName" placeholder="Smith" autocomplete="family-name" />
+          <span class="field-error" id="err-lastName">Please enter your last name.</span>
+        </div>
+      </div>
+
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label>Middle Name</label>
+          <input type="text" id="middleName" placeholder="Optional" />
+        </div>
+        <div class="form-group">
+          <label>Date of Birth <span class="req">*</span></label>
+          <input type="date" id="dob" />
+          <span class="field-error" id="err-dob">Please enter your date of birth.</span>
+        </div>
+        <div class="form-group">
+          <label>Social Security # <span class="req">*</span></label>
+          <input type="password" id="ssn" placeholder="XXX-XX-XXXX" maxlength="11" autocomplete="off" inputmode="numeric" />
+          <span class="field-error" id="err-ssn">Enter full 9-digit SSN.</span>
+        </div>
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Gov't ID Type <span class="req">*</span></label>
+          <select id="idType">
+            <option value="">Select type…</option>
+            <option>Driver's License</option>
+            <option>State ID</option>
+            <option>Passport</option>
+            <option>Military ID</option>
+            <option>Permanent Resident Card</option>
+          </select>
+          <span class="field-error" id="err-idType">Please select your ID type.</span>
+        </div>
+        <div class="form-group">
+          <label>ID Number <span class="req">*</span></label>
+          <input type="text" id="idNumber" placeholder="e.g. D123456789" />
+          <span class="field-error" id="err-idNumber">Please enter your ID number.</span>
+        </div>
+      </div>
+
+      <!-- AI ID Scan -->
+      <div style="background:#f0f9ff;border:1.5px dashed #bae6fd;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;">
+        <div style="font-size:0.82rem;font-weight:700;color:#0369a1;margin-bottom:0.4rem;">🤖 AI Auto-Fill (Optional)</div>
+        <div style="font-size:0.82rem;color:#0c4a6e;margin-bottom:0.75rem;">Upload a photo of your Driver's License or Passport — we'll try to auto-fill your name and ID number.</div>
+        <label style="display:inline-flex;align-items:center;gap:8px;padding:0.5rem 1rem;background:white;border:1.5px solid #bae6fd;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;color:#0369a1;">
+          📷 Upload ID Photo
+          <input type="file" id="idPhotoUpload" accept="image/*" style="display:none;" onchange="aiScanID(this)" />
+        </label>
+        <span id="idScanBadge" style="display:none;margin-left:10px;font-size:0.82rem;font-weight:600;"></span>
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Email Address <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="jane@email.com" autocomplete="email" />
+          <span class="field-error" id="err-email">Please enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label>Phone Number <span class="req">*</span></label>
+          <input type="tel" id="phone" placeholder="(801) 555-0100" autocomplete="tel" />
+          <span class="field-error" id="err-phone">Please enter your phone number.</span>
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+      <div class="subsection-label">Current Address</div>
+
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label>Street Address <span class="req">*</span></label>
+        <input type="text" id="curStreet" placeholder="123 Main St" autocomplete="street-address" />
+        <span class="field-error" id="err-curStreet">Please enter your street address.</span>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label>City <span class="req">*</span></label>
+          <input type="text" id="curCity" placeholder="Salt Lake City" />
+          <span class="field-error" id="err-curCity">Please enter city.</span>
+        </div>
+        <div class="form-group">
+          <label>State <span class="req">*</span></label>
+          <select id="curState">
+            <option value="">State…</option>
+            <option>UT</option><option>AZ</option><option>CA</option><option>CO</option><option>ID</option><option>NV</option><option>NM</option><option>OR</option><option>WA</option><option>WY</option>
+            <option>AL</option><option>AK</option><option>AR</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NH</option><option>NJ</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>VT</option><option>VA</option><option>WV</option><option>WI</option>
+          </select>
+          <span class="field-error" id="err-curState">Please select state.</span>
+        </div>
+        <div class="form-group">
+          <label>ZIP <span class="req">*</span></label>
+          <input type="text" id="curZip" placeholder="84101" maxlength="10" inputmode="numeric" />
+          <span class="field-error" id="err-curZip">Please enter ZIP.</span>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Monthly Rent Paid <span class="req">*</span></label>
+          <input type="number" id="curRent" placeholder="1200" min="0" />
+          <span class="field-error" id="err-curRent">Please enter current rent amount.</span>
+        </div>
+        <div class="form-group">
+          <label>How long at this address? <span class="req">*</span></label>
+          <input type="text" id="curDuration" placeholder="e.g. 2 years 3 months" />
+          <span class="field-error" id="err-curDuration">Please enter duration.</span>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(1)">Next: Co-Applicant →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 2: Co-Applicant ══ -->
+    <div class="form-card" id="section-2" style="display:none;">
+      <div class="section-title">👥 Co-Applicant</div>
+      <div class="section-subtitle">Optional. Add a co-applicant who will share financial responsibility for the lease.</div>
+
+      <div class="toggle-section">
+        <div class="toggle-header" onclick="toggleCoApp()">
+          <div>
+            <h4>Add a Co-Applicant</h4>
+            <p>Spouse, partner, roommate, or co-signer</p>
+          </div>
+          <label class="toggle-switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="hasCoApplicant" onchange="toggleCoApp(true)" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-body" id="co-applicant-body">
+          <div class="form-row cols-2" style="margin-top:0.5rem;">
+            <div class="form-group">
+              <label>First Name <span class="req">*</span></label>
+              <input type="text" id="coFirstName" placeholder="John" />
+            </div>
+            <div class="form-group">
+              <label>Last Name <span class="req">*</span></label>
+              <input type="text" id="coLastName" placeholder="Smith" />
+            </div>
+          </div>
+          <div class="form-row cols-3">
+            <div class="form-group">
+              <label>Date of Birth <span class="req">*</span></label>
+              <input type="date" id="coDob" />
+            </div>
+            <div class="form-group">
+              <label>SSN <span class="req">*</span></label>
+              <input type="password" id="coSsn" placeholder="XXX-XX-XXXX" maxlength="11" />
+            </div>
+            <div class="form-group">
+              <label>Relationship <span class="req">*</span></label>
+              <select id="coRelationship">
+                <option value="">Select…</option>
+                <option>Spouse</option><option>Partner</option><option>Roommate</option><option>Co-signer</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label>Email <span class="req">*</span></label>
+              <input type="email" id="coEmail" placeholder="john@email.com" />
+            </div>
+            <div class="form-group">
+              <label>Phone <span class="req">*</span></label>
+              <input type="tel" id="coPhone" placeholder="(801) 555-0200" />
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label>Gov't ID Type <span class="req">*</span></label>
+              <select id="coIdType">
+                <option value="">Select type…</option>
+                <option>Driver's License</option><option>State ID</option><option>Passport</option><option>Military ID</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>ID Number <span class="req">*</span></label>
+              <input type="text" id="coIdNumber" placeholder="e.g. D987654321" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Monthly Gross Income <span class="req">*</span></label>
+            <input type="number" id="coIncome" placeholder="3500" min="0" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(2)">Next: Rental History →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 3: Residential History ══ -->
+    <div class="form-card" id="section-3" style="display:none;">
+      <div class="section-title">🏘️ Residential History</div>
+      <div class="section-subtitle">List your previous addresses (up to 3). Include landlord contact info if available.</div>
+
+      <div id="res-history-list"></div>
+      <button class="btn-add-item" onclick="addResHistory()" id="addResBtn">+ Add Previous Address</button>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(3)">Next: Employment →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 4: Employment & Income ══ -->
+    <div class="form-card" id="section-4" style="display:none;">
+      <div class="section-title">💼 Employment & Income</div>
+      <div class="section-subtitle">Current employment and income. Monthly gross income = before taxes.</div>
+
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Employment Status <span class="req">*</span></label>
+          <select id="empStatus" onchange="handleEmpStatus()">
+            <option value="">Select…</option>
+            <option value="full-time">Employed Full-Time</option>
+            <option value="part-time">Employed Part-Time</option>
+            <option value="self-employed">Self-Employed</option>
+            <option value="retired">Retired</option>
+            <option value="student">Student</option>
+            <option value="unemployed">Unemployed</option>
+            <option value="other">Other Income Source</option>
+          </select>
+          <span class="field-error" id="err-empStatus">Please select employment status.</span>
+        </div>
+        <div class="form-group">
+          <label>Monthly Gross Income <span class="req">*</span></label>
+          <input type="number" id="monthlyIncome" placeholder="4500" min="0" />
+          <span class="field-error" id="err-monthlyIncome">Please enter your monthly income.</span>
+        </div>
+      </div>
+
+      <!-- AI Pay Stub Scanner -->
+      <div style="background:#f0fdf4;border:1.5px dashed #86efac;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;">
+        <div style="font-size:0.82rem;font-weight:700;color:#166534;margin-bottom:0.4rem;">🤖 AI Pay Stub Scanner (Optional)</div>
+        <div style="font-size:0.82rem;color:#14532d;margin-bottom:0.75rem;">Upload a photo or scan of your most recent pay stub — we'll auto-fill your income and employer details.</div>
+        <label style="display:inline-flex;align-items:center;gap:8px;padding:0.5rem 1rem;background:white;border:1.5px solid #86efac;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;color:#166534;">
+          📄 Upload Pay Stub
+          <input type="file" id="payStubUpload" accept="image/*,.pdf" style="display:none;" onchange="aiScanPayStub(this)" />
+        </label>
+        <span id="payStubBadge" style="display:none;margin-left:10px;font-size:0.82rem;font-weight:600;"></span>
+      </div>
+
+      <div id="employer-block">
+        <hr class="section-divider" />
+        <div class="subsection-label">Employer Details</div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Employer Name</label>
+            <input type="text" id="empName" placeholder="Company Inc." />
+          </div>
+          <div class="form-group">
+            <label>Job Title / Position</label>
+            <input type="text" id="empPosition" placeholder="Software Engineer" />
+          </div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="empStartDate" />
+          </div>
+          <div class="form-group">
+            <label>Supervisor Name</label>
+            <input type="text" id="empSupervisor" placeholder="Sarah Johnson" />
+          </div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Supervisor Phone</label>
+            <input type="tel" id="empSupervisorPhone" placeholder="(801) 555-0300" />
+          </div>
+          <div class="form-group">
+            <label>Work Address</label>
+            <input type="text" id="empAddress" placeholder="456 Business Ave, SLC UT" />
+          </div>
+        </div>
+      </div>
+
+      <div id="other-income-block" style="display:none;">
+        <hr class="section-divider" />
+        <div class="form-group">
+          <label>Describe Your Income Source</label>
+          <textarea id="otherIncomeDesc" rows="3" placeholder="e.g. Social Security, rental income, alimony, disability…"></textarea>
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+      <div class="subsection-label">Additional Income (Optional)</div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Source</label>
+          <input type="text" id="addlIncomeSource" placeholder="e.g. Freelance, rental, alimony" />
+        </div>
+        <div class="form-group">
+          <label>Monthly Amount ($)</label>
+          <input type="number" id="addlIncomeAmount" placeholder="500" min="0" />
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(4)">← Back</button>
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(4)">Next: Occupants & Pets →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 5: Occupants & Pets ══ -->
+    <div class="form-card" id="section-5" style="display:none;">
+      <div class="section-title">👨‍👩‍👧 Occupants & Pets</div>
+      <div class="section-subtitle">List everyone who will live in the unit. Adults 18+ must submit their own application.</div>
+
+      <div id="occupant-list"></div>
+      <button class="btn-add-item" onclick="addOccupant()" style="margin-bottom:1.5rem;">+ Add Occupant</button>
+
+      <hr class="section-divider" />
+      <div style="font-size:1rem;font-weight:700;margin-bottom:0.25rem;">Pets</div>
+      <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:1rem;">List all pets. Unauthorized pets may result in lease termination. Pet deposit or pet rent may apply.</p>
+
+      <div id="pet-list"></div>
+      <button class="btn-add-item" onclick="addPet()">+ Add Pet</button>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(5)">← Back</button>
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(5)">Next: Financial Background →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 6: Financial Background ══ -->
+    <div class="form-card" id="section-6" style="display:none;">
+      <div class="section-title">💳 Financial Background</div>
+      <div class="section-subtitle">Answer honestly. False statements may result in immediate disqualification.</div>
+
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label>Estimated Credit Score Range</label>
+        <select id="creditScore">
+          <option value="">Select range…</option>
+          <option>Excellent (750+)</option>
+          <option>Good (700–749)</option>
+          <option>Fair (650–699)</option>
+          <option>Poor (600–649)</option>
+          <option>Very Poor (below 600)</option>
+          <option>No credit history</option>
+        </select>
+      </div>
+
+      <hr class="section-divider" />
+
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem;">Have you ever filed for bankruptcy?</div>
+        <div class="yn-group">
+          <label class="yn-option"><input type="radio" name="bankruptcy" value="no" checked onchange="toggleDetail('bankruptcy-detail',false)" /> No</label>
+          <label class="yn-option"><input type="radio" name="bankruptcy" value="yes" onchange="toggleDetail('bankruptcy-detail',true)" /> Yes</label>
+        </div>
+        <div class="detail-block" id="bankruptcy-detail">
+          <div class="form-row cols-2">
+            <div class="form-group"><label>Type (Ch. 7, 11, 13)</label><input type="text" id="bankruptcyType" placeholder="e.g. Chapter 7" /></div>
+            <div class="form-group"><label>Discharge Date</label><input type="date" id="bankruptcyDate" /></div>
+          </div>
+          <div class="form-group"><label>Explain</label><textarea id="bankruptcyExplain" rows="2" placeholder="Brief explanation…"></textarea></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem;">Have you ever been evicted or asked to vacate?</div>
+        <div class="yn-group">
+          <label class="yn-option"><input type="radio" name="eviction" value="no" checked onchange="toggleDetail('eviction-detail',false)" /> No</label>
+          <label class="yn-option"><input type="radio" name="eviction" value="yes" onchange="toggleDetail('eviction-detail',true)" /> Yes</label>
+        </div>
+        <div class="detail-block" id="eviction-detail">
+          <div class="form-row cols-2">
+            <div class="form-group"><label>Year</label><input type="text" id="evictionDate" placeholder="e.g. 2021" /></div>
+            <div class="form-group"><label>City / State</label><input type="text" id="evictionLocation" placeholder="e.g. Salt Lake City, UT" /></div>
+          </div>
+          <div class="form-group"><label>Explain</label><textarea id="evictionExplain" rows="2" placeholder="Brief explanation…"></textarea></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:0.5rem;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem;">Do you have outstanding judgments, liens, or unpaid rent owed to a landlord?</div>
+        <div class="yn-group">
+          <label class="yn-option"><input type="radio" name="judgment" value="no" checked onchange="toggleDetail('judgment-detail',false)" /> No</label>
+          <label class="yn-option"><input type="radio" name="judgment" value="yes" onchange="toggleDetail('judgment-detail',true)" /> Yes</label>
+        </div>
+        <div class="detail-block" id="judgment-detail">
+          <div class="form-group"><label>Explain</label><textarea id="judgmentExplain" rows="2" placeholder="Amount owed, creditor, date…"></textarea></div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(6)">← Back</button>
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(6)">Next: Criminal Disclosure →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 7: Criminal Disclosure ══ -->
+    <div class="form-card" id="section-7" style="display:none;">
+      <div class="section-title">⚖️ Criminal Disclosure</div>
+      <div class="section-subtitle">Utah law requires disclosure. A criminal history does not automatically disqualify applicants — context matters.</div>
+
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem;">Have you been convicted of a felony in the last 7 years?</div>
+        <div class="yn-group">
+          <label class="yn-option"><input type="radio" name="felony" value="no" checked onchange="toggleDetail('felony-detail',false)" /> No</label>
+          <label class="yn-option"><input type="radio" name="felony" value="yes" onchange="toggleDetail('felony-detail',true)" /> Yes</label>
+        </div>
+        <div class="detail-block" id="felony-detail">
+          <div class="form-row cols-2">
+            <div class="form-group"><label>Offense</label><input type="text" id="felonyOffense" placeholder="e.g. Drug possession" /></div>
+            <div class="form-group"><label>Year</label><input type="text" id="felonyYear" placeholder="e.g. 2019" maxlength="4" /></div>
+          </div>
+          <div class="form-group"><label>Explain</label><textarea id="felonyExplain" rows="2" placeholder="Brief context…"></textarea></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem;">Have you been convicted of a misdemeanor involving violence, theft, or property damage in the last 5 years?</div>
+        <div class="yn-group">
+          <label class="yn-option"><input type="radio" name="misdemeanor" value="no" checked onchange="toggleDetail('misdemeanor-detail',false)" /> No</label>
+          <label class="yn-option"><input type="radio" name="misdemeanor" value="yes" onchange="toggleDetail('misdemeanor-detail',true)" /> Yes</label>
+        </div>
+        <div class="detail-block" id="misdemeanor-detail">
+          <div class="form-row cols-2">
+            <div class="form-group"><label>Offense</label><input type="text" id="misdemOffense" placeholder="e.g. Theft" /></div>
+            <div class="form-group"><label>Year</label><input type="text" id="misdemYear" placeholder="e.g. 2022" maxlength="4" /></div>
+          </div>
+          <div class="form-group"><label>Explain</label><textarea id="misdemExplain" rows="2" placeholder="Brief context…"></textarea></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:0.5rem;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem;">Are you currently listed on a sex offender registry?</div>
+        <div class="yn-group">
+          <label class="yn-option"><input type="radio" name="sexOffender" value="no" checked /> No</label>
+          <label class="yn-option"><input type="radio" name="sexOffender" value="yes" /> Yes</label>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(7)">← Back</button>
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(7)">Next: Emergency Contact →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 8: Emergency Contact ══ -->
+    <div class="form-card" id="section-8" style="display:none;">
+      <div class="section-title">🆘 Emergency Contact</div>
+      <div class="section-subtitle">Someone we can reach if you are unreachable. This person does not live in the unit.</div>
+
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="ecName" placeholder="Robert Smith" />
+          <span class="field-error" id="err-ecName">Please enter emergency contact name.</span>
+        </div>
+        <div class="form-group">
+          <label>Relationship <span class="req">*</span></label>
+          <select id="ecRelationship">
+            <option value="">Select…</option>
+            <option>Parent</option><option>Sibling</option><option>Spouse / Partner</option><option>Child</option><option>Friend</option><option>Other</option>
+          </select>
+          <span class="field-error" id="err-ecRelationship">Please select relationship.</span>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Phone Number <span class="req">*</span></label>
+          <input type="tel" id="ecPhone" placeholder="(801) 555-0400" />
+          <span class="field-error" id="err-ecPhone">Please enter phone number.</span>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="ecEmail" placeholder="robert@email.com" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="ecAddress" placeholder="789 Family Rd, Provo UT 84601" />
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(8)">← Back</button>
+        <div class="save-banner"><div class="save-dot"></div> Draft auto-saved</div>
+        <button class="btn-next" onclick="nextStep(8)">Next: Sign & Submit →</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 9: Authorization & Signature ══ -->
+    <div class="form-card" id="section-9" style="display:none;">
+      <div class="section-title">✍️ Authorization & Signature</div>
+      <div class="section-subtitle">Read carefully and sign to submit your application.</div>
+
+      <div class="fee-notice">
+        <strong>⚠️ Application & Screening Fee: $45.00</strong><br />
+        A non-refundable fee covers your background and credit check via TransUnion SmartMove. You will be redirected to a secure payment page after submission.
+      </div>
+
+      <div style="margin-bottom:1.25rem;">
+        <div class="subsection-label">Please confirm each of the following:</div>
+        <label class="consent-item">
+          <input type="checkbox" id="consent1" />
+          <span>I certify that all information in this application is true and complete. I understand that false statements may result in rejection or lease termination.</span>
+        </label>
+        <label class="consent-item">
+          <input type="checkbox" id="consent2" />
+          <span>I authorize the landlord / property management to verify all references, obtain a credit report, and conduct a background check.</span>
+        </label>
+        <label class="consent-item">
+          <input type="checkbox" id="consent3" />
+          <span>I understand the $45 screening fee is non-refundable regardless of the outcome of my application.</span>
+        </label>
+        <label class="consent-item">
+          <input type="checkbox" id="consent4" />
+          <span>I agree that my electronic signature carries the same legal weight as a handwritten signature under the Utah UETA and federal ESIGN Act.</span>
+        </label>
+        <span class="field-error" id="err-consents">Please check all boxes above before signing.</span>
+      </div>
+
+      <hr class="section-divider" />
+      <div class="subsection-label">Your Signature</div>
+
+      <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem;">
+        <button type="button" class="sig-btn active" id="sigTabDraw" onclick="switchSigTab('draw')">✏️ Draw</button>
+        <button type="button" class="sig-btn" id="sigTabType" onclick="switchSigTab('type')">⌨️ Type</button>
+      </div>
+
+      <div id="sig-draw-panel">
+        <div class="sig-pad-wrap">
+          <canvas id="sigCanvas" height="120"></canvas>
+        </div>
+        <div class="sig-actions">
+          <button type="button" class="sig-btn" onclick="clearSig()">Clear</button>
+          <span style="font-size:0.78rem;color:var(--gray-600);">Draw with mouse or finger</span>
+        </div>
+      </div>
+
+      <div id="sig-type-panel" style="display:none;">
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <input type="text" id="sigTyped" placeholder="Type your full legal name as your signature" oninput="renderTypedSig()" />
+        </div>
+        <div id="sig-typed-preview" style="font-family:'Segoe Script',cursive,serif;font-size:2rem;color:#1a1a1a;padding:0.75rem;border:1px solid var(--gray-200);border-radius:8px;min-height:64px;background:#fafafa;"></div>
+      </div>
+      <span class="field-error" id="err-signature">Please provide your signature before submitting.</span>
+
+      <div class="form-row cols-2" style="margin-top:1.25rem;">
+        <div class="form-group">
+          <label>Print Full Legal Name <span class="req">*</span></label>
+          <input type="text" id="printName" placeholder="Jane Marie Smith" />
+          <span class="field-error" id="err-printName">Please enter your printed name.</span>
+        </div>
+        <div class="form-group">
+          <label>Date <span class="req">*</span></label>
+          <input type="date" id="sigDate" />
+          <span class="field-error" id="err-sigDate">Please enter today's date.</span>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(9)">← Back</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitApplication()">Submit Application →</button>
+      </div>
+    </div>
+
+    <!-- ══ SUCCESS ══ -->
+    <div class="form-card success-screen" id="success-screen">
+      <div class="success-icon">🎉</div>
+      <h2>Application Submitted!</h2>
+      <p>Your application has been received and is under review. You'll receive a confirmation email shortly.</p>
+      <div class="app-id-badge" id="app-id-display">APP-2026-XXXX</div>
+      <p>The landlord typically responds within <strong>1–2 business days</strong>. Check your email for updates.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
+        <a href="tenant-portal.html" class="btn btn-primary">Open Tenant Portal</a>
+        <a href="listings.html" class="btn" style="background:var(--gray-100);color:#111;">Browse More Listings</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="data-layer.js"></script>
+<script src="hf-classify.js"></script>
+<script src="email-notifications.js"></script>
+<script>
+const STEP_NAMES = ['Primary','Co-Applicant','Rental History','Employment','Occupants & Pets','Financial','Criminal','Emergency','Sign & Submit'];
+const TOTAL_STEPS = 9;
+let currentStep = 1;
+let resCount = 0, occCount = 0, petCount = 0;
+let sigMode = 'draw', hasSig = false, sigDrawing = false;
+let sigCanvas, sigCtx;
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  buildStepPills();
+  initSigPad();
+  setTodayDate();
+  addResHistory(); addResHistory(); // start with 2 residence entries
+  loadDraft();
+  prefillFromUrl();
+  goToStep(1);
+});
+
+function buildStepPills() {
+  const row = document.getElementById('steps-row');
+  STEP_NAMES.forEach((name, i) => {
+    const p = document.createElement('span');
+    p.className = 'step-pill'; p.id = `pill-${i+1}`;
+    p.textContent = `${i+1}. ${name}`;
+    row.appendChild(p);
+  });
+}
+
+function setTodayDate() {
+  const el = document.getElementById('sigDate');
+  if (el) el.value = new Date().toISOString().split('T')[0];
+}
+
+// ── URL PARAMS ──
+function prefillFromUrl() {
+  const p = new URLSearchParams(window.location.search);
+  const id = p.get('property') || p.get('listing');
+  if (!id) return;
+  document.getElementById('property-banner').style.display = 'flex';
+  document.getElementById('prop-name').textContent = id.startsWith('RV-') ? `Listing ${id}` : `Property ${id}`;
+  loadPropDetails(id);
+}
+
+async function loadPropDetails(id) {
+  try {
+    const sb = await getSupabase();
+    if (!sb) return;
+    const col = id.startsWith('RV-') ? 'listing_id' : 'id';
+    const { data } = await sb.from('properties').select('address,city,state,zip,rent').eq(col, id).single();
+    if (data) {
+      document.getElementById('prop-name').textContent = data.address || `Property ${id}`;
+      document.getElementById('prop-details').textContent = `${data.city||''}, ${data.state||''} ${data.zip||''} · $${data.rent||'—'}/mo`;
+    }
+  } catch(e) {
+    document.getElementById('prop-details').textContent = 'Apply for this property';
+  }
+}
+
+// ── STEP NAVIGATION ──
+function goToStep(n) {
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const el = document.getElementById(`section-${i}`);
+    if (el) el.style.display = (i === n) ? 'block' : 'none';
+  }
+  document.getElementById('success-screen').classList.remove('show');
+  currentStep = n;
+  updateProgress(n);
+  saveDraft();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(step) {
+  const pct = Math.round((step / TOTAL_STEPS) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('step-count').textContent = `Step ${step} of ${TOTAL_STEPS}`;
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const pill = document.getElementById(`pill-${i}`);
+    if (!pill) continue;
+    pill.className = 'step-pill';
+    if (i < step) pill.classList.add('done');
+    else if (i === step) pill.classList.add('active');
+  }
+}
+
+function nextStep(from) { if (validateStep(from)) goToStep(from + 1); }
+function prevStep(from) { goToStep(from - 1); }
+
+// ── VALIDATION ──
+function clearErrors() {
+  document.querySelectorAll('.field-error.show').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('input.error, select.error, textarea.error').forEach(el => el.classList.remove('error'));
+}
+
+function markError(fieldId, errId) {
+  const f = document.getElementById(fieldId);
+  const e = document.getElementById(errId || `err-${fieldId}`);
+  if (f) f.classList.add('error');
+  if (e) e.classList.add('show');
+}
+
+function validateStep(step) {
+  clearErrors();
+  let ok = true;
+  const req = (id, errId) => { if (!gv(id)) { markError(id, errId); ok = false; } };
+
+  if (step === 1) {
+    req('firstName'); req('lastName'); req('dob');
+    if (!gv('ssn') || document.getElementById('ssn').value.replace(/\D/g,'').length < 9) { markError('ssn'); ok = false; }
+    req('idType'); req('idNumber');
+    if (!gv('email') || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gv('email'))) { markError('email'); ok = false; }
+    req('phone'); req('curStreet'); req('curCity'); req('curState'); req('curZip'); req('curRent'); req('curDuration');
+  }
+  if (step === 4) { req('empStatus'); req('monthlyIncome'); }
+  if (step === 8) { req('ecName'); req('ecRelationship'); req('ecPhone'); }
+
+  if (!ok) {
+    const first = document.querySelector('.error, .field-error.show');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return ok;
+}
+
+function gv(id) { return (document.getElementById(id)?.value || '').trim(); }
+function getRadio(name) { return document.querySelector(`input[name="${name}"]:checked`)?.value || 'no'; }
+
+// ── INPUT FORMATTING ──
+document.addEventListener('DOMContentLoaded', () => {
+  // SSN formatting
+  ['ssn','coSsn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function() {
+      let d = this.value.replace(/\D/g,'').slice(0,9);
+      if (d.length > 5) d = d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5);
+      else if (d.length > 3) d = d.slice(0,3)+'-'+d.slice(3);
+      this.value = d;
+    });
+  });
+  // Phone formatting
+  ['phone','coPhone','ecPhone','empSupervisorPhone'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function() {
+      let d = this.value.replace(/\D/g,'').slice(0,10);
+      if (d.length >= 6) this.value = '('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6);
+      else if (d.length >= 3) this.value = '('+d.slice(0,3)+') '+d.slice(3);
+      else this.value = d;
+    });
+  });
+});
+
+// ── CO-APPLICANT ──
+function toggleCoApp(fromCheckbox) {
+  const cb = document.getElementById('hasCoApplicant');
+  if (!fromCheckbox) cb.checked = !cb.checked;
+  document.getElementById('co-applicant-body').classList.toggle('open', cb.checked);
+}
+
+// ── CONDITIONAL DETAILS ──
+function toggleDetail(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('show', show);
+}
+
+// ── EMPLOYMENT STATUS ──
+function handleEmpStatus() {
+  const val = document.getElementById('empStatus').value;
+  const noEmp = ['retired','student','unemployed','other'];
+  document.getElementById('employer-block').style.display = noEmp.includes(val) ? 'none' : 'block';
+  document.getElementById('other-income-block').style.display = noEmp.includes(val) ? 'block' : 'none';
+}
+
+// ── RESIDENCE HISTORY REPEATER ──
+function addResHistory() {
+  if (resCount >= 3) return;
+  resCount++;
+  const n = resCount;
+  const labels = ['','Most Recent Previous Address','Address Before That','Earlier Address'];
+  const list = document.getElementById('res-history-list');
+  const div = document.createElement('div');
+  div.className = 'repeater-item'; div.id = `res-${n}`;
+  div.innerHTML = `
+    <div class="repeater-item-title">${labels[n]}</div>
+    ${n > 1 ? `<button class="btn-remove" onclick="removeRes(${n})" title="Remove">✕</button>` : ''}
+    <div class="form-group" style="margin-bottom:.75rem;">
+      <label>Street Address</label>
+      <input type="text" id="resStreet_${n}" placeholder="123 Previous St" />
+    </div>
+    <div class="form-row cols-3">
+      <div class="form-group"><label>City</label><input type="text" id="resCity_${n}" placeholder="Salt Lake City" /></div>
+      <div class="form-group"><label>State</label><input type="text" id="resState_${n}" placeholder="UT" maxlength="2" /></div>
+      <div class="form-group"><label>ZIP</label><input type="text" id="resZip_${n}" placeholder="84101" maxlength="10" /></div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Dates (From – To)</label><input type="text" id="resDates_${n}" placeholder="Jan 2022 – Mar 2024" /></div>
+      <div class="form-group"><label>Monthly Rent ($)</label><input type="number" id="resRent_${n}" placeholder="1100" min="0" /></div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Landlord / Property Manager</label><input type="text" id="resLandlord_${n}" placeholder="John Doe or ABC Properties" /></div>
+      <div class="form-group"><label>Landlord Phone</label><input type="tel" id="resLandlordPhone_${n}" placeholder="(801) 555-0500" /></div>
+    </div>
+    <div class="form-group"><label>Reason for Leaving</label><input type="text" id="resReason_${n}" placeholder="End of lease / moved for work / etc." /></div>
+  `;
+  list.appendChild(div);
+  if (resCount >= 3) document.getElementById('addResBtn').style.display = 'none';
+}
+
+function removeRes(n) {
+  const el = document.getElementById(`res-${n}`);
+  if (el) { el.remove(); resCount--; document.getElementById('addResBtn').style.display = ''; }
+}
+
+// ── OCCUPANT REPEATER ──
+function addOccupant() {
+  occCount++;
+  const n = occCount;
+  const list = document.getElementById('occupant-list');
+  const div = document.createElement('div');
+  div.className = 'repeater-item'; div.id = `occ-${n}`;
+  div.innerHTML = `
+    <div class="repeater-item-title">Occupant ${n}</div>
+    <button class="btn-remove" onclick="document.getElementById('occ-${n}').remove()" title="Remove">✕</button>
+    <div class="form-row cols-3">
+      <div class="form-group"><label>Full Name</label><input type="text" id="occName_${n}" placeholder="Full name" /></div>
+      <div class="form-group"><label>Age</label><input type="number" id="occAge_${n}" placeholder="25" min="0" max="120" /></div>
+      <div class="form-group">
+        <label>Relationship</label>
+        <select id="occRel_${n}">
+          <option value="">Select…</option>
+          <option>Child</option><option>Spouse / Partner</option><option>Roommate</option><option>Parent</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+  `;
+  list.appendChild(div);
+}
+
+// ── PET REPEATER ──
+function addPet() {
+  petCount++;
+  const n = petCount;
+  const list = document.getElementById('pet-list');
+  const div = document.createElement('div');
+  div.className = 'repeater-item'; div.id = `pet-${n}`;
+  div.innerHTML = `
+    <div class="repeater-item-title">Pet ${n}</div>
+    <button class="btn-remove" onclick="document.getElementById('pet-${n}').remove()" title="Remove">✕</button>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label>Type</label>
+        <select id="petType_${n}">
+          <option value="">Select…</option>
+          <option>Dog</option><option>Cat</option><option>Bird</option><option>Fish</option><option>Rabbit</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Name</label><input type="text" id="petName_${n}" placeholder="Buddy" /></div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="form-group"><label>Breed</label><input type="text" id="petBreed_${n}" placeholder="Labrador" /></div>
+      <div class="form-group"><label>Weight (lbs)</label><input type="number" id="petWeight_${n}" placeholder="50" min="0" /></div>
+      <div class="form-group"><label>Age (yrs)</label><input type="number" id="petAge_${n}" placeholder="3" min="0" /></div>
+    </div>
+  `;
+  list.appendChild(div);
+}
+
+// ── SIGNATURE PAD ──
+function initSigPad() {
+  sigCanvas = document.getElementById('sigCanvas');
+  if (!sigCanvas) return;
+  sigCtx = sigCanvas.getContext('2d');
+  resizeSig();
+  window.addEventListener('resize', resizeSig);
+
+  sigCanvas.addEventListener('mousedown', e => { sigDrawing = true; const p = pos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); });
+  sigCanvas.addEventListener('mousemove', e => { if (!sigDrawing) return; const p = pos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); hasSig = true; });
+  sigCanvas.addEventListener('mouseup', () => sigDrawing = false);
+  sigCanvas.addEventListener('mouseleave', () => sigDrawing = false);
+  sigCanvas.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing = true; const p = pos(e.touches[0]); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); }, { passive: false });
+  sigCanvas.addEventListener('touchmove', e => { e.preventDefault(); if (!sigDrawing) return; const p = pos(e.touches[0]); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); hasSig = true; }, { passive: false });
+  sigCanvas.addEventListener('touchend', () => sigDrawing = false, { passive: false });
+}
+
+function resizeSig() {
+  if (!sigCanvas) return;
+  const w = sigCanvas.parentElement.getBoundingClientRect().width || 600;
+  sigCanvas.width = w; sigCanvas.height = 120;
+  sigCtx.strokeStyle = '#1a1a1a'; sigCtx.lineWidth = 2.5; sigCtx.lineCap = 'round'; sigCtx.lineJoin = 'round';
+}
+
+function pos(e) {
+  const r = sigCanvas.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (sigCanvas.width / r.width), y: (e.clientY - r.top) * (sigCanvas.height / r.height) };
+}
+
+function clearSig() { sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); hasSig = false; }
+
+function switchSigTab(tab) {
+  sigMode = tab;
+  document.getElementById('sig-draw-panel').style.display = tab === 'draw' ? 'block' : 'none';
+  document.getElementById('sig-type-panel').style.display = tab === 'type' ? 'block' : 'none';
+  ['Draw','Type'].forEach(t => {
+    const btn = document.getElementById(`sigTab${t}`);
+    btn.classList.toggle('active', tab === t.toLowerCase());
+  });
+}
+
+function renderTypedSig() {
+  document.getElementById('sig-typed-preview').textContent = document.getElementById('sigTyped').value;
+}
+
+function getSigData() {
+  if (sigMode === 'draw') return hasSig ? sigCanvas.toDataURL('image/png') : null;
+  return document.getElementById('sigTyped').value.trim() || null;
+}
+
+// ── DRAFT SAVE / LOAD ──
+const DRAFT_FIELDS = ['firstName','lastName','middleName','dob','idType','idNumber','email','phone',
+  'curStreet','curCity','curState','curZip','curRent','curDuration',
+  'coFirstName','coLastName','coDob','coRelationship','coEmail','coPhone','coIdType','coIdNumber','coIncome',
+  'empStatus','monthlyIncome','empName','empPosition','empStartDate','empSupervisor','empSupervisorPhone','empAddress',
+  'addlIncomeSource','addlIncomeAmount','otherIncomeDesc','creditScore',
+  'ecName','ecRelationship','ecPhone','ecEmail','ecAddress','printName','sigDate'];
+
+function saveDraft() {
+  const d = { _step: currentStep, _coApp: document.getElementById('hasCoApplicant')?.checked || false };
+  DRAFT_FIELDS.forEach(id => { const el = document.getElementById(id); if (el) d[id] = el.value; });
+  localStorage.setItem('rv_app_draft', JSON.stringify(d));
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem('rv_app_draft');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    DRAFT_FIELDS.forEach(id => { const el = document.getElementById(id); if (el && d[id] != null) el.value = d[id]; });
+    if (d._coApp) { document.getElementById('hasCoApplicant').checked = true; document.getElementById('co-applicant-body').classList.add('open'); }
+    if (d._step && d._step > 1 && confirm(`Resume your saved application from Step ${d._step}?`)) goToStep(parseInt(d._step));
+  } catch(e) { /* fresh start */ }
+}
+
+// ── SUBMIT ──
+async function submitApplication() {
+  clearErrors();
+  let ok = true;
+
+  const allConsents = ['consent1','consent2','consent3','consent4'].every(id => document.getElementById(id).checked);
+  if (!allConsents) { document.getElementById('err-consents').classList.add('show'); ok = false; }
+
+  const sigData = getSigData();
+  if (!sigData) { document.getElementById('err-signature').classList.add('show'); ok = false; }
+
+  if (!gv('printName')) { markError('printName'); ok = false; }
+  if (!gv('sigDate')) { markError('sigDate'); ok = false; }
+
+  if (!ok) { document.querySelector('.error, .field-error.show')?.scrollIntoView({ behavior:'smooth', block:'center' }); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const params = new URLSearchParams(window.location.search);
+  const appId = 'APP-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+
+  // Collect residence history
+  const residence_history = [];
+  for (let i = 1; i <= 3; i++) {
+    const street = document.getElementById(`resStreet_${i}`)?.value;
+    if (street) residence_history.push({
+      street, city: document.getElementById(`resCity_${i}`)?.value,
+      state: document.getElementById(`resState_${i}`)?.value, zip: document.getElementById(`resZip_${i}`)?.value,
+      dates: document.getElementById(`resDates_${i}`)?.value, rent: document.getElementById(`resRent_${i}`)?.value,
+      landlord: document.getElementById(`resLandlord_${i}`)?.value,
+      landlord_phone: document.getElementById(`resLandlordPhone_${i}`)?.value,
+      reason: document.getElementById(`resReason_${i}`)?.value,
+    });
+  }
+
+  // Collect occupants
+  const occupants = [];
+  for (let i = 1; i <= occCount; i++) {
+    const name = document.getElementById(`occName_${i}`)?.value;
+    if (name) occupants.push({ name, age: document.getElementById(`occAge_${i}`)?.value, relationship: document.getElementById(`occRel_${i}`)?.value });
+  }
+
+  // Collect pets
+  const pets = [];
+  for (let i = 1; i <= petCount; i++) {
+    const type = document.getElementById(`petType_${i}`)?.value;
+    if (type) pets.push({ type, name: document.getElementById(`petName_${i}`)?.value, breed: document.getElementById(`petBreed_${i}`)?.value, weight: document.getElementById(`petWeight_${i}`)?.value, age: document.getElementById(`petAge_${i}`)?.value });
+  }
+
+  const appData = {
+    id: appId,
+    property_id: params.get('property') || params.get('listing') || null,
+    status: 'submitted',
+    submitted_at: new Date().toISOString(),
+    first_name: gv('firstName'), last_name: gv('lastName'), middle_name: gv('middleName'),
+    dob: gv('dob'), ssn_last4: gv('ssn').replace(/\D/g,'').slice(-4),
+    id_type: gv('idType'), id_number: gv('idNumber'),
+    email: gv('email'), phone: gv('phone'),
+    current_address: `${gv('curStreet')}, ${gv('curCity')}, ${gv('curState')} ${gv('curZip')}`,
+    current_rent: parseFloat(gv('curRent')) || 0, current_duration: gv('curDuration'),
+    has_co_applicant: document.getElementById('hasCoApplicant').checked,
+    co_first_name: gv('coFirstName'), co_last_name: gv('coLastName'),
+    co_email: gv('coEmail'), co_phone: gv('coPhone'),
+    employment_status: gv('empStatus'), monthly_income: parseFloat(gv('monthlyIncome')) || 0,
+    employer_name: gv('empName'), employer_position: gv('empPosition'),
+    employer_start_date: gv('empStartDate'), employer_supervisor: gv('empSupervisor'),
+    additional_income_source: gv('addlIncomeSource'), additional_income_amount: parseFloat(gv('addlIncomeAmount')) || 0,
+    credit_score_range: gv('creditScore'),
+    has_bankruptcy: getRadio('bankruptcy') === 'yes', bankruptcy_type: gv('bankruptcyType'),
+    has_eviction: getRadio('eviction') === 'yes', eviction_details: gv('evictionExplain'),
+    has_judgment: getRadio('judgment') === 'yes', judgment_details: gv('judgmentExplain'),
+    has_felony: getRadio('felony') === 'yes', felony_offense: gv('felonyOffense'), felony_year: gv('felonyYear'),
+    has_misdemeanor: getRadio('misdemeanor') === 'yes', misdem_offense: gv('misdemOffense'),
+    has_sex_offender: getRadio('sexOffender') === 'yes',
+    emergency_contact_name: gv('ecName'), emergency_contact_relationship: gv('ecRelationship'),
+    emergency_contact_phone: gv('ecPhone'), emergency_contact_email: gv('ecEmail'),
+    residence_history: JSON.stringify(residence_history),
+    occupants: JSON.stringify(occupants),
+    pets: JSON.stringify(pets),
+    signature_type: sigMode,
+    signature_data: sigMode === 'type' ? gv('sigTyped') : 'drawn_signature',
+    print_name: gv('printName'), signed_at: gv('sigDate'),
+  };
+
+  let saved = false;
+  try {
+    const sb = await getSupabase();
+    if (sb) {
+      const { error } = await sb.from('rental_applications').insert([appData]);
+      if (!error) saved = true;
+      else console.warn('Supabase insert error:', error.message);
+    }
+  } catch(e) { console.warn('Supabase unavailable, using localStorage fallback'); }
+
+  if (!saved) {
+    const list = JSON.parse(localStorage.getItem('rv_applications') || '[]');
+    list.push(appData);
+    localStorage.setItem('rv_applications', JSON.stringify(list));
+    saved = true;
+  }
+
+  if (saved) {
+    localStorage.removeItem('rv_app_draft');
+
+    // ── Fire confirmation emails ─────────────────────────────────────────
+    if (typeof RVEmail !== 'undefined') {
+      const emailData = {
+        appId,
+        tenantName: `${appData.first_name} ${appData.last_name}`.trim(),
+        tenantEmail: appData.email,
+        tenantPhone: appData.phone,
+        propertyAddress: document.getElementById('prop-name')?.textContent || '',
+        monthlyIncome: appData.monthly_income,
+        employmentStatus: appData.employment_status,
+      };
+      // Tenant confirmation
+      if (appData.email) RVEmail.applicationReceived(appData.email, emailData).catch(()=>{});
+      // Landlord alert — get landlord email from localStorage or workspace
+      const landlordEmail = localStorage.getItem('rv_user_email') || localStorage.getItem('rv_landlord_email');
+      if (landlordEmail) RVEmail.alertLandlord(landlordEmail, emailData).catch(()=>{});
+    }
+
+    for (let i = 1; i <= TOTAL_STEPS; i++) { const el = document.getElementById(`section-${i}`); if (el) el.style.display = 'none'; }
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('app-id-display').textContent = appId;
+    document.getElementById('success-screen').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    btn.disabled = false; btn.textContent = 'Submit Application →';
+    alert('Something went wrong. Please try again.');
+  }
+}
+
+// ── AI ID SCAN (Task 2.5) ────────────────────────────────────────────────────
+async function aiScanID(input) {
+  const file = input.files[0];
+  if (!file || typeof HFOCR === 'undefined') return;
+
+  const badge = document.getElementById('idScanBadge');
+  badge.style.display = 'inline';
+  badge.style.color = '#0369a1';
+  badge.textContent = '🤖 Scanning ID…';
+
+  try {
+    const result = await HFOCR.readImage(file);
+    if (!result) { badge.style.color = '#dc2626'; badge.textContent = '⚠️ Could not read ID'; return; }
+
+    // Extract ID number — look for license/passport number patterns
+    const idMatch = result.match(/(?:DL|ID|No\.?|#)\s*[:\.]?\s*([A-Z0-9]{6,12})/i)
+                 || result.match(/\b([A-Z]{1,2}\d{6,9})\b/)
+                 || result.match(/\b(\d{8,9})\b/);
+    if (idMatch) {
+      const idField = document.getElementById('idNumber');
+      if (idField && !idField.value) idField.value = idMatch[1];
+    }
+
+    // Extract DOB pattern
+    const dobMatch = result.match(/(?:DOB|Born|Birth)\s*[:\.]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i)
+                  || result.match(/\b(\d{2}[\/\-]\d{2}[\/\-]\d{4})\b/);
+    if (dobMatch) {
+      const dobField = document.getElementById('dob');
+      if (dobField && !dobField.value) {
+        // Convert MM/DD/YYYY to YYYY-MM-DD for date input
+        const parts = dobMatch[1].split(/[\/\-]/);
+        if (parts.length === 3 && parts[2].length === 4) {
+          dobField.value = `${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`;
+        }
+      }
+    }
+
+    badge.style.color = '#166534';
+    badge.textContent = '✅ ID scanned — review fields above';
+  } catch(e) {
+    badge.style.color = '#dc2626';
+    badge.textContent = '⚠️ Scan failed — please fill in manually';
+  }
+}
+
+// ── AI PAY STUB SCAN (Task 2.5) ──────────────────────────────────────────────
+async function aiScanPayStub(input) {
+  const file = input.files[0];
+  if (!file || typeof HFOCR === 'undefined') return;
+
+  const badge = document.getElementById('payStubBadge');
+  badge.style.display = 'inline';
+  badge.style.color = '#166534';
+  badge.textContent = '🤖 Reading pay stub…';
+
+  try {
+    const result = await HFOCR.readPaymentScreenshot(file);
+    let filled = [];
+
+    // Auto-fill monthly income
+    if (result.amount) {
+      const incomeField = document.getElementById('monthlyIncome');
+      if (incomeField && !incomeField.value) {
+        incomeField.value = result.amount;
+        filled.push('income');
+      }
+    }
+
+    // Try to extract employer name from raw OCR text
+    if (result.text) {
+      const empMatch = result.text.match(/(?:employer|company|from|pay to)\s*[:\.]?\s*([A-Z][A-Za-z\s&,\.]{3,40})/i);
+      if (empMatch) {
+        const empField = document.getElementById('empName');
+        if (empField && !empField.value) {
+          empField.value = empMatch[1].trim();
+          filled.push('employer');
+        }
+      }
+
+      // Extract pay period / start date
+      const dateMatch = result.text.match(/(?:period|date|pay date)\s*[:\.]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i);
+      if (dateMatch) {
+        const startField = document.getElementById('empStartDate');
+        if (startField && !startField.value) {
+          const parts = dateMatch[1].split(/[\/\-]/);
+          if (parts.length === 3 && parts[2].length === 4) {
+            startField.value = `${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`;
+          }
+        }
+      }
+    }
+
+    if (filled.length > 0) {
+      badge.style.color = '#166534';
+      badge.textContent = `✅ Auto-filled: ${filled.join(', ')} — please verify`;
+    } else {
+      badge.style.color = '#d97706';
+      badge.textContent = '⚠️ Scanned but couldn\'t extract data — fill in manually';
+    }
+  } catch(e) {
+    badge.style.color = '#dc2626';
+    badge.textContent = '⚠️ Scan failed — please fill in manually';
+  }
+}
+</script>
+</body>
+</html>

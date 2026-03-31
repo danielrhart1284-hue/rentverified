@@ -226,6 +226,46 @@
       .mgmt-toggle-row { flex-direction: column; }
     }
 
+    /* ── Applications Tab ── */
+    .app-filter-btn {
+      padding: 5px 14px; border-radius: 99px; font-size: .82rem; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: white; color: var(--gray-600); cursor: pointer; transition: all .15s;
+    }
+    .app-filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .app-filter-btn.active { background: var(--primary); border-color: var(--primary); color: #121212; }
+    .app-card {
+      display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--gray-100); transition: background .15s; flex-wrap: wrap;
+    }
+    .app-card:last-child { border-bottom: none; }
+    .app-card:hover { background: var(--gray-100); }
+    .app-avatar {
+      width: 42px; height: 42px; border-radius: 50%; background: var(--primary);
+      color: #121212; font-weight: 800; font-size: .9rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .app-info { flex: 1; min-width: 160px; }
+    .app-info .name { font-weight: 700; font-size: .95rem; }
+    .app-info .sub { font-size: .8rem; color: var(--gray-600); margin-top: 1px; }
+    .app-flags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .app-flag { padding: 2px 8px; border-radius: 99px; font-size: .72rem; font-weight: 700; }
+    .flag-warn { background: #fef3c7; color: #92400e; }
+    .flag-ok { background: #d1fae5; color: #065f46; }
+    .flag-bad { background: #fee2e2; color: #991b1b; }
+    .app-status { padding: 3px 10px; border-radius: 99px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+    .status-submitted { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-declined { background: #fee2e2; color: #991b1b; }
+    .app-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+    /* Modal detail sections */
+    .amod-section { margin-bottom: 1.25rem; }
+    .amod-section-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--gray-600); margin-bottom: .5rem; padding-bottom: .35rem; border-bottom: 1px solid var(--gray-200); }
+    .amod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .5rem; }
+    .amod-field { background: var(--gray-100); border-radius: 6px; padding: .4rem .6rem; }
+    .amod-field .lbl { font-size: .7rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: .04em; }
+    .amod-field .val { font-size: .875rem; font-weight: 500; margin-top: 1px; }
+    .amod-flag-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
+
     /* Collapsible sidebar groups */
     .sidebar-group { margin-bottom: 0.25rem; }
     .sidebar-group-label {
@@ -1003,6 +1043,11 @@
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
               Accounts
             </div>
+            <div class="dash-link" onclick="dashTab('applications')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              Applications
+              <span id="apps-badge" style="margin-left:auto;background:var(--danger);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;display:none;">0</span>
+            </div>
             <a href="screening.html" class="dash-link" style="color:var(--gray-400);">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
               Screening
@@ -1756,6 +1801,119 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS TAB -->
+      <div id="dtab-applications" class="tab-content">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+          <div>
+            <h1>Applications</h1>
+            <p>Review, approve, or decline rental applications submitted through your listing links.</p>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <button class="btn btn-outline btn-sm" onclick="loadApplications()">↻ Refresh</button>
+            <a href="tenant-application.html" target="_blank" class="btn btn-primary btn-sm">+ New Application Link</a>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+          <button class="app-filter-btn active" onclick="filterApps('all',this)">All</button>
+          <button class="app-filter-btn" onclick="filterApps('submitted',this)">⏳ Pending</button>
+          <button class="app-filter-btn" onclick="filterApps('approved',this)">✅ Approved</button>
+          <button class="app-filter-btn" onclick="filterApps('declined',this)">❌ Declined</button>
+        </div>
+
+        <!-- Applications List -->
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div id="apps-list-body">
+              <div style="text-align:center;padding:3rem;color:var(--gray-500);">
+                <div style="font-size:2.5rem;margin-bottom:.75rem;">📋</div>
+                <div style="font-weight:700;margin-bottom:.25rem;">No applications yet</div>
+                <div style="font-size:.875rem;">Share your listing link to start receiving applications.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPLICATION DETAIL MODAL -->
+      <div id="app-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;overflow-y:auto;padding:2rem 1rem;" onclick="if(event.target===this)closeAppModal()">
+        <div style="background:white;border-radius:16px;max-width:780px;margin:0 auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <!-- Modal Header -->
+          <div style="background:var(--dark);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="color:white;font-weight:800;font-size:1.1rem;" id="amod-name">Applicant Name</div>
+              <div style="color:var(--gray-400);font-size:.8rem;margin-top:2px;" id="amod-id">APP-2026-XXXX</div>
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:center;">
+              <span id="amod-status-badge" style="padding:3px 12px;border-radius:99px;font-size:.78rem;font-weight:700;background:#fef3c7;color:#92400e;">Pending</span>
+              <button onclick="closeAppModal()" style="background:rgba(255,255,255,.1);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;">✕</button>
+            </div>
+          </div>
+
+          <!-- Modal Body -->
+          <div style="padding:1.5rem;" id="amod-body">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Modal Footer: Approve / Decline / Generate Lease -->
+          <div id="amod-actions" style="padding:1.25rem 1.5rem;border-top:1px solid var(--gray-200);display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="closeAppModal()">Close</button>
+            <div id="amod-decide-btns">
+              <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;" onclick="openDeclineModal()">❌ Decline</button>
+              <button class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;margin-left:.5rem;" onclick="openApproveModal()">✅ Approve</button>
+            </div>
+            <a id="amod-lease-btn" href="#" target="_blank" class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none;text-decoration:none;display:none;">📝 Generate Lease</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROVE MODAL -->
+      <div id="approve-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9100;display:none;align-items:center;justify-content:center;" onclick="if(event.target===this)closeApproveModal()">
+        <div style="background:white;border-radius:12px;width:100%;max-width:440px;padding:1.75rem;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <h3 style="font-weight:800;margin-bottom:.25rem;">✅ Approve Application</h3>
+          <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1.25rem;">The applicant will be notified. You can add optional notes.</p>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:5px;">Notes (optional)</label>
+            <textarea id="approve-notes" rows="3" style="width:100%;padding:.6rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-family:inherit;font-size:.9rem;box-sizing:border-box;" placeholder="e.g. Lease start date Jan 1. Will send lease documents shortly."></textarea>
+          </div>
+          <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+            <button class="btn btn-outline btn-sm" onclick="closeApproveModal()">Cancel</button>
+            <button class="btn btn-sm" style="background:#10b981;color:white;border:none;font-weight:700;" onclick="submitDecision('approved')">Confirm Approval</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DECLINE MODAL -->
+      <div id="decline-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9100;align-items:center;justify-content:center;" onclick="if(event.target===this)closeDeclineModal()">
+        <div style="background:white;border-radius:12px;width:100%;max-width:440px;padding:1.75rem;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <h3 style="font-weight:800;margin-bottom:.25rem;">❌ Decline Application</h3>
+          <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1.25rem;">The applicant will be notified. Please select a reason.</p>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:5px;">Reason <span style="color:var(--danger)">*</span></label>
+            <select id="decline-reason" style="width:100%;padding:.6rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-family:inherit;font-size:.9rem;">
+              <option value="">Select reason…</option>
+              <option>Income does not meet requirements</option>
+              <option>Credit history</option>
+              <option>Rental history / prior eviction</option>
+              <option>Criminal background</option>
+              <option>Unit no longer available</option>
+              <option>Another applicant was selected</option>
+              <option>Incomplete application</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:5px;">Additional Notes (optional)</label>
+            <textarea id="decline-notes" rows="2" style="width:100%;padding:.6rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-family:inherit;font-size:.9rem;box-sizing:border-box;" placeholder="Optional details…"></textarea>
+          </div>
+          <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+            <button class="btn btn-outline btn-sm" onclick="closeDeclineModal()">Cancel</button>
+            <button class="btn btn-sm" style="background:#ef4444;color:white;border:none;font-weight:700;" onclick="submitDecision('declined')">Confirm Decline</button>
           </div>
         </div>
       </div>
@@ -4290,6 +4448,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     if (name === 'properties') renderPropertiesList();
     if (name === 'clients') { renderAllClientsList(); clearClientSelection(); }
     if (name === 'contractors') renderContractorList();
+    if (name === 'applications') loadApplications();
   }
 
   // ── All clients (admin: each person's data/listings) ──────────────────
@@ -7054,6 +7213,354 @@ dashTab = function(name) {
 
     // Hide tile if no data yet (but show it since it's a feature promotion)
   });
+
+  // ═══════════════════════════════════════════════
+  // APPLICATIONS — Load, Render, Review, Decide
+  // ═══════════════════════════════════════════════
+  var _allApps = [];
+  var _activeFilter = 'all';
+  var _reviewingApp = null;
+
+  function generateLeaseUrl(app) {
+    var params = new URLSearchParams({
+      appId:    app.id || '',
+      tenant:   ((app.first_name||'') + ' ' + (app.last_name||'')).trim(),
+      email:    app.email || '',
+      phone:    app.phone || '',
+      co:       app.has_co_applicant ? ((app.co_first_name||'') + ' ' + (app.co_last_name||'')).trim() : '',
+      property: app.property_id || '',
+      pets:     app.pets && app.pets !== '[]' ? 'yes' : 'no',
+    });
+    return 'leases.html?' + params.toString();
+  }
+
+  async function loadApplications() {
+    var body = document.getElementById('apps-list-body');
+    if (!body) return;
+    body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray-500);font-size:.875rem;">Loading…</div>';
+
+    var apps = [];
+    try {
+      var sb = await getSupabase();
+      if (sb) {
+        var res = await sb.from('rental_applications').select('*').order('submitted_at', { ascending: false });
+        if (res.data && res.data.length) apps = res.data;
+      }
+    } catch(e) {}
+
+    // Fallback: localStorage
+    if (!apps.length) {
+      try { apps = JSON.parse(localStorage.getItem('rv_applications') || '[]'); } catch(e) { apps = []; }
+    }
+
+    _allApps = apps;
+    updateAppsBadge();
+    renderAppsList(_activeFilter);
+  }
+
+  function updateAppsBadge() {
+    var pending = _allApps.filter(function(a){ return a.status === 'submitted'; }).length;
+    var badge = document.getElementById('apps-badge');
+    if (!badge) return;
+    if (pending > 0) { badge.textContent = pending; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  }
+
+  function filterApps(status, btn) {
+    _activeFilter = status;
+    document.querySelectorAll('.app-filter-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    renderAppsList(status);
+  }
+
+  function renderAppsList(filter) {
+    var body = document.getElementById('apps-list-body');
+    if (!body) return;
+    var list = filter === 'all' ? _allApps : _allApps.filter(function(a){ return a.status === filter; });
+
+    if (!list.length) {
+      var msg = filter === 'all' ? 'No applications yet. Share your listing link to start receiving applications.' : 'No ' + filter + ' applications.';
+      body.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray-500);"><div style="font-size:2.5rem;margin-bottom:.75rem;">📋</div><div style="font-weight:700;margin-bottom:.25rem;">' + (filter === 'all' ? 'No applications yet' : 'Nothing here') + '</div><div style="font-size:.875rem;">' + msg + '</div></div>';
+      return;
+    }
+
+    body.innerHTML = list.map(function(app) {
+      var initials = ((app.first_name||'?')[0] + (app.last_name||'?')[0]).toUpperCase();
+      var name = (app.first_name||'') + ' ' + (app.last_name||'');
+      var date = app.submitted_at ? new Date(app.submitted_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
+      var income = app.monthly_income ? '$' + Number(app.monthly_income).toLocaleString() + '/mo' : '—';
+      var emp = app.employment_status || '—';
+      var propId = app.property_id ? (' · ' + app.property_id) : '';
+
+      // Flags
+      var flags = '';
+      if (app.has_eviction) flags += '<span class="app-flag flag-bad">⚠ Eviction</span>';
+      if (app.has_bankruptcy) flags += '<span class="app-flag flag-warn">⚠ Bankruptcy</span>';
+      if (app.has_felony) flags += '<span class="app-flag flag-bad">⚠ Felony</span>';
+      if (app.has_judgment) flags += '<span class="app-flag flag-warn">⚠ Judgment</span>';
+      if (!app.has_eviction && !app.has_bankruptcy && !app.has_felony) flags += '<span class="app-flag flag-ok">✓ Clean</span>';
+
+      var statusClass = 'status-' + (app.status || 'submitted');
+      var statusLabel = app.status === 'approved' ? '✅ Approved' : app.status === 'declined' ? '❌ Declined' : '⏳ Pending';
+      var canDecide = (app.status === 'submitted' || app.status === 'pending');
+
+      return '<div class="app-card">' +
+        '<div class="app-avatar">' + initials + '</div>' +
+        '<div class="app-info">' +
+          '<div class="name">' + name + '</div>' +
+          '<div class="sub">' + date + propId + ' · ' + emp + ' · ' + income + '</div>' +
+        '</div>' +
+        '<div class="app-flags">' + flags + '</div>' +
+        '<span class="app-status ' + statusClass + '">' + statusLabel + '</span>' +
+        '<div class="app-actions">' +
+          '<button class="btn btn-outline btn-sm" onclick="openAppModal(' + JSON.stringify(JSON.stringify(app)) + ')">View</button>' +
+          (canDecide ? '<button class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;" onclick=\'openAppModalAndApprove(' + JSON.stringify(JSON.stringify(app)) + ')\'>✅</button>' : '') +
+          (canDecide ? '<button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;" onclick=\'openAppModalAndDecline(' + JSON.stringify(JSON.stringify(app)) + ')\'>❌</button>' : '') +
+          (app.status === 'approved' && !app.lease_id ? '<a href="' + generateLeaseUrl(app) + '" class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none;text-decoration:none;">📝 Lease</a>' : '') +
+          (app.lease_id ? '<span class="app-flag flag-ok" style="align-self:center;">📋 Lease Created</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openAppModal(appJson) {
+    var app = typeof appJson === 'string' ? JSON.parse(appJson) : appJson;
+    _reviewingApp = app;
+
+    document.getElementById('amod-name').textContent = (app.first_name||'') + ' ' + (app.last_name||'');
+    document.getElementById('amod-id').textContent = app.id || '';
+
+    var sb = document.getElementById('amod-status-badge');
+    if (app.status === 'approved') { sb.textContent = '✅ Approved'; sb.style.background='#d1fae5'; sb.style.color='#065f46'; }
+    else if (app.status === 'declined') { sb.textContent = '❌ Declined'; sb.style.background='#fee2e2'; sb.style.color='#991b1b'; }
+    else { sb.textContent = '⏳ Pending Review'; sb.style.background='#fef3c7'; sb.style.color='#92400e'; }
+
+    var canDecide = (app.status === 'submitted' || !app.status);
+    var footer = document.getElementById('amod-actions');
+    if (footer) footer.style.display = 'flex';
+    var decideDiv = document.getElementById('amod-decide-btns');
+    if (decideDiv) decideDiv.style.display = canDecide ? 'flex' : 'none';
+    var leaseBtn = document.getElementById('amod-lease-btn');
+    if (leaseBtn) {
+      if (app.status === 'approved') {
+        leaseBtn.href = generateLeaseUrl(app);
+        leaseBtn.style.display = '';
+      } else {
+        leaseBtn.style.display = 'none';
+      }
+    }
+
+    // Build detail body
+    var h = '';
+    function field(lbl, val) { return '<div class="amod-field"><div class="lbl">'+lbl+'</div><div class="val">'+(val||'—')+'</div></div>'; }
+    function section(title, content) { return '<div class="amod-section"><div class="amod-section-title">'+title+'</div>'+content+'</div>'; }
+    function grid(fields) { return '<div class="amod-grid">'+fields+'</div>'; }
+    function yn(val, label) { return val ? '<span class="app-flag flag-bad">⚠ '+label+'</span>' : '<span class="app-flag flag-ok">✓ No '+label+'</span>'; }
+
+    // Parse JSON fields
+    var resHistory = [], occupants = [], pets = [];
+    try { resHistory = typeof app.residence_history === 'string' ? JSON.parse(app.residence_history) : (app.residence_history||[]); } catch(e){}
+    try { occupants = typeof app.occupants === 'string' ? JSON.parse(app.occupants) : (app.occupants||[]); } catch(e){}
+    try { pets = typeof app.pets === 'string' ? JSON.parse(app.pets) : (app.pets||[]); } catch(e){}
+
+    h += section('👤 Primary Applicant',
+      grid(
+        field('Full Name', (app.first_name||'')+' '+(app.middle_name||'')+' '+(app.last_name||'')) +
+        field('Date of Birth', app.dob) +
+        field('SSN (last 4)', app.ssn_last4 ? '•••-••-'+app.ssn_last4 : '—') +
+        field('ID Type', app.id_type) +
+        field('ID Number', app.id_number) +
+        field('Email', app.email) +
+        field('Phone', app.phone) +
+        field('Current Address', app.current_address) +
+        field('Current Rent', app.current_rent ? '$'+Number(app.current_rent).toLocaleString() : '—') +
+        field('Duration at Address', app.current_duration)
+      )
+    );
+
+    if (app.has_co_applicant) {
+      h += section('👥 Co-Applicant',
+        grid(field('Name', (app.co_first_name||'')+ ' '+(app.co_last_name||'')) + field('Email', app.co_email) + field('Phone', app.co_phone))
+      );
+    }
+
+    if (resHistory.length) {
+      var rhHtml = resHistory.map(function(r,i) {
+        return '<div style="background:var(--gray-100);border-radius:6px;padding:.6rem .75rem;margin-bottom:.4rem;">' +
+          '<div style="font-weight:700;font-size:.82rem;">'+(r.street||'—')+', '+(r.city||'')+' '+(r.state||'')+' '+(r.zip||'')+'</div>' +
+          '<div style="font-size:.78rem;color:var(--gray-600);">'+(r.dates||'')+(r.rent?' · $'+r.rent+'/mo':'')+' · '+( r.reason||'')+'</div>' +
+          '<div style="font-size:.78rem;color:var(--gray-600);">Landlord: '+(r.landlord||'—')+(r.landlord_phone?' · '+r.landlord_phone:'')+'</div>' +
+        '</div>';
+      }).join('');
+      h += section('🏘️ Rental History', rhHtml);
+    }
+
+    h += section('💼 Employment & Income',
+      grid(
+        field('Status', app.employment_status) +
+        field('Monthly Income', app.monthly_income ? '$'+Number(app.monthly_income).toLocaleString() : '—') +
+        field('Employer', app.employer_name) +
+        field('Position', app.employer_position) +
+        field('Start Date', app.employer_start_date) +
+        field('Supervisor', app.employer_supervisor) +
+        field('Add\'l Income', app.additional_income_source ? app.additional_income_source + (app.additional_income_amount ? ' · $'+app.additional_income_amount+'/mo':'') : '—')
+      )
+    );
+
+    if (occupants.length) {
+      var occHtml = occupants.map(function(o){ return '<span class="app-flag flag-ok">'+o.name+(o.age?' ('+o.age+')':'')+' — '+(o.relationship||'')+'</span>'; }).join(' ');
+      h += section('👨‍👩‍👧 Occupants', '<div class="amod-flag-row">'+occHtml+'</div>');
+    }
+    if (pets.length) {
+      var petHtml = pets.map(function(p){ return '<span class="app-flag flag-warn">🐾 '+p.name+' ('+p.type+(p.breed?', '+p.breed:'')+(p.weight?', '+p.weight+'lbs':'')+')</span>'; }).join(' ');
+      h += section('🐾 Pets', '<div class="amod-flag-row">'+petHtml+'</div>');
+    }
+
+    h += section('💳 Financial Background',
+      '<div class="amod-flag-row">' +
+        yn(app.has_bankruptcy, 'Bankruptcy') +
+        yn(app.has_eviction, 'Eviction') +
+        yn(app.has_judgment, 'Judgment') +
+      '</div>' +
+      (app.credit_score_range ? '<div style="margin-top:.5rem;font-size:.875rem;">Credit Score: <strong>'+app.credit_score_range+'</strong></div>' : '')
+    );
+
+    h += section('⚖️ Criminal Disclosure',
+      '<div class="amod-flag-row">' +
+        yn(app.has_felony, 'Felony') + (app.felony_offense ? ' <em style="font-size:.78rem;color:var(--gray-600);">'+app.felony_offense+' ('+app.felony_year+')</em>' : '') +
+        yn(app.has_misdemeanor, 'Misdemeanor') +
+        yn(app.has_sex_offender, 'Sex Offender Registry') +
+      '</div>'
+    );
+
+    h += section('🆘 Emergency Contact',
+      grid(
+        field('Name', app.emergency_contact_name) +
+        field('Relationship', app.emergency_contact_relationship) +
+        field('Phone', app.emergency_contact_phone) +
+        field('Email', app.emergency_contact_email)
+      )
+    );
+
+    h += section('✍️ Signature',
+      grid(
+        field('Print Name', app.print_name) +
+        field('Signed', app.signed_at) +
+        field('Method', app.signature_type) +
+        field('Submitted', app.submitted_at ? new Date(app.submitted_at).toLocaleString() : '—')
+      )
+    );
+
+    if (app.decision_notes) {
+      h += section('📝 Decision Notes', '<div style="background:var(--gray-100);border-radius:6px;padding:.75rem;font-size:.875rem;">'+app.decision_notes+'</div>');
+    }
+
+    document.getElementById('amod-body').innerHTML = h;
+    document.getElementById('app-modal-overlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function openAppModalAndApprove(appJson) { openAppModal(appJson); setTimeout(openApproveModal, 100); }
+  function openAppModalAndDecline(appJson) { openAppModal(appJson); setTimeout(openDeclineModal, 100); }
+
+  function closeAppModal() {
+    document.getElementById('app-modal-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function openApproveModal() {
+    document.getElementById('approve-modal-overlay').style.display = 'flex';
+  }
+  function closeApproveModal() {
+    document.getElementById('approve-modal-overlay').style.display = 'none';
+    document.getElementById('approve-notes').value = '';
+  }
+
+  function openDeclineModal() {
+    document.getElementById('decline-modal-overlay').style.display = 'flex';
+  }
+  function closeDeclineModal() {
+    document.getElementById('decline-modal-overlay').style.display = 'none';
+    document.getElementById('decline-reason').value = '';
+    document.getElementById('decline-notes').value = '';
+  }
+
+  async function submitDecision(decision) {
+    if (!_reviewingApp) return;
+    if (decision === 'declined') {
+      var reason = document.getElementById('decline-reason').value;
+      if (!reason) { alert('Please select a reason for declining.'); return; }
+    }
+
+    var notes = decision === 'approved'
+      ? document.getElementById('approve-notes').value
+      : document.getElementById('decline-reason').value + (document.getElementById('decline-notes').value ? '\n' + document.getElementById('decline-notes').value : '');
+
+    var updates = {
+      status: decision,
+      decision: decision,
+      decision_notes: notes,
+      reviewed_at: new Date().toISOString()
+    };
+
+    var saved = false;
+    try {
+      var sb = await getSupabase();
+      if (sb) {
+        var res = await sb.from('rental_applications').update(updates).eq('id', _reviewingApp.id);
+        if (!res.error) saved = true;
+      }
+    } catch(e) {}
+
+    if (!saved) {
+      // localStorage fallback
+      try {
+        var apps = JSON.parse(localStorage.getItem('rv_applications') || '[]');
+        apps = apps.map(function(a) { return a.id === _reviewingApp.id ? Object.assign({}, a, updates) : a; });
+        localStorage.setItem('rv_applications', JSON.stringify(apps));
+        saved = true;
+      } catch(e) {}
+    }
+
+    if (saved) {
+      closeApproveModal(); closeDeclineModal(); closeAppModal();
+      loadApplications();
+      if (decision === 'approved' && _reviewingApp) {
+        // Show prominent toast with Generate Lease link
+        var leaseUrl = generateLeaseUrl(_reviewingApp);
+        var toastHtml = '✅ Application approved! &nbsp;<a href="' + leaseUrl + '" style="color:#fbbf24;font-weight:700;text-decoration:underline;">📝 Generate Lease →</a>';
+        var toastEl = document.getElementById('rv-toast') || document.createElement('div');
+        toastEl.id = 'rv-toast';
+        toastEl.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:.75rem 1.5rem;border-radius:99px;font-size:.9rem;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.4);white-space:nowrap;';
+        toastEl.innerHTML = toastHtml;
+        document.body.appendChild(toastEl);
+        setTimeout(function(){ if (toastEl.parentNode) toastEl.parentNode.removeChild(toastEl); }, 6000);
+      } else {
+        var msg = '❌ Application declined.';
+        if (typeof showToast === 'function') showToast(msg); else alert(msg);
+      }
+    } else {
+      alert('Something went wrong. Please try again.');
+    }
+  }
+
+  // Load badge count on dashboard open
+  (async function initAppsBadge() {
+    try {
+      var apps = [];
+      var sb = await getSupabase();
+      if (sb) {
+        var res = await sb.from('rental_applications').select('id,status').eq('status','submitted');
+        if (res.data) apps = res.data;
+      }
+      if (!apps.length) {
+        try { apps = (JSON.parse(localStorage.getItem('rv_applications')||'[]')).filter(function(a){return a.status==='submitted'||!a.status;}); } catch(e){}
+      }
+      var badge = document.getElementById('apps-badge');
+      if (badge && apps.length) { badge.textContent = apps.length; badge.style.display = ''; }
+    } catch(e) {}
+  })();
+
 </script>
 <script src="recommended-supplies.js" data-industry="property_management"></script>
 <script src="business-advisor.js" data-industry="property_management"></script>

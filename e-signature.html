@@ -92,6 +92,34 @@
     <button class="esig-tab" onclick="switchEsigTab('saved')">Saved Signatures</button>
   </div>
 
+  <!-- LEASE CONTEXT BANNER (shown when opened from leases.html) -->
+  <div id="lease-context-banner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:.9rem 1.25rem;margin-bottom:1.5rem;align-items:center;gap:.75rem;">
+    <span style="font-size:1.5rem;">📄</span>
+    <div>
+      <div style="font-weight:800;font-size:.95rem;color:#166534;" id="lcb-title">Lease Agreement — Sign Below</div>
+      <div style="font-size:.82rem;color:#166534;margin-top:2px;" id="lcb-sub">Review and sign your lease agreement below. This is legally binding.</div>
+    </div>
+  </div>
+
+  <!-- SUCCESS SCREEN (shown after signing) -->
+  <div id="sign-success-screen" style="display:none;text-align:center;padding:3rem 2rem;">
+    <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+    <h2 style="font-size:1.75rem;font-weight:800;margin-bottom:.75rem;">Document Signed!</h2>
+    <p style="color:#6b7280;max-width:460px;margin:0 auto 1.25rem;" id="success-msg">Your signature has been recorded.</p>
+    <div style="display:inline-block;padding:.5rem 1.5rem;background:#d1fae5;border:2px solid #86efac;border-radius:99px;font-size:.9rem;font-weight:700;color:#065f46;margin-bottom:2rem;" id="success-doc-id"></div>
+    <div id="portal-activation-block" style="display:none;background:white;border:2px solid #00E676;border-radius:12px;padding:1.5rem;max-width:440px;margin:0 auto 2rem;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🏠</div>
+      <h3 style="font-weight:800;margin-bottom:.25rem;">Your Tenant Portal is Ready!</h3>
+      <p style="font-size:.875rem;color:#6b7280;margin-bottom:1rem;">Your account has been set up. Click below to access your portal and start paying rent, submitting maintenance requests, and more.</p>
+      <a id="portal-link" href="tenant-portal.html" class="btn btn-primary" style="display:inline-block;text-decoration:none;padding:.75rem 2rem;font-weight:700;">Open My Portal →</a>
+      <p style="font-size:.75rem;color:#9ca3af;margin-top:.75rem;">Bookmark this link for easy access.</p>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="leases.html" class="btn btn-outline" style="text-decoration:none;">← Back to Leases</a>
+      <button class="btn-sig outline" onclick="location.href='e-signature.html'">Sign Another Document</button>
+    </div>
+  </div>
+
   <!-- SIGN PANEL -->
   <div class="esig-panel active" id="panel-sign">
     <div class="esig-card">
@@ -314,7 +342,32 @@ function signDocument() {
   docs.unshift(doc);
   localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
 
-  alert('Document signed successfully!\nDocument: ' + title + '\nSigned by: ' + doc.signer + '\nHash: ' + doc.hash);
+  // Run post-sign activation (mark lease signed + tenant portal)
+  activateAfterSign(doc);
+
+  // Show success screen instead of alert
+  document.querySelector('.esig-tabs').style.display = 'none';
+  document.querySelectorAll('.esig-panel').forEach(function(p) { p.style.display = 'none'; });
+  document.getElementById('lease-context-banner').style.display = 'none';
+
+  var successEl = document.getElementById('sign-success-screen');
+  successEl.style.display = 'block';
+
+  var ctx = window._leaseSignContext;
+  var msgEl = document.getElementById('success-msg');
+  if (msgEl) {
+    if (ctx && ctx.role === 'tenant') {
+      msgEl.textContent = 'Your lease for ' + (ctx.prop || 'your unit') + ' is signed. A copy has been saved to your documents.';
+    } else if (ctx && ctx.role === 'landlord') {
+      msgEl.textContent = 'Landlord signature recorded for ' + (ctx.tenant || 'tenant') + '. The lease is now fully executed.';
+    } else {
+      msgEl.textContent = 'Document "' + title + '" has been signed by ' + doc.signer + '.';
+    }
+  }
+
+  var docIdEl = document.getElementById('success-doc-id');
+  if (docIdEl) docIdEl.textContent = '🔐 Document ID: ' + doc.id + ' · Hash: ' + doc.hash;
+
   resetSignForm();
   renderDocs();
 }
@@ -399,11 +452,109 @@ function switchEsigTab(tab) {
   if (tab === 'saved') renderSavedSigs();
 }
 
-// Init
+// ── URL PARAM PREFILL (from leases.html) ──────────────
+function prefillFromLease() {
+  var p = new URLSearchParams(window.location.search);
+  var leaseId = p.get('leaseId');
+  if (!leaseId) return;
+
+  var tenant = p.get('tenant') || '';
+  var email  = p.get('email')  || '';
+  var prop   = p.get('prop')   || '';
+  var rent   = p.get('rent')   || '';
+  var start  = p.get('start')  || '';
+  var end    = p.get('end')    || '';
+  var role   = p.get('role')   || 'tenant';
+
+  // Pre-fill form fields
+  var docTitle = 'Lease Agreement — ' + prop + (tenant ? ' (' + tenant + ')' : '');
+  var el = function(id) { return document.getElementById(id); };
+  if (el('docTitle'))    el('docTitle').value    = docTitle;
+  if (el('docType'))     el('docType').value     = 'Lease Agreement';
+  if (el('signerName'))  el('signerName').value  = role === 'landlord' ? 'Landlord / Property Manager' : tenant;
+  if (el('signerEmail')) el('signerEmail').value = email;
+
+  // Show context banner
+  var banner = el('lease-context-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    var title = el('lcb-title');
+    var sub   = el('lcb-sub');
+    if (title) title.textContent = (role === 'landlord' ? 'Landlord Signature — ' : 'Tenant Signature — ') + prop;
+    if (sub)   sub.textContent   = tenant + ' · $' + rent + '/mo · ' + start + ' – ' + end +
+      (role === 'landlord' ? ' · Signing as Landlord/Property Manager' : ' · Please review and sign below. This is legally binding.');
+  }
+
+  // Store lease context for post-sign activation
+  window._leaseSignContext = { leaseId: leaseId, tenant: tenant, email: email, prop: prop, role: role };
+}
+
+// ── POST-SIGN: mark lease signed + activate tenant portal ──
+function activateAfterSign(doc) {
+  var ctx = window._leaseSignContext;
+  if (!ctx || !ctx.leaseId) return;
+
+  // Update lease in localStorage
+  try {
+    var leases = JSON.parse(localStorage.getItem('rv_leases') || '[]');
+    leases = leases.map(function(l) {
+      if (l.id !== ctx.leaseId) return l;
+      var update = { signed: true, signedDate: new Date().toISOString().split('T')[0] };
+      if (ctx.role === 'tenant')   update.tenantSignedAt   = new Date().toISOString();
+      if (ctx.role === 'landlord') update.landlordSignedAt = new Date().toISOString();
+      return Object.assign({}, l, update);
+    });
+    localStorage.setItem('rv_leases', JSON.stringify(leases));
+  } catch(e) {}
+
+  // If tenant signed → create tenant portal account
+  if (ctx.role === 'tenant' && ctx.email) {
+    try {
+      var accounts = JSON.parse(localStorage.getItem('rv_tenant_accounts') || '[]');
+      var existing = accounts.find(function(a) { return a.email === ctx.email; });
+      if (!existing) {
+        accounts.push({
+          id: 'TA-' + Date.now().toString(36).toUpperCase(),
+          email:       ctx.email,
+          name:        ctx.tenant,
+          leaseId:     ctx.leaseId,
+          property:    ctx.prop,
+          status:      'active',
+          activatedAt: new Date().toISOString(),
+          tempAccess:  true,
+        });
+        localStorage.setItem('rv_tenant_accounts', JSON.stringify(accounts));
+      }
+    } catch(e) {}
+
+    // Show portal activation block
+    var block = document.getElementById('portal-activation-block');
+    if (block) {
+      block.style.display = 'block';
+      var link = document.getElementById('portal-link');
+      if (link) link.href = 'tenant-portal.html?email=' + encodeURIComponent(ctx.email) + '&lease=' + ctx.leaseId;
+    }
+  }
+
+  // Update Supabase if available
+  if (typeof getSupabase === 'function') {
+    getSupabase().then(function(sb) {
+      if (!sb) return;
+      var update = { signed: true, signed_at: new Date().toISOString() };
+      sb.from('leases').update(update).eq('id', ctx.leaseId).then(function(){});
+      if (ctx.role === 'tenant') {
+        sb.from('rental_applications').update({ status: 'lease_signed' }).eq('email', ctx.email).then(function(){});
+      }
+    }).catch(function(){});
+  }
+}
+
+// ── Init ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   initCanvas();
   renderDocs();
   renderSavedSigs();
+  prefillFromLease();
 });
 </script>
 </body>

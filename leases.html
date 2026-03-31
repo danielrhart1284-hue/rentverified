@@ -158,6 +158,14 @@
 
     <!-- ── NEW LEASE ─────────────────────────────────── -->
     <div id="sec-new" style="display:none;">
+      <!-- Pre-fill banner (shown when opened from an approved application) -->
+      <div id="prefill-banner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:.9rem 1.25rem;margin-bottom:1.25rem;display:none;align-items:center;gap:.75rem;">
+        <span style="font-size:1.5rem;">✅</span>
+        <div>
+          <div style="font-weight:700;font-size:.95rem;color:#166534;">Pre-filled from Approved Application</div>
+          <div style="font-size:.82rem;color:#166534;margin-top:2px;" id="prefill-banner-sub">Tenant info has been filled in automatically. Complete the lease terms below and click Generate.</div>
+        </div>
+      </div>
       <div class="page-header"><div><h1>➕ Create New Lease</h1><p>Fill in tenant and property details to generate a lease agreement.</p></div></div>
       <div class="panel">
         <div class="panel-header"><h2>Property & Tenant Info</h2></div>
@@ -266,7 +274,17 @@
             <div class="fg"><label>Tenant Email</label><input id="esignEmail" type="email" placeholder="tenant@example.com"></div>
           </div>
           <div style="margin-top:1rem;">
-            <button class="btn btn-primary" onclick="sendForSignature()">✉️ Send Signing Request</button>
+            <button class="btn btn-primary" onclick="sendForSignature()">🔗 Generate Signing Link</button>
+          </div>
+          <!-- Sign link panel (shown after clicking Generate) -->
+          <div id="signLinkPanel" style="display:none;margin-top:1.25rem;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:1rem;">
+            <div style="font-weight:700;font-size:.9rem;color:#166534;margin-bottom:.5rem;">✅ Signing link ready for <span id="signLinkTenant"></span></div>
+            <div style="font-size:.82rem;color:#166534;margin-bottom:.75rem;">Copy and send this link to your tenant. They can sign on any device.</div>
+            <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+              <input type="text" id="signLinkUrl" readonly style="flex:1;font-size:.78rem;padding:.45rem .75rem;border:1px solid #86efac;border-radius:6px;background:white;min-width:0;" onclick="this.select()" />
+              <button class="btn btn-sm btn-primary" onclick="copyLink(document.getElementById('signLinkUrl').value)">📋 Copy</button>
+              <a id="signLinkOpen" href="#" target="_blank" class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none;text-decoration:none;" onclick="document.getElementById('signLinkOpen').href=document.getElementById('signLinkUrl').value">Open →</a>
+            </div>
           </div>
         </div>
       </div>
@@ -368,7 +386,67 @@ document.addEventListener('DOMContentLoaded', () => {
   renderClauses();
   renderESignPanel();
   renderRenewals();
+  prefillFromApplication();
 });
+
+// ── PREFILL FROM APPLICATION URL PARAMS ──────────────
+function prefillFromApplication() {
+  const p = new URLSearchParams(window.location.search);
+  const appId = p.get('appId');
+  if (!appId) return;
+
+  // Prefill tenant fields
+  const tenant = p.get('tenant') || '';
+  const email  = p.get('email')  || '';
+  const phone  = p.get('phone')  || '';
+  const co     = p.get('co')     || '';
+  const prop   = p.get('property') || '';
+  const hasPets = p.get('pets') === 'yes';
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+
+  set('nlTenant', tenant);
+  set('nlEmail',  email);
+  set('nlPhone',  phone);
+  set('nlCo',     co);
+
+  // Property: try to match existing option, else add it
+  if (prop) {
+    const propSel = document.getElementById('nlProp');
+    if (propSel) {
+      let matched = false;
+      for (let i = 0; i < propSel.options.length; i++) {
+        if (propSel.options[i].value.toLowerCase().includes(prop.toLowerCase())) {
+          propSel.selectedIndex = i; matched = true; break;
+        }
+      }
+      if (!matched) {
+        const opt = document.createElement('option');
+        opt.value = prop; opt.textContent = prop; opt.selected = true;
+        propSel.insertBefore(opt, propSel.firstChild);
+      }
+    }
+  }
+
+  // Pet policy
+  const petSel = document.getElementById('nlPets');
+  if (petSel && hasPets) petSel.value = 'All pets negotiated';
+
+  // Show banner
+  const banner = document.getElementById('prefill-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    const sub = document.getElementById('prefill-banner-sub');
+    if (sub) sub.textContent = `Application ${appId} — ${tenant}. Complete the lease terms below and click Generate Lease.`;
+  }
+
+  // Auto-open new lease section
+  showSec('new', null);
+
+  // Store appId on the form for linking later
+  const nlForm = document.getElementById('sec-new');
+  if (nlForm) nlForm.dataset.appId = appId;
+}
 
 function setDefaultDates() {
   const s = document.getElementById('nlStart');
@@ -446,7 +524,8 @@ function renderLeaseCards() {
       <div class="expiry-bar-track"><div class="expiry-bar-fill" style="width:${Math.max(0,Math.min(100,pct))}%;background:${sts==='expiring'?'#f59e0b':sts==='expired'?'#ef4444':'#10b981'};"></div></div>
       <div style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;">
         <button class="btn btn-outline btn-sm" onclick="openLeaseModal('${l.id}')">View Lease</button>
-        ${!l.signed?`<button class="btn btn-warn btn-sm" onclick="markSigned('${l.id}')">✍️ Mark Signed</button>`:''}
+        ${!l.signed?`<button class="btn btn-warn btn-sm" onclick="sendLeaseForSign('${l.id}')">✉️ Send for Signature</button>`:''}
+        ${!l.signed?`<a href="${buildSignUrl(l,'landlord')}" target="_blank" class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none;text-decoration:none;">✍️ Sign as Landlord</a>`:''}
         ${sts==='expiring'?`<button class="btn btn-success btn-sm" onclick="offerRenewal('${l.id}')">🔄 Offer Renewal</button>`:''}
         <button class="btn btn-sm" style="background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;" onclick="deleteLease('${l.id}')">✕ Remove</button>
       </div>
@@ -465,6 +544,10 @@ function createLease() {
   if(new Date(end) <= new Date(start)) return toast('⚠️ End date must be after start date.');
   if(rent <= 0) return toast('⚠️ Rent must be a positive number.');
   const utils = [...document.querySelectorAll('#utilityChecks input:checked')].map(c=>c.value);
+  // Capture appId if this lease was created from an approved application
+  const secNew = document.getElementById('sec-new');
+  const linkedAppId = secNew ? secNew.dataset.appId : (new URLSearchParams(window.location.search).get('appId') || '');
+
   const l = {
     id: uid(),
     prop:    document.getElementById('nlProp').value,
@@ -483,9 +566,25 @@ function createLease() {
     signed: false, signedDate: '',
     notes: document.getElementById('nlNotes').value,
     clauses: [],
+    application_id: linkedAppId || null,
+    created_at: new Date().toISOString(),
   };
   leases.unshift(l);
   saveData(); renderAll(); renderESignPanel(); renderRenewals();
+
+  // Mark the application as lease_created in localStorage/Supabase
+  if (linkedAppId) {
+    try {
+      const apps = JSON.parse(localStorage.getItem('rv_applications') || '[]');
+      const updated = apps.map(a => a.id === linkedAppId ? Object.assign({}, a, { status: 'approved', lease_id: l.id }) : a);
+      localStorage.setItem('rv_applications', JSON.stringify(updated));
+    } catch(e) {}
+    // Also update Supabase if available
+    getSupabase && getSupabase().then(sb => {
+      if (sb) sb.from('rental_applications').update({ lease_id: l.id }).eq('id', linkedAppId).then(() => {});
+    }).catch(() => {});
+  }
+
   toast(`✅ Lease created for ${l.tenant}. Send for signature now.`);
   showSec('leases', null);
 }
@@ -513,30 +612,101 @@ function offerRenewal(id) {
 }
 
 // ── E-SIGN ────────────────────────────────────────────
+function buildSignUrl(lease, role) {
+  const base = window.location.origin + window.location.pathname.replace('leases.html','');
+  const p = new URLSearchParams({
+    leaseId:  lease.id,
+    tenant:   lease.tenant || '',
+    email:    lease.email  || '',
+    prop:     lease.prop   || '',
+    rent:     lease.rent   || '',
+    start:    lease.start  || '',
+    end:      lease.end    || '',
+    role:     role || 'tenant',
+  });
+  return base + 'e-signature.html?' + p.toString();
+}
+
 function renderESignPanel() {
   const sel = document.getElementById('esignLease');
   if(!sel) return;
   sel.innerHTML = leases.map(l=>`<option value="${l.id}">${esc(l.tenant)} — ${esc(l.prop)}</option>`).join('');
+
   const pending = leases.filter(l=>!l.signed);
   const el = document.getElementById('pendingSignatures');
   el.innerHTML = pending.length
-    ? pending.map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem;background:#fff7ed;border-radius:8px;margin-bottom:.5rem;border:1px solid #fed7aa;">
-        <div><strong>${esc(l.tenant)}</strong> — ${esc(l.prop)}<div style="font-size:.78rem;color:#92400e;">Awaiting signature · Sent to ${esc(l.email)}</div></div>
-        <button class="btn btn-warn btn-sm" onclick="markSigned('${l.id}')">✍️ Mark Signed</button>
-      </div>`).join('')
+    ? pending.map(l=>{
+        const url = buildSignUrl(l, 'tenant');
+        return `<div style="padding:.9rem;background:#fff7ed;border-radius:8px;margin-bottom:.75rem;border:1px solid #fed7aa;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem;">
+            <div><strong>${esc(l.tenant)}</strong> — ${esc(l.prop)}<div style="font-size:.78rem;color:#92400e;margin-top:2px;">Awaiting tenant signature · ${esc(l.email)}</div></div>
+            <button class="btn btn-warn btn-sm" onclick="markSigned('${l.id}')">✍️ Mark Signed</button>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+            <input type="text" value="${esc(url)}" readonly style="flex:1;font-size:.72rem;padding:.35rem .6rem;border:1px solid #fed7aa;border-radius:6px;background:#fffbeb;min-width:0;" onclick="this.select()" />
+            <button class="btn btn-sm btn-outline" style="white-space:nowrap;font-size:.78rem;" onclick="copyLink('${esc(url)}')">📋 Copy Link</button>
+            <a href="${esc(url)}" target="_blank" class="btn btn-sm" style="background:#fef3c7;color:#92400e;border:none;white-space:nowrap;font-size:.78rem;text-decoration:none;">Open →</a>
+          </div>
+          <div style="margin-top:.5rem;">
+            <a href="${esc(buildSignUrl(l,'landlord'))}" target="_blank" class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none;font-size:.78rem;text-decoration:none;">✍️ Sign as Landlord</a>
+          </div>
+        </div>`;
+      }).join('')
     : '<p style="color:#94a3b8;font-size:.88rem;text-align:center;padding:1.5rem 0;">✅ All leases are signed!</p>';
+
   if(leases.length && document.getElementById('esignEmail')) {
-    const l = leases[0];
-    document.getElementById('esignEmail').value = l.email || '';
+    document.getElementById('esignEmail').value = leases.find(l=>!l.signed)?.email || leases[0].email || '';
+  }
+}
+
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(()=>toast('📋 Signing link copied!')).catch(()=>{
+    prompt('Copy this link and send to your tenant:', url);
+  });
+}
+
+function sendLeaseForSign(id) {
+  const l = leases.find(x=>x.id===id);
+  if(!l) return;
+  // Switch to e-sign section and pre-select this lease
+  showSec('esign', null);
+  const sel = document.getElementById('esignLease');
+  if(sel) sel.value = id;
+  const emailEl = document.getElementById('esignEmail');
+  if(emailEl) emailEl.value = l.email || '';
+  // Auto-generate the link
+  const url = buildSignUrl(l, 'tenant');
+  const panel = document.getElementById('signLinkPanel');
+  if(panel) {
+    document.getElementById('signLinkUrl').value = url;
+    document.getElementById('signLinkTenant').textContent = l.tenant;
+    document.getElementById('signLinkOpen').href = url;
+    panel.style.display = 'block';
   }
 }
 
 function sendForSignature() {
-  const id = document.getElementById('esignLease').value;
-  const email = document.getElementById('esignEmail').value;
+  const id    = document.getElementById('esignLease').value;
+  const email = document.getElementById('esignEmail').value.trim();
+  if(!id)    return toast('⚠️ No lease selected.');
   if(!email) return toast('⚠️ Enter tenant email.');
   const l = leases.find(x=>x.id===id);
-  toast(`✉️ Signing link sent to ${email}! (Connect email backend to send live.)`);
+  if(!l) return;
+
+  // Update tenant email on lease if changed
+  if(email !== l.email) { l.email = email; saveData(); }
+
+  const url = buildSignUrl(l, 'tenant');
+  const panel = document.getElementById('signLinkPanel');
+  if(panel) {
+    document.getElementById('signLinkUrl').value = url;
+    document.getElementById('signLinkTenant').textContent = l.tenant;
+    panel.style.display = 'block';
+  } else {
+    copyLink(url);
+  }
+  renderESignPanel();
+  toast('✉️ Signing link ready. Copy and send to tenant. (Email delivery coming in next update.)');
 }
 
 // ── RENEWALS ──────────────────────────────────────────

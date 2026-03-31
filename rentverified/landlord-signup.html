@@ -12,7 +12,7 @@
       min-height: calc(100vh - 68px);
     }
     .signup-left {
-      background: linear-gradient(135deg, #1a56db 0%, #1e3a8a 100%);
+      background: linear-gradient(135deg, #00E676 0%, #121212 100%);
       color: white;
       padding: 4rem 3rem;
       display: flex;
@@ -225,6 +225,46 @@
     @media (max-width: 600px) {
       .mgmt-toggle-row { flex-direction: column; }
     }
+
+    /* ── Applications Tab ── */
+    .app-filter-btn {
+      padding: 5px 14px; border-radius: 99px; font-size: .82rem; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: white; color: var(--gray-600); cursor: pointer; transition: all .15s;
+    }
+    .app-filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .app-filter-btn.active { background: var(--primary); border-color: var(--primary); color: #121212; }
+    .app-card {
+      display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--gray-100); transition: background .15s; flex-wrap: wrap;
+    }
+    .app-card:last-child { border-bottom: none; }
+    .app-card:hover { background: var(--gray-100); }
+    .app-avatar {
+      width: 42px; height: 42px; border-radius: 50%; background: var(--primary);
+      color: #121212; font-weight: 800; font-size: .9rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .app-info { flex: 1; min-width: 160px; }
+    .app-info .name { font-weight: 700; font-size: .95rem; }
+    .app-info .sub { font-size: .8rem; color: var(--gray-600); margin-top: 1px; }
+    .app-flags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .app-flag { padding: 2px 8px; border-radius: 99px; font-size: .72rem; font-weight: 700; }
+    .flag-warn { background: #fef3c7; color: #92400e; }
+    .flag-ok { background: #d1fae5; color: #065f46; }
+    .flag-bad { background: #fee2e2; color: #991b1b; }
+    .app-status { padding: 3px 10px; border-radius: 99px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+    .status-submitted { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-declined { background: #fee2e2; color: #991b1b; }
+    .app-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+    /* Modal detail sections */
+    .amod-section { margin-bottom: 1.25rem; }
+    .amod-section-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--gray-600); margin-bottom: .5rem; padding-bottom: .35rem; border-bottom: 1px solid var(--gray-200); }
+    .amod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .5rem; }
+    .amod-field { background: var(--gray-100); border-radius: 6px; padding: .4rem .6rem; }
+    .amod-field .lbl { font-size: .7rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: .04em; }
+    .amod-field .val { font-size: .875rem; font-weight: 500; margin-top: 1px; }
+    .amod-flag-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
 
     /* Collapsible sidebar groups */
     .sidebar-group { margin-bottom: 0.25rem; }
@@ -449,10 +489,10 @@
     .gsr-icon.property { background: #dbeafe; color: #2563eb; }
     .gsr-icon.tenant { background: #d1fae5; color: #059669; }
     .gsr-icon.maintenance { background: #fef3c7; color: #d97706; }
-    .gsr-icon.payment { background: #ede9fe; color: #7c3aed; }
+    .gsr-icon.payment { background: rgba(0,230,118,0.12); color: #7c3aed; }
     .gsr-icon.document { background: #fee2e2; color: #dc2626; }
     .gsr-icon.page { background: #f3f4f6; color: #374151; }
-    .gsr-title { font-size: 0.88rem; font-weight: 600; color: #1e1b4b; }
+    .gsr-title { font-size: 0.88rem; font-weight: 600; color: #121212; }
     .gsr-sub { font-size: 0.78rem; color: #6b7280; }
     .gsr-category {
       margin-left: auto;
@@ -610,15 +650,14 @@
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
-    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#1a56db"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
+    <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="#00E676"/><path d="M18 8L8 14v14h6v-8h8v8h6V14L18 8z" fill="white"/><circle cx="22" cy="12" r="3" fill="#93c5fd"/></svg>
     3120 Life
   </a>
   <div class="nav-links">
     <a href="index.html">← Back to Home</a>
   </div>
   <div class="nav-cta">
-    <a href="tenant-portal.html" class="btn btn-outline btn-sm">Log In / Sign Up</a>
-    <button class="btn btn-primary btn-sm" onclick="showLogin()" style="margin-left:.5rem;">Business Log In</button>
+    <button class="btn btn-primary btn-sm" onclick="showLogin()">Business Log In</button>
   </div>
 </nav>
 
@@ -629,38 +668,38 @@
     <!-- LEFT: Benefits -->
     <div class="signup-left">
       <div style="margin-bottom:2.5rem;">
-        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.7;margin-bottom:0.75rem;">For Landlords</div>
-        <h1 style="font-size:2.2rem;font-weight:900;line-height:1.2;margin-bottom:1rem;">List Your Properties.<br/>Let AI Handle the Rest.</h1>
-        <p style="opacity:0.85;font-size:1rem;line-height:1.6;">Join 3120 Life and get AI-powered tenant communication on every channel — website, SMS, email, WhatsApp, and Facebook Messenger.</p>
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.7;margin-bottom:0.75rem;">3120 Life</div>
+        <h1 style="font-size:2.2rem;font-weight:900;line-height:1.2;margin-bottom:1rem;">Run Your Business Smarter.</h1>
+        <p style="opacity:0.85;font-size:1rem;line-height:1.6;">AI-powered tools for property managers, contractors, and service businesses. Manage clients, invoicing, documents, and more — all in one place.</p>
       </div>
 
       <div>
         <div class="benefit-item">
           <div class="benefit-icon">🤖</div>
           <div class="benefit-text">
-            <h4>AI Answers for You</h4>
-            <p>Claude AI responds to tenant questions 24/7 across all your channels. You focus on managing properties, not answering the same questions.</p>
+            <h4>AI-Powered Automation</h4>
+            <p>Let AI handle client communication, scheduling, and follow-ups across all your channels — so you can focus on your business.</p>
           </div>
         </div>
         <div class="benefit-item">
-          <div class="benefit-icon">🛡️</div>
+          <div class="benefit-icon">📊</div>
           <div class="benefit-text">
-            <h4>Scam-Proof Your Listings</h4>
-            <p>Every listing gets a unique QR code and verification badge. Tenants know your Facebook ad is real because they can verify it here.</p>
+            <h4>Business Dashboard</h4>
+            <p>Track leads, invoices, jobs, and financials from a single dashboard built for your industry.</p>
           </div>
         </div>
         <div class="benefit-item">
           <div class="benefit-icon">📄</div>
           <div class="benefit-text">
-            <h4>Secure Document Sharing</h4>
-            <p>Share rental applications, leases, and move-in reports through a secure portal. No email attachments or Google Drive links.</p>
+            <h4>Secure Document Hub</h4>
+            <p>Share contracts, invoices, and reports through a secure portal. No email attachments or scattered Google Drive links.</p>
           </div>
         </div>
         <div class="benefit-item">
           <div class="benefit-icon">💚</div>
           <div class="benefit-text">
-            <h4>Tenant Portal Included</h4>
-            <p>Your tenants get a free portal to pay via Cash App or Zelle, view documents, and chat with AI support.</p>
+            <h4>Client Portal Included</h4>
+            <p>Your clients get a free portal to view documents, make payments, book appointments, and communicate with your team.</p>
           </div>
         </div>
       </div>
@@ -677,104 +716,70 @@
         <!-- ── LOGIN PANEL ───────────────────────────── -->
         <div id="login-panel">
           <div style="text-align:center;margin-bottom:1.75rem;">
-            <div style="font-size:2.5rem;margin-bottom:.5rem;">🏠</div>
+            <div style="font-size:2.5rem;margin-bottom:.5rem;">🔑</div>
             <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.35rem;">Sign In to 3120 Life</h2>
-            <p style="color:var(--gray-600);font-size:.9rem;">Landlord, Property Manager, or Listing Agent</p>
-          </div>
-          <!-- Role selector on login -->
-          <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;">
-            <button onclick="setLoginRole('landlord',this)" id="roleBtn-landlord"
-              style="flex:1;padding:.5rem;border-radius:8px;border:2px solid #1a56db;background:#eff6ff;color:#1a56db;font-size:.8rem;font-weight:700;cursor:pointer;">🏢 Landlord / PM</button>
-            <button onclick="setLoginRole('agent',this)" id="roleBtn-agent"
-              style="flex:1;padding:.5rem;border-radius:8px;border:2px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:.8rem;font-weight:700;cursor:pointer;">📋 Listing Agent</button>
-            <button onclick="setLoginRole('vendor',this)" id="roleBtn-vendor"
-              style="flex:1;padding:.5rem;border-radius:8px;border:2px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:.8rem;font-weight:700;cursor:pointer;">🔧 Vendor</button>
+            <p style="color:var(--gray-600);font-size:.9rem;">Sign in to your business dashboard</p>
           </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="font-weight:600;font-size:.88rem;">Email Address</label>
-            <input type="email" id="loginEmail" placeholder="you@email.com" value="demo@3120life.com"
+            <input type="email" id="loginEmail" placeholder="Email address" value=""
               style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
           </div>
           <div class="form-group" style="margin-bottom:.5rem;">
             <label style="font-weight:600;font-size:.88rem;">Password</label>
             <div style="position:relative;">
-              <input type="password" id="loginPw" placeholder="••••••••"
+              <input type="password" id="loginPw" placeholder="Password"
                 style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem;outline:none;box-sizing:border-box;" />
               <span onclick="togglePw()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);cursor:pointer;font-size:.85rem;color:#94a3b8;">👁</span>
             </div>
           </div>
           <div id="loginErr" style="display:none;color:#dc2626;font-size:.82rem;margin-bottom:.75rem;padding:.5rem .75rem;background:#fef2f2;border-radius:6px;"></div>
           <button onclick="doLogin()"
-            style="width:100%;padding:.75rem;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.75rem;transition:background .15s;"
-            onmouseover="this.style.background='#1e40af'" onmouseout="this.style.background='#1a56db'">
+            style="width:100%;padding:.75rem;background:#00E676;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:.75rem;transition:background .15s;"
+            onmouseover="this.style.background='#1e40af'" onmouseout="this.style.background='#00E676'">
             Sign In →
           </button>
           <p style="text-align:center;margin-top:1.25rem;font-size:.85rem;color:var(--gray-600);">
-            Don't have an account? <a href="#" onclick="showSignupForm()" style="color:#1a56db;font-weight:600;">Create one free →</a>
+            Don't have an account? <a href="#" onclick="showSignupForm()" style="color:#00E676;font-weight:600;">Create one free →</a>
           </p>
         </div>
 
         <!-- ── SIGNUP PANEL (hidden by default) ─────── -->
         <div id="signup-panel" style="display:none;">
         <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:0.4rem;">Create Your Account</h2>
-        <p style="color:var(--gray-600);margin-bottom:1rem;font-size:0.9rem;">Takes about 2 minutes. Already have an account? <a href="#" onclick="showLoginForm()" style="color:#1a56db;font-weight:600;">Sign in →</a></p>
-        <!-- Role selector on signup -->
-        <div style="margin-bottom:1.5rem;">
-          <label style="font-size:.82rem;font-weight:700;color:#374151;display:block;margin-bottom:.5rem;">I am a…</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
-            <label style="border:2px solid #1a56db;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;background:#eff6ff;font-size:.85rem;font-weight:600;color:#1a56db;">
-              <input type="radio" name="signupRole" value="landlord" checked style="accent-color:#1a56db;"> 🏢 Landlord</label>
-            <label style="border:2px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#64748b;">
-              <input type="radio" name="signupRole" value="pm" style="accent-color:#1a56db;"> 🏙 Property Manager</label>
-            <label style="border:2px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#64748b;">
-              <input type="radio" name="signupRole" value="agent" onclick="window.location.href='agent-portal.html'" style="accent-color:#8b5cf6;"> 📋 Listing Agent</label>
-            <label style="border:2px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#64748b;">
-              <input type="radio" name="signupRole" value="vendor" onclick="window.location.href='vendor-portal.html'" style="accent-color:#f59e0b;"> 🔧 Vendor / Handyman</label>
-          </div>
-        </div>
-
-        <div id="step-indicator" style="display:flex;gap:0.5rem;margin-bottom:2rem;">
-          <div id="si-1" style="flex:1;height:4px;border-radius:2px;background:var(--primary);"></div>
-          <div id="si-2" style="flex:1;height:4px;border-radius:2px;background:var(--gray-200);"></div>
-          <div id="si-3" style="flex:1;height:4px;border-radius:2px;background:var(--gray-200);"></div>
-        </div>
+        <p style="color:var(--gray-600);margin-bottom:1.5rem;font-size:0.9rem;">Already have an account? <a href="#" onclick="showLoginForm()" style="color:#00E676;font-weight:600;">Sign in →</a></p>
 
         <!-- Form Step 1: Account -->
         <div id="form-step-1">
-          <h3 style="font-weight:700;margin-bottom:1.5rem;font-size:1rem;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Step 1 of 3 · Account Info</h3>
+          <div class="form-group">
+            <label>Business Name <span style="color:#dc2626;">*</span></label>
+            <input type="text" id="su-business" placeholder="Your business name" required />
+          </div>
           <div class="grid-2">
             <div class="form-group">
               <label>First Name</label>
-              <input type="text" placeholder="Daniel" />
+              <input type="text" id="su-firstName" placeholder="First name" required />
             </div>
             <div class="form-group">
               <label>Last Name</label>
-              <input type="text" placeholder="Your Company" />
+              <input type="text" id="su-lastName" placeholder="Last name" required />
             </div>
           </div>
           <div class="form-group">
             <label>Email Address</label>
-            <input type="email" placeholder="you@example.com" />
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" placeholder="(555) 000-0000" />
+            <input type="email" id="su-email" placeholder="Email address" required />
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" placeholder="At least 8 characters" />
+            <input type="password" id="su-password" placeholder="At least 8 characters" />
           </div>
-          <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="formNext(2)">Continue →</button>
+          <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="submitSignup()">Create Account →</button>
           <p style="text-align:center;margin-top:1rem;font-size:.875rem;color:var(--gray-500);">Already have an account? <a href="#" onclick="showLogin();return false;" style="color:var(--primary);font-weight:600;">Sign In</a></p>
         </div>
 
         <!-- Form Step 2: Business -->
         <div id="form-step-2" style="display:none;">
           <h3 style="font-weight:700;margin-bottom:1.5rem;font-size:1rem;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;">Step 2 of 3 · Your Business</h3>
-          <div class="form-group">
-            <label>Business / Company Name</label>
-            <input type="text" placeholder="[Your Business Name]" />
-          </div>
           <div class="form-group">
             <label>How many properties do you manage?</label>
             <select>
@@ -786,7 +791,7 @@
           </div>
           <div class="form-group">
             <label>City / State</label>
-            <input type="text" placeholder="Atlanta, GA" />
+            <input type="text" id="su-city" />
           </div>
           <div class="form-group">
             <label>Choose Your Plan</label>
@@ -943,21 +948,21 @@
     <div style="background:white;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);width:100%;max-width:440px;padding:2.5rem;">
 
       <div style="text-align:center;margin-bottom:2rem;">
-        <div style="font-size:2rem;margin-bottom:.5rem;">🏠</div>
+        <div style="font-size:2rem;margin-bottom:.5rem;">🔑</div>
         <h2 style="font-weight:800;font-size:1.5rem;margin-bottom:.25rem;">Welcome Back</h2>
-        <p style="color:var(--gray-500);font-size:.9rem;">Sign in to your 3120 Life landlord dashboard</p>
+        <p style="color:var(--gray-500);font-size:.9rem;">Sign in to your business dashboard</p>
       </div>
 
       <div id="login-error" style="display:none;background:#FEF2F2;border:1px solid #EF4444;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.875rem;color:#B91C1C;"></div>
 
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" id="login-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()" />
+        <input type="email" id="login-email" placeholder="Email address" onkeydown="if(event.key==='Enter')doLogin()" />
       </div>
       <div class="form-group">
         <label>Password</label>
         <div style="position:relative;">
-          <input type="password" id="login-password" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:2.5rem;" />
+          <input type="password" id="login-password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:2.5rem;" />
           <button onclick="togglePwVis()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);padding:0;font-size:.85rem;" id="pw-vis-btn">👁</button>
         </div>
       </div>
@@ -967,9 +972,9 @@
         New to 3120 Life? <a href="#" onclick="showSignup();return false;" style="color:var(--primary);font-weight:600;">Create Account</a>
       </div>
 
-      <!-- Business login hint -->
-      <div style="margin-top:1.5rem;padding:.75rem 1rem;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;font-size:.78rem;color:#0369A1;">
-        <strong>[Your Business]:</strong> demo@3120life.com / demo123<br/>
+      <!-- Connection status -->
+      <div id="connection-hint" style="margin-top:1.5rem;padding:.75rem 1rem;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;font-size:.78rem;color:#0369A1;">
+        Sign in with your 3120 Life account credentials.
       </div>
     </div>
   </div>
@@ -992,7 +997,7 @@
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">SP</div>
           <div>
-            <div style="color:white;font-weight:600;font-size:0.875rem;">[Your Business]</div>
+            <div style="color:white;font-weight:600;font-size:0.875rem;">3120Life LLC</div>
             <div style="margin-top:3px;"><span class="plan-chip">Pro Plan</span></div>
           </div>
         </div>
@@ -1038,6 +1043,11 @@
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
               Accounts
             </div>
+            <div class="dash-link" onclick="dashTab('applications')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              Applications
+              <span id="apps-badge" style="margin-left:auto;background:var(--danger);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;display:none;">0</span>
+            </div>
             <a href="screening.html" class="dash-link" style="color:var(--gray-400);">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
               Screening
@@ -1049,7 +1059,7 @@
             <div class="dash-link" onclick="dashTab('inquiries')">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
               AI Conversations
-              <span style="margin-left:auto;background:var(--danger);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;">3</span>
+              <span id="ai-conv-badge" style="margin-left:auto;background:var(--danger);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;display:none;">0</span>
             </div>
             <div class="dash-link" onclick="dashTab('inbox')" data-sidebar-id="inbox">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -1068,7 +1078,7 @@
             <div class="dash-link" onclick="dashTab('payments')">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               Rent Payments
-              <span style="margin-left:auto;background:var(--warning);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;">2</span>
+              <span id="rent-pay-badge" style="margin-left:auto;background:var(--warning);color:white;font-size:0.7rem;padding:1px 7px;border-radius:999px;font-weight:700;display:none;">0</span>
             </div>
             <a href="accounting.html" class="dash-link" style="color:var(--gray-400);">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V5a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2h-2M9 7h6"/></svg>
@@ -1105,6 +1115,10 @@
             <a href="estimates.html" class="dash-link" style="color:var(--gray-400);">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
               Estimates
+            </a>
+            <a href="reports.html" class="dash-link" style="display:flex;align-items:center;gap:.65rem;padding:.55rem 1rem;color:#94a3b8;text-decoration:none;font-size:.85rem;border-radius:8px;">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              Reports
             </a>
           </div>
         </div>
@@ -1178,7 +1192,7 @@
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               Business Funding
             </a>
-            <div class="dash-link" onclick="dashTab('clienthub')" data-sidebar-id="import" style="color:var(--gray-400);">
+            <div class="dash-link" onclick="dashTab('import')" data-sidebar-id="import" style="color:var(--gray-400);">
               <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
               Portfolio Import
             </div>
@@ -1270,9 +1284,7 @@
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
           Management Profile
         </div>
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-        </a>
-        <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="document.getElementById('dashboard-screen').style.display='none';document.getElementById('signup-screen').style.display='block';">
+        <div class="dash-link" style="margin-top:0.5rem;color:#ef4444;" onclick="localStorage.removeItem('rv_account');localStorage.removeItem('rv_plan');document.getElementById('dashboard-screen').style.display='none';document.getElementById('signup-screen').style.display='block';">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           Sign Out
         </div>
@@ -1321,7 +1333,6 @@
               <label class="ob-toggle-row"><input type="checkbox" data-ob-pm="paypal" /><span class="ob-toggle-label">PayPal</span><span class="ob-toggle-tag">2.89% + 49¢</span></label>
             </div>
             <p style="font-size:0.72rem;color:var(--gray-500);margin-top:-0.5rem;margin-bottom:1rem;">Fees depend on whether you use personal (P2P) or business accounts. You can configure this in settings after setup.</p>
-            </div>
             <div style="display:flex;gap:0.75rem;">
               <button class="btn btn-outline" onclick="obNext(1)" style="flex:1;">Back</button>
               <button class="btn btn-primary" onclick="obNext(3)" style="flex:2;">Continue</button>
@@ -1362,10 +1373,10 @@
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
             <div>
               <h1>Welcome to Your Dashboard</h1>
-              <p>[Your Business Name] · <span class="plan-chip">Pro Plan</span></p>
+              <p>3120Life LLC · <span class="plan-chip">Pro Plan</span></p>
             </div>
             <div style="display:flex;gap:.5rem;align-items:center;">
-              <a href="doc-generator.html" style="background:#1a56db;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;">📄 Documents</a>
+              <a href="doc-generator.html" style="background:#00E676;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;text-decoration:none;">📄 Documents</a>
               <button class="btn btn-primary" onclick="dashTab('properties')">+ Add Property</button>
             </div>
           </div>
@@ -1402,7 +1413,7 @@
             <div style="font-size:1.75rem;flex-shrink:0;">⚠️</div>
             <div style="flex:1;min-width:200px;">
               <div style="color:#fde68a;font-weight:700;font-size:.88rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">INSURANCE ALERT</div>
-              <div style="font-size:.9rem;font-weight:700;">Your landlord policy at 123 Maple Street expires in 28 days</div>
+              <div style="font-size:.9rem;font-weight:700;">Your landlord policy expires soon -- review your coverage</div>
               <div style="font-size:.8rem;opacity:.8;margin-top:2px;">3 verified, NIPR-licensed agents in Utah County can give you same-day renewal quotes.</div>
             </div>
             <a href="insurance-agents.html" style="background:#2563eb;color:white;padding:.5rem 1.1rem;border-radius:8px;font-weight:700;font-size:.82rem;text-decoration:none;white-space:nowrap;flex-shrink:0;">Find Agents →</a>
@@ -1410,9 +1421,9 @@
         </div>
 
         <div class="grid-4" style="margin-bottom:2rem;">
-          <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Active Listings</div></div>
-          <div class="stat-card green"><div class="stat-value">2</div><div class="stat-label">Active Tenants</div></div>
-          <div class="stat-card yellow"><div class="stat-value">$2,400</div><div class="stat-label">Rent Pending</div></div>
+          <div class="stat-card"><div class="stat-value" id="dash-listing-count">0</div><div class="stat-label">Active Listings</div></div>
+          <div class="stat-card green"><div class="stat-value" id="dash-tenant-count">0</div><div class="stat-label">Active Tenants</div></div>
+          <div class="stat-card yellow"><div class="stat-value" id="dash-rent-pending">$0</div><div class="stat-label">Rent Pending</div></div>
           <div class="stat-card"><div class="stat-value" id="dash-assist-count">0</div><div class="stat-label">Assistance Cases</div></div>
         </div>
 
@@ -1531,14 +1542,7 @@
         }
         const STATUS_LABEL = {ok:'✅ OK',warn:'⚠️ Expiring',urgent:'🔴 Urgent',expired:'❌ Expired'};
         const STATUS_COLOR = {ok:'#10b981',warn:'#fbbf24',urgent:'#f97316',expired:'#ef4444'};
-        const contractors = [
-          {name:"Mike's Plumbing",  lic:'2026-08-15', gl:'2026-04-23'},
-          {name:'Elite Electric',   lic:'2026-11-30', gl:'2026-10-15'},
-          {name:'Handyman Dave',    lic:'2026-04-08', gl:'2026-09-01'},
-          {name:'ComfortPro HVAC',  lic:'2026-12-01', gl:'2026-02-14'},
-          {name:'FastFix Appliance',lic:'2026-09-20', gl:'2026-07-31'},
-          {name:'ProPaint Utah',    lic:'2026-07-14', gl:'2026-01-31'},
-        ];
+        const contractors = [];
         let ok=0,warn=0,urgent=0,exp=0;
         const tbody = document.getElementById('comp-mini-body');
         contractors.forEach(c => {
@@ -1702,11 +1706,11 @@
 
             <div class="tm-section-title" style="margin-top:0;">Personal Information</div>
             <div class="tm-grid">
-              <div class="tm-field"><label>First Name</label><input type="text" id="tm-firstName" placeholder="Jane" /></div>
-              <div class="tm-field"><label>Last Name</label><input type="text" id="tm-lastName" placeholder="Doe" /></div>
-              <div class="tm-field"><label>Email</label><input type="email" id="tm-email" placeholder="jane@example.com" /></div>
-              <div class="tm-field"><label>Phone</label><input type="tel" id="tm-phone" placeholder="801-555-1234" /></div>
-              <div class="tm-field full"><label>Alt Phone</label><input type="tel" id="tm-altPhone" placeholder="Optional alternative number" /></div>
+              <div class="tm-field"><label>First Name</label><input type="text" id="tm-firstName" /></div>
+              <div class="tm-field"><label>Last Name</label><input type="text" id="tm-lastName" /></div>
+              <div class="tm-field"><label>Email</label><input type="email" id="tm-email" /></div>
+              <div class="tm-field"><label>Phone</label><input type="tel" id="tm-phone" /></div>
+              <div class="tm-field full"><label>Alt Phone</label><input type="tel" id="tm-altPhone" /></div>
             </div>
 
             <div class="tm-section-title">Emergency Contact</div>
@@ -1793,39 +1797,123 @@
               <thead><tr><th>Contact</th><th>Message</th><th>Property</th><th>Channel</th><th>Time</th><th>Status</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><strong>Maria R.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">maria@email.com</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"Is 123 Maple still available?"</td>
-                  <td style="font-size:0.875rem;">123 Maple St</td>
-                  <td><span class="badge badge-available">💬 Chat</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">2m ago</td>
-                  <td><span class="badge badge-verified">AI Replied</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Tyler J.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">(555) 201-9876</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"Can I get an application?"</td>
-                  <td style="font-size:0.875rem;">789 Pine Rd</td>
-                  <td><span class="badge badge-pending">📱 SMS</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">1h ago</td>
-                  <td><span class="badge badge-available">App Sent</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Karen P.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">Facebook DM</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"Is the Oak Ave unit pet friendly?"</td>
-                  <td style="font-size:0.875rem;">456 Oak Ave</td>
-                  <td><span class="badge" style="background:#ede9fe;color:#5b21b6;">📘 Facebook</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">3h ago</td>
-                  <td><span class="badge badge-pending">Needs Review</span></td>
-                </tr>
-                <tr>
-                  <td><strong>James W.</strong><br/><span style="font-size:0.78rem;color:var(--gray-500);">james@email.com</span></td>
-                  <td style="max-width:200px;font-size:0.875rem;">"What utilities are included?"</td>
-                  <td style="font-size:0.875rem;">123 Maple St</td>
-                  <td><span class="badge" style="background:#fef3c7;color:#92400e;">📧 Email</span></td>
-                  <td style="font-size:0.8rem;color:var(--gray-500);">5h ago</td>
-                  <td><span class="badge badge-verified">AI Replied</span></td>
+                  <td colspan="6" style="text-align:center;padding:2rem;color:var(--gray-500);font-size:0.9rem;">No inquiries yet. Incoming leads from chat, SMS, email and social will appear here.</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS TAB -->
+      <div id="dtab-applications" class="tab-content">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+          <div>
+            <h1>Applications</h1>
+            <p>Review, approve, or decline rental applications submitted through your listing links.</p>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <button class="btn btn-outline btn-sm" onclick="loadApplications()">↻ Refresh</button>
+            <a href="tenant-application.html" target="_blank" class="btn btn-primary btn-sm">+ New Application Link</a>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+          <button class="app-filter-btn active" onclick="filterApps('all',this)">All</button>
+          <button class="app-filter-btn" onclick="filterApps('submitted',this)">⏳ Pending</button>
+          <button class="app-filter-btn" onclick="filterApps('approved',this)">✅ Approved</button>
+          <button class="app-filter-btn" onclick="filterApps('declined',this)">❌ Declined</button>
+        </div>
+
+        <!-- Applications List -->
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div id="apps-list-body">
+              <div style="text-align:center;padding:3rem;color:var(--gray-500);">
+                <div style="font-size:2.5rem;margin-bottom:.75rem;">📋</div>
+                <div style="font-weight:700;margin-bottom:.25rem;">No applications yet</div>
+                <div style="font-size:.875rem;">Share your listing link to start receiving applications.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPLICATION DETAIL MODAL -->
+      <div id="app-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;overflow-y:auto;padding:2rem 1rem;" onclick="if(event.target===this)closeAppModal()">
+        <div style="background:white;border-radius:16px;max-width:780px;margin:0 auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <!-- Modal Header -->
+          <div style="background:var(--dark);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="color:white;font-weight:800;font-size:1.1rem;" id="amod-name">Applicant Name</div>
+              <div style="color:var(--gray-400);font-size:.8rem;margin-top:2px;" id="amod-id">APP-2026-XXXX</div>
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:center;">
+              <span id="amod-status-badge" style="padding:3px 12px;border-radius:99px;font-size:.78rem;font-weight:700;background:#fef3c7;color:#92400e;">Pending</span>
+              <button onclick="closeAppModal()" style="background:rgba(255,255,255,.1);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;">✕</button>
+            </div>
+          </div>
+
+          <!-- Modal Body -->
+          <div style="padding:1.5rem;" id="amod-body">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Modal Footer: Approve / Decline / Generate Lease -->
+          <div id="amod-actions" style="padding:1.25rem 1.5rem;border-top:1px solid var(--gray-200);display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="closeAppModal()">Close</button>
+            <div id="amod-decide-btns">
+              <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;" onclick="openDeclineModal()">❌ Decline</button>
+              <button class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;margin-left:.5rem;" onclick="openApproveModal()">✅ Approve</button>
+            </div>
+            <a id="amod-lease-btn" href="#" target="_blank" class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none;text-decoration:none;display:none;">📝 Generate Lease</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROVE MODAL -->
+      <div id="approve-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9100;display:none;align-items:center;justify-content:center;" onclick="if(event.target===this)closeApproveModal()">
+        <div style="background:white;border-radius:12px;width:100%;max-width:440px;padding:1.75rem;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <h3 style="font-weight:800;margin-bottom:.25rem;">✅ Approve Application</h3>
+          <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1.25rem;">The applicant will be notified. You can add optional notes.</p>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:5px;">Notes (optional)</label>
+            <textarea id="approve-notes" rows="3" style="width:100%;padding:.6rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-family:inherit;font-size:.9rem;box-sizing:border-box;" placeholder="e.g. Lease start date Jan 1. Will send lease documents shortly."></textarea>
+          </div>
+          <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+            <button class="btn btn-outline btn-sm" onclick="closeApproveModal()">Cancel</button>
+            <button class="btn btn-sm" style="background:#10b981;color:white;border:none;font-weight:700;" onclick="submitDecision('approved')">Confirm Approval</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DECLINE MODAL -->
+      <div id="decline-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9100;align-items:center;justify-content:center;" onclick="if(event.target===this)closeDeclineModal()">
+        <div style="background:white;border-radius:12px;width:100%;max-width:440px;padding:1.75rem;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <h3 style="font-weight:800;margin-bottom:.25rem;">❌ Decline Application</h3>
+          <p style="color:var(--gray-600);font-size:.875rem;margin-bottom:1.25rem;">The applicant will be notified. Please select a reason.</p>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:5px;">Reason <span style="color:var(--danger)">*</span></label>
+            <select id="decline-reason" style="width:100%;padding:.6rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-family:inherit;font-size:.9rem;">
+              <option value="">Select reason…</option>
+              <option>Income does not meet requirements</option>
+              <option>Credit history</option>
+              <option>Rental history / prior eviction</option>
+              <option>Criminal background</option>
+              <option>Unit no longer available</option>
+              <option>Another applicant was selected</option>
+              <option>Incomplete application</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:5px;">Additional Notes (optional)</label>
+            <textarea id="decline-notes" rows="2" style="width:100%;padding:.6rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-family:inherit;font-size:.9rem;box-sizing:border-box;" placeholder="Optional details…"></textarea>
+          </div>
+          <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+            <button class="btn btn-outline btn-sm" onclick="closeDeclineModal()">Cancel</button>
+            <button class="btn btn-sm" style="background:#ef4444;color:white;border:none;font-weight:700;" onclick="submitDecision('declined')">Confirm Decline</button>
           </div>
         </div>
       </div>
@@ -2073,11 +2161,11 @@
               <h3 style="font-weight:700;margin-bottom:1.25rem;">⚙️ AI Behavior</h3>
               <div class="form-group">
                 <label>Business Name (shown to tenants)</label>
-                <input type="text" value="[Your Business Name]" />
+                <input type="text" value="3120Life LLC" />
               </div>
               <div class="form-group">
                 <label>AI Greeting Message</label>
-                <textarea rows="3" style="resize:none;">Hi! I'm the virtual assistant for [Your Business Name]. I can answer questions about available rentals, help you start an application, or connect you with management. How can I help?</textarea>
+                <textarea rows="3" style="resize:none;">Hi! I'm the virtual assistant for 3120Life LLC. I can answer questions about available rentals, help you start an application, or connect you with management. How can I help?</textarea>
               </div>
               <div class="form-group">
                 <label>Cash App $Cashtag</label>
@@ -2683,7 +2771,7 @@
 
         <!-- Statement Generator Modal -->
         <div id="statement-generator" style="display:none;">
-          <div class="card" style="margin-bottom:1.5rem;border:2px solid #1a56db;">
+          <div class="card" style="margin-bottom:1.5rem;border:2px solid #00E676;">
             <div class="card-body">
               <h3 style="font-weight:700;margin-bottom:1rem;">📄 Generate Monthly Owner Statement</h3>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
@@ -2816,7 +2904,7 @@
 
 
           <!-- ═══ PROPERTY COMMAND CENTER TAB ═══ -->
-          <div id="tab-propcommand" style="display:none;">
+          <div id="dtab-propcommand" class="tab-content">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
               <div>
                 <button onclick="closePropertyCommand()" class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;margin-right:.75rem;">← Back to Properties</button>
@@ -2893,7 +2981,7 @@
           </div>
 
           <!-- ═══ RENT STATUS BOARD TAB ═══ -->
-          <div id="tab-rentstatus" style="display:none;">
+          <div id="dtab-rentstatus" class="tab-content">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
               <h2 style="font-size:1.35rem;font-weight:800;margin:0;">📊 Rent Status Board</h2>
               <div style="display:flex;gap:.5rem;">
@@ -2934,7 +3022,7 @@
           </div>
 
           <!-- ═══ INBOX CENTRAL TAB ═══ -->
-          <div id="tab-inbox" style="display:none;">
+          <div id="dtab-inbox" class="tab-content">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
               <h2 style="font-size:1.35rem;font-weight:800;margin:0;">📨 Inbox Central</h2>
               <div style="display:flex;gap:.5rem;">
@@ -3060,7 +3148,7 @@
           </div>
 
           <!-- ═══ ATTORNEY DOCS TAB ═══ -->
-          <div id="tab-attydocs" style="display:none;">
+          <div id="dtab-attydocs" class="tab-content">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
               <h2 style="font-size:1.35rem;font-weight:800;margin:0;">⚖️ Legal Document Library</h2>
               <button onclick="showAttyUpload()" class="btn btn-sm btn-primary">+ Upload Legal Form</button>
@@ -3261,7 +3349,7 @@
     ['landlord','agent','vendor'].forEach(r => {
       const b = document.getElementById('roleBtn-'+r);
       if(b) {
-        const colors = { landlord:'#1a56db', agent:'#8b5cf6', vendor:'#f59e0b' };
+        const colors = { landlord:'#00E676', agent:'#8b5cf6', vendor:'#f59e0b' };
         const c = colors[r];
         b.style.borderColor = r===role ? c : '#e2e8f0';
         b.style.background  = r===role ? (r==='landlord'?'#eff6ff':r==='agent'?'#f5f3ff':'#fffbeb') : '#f8fafc';
@@ -3290,13 +3378,16 @@
   }
 
   async function submitSignup() {
-    const inputs = document.querySelectorAll('#form-step-1 input');
-    const firstName = inputs[0] ? inputs[0].value.trim() : '';
-    const lastName  = inputs[1] ? inputs[1].value.trim() : '';
-    const email     = inputs[2] ? inputs[2].value.trim().toLowerCase() : '';
-    const phone     = inputs[3] ? inputs[3].value.trim() : '';
-    const password  = inputs[4] ? inputs[4].value : '';
+    const business  = (document.getElementById('su-business')   || {}).value || '';
+    const firstName = (document.getElementById('su-firstName')  || {}).value || '';
+    const lastName  = (document.getElementById('su-lastName')   || {}).value || '';
+    const email     = ((document.getElementById('su-email')     || {}).value || '').trim().toLowerCase();
+    const password  = (document.getElementById('su-password')   || {}).value || '';
 
+    if (!business.trim()) {
+      alert('Please enter your business name.');
+      return;
+    }
     if (!email || !password) {
       alert('Please enter an email and password to create your account.');
       return;
@@ -3304,10 +3395,10 @@
 
     const { data, error } = await Auth.signUp({
       email, password,
-      firstName: firstName || 'User',
-      lastName: lastName || '',
-      phone,
-      company: 'My Company',
+      firstName: firstName.trim() || 'User',
+      lastName: lastName.trim() || '',
+      phone: '',
+      company: business.trim(),
       role: 'landlord',
       plan: 'starter'
     });
@@ -3317,7 +3408,7 @@
       return;
     }
 
-    const acct = { firstName, lastName, email, phone, company: 'My Company', plan: 'starter' };
+    const acct = { firstName: firstName.trim(), lastName: lastName.trim(), email, phone: '', company: business.trim(), plan: 'starter' };
     localStorage.setItem('rv_account', JSON.stringify(acct));
     document.getElementById('signup-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
@@ -3335,6 +3426,11 @@
     document.getElementById('login-screen').style.display   = 'none';
     document.getElementById('signup-screen').style.display  = 'block';
     document.getElementById('dashboard-screen').style.display = 'none';
+    // Go straight to signup form, not login panel
+    var lp = document.getElementById('login-panel');
+    var sp = document.getElementById('signup-panel');
+    if (lp) lp.style.display = 'none';
+    if (sp) sp.style.display = 'block';
   }
 
   function togglePwVis() {
@@ -3365,32 +3461,15 @@
       return;
     }
 
-    // Demo mode: bypass Supabase auth if not configured
-    var isDemo = (typeof RVData !== 'undefined' && typeof RVData._useSupabase === 'function' && !RVData._useSupabase()) ||
-                 (typeof isSupabaseConfigured === 'function' && !isSupabaseConfigured());
+    // Authenticate via Supabase
+    var isConfigured = (typeof RVData !== 'undefined' && typeof RVData._useSupabase === 'function' && RVData._useSupabase()) ||
+                       (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured());
 
     var data, error;
-    if (isDemo) {
-      // Check against hardcoded demo accounts
-      var DEMO_ACCOUNTS = [
-        { email: 'demo@3120life.com', password: 'demo123', role: 'landlord', first_name: 'Daniel', last_name: 'Hart', company: '[Your Business]', plan: 'enterprise' },
-        { email: 'daniel@3120life.com', password: 'admin', role: 'landlord', first_name: 'Daniel', last_name: 'Hart', company: '[Your Business]', plan: 'enterprise' },
-        { email: 'admin@3120life.com', password: 'admin', role: 'admin', first_name: 'Admin', last_name: '', company: '3120 Life', plan: 'enterprise' }
-      ];
-      var match = DEMO_ACCOUNTS.find(function(a) { return a.email === email && a.password === password; });
-      if (match) {
-        data = { profile: match, user: { email: match.email, user_metadata: match } };
-        error = null;
-      } else {
-        // Also allow any email + password "demo" to log in during demo mode
-        if (false) { // demo bypass removed
-          data = { profile: { role: 'landlord', first_name: email.split('@')[0], last_name: '', company: 'My Business' }, user: { email: email } };
-          error = null;
-        } else {
-          data = null;
-          error = { message: 'Demo mode: Use your credentials shown below, or use password "demo" for quick access.' };
-        }
-      }
+    if (!isConfigured) {
+      // Supabase not configured — show helpful message
+      data = null;
+      error = { message: 'Connecting to server... Please check your connection and try again.' };
     } else {
       var result = await Auth.signIn(email, password);
       data = result.data;
@@ -3562,7 +3641,7 @@
         <div style="font-size:.82rem;font-weight:600;color:${s.text};">${dayTxt}</div>
         <div style="font-size:.78rem;color:#6B7280;">Lease ends ${new Date(l.end).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
         <div style="display:flex;gap:.5rem;margin-left:auto;">
-          <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;font-size:.78rem;" onclick="alert('Opening renewal form for ${l.tenant}…')">🔄 Renew</button>
+          <button class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;font-size:.78rem;" onclick="showToast('Renewal flow for ${l.tenant} coming soon','info')">🔄 Renew</button>
           <button class="btn btn-sm" style="background:#f0fdf4;color:#15803d;font-size:.78rem;" onclick="dashTab('inquiries')">💬 Contact</button>
         </div>
       </div>`;
@@ -3636,7 +3715,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
 ✅ Verified listing on 3120 Life
 📋 Listing ID: ${listId}
 🌐 View & apply: rentrealverified.com
-📞 Contact: [Your Business Name]`;
+📞 Contact: 3120Life LLC`;
 
     document.getElementById('broadcast-address').textContent = addr;
     document.getElementById('broadcast-copy').value = copy;
@@ -3767,24 +3846,25 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
   var FEATURE_TILES = [
     { id: 'properties',   label: 'Properties',       icon: '&#127968;', bg: '#dbeafe', color: '#2563eb', action: "dashTab('properties')",        badgeKey: 'properties' },
     { id: 'tenants',      label: 'Tenants',           icon: '&#128101;', bg: '#d1fae5', color: '#059669', action: "dashTab('clients')",           badgeKey: 'tenants' },
-    { id: 'payments',     label: 'Rent Payments',     icon: '&#128176;', bg: '#ede9fe', color: '#7c3aed', action: "dashTab('payments')",          badgeKey: 'payments' },
+    { id: 'payments',     label: 'Rent Payments',     icon: '&#128176;', bg: 'rgba(0,230,118,0.12)', color: '#7c3aed', action: "dashTab('payments')",          badgeKey: 'payments' },
     { id: 'maintenance',  label: 'Maintenance',       icon: '&#128295;', bg: '#fef3c7', color: '#d97706', href: 'maintenance.html',              badgeKey: 'maintenance' },
     { id: 'leases',       label: 'Leases',            icon: '&#128196;', bg: '#f3f4f6', color: '#374151', href: 'leases.html',                   badgeKey: 'leases' },
     { id: 'screening',    label: 'Screening',         icon: '&#128737;', bg: '#d1fae5', color: '#065f46', href: 'screening.html',                badgeKey: null },
     { id: 'accounting',   label: 'Accounting',        icon: '&#128202;', bg: '#dbeafe', color: '#1e40af', href: 'accounting.html',               badgeKey: null },
     { id: 'documents',    label: 'Documents',         icon: '&#128193;', bg: '#fee2e2', color: '#dc2626', href: 'documents.html',                badgeKey: null },
     { id: 'insurance',    label: 'Insurance',         icon: '&#128737;', bg: '#fce7f3', color: '#db2777', href: 'insurance-agents.html',         badgeKey: null },
-    { id: 'funding',      label: 'Funding',           icon: '&#128179;', bg: '#ede9fe', color: '#5b21b6', href: 'funding.html',                  badgeKey: 'funding' },
+    { id: 'funding',      label: 'Funding',           icon: '&#128179;', bg: 'rgba(0,230,118,0.12)', color: '#5b21b6', href: 'funding.html',                  badgeKey: 'funding' },
     { id: 'eviction',     label: 'Eviction',          icon: '&#9888;',   bg: '#fee2e2', color: '#991b1b', href: 'eviction.html',                 badgeKey: null },
     { id: 'crm',          label: 'CRM',               icon: '&#128100;', bg: '#dbeafe', color: '#2563eb', href: 'crm.html',                      badgeKey: null },
     { id: 'invoices',     label: 'Invoices',          icon: '&#128203;', bg: '#d1fae5', color: '#059669', href: 'invoice-builder.html',          badgeKey: null },
     { id: 'time',         label: 'Time Tracking',     icon: '&#9201;',   bg: '#fef3c7', color: '#d97706', href: 'time-tracking.html',            badgeKey: null },
-    { id: 'esign',        label: 'E-Signature',       icon: '&#9997;',   bg: '#ede9fe', color: '#7c3aed', href: 'e-signature.html',              badgeKey: null },
+    { id: 'esign',        label: 'E-Signature',       icon: '&#9997;',   bg: 'rgba(0,230,118,0.12)', color: '#7c3aed', href: 'e-signature.html',              badgeKey: null },
     { id: 'formbuilder', label: 'Form Builder',       icon: '&#128196;', bg: '#fce7f3', color: '#db2777', href: 'form-builder.html',             badgeKey: null },
     { id: 'compliance',   label: 'Compliance',        icon: '&#128203;', bg: '#fef3c7', color: '#92400e', href: 'compliance.html',               badgeKey: null },
     { id: 'network',      label: 'Network',           icon: '&#127760;', bg: '#cffafe', color: '#0891b2', href: 'network.html',                  badgeKey: null },
     { id: 'referral',     label: 'Referrals',         icon: '&#127873;', bg: '#d1fae5', color: '#065f46', href: 'referral-dashboard.html',       badgeKey: null },
-    { id: 'hireapro',     label: 'Hire a Pro',        icon: '&#128188;', bg: '#eff6ff', color: '#1e3a8a', href: 'professional-marketplace.html',  badgeKey: null },
+    { id: 'hireapro',     label: 'Hire a Pro',        icon: '&#128188;', bg: '#eff6ff', color: '#121212', href: 'professional-marketplace.html',  badgeKey: null },
+    { id: 'projectmgmt', label: 'Project Mgmt',       icon: '&#128204;', bg: 'rgba(0,230,118,0.12)', color: '#065f46', href: 'project-management.html',       badgeKey: null },
     { id: 'projects',    label: 'Jobs',              icon: '&#128679;', bg: '#fef3c7', color: '#92400e', href: 'jobs.html',                      badgeKey: 'projects' },
     { id: 'scheduling',  label: 'Scheduling',        icon: '&#128197;', bg: '#dbeafe', color: '#1e40af', href: 'jobs.html#scheduling',            badgeKey: null },
     { id: 'quotes',      label: 'Quotes',            icon: '&#128221;', bg: '#d1fae5', color: '#065f46', href: 'jobs.html#quotes',                badgeKey: null },
@@ -3809,6 +3889,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     invoices:    'invoices',
     time:        'time_tracking',
     esign:       'e_signature',
+    projectmgmt: 'project_mgmt',
     projects:    'projects',
     scheduling:  'scheduling',
     quotes:      'quotes'
@@ -3985,6 +4066,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
       { name: 'CRM', href: 'crm.html' },
       { name: 'Invoice Builder', href: 'invoice-builder.html' },
       { name: 'Time Tracking', href: 'time-tracking.html' },
+      { name: 'Project Management', href: 'project-management.html' },
       { name: 'E-Signature', href: 'e-signature.html' },
       { name: 'Ad Builder', href: 'ad-builder.html' },
     ];
@@ -4366,21 +4448,15 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     if (name === 'properties') renderPropertiesList();
     if (name === 'clients') { renderAllClientsList(); clearClientSelection(); }
     if (name === 'contractors') renderContractorList();
+    if (name === 'applications') loadApplications();
   }
 
   // ── All clients (admin: each person's data/listings) ──────────────────
   const SAMPLE_CLIENTS = [
-    { id: 'your-business', companyName: '[Your Business Name]', email: 'demo@3120life.com' },
-    { id: 'demo-pm', companyName: 'Demo Property Co', email: 'demo@example.com' },
-    { id: 'demo-agent', companyName: 'Demo Agent LLC', email: 'agent@example.com' },
+    { id: 'your-business', companyName: '3120Life LLC', email: '' },
   ];
-  const DEMO_LISTINGS_PM = [
-    { address: '100 Main St, Provo UT', beds: 2, baths: 1, sqft: 900, rent: 1100, tenant: 'Alex Smith', status: 'rented', listingId: 'RV-2026-0010' },
-    { address: '200 Center St #4, Orem UT', beds: 1, baths: 1, sqft: 550, rent: 850, tenant: '', status: 'available', listingId: 'RV-2026-0011' },
-  ];
-  const DEMO_LISTINGS_AGENT = [
-    { address: '55 State St, American Fork UT', beds: 3, baths: 2, sqft: 1200, rent: 1450, tenant: 'Chris Jones', status: 'rented', listingId: 'RV-2026-0020' },
-  ];
+  const DEMO_LISTINGS_PM = [];
+  const DEMO_LISTINGS_AGENT = [];
   function getClients() {
     const raw = localStorage.getItem('rv_clients');
     if (raw) try { return JSON.parse(raw); } catch(e) {}
@@ -4600,7 +4676,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     const list = getListingsForClient(clientId);
     const container = document.getElementById('client-detail-listings-body');
     if (!container) return;
-    const thumbs = ['#ede9fe', '#e0f2fe', '#dcfce7', '#fef3c7', '#e0e7ff'];
+    const thumbs = ['rgba(0,230,118,0.12)', '#e0f2fe', '#dcfce7', '#fef3c7', '#e0e7ff'];
     container.innerHTML = list.map((p, i) => {
       const status = p.status || (p.tenant ? 'rented' : 'available');
       const badge = status === 'rented' ? 'badge-rented' : status === 'available' ? 'badge-available' : 'badge-pending';
@@ -4675,7 +4751,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
     const list = getListings();
     const container = document.getElementById('properties-list-body');
     if (!container) return;
-    const thumbs = ['#ede9fe', '#e0f2fe', '#dcfce7', '#fef3c7', '#e0e7ff'];
+    const thumbs = ['rgba(0,230,118,0.12)', '#e0f2fe', '#dcfce7', '#fef3c7', '#e0e7ff'];
     container.innerHTML = list.map((p, i) => {
       const status = p.status || (p.tenant ? 'rented' : 'available');
       const badge = status === 'rented' ? 'badge-rented' : status === 'available' ? 'badge-available' : 'badge-pending';
@@ -4684,7 +4760,7 @@ ${desc || 'Well-maintained rental property in a great location. Contact us for a
         <div class="prop-thumb" style="background:${thumb};">🏠</div>
         <div style="flex:2;"><div style="font-weight:600;">${(p.address || '').replace(/</g,'&lt;')}</div><div style="font-size:0.8rem;color:var(--gray-600);">${p.beds || 0} bed · ${p.baths || 0} bath · ${p.sqft || '—'} sqft</div></div>
         <div style="flex:1;font-weight:700;">$${Number(p.rent)||0}/mo</div>
-        <div style="flex:1;font-size:0.875rem;">${p.tenant ? (p.tenant.replace(/</g,'&lt;') + (p.tenant === '[Tenant Name]' ? '<br><span style="font-size:.72rem;background:#ede9fe;color:#5b21b6;padding:1px 6px;border-radius:999px;font-weight:700;">💳 Building Credit</span>' : '')) : '<span style="color:var(--gray-400);">Vacant</span>'}</div>
+        <div style="flex:1;font-size:0.875rem;">${p.tenant ? (p.tenant.replace(/</g,'&lt;') + (p.tenant === '[Tenant Name]' ? '<br><span style="font-size:.72rem;background:rgba(0,230,118,0.12);color:#5b21b6;padding:1px 6px;border-radius:999px;font-weight:700;">💳 Building Credit</span>' : '')) : '<span style="color:var(--gray-400);">Vacant</span>'}</div>
         <div style="flex:1;"><span class="badge ${badge}">${status === 'rented' ? 'Rented' : status === 'available' ? 'Available' : 'Coming soon'}</span></div>
         <div style="flex:1;font-family:monospace;font-size:0.8rem;color:var(--gray-600);">${(p.listingId || '').replace(/</g,'&lt;')}</div>
         <div style="width:100px;display:flex;gap:6px;" onclick="event.stopPropagation();"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditListing(${i})">Edit</button><button class="btn btn-outline btn-sm">QR</button></div>
@@ -5094,7 +5170,7 @@ dashTab = function(name) {
   document.addEventListener('DOMContentLoaded', function() {
     var zone = document.getElementById('import-drop-zone');
     if (!zone) return;
-    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='#1a56db'; zone.style.background='#eff6ff'; });
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='#00E676'; zone.style.background='#eff6ff'; });
     zone.addEventListener('dragleave', function(e) { e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background=''; });
     zone.addEventListener('drop', function(e) {
       e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background='';
@@ -5248,9 +5324,9 @@ dashTab = function(name) {
     strip.innerHTML = '';
     _dragDropPhotos.forEach(function(photo, i) {
       var div = document.createElement('div');
-      div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:2px solid ' + (photo.selected ? '#1a56db' : '#e5e7eb') + ';flex-shrink:0;cursor:pointer;opacity:' + (photo.selected ? '1' : '0.5') + ';';
+      div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:2px solid ' + (photo.selected ? '#00E676' : '#e5e7eb') + ';flex-shrink:0;cursor:pointer;opacity:' + (photo.selected ? '1' : '0.5') + ';';
       div.innerHTML = '<img src="' + photo.src + '" style="width:100%;height:100%;object-fit:cover;" />' +
-        '<div onclick="event.stopPropagation();togglePhotoSelect(' + i + ')" style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:4px;background:' + (photo.selected ? '#1a56db' : 'rgba(0,0,0,.4)') + ';color:white;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;">' + (photo.selected ? '✓' : '') + '</div>' +
+        '<div onclick="event.stopPropagation();togglePhotoSelect(' + i + ')" style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:4px;background:' + (photo.selected ? '#00E676' : 'rgba(0,0,0,.4)') + ';color:white;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;">' + (photo.selected ? '✓' : '') + '</div>' +
         '<button onclick="event.stopPropagation();removeDragPhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
       strip.appendChild(div);
     });
@@ -5282,10 +5358,10 @@ dashTab = function(name) {
       opt.textContent = c.name + (c.email ? ' (' + c.email + ')' : '');
       sel.appendChild(opt);
     });
-    // Also add default [Your Business]
+    // Also add default 3120Life LLC
     var opt2 = document.createElement('option');
     opt2.value = 'your-business';
-    opt2.textContent = '[Your Business Name] (Self)';
+    opt2.textContent = '3120Life LLC (Self)';
     sel.appendChild(opt2);
   }
 
@@ -5345,7 +5421,7 @@ dashTab = function(name) {
       (listing.description || '') + '\n\n' +
       'Listing ID: ' + (listing.listingId || 'N/A') + '\n' +
       'Verify at: https://3120life.com\n' +
-      'Managed by [Your Business Name]';
+      'Managed by 3120Life LLC';
     // Post to Facebook Page via Graph API
     fetch('https://graph.facebook.com/v18.0/' + api.pageId + '/feed', {
       method: 'POST',
@@ -5578,7 +5654,7 @@ dashTab = function(name) {
     // Add drag-drop listeners
     var zone = document.getElementById('spm-drop-zone');
     if (zone) {
-      zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='#1a56db'; zone.style.background='#eff6ff'; });
+      zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='#00E676'; zone.style.background='#eff6ff'; });
       zone.addEventListener('dragleave', function(e) { e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background=''; });
       zone.addEventListener('drop', function(e) {
         e.preventDefault(); zone.style.borderColor='#d1d5db'; zone.style.background='';
@@ -6563,15 +6639,16 @@ dashTab = function(name) {
     }
   };
 
-  // --- Seed sample messages for demo ---
+  // --- Seed sample messages (only in demo mode) ---
   function seedSampleMessages() {
+    if (!localStorage.getItem('rv_demo_mode')) return;
     const msgs = getMessages();
     if (msgs.length > 0) return;
     const samples = [
-      { from: 'Garth Properties', fromRole: 'owner', to: '[Your Business]', toRole: 'pm', property: '2142 S. King St, Salt Lake City, UT', subject: 'February Statement Question', body: 'Hi, I noticed the PM fee on 2142 S. King was 7% instead of the agreed 6.5%. Can you check this?', read: false },
-      { from: 'Russell Schofield', fromRole: 'tenant', to: '[Your Business]', toRole: 'pm', property: '2142 S. King St, Salt Lake City, UT', subject: 'Rent Payment Confirmation', body: 'Just sent February rent via Zelle. Please confirm receipt.', read: false },
-      { from: 'ABC Plumbing', fromRole: 'vendor', to: '[Your Business]', toRole: 'pm', property: '1285 W. Greasewood, Riverton, UT', subject: 'Repair Estimate', body: 'Attached is the estimate for the water heater replacement. Total: $1,450. Let me know if you want to proceed.', read: true },
-      { from: 'Tim Linford', fromRole: 'owner', to: '[Your Business]', toRole: 'pm', property: '', subject: 'Annual Tax Documents', body: 'Can you send me the 2025 tax summary for all three properties? My accountant needs them by March 15.', read: false },
+      { from: 'Garth Properties', fromRole: 'owner', to: '3120Life LLC', toRole: 'pm', property: '2142 S. King St, Salt Lake City, UT', subject: 'February Statement Question', body: 'Hi, I noticed the PM fee on 2142 S. King was 7% instead of the agreed 6.5%. Can you check this?', read: false },
+      { from: 'Russell Schofield', fromRole: 'tenant', to: '3120Life LLC', toRole: 'pm', property: '2142 S. King St, Salt Lake City, UT', subject: 'Rent Payment Confirmation', body: 'Just sent February rent via Zelle. Please confirm receipt.', read: false },
+      { from: 'ABC Plumbing', fromRole: 'vendor', to: '3120Life LLC', toRole: 'pm', property: '1285 W. Greasewood, Riverton, UT', subject: 'Repair Estimate', body: 'Attached is the estimate for the water heater replacement. Total: $1,450. Let me know if you want to proceed.', read: true },
+      { from: 'Tim Linford', fromRole: 'owner', to: '3120Life LLC', toRole: 'pm', property: '', subject: 'Annual Tax Documents', body: 'Can you send me the 2025 tax summary for all three properties? My accountant needs them by March 15.', read: false },
     ];
     samples.forEach(function(s) {
       sendMessage(s);
@@ -6675,14 +6752,7 @@ dashTab = function(name) {
     localStorage.setItem('rv_payments', JSON.stringify(arr));
   }
   function pmSeedSampleData() {
-    var existing = pmGetPayments();
-    if (existing.length > 0) return;
-    var samples = [
-      { id:'pay_sample_1', tenantId:'jane_doe', tenantName:'[Tenant Name]', property:'123 Maple St 2A', amount:1200, date:'2026-03-04', method:'cashApp', reference:'CA-88321', status:'pending', notes:'', voidedAt:null, voidReason:'', createdAt:'2026-03-04T14:15:00Z', updatedAt:'2026-03-04T14:15:00Z' },
-      { id:'pay_sample_2', tenantId:'robert_lee', tenantName:'[Tenant Name]', property:'456 Oak Ave 1B', amount:950, date:'2026-03-03', method:'zelle', reference:'ZL-44120', status:'pending', notes:'', voidedAt:null, voidReason:'', createdAt:'2026-03-03T10:22:00Z', updatedAt:'2026-03-03T10:22:00Z' },
-      { id:'pay_sample_3', tenantId:'jane_doe', tenantName:'[Tenant Name]', property:'123 Maple St 2A', amount:1200, date:'2026-02-01', method:'cashApp', reference:'CA-77210', status:'confirmed', notes:'', voidedAt:null, voidReason:'', createdAt:'2026-02-01T09:00:00Z', updatedAt:'2026-02-01T09:00:00Z' }
-    ];
-    pmSavePayments(samples);
+    // No fake seed data — payments start empty
   }
 
   // Get known tenants from various localStorage sources
@@ -7013,7 +7083,7 @@ dashTab = function(name) {
           <div style="font-weight:700;font-size:.875rem;margin-bottom:.4rem;">Auto-Generated Listing Copy</div>
           <div style="position:relative;">
             <textarea id="broadcast-copy" rows="5" readonly style="width:100%;padding:.75rem;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;line-height:1.5;background:#f9fafb;resize:none;"></textarea>
-            <button onclick="copyBroadcastText()" style="position:absolute;top:.5rem;right:.5rem;background:#1a56db;color:white;border:none;border-radius:6px;padding:3px 10px;font-size:.75rem;cursor:pointer;">Copy</button>
+            <button onclick="copyBroadcastText()" style="position:absolute;top:.5rem;right:.5rem;background:#00E676;color:white;border:none;border-radius:6px;padding:3px 10px;font-size:.75rem;cursor:pointer;">Copy</button>
           </div>
           <div id="copy-confirm" style="font-size:.75rem;color:#15803d;margin-top:4px;display:none;">✓ Copied to clipboard!</div>
         </div>
@@ -7081,7 +7151,7 @@ dashTab = function(name) {
         </div>
 
         <!-- Broadcast All button -->
-        <button onclick="broadcastAll()" style="width:100%;margin-top:1rem;padding:.8rem;background:linear-gradient(135deg,#1a56db,#7c3aed);color:white;border:none;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+        <button onclick="broadcastAll()" style="width:100%;margin-top:1rem;padding:.8rem;background:linear-gradient(135deg,#00E676,#7c3aed);color:white;border:none;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;">
           🚀 Open All Platforms at Once
         </button>
         <div style="font-size:.72rem;color:#9ca3af;text-align:center;margin-top:.5rem;">Each platform opens in a new tab. Your listing copy is ready to paste.</div>
@@ -7143,6 +7213,354 @@ dashTab = function(name) {
 
     // Hide tile if no data yet (but show it since it's a feature promotion)
   });
+
+  // ═══════════════════════════════════════════════
+  // APPLICATIONS — Load, Render, Review, Decide
+  // ═══════════════════════════════════════════════
+  var _allApps = [];
+  var _activeFilter = 'all';
+  var _reviewingApp = null;
+
+  function generateLeaseUrl(app) {
+    var params = new URLSearchParams({
+      appId:    app.id || '',
+      tenant:   ((app.first_name||'') + ' ' + (app.last_name||'')).trim(),
+      email:    app.email || '',
+      phone:    app.phone || '',
+      co:       app.has_co_applicant ? ((app.co_first_name||'') + ' ' + (app.co_last_name||'')).trim() : '',
+      property: app.property_id || '',
+      pets:     app.pets && app.pets !== '[]' ? 'yes' : 'no',
+    });
+    return 'leases.html?' + params.toString();
+  }
+
+  async function loadApplications() {
+    var body = document.getElementById('apps-list-body');
+    if (!body) return;
+    body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray-500);font-size:.875rem;">Loading…</div>';
+
+    var apps = [];
+    try {
+      var sb = await getSupabase();
+      if (sb) {
+        var res = await sb.from('rental_applications').select('*').order('submitted_at', { ascending: false });
+        if (res.data && res.data.length) apps = res.data;
+      }
+    } catch(e) {}
+
+    // Fallback: localStorage
+    if (!apps.length) {
+      try { apps = JSON.parse(localStorage.getItem('rv_applications') || '[]'); } catch(e) { apps = []; }
+    }
+
+    _allApps = apps;
+    updateAppsBadge();
+    renderAppsList(_activeFilter);
+  }
+
+  function updateAppsBadge() {
+    var pending = _allApps.filter(function(a){ return a.status === 'submitted'; }).length;
+    var badge = document.getElementById('apps-badge');
+    if (!badge) return;
+    if (pending > 0) { badge.textContent = pending; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  }
+
+  function filterApps(status, btn) {
+    _activeFilter = status;
+    document.querySelectorAll('.app-filter-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    renderAppsList(status);
+  }
+
+  function renderAppsList(filter) {
+    var body = document.getElementById('apps-list-body');
+    if (!body) return;
+    var list = filter === 'all' ? _allApps : _allApps.filter(function(a){ return a.status === filter; });
+
+    if (!list.length) {
+      var msg = filter === 'all' ? 'No applications yet. Share your listing link to start receiving applications.' : 'No ' + filter + ' applications.';
+      body.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray-500);"><div style="font-size:2.5rem;margin-bottom:.75rem;">📋</div><div style="font-weight:700;margin-bottom:.25rem;">' + (filter === 'all' ? 'No applications yet' : 'Nothing here') + '</div><div style="font-size:.875rem;">' + msg + '</div></div>';
+      return;
+    }
+
+    body.innerHTML = list.map(function(app) {
+      var initials = ((app.first_name||'?')[0] + (app.last_name||'?')[0]).toUpperCase();
+      var name = (app.first_name||'') + ' ' + (app.last_name||'');
+      var date = app.submitted_at ? new Date(app.submitted_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
+      var income = app.monthly_income ? '$' + Number(app.monthly_income).toLocaleString() + '/mo' : '—';
+      var emp = app.employment_status || '—';
+      var propId = app.property_id ? (' · ' + app.property_id) : '';
+
+      // Flags
+      var flags = '';
+      if (app.has_eviction) flags += '<span class="app-flag flag-bad">⚠ Eviction</span>';
+      if (app.has_bankruptcy) flags += '<span class="app-flag flag-warn">⚠ Bankruptcy</span>';
+      if (app.has_felony) flags += '<span class="app-flag flag-bad">⚠ Felony</span>';
+      if (app.has_judgment) flags += '<span class="app-flag flag-warn">⚠ Judgment</span>';
+      if (!app.has_eviction && !app.has_bankruptcy && !app.has_felony) flags += '<span class="app-flag flag-ok">✓ Clean</span>';
+
+      var statusClass = 'status-' + (app.status || 'submitted');
+      var statusLabel = app.status === 'approved' ? '✅ Approved' : app.status === 'declined' ? '❌ Declined' : '⏳ Pending';
+      var canDecide = (app.status === 'submitted' || app.status === 'pending');
+
+      return '<div class="app-card">' +
+        '<div class="app-avatar">' + initials + '</div>' +
+        '<div class="app-info">' +
+          '<div class="name">' + name + '</div>' +
+          '<div class="sub">' + date + propId + ' · ' + emp + ' · ' + income + '</div>' +
+        '</div>' +
+        '<div class="app-flags">' + flags + '</div>' +
+        '<span class="app-status ' + statusClass + '">' + statusLabel + '</span>' +
+        '<div class="app-actions">' +
+          '<button class="btn btn-outline btn-sm" onclick="openAppModal(' + JSON.stringify(JSON.stringify(app)) + ')">View</button>' +
+          (canDecide ? '<button class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;" onclick=\'openAppModalAndApprove(' + JSON.stringify(JSON.stringify(app)) + ')\'>✅</button>' : '') +
+          (canDecide ? '<button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;" onclick=\'openAppModalAndDecline(' + JSON.stringify(JSON.stringify(app)) + ')\'>❌</button>' : '') +
+          (app.status === 'approved' && !app.lease_id ? '<a href="' + generateLeaseUrl(app) + '" class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none;text-decoration:none;">📝 Lease</a>' : '') +
+          (app.lease_id ? '<span class="app-flag flag-ok" style="align-self:center;">📋 Lease Created</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openAppModal(appJson) {
+    var app = typeof appJson === 'string' ? JSON.parse(appJson) : appJson;
+    _reviewingApp = app;
+
+    document.getElementById('amod-name').textContent = (app.first_name||'') + ' ' + (app.last_name||'');
+    document.getElementById('amod-id').textContent = app.id || '';
+
+    var sb = document.getElementById('amod-status-badge');
+    if (app.status === 'approved') { sb.textContent = '✅ Approved'; sb.style.background='#d1fae5'; sb.style.color='#065f46'; }
+    else if (app.status === 'declined') { sb.textContent = '❌ Declined'; sb.style.background='#fee2e2'; sb.style.color='#991b1b'; }
+    else { sb.textContent = '⏳ Pending Review'; sb.style.background='#fef3c7'; sb.style.color='#92400e'; }
+
+    var canDecide = (app.status === 'submitted' || !app.status);
+    var footer = document.getElementById('amod-actions');
+    if (footer) footer.style.display = 'flex';
+    var decideDiv = document.getElementById('amod-decide-btns');
+    if (decideDiv) decideDiv.style.display = canDecide ? 'flex' : 'none';
+    var leaseBtn = document.getElementById('amod-lease-btn');
+    if (leaseBtn) {
+      if (app.status === 'approved') {
+        leaseBtn.href = generateLeaseUrl(app);
+        leaseBtn.style.display = '';
+      } else {
+        leaseBtn.style.display = 'none';
+      }
+    }
+
+    // Build detail body
+    var h = '';
+    function field(lbl, val) { return '<div class="amod-field"><div class="lbl">'+lbl+'</div><div class="val">'+(val||'—')+'</div></div>'; }
+    function section(title, content) { return '<div class="amod-section"><div class="amod-section-title">'+title+'</div>'+content+'</div>'; }
+    function grid(fields) { return '<div class="amod-grid">'+fields+'</div>'; }
+    function yn(val, label) { return val ? '<span class="app-flag flag-bad">⚠ '+label+'</span>' : '<span class="app-flag flag-ok">✓ No '+label+'</span>'; }
+
+    // Parse JSON fields
+    var resHistory = [], occupants = [], pets = [];
+    try { resHistory = typeof app.residence_history === 'string' ? JSON.parse(app.residence_history) : (app.residence_history||[]); } catch(e){}
+    try { occupants = typeof app.occupants === 'string' ? JSON.parse(app.occupants) : (app.occupants||[]); } catch(e){}
+    try { pets = typeof app.pets === 'string' ? JSON.parse(app.pets) : (app.pets||[]); } catch(e){}
+
+    h += section('👤 Primary Applicant',
+      grid(
+        field('Full Name', (app.first_name||'')+' '+(app.middle_name||'')+' '+(app.last_name||'')) +
+        field('Date of Birth', app.dob) +
+        field('SSN (last 4)', app.ssn_last4 ? '•••-••-'+app.ssn_last4 : '—') +
+        field('ID Type', app.id_type) +
+        field('ID Number', app.id_number) +
+        field('Email', app.email) +
+        field('Phone', app.phone) +
+        field('Current Address', app.current_address) +
+        field('Current Rent', app.current_rent ? '$'+Number(app.current_rent).toLocaleString() : '—') +
+        field('Duration at Address', app.current_duration)
+      )
+    );
+
+    if (app.has_co_applicant) {
+      h += section('👥 Co-Applicant',
+        grid(field('Name', (app.co_first_name||'')+ ' '+(app.co_last_name||'')) + field('Email', app.co_email) + field('Phone', app.co_phone))
+      );
+    }
+
+    if (resHistory.length) {
+      var rhHtml = resHistory.map(function(r,i) {
+        return '<div style="background:var(--gray-100);border-radius:6px;padding:.6rem .75rem;margin-bottom:.4rem;">' +
+          '<div style="font-weight:700;font-size:.82rem;">'+(r.street||'—')+', '+(r.city||'')+' '+(r.state||'')+' '+(r.zip||'')+'</div>' +
+          '<div style="font-size:.78rem;color:var(--gray-600);">'+(r.dates||'')+(r.rent?' · $'+r.rent+'/mo':'')+' · '+( r.reason||'')+'</div>' +
+          '<div style="font-size:.78rem;color:var(--gray-600);">Landlord: '+(r.landlord||'—')+(r.landlord_phone?' · '+r.landlord_phone:'')+'</div>' +
+        '</div>';
+      }).join('');
+      h += section('🏘️ Rental History', rhHtml);
+    }
+
+    h += section('💼 Employment & Income',
+      grid(
+        field('Status', app.employment_status) +
+        field('Monthly Income', app.monthly_income ? '$'+Number(app.monthly_income).toLocaleString() : '—') +
+        field('Employer', app.employer_name) +
+        field('Position', app.employer_position) +
+        field('Start Date', app.employer_start_date) +
+        field('Supervisor', app.employer_supervisor) +
+        field('Add\'l Income', app.additional_income_source ? app.additional_income_source + (app.additional_income_amount ? ' · $'+app.additional_income_amount+'/mo':'') : '—')
+      )
+    );
+
+    if (occupants.length) {
+      var occHtml = occupants.map(function(o){ return '<span class="app-flag flag-ok">'+o.name+(o.age?' ('+o.age+')':'')+' — '+(o.relationship||'')+'</span>'; }).join(' ');
+      h += section('👨‍👩‍👧 Occupants', '<div class="amod-flag-row">'+occHtml+'</div>');
+    }
+    if (pets.length) {
+      var petHtml = pets.map(function(p){ return '<span class="app-flag flag-warn">🐾 '+p.name+' ('+p.type+(p.breed?', '+p.breed:'')+(p.weight?', '+p.weight+'lbs':'')+')</span>'; }).join(' ');
+      h += section('🐾 Pets', '<div class="amod-flag-row">'+petHtml+'</div>');
+    }
+
+    h += section('💳 Financial Background',
+      '<div class="amod-flag-row">' +
+        yn(app.has_bankruptcy, 'Bankruptcy') +
+        yn(app.has_eviction, 'Eviction') +
+        yn(app.has_judgment, 'Judgment') +
+      '</div>' +
+      (app.credit_score_range ? '<div style="margin-top:.5rem;font-size:.875rem;">Credit Score: <strong>'+app.credit_score_range+'</strong></div>' : '')
+    );
+
+    h += section('⚖️ Criminal Disclosure',
+      '<div class="amod-flag-row">' +
+        yn(app.has_felony, 'Felony') + (app.felony_offense ? ' <em style="font-size:.78rem;color:var(--gray-600);">'+app.felony_offense+' ('+app.felony_year+')</em>' : '') +
+        yn(app.has_misdemeanor, 'Misdemeanor') +
+        yn(app.has_sex_offender, 'Sex Offender Registry') +
+      '</div>'
+    );
+
+    h += section('🆘 Emergency Contact',
+      grid(
+        field('Name', app.emergency_contact_name) +
+        field('Relationship', app.emergency_contact_relationship) +
+        field('Phone', app.emergency_contact_phone) +
+        field('Email', app.emergency_contact_email)
+      )
+    );
+
+    h += section('✍️ Signature',
+      grid(
+        field('Print Name', app.print_name) +
+        field('Signed', app.signed_at) +
+        field('Method', app.signature_type) +
+        field('Submitted', app.submitted_at ? new Date(app.submitted_at).toLocaleString() : '—')
+      )
+    );
+
+    if (app.decision_notes) {
+      h += section('📝 Decision Notes', '<div style="background:var(--gray-100);border-radius:6px;padding:.75rem;font-size:.875rem;">'+app.decision_notes+'</div>');
+    }
+
+    document.getElementById('amod-body').innerHTML = h;
+    document.getElementById('app-modal-overlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function openAppModalAndApprove(appJson) { openAppModal(appJson); setTimeout(openApproveModal, 100); }
+  function openAppModalAndDecline(appJson) { openAppModal(appJson); setTimeout(openDeclineModal, 100); }
+
+  function closeAppModal() {
+    document.getElementById('app-modal-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function openApproveModal() {
+    document.getElementById('approve-modal-overlay').style.display = 'flex';
+  }
+  function closeApproveModal() {
+    document.getElementById('approve-modal-overlay').style.display = 'none';
+    document.getElementById('approve-notes').value = '';
+  }
+
+  function openDeclineModal() {
+    document.getElementById('decline-modal-overlay').style.display = 'flex';
+  }
+  function closeDeclineModal() {
+    document.getElementById('decline-modal-overlay').style.display = 'none';
+    document.getElementById('decline-reason').value = '';
+    document.getElementById('decline-notes').value = '';
+  }
+
+  async function submitDecision(decision) {
+    if (!_reviewingApp) return;
+    if (decision === 'declined') {
+      var reason = document.getElementById('decline-reason').value;
+      if (!reason) { alert('Please select a reason for declining.'); return; }
+    }
+
+    var notes = decision === 'approved'
+      ? document.getElementById('approve-notes').value
+      : document.getElementById('decline-reason').value + (document.getElementById('decline-notes').value ? '\n' + document.getElementById('decline-notes').value : '');
+
+    var updates = {
+      status: decision,
+      decision: decision,
+      decision_notes: notes,
+      reviewed_at: new Date().toISOString()
+    };
+
+    var saved = false;
+    try {
+      var sb = await getSupabase();
+      if (sb) {
+        var res = await sb.from('rental_applications').update(updates).eq('id', _reviewingApp.id);
+        if (!res.error) saved = true;
+      }
+    } catch(e) {}
+
+    if (!saved) {
+      // localStorage fallback
+      try {
+        var apps = JSON.parse(localStorage.getItem('rv_applications') || '[]');
+        apps = apps.map(function(a) { return a.id === _reviewingApp.id ? Object.assign({}, a, updates) : a; });
+        localStorage.setItem('rv_applications', JSON.stringify(apps));
+        saved = true;
+      } catch(e) {}
+    }
+
+    if (saved) {
+      closeApproveModal(); closeDeclineModal(); closeAppModal();
+      loadApplications();
+      if (decision === 'approved' && _reviewingApp) {
+        // Show prominent toast with Generate Lease link
+        var leaseUrl = generateLeaseUrl(_reviewingApp);
+        var toastHtml = '✅ Application approved! &nbsp;<a href="' + leaseUrl + '" style="color:#fbbf24;font-weight:700;text-decoration:underline;">📝 Generate Lease →</a>';
+        var toastEl = document.getElementById('rv-toast') || document.createElement('div');
+        toastEl.id = 'rv-toast';
+        toastEl.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:.75rem 1.5rem;border-radius:99px;font-size:.9rem;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.4);white-space:nowrap;';
+        toastEl.innerHTML = toastHtml;
+        document.body.appendChild(toastEl);
+        setTimeout(function(){ if (toastEl.parentNode) toastEl.parentNode.removeChild(toastEl); }, 6000);
+      } else {
+        var msg = '❌ Application declined.';
+        if (typeof showToast === 'function') showToast(msg); else alert(msg);
+      }
+    } else {
+      alert('Something went wrong. Please try again.');
+    }
+  }
+
+  // Load badge count on dashboard open
+  (async function initAppsBadge() {
+    try {
+      var apps = [];
+      var sb = await getSupabase();
+      if (sb) {
+        var res = await sb.from('rental_applications').select('id,status').eq('status','submitted');
+        if (res.data) apps = res.data;
+      }
+      if (!apps.length) {
+        try { apps = (JSON.parse(localStorage.getItem('rv_applications')||'[]')).filter(function(a){return a.status==='submitted'||!a.status;}); } catch(e){}
+      }
+      var badge = document.getElementById('apps-badge');
+      if (badge && apps.length) { badge.textContent = apps.length; badge.style.display = ''; }
+    } catch(e) {}
+  })();
+
 </script>
 <script src="recommended-supplies.js" data-industry="property_management"></script>
 <script src="business-advisor.js" data-industry="property_management"></script>
