@@ -178,6 +178,13 @@
     <a onclick="filterTemplates('insurance')">🛡️ Insurance</a>
     <a onclick="filterTemplates('str')">🏖️ Short-Term Rental</a>
     <a onclick="filterTemplates('lending')">🏦 Lending</a>
+    <a onclick="filterTemplates('nonprofit')">💚 Nonprofit</a>
+    <a onclick="filterTemplates('wellness')">💆 Wellness / Med Spa</a>
+    <a onclick="filterTemplates('salon')">✂️ Salon &amp; Beauty</a>
+    <a onclick="filterTemplates('restaurant')">🍽️ Restaurant / Food</a>
+    <a onclick="filterTemplates('marketing')">📣 Marketing / Consulting</a>
+    <a onclick="filterTemplates('cleaning')">🧹 Cleaning / Janitorial</a>
+    <a onclick="filterTemplates('auto')">🔧 Auto Services</a>
     <a onclick="filterTemplates('general')">💼 General Business</a>
 
     <h3>My Documents</h3>
@@ -195,6 +202,17 @@
 
     <!-- Template Picker -->
     <div id="tpl-picker">
+      <!-- Industry Pack Banner (auto-shown when industry detected) -->
+      <div id="industry-pack-banner" style="display:none;margin-bottom:1.25rem;padding:.85rem 1.25rem;border-radius:10px;background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <span style="font-size:1.5rem;" id="ipack-icon">📋</span>
+        <div style="flex:1;min-width:160px;">
+          <div style="font-size:.7rem;font-weight:700;color:#7dd3fc;text-transform:uppercase;letter-spacing:.06em;">Your Industry Pack</div>
+          <div style="font-weight:700;font-size:.95rem;" id="ipack-title">Templates for Your Business</div>
+        </div>
+        <button id="ipack-btn" onclick="" style="background:#00E676;color:#0f172a;border:none;border-radius:7px;padding:.4rem .9rem;font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap;">Show My Templates</button>
+        <button onclick="document.getElementById('industry-pack-banner').style.display='none';renderTemplates();" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:none;border-radius:7px;padding:.4rem .75rem;font-size:.78rem;cursor:pointer;">Show All</button>
+      </div>
+
       <div class="tpl-grid" id="tpl-grid"></div>
     </div>
 
@@ -446,7 +464,50 @@ var TEMPLATES = [
   // GENERAL BUSINESS
   { id:'gen-invoice', name:'Invoice', icon:'💼', desc:'Standard business invoice for any service or product', profession:'general', tag:'tag-blue', tagText:'General' },
   { id:'gen-receipt', name:'Receipt', icon:'🧾', desc:'Payment receipt confirming completed transaction', profession:'general', tag:'tag-blue', tagText:'General' },
-  { id:'gen-proposal', name:'Proposal', icon:'📄', desc:'Service proposal with scope, timeline, and pricing', profession:'general', tag:'tag-blue', tagText:'General' }
+  { id:'gen-proposal', name:'Proposal', icon:'📄', desc:'Service proposal with scope, timeline, and pricing', profession:'general', tag:'tag-blue', tagText:'General' },
+  { id:'gen-nda', name:'NDA / Confidentiality Agreement', icon:'🔒', desc:'Non-disclosure agreement for vendors, contractors, or partners', profession:'general', tag:'tag-blue', tagText:'General', noItems:true },
+
+  // NONPROFIT / ASSOCIATION
+  { id:'np-donation', name:'Donation Receipt', icon:'🎁', desc:'IRS-compliant acknowledgment letter for tax-deductible donations', profession:'nonprofit', tag:'tag-green', tagText:'Nonprofit', noItems:true },
+  { id:'np-volunteer', name:'Volunteer Agreement', icon:'🤝', desc:'Volunteer terms, liability waiver, and emergency contact form', profession:'nonprofit', tag:'tag-green', tagText:'Nonprofit', noItems:true },
+  { id:'np-grant', name:'Grant Request Letter', icon:'📮', desc:'Formal funding request letter for grants and foundations', profession:'nonprofit', tag:'tag-green', tagText:'Nonprofit', noItems:true },
+  { id:'np-invoice', name:'Service Invoice', icon:'📊', desc:'Invoice for contracted services or program-related expenses', profession:'nonprofit', tag:'tag-green', tagText:'Nonprofit' },
+
+  // WELLNESS / MED SPA
+  { id:'well-invoice', name:'Service Invoice', icon:'💆', desc:'Invoice for treatments, packages, memberships, and retail', profession:'wellness', tag:'tag-purple', tagText:'Wellness' },
+  { id:'well-consent', name:'Treatment Consent Form', icon:'✅', desc:'Informed consent for procedures with client acknowledgment signature', profession:'wellness', tag:'tag-purple', tagText:'Wellness', noItems:true },
+  { id:'well-intake', name:'Client Intake Form', icon:'📋', desc:'New client health history, preferences, and contact information', profession:'wellness', tag:'tag-purple', tagText:'Wellness', noItems:true },
+  { id:'well-memberagree', name:'Membership Agreement', icon:'🌟', desc:'Monthly wellness membership terms, pricing, and cancellation policy', profession:'wellness', tag:'tag-purple', tagText:'Wellness', noItems:true },
+
+  // SALON / BARBER / BEAUTY
+  { id:'sal-invoice', name:'Service Invoice', icon:'✂️', desc:'Invoice for hair, nail, skin, or beauty services', profession:'salon', tag:'tag-purple', tagText:'Salon & Beauty' },
+  { id:'sal-appt', name:'Appointment Confirmation', icon:'📅', desc:'Appointment reminder with service details, stylist, and cancellation policy', profession:'salon', tag:'tag-purple', tagText:'Salon & Beauty', noItems:true },
+  { id:'sal-policy', name:'Late / No-Show Policy', icon:'⏰', desc:'Cancellation and no-show fee policy for client signature', profession:'salon', tag:'tag-purple', tagText:'Salon & Beauty', noItems:true },
+  { id:'sal-clientcard', name:'Client Record Card', icon:'🗃️', desc:'Service history, formulas, preferences, and allergy notes per client', profession:'salon', tag:'tag-purple', tagText:'Salon & Beauty', noItems:true },
+
+  // RESTAURANT / FOOD SERVICE
+  { id:'rest-catering', name:'Catering Invoice', icon:'🍽️', desc:'Invoice for catering events including food, staff, and rentals', profession:'restaurant', tag:'tag-amber', tagText:'Restaurant' },
+  { id:'rest-event', name:'Event Proposal', icon:'🎉', desc:'Catering or private dining proposal with menu, headcount, and pricing', profession:'restaurant', tag:'tag-amber', tagText:'Restaurant', noItems:true },
+  { id:'rest-vendor', name:'Vendor / Supplier Invoice', icon:'🚚', desc:'Invoice for food vendors, suppliers, or delivery services', profession:'restaurant', tag:'tag-amber', tagText:'Restaurant' },
+  { id:'rest-staff', name:'Staff Schedule', icon:'📅', desc:'Weekly staff schedule with shifts, roles, and contact information', profession:'restaurant', tag:'tag-amber', tagText:'Restaurant', noItems:true },
+
+  // MARKETING / CONSULTING
+  { id:'mkt-invoice', name:'Service Invoice', icon:'📣', desc:'Invoice for marketing, advertising, consulting, or retainer services', profession:'marketing', tag:'tag-amber', tagText:'Marketing' },
+  { id:'mkt-proposal', name:'Project Proposal', icon:'🎯', desc:'Client proposal with scope, objectives, timeline, and investment', profession:'marketing', tag:'tag-amber', tagText:'Marketing', noItems:true },
+  { id:'mkt-sow', name:'Statement of Work', icon:'📐', desc:'Detailed SOW with deliverables, milestones, and acceptance criteria', profession:'marketing', tag:'tag-amber', tagText:'Marketing', noItems:true },
+  { id:'mkt-retainer', name:'Retainer Agreement', icon:'🔄', desc:'Monthly retainer terms, scope, hours, and revision policy', profession:'marketing', tag:'tag-amber', tagText:'Marketing', noItems:true },
+
+  // CLEANING / JANITORIAL
+  { id:'cln-invoice', name:'Service Invoice', icon:'🧹', desc:'Invoice for residential or commercial cleaning services', profession:'cleaning', tag:'tag-blue', tagText:'Cleaning' },
+  { id:'cln-checklist', name:'Cleaning Checklist', icon:'✅', desc:'Room-by-room cleaning checklist with sign-off for each area', profession:'cleaning', tag:'tag-blue', tagText:'Cleaning', noItems:true },
+  { id:'cln-agreement', name:'Recurring Service Agreement', icon:'🔄', desc:'Ongoing cleaning service contract with frequency, rate, and terms', profession:'cleaning', tag:'tag-blue', tagText:'Cleaning', noItems:true },
+  { id:'cln-estimate', name:'Cleaning Estimate', icon:'📝', desc:'Quote for one-time or move-in/move-out deep cleaning services', profession:'cleaning', tag:'tag-blue', tagText:'Cleaning' },
+
+  // AUTO SERVICES
+  { id:'auto-invoice', name:'Repair Invoice', icon:'🔧', desc:'Invoice for auto repair, parts, and labor services', profession:'auto', tag:'tag-red', tagText:'Auto Services' },
+  { id:'auto-inspection', name:'Vehicle Inspection Report', icon:'🚗', desc:'Pre-purchase or safety inspection with pass/fail items and notes', profession:'auto', tag:'tag-red', tagText:'Auto Services', noItems:true },
+  { id:'auto-auth', name:'Service Authorization', icon:'📋', desc:'Customer authorization to perform repairs up to approved dollar amount', profession:'auto', tag:'tag-red', tagText:'Auto Services', noItems:true },
+  { id:'auto-estimate', name:'Repair Estimate', icon:'📝', desc:'Itemized estimate for parts and labor before work is approved', profession:'auto', tag:'tag-red', tagText:'Auto Services' }
 ];
 
 // ── Render Template Grid ──
@@ -595,6 +656,96 @@ function renderExtraFields() {
       '<div class="dg-field"><label>Annual Premium ($)</label><input id="x-premium" type="number" placeholder="1200" /></div></div>' +
       '<div class="dg-row"><div class="dg-field"><label>Coverage Limit ($)</label><input id="x-limit" placeholder="500,000" /></div>' +
       '<div class="dg-field"><label>Deductible ($)</label><input id="x-deductible" placeholder="1,000" /></div></div>';
+  }
+
+  // ── Nonprofit ──
+  if (id === 'np-donation') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Donor Name</label><input id="x-donor" placeholder="John & Jane Smith" /></div>' +
+      '<div class="dg-field"><label>Donation Amount ($)</label><input id="x-amount" type="number" placeholder="500" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Donation Type</label><select id="x-dtype"><option>Cash / Check</option><option>Credit Card</option><option>In-Kind Goods</option><option>In-Kind Services</option><option>Stock / Securities</option></select></div>' +
+      '<div class="dg-field"><label>Donation Date</label><input id="x-ddate" type="date" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>In-Kind Description (if applicable)</label><textarea id="x-inkind" placeholder="Leave blank for cash donations..."></textarea></div></div>';
+  }
+  else if (id === 'np-grant') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Funding Organization</label><input id="x-funder" placeholder="XYZ Foundation" /></div>' +
+      '<div class="dg-field"><label>Requested Amount ($)</label><input id="x-gamt" type="number" placeholder="10000" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Program / Project Name</label><input id="x-program" placeholder="Youth Outreach Initiative" /></div>' +
+      '<div class="dg-field"><label>Project Period</label><input id="x-period" placeholder="Jan 2026 – Dec 2026" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Brief Program Description</label><textarea id="x-gdesc" placeholder="Describe the program and intended impact..."></textarea></div></div>';
+  }
+  // ── Wellness / Med Spa ──
+  else if (id === 'well-consent') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Procedure / Treatment</label><input id="x-procedure" placeholder="Botox, Facial, Massage..." /></div>' +
+      '<div class="dg-field"><label>Provider / Practitioner</label><input id="x-provider" placeholder="Dr. Smith / Esthetician Name" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Known Allergies / Contraindications</label><textarea id="x-allergies" placeholder="List any known allergies, medications, or conditions..."></textarea></div></div>';
+  }
+  // ── Salon ──
+  else if (id === 'sal-appt') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Service(s)</label><input id="x-service" placeholder="Haircut + Color" /></div>' +
+      '<div class="dg-field"><label>Stylist / Tech</label><input id="x-stylist" placeholder="Name" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Appointment Date</label><input id="x-adate" type="date" /></div>' +
+      '<div class="dg-field"><label>Appointment Time</label><input id="x-atime" type="time" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Cancellation Fee ($)</label><input id="x-canfee" type="number" placeholder="25" /></div>' +
+      '<div class="dg-field"><label>Cancel Deadline (hrs notice)</label><input id="x-canhrs" type="number" placeholder="24" /></div></div>';
+  }
+  // ── Restaurant ──
+  else if (id === 'rest-event') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Event Type</label><input id="x-evtype" placeholder="Wedding Reception, Corporate Dinner..." /></div>' +
+      '<div class="dg-field"><label>Event Date</label><input id="x-evdate" type="date" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Estimated Guest Count</label><input id="x-guests" type="number" placeholder="75" /></div>' +
+      '<div class="dg-field"><label>Venue / Location</label><input id="x-evvenue" placeholder="Our location or client venue" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Menu / Package Description</label><textarea id="x-menu" placeholder="Describe the menu, service style, and inclusions..."></textarea></div></div>';
+  }
+  // ── Marketing / Consulting ──
+  else if (id === 'mkt-proposal') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Project / Campaign Name</label><input id="x-projname" placeholder="Q2 Brand Launch" /></div>' +
+      '<div class="dg-field"><label>Proposed Budget ($)</label><input id="x-budget" type="number" placeholder="5000" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Estimated Timeline</label><input id="x-timeline" placeholder="6 weeks" /></div>' +
+      '<div class="dg-field"><label>Number of Revisions</label><input id="x-revisions" type="number" placeholder="2" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Scope & Deliverables</label><textarea id="x-scope" placeholder="List key deliverables and out-of-scope items..."></textarea></div></div>';
+  }
+  else if (id === 'mkt-sow') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Project Name</label><input id="x-sowproj" placeholder="Website Redesign" /></div>' +
+      '<div class="dg-field"><label>Start Date</label><input id="x-sowstart" type="date" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>End Date / Deadline</label><input id="x-sowend" type="date" /></div>' +
+      '<div class="dg-field"><label>Total Project Fee ($)</label><input id="x-sowfee" type="number" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Milestones &amp; Deliverables</label><textarea id="x-milestones" placeholder="Milestone 1: Discovery — Week 1&#10;Milestone 2: Design Mockups — Week 3&#10;Milestone 3: Final Delivery — Week 6"></textarea></div></div>';
+  }
+  // ── Cleaning ──
+  else if (id === 'cln-checklist') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Property Type</label><select id="x-proptype"><option>Residential Home</option><option>Apartment / Condo</option><option>Office</option><option>Commercial Space</option><option>Vacation Rental</option></select></div>' +
+      '<div class="dg-field"><label>Cleaning Type</label><select id="x-cleantype"><option>Standard Clean</option><option>Deep Clean</option><option>Move-In / Move-Out</option><option>Post-Construction</option></select></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Rooms / Areas to Clean</label><textarea id="x-rooms" placeholder="Kitchen, Living Room, 3 Bedrooms, 2 Bathrooms, Garage..."></textarea></div></div>';
+  }
+  else if (id === 'cln-agreement') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Service Frequency</label><select id="x-freq"><option>Weekly</option><option>Bi-Weekly</option><option>Monthly</option><option>One-Time</option></select></div>' +
+      '<div class="dg-field"><label>Rate per Visit ($)</label><input id="x-visitrate" type="number" placeholder="150" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Contract Start Date</label><input id="x-cstart" type="date" /></div>' +
+      '<div class="dg-field"><label>Cancellation Notice (days)</label><input id="x-cnotice" type="number" placeholder="14" /></div></div>';
+  }
+  // ── Auto Services ──
+  else if (id === 'auto-inspection') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Year / Make / Model</label><input id="x-vehicle" placeholder="2019 Toyota Camry" /></div>' +
+      '<div class="dg-field"><label>VIN</label><input id="x-vin" placeholder="1HGCM82633A123456" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field"><label>Mileage</label><input id="x-mileage" type="number" placeholder="45000" /></div>' +
+      '<div class="dg-field"><label>License Plate</label><input id="x-plate" placeholder="ABC-1234" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Inspector Notes</label><textarea id="x-inspnotes" placeholder="List items inspected, pass/fail, and any recommended repairs..."></textarea></div></div>';
+  }
+  else if (id === 'auto-auth') {
+    html = '<div class="dg-row" style="margin-top:1rem;">' +
+      '<div class="dg-field"><label>Vehicle</label><input id="x-authveh" placeholder="2019 Toyota Camry" /></div>' +
+      '<div class="dg-field"><label>Authorized Amount ($)</label><input id="x-authlimit" type="number" placeholder="500" /></div></div>' +
+      '<div class="dg-row"><div class="dg-field dg-full"><label>Work to Be Performed</label><textarea id="x-workdesc" placeholder="Describe authorized repairs or services..."></textarea></div></div>';
   }
 
   document.getElementById('extra-fields').innerHTML = html;
@@ -953,9 +1104,73 @@ function val(id, def) { var el = document.getElementById(id); return el ? (el.va
 function valEl(id) { var el = document.getElementById(id); return el ? el.value : ''; }
 
 // ── Init ──
+// ── Industry → doc-generator profession key map ──────────────────────────
+var INDUSTRY_PROF_MAP = {
+  property_management: 'property_management',
+  short_term_rental:   'str',
+  commercial_re:       'commercial',
+  contractor:          'construction',
+  construction_trades: 'construction',
+  attorney:            'attorney',
+  accountant:          'accounting',
+  cpa:                 'accounting',
+  insurance:           'insurance',
+  lending:             'lending',
+  nonprofit:           'nonprofit',
+  wellness_spa:        'wellness',
+  salon_beauty:        'salon',
+  restaurant_food:     'restaurant',
+  marketing_consulting:'marketing',
+  cleaning:            'cleaning',
+  auto_services:       'auto',
+  general:             'general',
+};
+
+var INDUSTRY_PACK_META = {
+  property_management: { icon:'🏠', title:'Property Management Pack' },
+  str:                 { icon:'🏖️', title:'Short-Term Rental Pack' },
+  commercial:          { icon:'🏢', title:'Commercial Real Estate Pack' },
+  construction:        { icon:'🏗️', title:'Construction & Trades Pack' },
+  attorney:            { icon:'⚖️', title:'Legal Practice Pack' },
+  accounting:          { icon:'📊', title:'Accounting & CPA Pack' },
+  insurance:           { icon:'🛡️', title:'Insurance Agency Pack' },
+  lending:             { icon:'🏦', title:'Lending Pack' },
+  nonprofit:           { icon:'💚', title:'Nonprofit Pack' },
+  wellness:            { icon:'💆', title:'Wellness & Med Spa Pack' },
+  salon:               { icon:'✂️', title:'Salon & Beauty Pack' },
+  restaurant:          { icon:'🍽️', title:'Restaurant & Catering Pack' },
+  marketing:           { icon:'📣', title:'Marketing & Consulting Pack' },
+  cleaning:            { icon:'🧹', title:'Cleaning Service Pack' },
+  auto:                { icon:'🔧', title:'Auto Services Pack' },
+  general:             { icon:'💼', title:'General Business Pack' },
+};
+
 document.addEventListener('DOMContentLoaded', function() {
   renderTemplates();
-  // Auto-select template from URL param: ?template=con-invoice
+
+  // ── Detect industry and show pack banner ───────────────────────────────
+  try {
+    var industry = null;
+    var cfg = JSON.parse(localStorage.getItem('rv_workspace_config') || '{}');
+    if (cfg.industry) industry = cfg.industry;
+    var ob = JSON.parse(localStorage.getItem('rv_onboarding_config') || '{}');
+    if (ob.industry) industry = ob.industry;
+
+    if (industry && INDUSTRY_PROF_MAP[industry]) {
+      var prof = INDUSTRY_PROF_MAP[industry];
+      var count = TEMPLATES.filter(function(t) { return t.profession === prof; }).length;
+      if (count > 0) {
+        var meta = INDUSTRY_PACK_META[prof] || { icon:'📋', title:'Your Industry Pack' };
+        var banner = document.getElementById('industry-pack-banner');
+        document.getElementById('ipack-icon').textContent = meta.icon;
+        document.getElementById('ipack-title').textContent = meta.title + ' (' + count + ' templates)';
+        document.getElementById('ipack-btn').setAttribute('onclick', 'filterTemplates(\'' + prof + '\')');
+        banner.style.display = 'flex';
+      }
+    }
+  } catch (_) {}
+
+  // ── Auto-select template from URL param: ?template=con-invoice ────────
   var params = new URLSearchParams(window.location.search);
   var tpl = params.get('template');
   if (tpl && TEMPLATES.find(function(t) { return t.id === tpl; })) {
