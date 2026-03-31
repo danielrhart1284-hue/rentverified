@@ -68,6 +68,12 @@ const TEMPLATES = {
   new_application_alert: (d) =>
     `New application from ${d.tenantName} for ${d.address}. Review: rentverified.com/landlord-signup.html`,
 
+  tour_followup: (d) =>
+    `Hi ${d.name}, thanks for touring ${d.address}! Ready to apply? It takes 10 min: ${d.applyLink || 'rentverified.com/tenant-application.html'} -RentVerified`,
+
+  tour_reminder: (d) =>
+    `Reminder ${d.name}: your tour at ${d.address} is tomorrow at ${d.time}. Questions? Reply here. -RentVerified`,
+
   custom: (d) =>
     (d.message || d.body || '').slice(0, 160),
 };

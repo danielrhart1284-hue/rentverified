@@ -253,6 +253,46 @@ const TEMPLATES = {
     `)
   }),
 
+  // ── Post-tour follow-up to prospect
+  tour_followup: (d, appUrl) => ({
+    subject: `Thanks for touring ${d.propertyAddress || 'the property'} — ready to apply?`,
+    html: baseTemplate('Thanks for Touring', `
+      ${h1(`Thanks for touring, ${d.prospectName ? d.prospectName.split(' ')[0] : 'there'}! 👋`)}
+      ${p(`It was great showing you <strong>${d.propertyAddress || 'the property'}</strong>. We hope you liked what you saw!`)}
+      ${infoBox([
+        ['Property', d.propertyAddress || '—'],
+        ['Rent', d.rentAmount ? `$${Number(d.rentAmount).toLocaleString()}/mo` : '—'],
+        ['Available', d.availableDate || 'Now'],
+        ['Bedrooms', d.bedrooms || '—'],
+        ['Tour Date', d.tourDate || new Date().toLocaleDateString()],
+      ])}
+      ${p('If you\'re ready to move forward, you can submit your application online in about 10 minutes. We review applications quickly — usually within 1–2 business days.')}
+      ${btn('Apply Now →', `${appUrl}/tenant-application.html?property=${encodeURIComponent(d.propertyAddress || '')}`)}
+      ${p('<strong>Have questions?</strong> Reply to this email or call/text us directly.')}
+      ${d.managerName ? p(`<strong>${d.managerName}</strong>${d.managerPhone ? ` · ${d.managerPhone}` : ''}`) : ''}
+      ${p('<small style="color:#9CA3AF;">Not interested? No worries — we have other listings that might be a better fit.</small>')}
+      ${btn('See Other Listings', `${appUrl}/listings.html`, '#111827', '#ffffff')}
+    `)
+  }),
+
+  // ── Tour confirmation reminder (sent night before)
+  tour_reminder: (d, appUrl) => ({
+    subject: `📅 Reminder: Property tour tomorrow at ${d.tourTime || 'your scheduled time'}`,
+    html: baseTemplate('Tour Reminder', `
+      ${h1('Your tour is tomorrow!')}
+      ${p(`Hi ${d.prospectName || 'there'}, just a quick reminder about your upcoming property tour.`)}
+      ${infoBox([
+        ['Property', d.propertyAddress || '—'],
+        ['Date', d.tourDate || '—'],
+        ['Time', d.tourTime || '—'],
+        ['Address', d.propertyAddress || '—'],
+      ])}
+      ${p('If you need to reschedule or cancel, please let us know as soon as possible.')}
+      ${d.managerPhone ? p(`📞 Text or call to reschedule: <strong>${d.managerPhone}</strong>`) : ''}
+      ${btn('View Booking Details', `${appUrl}/calendar.html`)}
+    `)
+  }),
+
   // ── Maintenance status update
   maintenance_update: (d, appUrl) => ({
     subject: `🔧 Maintenance Update — ${d.issue || 'Your request'}: ${d.newStatus || 'Updated'}`,
