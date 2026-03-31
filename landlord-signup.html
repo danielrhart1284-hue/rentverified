@@ -302,6 +302,22 @@
     .ob-step-line { flex: 1; height: 2px; background: var(--gray-200); }
     .ob-page { display: none; }
     .ob-page.active { display: block; }
+
+    /* Inline form validation */
+    .field-error-msg {
+      display: block; margin-top: 4px; font-size: 0.78rem;
+      color: #dc2626; font-weight: 500;
+    }
+    .input-error {
+      border-color: #dc2626 !important;
+      background: #fff5f5 !important;
+    }
+    .input-error:focus { box-shadow: 0 0 0 3px rgba(220,38,38,0.15) !important; }
+    .form-error-banner {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+      padding: 0.65rem 1rem; margin-bottom: 1rem;
+      font-size: 0.85rem; color: #dc2626; font-weight: 500;
+    }
     .ob-toggle-row {
       display: flex; align-items: center; gap: 0.75rem;
       padding: 0.65rem 1rem; background: var(--gray-100);
@@ -753,12 +769,12 @@
         <div id="form-step-1">
           <div class="form-group">
             <label>Business Name <span style="color:#dc2626;">*</span></label>
-            <input type="text" id="su-business" placeholder="Your business name" required />
+            <input type="text" id="su-business" placeholder="Your business name" required oninput="this.classList.remove('input-error');var e=this.parentNode.querySelector('.field-error-msg');if(e)e.remove();" />
           </div>
           <div class="grid-2">
             <div class="form-group">
               <label>First Name</label>
-              <input type="text" id="su-firstName" placeholder="First name" required />
+              <input type="text" id="su-firstName" placeholder="First name" required oninput="this.classList.remove('input-error');var e=this.parentNode.querySelector('.field-error-msg');if(e)e.remove();" />
             </div>
             <div class="form-group">
               <label>Last Name</label>
@@ -767,11 +783,11 @@
           </div>
           <div class="form-group">
             <label>Email Address</label>
-            <input type="email" id="su-email" placeholder="Email address" required />
+            <input type="email" id="su-email" placeholder="Email address" required oninput="this.classList.remove('input-error');var e=this.parentNode.querySelector('.field-error-msg');if(e)e.remove();" />
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" id="su-password" placeholder="At least 8 characters" />
+            <input type="password" id="su-password" placeholder="At least 8 characters" oninput="this.classList.remove('input-error');var e=this.parentNode.querySelector('.field-error-msg');if(e)e.remove();" />
           </div>
           <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="submitSignup()">Create Account →</button>
           <p style="text-align:center;margin-top:1rem;font-size:.875rem;color:var(--gray-500);">Already have an account? <a href="#" onclick="showLogin();return false;" style="color:var(--primary);font-weight:600;">Sign In</a></p>
@@ -3370,21 +3386,73 @@
     if (lp) lp.style.display = 'block';
   }
 
+  // ── Inline validation helpers ────────────────────────────────────────────
+  function showFieldError(inputId, msg) {
+    var el = document.getElementById(inputId);
+    if (!el) return;
+    el.classList.add('input-error');
+    var existing = el.parentNode.querySelector('.field-error-msg');
+    if (existing) existing.remove();
+    var span = document.createElement('span');
+    span.className = 'field-error-msg';
+    span.textContent = msg;
+    el.parentNode.appendChild(span);
+    el.focus();
+  }
+  function clearFieldErrors(containerEl) {
+    var root = containerEl || document;
+    root.querySelectorAll('.input-error').forEach(function(el) { el.classList.remove('input-error'); });
+    root.querySelectorAll('.field-error-msg').forEach(function(el) { el.remove(); });
+    root.querySelectorAll('.form-error-banner').forEach(function(el) { el.remove(); });
+  }
+  function showFormBanner(containerId, msg) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var existing = container.querySelector('.form-error-banner');
+    if (existing) { existing.textContent = msg; return; }
+    var banner = document.createElement('div');
+    banner.className = 'form-error-banner';
+    banner.textContent = msg;
+    container.insertBefore(banner, container.firstChild);
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   async function submitSignup() {
+    var formStep1 = document.getElementById('form-step-1');
+    clearFieldErrors(formStep1);
+
     const business  = (document.getElementById('su-business')   || {}).value || '';
     const firstName = (document.getElementById('su-firstName')  || {}).value || '';
     const lastName  = (document.getElementById('su-lastName')   || {}).value || '';
     const email     = ((document.getElementById('su-email')     || {}).value || '').trim().toLowerCase();
     const password  = (document.getElementById('su-password')   || {}).value || '';
 
+    var valid = true;
+
     if (!business.trim()) {
-      alert('Please enter your business name.');
-      return;
+      showFieldError('su-business', 'Business name is required.');
+      valid = false;
     }
-    if (!email || !password) {
-      alert('Please enter an email and password to create your account.');
-      return;
+    if (!firstName.trim()) {
+      showFieldError('su-firstName', 'First name is required.');
+      valid = false;
     }
+    if (!email) {
+      showFieldError('su-email', 'Email address is required.');
+      valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showFieldError('su-email', 'Please enter a valid email address.');
+      valid = false;
+    }
+    if (!password) {
+      showFieldError('su-password', 'Password is required.');
+      valid = false;
+    } else if (password.length < 8) {
+      showFieldError('su-password', 'Password must be at least 8 characters.');
+      valid = false;
+    }
+
+    if (!valid) return;
 
     const { data, error } = await Auth.signUp({
       email, password,
@@ -3397,7 +3465,15 @@
     });
 
     if (error) {
-      alert(error.message || 'Signup failed. Please try again.');
+      var msg = error.message || 'Signup failed. Please try again.';
+      // Map Supabase error messages to friendly inline errors
+      if (/email.*already|already.*registered/i.test(msg)) {
+        showFieldError('su-email', 'An account with this email already exists. Try signing in.');
+      } else if (/password/i.test(msg)) {
+        showFieldError('su-password', msg);
+      } else {
+        showFormBanner('form-step-1', msg);
+      }
       return;
     }
 
