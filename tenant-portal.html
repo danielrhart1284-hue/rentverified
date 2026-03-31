@@ -1780,9 +1780,89 @@
     }
   }
 
-  function submitPayment() { nextPayStep(4); }
+  async function submitPayment() {
+    const isP2P = (selectedMethod === 'cashapp' || selectedMethod === 'zelle');
 
-  document.addEventListener('DOMContentLoaded', () => { updateFeeDisplay('ach'); });
+    // P2P (Cash App / Zelle) — keep existing manual confirmation flow
+    if (isP2P) {
+      nextPayStep(4);
+      return;
+    }
+
+    // Card or ACH — redirect to Stripe Checkout
+    const btn = document.getElementById('confirm-btn');
+    if (btn) { btn.textContent = '🔒 Redirecting to Stripe...'; btn.disabled = true; }
+
+    try {
+      // Get rent amount from current session
+      const rentRaw   = localStorage.getItem('rv_lease_rent') || '120000'; // cents
+      const rentCents = parseInt(rentRaw.replace(/\D/g,'')) || 120000;
+
+      const tenantEmail   = localStorage.getItem('rv_user_email') || '';
+      const tenantName    = localStorage.getItem('rv_user_name') || '';
+      const property      = localStorage.getItem('rv_lease_property') || '';
+      const landlordName  = localStorage.getItem('rv_landlord_name') || '3120Life LLC';
+      const absorbFee     = localStorage.getItem('rv_landlord_absorbs_fee') === 'true';
+      const month         = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      const res = await fetch('/api/stripe-rent-checkout', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          rentAmount:     rentCents,
+          tenantName,
+          tenantEmail,
+          propertyAddress: property,
+          landlordName,
+          paymentMethod:  selectedMethod === 'ach' ? 'ach' : 'card',
+          absorbFee,
+          month,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Payment error: ' + (data.error || 'Please try again.'));
+        if (btn) { btn.textContent = '✓ Confirm & Pay'; btn.disabled = false; }
+      }
+    } catch (e) {
+      alert('Network error — please try again.');
+      if (btn) { btn.textContent = '✓ Confirm & Pay'; btn.disabled = false; }
+    }
+  }
+
+  // ── Handle return from Stripe Checkout ──────────────────────────────────
+  function checkStripeReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      const amount = parseInt(params.get('amount') || 0);
+      const month  = params.get('month') || 'This month';
+      // Show success step
+      showTab('pay');
+      setTimeout(() => {
+        nextPayStep(4);
+        const msgEl = document.getElementById('success-msg');
+        const detEl = document.getElementById('success-detail');
+        const rcptTotal = document.getElementById('rcpt-total');
+        if (msgEl) msgEl.textContent = `Your ${month} rent payment was successful!`;
+        if (detEl) detEl.textContent = "Payment confirmed by Stripe. Your landlord has been notified and you'll receive an email receipt shortly.";
+        if (rcptTotal) rcptTotal.textContent = amount ? '$' + (amount/100).toFixed(2) : '--';
+        // Clean URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }, 300);
+    } else if (params.get('payment') === 'canceled') {
+      showTab('pay');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateFeeDisplay('ach');
+    checkStripeReturn();
+  });
 
   // ── Tenant Onboarding ──────────────────────────────────────────────────
   function showTenantOnboarding() {
