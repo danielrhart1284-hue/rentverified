@@ -123,6 +123,11 @@
     var existing = document.getElementById('rv-funding-banner');
     if (existing) existing.remove();
 
+    // Never show on pre-login screen
+    if (!localStorage.getItem('rv_account')) return;
+    var signupScreen = document.getElementById('signup-screen');
+    if (signupScreen && signupScreen.style.display !== 'none') return;
+
     if (isDismissed()) return;
 
     var result = checkEligibility();
