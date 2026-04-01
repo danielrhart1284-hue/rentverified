@@ -123,6 +123,11 @@
     var existing = document.getElementById('rv-funding-banner');
     if (existing) existing.remove();
 
+    // Only show when the dashboard is visible (user is logged in)
+    var dashScreen = document.getElementById('dashboard-screen');
+    if (!dashScreen || dashScreen.style.display !== 'block') return;
+    if (!localStorage.getItem('rv_account')) return;
+
     if (isDismissed()) return;
 
     var result = checkEligibility();

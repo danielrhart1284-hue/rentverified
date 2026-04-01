@@ -226,6 +226,29 @@ var LS_POSTS = 'rv_community_posts';
 var LS_RECS = 'rv_community_recs';
 var LS_JOINED = 'rv_community_joined';
 var LS_LIKES = 'rv_community_likes';
+
+function getMyBizId() {
+  try {
+    var biz = JSON.parse(localStorage.getItem('rv_active_business') || 'null');
+    if (biz && biz.id) return biz.id;
+    var acc = JSON.parse(localStorage.getItem('rv_account') || 'null');
+    if (acc && acc.id) return acc.id;
+    if (acc && acc.email) return 'biz_' + acc.email.replace(/[^a-z0-9]/gi, '_');
+  } catch (_) {}
+  return 'user_biz';
+}
+
+function getMyName() {
+  try {
+    var acc = JSON.parse(localStorage.getItem('rv_account') || 'null');
+    if (acc) {
+      var name = [acc.firstName, acc.lastName].filter(Boolean).join(' ');
+      if (name) return name;
+      if (acc.companyName) return acc.companyName;
+    }
+  } catch (_) {}
+  return 'You';
+}
 var currentTab = 'groups';
 var currentGroupId = null;
 
@@ -356,8 +379,9 @@ function typeBadge(type) {
 function renderStats() {
   var joined = getJoinedGroups();
   var recs = getRecommendations();
-  var received = recs.filter(function(r) { return r.to_business_id === 'demo_biz'; }).length;
-  var given = recs.filter(function(r) { return r.from_business_id === 'demo_biz'; }).length;
+  var myId = getMyBizId();
+  var received = recs.filter(function(r) { return r.to_business_id === myId; }).length;
+  var given = recs.filter(function(r) { return r.from_business_id === myId; }).length;
 
   document.getElementById('commStats').innerHTML =
     '<div class="comm-stat"><div class="val">' + joined.length + '</div><div class="lbl">Groups Joined</div></div>' +
@@ -424,8 +448,9 @@ function renderDiscover() {
 
 function renderRecommendations() {
   var recs = getRecommendations();
-  var received = recs.filter(function(r) { return r.to_business_id === 'demo_biz'; });
-  var given = recs.filter(function(r) { return r.from_business_id === 'demo_biz'; });
+  var myId = getMyBizId();
+  var received = recs.filter(function(r) { return r.to_business_id === myId; });
+  var given = recs.filter(function(r) { return r.from_business_id === myId; });
 
   var html = '<div class="rec-section-title">Recommendations Received (' + received.length + ')</div>';
   if (received.length === 0) {
@@ -573,8 +598,8 @@ function addPost(groupId) {
   var post = {
     id: 'gp_' + Date.now(),
     group_id: groupId,
-    business_id: 'demo_biz',
-    author: 'Daniel Hart',
+    business_id: getMyBizId(),
+    author: getMyName(),
     content: content,
     likes: 0,
     created_at: new Date().toISOString()
@@ -649,8 +674,8 @@ function submitRecommendation() {
 
   var rec = {
     id: 'rec_' + Date.now(),
-    from_business_id: 'demo_biz',
-    from_name: 'Daniel Hart, 3120Life LLC',
+    from_business_id: getMyBizId(),
+    from_name: getMyName(),
     to_business_id: 'biz_' + Date.now(),
     to_name: business,
     text: text,

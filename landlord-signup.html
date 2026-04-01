@@ -1670,7 +1670,7 @@
 
             <div class="tm-section-title">Emergency Contact</div>
             <div class="tm-grid">
-              <div class="tm-field full"><label>Contact Name</label><input type="text" id="tm-ecName" placeholder="[Client Name]" /></div>
+              <div class="tm-field full"><label>Contact Name</label><input type="text" id="tm-ecName" placeholder="e.g. Jane Smith" /></div>
               <div class="tm-field"><label>Phone</label><input type="tel" id="tm-ecPhone" placeholder="801-555-5678" /></div>
               <div class="tm-field"><label>Relationship</label><input type="text" id="tm-ecRelationship" placeholder="Spouse, Parent, etc." /></div>
             </div>
@@ -3068,7 +3068,7 @@
             </div>
             <div>
               <label style="display:block;font-size:0.82rem;font-weight:600;margin-bottom:4px;">Display Name</label>
-              <input type="text" id="ctr-invite-name" placeholder="[Client Name]" style="width:100%;padding:0.6rem;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.9rem;" />
+              <input type="text" id="ctr-invite-name" placeholder="e.g. Jane Smith" style="width:100%;padding:0.6rem;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.9rem;" />
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
               <div>
@@ -3504,25 +3504,73 @@
   document.addEventListener('DOMContentLoaded', renderLeaseExpiry);
 
   /* ── PHOTO UPLOAD ── */
-  let editPhotos = []; // base64 array for current edit session
+  let editPhotos = []; // URL or base64 array for current edit session
+  let _rvCloudinary = null; // { cloudName, uploadPreset } loaded once
 
-  function handlePhotoUpload(input) {
+  async function getCloudinaryConfig() {
+    if (_rvCloudinary !== null) return _rvCloudinary;
+    try {
+      const res = await fetch('/api/cloudinary-config');
+      if (res.ok) {
+        const cfg = await res.json();
+        _rvCloudinary = (cfg.cloudName && cfg.uploadPreset) ? cfg : {};
+      } else { _rvCloudinary = {}; }
+    } catch (_) { _rvCloudinary = {}; }
+    return _rvCloudinary;
+  }
+
+  async function uploadToCloudinary(file) {
+    const cfg = await getCloudinaryConfig();
+    if (!cfg.cloudName || !cfg.uploadPreset) return null;
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', cfg.uploadPreset);
+    try {
+      const res = await fetch('https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/image/upload', { method: 'POST', body: fd });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.secure_url || null;
+    } catch (_) { return null; }
+  }
+
+  function buildThumbHTML(src, idx) {
+    return '<div id="photo-thumb-' + idx + '" style="position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;">' +
+      '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;" />' +
+      '<button onclick="removePhoto(' + idx + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>' +
+      '</div>';
+  }
+
+  async function handlePhotoUpload(input) {
     const files = Array.from(input.files).slice(0, 5);
     editPhotos = [];
     const strip = document.getElementById('photo-preview-strip');
     strip.innerHTML = '';
-    files.forEach((file, i) => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        editPhotos[i] = e.target.result;
-        const img = document.createElement('div');
-        img.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid #e5e7eb;flex-shrink:0;';
-        img.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" />' +
-          '<button onclick="removePhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>';
-        strip.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
+
+    for (let i = 0; i < files.length; i++) {
+      const ph = document.createElement('div');
+      ph.id = 'photo-thumb-' + i;
+      ph.style.cssText = 'width:72px;height:72px;border-radius:8px;border:2px dashed #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#9ca3af;';
+      ph.textContent = '⏳';
+      strip.appendChild(ph);
+
+      const url = await uploadToCloudinary(files[i]);
+      if (url) {
+        editPhotos[i] = url;
+        const el = document.getElementById('photo-thumb-' + i);
+        if (el) el.outerHTML = buildThumbHTML(url, i);
+      } else {
+        await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            editPhotos[i] = ev.target.result;
+            const el = document.getElementById('photo-thumb-' + i);
+            if (el) el.outerHTML = buildThumbHTML(ev.target.result, i);
+            resolve();
+          };
+          reader.readAsDataURL(files[i]);
+        });
+      }
+    }
   }
 
   function removePhoto(idx) {
@@ -5147,15 +5195,24 @@ dashTab = function(name) {
 
   // Initialize drag-drop on the photo upload area
   document.addEventListener('DOMContentLoaded', function() {
-    initDragDropZone('photo-drop-zone', function(files) {
-      files.forEach(function(file) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          _dragDropPhotos.push({ src: e.target.result, selected: true, name: file.name });
+    initDragDropZone('photo-drop-zone', async function(files) {
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var url = await uploadToCloudinary(file);
+        if (url) {
+          _dragDropPhotos.push({ src: url, selected: true, name: file.name });
           renderDragDropPhotos();
-        };
-        reader.readAsDataURL(file);
-      });
+        } else {
+          (function(f) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              _dragDropPhotos.push({ src: e.target.result, selected: true, name: f.name });
+              renderDragDropPhotos();
+            };
+            reader.readAsDataURL(f);
+          })(file);
+        }
+      }
     });
   });
 
